@@ -1,0 +1,69 @@
+{
+  "home": {
+    "title": "Crea tu tienda virtual con Shopifree",
+    "subtitle": "La plataforma más sencilla para crear y gestionar tu tienda online. Sin conocimientos técnicos, sin complicaciones.",
+    "startFree": "Empieza gratis",
+    "login": "Iniciar sesión",
+    "feature1": {
+      "title": "Rápido y fácil",
+      "description": "Configura tu tienda en minutos, sin necesidad de programar"
+    },
+    "feature2": {
+      "title": "Sin comisiones",
+      "description": "Mantén el 100% de tus ganancias, solo pagas por las herramientas"
+    },
+    "feature3": {
+      "title": "Analíticas incluidas",
+      "description": "Visualiza el rendimiento de tu tienda con reportes detallados"
+    },
+    "footer": {
+      "description": "La plataforma completa para crear tu tienda online exitosa.",
+      "legal": "Legal",
+      "privacy": "Políticas de privacidad",
+      "terms": "Términos y condiciones",
+      "support": "Soporte",
+      "contact": "Contacto",
+      "followUs": "Síguenos",
+      "rights": "Todos los derechos reservados."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Accede a tu cuenta de Shopifree",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "loginButton": "Iniciar sesión",
+      "googleLogin": "Continuar con Google",
+      "otpLogin": "Iniciar con OTP",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate aquí",
+      "forgotPassword": "¿Olvidaste tu contraseña?"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Únete a Shopifree y crea tu tienda",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "registerButton": "Crear cuenta",
+      "googleRegister": "Registrarse con Google",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión aquí",
+      "terms": "Al registrarte, aceptas nuestros",
+      "termsLink": "Términos y condiciones",
+      "and": "y",
+      "privacyLink": "Políticas de privacidad"
+    },
+    "otp": {
+      "title": "Verificación OTP",
+      "subtitle": "Ingresa el código enviado a tu teléfono",
+      "phone": "Número de teléfono",
+      "code": "Código de verificación",
+      "sendCode": "Enviar código",
+      "verifyCode": "Verificar código",
+      "resendCode": "Reenviar código",
+      "backToLogin": "Volver al login"
+    }
+  }
+} 

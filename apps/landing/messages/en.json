@@ -1,0 +1,69 @@
+{
+  "home": {
+    "title": "Create your virtual store with Shopifree",
+    "subtitle": "The simplest platform to create and manage your online store. No technical knowledge, no complications.",
+    "startFree": "Start for free",
+    "login": "Sign in",
+    "feature1": {
+      "title": "Fast and easy",
+      "description": "Set up your store in minutes, no coding required"
+    },
+    "feature2": {
+      "title": "No commissions",
+      "description": "Keep 100% of your earnings, only pay for the tools"
+    },
+    "feature3": {
+      "title": "Analytics included",
+      "description": "View your store's performance with detailed reports"
+    },
+    "footer": {
+      "description": "The complete platform to create your successful online store.",
+      "legal": "Legal",
+      "privacy": "Privacy policy",
+      "terms": "Terms and conditions",
+      "support": "Support",
+      "contact": "Contact",
+      "followUs": "Follow us",
+      "rights": "All rights reserved."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access your Shopifree account",
+      "email": "Email address",
+      "password": "Password",
+      "loginButton": "Sign in",
+      "googleLogin": "Continue with Google",
+      "otpLogin": "Sign in with OTP",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here",
+      "forgotPassword": "Forgot your password?"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join Shopifree and create your store",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "registerButton": "Create account",
+      "googleRegister": "Sign up with Google",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in here",
+      "terms": "By signing up, you agree to our",
+      "termsLink": "Terms and conditions",
+      "and": "and",
+      "privacyLink": "Privacy policy"
+    },
+    "otp": {
+      "title": "OTP Verification",
+      "subtitle": "Enter the code sent to your phone",
+      "phone": "Phone number",
+      "code": "Verification code",
+      "sendCode": "Send code",
+      "verifyCode": "Verify code",
+      "resendCode": "Resend code",
+      "backToLogin": "Back to login"
+    }
+  }
+} 
