@@ -25,7 +25,7 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
       
       // Small delay to prevent flashing
       const timer = setTimeout(() => {
-        window.location.href = getLandingUrl('/es/login')
+        window.location.href = '/login'
       }, 100)
       
       return () => clearTimeout(timer)
@@ -94,7 +94,7 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
             </button>
             <br />
             <a
-              href={getLandingUrl('/es/login')}
+              href="/login"
               className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm inline-block"
             >
               Volver al Login
@@ -135,7 +135,7 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
           
           <p className="text-gray-600 mt-4">
             Si no eres redirigido automáticamente,{' '}
-            <a href={getLandingUrl('/es/login')} className="text-blue-600 underline">
+            <a href="/login" className="text-blue-600 underline">
               haz clic aquí
             </a>
           </p>

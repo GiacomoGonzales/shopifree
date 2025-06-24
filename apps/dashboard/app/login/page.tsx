@@ -1,21 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import { Button, Input } from '@shopifree/ui'
-import { signInWithEmail, signInWithGoogle } from '../../../../lib/auth'
-import { getDashboardUrl } from '../../../../lib/config'
+import { signInWithEmail, signInWithGoogle } from '../../lib/auth'
+import { useAuth } from '../../lib/simple-auth-context'
 
 export default function LoginPage() {
-  const t = useTranslations('auth.login')
-  const locale = useLocale()
   const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace('/')
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,8 +30,8 @@ export default function LoginPage() {
     const { user, error: authError } = await signInWithEmail(email, password)
     
     if (user) {
-      // Redirect to dashboard with login parameter
-      window.location.href = getDashboardUrl('?from_login=true')
+      // AuthContext will handle the redirect automatically
+      router.replace('/')
     } else {
       setError(authError || 'Error al iniciar sesión')
     }
@@ -41,8 +46,8 @@ export default function LoginPage() {
     const { user, error: authError } = await signInWithGoogle()
     
     if (user) {
-      // Redirect to dashboard with login parameter
-      window.location.href = getDashboardUrl('?from_login=true')
+      // AuthContext will handle the redirect automatically
+      router.replace('/')
     } else {
       setError(authError || 'Error al iniciar sesión con Google')
     }
@@ -50,17 +55,34 @@ export default function LoginPage() {
     setLoading(false)
   }
 
+  // Show loading if auth is still initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if authenticated (will redirect)
+  if (isAuthenticated) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link href={`/${locale}`} className="flex justify-center">
+        <div className="flex justify-center">
           <h1 className="text-3xl font-bold text-gray-900">Shopifree</h1>
-        </Link>
+        </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {t('title')}
+          Iniciar sesión en tu cuenta
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          {t('subtitle')}
+          Accede a tu dashboard de Shopifree
         </p>
       </div>
 
@@ -74,19 +96,21 @@ export default function LoginPage() {
 
           <form className="space-y-6" onSubmit={handleEmailLogin}>
             <Input
-              label={t('email')}
+              label="Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
 
             <Input
-              label={t('password')}
+              label="Contraseña"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
 
             <Button
@@ -94,7 +118,7 @@ export default function LoginPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Cargando...' : t('loginButton')}
+              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
           </form>
 
@@ -108,7 +132,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-6">
               <Button
                 variant="secondary"
                 className="w-full"
@@ -121,28 +145,25 @@ export default function LoginPage() {
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                {t('googleLogin')}
+                Continuar con Google
               </Button>
-
-                             <Link href={`/${locale}/otp`}>
-                 <Button variant="secondary" className="w-full">
-                   {t('otpLogin')}
-                 </Button>
-               </Link>
             </div>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              {t('noAccount')}{' '}
-              <Link href={`/${locale}/register`} className="font-medium text-indigo-600 hover:text-indigo-500">
-                {t('signUp')}
-              </Link>
+              ¿No tienes una cuenta?{' '}
+              <a 
+                href="https://shopifree.app/es/register" 
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Regístrate aquí
+              </a>
             </p>
             <p className="mt-2">
-              <Link href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
-                {t('forgotPassword')}
-              </Link>
+              <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
+                ¿Olvidaste tu contraseña?
+              </a>
             </p>
           </div>
         </div>

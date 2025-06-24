@@ -150,9 +150,9 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               {t('hasAccount')}{' '}
-              <Link href={`/${locale}/login`} className="font-medium text-indigo-600 hover:text-indigo-500">
+              <a href="https://dashboard.shopifree.app/login" className="font-medium text-indigo-600 hover:text-indigo-500">
                 {t('signIn')}
-              </Link>
+              </a>
             </p>
             <p className="mt-4 text-xs text-gray-500">
               {t('terms')}{' '}

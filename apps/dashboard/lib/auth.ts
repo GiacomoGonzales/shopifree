@@ -1,4 +1,4 @@
-import { onAuthStateChanged, User } from 'firebase/auth'
+import { onAuthStateChanged, User, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirebaseAuth } from './firebase'
 
 // Auth state observer
@@ -16,6 +16,65 @@ export const onAuthStateChange = (callback: (user: User | null) => void) => {
 export const getCurrentUser = (): User | null => {
   const auth = getFirebaseAuth()
   return auth?.currentUser || null
+}
+
+// Sign in with email and password
+export const signInWithEmail = async (email: string, password: string) => {
+  try {
+    const auth = getFirebaseAuth()
+    if (!auth) {
+      return { user: null, error: 'Firebase no está disponible' }
+    }
+
+    // Set persistence before signing in
+    await setPersistence(auth, browserLocalPersistence)
+    
+    const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    return { user: userCredential.user, error: null }
+  } catch (error: any) {
+    console.error('Error signing in:', error)
+    let errorMessage = 'Error al iniciar sesión'
+    
+    if (error?.code === 'auth/user-not-found') {
+      errorMessage = 'Usuario no encontrado'
+    } else if (error?.code === 'auth/wrong-password') {
+      errorMessage = 'Contraseña incorrecta'
+    } else if (error?.code === 'auth/invalid-email') {
+      errorMessage = 'Email inválido'
+    } else if (error?.code === 'auth/too-many-requests') {
+      errorMessage = 'Demasiados intentos. Intenta más tarde'
+    }
+    
+    return { user: null, error: errorMessage }
+  }
+}
+
+// Sign in with Google
+export const signInWithGoogle = async () => {
+  try {
+    const auth = getFirebaseAuth()
+    if (!auth) {
+      return { user: null, error: 'Firebase no está disponible' }
+    }
+
+    // Set persistence before signing in
+    await setPersistence(auth, browserLocalPersistence)
+    
+    const provider = new GoogleAuthProvider()
+    const userCredential = await signInWithPopup(auth, provider)
+    return { user: userCredential.user, error: null }
+  } catch (error: any) {
+    console.error('Error signing in with Google:', error)
+    let errorMessage = 'Error al iniciar sesión con Google'
+    
+    if (error?.code === 'auth/popup-blocked') {
+      errorMessage = 'Popup bloqueado. Permite popups para este sitio'
+    } else if (error?.code === 'auth/popup-closed-by-user') {
+      errorMessage = 'Proceso cancelado por el usuario'
+    }
+    
+    return { user: null, error: errorMessage }
+  }
 }
 
 // Sign out
