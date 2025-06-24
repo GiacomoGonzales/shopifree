@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl'
 import { notFound } from 'next/navigation'
+import { setRequestLocale } from 'next-intl/server'
 
 const locales = ['en', 'es']
 
@@ -16,6 +17,9 @@ export default async function LocaleLayout({
 }) {
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale as any)) notFound()
+
+  // Enable static rendering
+  setRequestLocale(locale)
 
   let messages
   try {

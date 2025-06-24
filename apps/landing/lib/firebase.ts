@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app'
+import { initializeApp, getApps } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
@@ -11,26 +11,25 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// 🔍 DEBUGGING: Mostrar valores de configuración
-console.log('🔍 FIREBASE CONFIG DEBUG:')
-console.log('firebaseConfig.apiKey:', firebaseConfig.apiKey)
-console.log('firebaseConfig.authDomain:', firebaseConfig.authDomain)
-console.log('firebaseConfig.projectId:', firebaseConfig.projectId)
-console.log('firebaseConfig.storageBucket:', firebaseConfig.storageBucket)
-console.log('firebaseConfig.messagingSenderId:', firebaseConfig.messagingSenderId)
-console.log('firebaseConfig.appId:', firebaseConfig.appId)
-console.log('🔍 ALL ENV VARS:')
-console.log('NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY)
-console.log('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN)
-console.log('NEXT_PUBLIC_FIREBASE_PROJECT_ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID)
+// Verificar si las variables de entorno están configuradas
+const isFirebaseConfigured = Object.values(firebaseConfig).every(value => value && value !== 'undefined')
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
+let app
+let auth
+let db
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app)
+if (isFirebaseConfigured) {
+  // Initialize Firebase only if not already initialized
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  auth = getAuth(app)
+  db = getFirestore(app)
+} else {
+  console.warn('⚠️ Firebase no está configurado. Variables de entorno faltantes.')
+  // Create mock objects to prevent runtime errors
+  app = null
+  auth = null
+  db = null
+}
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app)
-
+export { auth, db }
 export default app 

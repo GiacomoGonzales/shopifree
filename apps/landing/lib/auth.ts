@@ -13,6 +13,10 @@ const googleProvider = new GoogleAuthProvider()
 
 // Register with email and password
 export const registerWithEmail = async (email: string, password: string) => {
+  if (!auth || !db) {
+    return { user: null, error: 'Firebase no está configurado. Por favor configura las variables de entorno.' }
+  }
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
@@ -28,6 +32,10 @@ export const registerWithEmail = async (email: string, password: string) => {
 
 // Sign in with email and password
 export const signInWithEmail = async (email: string, password: string) => {
+  if (!auth || !db) {
+    return { user: null, error: 'Firebase no está configurado. Por favor configura las variables de entorno.' }
+  }
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     return { user: userCredential.user, error: null }
@@ -38,6 +46,10 @@ export const signInWithEmail = async (email: string, password: string) => {
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
+  if (!auth || !db) {
+    return { user: null, error: 'Firebase no está configurado. Por favor configura las variables de entorno.' }
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider)
     const user = result.user
@@ -56,6 +68,10 @@ export const signInWithGoogle = async () => {
 
 // Save user to Firestore
 const saveUserToFirestore = async (user: User, language: string = 'es') => {
+  if (!db) {
+    throw new Error('Firebase no está configurado')
+  }
+
   const userData = {
     email: user.email,
     createdAt: new Date(),
@@ -68,6 +84,11 @@ const saveUserToFirestore = async (user: User, language: string = 'es') => {
 
 // Get user profile from Firestore
 export const getUserProfile = async (uid: string) => {
+  if (!db) {
+    console.warn('Firebase no está configurado')
+    return null
+  }
+
   try {
     const userDoc = await getDoc(doc(db, 'users', uid))
     if (userDoc.exists()) {
