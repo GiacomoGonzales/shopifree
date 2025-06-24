@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [storeData, setStoreData] = useState<StoreWithId | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
   const [debugInfo, setDebugInfo] = useState<string[]>([])
+  const [authCheckComplete, setAuthCheckComplete] = useState(false)
 
   // Debug function
   const addDebugInfo = (message: string) => {
@@ -30,8 +31,20 @@ export default function DashboardPage() {
   useEffect(() => {
     addDebugInfo('Component mounted, setting up auth listener')
     
+    // Check if user was redirected from login with auth info
+    const urlParams = new URLSearchParams(window.location.search)
+    const fromLogin = urlParams.get('from_login')
+    
+    if (fromLogin) {
+      addDebugInfo('User came from login, will wait longer for auth')
+    }
+    
+    let authCheckTimeout: NodeJS.Timeout
+    let authCallbackCount = 0
+    
     const unsubscribe = onAuthStateChange(async (authUser) => {
-      addDebugInfo(`Auth state changed. User: ${authUser ? 'EXISTS' : 'NULL'}`)
+      authCallbackCount++
+      addDebugInfo(`Auth state changed (#${authCallbackCount}). User: ${authUser ? 'EXISTS' : 'NULL'}`)
       
       // Mark auth as initialized after first callback
       if (!authInitialized) {
@@ -43,6 +56,12 @@ export default function DashboardPage() {
       
       if (authUser) {
         addDebugInfo(`User authenticated: ${authUser.email} (UID: ${authUser.uid})`)
+        setAuthCheckComplete(true)
+        
+        // Clear any pending timeout
+        if (authCheckTimeout) {
+          clearTimeout(authCheckTimeout)
+        }
         
         // User is authenticated - check if user has a store
         try {
@@ -64,11 +83,19 @@ export default function DashboardPage() {
       } else {
         addDebugInfo(`User not authenticated. Auth initialized: ${authInitialized}`)
         
-        // User is not authenticated - but only redirect if auth is initialized
-        // This prevents premature redirects during initial Firebase auth check
-        if (authInitialized) {
+        // If this is the first callback or we came from login, wait longer
+        if (authCallbackCount === 1 || fromLogin) {
+          addDebugInfo('First auth callback or from login - waiting longer before redirect')
+          
+          // Set a timeout to mark auth check as complete
+          authCheckTimeout = setTimeout(() => {
+            addDebugInfo('Auth check timeout reached, marking as complete')
+            setAuthCheckComplete(true)
+          }, fromLogin ? 5000 : 3000) // Wait longer if coming from login
+          
+        } else if (authInitialized && authCheckComplete) {
           addDebugInfo('Will redirect to login in 2 seconds...')
-          // Increased delay to allow debugging
+          // Redirect after auth is fully initialized and checked
           setTimeout(() => {
             addDebugInfo('Redirecting to login now')
             window.location.href = getLandingUrl('/es/login')
@@ -81,9 +108,12 @@ export default function DashboardPage() {
 
     return () => {
       addDebugInfo('Cleaning up auth listener')
+      if (authCheckTimeout) {
+        clearTimeout(authCheckTimeout)
+      }
       unsubscribe()
     }
-  }, [authInitialized])
+  }, [authInitialized, authCheckComplete])
 
   const handleStoreCreated = () => {
     setShowSuccess(true)
@@ -101,7 +131,7 @@ export default function DashboardPage() {
   }
 
   // Show loading while Firebase is checking authentication
-  if (loading || !authInitialized) {
+  if (loading || (!authInitialized || !authCheckComplete)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md">
@@ -111,6 +141,9 @@ export default function DashboardPage() {
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-gray-900">Verificando autenticación...</h2>
+          <p className="text-sm text-gray-600 mt-2">
+            Esto puede tomar unos segundos después del login inicial
+          </p>
           
           {/* Debug info */}
           {process.env.NODE_ENV === 'development' && (
@@ -126,7 +159,7 @@ export default function DashboardPage() {
     )
   }
 
-  // User not authenticated (only show this after auth is initialized)
+  // User not authenticated (only show this after auth is initialized and checked)
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

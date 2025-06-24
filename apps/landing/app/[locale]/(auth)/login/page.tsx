@@ -25,8 +25,8 @@ export default function LoginPage() {
     const { user, error: authError } = await signInWithEmail(email, password)
     
     if (user) {
-      // Redirect to dashboard
-      window.location.href = getDashboardUrl()
+      // Redirect to dashboard with login parameter
+      window.location.href = getDashboardUrl('?from_login=true')
     } else {
       setError(authError || 'Error al iniciar sesión')
     }
@@ -41,8 +41,8 @@ export default function LoginPage() {
     const { user, error: authError } = await signInWithGoogle()
     
     if (user) {
-      // Redirect to dashboard
-      window.location.href = getDashboardUrl()
+      // Redirect to dashboard with login parameter
+      window.location.href = getDashboardUrl('?from_login=true')
     } else {
       setError(authError || 'Error al iniciar sesión con Google')
     }
