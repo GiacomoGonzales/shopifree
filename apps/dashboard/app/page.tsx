@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/simple-auth-context'
 import { getUserStore, StoreWithId } from '../lib/store'
 import AuthGuard from '../components/AuthGuard'
 import StoreSetup from '../components/StoreSetup'

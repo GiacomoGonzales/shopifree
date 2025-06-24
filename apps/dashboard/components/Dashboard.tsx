@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/simple-auth-context'
 import { getLandingUrl } from '../lib/config'
 
 interface DashboardProps {

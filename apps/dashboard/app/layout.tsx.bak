@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AuthProvider } from '../lib/simple-auth-context'
+import { AuthProvider } from '../lib/auth-context'
 
 export const metadata: Metadata = {
   title: 'Dashboard - Shopifree',
@@ -21,4 +21,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-}
+} 

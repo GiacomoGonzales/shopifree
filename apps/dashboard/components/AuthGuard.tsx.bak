@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useAuth } from '../lib/simple-auth-context'
+import { useAuth } from '../lib/auth-context'
 import { getLandingUrl } from '../lib/config'
 
 interface AuthGuardProps {
