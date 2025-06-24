@@ -27,8 +27,10 @@ export interface StoreConfig {
   updatedAt: any
 }
 
+export type StoreWithId = StoreConfig & { id: string }
+
 // Check if user has a store
-export const getUserStore = async (userId: string) => {
+export const getUserStore = async (userId: string): Promise<StoreWithId | null> => {
   try {
     const db = getFirebaseDb()
     if (!db) {
@@ -41,7 +43,7 @@ export const getUserStore = async (userId: string) => {
     
     if (!querySnapshot.empty) {
       const storeDoc = querySnapshot.docs[0]
-      return { id: storeDoc.id, ...storeDoc.data() }
+      return { id: storeDoc.id, ...storeDoc.data() } as StoreWithId
     }
     
     return null
