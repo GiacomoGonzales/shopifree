@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Button, Input } from '@shopifree/ui'
-import { signInWithEmail, signInWithGoogle } from '../../lib/auth'
-import { useAuth } from '../../lib/simple-auth-context'
+import { signInWithEmail, signInWithGoogle } from '../../../lib/auth'
+import { useAuth } from '../../../lib/simple-auth-context'
 
-export default function LoginPage() {
+export default function LoginPage({ params: { locale } }: { params: { locale: string } }) {
   const router = useRouter()
+  const t = useTranslations('auth.login')
+  const tErrors = useTranslations('auth.errors')
+  const tLoading = useTranslations('loading')
   const { isAuthenticated, loading: authLoading } = useAuth()
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,9 +22,34 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.replace('/')
+      router.replace(`/${locale}`)
     }
-  }, [isAuthenticated, authLoading, router])
+  }, [isAuthenticated, authLoading, router, locale])
+
+  const getErrorMessage = (authError: string) => {
+    if (authError.includes('usuario no encontrado') || authError.includes('user-not-found')) {
+      return tErrors('userNotFound')
+    }
+    if (authError.includes('contraseña incorrecta') || authError.includes('wrong-password')) {
+      return tErrors('wrongPassword')
+    }
+    if (authError.includes('email inválido') || authError.includes('invalid-email')) {
+      return tErrors('invalidEmail')
+    }
+    if (authError.includes('demasiados intentos') || authError.includes('too-many-requests')) {
+      return tErrors('tooManyRequests')
+    }
+    if (authError.includes('Firebase no está disponible') || authError.includes('firebase unavailable')) {
+      return tErrors('firebaseUnavailable')
+    }
+    if (authError.includes('popup bloqueado') || authError.includes('popup-blocked')) {
+      return tErrors('popupBlocked')
+    }
+    if (authError.includes('proceso cancelado') || authError.includes('popup-closed')) {
+      return tErrors('popupClosed')
+    }
+    return tErrors('general')
+  }
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,10 +59,9 @@ export default function LoginPage() {
     const { user, error: authError } = await signInWithEmail(email, password)
     
     if (user) {
-      // AuthContext will handle the redirect automatically
-      router.replace('/')
+      router.replace(`/${locale}`)
     } else {
-      setError(authError || 'Error al iniciar sesión')
+      setError(getErrorMessage(authError || ''))
     }
     
     setLoading(false)
@@ -46,10 +74,9 @@ export default function LoginPage() {
     const { user, error: authError } = await signInWithGoogle()
     
     if (user) {
-      // AuthContext will handle the redirect automatically
-      router.replace('/')
+      router.replace(`/${locale}`)
     } else {
-      setError(authError || 'Error al iniciar sesión con Google')
+      setError(getErrorMessage(authError || ''))
     }
     
     setLoading(false)
@@ -61,7 +88,7 @@ export default function LoginPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Cargando...</p>
+          <p className="mt-2 text-gray-600">{tLoading('general')}</p>
         </div>
       </div>
     )
@@ -79,10 +106,10 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-gray-900">Shopifree</h1>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Iniciar sesión en tu cuenta
+          {t('title')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Accede a tu dashboard de Shopifree
+          {t('subtitle')}
         </p>
       </div>
 
@@ -96,7 +123,7 @@ export default function LoginPage() {
 
           <form className="space-y-6" onSubmit={handleEmailLogin}>
             <Input
-              label="Email"
+              label={t('email')}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -105,7 +132,7 @@ export default function LoginPage() {
             />
 
             <Input
-              label="Contraseña"
+              label={t('password')}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -118,7 +145,7 @@ export default function LoginPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {loading ? t('loading') : t('loginButton')}
             </Button>
           </form>
 
@@ -128,7 +155,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">O continúa con</span>
+                <span className="px-2 bg-white text-gray-500">{t('or')}</span>
               </div>
             </div>
 
@@ -145,24 +172,24 @@ export default function LoginPage() {
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Continuar con Google
+                {t('googleButton')}
               </Button>
             </div>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              ¿No tienes una cuenta?{' '}
+              {t('noAccount')}{' '}
               <a 
-                href="https://shopifree.app/es/register" 
+                href={`https://shopifree.app/${locale}/register`}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
-                Regístrate aquí
+                {t('register')}
               </a>
             </p>
             <p className="mt-2">
               <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
-                ¿Olvidaste tu contraseña?
+                {t('forgotPassword')}
               </a>
             </p>
           </div>

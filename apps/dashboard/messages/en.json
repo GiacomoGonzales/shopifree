@@ -1,4 +1,129 @@
 {
-  "dashboard": "Dashboard",
-  "manage": "Manage your online store"
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Manage your online store",
+    "welcome": "Welcome to your store!",
+    "storeReady": "Your store is ready!",
+    "storeReadyDescription": "You have successfully configured your store. Soon you'll be able to add products and manage orders.",
+    "storeInfo": "Store Information",
+    "userInfo": "User Information",
+    "hello": "Hello",
+    "signOut": "Sign out",
+    "active": "Active",
+    "store": "Store",
+    "url": "URL",
+    "slogan": "Slogan",
+    "currency": "Currency",
+    "email": "Email",
+    "uid": "UID",
+    "name": "Name"
+  },
+  "storeSetup": {
+    "title": "Welcome to Shopifree!",
+    "subtitle": "Let's set up your store to start selling",
+    "storeName": "Store name",
+    "storeNamePlaceholder": "e.g. My Amazing Store",
+    "subdomain": "Subdomain (URL)",
+    "subdomainPlaceholder": "my-store",
+    "subdomainHint": "Your store will be available at:",
+    "slogan": "Slogan",
+    "sloganPlaceholder": "e.g. The best products at the best price",
+    "description": "Description",
+    "descriptionPlaceholder": "Briefly describe what you sell...",
+    "hasPhysicalLocation": "Do you have a physical location?",
+    "address": "Address",
+    "addressPlaceholder": "123 Main St, City, Country",
+    "primaryColor": "Primary color",
+    "secondaryColor": "Secondary color",
+    "currency": "Currency",
+    "currencyPlaceholder": "USD, EUR, GBP, etc.",
+    "whatsapp": "WhatsApp",
+    "whatsappPlaceholder": "+1 234 567 8900",
+    "createStore": "🚀 Create my store",
+    "creating": "Creating store...",
+    "checking": "Checking...",
+    "available": "✅ Available",
+    "notAvailable": "❌ Not available",
+    "required": "*",
+    "errors": {
+      "storeNameRequired": "Store name is required",
+      "slugRequired": "Slug is required",
+      "slugMinLength": "Slug must be at least 3 characters",
+      "slugTaken": "This slug is already taken",
+      "sloganRequired": "Slogan is required",
+      "descriptionRequired": "Description is required",
+      "currencyRequired": "Currency is required",
+      "phoneRequired": "Phone is required",
+      "addressRequired": "Address is required when you have a physical location"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Access your Shopifree dashboard",
+      "email": "Email",
+      "password": "Password",
+      "loginButton": "Sign in",
+      "googleButton": "Continue with Google",
+      "loading": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up here",
+      "forgotPassword": "Forgot your password?",
+      "or": "Or continue with"
+    },
+    "errors": {
+      "userNotFound": "User not found",
+      "wrongPassword": "Incorrect password",
+      "invalidEmail": "Invalid email",
+      "tooManyRequests": "Too many attempts. Try again later",
+      "firebaseUnavailable": "Firebase is not available",
+      "googleSignIn": "Error signing in with Google",
+      "popupBlocked": "Popup blocked. Allow popups for this site",
+      "popupClosed": "Process cancelled by user",
+      "general": "Error signing in"
+    }
+  },
+  "loading": {
+    "initializing": "Starting Firebase...",
+    "authentication": "Verifying authentication...",
+    "userInfo": "Loading your user information",
+    "store": "Loading your store...",
+    "general": "Loading..."
+  },
+  "success": {
+    "title": "Store created successfully!",
+    "subtitle": "is ready to receive your first customers",
+    "whatCanDo": "What you can do now:",
+    "addProducts": "Add products to your catalog",
+    "customizeDesign": "Customize your store design",
+    "setupPayments": "Set up payment methods",
+    "shareStore": "Share your store with customers",
+    "goToDashboard": "Go to Dashboard",
+    "redirecting": "Automatically redirecting in 3 seconds..."
+  },
+  "loading": {
+    "initializing": "Starting Firebase...",
+    "authentication": "Verifying authentication...",
+    "userInfo": "Loading your user information",
+    "store": "Loading your store...",
+    "general": "Loading...",
+    "creatingStore": "Creating your store!",
+    "completed": "completed",
+    "messages": [
+      "Setting up your store...",
+      "Loading logo...",
+      "Setting up your catalog...",
+      "Creating initial design...",
+      "Finalizing configuration..."
+    ]
+  },
+  "common": {
+    "retry": "Retry",
+    "backToLogin": "Back to Login",
+    "redirecting": "Redirecting to login...",
+    "notAuthenticated": "Not authenticated",
+    "dataAvailable": "Available",
+    "dataNotAvailable": "Not available",
+    "firebaseInitialized": "Initialized"
+  }
 } 

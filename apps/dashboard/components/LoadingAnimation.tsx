@@ -1,16 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-const loadingMessages = [
-  "Configurando tu tienda...",
-  "Cargando logo...",
-  "Estableciendo tu catálogo...",
-  "Creando diseño inicial...",
-  "Finalizando configuración..."
-]
+import { useTranslations } from 'next-intl'
 
 export default function LoadingAnimation() {
+  const t = useTranslations('loading')
+  const loadingMessages = t.raw('messages') as string[]
   const [currentMessage, setCurrentMessage] = useState(0)
   const [progress, setProgress] = useState(0)
 
@@ -59,7 +54,7 @@ export default function LoadingAnimation() {
 
           {/* Loading Message */}
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            ¡Creando tu tienda! 🎉
+            {t('creatingStore')} 🎉
           </h2>
           
           <p className="text-gray-600 mb-8 animate-pulse">
@@ -75,7 +70,7 @@ export default function LoadingAnimation() {
           </div>
 
           <p className="text-sm text-gray-500">
-            {Math.round(progress)}% completado
+            {Math.round(progress)}% {t('completed')}
           </p>
 
           {/* Floating Dots Animation */}

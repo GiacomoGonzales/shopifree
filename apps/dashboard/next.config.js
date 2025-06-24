@@ -1,10 +1,12 @@
+const withNextIntl = require('next-intl/plugin')('./i18n.ts');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: [],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
-  // Ensure environment variables are available during buil
+  // Ensure environment variables are available during build
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -15,4 +17,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = withNextIntl(nextConfig); 

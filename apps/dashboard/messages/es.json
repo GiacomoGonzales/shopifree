@@ -1,4 +1,129 @@
 {
-  "dashboard": "Panel de Control",
-  "manage": "Gestiona tu tienda online"
+  "dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Gestiona tu tienda online",
+    "welcome": "¡Bienvenido a tu tienda!",
+    "storeReady": "¡Tu tienda está lista!",
+    "storeReadyDescription": "Has configurado exitosamente tu tienda. Próximamente podrás agregar productos y gestionar pedidos.",
+    "storeInfo": "Información de la tienda",
+    "userInfo": "Información de Usuario",
+    "hello": "Hola",
+    "signOut": "Cerrar sesión",
+    "active": "Activa",
+    "store": "Tienda",
+    "url": "URL",
+    "slogan": "Slogan",
+    "currency": "Moneda",
+    "email": "Email",
+    "uid": "UID",
+    "name": "Nombre"
+  },
+  "storeSetup": {
+    "title": "¡Bienvenido a Shopifree!",
+    "subtitle": "Configuremos tu tienda para empezar a vender",
+    "storeName": "Nombre de la tienda",
+    "storeNamePlaceholder": "Ej: Mi Tienda Genial",
+    "subdomain": "Subdominio (URL)",
+    "subdomainPlaceholder": "mi-tienda",
+    "subdomainHint": "Tu tienda será accesible en:",
+    "slogan": "Slogan",
+    "sloganPlaceholder": "Ej: Los mejores productos al mejor precio",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe brevemente qué vendes...",
+    "hasPhysicalLocation": "¿Tiene local físico?",
+    "address": "Dirección",
+    "addressPlaceholder": "Calle 123, Ciudad, País",
+    "primaryColor": "Color primario",
+    "secondaryColor": "Color secundario",
+    "currency": "Moneda",
+    "currencyPlaceholder": "USD, EUR, COP, etc.",
+    "whatsapp": "WhatsApp",
+    "whatsappPlaceholder": "+1 234 567 8900",
+    "createStore": "🚀 Crear mi tienda",
+    "creating": "Creando tienda...",
+    "checking": "Verificando...",
+    "available": "✅ Disponible",
+    "notAvailable": "❌ No disponible",
+    "required": "*",
+    "errors": {
+      "storeNameRequired": "Nombre de tienda requerido",
+      "slugRequired": "Slug requerido",
+      "slugMinLength": "Slug debe tener al menos 3 caracteres",
+      "slugTaken": "Este slug ya está ocupado",
+      "sloganRequired": "Slogan requerido",
+      "descriptionRequired": "Descripción requerida",
+      "currencyRequired": "Moneda requerida",
+      "phoneRequired": "Teléfono requerido",
+      "addressRequired": "Dirección requerida cuando tiene local físico"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión en tu cuenta",
+      "subtitle": "Accede a tu dashboard de Shopifree",
+      "email": "Email",
+      "password": "Contraseña",
+      "loginButton": "Iniciar sesión",
+      "googleButton": "Continuar con Google",
+      "loading": "Iniciando sesión...",
+      "noAccount": "¿No tienes una cuenta?",
+      "register": "Regístrate aquí",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "or": "O continúa con"
+    },
+    "errors": {
+      "userNotFound": "Usuario no encontrado",
+      "wrongPassword": "Contraseña incorrecta",
+      "invalidEmail": "Email inválido",
+      "tooManyRequests": "Demasiados intentos. Intenta más tarde",
+      "firebaseUnavailable": "Firebase no está disponible",
+      "googleSignIn": "Error al iniciar sesión con Google",
+      "popupBlocked": "Popup bloqueado. Permite popups para este sitio",
+      "popupClosed": "Proceso cancelado por el usuario",
+      "general": "Error al iniciar sesión"
+    }
+  },
+  "loading": {
+    "initializing": "Iniciando Firebase...",
+    "authentication": "Verificando autenticación...",
+    "userInfo": "Cargando tu información de usuario",
+    "store": "Cargando tu tienda...",
+    "general": "Cargando..."
+  },
+  "success": {
+    "title": "¡Tienda creada con éxito!",
+    "subtitle": "está lista para recibir tus primeros clientes",
+    "whatCanDo": "Lo que puedes hacer ahora:",
+    "addProducts": "Agregar productos a tu catálogo",
+    "customizeDesign": "Personalizar el diseño de tu tienda",
+    "setupPayments": "Configurar métodos de pago",
+    "shareStore": "Compartir tu tienda con clientes",
+    "goToDashboard": "Ir al Dashboard",
+    "redirecting": "Redirigiendo automáticamente en 3 segundos..."
+  },
+  "loading": {
+    "initializing": "Iniciando Firebase...",
+    "authentication": "Verificando autenticación...",
+    "userInfo": "Cargando tu información de usuario",
+    "store": "Cargando tu tienda...",
+    "general": "Cargando...",
+    "creatingStore": "¡Creando tu tienda!",
+    "completed": "completado",
+    "messages": [
+      "Configurando tu tienda...",
+      "Cargando logo...",
+      "Estableciendo tu catálogo...",
+      "Creando diseño inicial...",
+      "Finalizando configuración..."
+    ]
+  },
+  "common": {
+    "retry": "Reintentar",
+    "backToLogin": "Volver al Login",
+    "redirecting": "Redirigiendo al login...",
+    "notAuthenticated": "No autenticado",
+    "dataAvailable": "Disponibles",
+    "dataNotAvailable": "No disponibles",
+    "firebaseInitialized": "Inicializado"
+  }
 } 

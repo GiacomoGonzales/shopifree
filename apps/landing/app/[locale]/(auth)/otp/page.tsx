@@ -109,7 +109,7 @@ export default function OTPPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              <a href="https://dashboard.shopifree.app/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="font-medium text-indigo-600 hover:text-indigo-500">
                 {t('backToLogin')}
               </a>
             </p>

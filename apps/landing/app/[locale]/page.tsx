@@ -24,7 +24,7 @@ export default function HomePage() {
               <Link href="/en" className="text-sm text-gray-600 hover:text-gray-900">
                 EN
               </Link>
-              <a href="https://dashboard.shopifree.app/login">
+              <a href={`https://dashboard.shopifree.app/${locale}/login`}>
                 <Button variant="secondary" size="sm">
                   {t('login')}
                 </Button>

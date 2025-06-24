@@ -5,12 +5,15 @@ import { Button, Input } from '@shopifree/ui'
 import { checkSlugAvailability, createStore } from '../lib/store'
 import { getCurrentUser } from '../lib/auth'
 import LoadingAnimation from './LoadingAnimation'
+import { useTranslations } from 'next-intl'
 
 interface StoreSetupProps {
   onStoreCreated: () => void
 }
 
 export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
+  const t = useTranslations('storeSetup')
+  const tErrors = useTranslations('storeSetup.errors')
   const [formData, setFormData] = useState({
     storeName: '',
     slug: '',
@@ -55,16 +58,16 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
-    if (!formData.storeName.trim()) newErrors.storeName = 'Nombre de tienda requerido'
-    if (!formData.slug.trim()) newErrors.slug = 'Slug requerido'
-    if (formData.slug.length < 3) newErrors.slug = 'Slug debe tener al menos 3 caracteres'
-    if (slugAvailable === false) newErrors.slug = 'Este slug ya está ocupado'
-    if (!formData.slogan.trim()) newErrors.slogan = 'Slogan requerido'
-    if (!formData.description.trim()) newErrors.description = 'Descripción requerida'
-    if (!formData.currency.trim()) newErrors.currency = 'Moneda requerida'
-    if (!formData.phone.trim()) newErrors.phone = 'Teléfono requerido'
+    if (!formData.storeName.trim()) newErrors.storeName = tErrors('storeNameRequired')
+    if (!formData.slug.trim()) newErrors.slug = tErrors('slugRequired')
+    if (formData.slug.length < 3) newErrors.slug = tErrors('slugMinLength')
+    if (slugAvailable === false) newErrors.slug = tErrors('slugTaken')
+    if (!formData.slogan.trim()) newErrors.slogan = tErrors('sloganRequired')
+    if (!formData.description.trim()) newErrors.description = tErrors('descriptionRequired')
+    if (!formData.currency.trim()) newErrors.currency = tErrors('currencyRequired')
+    if (!formData.phone.trim()) newErrors.phone = tErrors('phoneRequired')
     if (formData.hasPhysicalLocation && !formData.address.trim()) {
-      newErrors.address = 'Dirección requerida cuando tiene local físico'
+      newErrors.address = tErrors('addressRequired')
     }
     
     setErrors(newErrors)
@@ -118,10 +121,10 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
         <div className="bg-white rounded-lg shadow-md p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              ¡Bienvenido a Shopifree! 🎉
+              {t('title')} 🎉
             </h1>
             <p className="text-gray-600">
-              Configuremos tu tienda para empezar a vender
+              {t('subtitle')}
             </p>
           </div>
 
@@ -129,10 +132,10 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
             {/* Store Name */}
             <div>
               <Input
-                label="Nombre de la tienda *"
+                label={`${t('storeName')} ${t('required')}`}
                 value={formData.storeName}
                 onChange={(e) => handleInputChange('storeName', e.target.value)}
-                placeholder="Ej: Mi Tienda Genial"
+                placeholder={t('storeNamePlaceholder')}
               />
               {errors.storeName && (
                 <p className="text-red-500 text-sm mt-1">{errors.storeName}</p>
@@ -143,7 +146,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
             <div>
               <div className="flex items-center space-x-2">
                 <Input
-                  label="Subdominio (URL) *"
+                  label={`${t('subdomain')} ${t('required')}`}
                   value={formData.slug}
                   onChange={(e) => {
                     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
@@ -152,33 +155,33 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
                       checkSlug(slug)
                     }
                   }}
-                  placeholder="mi-tienda"
+                  placeholder={t('subdomainPlaceholder')}
                 />
                 {slugChecking && (
-                  <div className="text-yellow-500 text-sm">Verificando...</div>
+                  <div className="text-yellow-500 text-sm">{t('checking')}</div>
                 )}
                 {slugAvailable === true && (
-                  <div className="text-green-500 text-sm">✅ Disponible</div>
+                  <div className="text-green-500 text-sm">{t('available')}</div>
                 )}
                 {slugAvailable === false && (
-                  <div className="text-red-500 text-sm">❌ No disponible</div>
+                  <div className="text-red-500 text-sm">{t('notAvailable')}</div>
                 )}
               </div>
               {errors.slug && (
                 <p className="text-red-500 text-sm mt-1">{errors.slug}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">
-                Tu tienda será accesible en: {formData.slug}.shopifree.app
+                {t('subdomainHint')} {formData.slug}.shopifree.app
               </p>
             </div>
 
             {/* Slogan */}
             <div>
               <Input
-                label="Slogan *"
+                label={`${t('slogan')} ${t('required')}`}
                 value={formData.slogan}
                 onChange={(e) => handleInputChange('slogan', e.target.value)}
-                placeholder="Ej: Los mejores productos al mejor precio"
+                placeholder={t('sloganPlaceholder')}
               />
               {errors.slogan && (
                 <p className="text-red-500 text-sm mt-1">{errors.slogan}</p>
@@ -188,12 +191,12 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción *
+                {t('description')} {t('required')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Describe brevemente qué vendes..."
+                placeholder={t('descriptionPlaceholder')}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -212,7 +215,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="hasPhysicalLocation" className="text-sm font-medium text-gray-700">
-                ¿Tiene local físico?
+                {t('hasPhysicalLocation')}
               </label>
             </div>
 
@@ -220,10 +223,10 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
             {formData.hasPhysicalLocation && (
               <div>
                 <Input
-                  label="Dirección *"
+                  label={`${t('address')} ${t('required')}`}
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Calle 123, Ciudad, País"
+                  placeholder={t('addressPlaceholder')}
                 />
                 {errors.address && (
                   <p className="text-red-500 text-sm mt-1">{errors.address}</p>
@@ -235,7 +238,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Color primario
+                  {t('primaryColor')}
                 </label>
                 <input
                   type="color"
@@ -246,7 +249,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Color secundario
+                  {t('secondaryColor')}
                 </label>
                 <input
                   type="color"
@@ -261,10 +264,10 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Input
-                  label="Moneda *"
+                  label={`${t('currency')} ${t('required')}`}
                   value={formData.currency}
                   onChange={(e) => handleInputChange('currency', e.target.value)}
-                  placeholder="USD, EUR, COP, etc."
+                  placeholder={t('currencyPlaceholder')}
                 />
                 {errors.currency && (
                   <p className="text-red-500 text-sm mt-1">{errors.currency}</p>
@@ -272,10 +275,10 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
               </div>
               <div>
                 <Input
-                  label="WhatsApp *"
+                  label={`${t('whatsapp')} ${t('required')}`}
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder="+1 234 567 8900"
+                  placeholder={t('whatsappPlaceholder')}
                 />
                 {errors.phone && (
                   <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
@@ -290,7 +293,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
                 disabled={loading || slugAvailable === false}
                 className="w-full py-3 text-lg"
               >
-                {loading ? 'Creando tienda...' : '🚀 Crear mi tienda'}
+                {loading ? t('creating') : t('createStore')}
               </Button>
             </div>
           </form>

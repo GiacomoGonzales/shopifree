@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@shopifree/ui'
+import { useTranslations } from 'next-intl'
 
 interface SuccessScreenProps {
   storeName: string
@@ -9,6 +10,7 @@ interface SuccessScreenProps {
 }
 
 export default function SuccessScreen({ storeName, onContinue }: SuccessScreenProps) {
+  const t = useTranslations('success')
   const [showConfetti, setShowConfetti] = useState(true)
 
   useEffect(() => {
@@ -69,32 +71,32 @@ export default function SuccessScreen({ storeName, onContinue }: SuccessScreenPr
 
           {/* Success Message */}
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ¡Tienda creada con éxito! 🎉
+            {t('title')} 🎉
           </h1>
           
           <p className="text-gray-600 mb-6">
-            <span className="font-semibold text-blue-600">{storeName}</span> está lista para recibir tus primeros clientes
+            <span className="font-semibold text-blue-600">{storeName}</span> {t('subtitle')}
           </p>
 
           {/* Features Preview */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-            <h3 className="font-semibold text-gray-900 mb-3">Lo que puedes hacer ahora:</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">{t('whatCanDo')}</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Agregar productos a tu catálogo
+                {t('addProducts')}
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Personalizar el diseño de tu tienda
+                {t('customizeDesign')}
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Configurar métodos de pago
+                {t('setupPayments')}
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Compartir tu tienda con clientes
+                {t('shareStore')}
               </li>
             </ul>
           </div>
@@ -104,11 +106,11 @@ export default function SuccessScreen({ storeName, onContinue }: SuccessScreenPr
             onClick={onContinue}
             className="w-full py-3 text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
-            Ir al Dashboard 🚀
+            {t('goToDashboard')} 🚀
           </Button>
 
           <p className="text-xs text-gray-500 mt-4">
-            Redirigiendo automáticamente en 3 segundos...
+            {t('redirecting')}
           </p>
         </div>
       </div>
