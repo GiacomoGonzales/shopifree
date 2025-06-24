@@ -6,15 +6,7 @@ const nextConfig = {
     serverComponentsExternalPackages: [],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
-  output: undefined,
-  trailingSlash: false,
-  generateBuildId: async () => {
-    return 'shopifree-dynamic-build'
-  },
   reactStrictMode: true,
-  exportPathMap: undefined,
-  serverRuntimeConfig: {},
-  publicRuntimeConfig: {},
 };
 
 module.exports = withNextIntl(nextConfig); 
