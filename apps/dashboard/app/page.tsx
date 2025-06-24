@@ -8,6 +8,9 @@ import StoreSetup from '../components/StoreSetup'
 import SuccessScreen from '../components/SuccessScreen'
 import Dashboard from '../components/Dashboard'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)

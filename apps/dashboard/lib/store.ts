@@ -8,7 +8,7 @@ import {
   getDocs,
   serverTimestamp 
 } from 'firebase/firestore'
-import { db } from './firebase'
+import { getFirebaseDb } from './firebase'
 
 export interface StoreConfig {
   storeName: string
@@ -30,6 +30,12 @@ export interface StoreConfig {
 // Check if user has a store
 export const getUserStore = async (userId: string) => {
   try {
+    const db = getFirebaseDb()
+    if (!db) {
+      console.warn('Firebase db not available')
+      return null
+    }
+    
     const q = query(collection(db, 'stores'), where('ownerId', '==', userId))
     const querySnapshot = await getDocs(q)
     
@@ -48,6 +54,12 @@ export const getUserStore = async (userId: string) => {
 // Check if slug is available
 export const checkSlugAvailability = async (slug: string) => {
   try {
+    const db = getFirebaseDb()
+    if (!db) {
+      console.warn('Firebase db not available')
+      return false
+    }
+    
     const q = query(collection(db, 'stores'), where('slug', '==', slug))
     const querySnapshot = await getDocs(q)
     return querySnapshot.empty
@@ -60,6 +72,11 @@ export const checkSlugAvailability = async (slug: string) => {
 // Create new store
 export const createStore = async (storeData: Omit<StoreConfig, 'createdAt' | 'updatedAt'>) => {
   try {
+    const db = getFirebaseDb()
+    if (!db) {
+      throw new Error('Firebase db not available')
+    }
+    
     // Generate store ID
     const storeRef = doc(collection(db, 'stores'))
     

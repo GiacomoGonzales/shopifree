@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app'
+import { getAuth, Auth } from 'firebase/auth'
+import { getFirestore, Firestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,13 +11,68 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
+// Check if we're in the browser and have valid config
+const isValidConfig = () => {
+  return (
+    typeof window !== 'undefined' &&
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId
+  )
+}
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app)
+// Initialize Firebase only if we have valid config and we're in the browser
+let app: FirebaseApp | null = null
+let auth: Auth | null = null
+let db: Firestore | null = null
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app)
+const initializeFirebase = () => {
+  if (!isValidConfig()) {
+    console.warn('Firebase config is invalid or not available')
+    return null
+  }
 
-export default app 
+  try {
+    // Check if Firebase is already initialized
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig)
+    } else {
+      app = getApp()
+    }
+
+    auth = getAuth(app)
+    db = getFirestore(app)
+    
+    return app
+  } catch (error) {
+    console.error('Error initializing Firebase:', error)
+    return null
+  }
+}
+
+// Export functions that lazily initialize Firebase
+export const getFirebaseAuth = () => {
+  if (!auth && isValidConfig()) {
+    initializeFirebase()
+  }
+  return auth
+}
+
+export const getFirebaseDb = () => {
+  if (!db && isValidConfig()) {
+    initializeFirebase()
+  }
+  return db
+}
+
+export const getFirebaseApp = () => {
+  if (!app && isValidConfig()) {
+    initializeFirebase()
+  }
+  return app
+}
+
+// For backward compatibility
+export { getFirebaseAuth as auth, getFirebaseDb as db }
+
+export default getFirebaseApp 
