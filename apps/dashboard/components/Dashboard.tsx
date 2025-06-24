@@ -1,15 +1,15 @@
 'use client'
 
-import { User } from 'firebase/auth'
-import { signOut } from '../lib/auth'
+import { useAuth } from '../lib/auth-context'
 import { getLandingUrl } from '../lib/config'
 
 interface DashboardProps {
-  user: User
   store: any
 }
 
-export default function Dashboard({ user, store }: DashboardProps) {
+export default function Dashboard({ store }: DashboardProps) {
+  const { user, userData, signOut } = useAuth()
+
   const handleSignOut = async () => {
     await signOut()
     window.location.href = getLandingUrl('/es')
@@ -31,7 +31,7 @@ export default function Dashboard({ user, store }: DashboardProps) {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
-                Hola, <span className="font-medium">{user.email}</span>
+                Hola, <span className="font-medium">{user?.email || userData?.email}</span>
               </div>
               <button
                 onClick={handleSignOut}
@@ -58,6 +58,20 @@ export default function Dashboard({ user, store }: DashboardProps) {
             <p><span className="font-medium">Moneda:</span> {store?.currency}</p>
           </div>
         </div>
+
+        {/* User Info Card (Optional - shows Firestore data) */}
+        {userData && (
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Información de Usuario</h3>
+            <div className="space-y-1 text-sm text-gray-600">
+              <p><span className="font-medium">Email:</span> {userData.email}</p>
+              <p><span className="font-medium">UID:</span> {userData.uid}</p>
+              {userData.displayName && (
+                <p><span className="font-medium">Nombre:</span> {userData.displayName}</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Getting Started */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
