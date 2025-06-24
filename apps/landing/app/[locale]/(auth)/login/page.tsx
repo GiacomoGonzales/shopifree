@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import { Button, Input } from '@shopifree/ui'
 import { signInWithEmail, signInWithGoogle } from '../../../../lib/auth'
+import { getDashboardUrl } from '../../../../lib/config'
 
 export default function LoginPage() {
   const t = useTranslations('auth.login')
@@ -25,7 +26,7 @@ export default function LoginPage() {
     
     if (user) {
       // Redirect to dashboard
-      window.location.href = 'http://localhost:3001'
+      window.location.href = getDashboardUrl()
     } else {
       setError(authError || 'Error al iniciar sesión')
     }
@@ -41,7 +42,7 @@ export default function LoginPage() {
     
     if (user) {
       // Redirect to dashboard
-      window.location.href = 'http://localhost:3001'
+      window.location.href = getDashboardUrl()
     } else {
       setError(authError || 'Error al iniciar sesión con Google')
     }

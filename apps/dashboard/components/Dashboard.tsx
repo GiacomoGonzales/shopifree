@@ -2,6 +2,7 @@
 
 import { User } from 'firebase/auth'
 import { signOut } from '../lib/auth'
+import { getLandingUrl } from '../lib/config'
 
 interface DashboardProps {
   user: User
@@ -11,7 +12,7 @@ interface DashboardProps {
 export default function Dashboard({ user, store }: DashboardProps) {
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = 'http://localhost:3000/es'
+    window.location.href = getLandingUrl('/es')
   }
 
   return (

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { User } from 'firebase/auth'
 import { onAuthStateChange } from '../lib/auth'
 import { getUserStore } from '../lib/store'
+import { getLandingUrl } from '../lib/config'
 import StoreSetup from '../components/StoreSetup'
 import SuccessScreen from '../components/SuccessScreen'
 import Dashboard from '../components/Dashboard'
@@ -33,7 +34,7 @@ export default function DashboardPage() {
         }
       } else {
         // Redirect to landing if not authenticated
-        window.location.href = 'http://localhost:3000/es/login'
+        window.location.href = getLandingUrl('/es/login')
       }
       
       setLoading(false)
