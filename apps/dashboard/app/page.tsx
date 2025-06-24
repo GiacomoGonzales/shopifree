@@ -15,33 +15,50 @@ export const dynamic = 'force-dynamic'
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [authInitialized, setAuthInitialized] = useState(false)
   const [hasStore, setHasStore] = useState(false)
   const [storeData, setStoreData] = useState<any>(null)
   const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange(async (authUser) => {
+      // Mark auth as initialized after first callback
+      if (!authInitialized) {
+        setAuthInitialized(true)
+      }
+      
       setUser(authUser)
       
       if (authUser) {
-        // Check if user has a store
-        const userStore = await getUserStore(authUser.uid)
-        if (userStore) {
-          setHasStore(true)
-          setStoreData(userStore)
-        } else {
+        // User is authenticated - check if user has a store
+        try {
+          const userStore = await getUserStore(authUser.uid)
+          if (userStore) {
+            setHasStore(true)
+            setStoreData(userStore)
+          } else {
+            setHasStore(false)
+          }
+        } catch (error) {
+          console.error('Error getting user store:', error)
           setHasStore(false)
         }
       } else {
-        // Redirect to landing if not authenticated
-        window.location.href = getLandingUrl('/es/login')
+        // User is not authenticated - but only redirect if auth is initialized
+        // This prevents premature redirects during initial Firebase auth check
+        if (authInitialized) {
+          // Small delay to ensure this isn't a temporary state
+          setTimeout(() => {
+            window.location.href = getLandingUrl('/es/login')
+          }, 100)
+        }
       }
       
       setLoading(false)
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [authInitialized])
 
   const handleStoreCreated = () => {
     setShowSuccess(true)
@@ -58,8 +75,8 @@ export default function DashboardPage() {
     }
   }
 
-  // Loading state
-  if (loading) {
+  // Show loading while Firebase is checking authentication
+  if (loading || !authInitialized) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -68,15 +85,26 @@ export default function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">Cargando...</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Verificando autenticación...</h2>
         </div>
       </div>
     )
   }
 
-  // User not authenticated (handled in useEffect)
+  // User not authenticated (only show this after auth is initialized)
   if (!user) {
-    return null
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900">Redirigiendo...</h2>
+          <p className="text-gray-600 mt-2">Si no eres redirigido automáticamente, 
+            <a href={getLandingUrl('/es/login')} className="text-blue-600 underline ml-1">
+              haz clic aquí
+            </a>
+          </p>
+        </div>
+      </div>
+    )
   }
 
   // Show success screen after store creation
