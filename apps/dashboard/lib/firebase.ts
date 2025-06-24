@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app'
-import { getAuth, Auth } from 'firebase/auth'
+import { getAuth, Auth, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirestore, Firestore } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -26,7 +26,7 @@ let app: FirebaseApp | null = null
 let auth: Auth | null = null
 let db: Firestore | null = null
 
-const initializeFirebase = () => {
+const initializeFirebase = async () => {
   if (!isValidConfig()) {
     console.warn('Firebase config is invalid or not available')
     return null
@@ -42,6 +42,16 @@ const initializeFirebase = () => {
 
     auth = getAuth(app)
     db = getFirestore(app)
+    
+    // 🔥 Configurar persistencia explícitamente
+    if (auth) {
+      try {
+        await setPersistence(auth, browserLocalPersistence)
+        console.log('✅ Firebase persistencia configurada en dashboard')
+      } catch (persistenceError) {
+        console.warn('⚠️ No se pudo configurar persistencia:', persistenceError)
+      }
+    }
     
     return app
   } catch (error) {

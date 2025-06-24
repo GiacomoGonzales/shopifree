@@ -13,13 +13,19 @@ interface UserData {
   [key: string]: any // Allow any additional fields
 }
 
+interface DebugInfo {
+  [key: string]: any
+}
+
 interface AuthContextType {
   user: User | null
   userData: UserData | null
   loading: boolean
+  authInitialized: boolean
   error: string | null
   isAuthenticated: boolean
   signOut: () => Promise<void>
+  debugInfo: DebugInfo // Add debug info
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -28,22 +34,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [authInitialized, setAuthInitialized] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>({})
 
   // Simple function to get user data - compatible with existing structure
   const getUserData = async (user: User): Promise<UserData | null> => {
     try {
+      console.log('🔍 Getting user data for:', user.uid, user.email)
+      
       const db = getFirebaseDb()
       if (!db) {
-        console.warn('Firebase db not available')
+        console.warn('❌ Firebase db not available')
+        setDebugInfo((prev: DebugInfo) => ({ ...prev, dbAvailable: false }))
         return null
       }
 
+      setDebugInfo((prev: DebugInfo) => ({ ...prev, dbAvailable: true }))
+
       const userDocRef = doc(db, 'users', user.uid)
+      console.log('📄 Fetching user document from Firestore...')
+      
       const userDocSnap = await getDoc(userDocRef)
 
       if (userDocSnap.exists()) {
         const data = userDocSnap.data()
+        console.log('✅ User document found:', data)
+        
+        setDebugInfo((prev: DebugInfo) => ({ 
+          ...prev, 
+          userDocExists: true,
+          userDocData: data,
+          timestamp: new Date().toISOString()
+        }))
         
         // Update last login without overwriting other data
         try {
@@ -51,8 +74,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             lastLoginAt: serverTimestamp(),
             updatedAt: serverTimestamp()
           }, { merge: true })
+          console.log('✅ Updated last login timestamp')
         } catch (updateError) {
-          console.warn('Could not update last login:', updateError)
+          console.warn('⚠️ Could not update last login:', updateError)
         }
 
         // Return normalized data
@@ -63,10 +87,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
 
-      console.log('No user document found for:', user.uid)
+      console.log('❌ No user document found for:', user.uid)
+      setDebugInfo((prev: DebugInfo) => ({ 
+        ...prev, 
+        userDocExists: false,
+        searchedUid: user.uid,
+        timestamp: new Date().toISOString()
+      }))
       return null
     } catch (error) {
-      console.error('Error getting user data:', error)
+      console.error('❌ Error getting user data:', error)
+      setDebugInfo((prev: DebugInfo) => ({ 
+        ...prev, 
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString()
+      }))
       return null
     }
   }
@@ -84,49 +119,72 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   useEffect(() => {
+    console.log('🚀 Initializing auth context...')
+    
     const auth = getFirebaseAuth()
     
     if (!auth) {
-      console.warn('Firebase auth not available')
+      console.warn('❌ Firebase auth not available')
+      setDebugInfo({ authAvailable: false })
       setLoading(false)
+      setAuthInitialized(true)
       return
     }
+
+    console.log('✅ Firebase auth available')
+    setDebugInfo((prev: DebugInfo) => ({ ...prev, authAvailable: true }))
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         setError(null)
         
         if (firebaseUser) {
+          console.log('👤 User authenticated:', firebaseUser.uid, firebaseUser.email)
           setUser(firebaseUser)
           
           const userData = await getUserData(firebaseUser)
           if (userData) {
+            console.log('✅ User data loaded successfully')
             setUserData(userData)
           } else {
-            setError('No se encontró información del usuario en la base de datos.')
+            console.log('❌ No user data found - user needs to be created or migrated')
+            setError('No se encontró información del usuario en la base de datos. Contacta soporte.')
           }
         } else {
+          console.log('👤 No user authenticated')
           setUser(null)
           setUserData(null)
         }
       } catch (error) {
-        console.error('Auth error:', error)
-        setError('Error de autenticación')
+        console.error('❌ Auth error:', error)
+        setError('Error de autenticación: ' + (error instanceof Error ? error.message : String(error)))
       } finally {
         setLoading(false)
+        setAuthInitialized(true)
+        console.log('✅ Auth state change complete - Firebase initialized')
       }
     })
 
     return () => unsubscribe()
   }, [])
 
+  // 🔥 Agregar logs para debugging en producción
+  useEffect(() => {
+    console.log('✅ Firebase user:', !!user, user?.uid)
+    console.log('✅ Firebase initialized:', authInitialized)
+    console.log('✅ Loading state:', loading)
+    console.log('✅ Is authenticated:', !!user)
+  }, [user, authInitialized, loading])
+
   const value: AuthContextType = {
     user,
     userData,
     loading,
+    authInitialized,
     error,
-    isAuthenticated: !!user && !!userData,
-    signOut
+    isAuthenticated: !!user, // 🔥 Solo depender del user, no de userData
+    signOut,
+    debugInfo
   }
 
   return (

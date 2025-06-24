@@ -3,7 +3,9 @@ import {
   signInWithEmailAndPassword, 
   signInWithPopup, 
   GoogleAuthProvider,
-  User 
+  User,
+  setPersistence,
+  browserLocalPersistence
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
@@ -37,9 +39,17 @@ export const signInWithEmail = async (email: string, password: string) => {
   }
 
   try {
+    // 🔥 Configurar persistencia ANTES del login
+    console.log('🔧 Configurando persistencia local...')
+    await setPersistence(auth, browserLocalPersistence)
+    
+    console.log('🔐 Iniciando sesión con email...')
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    console.log('✅ Login exitoso:', userCredential.user.uid)
+    
     return { user: userCredential.user, error: null }
   } catch (error: any) {
+    console.error('❌ Error en login:', error)
     return { user: null, error: error.message }
   }
 }
@@ -51,8 +61,14 @@ export const signInWithGoogle = async () => {
   }
 
   try {
+    // 🔥 Configurar persistencia ANTES del login
+    console.log('🔧 Configurando persistencia local...')
+    await setPersistence(auth, browserLocalPersistence)
+    
+    console.log('🔐 Iniciando sesión con Google...')
     const result = await signInWithPopup(auth, googleProvider)
     const user = result.user
+    console.log('✅ Login con Google exitoso:', user.uid)
     
     // Check if user exists in Firestore, if not create profile
     const userDoc = await getDoc(doc(db, 'users', user.uid))
@@ -62,6 +78,7 @@ export const signInWithGoogle = async () => {
     
     return { user, error: null }
   } catch (error: any) {
+    console.error('❌ Error en login con Google:', error)
     return { user: null, error: error.message }
   }
 }
