@@ -4,7 +4,7 @@ const nextConfig = {
     serverComponentsExternalPackages: [],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
-  // Ensure environment variables are available during build
+  // Ensure environment variables are available during buil
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
