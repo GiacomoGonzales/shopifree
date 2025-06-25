@@ -12,7 +12,7 @@ import { getFirebaseDb } from './firebase'
 
 export interface StoreConfig {
   storeName: string
-  slug: string
+  subdomain: string // Campo principal para el subdominio
   slogan: string
   description: string
   hasPhysicalLocation: boolean
@@ -53,8 +53,47 @@ export const getUserStore = async (userId: string): Promise<StoreWithId | null> 
   }
 }
 
-// Check if slug is available
-export const checkSlugAvailability = async (slug: string) => {
+// Validate subdomain format
+export const validateSubdomain = (subdomain: string): { isValid: boolean; error?: string } => {
+  if (!subdomain || subdomain.length < 3) {
+    return { isValid: false, error: 'El subdominio debe tener al menos 3 caracteres' }
+  }
+  
+  if (subdomain.length > 50) {
+    return { isValid: false, error: 'El subdominio no puede tener más de 50 caracteres' }
+  }
+  
+  // Solo letras minúsculas, números y guiones
+  const validPattern = /^[a-z0-9-]+$/
+  if (!validPattern.test(subdomain)) {
+    return { isValid: false, error: 'Solo se permiten letras minúsculas, números y guiones' }
+  }
+  
+  // No puede empezar o terminar con guión
+  if (subdomain.startsWith('-') || subdomain.endsWith('-')) {
+    return { isValid: false, error: 'No puede empezar o terminar con guión' }
+  }
+  
+  // No puede tener guiones consecutivos
+  if (subdomain.includes('--')) {
+    return { isValid: false, error: 'No puede tener guiones consecutivos' }
+  }
+  
+  // Lista de subdominios reservados
+  const reservedSubdomains = [
+    'www', 'api', 'admin', 'app', 'mail', 'ftp', 'localhost', 'dashboard',
+    'support', 'help', 'blog', 'store', 'shop', 'cdn', 'assets', 'static'
+  ]
+  
+  if (reservedSubdomains.includes(subdomain)) {
+    return { isValid: false, error: 'Este subdominio está reservado' }
+  }
+  
+  return { isValid: true }
+}
+
+// Check if subdomain is available
+export const checkSubdomainAvailability = async (subdomain: string) => {
   try {
     const db = getFirebaseDb()
     if (!db) {
@@ -62,14 +101,23 @@ export const checkSlugAvailability = async (slug: string) => {
       return false
     }
     
-    const q = query(collection(db, 'stores'), where('slug', '==', slug))
+    // Validar formato primero
+    const validation = validateSubdomain(subdomain)
+    if (!validation.isValid) {
+      return false
+    }
+    
+    const q = query(collection(db, 'stores'), where('subdomain', '==', subdomain))
     const querySnapshot = await getDocs(q)
     return querySnapshot.empty
   } catch (error) {
-    console.error('Error checking slug availability:', error)
+    console.error('Error checking subdomain availability:', error)
     return false
   }
 }
+
+// Legacy function for backward compatibility
+export const checkSlugAvailability = checkSubdomainAvailability
 
 // Create new store
 export const createStore = async (storeData: Omit<StoreConfig, 'createdAt' | 'updatedAt'>) => {

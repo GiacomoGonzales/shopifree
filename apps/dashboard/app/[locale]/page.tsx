@@ -5,7 +5,6 @@ import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore, StoreWithId } from '../../lib/store'
 import AuthGuard from '../../components/AuthGuard'
 import StoreSetup from '../../components/StoreSetup'
-import SuccessScreen from '../../components/SuccessScreen'
 import Dashboard from '../../components/Dashboard'
 import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
@@ -18,45 +17,56 @@ function DashboardContent() {
   const { user, userData } = useAuth()
   const [hasStore, setHasStore] = useState(false)
   const [storeData, setStoreData] = useState<StoreWithId | null>(null)
-  const [showSuccess, setShowSuccess] = useState(false)
   const [storeLoading, setStoreLoading] = useState(true)
 
-  // Check if user has a store when component mounts
+  // Check if user has a store when component mounts or user changes
   useEffect(() => {
     const checkUserStore = async () => {
-      if (user) {
+      if (user?.uid) {
+        setStoreLoading(true)
         try {
           const userStore = await getUserStore(user.uid)
+          
           if (userStore) {
             setHasStore(true)
             setStoreData(userStore)
           } else {
             setHasStore(false)
+            setStoreData(null)
           }
         } catch (error) {
           console.error('Error getting user store:', error)
           setHasStore(false)
+          setStoreData(null)
         } finally {
           setStoreLoading(false)
         }
+      } else if (user === null) {
+        // User is not authenticated, reset states
+        setHasStore(false)
+        setStoreData(null)
+        setStoreLoading(false)
       }
     }
 
     checkUserStore()
-  }, [user])
+  }, [user?.uid]) // Solo depende del UID del usuario
 
-  const handleStoreCreated = () => {
-    setShowSuccess(true)
-  }
-
-  const handleSuccessContinue = () => {
-    setShowSuccess(false)
-    setHasStore(true)
-    // Reload store data
-    if (user) {
-      getUserStore(user.uid).then(store => {
-        setStoreData(store)
-      })
+  const handleStoreCreated = async () => {
+    // After store creation, refresh the store data
+    if (user?.uid) {
+      setStoreLoading(true)
+      try {
+        const userStore = await getUserStore(user.uid)
+        if (userStore) {
+          setHasStore(true)
+          setStoreData(userStore)
+        }
+      } catch (error) {
+        console.error('Error refreshing store data:', error)
+      } finally {
+        setStoreLoading(false)
+      }
     }
   }
 
@@ -73,16 +83,6 @@ function DashboardContent() {
           <h2 className="text-xl font-semibold text-gray-900">{t('store')}</h2>
         </div>
       </div>
-    )
-  }
-
-  // Show success screen after store creation
-  if (showSuccess && storeData) {
-    return (
-      <SuccessScreen 
-        storeName={storeData.storeName || "Tu Tienda"} 
-        onContinue={handleSuccessContinue} 
-      />
     )
   }
 
