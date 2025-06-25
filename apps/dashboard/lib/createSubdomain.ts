@@ -105,4 +105,85 @@ export async function verifyVercelToken(): Promise<boolean> {
     console.error('❌ Error verificando token:', error);
     return false;
   }
+}
+
+/**
+ * Función para verificar si un subdominio ya existe en Vercel
+ * @param subdomain - El subdominio a verificar (sin .shopifree.app)
+ * @returns true si existe, false si no existe
+ */
+export async function checkSubdomainExists(subdomain: string): Promise<boolean> {
+  const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+  
+  if (!VERCEL_TOKEN) {
+    console.error('❌ VERCEL_TOKEN no configurado');
+    return false;
+  }
+  
+  try {
+    const domainName = `${subdomain}.shopifree.app`;
+    console.log('🔍 Verificando si existe el dominio:', domainName);
+    
+    const response = await fetch('https://api.vercel.com/v10/projects/shopifree-public-store/domains', {
+      headers: {
+        'Authorization': `Bearer ${VERCEL_TOKEN}`,
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('❌ Error obteniendo dominios del proyecto');
+      return false;
+    }
+    
+    const data = await response.json();
+    const domains = data.domains || [];
+    
+    const exists = domains.some((domain: any) => domain.name === domainName);
+    console.log(exists ? '✅ El dominio SÍ existe en Vercel' : '❌ El dominio NO existe en Vercel');
+    
+    return exists;
+    
+  } catch (error) {
+    console.error('❌ Error verificando subdominio:', error);
+    return false;
+  }
+}
+
+/**
+ * Función para obtener todos los dominios del proyecto
+ * @returns lista de dominios o null si hay error
+ */
+export async function getProjectDomains(): Promise<any[] | null> {
+  const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+  
+  if (!VERCEL_TOKEN) {
+    console.error('❌ VERCEL_TOKEN no configurado');
+    return null;
+  }
+  
+  try {
+    console.log('📋 Obteniendo todos los dominios del proyecto...');
+    
+    const response = await fetch('https://api.vercel.com/v10/projects/shopifree-public-store/domains', {
+      headers: {
+        'Authorization': `Bearer ${VERCEL_TOKEN}`,
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('❌ Error obteniendo dominios del proyecto');
+      return null;
+    }
+    
+    const data = await response.json();
+    const domains = data.domains || [];
+    
+    console.log('📋 Dominios encontrados:', domains.map((d: any) => d.name));
+    
+    return domains;
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo dominios:', error);
+    return null;
+  }
 } 
