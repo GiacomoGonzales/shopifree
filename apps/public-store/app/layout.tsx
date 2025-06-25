@@ -4,8 +4,9 @@ import { StoreProvider } from '../lib/store-context'
 import { getStoreBySubdomain, extractSubdomain } from '../lib/store'
 import './globals.css'
 
-// Force dynamic rendering
+// Force dynamic rendering with Node.js runtime (required for Firebase)
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export const metadata: Metadata = {
   title: 'Shopifree Store',
