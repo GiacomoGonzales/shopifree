@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button, Input } from '@shopifree/ui'
 import { checkSubdomainAvailability, validateSubdomain, createStore } from '../lib/store'
-import { createSubdomain, verifyVercelToken, checkSubdomainExists } from '../lib/createSubdomain'
+import { createSubdomain } from '../lib/createSubdomain'
 import { getCurrentUser } from '../lib/auth'
 import LoadingAnimation from './LoadingAnimation'
 import { useTranslations } from 'next-intl'
@@ -169,35 +169,15 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
       await createStore(storeData)
       console.log('✅ Tienda creada en Firestore:', storeData.subdomain)
       
-      // 2. Verificar token de Vercel antes de intentar crear subdominio
-      console.log('🔐 Verificando token de Vercel...')
-      const tokenValid = await verifyVercelToken()
-      
-      if (!tokenValid) {
-        console.warn('⚠️ Token de Vercel no válido - saltando creación de subdominio')
-        console.warn('📝 Verifica que VERCEL_TOKEN esté configurado en .env.local')
-      } else {
-        // 3. Crear subdominio en Vercel automáticamente
-        try {
-          console.log('🚀 Creando subdominio en Vercel:', storeData.subdomain)
-          await createSubdomain(storeData.subdomain)
-          console.log('✅ Subdominio creado exitosamente:', `${storeData.subdomain}.shopifree.app`)
-          
-          // 4. Verificar que se creó correctamente
-          setTimeout(async () => {
-            const exists = await checkSubdomainExists(storeData.subdomain)
-            if (exists) {
-              console.log('🎯 Verificación exitosa: El subdominio está disponible en Vercel')
-            } else {
-              console.warn('⚠️ El subdominio no aparece en Vercel - puede tardar unos minutos')
-            }
-          }, 2000)
-          
-        } catch (subdomainError) {
-          console.warn('⚠️ Error creando subdominio (la tienda se creó pero sin subdominio):', subdomainError)
-          // No detenemos el proceso, solo loggeamos el error
-          // La tienda ya fue creada exitosamente en Firestore
-        }
+      // 2. Crear subdominio en Vercel automáticamente via API route
+      try {
+        console.log('🚀 Creando subdominio en Vercel:', storeData.subdomain)
+        await createSubdomain(storeData.subdomain)
+        console.log('✅ Subdominio creado exitosamente:', `${storeData.subdomain}.shopifree.app`)
+      } catch (subdomainError) {
+        console.warn('⚠️ Error creando subdominio (la tienda se creó pero sin subdominio):', subdomainError)
+        // No detenemos el proceso, solo loggeamos el error
+        // La tienda ya fue creada exitosamente en Firestore
       }
       
       // Show success toast and close loading immediately

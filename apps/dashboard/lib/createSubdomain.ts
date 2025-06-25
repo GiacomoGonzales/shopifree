@@ -1,10 +1,44 @@
 /**
- * Crea un subdominio en Vercel para el proyecto shopifree-public-store
+ * Crea un subdominio en Vercel usando la API route del servidor
  * @param subdomain - El subdominio a crear (sin .shopifree.app)
  * @returns true si fue exitoso
  * @throws Error si falla la validación o la creación
  */
 export async function createSubdomain(subdomain: string): Promise<boolean> {
+  console.log('🚀 [CLIENT] Creando subdominio via API route:', subdomain);
+  
+  try {
+    const response = await fetch('/api/subdomain', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ subdomain }),
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error('❌ [CLIENT] Error de API route:', result.error);
+      throw new Error(result.error || 'Error al crear el subdominio');
+    }
+    
+    console.log('✅ [CLIENT] Subdominio creado exitosamente:', result.domain);
+    return true;
+    
+  } catch (error) {
+    console.error('❌ [CLIENT] Error llamando a API route:', error);
+    throw error;
+  }
+}
+
+/**
+ * FUNCIÓN LEGACY - Crea un subdominio directamente desde el cliente (NO USAR)
+ * @param subdomain - El subdominio a crear (sin .shopifree.app)
+ * @returns true si fue exitoso
+ * @throws Error si falla la validación o la creación
+ */
+export async function createSubdomainLegacy(subdomain: string): Promise<boolean> {
   // 1. Validar que el subdominio contenga solo letras, números o guiones, y no tenga espacios
   const subdomainRegex = /^[a-zA-Z0-9-]+$/;
   

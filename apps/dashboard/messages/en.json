@@ -121,7 +121,10 @@
     "authentication": "Verifying authentication...",
     "userInfo": "Loading your user information",
     "store": "Loading store information...",
-    "general": "Loading..."
+    "general": "Loading...",
+    "messages": "Loading translations...",
+    "creatingStore": "Creating your store...",
+    "completed": "Process completed successfully"
   },
   "success": {
     "title": "Congratulations!",

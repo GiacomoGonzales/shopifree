@@ -122,15 +122,9 @@
     "userInfo": "Cargando tu información de usuario",
     "store": "Cargando información de la tienda...",
     "general": "Cargando...",
-    "creatingStore": "¡Creando tu tienda!",
-    "completed": "completado",
-    "messages": [
-      "Configurando tu tienda...",
-      "Cargando logo...",
-      "Estableciendo tu catálogo...",
-      "Creando diseño inicial...",
-      "Finalizando configuración..."
-    ]
+    "messages": "Cargando traducciones...",
+    "creatingStore": "Creando tu tienda...",
+    "completed": "Proceso completado exitosamente"
   },
   "success": {
     "title": "¡Felicitaciones!",
