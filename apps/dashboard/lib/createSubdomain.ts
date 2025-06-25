@@ -21,7 +21,15 @@ export async function createSubdomain(subdomain: string): Promise<boolean> {
     throw new Error('El subdominio no puede empezar ni terminar con un guión');
   }
   
+  // Usar el Project ID correcto
+  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'prj_YgKbAHmwKcCff31cek9QUWknSiAX';
   const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+  
+  console.log('🔧 Variables de entorno:', {
+    hasToken: !!VERCEL_TOKEN,
+    tokenLength: VERCEL_TOKEN?.length || 0,
+    projectId: VERCEL_PROJECT_ID
+  });
   
   if (!VERCEL_TOKEN) {
     throw new Error('Token de Vercel no configurado. Agrega VERCEL_TOKEN al archivo .env.local');
@@ -33,8 +41,9 @@ export async function createSubdomain(subdomain: string): Promise<boolean> {
     // 2. Crear el subdominio como subdomain.shopifree.app en la API de Vercel
     const domainName = `${subdomain}.shopifree.app`;
     console.log('📞 Llamando a Vercel API para crear:', domainName);
+    console.log('🆔 Usando Project ID:', VERCEL_PROJECT_ID);
     
-    const response = await fetch('https://api.vercel.com/v10/projects/shopifree-public-store/domains', {
+    const response = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${VERCEL_TOKEN}`,
@@ -45,10 +54,13 @@ export async function createSubdomain(subdomain: string): Promise<boolean> {
       }),
     });
     
+    console.log('📊 Status de respuesta:', response.status, response.statusText);
+    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.error?.message || errorData.message || `Error HTTP ${response.status}: ${response.statusText}`;
       console.error('❌ Error de Vercel API:', errorMessage);
+      console.error('📋 Respuesta completa:', errorData);
       throw new Error(`Error al crear el subdominio en Vercel: ${errorMessage}`);
     }
     
@@ -113,6 +125,7 @@ export async function verifyVercelToken(): Promise<boolean> {
  * @returns true si existe, false si no existe
  */
 export async function checkSubdomainExists(subdomain: string): Promise<boolean> {
+  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'prj_YgKbAHmwKcCff31cek9QUWknSiAX';
   const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
   
   if (!VERCEL_TOKEN) {
@@ -124,7 +137,7 @@ export async function checkSubdomainExists(subdomain: string): Promise<boolean> 
     const domainName = `${subdomain}.shopifree.app`;
     console.log('🔍 Verificando si existe el dominio:', domainName);
     
-    const response = await fetch('https://api.vercel.com/v10/projects/shopifree-public-store/domains', {
+    const response = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`, {
       headers: {
         'Authorization': `Bearer ${VERCEL_TOKEN}`,
       },
@@ -154,6 +167,7 @@ export async function checkSubdomainExists(subdomain: string): Promise<boolean> 
  * @returns lista de dominios o null si hay error
  */
 export async function getProjectDomains(): Promise<any[] | null> {
+  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'prj_YgKbAHmwKcCff31cek9QUWknSiAX';
   const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
   
   if (!VERCEL_TOKEN) {
@@ -164,7 +178,7 @@ export async function getProjectDomains(): Promise<any[] | null> {
   try {
     console.log('📋 Obteniendo todos los dominios del proyecto...');
     
-    const response = await fetch('https://api.vercel.com/v10/projects/shopifree-public-store/domains', {
+    const response = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`, {
       headers: {
         'Authorization': `Bearer ${VERCEL_TOKEN}`,
       },
