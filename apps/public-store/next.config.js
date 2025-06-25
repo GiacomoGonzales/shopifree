@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: [],
+    serverComponentsExternalPackages: ['firebase', '@firebase/app', '@firebase/firestore'],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
   // Enable Firebase environment variables
