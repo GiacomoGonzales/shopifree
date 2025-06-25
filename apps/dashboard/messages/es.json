@@ -89,6 +89,19 @@
       "forgotPassword": "¿Olvidaste tu contraseña?",
       "or": "O continúa con"
     },
+    "register": {
+      "title": "Crear tu cuenta",
+      "subtitle": "Únete a Shopifree y crea tu tienda",
+      "email": "Email",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "registerButton": "Crear cuenta",
+      "googleButton": "Continuar con Google",
+      "loading": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Inicia sesión aquí",
+      "or": "O continúa con"
+    },
     "errors": {
       "userNotFound": "Usuario no encontrado",
       "wrongPassword": "Contraseña incorrecta",
@@ -98,7 +111,9 @@
       "googleSignIn": "Error al iniciar sesión con Google",
       "popupBlocked": "Popup bloqueado. Permite popups para este sitio",
       "popupClosed": "Proceso cancelado por el usuario",
-      "general": "Error al iniciar sesión"
+      "general": "Error al iniciar sesión",
+      "emailAlreadyInUse": "Este email ya está registrado",
+      "weakPassword": "La contraseña es muy débil"
     }
   },
   "loading": {

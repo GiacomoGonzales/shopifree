@@ -181,7 +181,7 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
             <p className="text-sm text-gray-600">
               {t('noAccount')}{' '}
               <a 
-                href={`https://shopifree.app/${locale}/register`}
+                href={`/${locale}/register`}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 {t('register')}

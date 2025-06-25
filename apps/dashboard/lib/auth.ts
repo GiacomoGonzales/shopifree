@@ -1,4 +1,4 @@
-import { onAuthStateChanged, User, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth'
+import { onAuthStateChanged, User, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirebaseAuth } from './firebase'
 
 // Auth state observer
@@ -41,6 +41,37 @@ export const signInWithEmail = async (email: string, password: string) => {
       errorMessage = 'Contraseña incorrecta'
     } else if (error?.code === 'auth/invalid-email') {
       errorMessage = 'Email inválido'
+    } else if (error?.code === 'auth/too-many-requests') {
+      errorMessage = 'Demasiados intentos. Intenta más tarde'
+    }
+    
+    return { user: null, error: errorMessage }
+  }
+}
+
+// Register with email and password
+export const registerWithEmail = async (email: string, password: string) => {
+  try {
+    const auth = getFirebaseAuth()
+    if (!auth) {
+      return { user: null, error: 'Firebase no está disponible' }
+    }
+
+    // Set persistence before registering
+    await setPersistence(auth, browserLocalPersistence)
+    
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    return { user: userCredential.user, error: null }
+  } catch (error: any) {
+    console.error('Error registering:', error)
+    let errorMessage = 'Error al crear la cuenta'
+    
+    if (error?.code === 'auth/email-already-in-use') {
+      errorMessage = 'Este email ya está registrado'
+    } else if (error?.code === 'auth/invalid-email') {
+      errorMessage = 'Email inválido'
+    } else if (error?.code === 'auth/weak-password') {
+      errorMessage = 'La contraseña es muy débil'
     } else if (error?.code === 'auth/too-many-requests') {
       errorMessage = 'Demasiados intentos. Intenta más tarde'
     }

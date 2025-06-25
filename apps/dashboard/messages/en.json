@@ -89,6 +89,19 @@
       "forgotPassword": "Forgot your password?",
       "or": "Or continue with"
     },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Join Shopifree and create your store",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "registerButton": "Create account",
+      "googleButton": "Continue with Google",
+      "loading": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in here",
+      "or": "Or continue with"
+    },
     "errors": {
       "userNotFound": "User not found",
       "wrongPassword": "Incorrect password",
@@ -98,7 +111,9 @@
       "googleSignIn": "Error signing in with Google",
       "popupBlocked": "Popup blocked. Allow popups for this site",
       "popupClosed": "Process cancelled by user",
-      "general": "Error signing in"
+      "general": "Error signing in",
+      "emailAlreadyInUse": "This email is already registered",
+      "weakPassword": "Password is too weak"
     }
   },
   "loading": {

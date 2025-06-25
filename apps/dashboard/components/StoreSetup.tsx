@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button, Input } from '@shopifree/ui'
 import { checkSubdomainAvailability, validateSubdomain, createStore } from '../lib/store'
+import { createSubdomain } from '../lib/createSubdomain'
 import { getCurrentUser } from '../lib/auth'
 import LoadingAnimation from './LoadingAnimation'
 import { useTranslations } from 'next-intl'
@@ -164,7 +165,20 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
         ownerId: user.uid
       }
       
+      // 1. Crear tienda en Firestore
       await createStore(storeData)
+      console.log('✅ Tienda creada en Firestore:', storeData.subdomain)
+      
+      // 2. Crear subdominio en Vercel automáticamente
+      try {
+        console.log('🚀 Creando subdominio en Vercel:', storeData.subdomain)
+        await createSubdomain(storeData.subdomain)
+        console.log('✅ Subdominio creado exitosamente:', `${storeData.subdomain}.shopifree.app`)
+      } catch (subdomainError) {
+        console.warn('⚠️ Error creando subdominio (la tienda se creó pero sin subdominio):', subdomainError)
+        // No detenemos el proceso, solo loggeamos el error
+        // La tienda ya fue creada exitosamente en Firestore
+      }
       
       // Show success toast and close loading immediately
       showToast(t('successTitle'), 'success')

@@ -5,6 +5,7 @@ import { User } from 'firebase/auth'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth, getFirebaseDb } from './firebase'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { createUserDocument } from './user'
 
 // Simple user interface that works with existing data
 interface UserData {
@@ -88,13 +89,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       console.log('❌ No user document found for:', user.uid)
-      setDebugInfo((prev: DebugInfo) => ({ 
-        ...prev, 
-        userDocExists: false,
-        searchedUid: user.uid,
-        timestamp: new Date().toISOString()
-      }))
-      return null
+      console.log('🔧 Creating user document automatically...')
+      
+      // Create user document automatically
+      try {
+        const newUserData = await createUserDocument(user)
+        console.log('✅ User document created successfully:', newUserData)
+        
+        setDebugInfo((prev: DebugInfo) => ({ 
+          ...prev, 
+          userDocExists: false,
+          userDocCreated: true,
+          searchedUid: user.uid,
+          newUserData: newUserData,
+          timestamp: new Date().toISOString()
+        }))
+        
+        return newUserData
+      } catch (createError) {
+        console.error('❌ Error creating user document:', createError)
+        setDebugInfo((prev: DebugInfo) => ({ 
+          ...prev, 
+          userDocExists: false,
+          userDocCreated: false,
+          createError: createError instanceof Error ? createError.message : String(createError),
+          searchedUid: user.uid,
+          timestamp: new Date().toISOString()
+        }))
+        return null
+      }
     } catch (error) {
       console.error('❌ Error getting user data:', error)
       setDebugInfo((prev: DebugInfo) => ({ 
@@ -147,8 +170,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.log('✅ User data loaded successfully')
             setUserData(userData)
           } else {
-            console.log('❌ No user data found - user needs to be created or migrated')
-            setError('No se encontró información del usuario en la base de datos. Contacta soporte.')
+            console.log('❌ Could not load or create user data')
+            setError('Error al cargar los datos del usuario. Por favor, intenta nuevamente.')
           }
         } else {
           console.log('👤 No user authenticated')
