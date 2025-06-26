@@ -30,12 +30,12 @@ export async function POST(request: NextRequest) {
     
     // Obtener variables de entorno del servidor
     const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-    const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'prj_7qzFy7LLfbHAMHVRCEZzKgj6Ypa5';
+    const VERCEL_PUBLIC_STORE_PROJECT_ID = process.env.VERCEL_PUBLIC_STORE_PROJECT_ID;
     
     console.log('🔧 [SERVER] Variables de entorno:', {
       hasToken: !!VERCEL_TOKEN,
       tokenLength: VERCEL_TOKEN?.length || 0,
-      projectId: VERCEL_PROJECT_ID
+      projectId: VERCEL_PUBLIC_STORE_PROJECT_ID
     });
     
     if (!VERCEL_TOKEN) {
@@ -46,11 +46,19 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    if (!VERCEL_PUBLIC_STORE_PROJECT_ID) {
+      console.error('❌ [SERVER] VERCEL_PUBLIC_STORE_PROJECT_ID no configurado');
+      return NextResponse.json(
+        { error: 'Project ID del Public Store no configurado en el servidor' },
+        { status: 500 }
+      )
+    }
+    
     // Crear el subdominio en Vercel
     const domainName = `${subdomain}.shopifree.app`;
     console.log('📞 [SERVER] Llamando a Vercel API para crear:', domainName);
     
-    const response = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`, {
+    const response = await fetch(`https://api.vercel.com/v9/projects/${VERCEL_PUBLIC_STORE_PROJECT_ID}/domains`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${VERCEL_TOKEN}`,
