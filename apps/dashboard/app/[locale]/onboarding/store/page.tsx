@@ -239,7 +239,7 @@ function StoreOnboardingContent() {
       
       await createStore(storeData)
       
-      router.push('/dashboard')
+      router.push('/')
     } catch (error) {
       console.error('Error creating store:', error)
       alert(t('errors.createError'))

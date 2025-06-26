@@ -43,11 +43,11 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
             {t('subtitle')}
           </p>
-          <Link href={`/${locale}/register`}>
+          <a href={`https://dashboard.shopifree.app/${locale}/register`}>
             <Button size="lg" className="px-8 py-4 text-lg">
               {t('startFree')}
             </Button>
-          </Link>
+          </a>
         </div>
 
         {/* Features Grid */}
