@@ -1,13 +1,13 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { StoreData } from './store'
+import { StoreDataClient } from './store'
 
 interface StoreContextType {
-  store: StoreData | null
+  store: StoreDataClient | null
   loading: boolean
   error: string | null
-  setStore: (store: StoreData | null) => void
+  setStore: (store: StoreDataClient | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
@@ -24,14 +24,14 @@ export const useStore = () => {
 
 interface StoreProviderProps {
   children: React.ReactNode
-  initialStore?: StoreData | null
+  initialStore?: StoreDataClient | null
 }
 
 export const StoreProvider: React.FC<StoreProviderProps> = ({ 
   children, 
   initialStore = null 
 }) => {
-  const [store, setStore] = useState<StoreData | null>(initialStore)
+  const [store, setStore] = useState<StoreDataClient | null>(initialStore)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
