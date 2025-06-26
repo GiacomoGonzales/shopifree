@@ -27,6 +27,62 @@
     "visitStore": "Visit Store",
     "editStore": "Edit Store"
   },
+  "navigation": {
+    "home": "Home",
+    "settings": "Settings",
+    "catalog": "Catalog",
+    "appearance": "Appearance",
+    "reports": "Reports",
+    "marketing": "Marketing",
+    "support": "Support",
+    "account": "My Account",
+    "logout": "Sign out",
+    "menu": "Menu",
+    "toggleSidebar": "Toggle sidebar",
+    "changeLanguage": "Change language"
+  },
+  "pages": {
+    "home": {
+      "title": "Home",
+      "subtitle": "Store overview",
+      "description": "Here you'll see a general overview of your store, recent sales and important statistics."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Store settings",
+      "description": "Configure general store settings, contact information and preferences."
+    },
+    "catalog": {
+      "title": "Catalog",
+      "subtitle": "Manage your products",
+      "description": "Add, edit and organize your catalog products."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize your store",
+      "description": "Customize the design, colors and visual appearance of your store."
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Analytics and statistics",
+      "description": "View sales reports, best-selling products and store statistics."
+    },
+    "marketing": {
+      "title": "Marketing",
+      "subtitle": "Promote your store",
+      "description": "Tools to promote your store, create campaigns and increase sales."
+    },
+    "support": {
+      "title": "Support",
+      "subtitle": "Help and assistance",
+      "description": "Find answers to your questions and contact our support team."
+    },
+    "account": {
+      "title": "My Account",
+      "subtitle": "Personal information",
+      "description": "Manage your personal information, preferences and account settings."
+    }
+  },
   "storeSetup": {
     "title": "Let's set up your store!",
     "subtitle": "Complete the basic information to get started",

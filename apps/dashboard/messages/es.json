@@ -27,6 +27,62 @@
     "visitStore": "Visitar Tienda",
     "editStore": "Editar Tienda"
   },
+  "navigation": {
+    "home": "Inicio",
+    "settings": "Configuración",
+    "catalog": "Catálogo",
+    "appearance": "Apariencia",
+    "reports": "Reportes",
+    "marketing": "Marketing",
+    "support": "Soporte",
+    "account": "Mi Cuenta",
+    "logout": "Cerrar sesión",
+    "menu": "Menú",
+    "toggleSidebar": "Alternar menú lateral",
+    "changeLanguage": "Cambiar idioma"
+  },
+  "pages": {
+    "home": {
+      "title": "Inicio",
+      "subtitle": "Resumen de tu tienda",
+      "description": "Aquí verás un resumen general de tu tienda, ventas recientes y estadísticas importantes."
+    },
+    "settings": {
+      "title": "Configuración",
+      "subtitle": "Ajustes de tu tienda",
+      "description": "Configura los ajustes generales de tu tienda, información de contacto y preferencias."
+    },
+    "catalog": {
+      "title": "Catálogo",
+      "subtitle": "Gestiona tus productos",
+      "description": "Agrega, edita y organiza los productos de tu catálogo."
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "subtitle": "Personaliza tu tienda",
+      "description": "Personaliza el diseño, colores y aspecto visual de tu tienda."
+    },
+    "reports": {
+      "title": "Reportes",
+      "subtitle": "Análisis y estadísticas",
+      "description": "Visualiza reportes de ventas, productos más vendidos y estadísticas de tu tienda."
+    },
+    "marketing": {
+      "title": "Marketing",
+      "subtitle": "Promociona tu tienda",
+      "description": "Herramientas para promocionar tu tienda, crear campañas y aumentar las ventas."
+    },
+    "support": {
+      "title": "Soporte",
+      "subtitle": "Ayuda y asistencia",
+      "description": "Encuentra respuestas a tus preguntas y contacta con nuestro equipo de soporte."
+    },
+    "account": {
+      "title": "Mi Cuenta",
+      "subtitle": "Información personal",
+      "description": "Gestiona tu información personal, preferencias y configuración de cuenta."
+    }
+  },
   "storeSetup": {
     "title": "¡Vamos a configurar tu tienda!",
     "subtitle": "Completa la información básica para comenzar",

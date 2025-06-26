@@ -1,17 +1,10 @@
 'use client'
 
-import { useAuth } from '../lib/simple-auth-context'
 import { useTranslations } from 'next-intl'
-import DashboardLayout from './DashboardLayout'
+import DashboardLayout from '../../../components/DashboardLayout'
 
-interface DashboardProps {
-  store: any
-}
-
-export default function Dashboard({ store }: DashboardProps) {
-  const { user, userData } = useAuth()
-  const t = useTranslations('dashboard')
-  const tHome = useTranslations('pages.home')
+export default function ReportsPage() {
+  const t = useTranslations('pages.reports')
 
   return (
     <DashboardLayout>
@@ -20,28 +13,16 @@ export default function Dashboard({ store }: DashboardProps) {
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex-1 min-w-0">
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                {tHome('title')}
+                {t('title')}
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                {tHome('subtitle')}
+                {t('subtitle')}
               </p>
-            </div>
-            <div className="mt-4 flex md:mt-0 md:ml-4">
-              <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                {t('visitStore')}
-              </button>
             </div>
           </div>
 
           <div className="mt-8">
-            {/* Tarjetas de estadísticas rápidas */}
+            {/* Grid de estadísticas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
@@ -133,62 +114,27 @@ export default function Dashboard({ store }: DashboardProps) {
               </div>
             </div>
 
-            {/* Información de la tienda */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Store Info Card */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {t('storeInfo')}
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <dt className="text-sm font-medium text-gray-500">{t('storeName')}:</dt>
-                      <dd className="text-sm text-gray-900">{store?.storeName}</dd>
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                  {t('title')}
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {t('description')}
+                </p>
+                
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" clipRule="evenodd" />
+                      </svg>
                     </div>
-                    <div className="flex justify-between">
-                      <dt className="text-sm font-medium text-gray-500">{t('url')}:</dt>
-                      <dd className="text-sm text-gray-900">{store?.slug}.shopifree.app</dd>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm text-yellow-700">
+                        Los reportes detallados estarán disponibles cuando comiences a recibir pedidos y visitantes.
+                      </p>
                     </div>
-                    <div className="flex justify-between">
-                      <dt className="text-sm font-medium text-gray-500">{t('slogan')}:</dt>
-                      <dd className="text-sm text-gray-900">{store?.slogan}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-sm font-medium text-gray-500">{t('currency')}:</dt>
-                      <dd className="text-sm text-gray-900">{store?.currency}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-sm font-medium text-gray-500">Estado:</dt>
-                      <dd className="text-sm text-gray-900">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          {t('active')}
-                        </span>
-                      </dd>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Inicio rápido */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {t('welcome')} 🎉
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    {t('storeReadyDescription')}
-                  </p>
-                  <div className="space-y-2">
-                    <button className="w-full text-left px-3 py-2 text-sm text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200">
-                      📦 Agregar tu primer producto
-                    </button>
-                    <button className="w-full text-left px-3 py-2 text-sm text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200">
-                      🎨 Personalizar la apariencia
-                    </button>
-                    <button className="w-full text-left px-3 py-2 text-sm text-green-700 bg-green-100 rounded-md hover:bg-green-200">
-                      📧 Configurar dominio personalizado
-                    </button>
                   </div>
                 </div>
               </div>
