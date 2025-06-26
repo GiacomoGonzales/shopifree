@@ -139,6 +139,70 @@
       "manageOrders": "Gestionar pedidos"
     }
   },
+  "onboarding": {
+    "user": {
+      "title": "Completa tu perfil",
+      "subtitle": "Necesitamos información básica para comenzar",
+      "nombre": "Nombre completo",
+      "nombrePlaceholder": "Ingresa tu nombre completo",
+      "telefono": "Teléfono",
+      "telefonoPlaceholder": "+1234567890",
+      "correo": "Correo electrónico",
+      "correoHint": "Este correo proviene de tu autenticación y no se puede cambiar",
+      "zonaHoraria": "Zona horaria",
+      "continue": "Continuar",
+      "saving": "Guardando...",
+      "errors": {
+        "nombreRequired": "El nombre completo es obligatorio",
+        "telefonoRequired": "El teléfono es obligatorio",
+        "telefonoInvalid": "Por favor ingresa un número de teléfono válido",
+        "zonaHorariaRequired": "La zona horaria es obligatoria",
+        "saveError": "Error al guardar tu información. Inténtalo de nuevo."
+      }
+    },
+    "store": {
+      "title": "Crea tu tienda",
+      "subtitle": "Configura tu tienda online con información básica",
+      "nombreTienda": "Nombre de la tienda",
+      "nombreTiendaPlaceholder": "Mi Tienda Increíble",
+      "subdominio": "Subdominio",
+      "subdomainPlaceholder": "mi-tienda",
+      "subdomainHint": "Tu tienda estará disponible en",
+      "slogan": "Eslogan",
+      "sloganPlaceholder": "La mejor tienda online",
+      "descripcion": "Descripción",
+      "descripcionPlaceholder": "Describe tu tienda y lo que vendes...",
+      "tieneLocalFisico": "¿Tienes un local físico?",
+      "direccion": "Dirección",
+      "direccionPlaceholder": "Calle 123, Ciudad, País",
+      "tipoComercio": "Tipo de comercio",
+      "tipoComercioPlaceholder": "Selecciona tu tipo de negocio",
+      "telefonoTienda": "Teléfono de la tienda",
+      "telefonoTiendaPlaceholder": "+1234567890",
+      "logo": "Logo",
+      "fotoLocal": "Foto del local",
+      "colorPrimario": "Color primario",
+      "colorSecundario": "Color secundario",
+      "moneda": "Moneda",
+      "redesSociales": "Redes sociales",
+      "createStore": "Crear Tienda",
+      "creating": "Creando tu tienda...",
+      "creatingMessage": "Por favor espera mientras configuramos tu tienda",
+      "errors": {
+        "nombreTiendaRequired": "El nombre de la tienda es obligatorio",
+        "subdomainRequired": "El subdominio es obligatorio",
+        "subdomainTaken": "Este subdominio ya está en uso",
+        "subdomainNotAvailable": "El subdominio no está disponible",
+        "subdomainCheckError": "Error al verificar disponibilidad del subdominio",
+        "sloganRequired": "El eslogan es obligatorio",
+        "descripcionRequired": "La descripción es obligatoria",
+        "tipoComercioRequired": "El tipo de comercio es obligatorio",
+        "telefonoTiendaRequired": "El teléfono de la tienda es obligatorio",
+        "direccionRequired": "La dirección es obligatoria cuando tienes un local físico",
+        "createError": "Error al crear la tienda. Inténtalo de nuevo."
+      }
+    }
+  },
   "common": {
     "retry": "Reintentar",
     "backToLogin": "Volver al Login",

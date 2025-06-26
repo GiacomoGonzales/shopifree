@@ -17,11 +17,19 @@ export interface StoreConfig {
   description: string
   hasPhysicalLocation: boolean
   address?: string
+  tipoComercio?: string
   primaryColor: string
   secondaryColor: string
   currency: string
   phone: string
   logo?: string
+  fotoLocal?: string
+  redes?: {
+    facebook?: string
+    instagram?: string
+    whatsapp?: string
+    tiktok?: string
+  }
   ownerId: string
   createdAt: any
   updatedAt: any

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore, StoreWithId } from '../../lib/store'
 import AuthGuard from '../../components/AuthGuard'
@@ -14,15 +15,25 @@ export const dynamic = 'force-dynamic'
 
 function DashboardContent() {
   const t = useTranslations('loading')
+  const router = useRouter()
   const { user, userData } = useAuth()
   const [hasStore, setHasStore] = useState(false)
   const [storeData, setStoreData] = useState<StoreWithId | null>(null)
   const [storeLoading, setStoreLoading] = useState(true)
+  const [onboardingChecked, setOnboardingChecked] = useState(false)
 
-  // Check if user has a store when component mounts or user changes
+  // Check onboarding status and redirect if needed
   useEffect(() => {
-    const checkUserStore = async () => {
-      if (user?.uid) {
+    const checkOnboardingStatus = async () => {
+      if (user?.uid && userData) {
+        // Check if user has completed onboarding
+        if (!userData.onboardingUserCompleted) {
+          console.log('👤 User onboarding not completed, redirecting to /onboarding/user')
+          router.push('/onboarding/user')
+          return
+        }
+
+        // Check if user has a store
         setStoreLoading(true)
         try {
           const userStore = await getUserStore(user.uid)
@@ -30,9 +41,11 @@ function DashboardContent() {
           if (userStore) {
             setHasStore(true)
             setStoreData(userStore)
+            setOnboardingChecked(true)
           } else {
-            setHasStore(false)
-            setStoreData(null)
+            console.log('🏪 User store not found, redirecting to /onboarding/store')
+            router.push('/onboarding/store')
+            return
           }
         } catch (error) {
           console.error('Error getting user store:', error)
@@ -46,11 +59,12 @@ function DashboardContent() {
         setHasStore(false)
         setStoreData(null)
         setStoreLoading(false)
+        setOnboardingChecked(false)
       }
     }
 
-    checkUserStore()
-  }, [user?.uid]) // Solo depende del UID del usuario
+    checkOnboardingStatus()
+  }, [user?.uid, userData, router]) // Include userData and router in dependencies
 
   const handleStoreCreated = async () => {
     // After store creation, refresh the store data
@@ -70,8 +84,8 @@ function DashboardContent() {
     }
   }
 
-  // Show loading while checking store data
-  if (storeLoading) {
+  // Show loading while checking onboarding status or store data
+  if (storeLoading || !onboardingChecked) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -81,17 +95,13 @@ function DashboardContent() {
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-gray-900">{t('store')}</h2>
+          <p className="text-gray-600 mt-2">Verificando estado de configuración...</p>
         </div>
       </div>
     )
   }
 
-  // User doesn't have a store - show setup
-  if (!hasStore) {
-    return <StoreSetup onStoreCreated={handleStoreCreated} />
-  }
-
-  // User has a store - show dashboard
+  // All onboarding completed - show dashboard
   return <Dashboard store={storeData} />
 }
 

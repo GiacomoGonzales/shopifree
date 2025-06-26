@@ -12,6 +12,12 @@ export interface UserDocument {
   role?: string
   lastLoginAt?: any
   isActive?: boolean
+  // Onboarding fields
+  nombre?: string
+  telefono?: string
+  correo?: string
+  zonaHoraria?: string
+  onboardingUserCompleted?: boolean
 }
 
 /**

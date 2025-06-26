@@ -139,6 +139,70 @@
       "manageOrders": "Manage orders"
     }
   },
+  "onboarding": {
+    "user": {
+      "title": "Complete your profile",
+      "subtitle": "We need some basic information to get started",
+      "nombre": "Full name",
+      "nombrePlaceholder": "Enter your full name",
+      "telefono": "Phone",
+      "telefonoPlaceholder": "+1234567890",
+      "correo": "Email",
+      "correoHint": "This email comes from your authentication and cannot be changed",
+      "zonaHoraria": "Time zone",
+      "continue": "Continue",
+      "saving": "Saving...",
+      "errors": {
+        "nombreRequired": "Full name is required",
+        "telefonoRequired": "Phone is required",
+        "telefonoInvalid": "Please enter a valid phone number",
+        "zonaHorariaRequired": "Time zone is required",
+        "saveError": "Error saving your information. Please try again."
+      }
+    },
+    "store": {
+      "title": "Create your store",
+      "subtitle": "Set up your online store with basic information",
+      "nombreTienda": "Store name",
+      "nombreTiendaPlaceholder": "My Awesome Store",
+      "subdominio": "Subdomain",
+      "subdomainPlaceholder": "my-store",
+      "subdomainHint": "Your store will be available at",
+      "slogan": "Slogan",
+      "sloganPlaceholder": "The best online store",
+      "descripcion": "Description",
+      "descripcionPlaceholder": "Describe your store and what you sell...",
+      "tieneLocalFisico": "Do you have a physical location?",
+      "direccion": "Address",
+      "direccionPlaceholder": "123 Street, City, Country",
+      "tipoComercio": "Business type",
+      "tipoComercioPlaceholder": "Select your business type",
+      "telefonoTienda": "Store phone",
+      "telefonoTiendaPlaceholder": "+1234567890",
+      "logo": "Logo",
+      "fotoLocal": "Store photo",
+      "colorPrimario": "Primary color",
+      "colorSecundario": "Secondary color",
+      "moneda": "Currency",
+      "redesSociales": "Social networks",
+      "createStore": "Create Store",
+      "creating": "Creating your store...",
+      "creatingMessage": "Please wait while we set up your store",
+      "errors": {
+        "nombreTiendaRequired": "Store name is required",
+        "subdomainRequired": "Subdomain is required",
+        "subdomainTaken": "This subdomain is already taken",
+        "subdomainNotAvailable": "Subdomain is not available",
+        "subdomainCheckError": "Error checking subdomain availability",
+        "sloganRequired": "Slogan is required",
+        "descripcionRequired": "Description is required",
+        "tipoComercioRequired": "Business type is required",
+        "telefonoTiendaRequired": "Store phone is required",
+        "direccionRequired": "Address is required when you have a physical location",
+        "createError": "Error creating store. Please try again."
+      }
+    }
+  },
   "common": {
     "retry": "Retry",
     "backToLogin": "Back to Login",
