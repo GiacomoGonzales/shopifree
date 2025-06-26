@@ -219,8 +219,8 @@ export const extractSubdomain = (host: string | null): string | null => {
   
   // For local development, handle localhost
   if (cleanHost === 'localhost' || cleanHost.includes('127.0.0.1')) {
-    // For local testing, you can set a subdomain via query param or return null for main site
-    return null // Return null to show main landing page in development
+    // TEMPORALMENTE: Devolver 'tortugas' para probar tu tienda creada
+    return 'tortugas' // ← Cambiar esto por otro subdomain si quieres probar otra tienda
   }
   
   // Extract subdomain (everything before the first dot)
