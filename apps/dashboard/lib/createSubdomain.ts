@@ -5,7 +5,7 @@
  * @throws Error si falla la validación o la creación
  */
 export async function createSubdomain(subdomain: string): Promise<boolean> {
-  console.log('🚀 [CLIENT] Creando subdominio via API route:', subdomain);
+  console.log('🚀 [CLIENT] Creando subdominio via API route v2.0:', subdomain);
   
   try {
     const response = await fetch('/api/subdomain', {
