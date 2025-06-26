@@ -223,15 +223,26 @@ export const extractSubdomain = (host: string | null): string | null => {
     return 'tortugas' // ← Cambiar esto por otro subdomain si quieres probar otra tienda
   }
   
-  // Extract subdomain (everything before the first dot)
-  const parts = cleanHost.split('.')
-  if (parts.length < 2) return null
+  // Remove specific domains to extract clean subdomain
+  let subdomain = cleanHost
+    .replace('.shopifree.app', '')
+    .replace('.vercel.app', '')
   
-  const subdomain = parts[0]
+  // If no domain was removed, try extracting subdomain (everything before the first dot)
+  if (subdomain === cleanHost) {
+    const parts = cleanHost.split('.')
+    if (parts.length < 2) return null
+    subdomain = parts[0]
+  }
   
   // Ignore reserved subdomains that should show the main landing
   const reservedSubdomains = ['www', 'shopifree', 'app', 'api', 'admin', 'dashboard']
   if (reservedSubdomains.includes(subdomain)) {
+    return null
+  }
+  
+  // Ensure we have a valid subdomain
+  if (!subdomain || subdomain === cleanHost) {
     return null
   }
   

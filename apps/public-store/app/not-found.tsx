@@ -1,9 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 
 // Client component for the back button
 function BackButton() {
-  'use client'
-  
   return (
     <button
       onClick={() => window.history.back()}
