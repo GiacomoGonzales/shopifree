@@ -31,7 +31,7 @@ const timeZones = [
 function UserOnboardingContent() {
   const t = useTranslations('onboarding.user')
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, refreshUserData } = useAuth()
   
   const [formData, setFormData] = useState<UserFormData>({
     nombre: '',
@@ -81,18 +81,30 @@ function UserOnboardingContent() {
     setLoading(true)
     
     try {
-      await updateUserDocument(user.uid, {
+      console.log('💾 Saving user onboarding data for:', user.uid)
+      const updateData = {
         displayName: formData.nombre,
         nombre: formData.nombre,
         telefono: formData.telefono,
         correo: formData.correo,
         zonaHoraria: formData.zonaHoraria,
         onboardingUserCompleted: true
-      })
+      }
+      console.log('📝 Update data:', updateData)
+      
+      await updateUserDocument(user.uid, updateData)
+      console.log('✅ User document updated successfully')
+      
+      // Refresh user data in context to reflect changes
+      console.log('🔄 Refreshing auth context...')
+      await refreshUserData()
+      
+      // Small delay to ensure context propagation
+      await new Promise(resolve => setTimeout(resolve, 300))
       
       router.push('/onboarding/store')
     } catch (error) {
-      console.error('Error updating user:', error)
+      console.error('❌ Error updating user:', error)
       alert(t('errors.saveError'))
     } finally {
       setLoading(false)

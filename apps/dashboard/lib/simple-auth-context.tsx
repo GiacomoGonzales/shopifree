@@ -26,6 +26,7 @@ interface AuthContextType {
   error: string | null
   isAuthenticated: boolean
   signOut: () => Promise<void>
+  refreshUserData: () => Promise<void> // Add refresh function
   debugInfo: DebugInfo // Add debug info
 }
 
@@ -129,6 +130,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const refreshUserData = async () => {
+    console.log('🔄 Refreshing user data...')
+    if (user) {
+      try {
+        const freshUserData = await getUserData(user)
+        if (freshUserData) {
+          console.log('✅ User data refreshed successfully:', freshUserData)
+          setUserData(freshUserData)
+        }
+      } catch (error) {
+        console.error('❌ Error refreshing user data:', error)
+      }
+    }
+  }
+
   const signOut = async () => {
     try {
       const auth = getFirebaseAuth()
@@ -207,6 +223,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error,
     isAuthenticated: !!user, // 🔥 Solo depender del user, no de userData
     signOut,
+    refreshUserData,
     debugInfo
   }
 
