@@ -1,22 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Providers } from './providers'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Dashboard - Shopifree',
-  description: 'Manage your online store',
-  icons: {
-    icon: '/brand/icons/favicon.png',
-    shortcut: '/brand/icons/favicon.png',
-    apple: '/brand/icons/favicon.png',
-  },
-}
-
-// Generate static params for supported locales
-export function generateStaticParams() {
-  return [{ locale: 'es' }, { locale: 'en' }]
-}
 
 export default async function LocaleLayout({
   children,
@@ -30,6 +14,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <title>Dashboard - Shopifree</title>
+        <meta name="description" content="Manage your online store" />
+      </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>

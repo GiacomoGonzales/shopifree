@@ -281,6 +281,7 @@ function StoreOnboardingContent() {
                 onChange={(e) => handleInputChange('nombreTienda', e.target.value)}
                 placeholder={t('nombreTiendaPlaceholder')}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.nombreTienda ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -297,7 +298,7 @@ function StoreOnboardingContent() {
                   value={formData.subdominio}
                   onChange={(e) => handleInputChange('subdominio', e.target.value.toLowerCase())}
                   placeholder={t('subdomainPlaceholder')}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.subdominio ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -352,7 +353,7 @@ function StoreOnboardingContent() {
                 onChange={(e) => handleInputChange('descripcion', e.target.value)}
                 placeholder={t('descripcionPlaceholder')}
                 rows={4}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.descripcion ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -365,7 +366,7 @@ function StoreOnboardingContent() {
                   type="checkbox"
                   checked={formData.tieneLocalFisico}
                   onChange={(e) => handleInputChange('tieneLocalFisico', e.target.checked)}
-                  className="w-5 h-5 text-gray-800 border-gray-300 rounded focus:ring-gray-600"
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <span className="text-sm font-medium text-gray-700">{t('tieneLocalFisico')}</span>
               </label>
