@@ -54,7 +54,7 @@ export default function Dashboard({ store }: DashboardProps) {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Ventas del mes
+                          {tHome('stats.monthlySales')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           $0.00
@@ -76,7 +76,7 @@ export default function Dashboard({ store }: DashboardProps) {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Pedidos
+                          {tHome('stats.orders')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           0
@@ -98,7 +98,7 @@ export default function Dashboard({ store }: DashboardProps) {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Productos
+                          {tHome('stats.products')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           0
@@ -121,7 +121,7 @@ export default function Dashboard({ store }: DashboardProps) {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Visitas
+                          {tHome('stats.visits')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           0
@@ -181,13 +181,13 @@ export default function Dashboard({ store }: DashboardProps) {
                   </p>
                   <div className="space-y-2">
                     <button className="w-full text-left px-3 py-2 text-sm text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200">
-                      📦 Agregar tu primer producto
+                      📦 {tHome('quickActions.addFirstProduct')}
                     </button>
                     <button className="w-full text-left px-3 py-2 text-sm text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200">
-                      🎨 Personalizar la apariencia
+                      🎨 {tHome('quickActions.customizeAppearance')}
                     </button>
                     <button className="w-full text-left px-3 py-2 text-sm text-green-700 bg-green-100 rounded-md hover:bg-green-200">
-                      📧 Configurar dominio personalizado
+                      📧 {tHome('quickActions.configureDomain')}
                     </button>
                   </div>
                 </div>

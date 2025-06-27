@@ -6,7 +6,8 @@ import {
   collection, 
   where, 
   getDocs,
-  serverTimestamp 
+  serverTimestamp,
+  updateDoc
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 
@@ -29,6 +30,47 @@ export interface StoreConfig {
     instagram?: string
     whatsapp?: string
     tiktok?: string
+  }
+  // Configuración avanzada
+  advanced?: {
+    customDomain?: {
+      domain?: string
+      verified?: boolean
+    }
+    checkout?: {
+      method: 'whatsapp' | 'traditional'
+      whatsappMessage?: string
+    }
+    payments?: {
+      provider?: 'culqi' | 'mercadopago' | null
+      publicKey?: string
+      secretKey?: string
+      connected?: boolean
+    }
+    shipping?: {
+      enabled?: boolean
+      type?: 'free' | 'fixed' | 'minimum'
+      cost?: number
+      minimumOrderAmount?: number
+      checkoutText?: string
+      estimatedTime?: string
+    }
+    notifications?: {
+      email?: boolean
+      whatsapp?: boolean
+      alternativeEmail?: string
+    }
+    seo?: {
+      title?: string
+      metaDescription?: string
+      ogImage?: string
+      customSlug?: string
+    }
+    integrations?: {
+      googleAnalytics?: string
+      metaPixel?: string
+    }
+    language?: 'es' | 'en'
   }
   ownerId: string
   createdAt: any
@@ -58,6 +100,48 @@ export const getUserStore = async (userId: string): Promise<StoreWithId | null> 
   } catch (error) {
     console.error('Error getting user store:', error)
     return null
+  }
+}
+
+// Update store data
+export const updateStore = async (storeId: string, data: Partial<StoreConfig>) => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) {
+      throw new Error('Firebase db not available')
+    }
+    
+    const storeRef = doc(db, 'stores', storeId)
+    await updateDoc(storeRef, {
+      ...data,
+      updatedAt: serverTimestamp()
+    })
+    
+    return true
+  } catch (error) {
+    console.error('Error updating store:', error)
+    throw error
+  }
+}
+
+// Update specific store field
+export const updateStoreField = async (storeId: string, field: string, value: any) => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) {
+      throw new Error('Firebase db not available')
+    }
+    
+    const storeRef = doc(db, 'stores', storeId)
+    await updateDoc(storeRef, {
+      [field]: value,
+      updatedAt: serverTimestamp()
+    })
+    
+    return true
+  } catch (error) {
+    console.error('Error updating store field:', error)
+    throw error
   }
 }
 

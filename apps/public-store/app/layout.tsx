@@ -96,6 +96,9 @@ export default async function RootLayout({
         <head>
           <title>Tienda no encontrada - Shopifree</title>
           <meta name="description" content="La tienda que buscas no existe o no está disponible" />
+          <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
+          <link rel="shortcut icon" href="/brand/icons/favicon.png" type="image/png" />
+          <link rel="apple-touch-icon" href="/brand/icons/favicon.png" />
         </head>
         <body>
           <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -148,6 +151,9 @@ export default async function RootLayout({
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
+        <link rel="shortcut icon" href="/brand/icons/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/brand/icons/favicon.png" />
       </head>
       <body>
         <StoreProvider initialStore={store}>

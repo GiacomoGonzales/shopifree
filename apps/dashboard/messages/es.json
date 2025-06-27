@@ -29,38 +29,260 @@
   },
   "navigation": {
     "home": "Inicio",
-    "settings": "Configuración",
-    "catalog": "Catálogo",
-    "appearance": "Apariencia",
-    "reports": "Reportes",
+    "orders": "Pedidos",
+    "products": "Productos",
+    "customers": "Clientes",
     "marketing": "Marketing",
+    "discounts": "Descuentos",
+    "content": "Contenido",
+    "storeDesign": "Diseño de tienda",
+    "reports": "Reportes",
+    "settings": "Configuración",
+    "basicSettings": "General",
+    "advancedSettings": "Configuración Avanzada",
     "support": "Soporte",
     "account": "Mi Cuenta",
     "logout": "Cerrar sesión",
     "menu": "Menú",
     "toggleSidebar": "Alternar menú lateral",
-    "changeLanguage": "Cambiar idioma"
+    "changeLanguage": "Cambiar idioma",
+    "hello": "Hola"
   },
   "pages": {
     "home": {
       "title": "Inicio",
       "subtitle": "Resumen de tu tienda",
-      "description": "Aquí verás un resumen general de tu tienda, ventas recientes y estadísticas importantes."
+      "description": "Aquí verás un resumen general de tu tienda, ventas recientes y estadísticas importantes.",
+      "stats": {
+        "monthlySales": "Ventas del mes",
+        "orders": "Pedidos",
+        "products": "Productos",
+        "visits": "Visitas"
+      },
+      "quickActions": {
+        "addFirstProduct": "Agregar tu primer producto",
+        "customizeAppearance": "Personalizar la apariencia",
+        "configureDomain": "Configurar dominio personalizado"
+      }
     },
     "settings": {
       "title": "Configuración",
       "subtitle": "Ajustes de tu tienda",
-      "description": "Configura los ajustes generales de tu tienda, información de contacto y preferencias."
+      "description": "Configura los ajustes generales de tu tienda, información de contacto y preferencias.",
+      "tabs": {
+        "basic": "General",
+        "advanced": "Configuración Avanzada"
+      },
+      "basic": {
+        "sections": {
+          "info": "Información de la tienda",
+          "contact": "Contacto",
+          "branding": "Branding",
+          "social": "Redes sociales",
+          "location": "Localización"
+        },
+        "storeInfo": {
+          "title": "Información de la Tienda",
+          "storeName": "Nombre de la tienda",
+          "storeNamePlaceholder": "Mi Tienda Increíble",
+          "subdomain": "Subdominio",
+          "subdomainHint": "Solo lectura - Tu tienda está disponible en:",
+          "slogan": "Eslogan",
+          "sloganPlaceholder": "La mejor tienda online",
+          "description": "Descripción de la tienda",
+          "descriptionPlaceholder": "Describe tu tienda y lo que vendes..."
+        },
+        "contact": {
+          "title": "Información de Contacto",
+          "hasPhysicalLocation": "¿Tiene local físico?",
+          "address": "Dirección",
+          "addressPlaceholder": "Calle 123, Ciudad, País",
+          "businessType": "Tipo de comercio",
+          "businessTypePlaceholder": "Selecciona tu tipo de negocio",
+          "businessTypes": {
+            "retail": "Venta al por menor",
+            "wholesale": "Venta al por mayor",
+            "service": "Servicios",
+            "restaurant": "Restaurante/Comida",
+            "fashion": "Moda y accesorios",
+            "technology": "Tecnología",
+            "health": "Salud y belleza",
+            "sports": "Deportes y recreación",
+            "education": "Educación",
+            "other": "Otro"
+          },
+          "phone": "Teléfono de contacto",
+          "phonePlaceholder": "+1234567890"
+        },
+        "branding": {
+          "title": "Imagen de Marca",
+          "logo": "Logo",
+          "logoUpload": "Subir logo",
+          "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
+          "storePhoto": "Foto del local",
+          "storePhotoUpload": "Subir foto",
+          "storePhotoHint": "Opcional: Foto de tu local físico",
+          "primaryColor": "Color primario",
+          "secondaryColor": "Color secundario",
+          "currency": "Moneda",
+          "currencyPlaceholder": "USD"
+        },
+        "socialMedia": {
+          "title": "Redes Sociales",
+          "facebook": "Facebook",
+          "facebookPlaceholder": "https://facebook.com/mi-tienda",
+          "instagram": "Instagram",
+          "instagramPlaceholder": "https://instagram.com/mi-tienda",
+          "whatsapp": "WhatsApp",
+          "whatsappPlaceholder": "+1234567890",
+          "tiktok": "TikTok",
+          "tiktokPlaceholder": "https://tiktok.com/@mi-tienda"
+        }
+      },
+      "advanced": {
+        "tabs": {
+          "domain": "Dominio Personalizado",
+          "checkout": "Método de Checkout",
+          "payments": "Pasarela de Pago",
+          "shipping": "Envíos",
+          "notifications": "Notificaciones",
+          "seo": "SEO",
+          "integrations": "Integraciones",
+          "language": "Idioma"
+        },
+        "domain": {
+          "title": "Configurar Dominio Personalizado",
+          "description": "Usa tu propio dominio para tu tienda",
+          "customDomain": "Dominio personalizado",
+          "customDomainPlaceholder": "mi-tienda.com",
+          "verifyDomain": "Verificar dominio",
+          "verificationStatus": "Estado de verificación",
+          "verified": "Verificado",
+          "notVerified": "No verificado",
+          "cnameGuide": "Guía para configurar CNAME",
+          "cnameInstructions": "Agrega un registro CNAME en tu proveedor de DNS:",
+          "cnameRecord": "CNAME: www → shopifree.app"
+        },
+        "checkout": {
+          "title": "Método de Checkout",
+          "description": "Configura cómo recibir los pedidos",
+          "whatsappCheckout": "Venta por WhatsApp",
+          "whatsappDescription": "Los clientes envían pedidos por WhatsApp (Plan Free)",
+          "traditionalCheckout": "Checkout tradicional",
+          "traditionalDescription": "Carrito y checkout integrado (Planes Premium/Pro)",
+          "premiumRequired": "Requiere plan de pago",
+          "whatsappMessage": "Mensaje predefinido WhatsApp",
+          "whatsappMessagePlaceholder": "¡Hola! Me interesa este producto de {storeName}:"
+        },
+        "payments": {
+          "title": "Pasarela de Pago",
+          "description": "Configura tu método de pago",
+          "provider": "Proveedor",
+          "selectProvider": "Selecciona un proveedor",
+          "culqi": "Culqi",
+          "mercadopago": "MercadoPago",
+          "publicKey": "Clave pública",
+          "publicKeyPlaceholder": "pk_test_...",
+          "secretKey": "Clave secreta",
+          "secretKeyPlaceholder": "sk_test_...",
+          "testConnection": "Probar conexión",
+          "connectionStatus": "Estado de conexión",
+          "connected": "Conectado",
+          "notConnected": "No conectado"
+        },
+        "shipping": {
+          "title": "Configuración de Envíos",
+          "description": "Configura las opciones de envío",
+          "enableShipping": "Activar módulo de envíos",
+          "shippingType": "Tipo de envío",
+          "freeShipping": "Envío gratis",
+          "fixedCost": "Costo fijo",
+          "minimumAmount": "Envío gratis por monto mínimo",
+          "shippingCost": "Costo de envío",
+          "shippingCostPlaceholder": "15.00",
+          "minimumOrderAmount": "Monto mínimo para envío gratis",
+          "minimumOrderPlaceholder": "50.00",
+          "checkoutText": "Texto visible en checkout",
+          "checkoutTextPlaceholder": "Envío a domicilio disponible",
+          "estimatedTime": "Tiempo estimado de entrega",
+          "estimatedTimePlaceholder": "24-48 horas"
+        },
+        "notifications": {
+          "title": "Notificaciones Automáticas",
+          "description": "Configura el envío automático de notificaciones",
+          "emailNotifications": "Notificaciones por correo electrónico",
+          "whatsappNotifications": "Notificaciones por WhatsApp",
+          "alternativeEmail": "Email alternativo",
+          "alternativeEmailPlaceholder": "ventas@mi-tienda.com",
+          "alternativeEmailHint": "Email adicional para recibir notificaciones"
+        },
+        "seo": {
+          "title": "Configuración SEO",
+          "description": "Optimiza tu tienda para motores de búsqueda",
+          "seoTitle": "Título SEO",
+          "seoTitlePlaceholder": "Mi Tienda - La mejor tienda online",
+          "metaDescription": "Meta descripción",
+          "metaDescriptionPlaceholder": "Encuentra los mejores productos en nuestra tienda online...",
+          "ogImage": "Imagen Open Graph",
+          "ogImageUpload": "Subir imagen OG",
+          "ogImageHint": "Recomendado: 1200x630px para redes sociales",
+          "customSlug": "Slug personalizado",
+          "customSlugPlaceholder": "mi-tienda-especial",
+          "customSlugHint": "Opcional: URL personalizada para tu tienda"
+        },
+        "integrations": {
+          "title": "Integraciones",
+          "description": "Conecta herramientas de análisis y marketing",
+          "googleAnalytics": "Google Analytics",
+          "googleAnalyticsPlaceholder": "GA4-XXXXXXXXXX",
+          "metaPixel": "Meta Pixel (Facebook)",
+          "metaPixelPlaceholder": "1234567890123456"
+        },
+        "language": {
+          "title": "Idioma de la Tienda",
+          "description": "Selecciona el idioma principal de tu tienda",
+          "storeLanguage": "Idioma de la tienda",
+          "spanish": "Español",
+          "english": "Inglés"
+        }
+      },
+      "actions": {
+        "save": "Guardar cambios",
+        "saving": "Guardando...",
+        "saved": "Cambios guardados",
+        "error": "Error al guardar",
+        "cancel": "Cancelar",
+        "uploading": "Subiendo...",
+        "upload": "Subir archivo",
+        "remove": "Remover",
+        "verify": "Verificar",
+        "test": "Probar"
+      }
     },
-    "catalog": {
-      "title": "Catálogo",
+    "products": {
+      "title": "Productos",
       "subtitle": "Gestiona tus productos",
       "description": "Agrega, edita y organiza los productos de tu catálogo."
     },
-    "appearance": {
-      "title": "Apariencia",
-      "subtitle": "Personaliza tu tienda",
-      "description": "Personaliza el diseño, colores y aspecto visual de tu tienda."
+    "customers": {
+      "title": "Clientes",
+      "subtitle": "Gestiona tus clientes",
+      "description": "Visualiza y administra la información de tus clientes y su historial de compras."
+    },
+    "discounts": {
+      "title": "Descuentos",
+      "subtitle": "Gestiona promociones y descuentos",
+      "description": "Crea cupones, códigos de descuento y promociones especiales para tu tienda."
+    },
+    "content": {
+      "title": "Contenido",
+      "subtitle": "Gestiona el contenido de tu tienda",
+      "description": "Administra páginas, blogs, categorías y todo el contenido de tu tienda."
+    },
+    "storeDesign": {
+      "title": "Diseño de tienda",
+      "subtitle": "Personaliza el diseño de tu tienda",
+      "description": "Personaliza el diseño, colores, temas y aspecto visual de tu tienda."
     },
     "reports": {
       "title": "Reportes",
@@ -81,6 +303,66 @@
       "title": "Mi Cuenta",
       "subtitle": "Información personal",
       "description": "Gestiona tu información personal, preferencias y configuración de cuenta."
+    },
+    "orders": {
+      "title": "Pedidos",
+      "subtitle": "Gestiona las ventas de tu tienda",
+      "description": "Visualiza y administra todos los pedidos que has recibido en tu tienda.",
+      "noOrders": "Aún no tienes pedidos",
+      "noOrdersDescription": "Cuando recibas tu primer pedido, aparecerá aquí. ¡Comparte tu tienda para comenzar a vender!",
+      "table": {
+        "date": "Fecha",
+        "customer": "Cliente",
+        "total": "Total",
+        "paymentMethod": "Método de pago",
+        "status": "Estado",
+        "actions": "Acciones",
+        "viewDetails": "Ver detalles"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "confirmed": "Confirmado",
+        "preparing": "Preparando",
+        "ready": "Listo",
+        "shipped": "Enviado",
+        "delivered": "Entregado",
+        "cancelled": "Cancelado"
+      },
+      "paymentMethods": {
+        "cash": "Efectivo",
+        "transfer": "Transferencia",
+        "card": "Tarjeta",
+        "other": "Otro"
+      },
+      "details": {
+        "title": "Detalles del Pedido",
+        "orderNumber": "Pedido #",
+        "customerInfo": "Información del Cliente",
+        "name": "Nombre",
+        "phone": "Teléfono",
+        "address": "Dirección",
+        "notes": "Notas",
+        "orderItems": "Productos",
+        "product": "Producto",
+        "presentation": "Presentación",
+        "quantity": "Cantidad",
+        "subtotal": "Subtotal",
+        "orderSummary": "Resumen del Pedido",
+        "itemsSubtotal": "Subtotal de productos",
+        "shippingCost": "Costo de envío",
+        "total": "Total",
+        "actions": "Acciones",
+        "updateStatus": "Actualizar Estado",
+        "replyWhatsApp": "Responder por WhatsApp",
+        "resendEmail": "Reenviar confirmación",
+        "close": "Cerrar",
+        "updating": "Actualizando...",
+        "updated": "Estado actualizado"
+      },
+      "whatsapp": {
+        "greeting": "Hola! Te escribo desde {storeName} sobre tu pedido #{orderId}.",
+        "statusUpdate": "Tu pedido está ahora en estado: {status}"
+      }
     }
   },
   "storeSetup": {

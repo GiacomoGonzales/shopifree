@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import { useAuth } from '../lib/simple-auth-context'
 import { getLandingUrl } from '../lib/config'
 
@@ -13,18 +14,37 @@ const MenuIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   ),
-  Settings: () => (
+  Orders: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
     </svg>
   ),
-  Catalog: () => (
+  Products: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
     </svg>
   ),
-  Appearance: () => (
+  Customers: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+    </svg>
+  ),
+  Marketing: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+    </svg>
+  ),
+  Discounts: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+    </svg>
+  ),
+  Content: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  StoreDesign: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
     </svg>
@@ -34,9 +54,10 @@ const MenuIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>
   ),
-  Marketing: () => (
+  Settings: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
   Support: () => (
@@ -68,6 +89,16 @@ const MenuIcons = {
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
+  ),
+  ChevronDown: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  ),
+  ChevronRight: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
   )
 }
 
@@ -94,16 +125,86 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const currentLocale = pathname.split('/')[1] || 'es'
   const otherLocale = currentLocale === 'es' ? 'en' : 'es'
 
+  // Función para obtener el título dinámico de la página actual
+  const getPageTitle = () => {
+    const pathSegments = pathname.split('/').filter(Boolean)
+    const currentSection = pathSegments[pathSegments.length - 1] || ''
+    const parentSection = pathSegments[pathSegments.length - 2] || ''
+    
+    // Mapeo de rutas a keys de traducción
+    const routeToTranslationKey: Record<string, string> = {
+      'home': 'home',
+      'orders': 'orders', 
+      'products': 'products',
+      'customers': 'customers',
+      'marketing': 'marketing',
+      'discounts': 'discounts',
+      'content': 'content',
+      'store-design': 'storeDesign',
+      'reports': 'reports',
+      'settings': 'settings',
+      'support': 'support',
+      'account': 'account'
+    }
+
+    // Mapeo específico para subrutas de settings
+    const settingsSubrouteToTranslationKey: Record<string, string> = {
+      'general': 'basicSettings',
+      'basic': 'basicSettings', // Backward compatibility
+      'advanced': 'advancedSettings'
+    }
+
+    // Si estamos en una subruta de settings
+    if (parentSection === 'settings' && settingsSubrouteToTranslationKey[currentSection]) {
+      return t(settingsSubrouteToTranslationKey[currentSection])
+    }
+
+    // Si la ruta actual tiene una traducción, la usamos
+    if (routeToTranslationKey[currentSection]) {
+      return t(routeToTranslationKey[currentSection])
+    }
+    
+    // Si estamos en el home o ruta base, mostramos "Dashboard"
+    if (currentSection === currentLocale || currentSection === '' || pathSegments.length <= 1) {
+      return 'Dashboard'
+    }
+    
+    // Fallback por si no encontramos la traducción
+    return 'Dashboard'
+  }
+
   // Elementos del menú de navegación
   const navigationItems = [
-    { key: 'home', href: `/${currentLocale}`, icon: MenuIcons.Home },
-    { key: 'settings', href: `/${currentLocale}/settings`, icon: MenuIcons.Settings },
-    { key: 'catalog', href: `/${currentLocale}/catalog`, icon: MenuIcons.Catalog },
-    { key: 'appearance', href: `/${currentLocale}/appearance`, icon: MenuIcons.Appearance },
-    { key: 'reports', href: `/${currentLocale}/reports`, icon: MenuIcons.Reports },
+    { key: 'home', href: `/${currentLocale}/home`, icon: MenuIcons.Home },
+    { key: 'orders', href: `/${currentLocale}/orders`, icon: MenuIcons.Orders },
+    { key: 'products', href: `/${currentLocale}/products`, icon: MenuIcons.Products },
+    { key: 'customers', href: `/${currentLocale}/customers`, icon: MenuIcons.Customers },
     { key: 'marketing', href: `/${currentLocale}/marketing`, icon: MenuIcons.Marketing },
+    { key: 'discounts', href: `/${currentLocale}/discounts`, icon: MenuIcons.Discounts },
+    { key: 'content', href: `/${currentLocale}/content`, icon: MenuIcons.Content },
+    { key: 'storeDesign', href: `/${currentLocale}/store-design`, icon: MenuIcons.StoreDesign },
+    { key: 'reports', href: `/${currentLocale}/reports`, icon: MenuIcons.Reports },
     { key: 'support', href: `/${currentLocale}/support`, icon: MenuIcons.Support },
   ]
+
+  // Elemento especial para Settings con subopciones
+  const settingsItem = {
+    key: 'settings',
+    href: `/${currentLocale}/settings`,
+    icon: MenuIcons.Settings,
+    subitems: [
+      { 
+        key: 'basicSettings', 
+        href: `/${currentLocale}/settings/general`, 
+        label: t('basicSettings') || (currentLocale === 'es' ? 'General' : 'General')
+      },
+      { 
+        key: 'advancedSettings', 
+        href: `/${currentLocale}/settings/advanced`, 
+        label: t('advancedSettings') || (currentLocale === 'es' ? 'Configuración Avanzada' : 'Advanced Settings')
+      }
+    ]
+  }
 
   const handleSignOut = async () => {
     await signOut()
@@ -117,10 +218,86 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   const isActiveRoute = (href: string) => {
-    if (href === `/${currentLocale}`) {
-      return pathname === href
+    if (href === `/${currentLocale}/home`) {
+      return pathname === href || pathname === `/${currentLocale}` || pathname === `/${currentLocale}/`
     }
     return pathname.startsWith(href)
+  }
+
+  // Función para renderizar elementos de menú normales
+  const renderMenuItems = (isMobile: boolean = false) => {
+    return navigationItems.map((item) => {
+      const Icon = item.icon
+      const isActive = isActiveRoute(item.href)
+      return (
+        <button
+          key={item.key}
+          onClick={() => {
+            router.push(item.href)
+            if (isMobile) setSidebarOpen(false)
+          }}
+          className={`w-full group flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
+            isActive
+              ? 'bg-gray-100 text-gray-900'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+          }`}
+        >
+          <Icon />
+          <span className="ml-3">{t(item.key)}</span>
+        </button>
+      )
+    })
+  }
+
+  // Función para renderizar el elemento Settings con submenú
+  const renderSettingsMenu = (isMobile: boolean = false) => {
+    const Icon = settingsItem.icon
+    const isSettingsActive = pathname.startsWith(settingsItem.href)
+    
+    return (
+      <div key={settingsItem.key}>
+        {/* Elemento principal de Settings */}
+        <button
+          onClick={() => {
+            router.push(`/${currentLocale}/settings/general`)
+            if (isMobile) setSidebarOpen(false)
+          }}
+          className={`w-full group flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
+            isSettingsActive
+              ? 'bg-gray-100 text-gray-900'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+          }`}
+        >
+          <Icon />
+          <span className="ml-3">{t(settingsItem.key)}</span>
+        </button>
+        
+        {/* Submenú de Settings - siempre visible cuando estamos en settings */}
+        {isSettingsActive && (
+          <div className="mt-1">
+            {settingsItem.subitems.map((subitem) => {
+              const isSubitemActive = isActiveRoute(subitem.href)
+              return (
+                <button
+                  key={subitem.key}
+                  onClick={() => {
+                    router.push(subitem.href)
+                    if (isMobile) setSidebarOpen(false)
+                  }}
+                  className={`w-full group flex items-center py-1.5 pl-10 pr-2 text-sm ${
+                    isSubitemActive
+                      ? 'text-gray-900 font-medium'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {subitem.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -139,31 +316,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
           </div>
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            <div className="flex-shrink-0 flex items-center px-4">
-              <h1 className="text-xl font-bold text-gray-900">Shopifree</h1>
+            <div className="flex-shrink-0 flex items-center px-4 justify-center">
+              <button 
+                onClick={() => router.push(`/${currentLocale}/home`)}
+                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md transition-all duration-200 hover:scale-105"
+              >
+                <Image 
+                  src="/logo-primary.png" 
+                  alt="Shopifree Logo" 
+                  width={140} 
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                  priority
+                />
+              </button>
             </div>
-            <nav className="mt-5 px-2 space-y-1">
-              {navigationItems.map((item) => {
-                const Icon = item.icon
-                const isActive = isActiveRoute(item.href)
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => {
-                      router.push(item.href)
-                      setSidebarOpen(false)
-                    }}
-                    className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      isActive
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon />
-                    <span className="ml-3">{t(item.key)}</span>
-                  </button>
-                )
-              })}
+            <nav className="mt-5 px-2 space-y-0.5">
+              {renderMenuItems(true)}
+              {renderSettingsMenu(true)}
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
@@ -191,28 +361,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white">
           <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <div className="flex items-center flex-shrink-0 px-4">
-              <h1 className="text-xl font-bold text-gray-900">Shopifree</h1>
+            <div className="flex items-center flex-shrink-0 px-4 justify-center">
+              <button 
+                onClick={() => router.push(`/${currentLocale}/home`)}
+                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md transition-all duration-200 hover:scale-105"
+              >
+                <Image 
+                  src="/logo-primary.png" 
+                  alt="Shopifree Logo" 
+                  width={140} 
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                  priority
+                />
+              </button>
             </div>
-            <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
-              {navigationItems.map((item) => {
-                const Icon = item.icon
-                const isActive = isActiveRoute(item.href)
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => router.push(item.href)}
-                    className={`w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      isActive
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon />
-                    <span className="ml-3">{t(item.key)}</span>
-                  </button>
-                )
-              })}
+            <nav className="mt-5 flex-1 px-2 bg-white space-y-0.5">
+              {renderMenuItems(false)}
+              {renderSettingsMenu(false)}
             </nav>
           </div>
 
@@ -220,14 +386,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex-shrink-0 border-t border-gray-200 p-4">
             <button
               onClick={() => router.push(`/${currentLocale}/account`)}
-              className="w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className="w-full group flex items-center px-2 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             >
               <MenuIcons.Account />
               <span className="ml-3">{t('account')}</span>
             </button>
             <button
               onClick={handleSignOut}
-              className="w-full mt-1 group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className="w-full mt-1 group flex items-center px-2 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             >
               <MenuIcons.Logout />
               <span className="ml-3">{t('logout')}</span>
@@ -253,7 +419,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="relative w-full text-gray-400 focus-within:text-gray-600">
                   <div className="absolute inset-y-0 left-0 flex items-center">
                     <h2 className="text-lg font-semibold text-gray-900">
-                      Dashboard
+                      {getPageTitle()}
                     </h2>
                   </div>
                 </div>
@@ -307,7 +473,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="ml-3 relative">
                 <div className="flex items-center">
                   <span className="text-sm font-medium text-gray-700">
-                    {user?.email}
+                    {t('hello')}, {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
                   </span>
                 </div>
               </div>

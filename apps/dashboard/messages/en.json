@@ -29,38 +29,260 @@
   },
   "navigation": {
     "home": "Home",
-    "settings": "Settings",
-    "catalog": "Catalog",
-    "appearance": "Appearance",
-    "reports": "Reports",
+    "orders": "Orders",
+    "products": "Products",
+    "customers": "Customers",
     "marketing": "Marketing",
+    "discounts": "Discounts",
+    "content": "Content",
+    "storeDesign": "Store Design",
+    "reports": "Reports",
+    "settings": "Settings",
+    "basicSettings": "General",
+    "advancedSettings": "Advanced Settings",
     "support": "Support",
     "account": "My Account",
     "logout": "Sign out",
     "menu": "Menu",
     "toggleSidebar": "Toggle sidebar",
-    "changeLanguage": "Change language"
+    "changeLanguage": "Change language",
+    "hello": "Hello"
   },
   "pages": {
     "home": {
       "title": "Home",
       "subtitle": "Store overview",
-      "description": "Here you'll see a general overview of your store, recent sales and important statistics."
+      "description": "Here you'll see a general overview of your store, recent sales and important statistics.",
+      "stats": {
+        "monthlySales": "Monthly sales",
+        "orders": "Orders",
+        "products": "Products",
+        "visits": "Visits"
+      },
+      "quickActions": {
+        "addFirstProduct": "Add your first product",
+        "customizeAppearance": "Customize appearance",
+        "configureDomain": "Configure custom domain"
+      }
     },
     "settings": {
       "title": "Settings",
       "subtitle": "Store settings",
-      "description": "Configure general store settings, contact information and preferences."
+      "description": "Configure general store settings, contact information and preferences.",
+      "tabs": {
+        "basic": "General",
+        "advanced": "Advanced Settings"
+      },
+      "basic": {
+        "sections": {
+          "info": "Store information",
+          "contact": "Contact",
+          "branding": "Branding", 
+          "social": "Social media",
+          "location": "Location"
+        },
+        "storeInfo": {
+          "title": "Store Information",
+          "storeName": "Store name",
+          "storeNamePlaceholder": "My Awesome Store",
+          "subdomain": "Subdomain",
+          "subdomainHint": "Read-only - Your store is available at:",
+          "slogan": "Slogan",
+          "sloganPlaceholder": "The best online store",
+          "description": "Store description",
+          "descriptionPlaceholder": "Describe your store and what you sell..."
+        },
+        "contact": {
+          "title": "Contact Information",
+          "hasPhysicalLocation": "Has physical location?",
+          "address": "Address",
+          "addressPlaceholder": "123 Street, City, Country",
+          "businessType": "Business type",
+          "businessTypePlaceholder": "Select your business type",
+          "businessTypes": {
+            "retail": "Retail",
+            "wholesale": "Wholesale",
+            "service": "Services",
+            "restaurant": "Restaurant/Food",
+            "fashion": "Fashion & Accessories",
+            "technology": "Technology",
+            "health": "Health & Beauty",
+            "sports": "Sports & Recreation",
+            "education": "Education",
+            "other": "Other"
+          },
+          "phone": "Contact phone",
+          "phonePlaceholder": "+1234567890"
+        },
+        "branding": {
+          "title": "Branding",
+          "logo": "Logo",
+          "logoUpload": "Upload logo",
+          "logoHint": "Recommended: 200x200px, PNG or JPG format",
+          "storePhoto": "Store photo",
+          "storePhotoUpload": "Upload photo",
+          "storePhotoHint": "Optional: Photo of your physical store",
+          "primaryColor": "Primary color",
+          "secondaryColor": "Secondary color",
+          "currency": "Currency",
+          "currencyPlaceholder": "USD"
+        },
+        "socialMedia": {
+          "title": "Social Media",
+          "facebook": "Facebook",
+          "facebookPlaceholder": "https://facebook.com/my-store",
+          "instagram": "Instagram",
+          "instagramPlaceholder": "https://instagram.com/my-store",
+          "whatsapp": "WhatsApp",
+          "whatsappPlaceholder": "+1234567890",
+          "tiktok": "TikTok",
+          "tiktokPlaceholder": "https://tiktok.com/@my-store"
+        }
+      },
+      "advanced": {
+        "tabs": {
+          "domain": "Custom Domain",
+          "checkout": "Checkout Method",
+          "payments": "Payment Gateway",
+          "shipping": "Shipping",
+          "notifications": "Notifications",
+          "seo": "SEO",
+          "integrations": "Integrations",
+          "language": "Language"
+        },
+        "domain": {
+          "title": "Configure Custom Domain",
+          "description": "Use your own domain for your store",
+          "customDomain": "Custom domain",
+          "customDomainPlaceholder": "my-store.com",
+          "verifyDomain": "Verify domain",
+          "verificationStatus": "Verification status",
+          "verified": "Verified",
+          "notVerified": "Not verified",
+          "cnameGuide": "CNAME Configuration Guide",
+          "cnameInstructions": "Add a CNAME record in your DNS provider:",
+          "cnameRecord": "CNAME: www → shopifree.app"
+        },
+        "checkout": {
+          "title": "Checkout Method",
+          "description": "Configure how to receive orders",
+          "whatsappCheckout": "WhatsApp Sales",
+          "whatsappDescription": "Customers send orders via WhatsApp (Free Plan)",
+          "traditionalCheckout": "Traditional checkout",
+          "traditionalDescription": "Integrated cart and checkout (Premium/Pro Plans)",
+          "premiumRequired": "Requires paid plan",
+          "whatsappMessage": "Predefined WhatsApp message",
+          "whatsappMessagePlaceholder": "Hello! I'm interested in this product from {storeName}:"
+        },
+        "payments": {
+          "title": "Payment Gateway",
+          "description": "Configure your payment method",
+          "provider": "Provider",
+          "selectProvider": "Select a provider",
+          "culqi": "Culqi",
+          "mercadopago": "MercadoPago",
+          "publicKey": "Public key",
+          "publicKeyPlaceholder": "pk_test_...",
+          "secretKey": "Secret key",
+          "secretKeyPlaceholder": "sk_test_...",
+          "testConnection": "Test connection",
+          "connectionStatus": "Connection status",
+          "connected": "Connected",
+          "notConnected": "Not connected"
+        },
+        "shipping": {
+          "title": "Shipping Configuration",
+          "description": "Configure shipping options",
+          "enableShipping": "Enable shipping module",
+          "shippingType": "Shipping type",
+          "freeShipping": "Free shipping",
+          "fixedCost": "Fixed cost",
+          "minimumAmount": "Free shipping by minimum amount",
+          "shippingCost": "Shipping cost",
+          "shippingCostPlaceholder": "15.00",
+          "minimumOrderAmount": "Minimum amount for free shipping",
+          "minimumOrderPlaceholder": "50.00",
+          "checkoutText": "Text visible in checkout",
+          "checkoutTextPlaceholder": "Home delivery available",
+          "estimatedTime": "Estimated delivery time",
+          "estimatedTimePlaceholder": "24-48 hours"
+        },
+        "notifications": {
+          "title": "Automatic Notifications",
+          "description": "Configure automatic notification sending",
+          "emailNotifications": "Email notifications",
+          "whatsappNotifications": "WhatsApp notifications",
+          "alternativeEmail": "Alternative email",
+          "alternativeEmailPlaceholder": "sales@my-store.com",
+          "alternativeEmailHint": "Additional email to receive notifications"
+        },
+        "seo": {
+          "title": "SEO Configuration",
+          "description": "Optimize your store for search engines",
+          "seoTitle": "SEO Title",
+          "seoTitlePlaceholder": "My Store - The best online store",
+          "metaDescription": "Meta description",
+          "metaDescriptionPlaceholder": "Find the best products in our online store...",
+          "ogImage": "Open Graph Image",
+          "ogImageUpload": "Upload OG image",
+          "ogImageHint": "Recommended: 1200x630px for social media",
+          "customSlug": "Custom slug",
+          "customSlugPlaceholder": "my-special-store",
+          "customSlugHint": "Optional: Custom URL for your store"
+        },
+        "integrations": {
+          "title": "Integrations",
+          "description": "Connect analytics and marketing tools",
+          "googleAnalytics": "Google Analytics",
+          "googleAnalyticsPlaceholder": "GA4-XXXXXXXXXX",
+          "metaPixel": "Meta Pixel (Facebook)",
+          "metaPixelPlaceholder": "1234567890123456"
+        },
+        "language": {
+          "title": "Store Language",
+          "description": "Select your store's primary language",
+          "storeLanguage": "Store language",
+          "spanish": "Spanish",
+          "english": "English"
+        }
+      },
+      "actions": {
+        "save": "Save changes",
+        "saving": "Saving...",
+        "saved": "Changes saved",
+        "error": "Error saving",
+        "cancel": "Cancel",
+        "uploading": "Uploading...",
+        "upload": "Upload file",
+        "remove": "Remove",
+        "verify": "Verify",
+        "test": "Test"
+      }
     },
-    "catalog": {
-      "title": "Catalog",
+    "products": {
+      "title": "Products",
       "subtitle": "Manage your products",
       "description": "Add, edit and organize your catalog products."
     },
-    "appearance": {
-      "title": "Appearance",
-      "subtitle": "Customize your store",
-      "description": "Customize the design, colors and visual appearance of your store."
+    "customers": {
+      "title": "Customers",
+      "subtitle": "Manage your customers",
+      "description": "View and manage customer information and their purchase history."
+    },
+    "discounts": {
+      "title": "Discounts",
+      "subtitle": "Manage promotions and discounts",
+      "description": "Create coupons, discount codes and special promotions for your store."
+    },
+    "content": {
+      "title": "Content",
+      "subtitle": "Manage your store content",
+      "description": "Manage pages, blogs, categories and all your store content."
+    },
+    "storeDesign": {
+      "title": "Store Design",
+      "subtitle": "Customize your store design",
+      "description": "Customize the design, colors, themes and visual appearance of your store."
     },
     "reports": {
       "title": "Reports",
@@ -81,6 +303,66 @@
       "title": "My Account",
       "subtitle": "Personal information",
       "description": "Manage your personal information, preferences and account settings."
+    },
+    "orders": {
+      "title": "Orders",
+      "subtitle": "Manage your store sales",
+      "description": "View and manage all orders received in your store.",
+      "noOrders": "You don't have orders yet",
+      "noOrdersDescription": "When you receive your first order, it will appear here. Share your store to start selling!",
+      "table": {
+        "date": "Date",
+        "customer": "Customer",
+        "total": "Total",
+        "paymentMethod": "Payment Method",
+        "status": "Status",
+        "actions": "Actions",
+        "viewDetails": "View details"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "preparing": "Preparing",
+        "ready": "Ready",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "transfer": "Transfer",
+        "card": "Card",
+        "other": "Other"
+      },
+      "details": {
+        "title": "Order Details",
+        "orderNumber": "Order #",
+        "customerInfo": "Customer Information",
+        "name": "Name",
+        "phone": "Phone",
+        "address": "Address",
+        "notes": "Notes",
+        "orderItems": "Products",
+        "product": "Product",
+        "presentation": "Presentation",
+        "quantity": "Quantity",
+        "subtotal": "Subtotal",
+        "orderSummary": "Order Summary",
+        "itemsSubtotal": "Items subtotal",
+        "shippingCost": "Shipping cost",
+        "total": "Total",
+        "actions": "Actions",
+        "updateStatus": "Update Status",
+        "replyWhatsApp": "Reply via WhatsApp",
+        "resendEmail": "Resend confirmation",
+        "close": "Close",
+        "updating": "Updating...",
+        "updated": "Status updated"
+      },
+      "whatsapp": {
+        "greeting": "Hello! I'm writing from {storeName} about your order #{orderId}.",
+        "statusUpdate": "Your order is now in status: {status}"
+      }
     }
   },
   "storeSetup": {
