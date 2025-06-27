@@ -160,14 +160,14 @@ export default function GeneralSettingsPage() {
   }
 
   const renderStoreInfoSection = () => (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">{t('storeInfo.title')}</h1>
-        <p className="text-gray-600">Configura la información básica de tu tienda</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{t('storeInfo.title')}</h3>
+            <p className="mt-1 text-sm text-gray-600">Configura la información básica de tu tienda</p>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -178,7 +178,7 @@ export default function GeneralSettingsPage() {
                 value={formData.storeName}
                 onChange={(e) => handleChange('storeName', e.target.value)}
                 placeholder={t('storeInfo.storeNamePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
 
@@ -207,7 +207,7 @@ export default function GeneralSettingsPage() {
               value={formData.slogan}
               onChange={(e) => handleChange('slogan', e.target.value)}
               placeholder={t('storeInfo.sloganPlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
             />
           </div>
 
@@ -220,7 +220,7 @@ export default function GeneralSettingsPage() {
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
               placeholder={t('storeInfo.descriptionPlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm resize-none"
             />
           </div>
         </div>
@@ -229,20 +229,20 @@ export default function GeneralSettingsPage() {
   )
 
   const renderContactSection = () => (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">{t('contact.title')}</h1>
-        <p className="text-gray-600">Configura la información de contacto de tu tienda</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{t('contact.title')}</h3>
+            <p className="mt-1 text-sm text-gray-600">Configura la información de contacto de tu tienda</p>
+          </div>
+          
           <div className="flex items-center">
             <input
               type="checkbox"
               checked={formData.hasPhysicalLocation}
               onChange={(e) => handleChange('hasPhysicalLocation', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-gray-800 focus:ring-gray-600 border-gray-300 rounded"
             />
             <label className="ml-3 block text-sm font-medium text-gray-700">
               {t('contact.hasPhysicalLocation')}
@@ -259,7 +259,7 @@ export default function GeneralSettingsPage() {
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
                 placeholder={t('contact.addressPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
           )}
@@ -274,7 +274,7 @@ export default function GeneralSettingsPage() {
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
                 placeholder={t('contact.phonePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
 
@@ -285,7 +285,7 @@ export default function GeneralSettingsPage() {
               <select
                 value={formData.tipoComercio}
                 onChange={(e) => handleChange('tipoComercio', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm bg-white"
               >
                 <option value="">{t('contact.businessTypePlaceholder')}</option>
                 <option value="retail">{t('contact.businessTypes.retail')}</option>
@@ -307,14 +307,14 @@ export default function GeneralSettingsPage() {
   )
 
   const renderBrandingSection = () => (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">{t('branding.title')}</h1>
-        <p className="text-gray-600">Personaliza los colores y la identidad visual de tu tienda</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{t('branding.title')}</h3>
+            <p className="mt-1 text-sm text-gray-600">Personaliza los colores y la identidad visual de tu tienda</p>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -331,7 +331,7 @@ export default function GeneralSettingsPage() {
                   type="text"
                   value={formData.primaryColor}
                   onChange={(e) => handleChange('primaryColor', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm font-mono"
                 />
               </div>
             </div>
@@ -351,7 +351,7 @@ export default function GeneralSettingsPage() {
                   type="text"
                   value={formData.secondaryColor}
                   onChange={(e) => handleChange('secondaryColor', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm font-mono"
                 />
               </div>
             </div>
@@ -365,7 +365,7 @@ export default function GeneralSettingsPage() {
                 value={formData.currency}
                 onChange={(e) => handleChange('currency', e.target.value)}
                 placeholder={t('branding.currencyPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
           </div>
@@ -375,14 +375,14 @@ export default function GeneralSettingsPage() {
   )
 
   const renderSocialSection = () => (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">{t('socialMedia.title')}</h1>
-        <p className="text-gray-600">Conecta tus redes sociales para que los clientes puedan encontrarte</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{t('socialMedia.title')}</h3>
+            <p className="mt-1 text-sm text-gray-600">Conecta tus redes sociales para que los clientes puedan encontrarte</p>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -393,7 +393,7 @@ export default function GeneralSettingsPage() {
                 value={formData.redes.facebook}
                 onChange={(e) => handleChange('redes.facebook', e.target.value)}
                 placeholder={t('socialMedia.facebookPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
 
@@ -406,7 +406,7 @@ export default function GeneralSettingsPage() {
                 value={formData.redes.instagram}
                 onChange={(e) => handleChange('redes.instagram', e.target.value)}
                 placeholder={t('socialMedia.instagramPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
 
@@ -419,7 +419,7 @@ export default function GeneralSettingsPage() {
                 value={formData.redes.whatsapp}
                 onChange={(e) => handleChange('redes.whatsapp', e.target.value)}
                 placeholder={t('socialMedia.whatsappPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
 
@@ -432,7 +432,7 @@ export default function GeneralSettingsPage() {
                 value={formData.redes.tiktok}
                 onChange={(e) => handleChange('redes.tiktok', e.target.value)}
                 placeholder={t('socialMedia.tiktokPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
               />
             </div>
           </div>
@@ -442,14 +442,14 @@ export default function GeneralSettingsPage() {
   )
 
   const renderLocationSection = () => (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Localización</h1>
-        <p className="text-gray-600">Configura la ubicación y zona horaria de tu tienda</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">Localización</h3>
+            <p className="mt-1 text-sm text-gray-600">Configura la ubicación y zona horaria de tu tienda</p>
+          </div>
+          
           <div className="text-center py-12 text-gray-500">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -484,37 +484,49 @@ export default function GeneralSettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex min-h-screen bg-gray-50">
-        {/* Submenú lateral interno */}
-        <aside className="w-64 bg-white border-r border-gray-200 px-6 py-6">
-          <div className="space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                {t(`sections.${section.key}`)}
-              </button>
-            ))}
+      <div className="py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Tabs horizontales */}
+          <div className="mb-6">
+            <div className="border-b border-gray-200">
+              <div className="overflow-x-auto" style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}>
+                <nav className="flex space-x-8">
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                        activeSection === section.id
+                          ? 'border-gray-600 text-gray-800'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {t(`sections.${section.key}`)}
+                    </button>
+                  ))}
+                </nav>
+                <style jsx>{`
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
+              </div>
+            </div>
           </div>
-        </aside>
 
-        {/* Contenido dinámico */}
-        <main className="flex-1 px-8 py-6">
+          {/* Contenido dinámico */}
           <div className="max-w-4xl">
             {renderSection()}
 
-            {/* Botón de guardar fijo */}
+            {/* Botón de guardar */}
             <div className="mt-8 flex justify-between items-center">
               {saveMessage && (
                 <div className={`px-4 py-2 rounded-md text-sm font-medium ${
                   saveMessage === tActions('saved')
-                    ? 'bg-green-100 text-green-800 border border-green-200'
+                    ? 'bg-gray-100 text-gray-800 border border-gray-300'
                     : 'bg-red-100 text-red-800 border border-red-200'
                 }`}>
                   {saveMessage}
@@ -524,7 +536,7 @@ export default function GeneralSettingsPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-6 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {saving ? (
                     <>
@@ -541,7 +553,7 @@ export default function GeneralSettingsPage() {
               </div>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </DashboardLayout>
   )

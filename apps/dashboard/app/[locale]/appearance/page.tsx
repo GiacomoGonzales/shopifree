@@ -49,16 +49,16 @@ export default function AppearancePage() {
                     </div>
                   </div>
 
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <div className="bg-gray-100 border border-gray-300 rounded-lg p-4">
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="h-5 w-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
                         </svg>
                       </div>
                       <div className="ml-3 flex-1">
-                        <h4 className="text-sm font-medium text-indigo-700">Diseño y Layout</h4>
-                        <p className="text-sm text-indigo-600">
+                        <h4 className="text-sm font-medium text-gray-800">Diseño y Layout</h4>
+                        <p className="text-sm text-gray-700">
                           Ajusta el diseño de tu tienda
                         </p>
                       </div>

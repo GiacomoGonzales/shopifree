@@ -208,7 +208,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = getLandingUrl(`/${currentLocale}`)
+    router.push(`/${currentLocale}/login`)
   }
 
   const handleLanguageChange = (locale: string) => {
@@ -319,14 +319,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-shrink-0 flex items-center px-4 justify-center">
               <button 
                 onClick={() => router.push(`/${currentLocale}/home`)}
-                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md transition-all duration-200 hover:scale-105"
+                className="focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md transition-all duration-200 hover:scale-105"
               >
                 <Image 
-                  src="/logo-primary.png" 
+                  src="/logo-primary.svg" 
                   alt="Shopifree Logo" 
-                  width={140} 
-                  height={40}
-                  className="h-8 w-auto object-contain"
+                  width={280} 
+                  height={80}
+                  className="h-16 w-auto object-contain"
                   priority
                 />
               </button>
@@ -364,14 +364,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center flex-shrink-0 px-4 justify-center">
               <button 
                 onClick={() => router.push(`/${currentLocale}/home`)}
-                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md transition-all duration-200 hover:scale-105"
+                className="focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md transition-all duration-200 hover:scale-105"
               >
                 <Image 
-                  src="/logo-primary.png" 
+                  src="/logo-primary.svg" 
                   alt="Shopifree Logo" 
-                  width={140} 
-                  height={40}
-                  className="h-8 w-auto object-contain"
+                  width={280} 
+                  height={80}
+                  className="h-16 w-auto object-contain"
                   priority
                 />
               </button>
@@ -408,7 +408,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
           <button
             type="button"
-            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
+            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-600 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <MenuIcons.Menu />
@@ -430,7 +430,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="relative ml-3">
                 <button
                   type="button"
-                  className="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                   onClick={(e) => {
                     e.stopPropagation()
                     setLanguageDropdownOpen(!languageDropdownOpen)

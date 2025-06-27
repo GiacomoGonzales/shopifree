@@ -49,7 +49,7 @@ export default function AccountPage() {
                           name="displayName"
                           id="displayName"
                           value={userData?.displayName || ''}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-600 focus:border-gray-600 sm:text-sm"
                           placeholder="Tu nombre completo"
                         />
                       </div>
@@ -63,7 +63,7 @@ export default function AccountPage() {
                           name="phone"
                           id="phone"
                           value={userData?.phone || ''}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-600 focus:border-gray-600 sm:text-sm"
                           placeholder="+1234567890"
                         />
                       </div>
@@ -71,7 +71,7 @@ export default function AccountPage() {
                       <div className="flex justify-end">
                         <button
                           type="submit"
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                         >
                           Guardar Cambios
                         </button>
@@ -139,7 +139,7 @@ export default function AccountPage() {
                     <div className="space-y-3">
                       <button
                         type="button"
-                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                       >
                         Cambiar Contraseña
                       </button>

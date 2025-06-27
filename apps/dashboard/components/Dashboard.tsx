@@ -29,7 +29,7 @@ export default function Dashboard({ store }: DashboardProps) {
             <div className="mt-4 flex md:mt-0 md:ml-4">
               <button
                 type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
               >
                 <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -171,7 +171,7 @@ export default function Dashboard({ store }: DashboardProps) {
               </div>
 
               {/* Inicio rápido */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden shadow rounded-lg">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                     {t('welcome')} 🎉
@@ -180,7 +180,7 @@ export default function Dashboard({ store }: DashboardProps) {
                     {t('storeReadyDescription')}
                   </p>
                   <div className="space-y-2">
-                    <button className="w-full text-left px-3 py-2 text-sm text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200">
+                    <button className="w-full text-left px-3 py-2 text-sm text-gray-800 bg-gray-100 rounded-md hover:bg-gray-200">
                       📦 {tHome('quickActions.addFirstProduct')}
                     </button>
                     <button className="w-full text-left px-3 py-2 text-sm text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200">

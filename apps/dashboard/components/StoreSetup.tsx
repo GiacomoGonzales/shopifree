@@ -304,7 +304,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder={t('descriptionPlaceholder')}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
                 />
                 {errors.description && (
                   <p className="text-red-500 text-sm mt-1">{errors.description}</p>
@@ -318,7 +318,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
                   id="hasPhysicalLocation"
                   checked={formData.hasPhysicalLocation}
                   onChange={(e) => handleInputChange('hasPhysicalLocation', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-gray-800 focus:ring-gray-600 border-gray-300 rounded"
                 />
                 <label htmlFor="hasPhysicalLocation" className="text-sm font-medium text-gray-700">
                   {t('hasPhysicalLocation')}

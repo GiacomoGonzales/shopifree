@@ -123,8 +123,8 @@ function UserOnboardingContent() {
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-8">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -142,7 +142,7 @@ function UserOnboardingContent() {
                 value={formData.nombre}
                 onChange={(e) => handleInputChange('nombre', e.target.value)}
                 placeholder={t('nombrePlaceholder')}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                   errors.nombre ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -158,7 +158,7 @@ function UserOnboardingContent() {
                 value={formData.telefono}
                 onChange={(e) => handleInputChange('telefono', e.target.value)}
                 placeholder={t('telefonoPlaceholder')}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                   errors.telefono ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -185,7 +185,7 @@ function UserOnboardingContent() {
               <select
                 value={formData.zonaHoraria}
                 onChange={(e) => handleInputChange('zonaHoraria', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                   errors.zonaHoraria ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
@@ -201,7 +201,7 @@ function UserOnboardingContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('saving') : t('continue')}
             </button>

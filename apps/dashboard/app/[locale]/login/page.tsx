@@ -87,7 +87,7 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mx-auto"></div>
           <p className="mt-2 text-gray-600">{tLoading('general')}</p>
         </div>
       </div>
@@ -96,7 +96,14 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
 
   // Don't render if authenticated (will redirect)
   if (isAuthenticated) {
-    return null
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Accediendo...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -182,13 +189,13 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
               {t('noAccount')}{' '}
               <a 
                 href={`/${locale}/register`}
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-gray-800 hover:text-gray-900"
               >
                 {t('register')}
               </a>
             </p>
             <p className="mt-2">
-              <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
+              <a href="#" className="text-sm text-gray-800 hover:text-gray-900">
                 {t('forgotPassword')}
               </a>
             </p>

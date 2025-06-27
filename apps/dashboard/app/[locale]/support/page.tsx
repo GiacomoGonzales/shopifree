@@ -17,7 +17,7 @@ export default function SupportPage() {
                 <div className="p-6">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <svg className="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-8 w-8 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
@@ -26,7 +26,7 @@ export default function SupportPage() {
                       <p className="text-sm text-gray-500 mt-2">
                         Encuentra respuestas a las preguntas más comunes sobre Shopifree
                       </p>
-                      <button className="mt-3 text-sm text-blue-600 hover:text-blue-500">
+                      <button className="mt-3 text-sm text-gray-800 hover:text-gray-900">
                         Ver FAQ →
                       </button>
                     </div>
@@ -75,7 +75,7 @@ export default function SupportPage() {
                       type="text"
                       name="subject"
                       id="subject"
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-600 focus:border-gray-600 sm:text-sm"
                       placeholder="Describe brevemente tu consulta"
                     />
                   </div>
@@ -88,7 +88,7 @@ export default function SupportPage() {
                       id="message"
                       name="message"
                       rows={4}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-600 focus:border-gray-600 sm:text-sm"
                       placeholder="Describe tu problema o consulta en detalle..."
                     />
                   </div>
@@ -96,7 +96,7 @@ export default function SupportPage() {
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                     >
                       Enviar Mensaje
                     </button>

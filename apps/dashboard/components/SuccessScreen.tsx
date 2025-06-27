@@ -75,7 +75,7 @@ export default function SuccessScreen({ storeName, onContinue }: SuccessScreenPr
           </h1>
           
           <p className="text-gray-600 mb-6">
-            <span className="font-semibold text-blue-600">{storeName}</span> {t('subtitle')}
+            <span className="font-semibold text-gray-900">{storeName}</span> {t('subtitle')}
           </p>
 
           {/* Features Preview */}

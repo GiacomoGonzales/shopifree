@@ -97,7 +97,7 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mx-auto"></div>
           <p className="mt-2 text-gray-600">{tLoading('general')}</p>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
               {t('hasAccount')}{' '}
               <a 
                 href={`/${locale}/login`}
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-gray-800 hover:text-gray-900"
               >
                 {t('signIn')}
               </a>
