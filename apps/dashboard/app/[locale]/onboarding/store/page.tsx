@@ -281,7 +281,6 @@ function StoreOnboardingContent() {
                 onChange={(e) => handleInputChange('nombreTienda', e.target.value)}
                 placeholder={t('nombreTiendaPlaceholder')}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.nombreTienda ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
