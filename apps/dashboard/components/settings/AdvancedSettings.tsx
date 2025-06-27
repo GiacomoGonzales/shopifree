@@ -101,21 +101,30 @@ export default function AdvancedSettings({ store, onUpdate, saving }: AdvancedSe
     <div>
       {/* Sub-tabs */}
       <div className="mb-6">
-        <nav className="flex space-x-8 border-b border-gray-200">
-          {subTabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveSubTab(tab)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeSubTab === tab
-                  ? 'border-gray-600 text-gray-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {t(`tabs.${tab}`)}
-            </button>
-          ))}
-        </nav>
+        <div className="border-b border-gray-200">
+          <nav 
+            className="flex space-x-8 overflow-x-auto px-4 sm:px-0 scrollbar-none" 
+            style={{
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {subTabs.map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveSubTab(tab)}
+                className={`py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                  activeSubTab === tab
+                    ? 'border-gray-600 text-gray-800'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {t(`tabs.${tab}`)}
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
       {/* Content */}

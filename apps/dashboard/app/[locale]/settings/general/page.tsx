@@ -489,31 +489,28 @@ export default function GeneralSettingsPage() {
           {/* Tabs horizontales */}
           <div className="mb-6">
             <div className="border-b border-gray-200">
-              <div className="overflow-x-auto" style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
-              }}>
-                <nav className="flex space-x-8">
-                  {sections.map((section) => (
-                    <button
-                      key={section.id}
-                      onClick={() => setActiveSection(section.id)}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
-                        activeSection === section.id
-                          ? 'border-gray-600 text-gray-800'
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      {t(`sections.${section.key}`)}
-                    </button>
-                  ))}
-                </nav>
-                <style jsx>{`
-                  div::-webkit-scrollbar {
-                    display: none;
-                  }
-                `}</style>
-              </div>
+              <nav 
+                className="flex space-x-8 overflow-x-auto px-4 sm:px-0 scrollbar-none" 
+                style={{
+                  scrollbarWidth: 'none', 
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch'
+                }}
+              >
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                      activeSection === section.id
+                        ? 'border-gray-600 text-gray-800'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {t(`sections.${section.key}`)}
+                  </button>
+                ))}
+              </nav>
             </div>
           </div>
 

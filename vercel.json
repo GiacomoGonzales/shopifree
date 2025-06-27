@@ -1,8 +1,0 @@
-{
-  "installCommand": "npm install --workspaces",
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  }
-} 
