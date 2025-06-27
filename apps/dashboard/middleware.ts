@@ -12,6 +12,6 @@ export const config = {
   // Match all pathnames except for
   // - … if they start with `/api`, `/_next` or `/_vercel`
   // - … the ones with a file extension (e.g. `/favicon.ico`)
-  // - … static files like favicon.ico, favicon.png, etc.
-  matcher: ['/((?!api|_next|_vercel|favicon|.*\\..*).*)', '/', '/(en|es)(.*)']
+  // - … favicon files specifically
+  matcher: ['/((?!api|_next|_vercel|favicon|.*\\..*).*)', '/([\\w-]+)?/users/(.+)']
 }; 
