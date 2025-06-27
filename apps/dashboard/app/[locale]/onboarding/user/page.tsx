@@ -9,23 +9,90 @@ import AuthGuard from '../../../../components/AuthGuard'
 
 interface UserFormData {
   nombre: string
-  telefono: string
+  codigoPais: string
+  telefonoLocal: string
   correo: string
   zonaHoraria: string
 }
 
 const timeZones = [
-  'America/Mexico_City',
-  'America/New_York', 
-  'America/Los_Angeles',
-  'America/Chicago',
-  'America/Denver',
-  'America/Bogota',
-  'America/Argentina/Buenos_Aires',
-  'America/Sao_Paulo',
-  'Europe/Madrid',
-  'Europe/London',
-  'Europe/Paris'
+  // América del Norte
+  { zone: 'America/Mexico_City', label: 'México (GMT-6)' },
+  { zone: 'America/New_York', label: 'Nueva York, Miami, Toronto (GMT-5)' },
+  { zone: 'America/Chicago', label: 'Chicago, Houston, Dallas (GMT-6)' },
+  { zone: 'America/Denver', label: 'Denver, Phoenix (GMT-7)' },
+  { zone: 'America/Los_Angeles', label: 'Los Ángeles, San Francisco, Seattle (GMT-8)' },
+  
+  // América Central
+  { zone: 'America/Guatemala', label: 'Guatemala, San Salvador, Tegucigalpa (GMT-6)' },
+  { zone: 'America/Costa_Rica', label: 'Costa Rica, Nicaragua (GMT-6)' },
+  { zone: 'America/Panama', label: 'Panamá (GMT-5)' },
+  
+  // América del Sur
+  { zone: 'America/Bogota', label: 'Bogotá, Lima, Quito (GMT-5)' },
+  { zone: 'America/Caracas', label: 'Caracas (GMT-4)' },
+  { zone: 'America/La_Paz', label: 'La Paz, Sucre (GMT-4)' },
+  { zone: 'America/Santiago', label: 'Santiago de Chile (GMT-3)' },
+  { zone: 'America/Argentina/Buenos_Aires', label: 'Buenos Aires, Montevideo (GMT-3)' },
+  { zone: 'America/Asuncion', label: 'Asunción (GMT-3)' },
+  { zone: 'America/Sao_Paulo', label: 'São Paulo, Río de Janeiro, Brasília (GMT-3)' },
+  { zone: 'America/Manaus', label: 'Manaus (GMT-4)' },
+  
+  // Europa
+  { zone: 'Europe/London', label: 'Londres, Dublín, Lisboa (GMT+0)' },
+  { zone: 'Europe/Madrid', label: 'Madrid, París, Roma, Berlín (GMT+1)' },
+  { zone: 'Europe/Amsterdam', label: 'Ámsterdam, Bruselas, Zurich (GMT+1)' },
+  { zone: 'Europe/Vienna', label: 'Viena, Praga, Budapest (GMT+1)' },
+  { zone: 'Europe/Stockholm', label: 'Estocolmo, Oslo, Copenhague (GMT+1)' },
+  { zone: 'Europe/Helsinki', label: 'Helsinki (GMT+2)' },
+  { zone: 'Europe/Athens', label: 'Atenas, Bucarest (GMT+2)' },
+  { zone: 'Europe/Moscow', label: 'Moscú (GMT+3)' },
+  
+  // Asia
+  { zone: 'Asia/Tokyo', label: 'Tokio, Seúl (GMT+9)' },
+  { zone: 'Asia/Shanghai', label: 'Pekín, Shanghai, Hong Kong (GMT+8)' },
+  { zone: 'Asia/Singapore', label: 'Singapur, Manila (GMT+8)' },
+  { zone: 'Asia/Bangkok', label: 'Bangkok, Jakarta (GMT+7)' },
+  { zone: 'Asia/Kolkata', label: 'Nueva Delhi, Mumbai (GMT+5:30)' },
+  { zone: 'Asia/Dubai', label: 'Dubái, Abu Dhabi (GMT+4)' },
+  
+  // África
+  { zone: 'Africa/Cairo', label: 'El Cairo (GMT+2)' },
+  { zone: 'Africa/Lagos', label: 'Lagos, Abuja (GMT+1)' },
+  { zone: 'Africa/Johannesburg', label: 'Johannesburgo, Ciudad del Cabo (GMT+2)' },
+  
+  // Oceanía
+  { zone: 'Australia/Sydney', label: 'Sídney, Melbourne (GMT+10)' },
+  { zone: 'Pacific/Auckland', label: 'Auckland (GMT+12)' }
+]
+
+const countryCodes = [
+  { code: '+1', country: 'Estados Unidos / Canadá', flag: '🇺🇸' },
+  { code: '+52', country: 'México', flag: '🇲🇽' },
+  { code: '+34', country: 'España', flag: '🇪🇸' },
+  { code: '+54', country: 'Argentina', flag: '🇦🇷' },
+  { code: '+57', country: 'Colombia', flag: '🇨🇴' },
+  { code: '+51', country: 'Perú', flag: '🇵🇪' },
+  { code: '+56', country: 'Chile', flag: '🇨🇱' },
+  { code: '+58', country: 'Venezuela', flag: '🇻🇪' },
+  { code: '+593', country: 'Ecuador', flag: '🇪🇨' },
+  { code: '+591', country: 'Bolivia', flag: '🇧🇴' },
+  { code: '+595', country: 'Paraguay', flag: '🇵🇾' },
+  { code: '+598', country: 'Uruguay', flag: '🇺🇾' },
+  { code: '+55', country: 'Brasil', flag: '🇧🇷' },
+  { code: '+33', country: 'Francia', flag: '🇫🇷' },
+  { code: '+49', country: 'Alemania', flag: '🇩🇪' },
+  { code: '+39', country: 'Italia', flag: '🇮🇹' },
+  { code: '+44', country: 'Reino Unido', flag: '🇬🇧' },
+  { code: '+351', country: 'Portugal', flag: '🇵🇹' },
+  { code: '+31', country: 'Países Bajos', flag: '🇳🇱' },
+  { code: '+41', country: 'Suiza', flag: '🇨🇭' },
+  { code: '+43', country: 'Austria', flag: '🇦🇹' },
+  { code: '+32', country: 'Bélgica', flag: '🇧🇪' },
+  { code: '+45', country: 'Dinamarca', flag: '🇩🇰' },
+  { code: '+46', country: 'Suecia', flag: '🇸🇪' },
+  { code: '+47', country: 'Noruega', flag: '🇳🇴' },
+  { code: '+358', country: 'Finlandia', flag: '🇫🇮' }
 ]
 
 function UserOnboardingContent() {
@@ -35,7 +102,8 @@ function UserOnboardingContent() {
   
   const [formData, setFormData] = useState<UserFormData>({
     nombre: '',
-    telefono: '',
+    codigoPais: '+52', // México por defecto
+    telefonoLocal: '',
     correo: user?.email || '',
     zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Mexico_City'
   })
@@ -59,10 +127,10 @@ function UserOnboardingContent() {
       newErrors.nombre = t('errors.nombreRequired')
     }
     
-    if (!formData.telefono.trim()) {
-      newErrors.telefono = t('errors.telefonoRequired')
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.telefono)) {
-      newErrors.telefono = t('errors.telefonoInvalid')
+    if (!formData.telefonoLocal.trim()) {
+      newErrors.telefonoLocal = t('errors.telefonoRequired')
+    } else if (!/^[\d\s-()]+$/.test(formData.telefonoLocal)) {
+      newErrors.telefonoLocal = t('errors.telefonoInvalid')
     }
     
     if (!formData.zonaHoraria) {
@@ -82,10 +150,13 @@ function UserOnboardingContent() {
     
     try {
       console.log('💾 Saving user onboarding data for:', user.uid)
+      // Combinar código de país con teléfono local
+      const telefonoCompleto = `${formData.codigoPais}${formData.telefonoLocal}`
+      
       const updateData = {
         displayName: formData.nombre,
         nombre: formData.nombre,
-        telefono: formData.telefono,
+        telefono: telefonoCompleto,
         correo: formData.correo,
         zonaHoraria: formData.zonaHoraria,
         onboardingUserCompleted: true
@@ -153,16 +224,32 @@ function UserOnboardingContent() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('telefono')} <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                value={formData.telefono}
-                onChange={(e) => handleInputChange('telefono', e.target.value)}
-                placeholder={t('telefonoPlaceholder')}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.telefono ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>}
+              <div className="flex space-x-2">
+                <select
+                  value={formData.codigoPais}
+                  onChange={(e) => handleInputChange('codigoPais', e.target.value)}
+                  className="w-24 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white"
+                >
+                  {countryCodes.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.flag} {country.code}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  value={formData.telefonoLocal}
+                  onChange={(e) => handleInputChange('telefonoLocal', e.target.value)}
+                  placeholder="1234567890"
+                  className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                    errors.telefonoLocal ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              {errors.telefonoLocal && <p className="text-red-500 text-sm mt-1">{errors.telefonoLocal}</p>}
+              <p className="text-xs text-gray-500 mt-1">
+                Ingresa solo el número local (sin código de país)
+              </p>
             </div>
 
             <div>
@@ -190,8 +277,8 @@ function UserOnboardingContent() {
                 }`}
               >
                 {timeZones.map(tz => (
-                  <option key={tz} value={tz}>
-                    {tz.replace('_', ' ')}
+                  <option key={tz.zone} value={tz.zone}>
+                    {tz.label}
                   </option>
                 ))}
               </select>
