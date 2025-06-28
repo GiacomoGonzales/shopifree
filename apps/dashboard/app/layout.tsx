@@ -5,15 +5,14 @@ export const metadata: Metadata = {
   title: 'Dashboard - Shopifree',
   description: 'Manage your online store',
   icons: {
-    icon: '/brand/icons/favicon.png',
-    shortcut: '/brand/icons/favicon.png',
-    apple: '/brand/icons/favicon.png',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
     other: [
       {
         rel: 'icon',
-        type: 'image/png',
-        sizes: '32x32',
-        url: '/brand/icons/favicon.png',
+        type: 'image/svg+xml',
+        url: '/favicon.svg',
       }
     ]
   },
