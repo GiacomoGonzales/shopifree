@@ -109,7 +109,8 @@ export default function SuccessScreen({ storeName, onContinue }: SuccessScreenPr
             {t('goToDashboard')} 🚀
           </Button>
 
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-gray-500 mt-4 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-3 w-3 border border-gray-400 border-t-transparent mr-2"></div>
             {t('redirecting')}
           </p>
         </div>

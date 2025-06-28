@@ -542,11 +542,11 @@ function StoreOnboardingContent() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('telefonoTienda')} <span className="text-red-500">*</span>
               </label>
-              <div className="flex space-x-2">
+              <div className="flex space-x-1 sm:space-x-2">
                 <select
                   value={formData.codigoPaisTienda}
                   onChange={(e) => handleInputChange('codigoPaisTienda', e.target.value)}
-                  className="w-24 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white"
+                  className="w-20 sm:w-24 px-1 sm:px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white text-xs sm:text-sm"
                 >
                   {countryCodes.map((country) => (
                     <option key={country.code} value={country.code}>
@@ -559,13 +559,13 @@ function StoreOnboardingContent() {
                   value={formData.telefonoLocalTienda}
                   onChange={(e) => handleInputChange('telefonoLocalTienda', e.target.value)}
                   placeholder="1234567890"
-                  className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                  className={`flex-1 px-2 sm:px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 text-xs sm:text-sm ${
                     errors.telefonoLocalTienda ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
               </div>
               {errors.telefonoLocalTienda && <p className="text-red-500 text-sm mt-1">{errors.telefonoLocalTienda}</p>}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1 break-words">
                 Ingresa solo el número local (sin código de país)
               </p>
             </div>
@@ -815,10 +815,10 @@ function StoreOnboardingContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg mx-auto">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <div className="text-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-sm sm:max-w-lg mx-auto">
+        <div className="bg-white rounded-lg shadow-xl p-4 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4M9 7h6m-6 4h6m-2 4h2M7 7h.01M7 11h.01M7 15h.01" />
@@ -840,12 +840,12 @@ function StoreOnboardingContent() {
             {renderCurrentStep()}
             
             {/* Botones de navegación */}
-            <div className="flex justify-between pt-6">
+            <div className="flex justify-between pt-4 sm:pt-6">
               <button
                 type="button"
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
-                className="px-6 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 sm:px-6 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 Anterior
               </button>
@@ -854,7 +854,7 @@ function StoreOnboardingContent() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  className="px-4 sm:px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base"
                 >
                   Siguiente
                 </button>
@@ -862,7 +862,7 @@ function StoreOnboardingContent() {
                 <button
                   type="button"
                   onClick={handleCreateStore}
-                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  className="px-4 sm:px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base"
                 >
                   {t('createStore')}
                 </button>

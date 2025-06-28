@@ -161,7 +161,7 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-black hover:bg-gray-800 text-white focus:ring-gray-600"
               disabled={loading}
             >
               {loading ? t('loading') : t('registerButton')}
@@ -181,7 +181,7 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
             <div className="mt-6">
               <Button
                 variant="secondary"
-                className="w-full"
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500"
                 onClick={handleGoogleRegister}
                 disabled={loading}
               >

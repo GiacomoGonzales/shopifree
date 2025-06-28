@@ -149,7 +149,7 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-black hover:bg-gray-800 text-white focus:ring-gray-600"
               disabled={loading}
             >
               {loading ? t('loading') : t('loginButton')}
@@ -169,7 +169,7 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
             <div className="mt-6">
               <Button
                 variant="secondary"
-                className="w-full"
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500"
                 onClick={handleGoogleLogin}
                 disabled={loading}
               >
