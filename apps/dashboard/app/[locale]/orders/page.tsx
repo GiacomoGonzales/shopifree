@@ -127,22 +127,7 @@ export default function OrdersPage() {
     )
   }
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Cargando pedidos...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </DashboardLayout>
-    )
-  }
+  // El loading lo maneja el DashboardLayout, no mostramos loading individual aquí
 
   return (
     <DashboardLayout>

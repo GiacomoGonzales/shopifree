@@ -31,6 +31,10 @@
     "home": "Home",
     "orders": "Orders",
     "products": "Products",
+    "productsSection": "Products",
+    "categories": "Categories",
+    "brands": "Brands",
+    "collections": "Collections",
     "customers": "Customers",
     "marketing": "Marketing",
     "discounts": "Discounts",
@@ -263,6 +267,21 @@
       "title": "Products",
       "subtitle": "Manage your products",
       "description": "Add, edit and organize your catalog products."
+    },
+    "categories": {
+      "title": "Categories",
+      "subtitle": "Organize your products",
+      "description": "Create and manage categories to better organize your product catalog."
+    },
+    "brands": {
+      "title": "Brands",
+      "subtitle": "Manage brands",
+      "description": "Manage the brands of products you sell in your store."
+    },
+    "collections": {
+      "title": "Collections",
+      "subtitle": "Create special collections",
+      "description": "Group products into thematic collections to facilitate navigation."
     },
     "customers": {
       "title": "Customers",

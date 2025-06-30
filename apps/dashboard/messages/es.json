@@ -31,6 +31,10 @@
     "home": "Inicio",
     "orders": "Pedidos",
     "products": "Productos",
+    "productsSection": "Productos",
+    "categories": "Categorías",
+    "brands": "Marcas",
+    "collections": "Colecciones",
     "customers": "Clientes",
     "marketing": "Marketing",
     "discounts": "Descuentos",
@@ -263,6 +267,21 @@
       "title": "Productos",
       "subtitle": "Gestiona tus productos",
       "description": "Agrega, edita y organiza los productos de tu catálogo."
+    },
+    "categories": {
+      "title": "Categorías",
+      "subtitle": "Organiza tus productos",
+      "description": "Crea y gestiona categorías para organizar mejor tu catálogo de productos."
+    },
+    "brands": {
+      "title": "Marcas",
+      "subtitle": "Gestiona las marcas",
+      "description": "Administra las marcas de los productos que vendes en tu tienda."
+    },
+    "collections": {
+      "title": "Colecciones",
+      "subtitle": "Crea colecciones especiales",
+      "description": "Agrupa productos en colecciones temáticas para facilitar la navegación."
     },
     "customers": {
       "title": "Clientes",
