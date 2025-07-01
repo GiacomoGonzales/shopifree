@@ -18,14 +18,20 @@ export interface StoreConfig {
   description: string
   hasPhysicalLocation: boolean
   address?: string
-  tipoComercio?: string
+  location?: {
+    address: string
+    lat: number
+    lng: number
+  }
+  businessType?: string // Cambiado de tipoComercio
   primaryColor: string
   secondaryColor: string
   currency: string
   phone: string
+  emailStore?: string // Nuevo campo para correo electrónico de la tienda
   logo?: string
-  fotoLocal?: string
-  redes?: {
+  storePhoto?: string // Cambiado de fotoLocal
+  socialMedia?: { // Cambiado de redes
     facebook?: string
     instagram?: string
     whatsapp?: string

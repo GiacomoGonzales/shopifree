@@ -12,12 +12,14 @@ export interface UserDocument {
   role?: string
   lastLoginAt?: any
   isActive?: boolean
-  // Onboarding fields
+  phone?: string
+  timezone?: string
+  onboardingUserCompleted?: boolean
+  // Legacy fields (deprecated - for backward compatibility)
   nombre?: string
   telefono?: string
   correo?: string
   zonaHoraria?: string
-  onboardingUserCompleted?: boolean
 }
 
 /**

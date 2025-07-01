@@ -87,10 +87,13 @@
         },
         "storeInfo": {
           "title": "Store Information",
+          "subtitle": "Configure your store's basic information",
           "storeName": "Store name",
           "storeNamePlaceholder": "My Awesome Store",
           "subdomain": "Subdomain",
           "subdomainHint": "Read-only - Your store is available at:",
+          "storeUrl": "Your store URL",
+          "storeUrlHint": "This is your store's web address. Customers can visit it from any browser.",
           "slogan": "Slogan",
           "sloganPlaceholder": "The best online store",
           "description": "Store description",
@@ -98,9 +101,12 @@
         },
         "contact": {
           "title": "Contact Information",
+          "subtitle": "Configure your store's contact information",
           "hasPhysicalLocation": "Has physical location?",
           "address": "Address",
           "addressPlaceholder": "123 Street, City, Country",
+          "addressAutocomplete": "Start typing your address...",
+          "addressCoordinates": "Coordinates saved automatically",
           "businessType": "Business type",
           "businessTypePlaceholder": "Select your business type",
           "businessTypes": {
@@ -116,10 +122,14 @@
             "other": "Other"
           },
           "phone": "Contact phone",
-          "phonePlaceholder": "+1234567890"
+          "phonePlaceholder": "+1234567890",
+          "emailStore": "Store email address",
+          "emailStorePlaceholder": "store@mydomain.com",
+          "emailStoreHint": "Optional: Public contact email for your store"
         },
         "branding": {
           "title": "Branding",
+          "subtitle": "Customize colors and visual identity of your store",
           "logo": "Logo",
           "logoUpload": "Upload logo",
           "logoHint": "Recommended: 200x200px, PNG or JPG format",
@@ -133,6 +143,7 @@
         },
         "socialMedia": {
           "title": "Social Media",
+          "subtitle": "Connect your social networks so customers can find you",
           "facebook": "Facebook",
           "facebookPlaceholder": "https://facebook.com/my-store",
           "instagram": "Instagram",

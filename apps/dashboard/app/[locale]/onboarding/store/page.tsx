@@ -8,21 +8,21 @@ import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
 
 interface StoreFormData {
-  nombreTienda: string
-  subdominio: string
+  storeName: string
+  subdomain: string
   slogan: string
-  descripcion: string
-  tieneLocalFisico: boolean
-  direccion: string
-  tipoComercio: string
-  codigoPaisTienda: string
-  telefonoLocalTienda: string
+  description: string
+  hasPhysicalLocation: boolean
+  address: string
+  businessType: string
+  countryCode: string
+  localPhone: string
   logoFile: File | null
-  fotoLocalFile: File | null
-  colorPrimario: string
-  colorSecundario: string
-  moneda: string
-  redes: {
+  storePhotoFile: File | null
+  primaryColor: string
+  secondaryColor: string
+  currency: string
+  socialMedia: {
     facebook: string
     instagram: string
     tiktok: string
@@ -59,37 +59,17 @@ const countryCodes = [
   { code: '+358', country: 'Finlandia', flag: '🇫🇮' }
 ]
 
-const tiposComercio = [
-  'Minimarket y Tienda de Conveniencia',
-  'Supermercado y Abarrotes',
-  'Moda y Accesorios',
-  'Tecnología y Electrónicos',
-  'Hogar y Decoración',
-  'Salud y Belleza',
-  'Productos Naturales y Orgánicos',
-  'Farmacia y Medicamentos',
-  'Deportes, Fitness y Suplementos',
-  'Comida y Bebidas',
-  'Panadería y Repostería',
-  'Restaurante y Comida Rápida',
-  'Entretenimiento y Cultura',
-  'Librería y Papelería',
-  'Mascotas y Animales',
-  'Automotriz',
-  'Ferretería y Construcción',
-  'Servicios Profesionales',
-  'Servicios Personales',
-  'Educación y Capacitación',
-  'Salud y Bienestar',
-  'Inmobiliaria',
-  'Turismo y Viajes',
-  'Agricultura y Ganadería',
-  'Manufactura e Industria',
-  'Servicios Financieros',
-  'Logística y Transporte',
-  'Energía y Medio Ambiente',
-  'ONGs y Fundaciones',
-  'Otro'
+const businessTypes = [
+  { value: 'retail', labelEs: 'Venta al por menor', labelEn: 'Retail' },
+  { value: 'wholesale', labelEs: 'Venta al por mayor', labelEn: 'Wholesale' },
+  { value: 'service', labelEs: 'Servicios', labelEn: 'Services' },
+  { value: 'restaurant', labelEs: 'Restaurante/Comida', labelEn: 'Restaurant/Food' },
+  { value: 'fashion', labelEs: 'Moda y accesorios', labelEn: 'Fashion & Accessories' },
+  { value: 'technology', labelEs: 'Tecnología', labelEn: 'Technology' },
+  { value: 'health', labelEs: 'Salud y belleza', labelEn: 'Health & Beauty' },
+  { value: 'sports', labelEs: 'Deportes y recreación', labelEn: 'Sports & Recreation' },
+  { value: 'education', labelEs: 'Educación', labelEn: 'Education' },
+  { value: 'other', labelEs: 'Otro', labelEn: 'Other' }
 ]
 
 const monedas = [
@@ -137,21 +117,21 @@ function StoreOnboardingContent() {
   const totalSteps = 5
   
   const [formData, setFormData] = useState<StoreFormData>({
-    nombreTienda: '',
-    subdominio: '',
+    storeName: '',
+    subdomain: '',
     slogan: '',
-    descripcion: '',
-    tieneLocalFisico: false,
-    direccion: '',
-    tipoComercio: '',
-    codigoPaisTienda: '+52', // México por defecto
-    telefonoLocalTienda: '',
+    description: '',
+    hasPhysicalLocation: false,
+    address: '',
+    businessType: '',
+    countryCode: '+52', // México por defecto
+    localPhone: '',
     logoFile: null,
-    fotoLocalFile: null,
-    colorPrimario: '#3B82F6',
-    colorSecundario: '#1F2937',
-    moneda: 'USD',
-    redes: {
+    storePhotoFile: null,
+    primaryColor: '#3B82F6',
+    secondaryColor: '#1F2937',
+    currency: 'USD',
+    socialMedia: {
       facebook: '',
       instagram: '',
       tiktok: '',
@@ -174,7 +154,7 @@ function StoreOnboardingContent() {
     
     const validation = validateSubdomain(subdomain)
     if (!validation.isValid) {
-      setErrors(prev => ({ ...prev, subdominio: validation.error }))
+      setErrors(prev => ({ ...prev, subdomain: validation.error }))
       setSubdomainStatus('unavailable')
       return
     }
@@ -184,25 +164,25 @@ function StoreOnboardingContent() {
       const isAvailable = await checkSubdomainAvailability(subdomain)
       setSubdomainStatus(isAvailable ? 'available' : 'unavailable')
       if (!isAvailable) {
-        setErrors(prev => ({ ...prev, subdominio: t('errors.subdomainTaken') }))
+        setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainTaken') }))
       } else {
-        setErrors(prev => ({ ...prev, subdominio: undefined }))
+        setErrors(prev => ({ ...prev, subdomain: undefined }))
       }
     } catch (error) {
       setSubdomainStatus('unavailable')
-      setErrors(prev => ({ ...prev, subdominio: t('errors.subdomainCheckError') }))
+      setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainCheckError') }))
     }
   }
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (formData.subdominio && currentStep === 1) {
-        checkSubdomain(formData.subdominio)
+      if (formData.subdomain && currentStep === 1) {
+        checkSubdomain(formData.subdomain)
       }
     }, 500)
     
     return () => clearTimeout(timeoutId)
-  }, [formData.subdominio, currentStep])
+  }, [formData.subdomain, currentStep])
 
   // Validar paso actual
   const validateCurrentStep = (): boolean => {
@@ -210,33 +190,33 @@ function StoreOnboardingContent() {
     
     switch (currentStep) {
       case 1:
-        if (!formData.nombreTienda.trim()) {
-          newErrors.nombreTienda = t('errors.nombreTiendaRequired')
+        if (!formData.storeName.trim()) {
+          newErrors.storeName = t('errors.storeNameRequired')
         }
-        if (!formData.subdominio.trim()) {
-          newErrors.subdominio = t('errors.subdomainRequired')
+        if (!formData.subdomain.trim()) {
+          newErrors.subdomain = t('errors.subdomainRequired')
         } else if (subdomainStatus !== 'available') {
-          newErrors.subdominio = t('errors.subdomainNotAvailable')
+          newErrors.subdomain = t('errors.subdomainNotAvailable')
         }
         break
         
       case 2:
-        if (!formData.descripcion.trim()) {
-          newErrors.descripcion = t('errors.descripcionRequired')
+        if (!formData.description.trim()) {
+          newErrors.description = t('errors.descriptionRequired')
         }
-        if (formData.tieneLocalFisico && !formData.direccion.trim()) {
-          newErrors.direccion = t('errors.direccionRequired')
+        if (formData.hasPhysicalLocation && !formData.address.trim()) {
+          newErrors.address = t('errors.addressRequired')
         }
         break
         
       case 3:
-        if (!formData.tipoComercio) {
-          newErrors.tipoComercio = t('errors.tipoComercioRequired')
+        if (!formData.businessType) {
+          newErrors.businessType = t('errors.businessTypeRequired')
         }
-        if (!formData.telefonoLocalTienda.trim()) {
-          newErrors.telefonoLocalTienda = t('errors.telefonoTiendaRequired')
-        } else if (!/^[\d\s-()]+$/.test(formData.telefonoLocalTienda)) {
-          newErrors.telefonoLocalTienda = t('errors.telefonoInvalid')
+        if (!formData.localPhone.trim()) {
+          newErrors.localPhone = t('errors.localPhoneRequired')
+        } else if (!/^[\d\s-()]+$/.test(formData.localPhone)) {
+          newErrors.localPhone = t('errors.localPhoneInvalid')
         }
         break
         
@@ -273,14 +253,14 @@ function StoreOnboardingContent() {
     }
   }
 
-  const handleRedesChange = (platform: keyof StoreFormData['redes'], value: string) => {
+  const handleRedesChange = (platform: keyof StoreFormData['socialMedia'], value: string) => {
     setFormData(prev => ({
       ...prev,
-      redes: { ...prev.redes, [platform]: value }
+      socialMedia: { ...prev.socialMedia, [platform]: value }
     }))
   }
 
-  const handleFileChange = (field: 'logoFile' | 'fotoLocalFile', file: File | null) => {
+  const handleFileChange = (field: 'logoFile' | 'storePhotoFile', file: File | null) => {
     setFormData(prev => ({ ...prev, [field]: file }))
   }
 
@@ -301,26 +281,26 @@ function StoreOnboardingContent() {
       
       // Simular carga de archivos (en producción usarías Firebase Storage)
       const logoURL = formData.logoFile ? 'https://placeholder-logo.jpg' : ''
-      const fotoLocalURL = formData.fotoLocalFile ? 'https://placeholder-foto.jpg' : ''
+      const storePhotoURL = formData.storePhotoFile ? 'https://placeholder-store-photo.jpg' : ''
       
       // Combinar código de país con teléfono local
-      const telefonoCompleto = `${formData.codigoPaisTienda}${formData.telefonoLocalTienda}`
+      const phoneCompleto = `${formData.countryCode}${formData.localPhone}`
       
       const storeData = {
-        storeName: formData.nombreTienda,
-        subdomain: formData.subdominio,
+        storeName: formData.storeName,
+        subdomain: formData.subdomain,
         slogan: formData.slogan,
-        description: formData.descripcion,
-        hasPhysicalLocation: formData.tieneLocalFisico,
-        address: formData.direccion,
-        tipoComercio: formData.tipoComercio,
-        phone: telefonoCompleto,
-        primaryColor: formData.colorPrimario,
-        secondaryColor: formData.colorSecundario,
-        currency: formData.moneda,
+        description: formData.description,
+        hasPhysicalLocation: formData.hasPhysicalLocation,
+        address: formData.address,
+        businessType: formData.businessType,
+        phone: phoneCompleto,
+        primaryColor: formData.primaryColor,
+        secondaryColor: formData.secondaryColor,
+        currency: formData.currency,
         logo: logoURL,
-        fotoLocal: fotoLocalURL,
-        redes: formData.redes,
+        storePhoto: storePhotoURL,
+        socialMedia: formData.socialMedia,
         ownerId: user.uid
       }
       
@@ -398,32 +378,32 @@ function StoreOnboardingContent() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('nombreTienda')} <span className="text-red-500">*</span>
+                {t('storeName')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                value={formData.nombreTienda}
-                onChange={(e) => handleInputChange('nombreTienda', e.target.value)}
-                placeholder={t('nombreTiendaPlaceholder')}
+                value={formData.storeName}
+                onChange={(e) => handleInputChange('storeName', e.target.value)}
+                placeholder={t('storeNamePlaceholder')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.nombreTienda ? 'border-red-500' : 'border-gray-300'
+                  errors.storeName ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.nombreTienda && <p className="text-red-500 text-sm mt-1">{errors.nombreTienda}</p>}
+              {errors.storeName && <p className="text-red-500 text-sm mt-1">{errors.storeName}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('subdominio')} <span className="text-red-500">*</span>
+                {t('subdomain')} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
-                  value={formData.subdominio}
-                  onChange={(e) => handleInputChange('subdominio', e.target.value.toLowerCase())}
+                  value={formData.subdomain}
+                  onChange={(e) => handleInputChange('subdomain', e.target.value.toLowerCase())}
                   placeholder={t('subdomainPlaceholder')}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                    errors.subdominio ? 'border-red-500' : 'border-gray-300'
+                    errors.subdomain ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
                 {subdomainStatus === 'checking' && (
@@ -442,12 +422,12 @@ function StoreOnboardingContent() {
                   </div>
                 )}
               </div>
-              {formData.subdominio && (
+              {formData.subdomain && (
                 <p className="text-xs text-gray-500 mt-1">
-                  {t('subdomainHint')}: <strong>{formData.subdominio}.shopifree.app</strong>
+                  {t('subdomainHint')}: <strong>{formData.subdomain}.shopifree.app</strong>
                 </p>
               )}
-              {errors.subdominio && <p className="text-red-500 text-sm mt-1">{errors.subdominio}</p>}
+              {errors.subdomain && <p className="text-red-500 text-sm mt-1">{errors.subdomain}</p>}
             </div>
 
             <div>
@@ -470,47 +450,47 @@ function StoreOnboardingContent() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('descripcion')} <span className="text-red-500">*</span>
+                {t('description')} <span className="text-red-500">*</span>
               </label>
               <textarea
-                value={formData.descripcion}
-                onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                placeholder={t('descripcionPlaceholder')}
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder={t('descriptionPlaceholder')}
                 rows={4}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.descripcion ? 'border-red-500' : 'border-gray-300'
+                  errors.description ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.descripcion && <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>}
+              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
 
             <div>
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={formData.tieneLocalFisico}
-                  onChange={(e) => handleInputChange('tieneLocalFisico', e.target.checked)}
+                  checked={formData.hasPhysicalLocation}
+                  onChange={(e) => handleInputChange('hasPhysicalLocation', e.target.checked)}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">{t('tieneLocalFisico')}</span>
+                <span className="text-sm font-medium text-gray-700">{t('hasPhysicalLocation')}</span>
               </label>
             </div>
 
-            {formData.tieneLocalFisico && (
+            {formData.hasPhysicalLocation && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('direccion')} <span className="text-red-500">*</span>
+                  {t('address')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={formData.direccion}
-                  onChange={(e) => handleInputChange('direccion', e.target.value)}
-                  placeholder={t('direccionPlaceholder')}
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder={t('addressPlaceholder')}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                    errors.direccion ? 'border-red-500' : 'border-gray-300'
+                    errors.address ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.direccion && <p className="text-red-500 text-sm mt-1">{errors.direccion}</p>}
+                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
               </div>
             )}
           </div>
@@ -521,31 +501,31 @@ function StoreOnboardingContent() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('tipoComercio')} <span className="text-red-500">*</span>
+                {t('businessType')} <span className="text-red-500">*</span>
               </label>
               <select
-                value={formData.tipoComercio}
-                onChange={(e) => handleInputChange('tipoComercio', e.target.value)}
+                value={formData.businessType}
+                onChange={(e) => handleInputChange('businessType', e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.tipoComercio ? 'border-red-500' : 'border-gray-300'
+                  errors.businessType ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
-                <option value="">{t('tipoComercioPlaceholder')}</option>
-                {tiposComercio.map(tipo => (
-                  <option key={tipo} value={tipo}>{tipo}</option>
+                <option value="">{t('businessTypePlaceholder')}</option>
+                {businessTypes.map(tipo => (
+                  <option key={tipo.value} value={tipo.value}>{tipo.labelEs}</option>
                 ))}
               </select>
-              {errors.tipoComercio && <p className="text-red-500 text-sm mt-1">{errors.tipoComercio}</p>}
+              {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('telefonoTienda')} <span className="text-red-500">*</span>
+                {t('localPhone')} <span className="text-red-500">*</span>
               </label>
               <div className="flex space-x-1 sm:space-x-2">
                 <select
-                  value={formData.codigoPaisTienda}
-                  onChange={(e) => handleInputChange('codigoPaisTienda', e.target.value)}
+                  value={formData.countryCode}
+                  onChange={(e) => handleInputChange('countryCode', e.target.value)}
                   className="w-20 sm:w-24 px-1 sm:px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white text-xs sm:text-sm"
                 >
                   {countryCodes.map((country) => (
@@ -556,15 +536,15 @@ function StoreOnboardingContent() {
                 </select>
                 <input
                   type="tel"
-                  value={formData.telefonoLocalTienda}
-                  onChange={(e) => handleInputChange('telefonoLocalTienda', e.target.value)}
+                  value={formData.localPhone}
+                  onChange={(e) => handleInputChange('localPhone', e.target.value)}
                   placeholder="1234567890"
                   className={`flex-1 px-2 sm:px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 text-xs sm:text-sm ${
-                    errors.telefonoLocalTienda ? 'border-red-500' : 'border-gray-300'
+                    errors.localPhone ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
               </div>
-              {errors.telefonoLocalTienda && <p className="text-red-500 text-sm mt-1">{errors.telefonoLocalTienda}</p>}
+              {errors.localPhone && <p className="text-red-500 text-sm mt-1">{errors.localPhone}</p>}
               <p className="text-xs text-gray-500 mt-1 break-words">
                 Ingresa solo el número local (sin código de país)
               </p>
@@ -630,31 +610,31 @@ function StoreOnboardingContent() {
               {/* Store Photo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Foto de la tienda <span className="text-gray-400 text-xs">(opcional)</span>
+                  {t('storePhoto')} <span className="text-gray-400 text-xs">(opcional)</span>
                 </label>
                 <div className="relative">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group">
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleFileChange('fotoLocalFile', e.target.files?.[0] || null)}
+                      onChange={(e) => handleFileChange('storePhotoFile', e.target.files?.[0] || null)}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    {formData.fotoLocalFile ? (
+                    {formData.storePhotoFile ? (
                       <div className="relative w-full h-full">
                         <img
-                          src={URL.createObjectURL(formData.fotoLocalFile)}
+                          src={URL.createObjectURL(formData.storePhotoFile)}
                           alt="Preview de la foto de tienda"
                           className="w-full h-32 object-cover rounded-lg"
                         />
                         <div className="mt-2 text-center">
-                          <span className="text-xs text-gray-600 font-medium">{formData.fotoLocalFile.name}</span>
+                          <span className="text-xs text-gray-600 font-medium">{formData.storePhotoFile.name}</span>
                         </div>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleFileChange('fotoLocalFile', null)
+                            handleFileChange('storePhotoFile', null)
                           }}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
                         >
@@ -685,23 +665,23 @@ function StoreOnboardingContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Color Primario <span className="text-red-500">*</span>
+                    {t('primaryColor')} <span className="text-red-500">*</span>
                   </label>
                                      <div className="flex items-center space-x-4">
                      <div className="relative">
                        <input
                          type="color"
-                         value={formData.colorPrimario}
-                         onChange={(e) => handleInputChange('colorPrimario', e.target.value)}
+                         value={formData.primaryColor}
+                         onChange={(e) => handleInputChange('primaryColor', e.target.value)}
                          className="w-16 h-16 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors appearance-none"
-                         style={{ backgroundColor: formData.colorPrimario }}
+                         style={{ backgroundColor: formData.primaryColor }}
                        />
                      </div>
                     <div className="flex-1">
                       <input
                         type="text"
-                        value={formData.colorPrimario}
-                        onChange={(e) => handleInputChange('colorPrimario', e.target.value)}
+                        value={formData.primaryColor}
+                        onChange={(e) => handleInputChange('primaryColor', e.target.value)}
                         placeholder="#3B82F6"
                         className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono text-sm"
                       />
@@ -711,23 +691,23 @@ function StoreOnboardingContent() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Color Secundario <span className="text-red-500">*</span>
+                    {t('secondaryColor')} <span className="text-red-500">*</span>
                   </label>
                                      <div className="flex items-center space-x-4">
                      <div className="relative">
                        <input
                          type="color"
-                         value={formData.colorSecundario}
-                         onChange={(e) => handleInputChange('colorSecundario', e.target.value)}
+                         value={formData.secondaryColor}
+                         onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
                          className="w-16 h-16 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors appearance-none"
-                         style={{ backgroundColor: formData.colorSecundario }}
+                         style={{ backgroundColor: formData.secondaryColor }}
                        />
                      </div>
                     <div className="flex-1">
                       <input
                         type="text"
-                        value={formData.colorSecundario}
-                        onChange={(e) => handleInputChange('colorSecundario', e.target.value)}
+                        value={formData.secondaryColor}
+                        onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
                         placeholder="#1F2937"
                         className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono text-sm"
                       />
@@ -744,11 +724,11 @@ function StoreOnboardingContent() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('moneda')} <span className="text-red-500">*</span>
+                {t('currency')} <span className="text-red-500">*</span>
               </label>
               <select
-                value={formData.moneda}
-                onChange={(e) => handleInputChange('moneda', e.target.value)}
+                value={formData.currency}
+                onChange={(e) => handleInputChange('currency', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
               >
                 {monedas.map(moneda => (
@@ -761,14 +741,14 @@ function StoreOnboardingContent() {
 
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {t('redesSociales')} <span className="text-gray-400 text-sm font-normal">(todas opcionales)</span>
+                {t('socialMedia')} <span className="text-gray-400 text-sm font-normal">(todas opcionales)</span>
               </h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
                   <input
                     type="url"
-                    value={formData.redes.facebook}
+                    value={formData.socialMedia.facebook}
                     onChange={(e) => handleRedesChange('facebook', e.target.value)}
                     placeholder="https://facebook.com/mi-tienda"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
@@ -778,7 +758,7 @@ function StoreOnboardingContent() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
                   <input
                     type="url"
-                    value={formData.redes.instagram}
+                    value={formData.socialMedia.instagram}
                     onChange={(e) => handleRedesChange('instagram', e.target.value)}
                     placeholder="https://instagram.com/mi-tienda"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
@@ -788,7 +768,7 @@ function StoreOnboardingContent() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">X (Twitter)</label>
                   <input
                     type="url"
-                    value={formData.redes.x}
+                    value={formData.socialMedia.x}
                     onChange={(e) => handleRedesChange('x', e.target.value)}
                     placeholder="https://x.com/mi-tienda"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
@@ -798,7 +778,7 @@ function StoreOnboardingContent() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">TikTok</label>
                   <input
                     type="url"
-                    value={formData.redes.tiktok}
+                    value={formData.socialMedia.tiktok}
                     onChange={(e) => handleRedesChange('tiktok', e.target.value)}
                     placeholder="https://tiktok.com/@mi-tienda"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"

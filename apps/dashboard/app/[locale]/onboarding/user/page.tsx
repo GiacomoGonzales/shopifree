@@ -8,11 +8,11 @@ import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
 
 interface UserFormData {
-  nombre: string
-  codigoPais: string
-  telefonoLocal: string
-  correo: string
-  zonaHoraria: string
+  displayName: string
+  countryCode: string
+  localPhone: string
+  email: string
+  timezone: string
 }
 
 const timeZones = [
@@ -101,11 +101,11 @@ function UserOnboardingContent() {
   const { user, refreshUserData } = useAuth()
   
   const [formData, setFormData] = useState<UserFormData>({
-    nombre: '',
-    codigoPais: '+52', // México por defecto
-    telefonoLocal: '',
-    correo: user?.email || '',
-    zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Mexico_City'
+    displayName: '',
+    countryCode: '+52', // México por defecto
+    localPhone: '',
+    email: user?.email || '',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Mexico_City'
   })
   
   const [loading, setLoading] = useState(false)
@@ -115,7 +115,7 @@ function UserOnboardingContent() {
     if (user?.email) {
       setFormData(prev => ({
         ...prev,
-        correo: user.email || ''
+        email: user.email || ''
       }))
     }
   }, [user?.email])
@@ -123,18 +123,18 @@ function UserOnboardingContent() {
   const validateForm = (): boolean => {
     const newErrors: Partial<UserFormData> = {}
     
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = t('errors.nombreRequired')
+    if (!formData.displayName.trim()) {
+      newErrors.displayName = t('errors.nombreRequired')
     }
     
-    if (!formData.telefonoLocal.trim()) {
-      newErrors.telefonoLocal = t('errors.telefonoRequired')
-    } else if (!/^[\d\s-()]+$/.test(formData.telefonoLocal)) {
-      newErrors.telefonoLocal = t('errors.telefonoInvalid')
+    if (!formData.localPhone.trim()) {
+      newErrors.localPhone = t('errors.telefonoRequired')
+    } else if (!/^[\d\s-()]+$/.test(formData.localPhone)) {
+      newErrors.localPhone = t('errors.telefonoInvalid')
     }
     
-    if (!formData.zonaHoraria) {
-      newErrors.zonaHoraria = t('errors.zonaHorariaRequired')
+    if (!formData.timezone) {
+      newErrors.timezone = t('errors.zonaHorariaRequired')
     }
 
     setErrors(newErrors)
@@ -151,14 +151,13 @@ function UserOnboardingContent() {
     try {
       console.log('💾 Saving user onboarding data for:', user.uid)
       // Combinar código de país con teléfono local
-      const telefonoCompleto = `${formData.codigoPais}${formData.telefonoLocal}`
+      const phoneComplete = `${formData.countryCode}${formData.localPhone}`
       
       const updateData = {
-        displayName: formData.nombre,
-        nombre: formData.nombre,
-        telefono: telefonoCompleto,
-        correo: formData.correo,
-        zonaHoraria: formData.zonaHoraria,
+        displayName: formData.displayName,
+        phone: phoneComplete,
+        email: formData.email,
+        timezone: formData.timezone,
         onboardingUserCompleted: true
       }
       console.log('📝 Update data:', updateData)
@@ -210,14 +209,14 @@ function UserOnboardingContent() {
               </label>
               <input
                 type="text"
-                value={formData.nombre}
-                onChange={(e) => handleInputChange('nombre', e.target.value)}
+                value={formData.displayName}
+                onChange={(e) => handleInputChange('displayName', e.target.value)}
                 placeholder={t('nombrePlaceholder')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.nombre ? 'border-red-500' : 'border-gray-300'
+                  errors.displayName ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
+              {errors.displayName && <p className="text-red-500 text-sm mt-1">{errors.displayName}</p>}
             </div>
 
             <div>
@@ -226,8 +225,8 @@ function UserOnboardingContent() {
               </label>
               <div className="flex space-x-2">
                 <select
-                  value={formData.codigoPais}
-                  onChange={(e) => handleInputChange('codigoPais', e.target.value)}
+                  value={formData.countryCode}
+                  onChange={(e) => handleInputChange('countryCode', e.target.value)}
                   className="w-24 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white"
                 >
                   {countryCodes.map((country) => (
@@ -238,15 +237,15 @@ function UserOnboardingContent() {
                 </select>
                 <input
                   type="tel"
-                  value={formData.telefonoLocal}
-                  onChange={(e) => handleInputChange('telefonoLocal', e.target.value)}
+                  value={formData.localPhone}
+                  onChange={(e) => handleInputChange('localPhone', e.target.value)}
                   placeholder="1234567890"
                   className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                    errors.telefonoLocal ? 'border-red-500' : 'border-gray-300'
+                    errors.localPhone ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
               </div>
-              {errors.telefonoLocal && <p className="text-red-500 text-sm mt-1">{errors.telefonoLocal}</p>}
+              {errors.localPhone && <p className="text-red-500 text-sm mt-1">{errors.localPhone}</p>}
               <p className="text-xs text-gray-500 mt-1">
                 Ingresa solo el número local (sin código de país)
               </p>
@@ -258,7 +257,7 @@ function UserOnboardingContent() {
               </label>
               <input
                 type="email"
-                value={formData.correo}
+                value={formData.email}
                 disabled={!!user?.email}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
               />
@@ -270,10 +269,10 @@ function UserOnboardingContent() {
                 {t('zonaHoraria')} <span className="text-red-500">*</span>
               </label>
               <select
-                value={formData.zonaHoraria}
-                onChange={(e) => handleInputChange('zonaHoraria', e.target.value)}
+                value={formData.timezone}
+                onChange={(e) => handleInputChange('timezone', e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.zonaHoraria ? 'border-red-500' : 'border-gray-300'
+                  errors.timezone ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 {timeZones.map(tz => (
@@ -282,7 +281,7 @@ function UserOnboardingContent() {
                   </option>
                 ))}
               </select>
-              {errors.zonaHoraria && <p className="text-red-500 text-sm mt-1">{errors.zonaHoraria}</p>}
+              {errors.timezone && <p className="text-red-500 text-sm mt-1">{errors.timezone}</p>}
             </div>
 
             <button
