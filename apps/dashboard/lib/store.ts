@@ -29,13 +29,22 @@ export interface StoreConfig {
   currency: string
   phone: string
   emailStore?: string // Nuevo campo para correo electrónico de la tienda
-  logo?: string
-  storePhoto?: string // Cambiado de fotoLocal
+  logo?: string // Legacy field - deprecated
+  storePhoto?: string // Legacy field - deprecated
+  logoUrl?: string // New Cloudinary URL for logo
+  storefrontImageUrl?: string // New Cloudinary URL for storefront image
+  logoPublicId?: string // Cloudinary public_id for logo deletion
+  storefrontImagePublicId?: string // Cloudinary public_id for storefront image deletion
   socialMedia?: { // Cambiado de redes
     facebook?: string
     instagram?: string
-    whatsapp?: string
     tiktok?: string
+    x?: string
+    snapchat?: string
+    linkedin?: string
+    telegram?: string
+    youtube?: string
+    pinterest?: string
   }
   // Configuración avanzada
   advanced?: {

@@ -12,6 +12,34 @@ interface StoreSetupProps {
   onStoreCreated: () => void
 }
 
+const monedas = [
+  { code: 'USD', symbol: '$', name: 'Dólar Americano' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'MXN', symbol: '$', name: 'Peso Mexicano' },
+  { code: 'COP', symbol: '$', name: 'Peso Colombiano' },
+  { code: 'ARS', symbol: '$', name: 'Peso Argentino' },
+  { code: 'CLP', symbol: '$', name: 'Peso Chileno' },
+  { code: 'PEN', symbol: 'S/', name: 'Sol Peruano' },
+  { code: 'BRL', symbol: 'R$', name: 'Real Brasileño' },
+  { code: 'UYU', symbol: '$', name: 'Peso Uruguayo' },
+  { code: 'PYG', symbol: '₲', name: 'Guaraní Paraguayo' },
+  { code: 'BOB', symbol: 'Bs', name: 'Boliviano' },
+  { code: 'VES', symbol: 'Bs', name: 'Bolívar Venezolano' },
+  { code: 'GTQ', symbol: 'Q', name: 'Quetzal Guatemalteco' },
+  { code: 'CRC', symbol: '₡', name: 'Colón Costarricense' },
+  { code: 'NIO', symbol: 'C$', name: 'Córdoba Nicaragüense' },
+  { code: 'PAB', symbol: 'B/.', name: 'Balboa Panameño' },
+  { code: 'DOP', symbol: 'RD$', name: 'Peso Dominicano' },
+  { code: 'HNL', symbol: 'L', name: 'Lempira Hondureño' },
+  { code: 'SVC', symbol: '$', name: 'Colón Salvadoreño' },
+  { code: 'GBP', symbol: '£', name: 'Libra Esterlina' },
+  { code: 'CAD', symbol: 'C$', name: 'Dólar Canadiense' },
+  { code: 'CHF', symbol: 'CHF', name: 'Franco Suizo' },
+  { code: 'JPY', symbol: '¥', name: 'Yen Japonés' },
+  { code: 'CNY', symbol: '¥', name: 'Yuan Chino' },
+  { code: 'AUD', symbol: 'A$', name: 'Dólar Australiano' }
+]
+
 // Toast notification component
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
   return (
@@ -56,6 +84,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
     description: '',
     hasPhysicalLocation: false,
     address: '',
+    businessType: '',
     primaryColor: '#3B82F6',
     secondaryColor: '#EF4444',
     currency: 'USD',
@@ -134,6 +163,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
     
     if (!formData.slogan.trim()) newErrors.slogan = tErrors('sloganRequired')
     if (!formData.description.trim()) newErrors.description = tErrors('descriptionRequired')
+    if (!formData.businessType.trim()) newErrors.businessType = tErrors('businessTypeRequired')
     if (!formData.currency.trim()) newErrors.currency = tErrors('currencyRequired')
     if (!formData.phone.trim()) newErrors.phone = tErrors('phoneRequired')
     if (formData.hasPhysicalLocation && !formData.address.trim()) {
@@ -311,6 +341,39 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
                 )}
               </div>
 
+              {/* Business Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('businessType')} {t('required')}
+                </label>
+                <select
+                  value={formData.businessType}
+                  onChange={(e) => handleInputChange('businessType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                >
+                  <option value="">{t('businessTypePlaceholder')}</option>
+                  <option value="fashion">{t('fashionAccessories')}</option>
+                  <option value="technology">{t('techElectronics')}</option>
+                  <option value="health">{t('healthBeauty')}</option>
+                  <option value="food">{t('foodDrinks')}</option>
+                  <option value="restaurant">{t('restaurant')}</option>
+                  <option value="home">{t('homeDecoration')}</option>
+                  <option value="sports">{t('sports')}</option>
+                  <option value="education">{t('education')}</option>
+                  <option value="toys">{t('toys')}</option>
+                  <option value="pets">{t('pets')}</option>
+                  <option value="service">{t('services')}</option>
+                  <option value="wholesale">{t('wholesale')}</option>
+                  <option value="retail">{t('retail')}</option>
+                  <option value="handcrafts">{t('handcrafts')}</option>
+                  <option value="eco">{t('ecoProducts')}</option>
+                  <option value="other">{t('otherBusiness')}</option>
+                </select>
+                {errors.businessType && (
+                  <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>
+                )}
+              </div>
+
               {/* Physical Location */}
               <div className="flex items-center space-x-2">
                 <input
@@ -369,12 +432,20 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
               {/* Currency & Phone */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Input
-                    label={`${t('currency')} ${t('required')}`}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('currency')} {t('required')}
+                  </label>
+                  <select
                     value={formData.currency}
                     onChange={(e) => handleInputChange('currency', e.target.value)}
-                    placeholder={t('currencyPlaceholder')}
-                  />
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white"
+                  >
+                    {monedas.map(moneda => (
+                      <option key={moneda.code} value={moneda.code}>
+                        {moneda.symbol} {moneda.name}
+                      </option>
+                    ))}
+                  </select>
                   {errors.currency && (
                     <p className="text-red-500 text-sm mt-1">{errors.currency}</p>
                   )}

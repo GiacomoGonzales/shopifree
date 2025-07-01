@@ -39,6 +39,11 @@ interface StoreFormData {
     instagram: string
     tiktok: string
     x: string
+    snapchat: string
+    linkedin: string
+    telegram: string
+    youtube: string
+    pinterest: string
   }
 }
 
@@ -72,16 +77,22 @@ const countryCodes = [
 ]
 
 const businessTypes = [
-  { value: 'retail', labelEs: 'Venta al por menor', labelEn: 'Retail' },
-  { value: 'wholesale', labelEs: 'Venta al por mayor', labelEn: 'Wholesale' },
-  { value: 'service', labelEs: 'Servicios', labelEn: 'Services' },
-  { value: 'restaurant', labelEs: 'Restaurante/Comida', labelEn: 'Restaurant/Food' },
   { value: 'fashion', labelEs: 'Moda y accesorios', labelEn: 'Fashion & Accessories' },
-  { value: 'technology', labelEs: 'Tecnología', labelEn: 'Technology' },
+  { value: 'technology', labelEs: 'Tecnología y electrónica', labelEn: 'Technology & Electronics' },
   { value: 'health', labelEs: 'Salud y belleza', labelEn: 'Health & Beauty' },
+  { value: 'food', labelEs: 'Alimentos y bebidas', labelEn: 'Food & Beverages' },
+  { value: 'restaurant', labelEs: 'Restaurante y comida rápida', labelEn: 'Restaurant & Fast Food' },
+  { value: 'home', labelEs: 'Hogar y decoración', labelEn: 'Home & Decoration' },
   { value: 'sports', labelEs: 'Deportes y recreación', labelEn: 'Sports & Recreation' },
-  { value: 'education', labelEs: 'Educación', labelEn: 'Education' },
-  { value: 'other', labelEs: 'Otro', labelEn: 'Other' }
+  { value: 'education', labelEs: 'Educación y formación', labelEn: 'Education & Training' },
+  { value: 'toys', labelEs: 'Juguetes y niños', labelEn: 'Toys & Kids' },
+  { value: 'pets', labelEs: 'Mascotas', labelEn: 'Pets' },
+  { value: 'service', labelEs: 'Servicios profesionales', labelEn: 'Professional Services' },
+  { value: 'wholesale', labelEs: 'Venta por mayor', labelEn: 'Wholesale' },
+  { value: 'retail', labelEs: 'Venta por menor', labelEn: 'Retail' },
+  { value: 'handcrafts', labelEs: 'Manualidades y arte', labelEn: 'Handcrafts & Art' },
+  { value: 'eco', labelEs: 'Productos ecológicos o sostenibles', labelEn: 'Eco-friendly or Sustainable Products' },
+  { value: 'other', labelEs: 'Otro (personalizado)', labelEn: 'Other (custom)' }
 ]
 
 const monedas = [
@@ -154,7 +165,12 @@ function StoreOnboardingContent() {
       facebook: '',
       instagram: '',
       tiktok: '',
-      x: ''
+      x: '',
+      snapchat: '',
+      linkedin: '',
+      telegram: '',
+      youtube: '',
+      pinterest: ''
     }
   })
   
@@ -651,7 +667,9 @@ function StoreOnboardingContent() {
               >
                 <option value="">{t('businessTypePlaceholder')}</option>
                 {businessTypes.map(tipo => (
-                  <option key={tipo.value} value={tipo.value}>{locale === 'en' ? tipo.labelEn : tipo.labelEs}</option>
+                  <option key={tipo.value} value={tipo.value}>
+                    {t(`businessTypes.${tipo.value}`)}
+                  </option>
                 ))}
               </select>
               {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
@@ -920,6 +938,56 @@ function StoreOnboardingContent() {
                     value={formData.socialMedia.tiktok}
                     onChange={(e) => handleRedesChange('tiktok', e.target.value)}
                     placeholder="https://tiktok.com/@mi-tienda"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Snapchat</label>
+                  <input
+                    type="url"
+                    value={formData.socialMedia.snapchat}
+                    onChange={(e) => handleRedesChange('snapchat', e.target.value)}
+                    placeholder="https://snapchat.com/add/mi-tienda"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn</label>
+                  <input
+                    type="url"
+                    value={formData.socialMedia.linkedin}
+                    onChange={(e) => handleRedesChange('linkedin', e.target.value)}
+                    placeholder="https://linkedin.com/company/mi-tienda"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Telegram</label>
+                  <input
+                    type="url"
+                    value={formData.socialMedia.telegram}
+                    onChange={(e) => handleRedesChange('telegram', e.target.value)}
+                    placeholder="https://t.me/mi-tienda"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">YouTube</label>
+                  <input
+                    type="url"
+                    value={formData.socialMedia.youtube}
+                    onChange={(e) => handleRedesChange('youtube', e.target.value)}
+                    placeholder="https://youtube.com/@mi-tienda"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pinterest</label>
+                  <input
+                    type="url"
+                    value={formData.socialMedia.pinterest}
+                    onChange={(e) => handleRedesChange('pinterest', e.target.value)}
+                    placeholder="https://pinterest.com/mi-tienda"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
                   />
                 </div>

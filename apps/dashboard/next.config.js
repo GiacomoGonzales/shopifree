@@ -3,9 +3,23 @@ const withNextIntl = require('next-intl/plugin')('./i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: [],
+    serverComponentsExternalPackages: ['firebase', 'firebase-admin', 'firebase/app', 'firebase/auth', 'firebase/firestore'],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Fix for Firebase
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      };
+    }
+    
+    return config;
+  },
   // Ensure environment variables are available during build
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
