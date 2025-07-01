@@ -45,10 +45,16 @@ CLOUDINARY_API_SECRET=tu_api_secret_aqui
 
 ## 📁 Estructura de Carpetas en Cloudinary
 
-Las imágenes se organizan automáticamente en:
+Las imágenes se organizan automáticamente en carpetas por tipo y tienda:
 
-- **`logos/`**: Para los logos de las tiendas
-- **`store_photos/`**: Para las fotos de los locales físicos
+- **`logos/{storeId}/`**: Para los logos de las tiendas
+- **`store_photos/{storeId}/`**: Para las fotos de los locales físicos
+- **`categories/{storeId}/`**: Para las imágenes de categorías
+- **`brands/{storeId}/`**: Para las imágenes de marcas
+- **`products/{storeId}/`**: Para las imágenes de productos
+- **`banners/{storeId}/`**: Para banners y imágenes promocionales
+
+Cada tienda tiene su propio subdirectorio dentro de cada tipo de carpeta, identificado por su `storeId`, evitando conflictos entre diferentes tiendas.
 
 ## 🗑️ Eliminación Automática de Imágenes Anteriores
 

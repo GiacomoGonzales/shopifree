@@ -160,7 +160,7 @@ export default function BrandModal({
 
         // Subir nueva imagen
         const uploadResult = await uploadImageToCloudinary(imageFile, {
-          folder: 'brands',
+          folder: 'brands' as const,
           storeId: storeId
         })
 

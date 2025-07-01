@@ -5,8 +5,10 @@ interface CloudinaryUploadResponse {
   bytes: number
 }
 
+export type CloudinaryFolder = 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners'
+
 interface UploadOptions {
-  folder: 'logos' | 'store_photos' | 'categories'
+  folder: CloudinaryFolder
   maxSizeBytes?: number
   storeId?: string // Para crear carpetas específicas por tienda
 }
@@ -70,9 +72,9 @@ export const uploadImageToCloudinary = async (
     formData.append('file', file)
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
     
-    // Para categorías, crear carpeta específica por tienda
-    if (options.folder === 'categories' && options.storeId) {
-      formData.append('folder', `categories/${options.storeId}`)
+    // Si se proporciona storeId, crear carpeta específica por tienda
+    if (options.storeId) {
+      formData.append('folder', `${options.folder}/${options.storeId}`)
     } else {
       formData.append('folder', options.folder)
     }

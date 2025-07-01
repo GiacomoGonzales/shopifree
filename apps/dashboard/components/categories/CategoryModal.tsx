@@ -155,7 +155,7 @@ export default function CategoryModal({
 
         // Subir nueva imagen
         const uploadResult = await uploadImageToCloudinary(imageFile, {
-          folder: 'categories',
+          folder: 'categories' as const,
           storeId: storeId
         })
 
