@@ -2,34 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { CategoryWithId } from '../../lib/categories'
+import { BrandWithId } from '../../lib/brands'
 import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile } from '../../lib/cloudinary'
 
-interface CategoryModalProps {
+interface BrandModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (categoryData: any) => Promise<void>
-  category?: CategoryWithId | null
-  parentCategories: CategoryWithId[]
+  onSave: (brandData: any) => Promise<void>
+  brand?: BrandWithId | null
   storeId: string
 }
 
-export default function CategoryModal({
+export default function BrandModal({
   isOpen,
   onClose,
   onSave,
-  category,
-  parentCategories,
+  brand,
   storeId
-}: CategoryModalProps) {
-  const t = useTranslations('pages.categories')
+}: BrandModalProps) {
+  const t = useTranslations('pages.brands')
   
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    parentCategoryId: '',
-    imageUrl: '',
-    imagePublicId: ''
+    image: ''
   })
   
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -39,40 +35,40 @@ export default function CategoryModal({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDraggingOver, setIsDraggingOver] = useState(false)
 
-  // Resetear formulario cuando se abre/cierra el modal o cambia la categoría
+  // Resetear formulario cuando se abre/cierra el modal o cambia la marca
   useEffect(() => {
     if (isOpen) {
-      if (category) {
-        // Editar categoría existente
+      if (brand) {
+        // Editar marca existente
         setFormData({
-          name: category.name || '',
-          description: category.description || '',
-          parentCategoryId: category.parentCategoryId || '',
-          imageUrl: category.imageUrl || '',
-          imagePublicId: category.imagePublicId || ''
+          name: brand.name || '',
+          description: brand.description || '',
+          image: brand.image || ''
         })
-        setImagePreview(category.imageUrl || '')
+        setImagePreview(brand.image || '')
       } else {
-        // Nueva categoría
+        // Nueva marca
         setFormData({
           name: '',
           description: '',
-          parentCategoryId: '',
-          imageUrl: '',
-          imagePublicId: ''
+          image: ''
         })
         setImagePreview('')
       }
       setImageFile(null)
       setErrors({})
     }
-  }, [isOpen, category])
+  }, [isOpen, brand])
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
     if (!formData.name.trim()) {
       newErrors.name = t('messages.nameRequired')
+    }
+
+    if (!formData.image && !imageFile) {
+      newErrors.image = t('messages.imageRequired')
     }
 
     setErrors(newErrors)
@@ -99,8 +95,7 @@ export default function CategoryModal({
     setImagePreview('')
     setFormData({
       ...formData,
-      imageUrl: '',
-      imagePublicId: ''
+      image: ''
     })
   }
 
@@ -141,41 +136,48 @@ export default function CategoryModal({
     setIsSaving(true)
 
     try {
-      let imageUrl = formData.imageUrl
-      let imagePublicId = formData.imagePublicId
+      let imageUrl = formData.image
 
       // Si hay una nueva imagen para subir
       if (imageFile) {
         setIsUploading(true)
 
-        // Si había una imagen anterior, eliminarla
-        if (formData.imagePublicId) {
-          await deleteImageFromCloudinary(formData.imagePublicId)
+        // Si había una imagen anterior y tenemos el public_id, eliminarla
+        if (formData.image && brand?.image) {
+          try {
+            // Extraer public_id de la URL de Cloudinary si es posible
+            const urlParts = brand.image.split('/')
+            const lastPart = urlParts[urlParts.length - 1]
+            const publicId = lastPart.split('.')[0]
+            if (publicId && brand.image.includes('cloudinary')) {
+              await deleteImageFromCloudinary(`brands/${publicId}`)
+            }
+          } catch (deleteError) {
+            console.warn('Error deleting previous image:', deleteError)
+            // No bloquear el proceso si no se puede eliminar la imagen anterior
+          }
         }
 
         // Subir nueva imagen
         const uploadResult = await uploadImageToCloudinary(imageFile, {
-          folder: 'categories',
+          folder: 'brands',
           storeId: storeId
         })
 
         imageUrl = uploadResult.secure_url
-        imagePublicId = uploadResult.public_id
         setIsUploading(false)
       }
 
-      const categoryData = {
+      const brandData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
-        parentCategoryId: formData.parentCategoryId || null,
-        imageUrl,
-        imagePublicId
+        image: imageUrl
       }
 
-      await onSave(categoryData)
+      await onSave(brandData)
       onClose()
     } catch (error) {
-      console.error('Error saving category:', error)
+      console.error('Error saving brand:', error)
       setErrors({ 
         general: error instanceof Error ? error.message : t('messages.error') 
       })
@@ -193,7 +195,7 @@ export default function CategoryModal({
         <div className="mt-3">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900">
-              {category ? t('editCategory') : t('addCategory')}
+              {brand ? t('editBrand') : t('addBrand')}
             </h3>
             <button
               onClick={onClose}
@@ -248,7 +250,7 @@ export default function CategoryModal({
             {/* Imagen */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {t('form.image')}
+                {t('form.image')} *
               </label>
               <div className="relative">
                 {imagePreview ? (
@@ -256,7 +258,7 @@ export default function CategoryModal({
                   <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
                     <img
                       src={imagePreview}
-                      alt="Category preview"
+                      alt="Brand preview"
                       className="w-full h-32 object-contain"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
@@ -356,28 +358,6 @@ export default function CategoryModal({
               <p className="mt-2 text-xs text-gray-500">{t('form.imageHint')}</p>
             </div>
 
-            {/* Categoría padre */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('form.parentCategory')}
-              </label>
-              <select
-                value={formData.parentCategoryId}
-                onChange={(e) => setFormData({ ...formData, parentCategoryId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-600 focus:border-gray-600"
-              >
-                <option value="">{t('form.noParentCategory')}</option>
-                {parentCategories
-                  .filter(cat => !category || cat.id !== category.id) // No mostrar la categoría actual como padre
-                  .map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-              </select>
-              <p className="mt-1 text-sm text-gray-500">{t('form.parentCategoryPlaceholder')}</p>
-            </div>
-
             {/* Botones */}
             <div className="flex justify-end space-x-3 pt-4">
               <button
@@ -402,7 +382,7 @@ export default function CategoryModal({
                     {isUploading ? t('imageUpload.uploading') : t('actions.saving')}
                   </>
                 ) : (
-                  category ? t('actions.update') : t('actions.create')
+                  brand ? t('actions.update') : t('actions.create')
                 )}
               </button>
             </div>

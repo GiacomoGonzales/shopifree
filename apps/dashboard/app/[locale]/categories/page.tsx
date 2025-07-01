@@ -60,7 +60,7 @@ export default function CategoriesPage() {
   const [parentCategories, setParentCategories] = useState<CategoryWithId[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<CategoryWithId | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<CategoryWithId | null>(null)
   const [storeId, setStoreId] = useState<string>('')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
@@ -113,20 +113,20 @@ export default function CategoriesPage() {
   }, [user, t])
 
   const handleAddCategory = () => {
-    setEditingCategory(null)
+    setSelectedCategory(null)
     setIsModalOpen(true)
   }
 
   const handleEditCategory = (category: CategoryWithId) => {
-    setEditingCategory(category)
+    setSelectedCategory(category)
     setIsModalOpen(true)
   }
 
   const handleSaveCategory = async (categoryData: any) => {
     try {
-      if (editingCategory) {
+      if (selectedCategory) {
         // Actualizar categoría existente
-        await updateCategory(storeId, editingCategory.id, categoryData)
+        await updateCategory(storeId, selectedCategory.id, categoryData, selectedCategory.parentCategoryId || undefined)
         showToast(t('messages.updated'), 'success')
       } else {
         // Crear nueva categoría
@@ -162,7 +162,7 @@ export default function CategoriesPage() {
       // Buscar la categoría a eliminar
       const categoryToDelete = categories.find(cat => cat.id === categoryId)
       
-      await deleteCategory(storeId, categoryId)
+      await deleteCategory(storeId, categoryId, categoryToDelete?.parentCategoryId || undefined)
       
       // Si la categoría tenía imagen, eliminarla de Cloudinary
       if (categoryToDelete?.imagePublicId) {
@@ -186,66 +186,59 @@ export default function CategoriesPage() {
     }
   }
 
-  const handleReorderCategories = async (reorderedCategories: CategoryWithId[]) => {
-    try {
-      // Actualizar estado local inmediatamente para UI responsiva
-      setCategories(reorderedCategories)
-      
-      // Separar categorías padre y subcategorías
-      const parentCategoriesOnly = reorderedCategories.filter(cat => !cat.parentCategoryId)
-      const subcategoriesOnly = reorderedCategories.filter(cat => cat.parentCategoryId)
-      
-      // Preparar datos para actualizar orden de categorías padre
-      const parentCategoriesOrder = parentCategoriesOnly.map((category, index) => ({
-        id: category.id,
-        order: index + 1
-      }))
-
-      // Preparar datos para actualizar orden de subcategorías (agrupadas por categoría padre)
-      const subcategoriesOrder: { id: string; order: number }[] = []
-      
-      // Agrupar subcategorías por categoría padre y asignar orden
-      const subcategoriesByParent = subcategoriesOnly.reduce((acc, subcat) => {
-        if (!acc[subcat.parentCategoryId!]) {
-          acc[subcat.parentCategoryId!] = []
-        }
-        acc[subcat.parentCategoryId!].push(subcat)
-        return acc
-      }, {} as Record<string, CategoryWithId[]>)
-
-      // Asignar orden dentro de cada categoría padre
-      Object.values(subcategoriesByParent).forEach(subcats => {
-        subcats.forEach((subcat, index) => {
-          subcategoriesOrder.push({
-            id: subcat.id,
-            order: index + 1
-          })
-        })
-      })
-
-      // Combinar todos los órdenes para una sola llamada a la base de datos
-      const allCategoriesOrder = [...parentCategoriesOrder, ...subcategoriesOrder]
-
-      // Actualizar orden en la base de datos
-      await updateCategoriesOrder(storeId, allCategoriesOrder)
-      
-      // NO RECARGAR datos después de un reordenamiento exitoso
-      // El estado local ya está actualizado correctamente
-      
-      showToast(t('messages.orderUpdated') || 'Orden actualizado correctamente', 'success')
-    } catch (error) {
-      console.error('Error updating categories order:', error)
-      const errorMessage = error instanceof Error ? error.message : t('messages.error')
-      showToast(errorMessage, 'error')
-      
-      // Solo recargar datos en caso de error para restaurar el estado correcto
+  const handleReorderCategories = (reorderedCategories: { id: string; order: number; parentCategoryId?: string }[]) => {
+    // Guardar el estado actual para poder revertir en caso de error
+    const previousCategories = [...categories]
+    const previousParentCategories = [...parentCategories]
+    
+    // **ACTUALIZACIÓN OPTIMISTA** - Actualizar UI inmediatamente
+    const updatedCategories = categories.map(category => {
+      const reorderData = reorderedCategories.find(item => item.id === category.id)
+      if (reorderData) {
+        return { ...category, order: reorderData.order }
+      }
+      return category
+    })
+    
+    // Ordenar las categorías actualizadas
+    updatedCategories.sort((a, b) => (a.order || 0) - (b.order || 0))
+    
+    // Actualizar el estado inmediatamente para una UX fluida
+    setCategories(updatedCategories)
+    
+    // Actualizar también las categorías padre si es necesario
+    const updatedParentCategories = parentCategories.map(category => {
+      const reorderData = reorderedCategories.find(item => item.id === category.id && !item.parentCategoryId)
+      if (reorderData) {
+        return { ...category, order: reorderData.order }
+      }
+      return category
+    })
+    updatedParentCategories.sort((a, b) => (a.order || 0) - (b.order || 0))
+    setParentCategories(updatedParentCategories)
+    
+    // Ejecutar la actualización en Firebase en segundo plano sin bloquear la UI
+    const updateInBackground = async () => {
       try {
-        const allCategories = await getCategories(storeId)
-        setCategories(allCategories)
-      } catch (reloadError) {
-        console.error('Error reloading categories:', reloadError)
+        await updateCategoriesOrder(storeId, reorderedCategories)
+        
+        // Si todo sale bien, mostrar mensaje de éxito
+        const successMessage = t('messages.orderUpdated') || 'Orden actualizado correctamente'
+        showToast(successMessage, 'success')
+      } catch (error) {
+        console.error('Error updating categories order:', error)
+        
+        // **REVERTIR** en caso de error - volver al estado anterior
+        setCategories(previousCategories)
+        setParentCategories(previousParentCategories)
+        
+        const errorMessage = error instanceof Error ? error.message : t('messages.error')
+        showToast(errorMessage, 'error')
       }
     }
+    
+    // Ejecutar en segundo plano
+    updateInBackground()
   }
 
   return (
@@ -274,7 +267,6 @@ export default function CategoriesPage() {
               onDelete={handleDeleteCategory}
               onReorder={handleReorderCategories}
               loading={loading}
-              locale={locale}
             />
           </div>
         </div>
@@ -283,12 +275,14 @@ export default function CategoriesPage() {
       {/* Modal para crear/editar categorías */}
       <CategoryModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedCategory(null)
+        }}
         onSave={handleSaveCategory}
-        category={editingCategory}
+        category={selectedCategory}
         parentCategories={parentCategories}
         storeId={storeId}
-        locale={locale}
       />
 
       {/* Toast notification */}

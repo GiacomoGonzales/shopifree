@@ -14,19 +14,9 @@ import {
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 
-export interface CategoryName {
-  es: string
-  en: string
-}
-
-export interface CategoryDescription {
-  es: string
-  en: string
-}
-
 export interface Category {
-  name: CategoryName
-  description: CategoryDescription
+  name: string
+  description: string
   slug: string
   imageUrl: string
   imagePublicId: string
@@ -38,7 +28,7 @@ export interface Category {
 
 export type CategoryWithId = Category & { id: string }
 
-// Generar slug a partir del nombre en español
+// Generar slug a partir del nombre
 export const generateSlug = (name: string): string => {
   return name
     .toLowerCase()
@@ -54,16 +44,28 @@ export const generateSlug = (name: string): string => {
 export const checkSlugAvailability = async (
   storeId: string, 
   slug: string, 
-  excludeCategoryId?: string
+  excludeCategoryId?: string,
+  parentCategoryId?: string
 ): Promise<boolean> => {
   try {
     const db = getFirebaseDb()
     if (!db) return false
 
-    const categoriesQuery = query(
-      collection(db, 'stores', storeId, 'categories'),
-      where('slug', '==', slug)
-    )
+    let categoriesQuery
+    
+    if (parentCategoryId) {
+      // Verificar en subcategorías
+      categoriesQuery = query(
+        collection(db, 'stores', storeId, 'categories', parentCategoryId, 'subcategorias'),
+        where('slug', '==', slug)
+      )
+    } else {
+      // Verificar en categorías padre
+      categoriesQuery = query(
+        collection(db, 'stores', storeId, 'categories'),
+        where('slug', '==', slug)
+      )
+    }
     
     const querySnapshot = await getDocs(categoriesQuery)
     
@@ -83,7 +85,7 @@ export const checkSlugAvailability = async (
   }
 }
 
-// Obtener todas las categorías de una tienda
+// Obtener todas las categorías de una tienda (padre + subcategorías)
 export const getCategories = async (storeId: string): Promise<CategoryWithId[]> => {
   try {
     const db = getFirebaseDb()
@@ -94,25 +96,52 @@ export const getCategories = async (storeId: string): Promise<CategoryWithId[]> 
 
     console.log('Consultando categorías para store:', storeId)
     
-    // Primero intentar sin orderBy para evitar problemas de índice
-    const categoriesQuery = query(
+    // Obtener categorías padre
+    const parentCategoriesQuery = query(
       collection(db, 'stores', storeId, 'categories')
     )
     
-    const querySnapshot = await getDocs(categoriesQuery)
-    console.log('Documentos encontrados:', querySnapshot.size)
+    const parentSnapshot = await getDocs(parentCategoriesQuery)
+    console.log('Categorías padre encontradas:', parentSnapshot.size)
     
-    const categories = querySnapshot.docs.map(doc => {
+    const allCategories: CategoryWithId[] = []
+    
+    // Agregar categorías padre
+    parentSnapshot.docs.forEach(doc => {
       const data = doc.data()
-      console.log('Documento:', doc.id, data)
-      return {
+      console.log('Categoría padre:', doc.id, data)
+      allCategories.push({
         id: doc.id,
         ...data
+      } as CategoryWithId)
+    })
+    
+    // Obtener subcategorías de cada categoría padre
+    for (const parentDoc of parentSnapshot.docs) {
+      try {
+        const subcategoriesQuery = query(
+          collection(db, 'stores', storeId, 'categories', parentDoc.id, 'subcategorias')
+        )
+        
+        const subcategoriesSnapshot = await getDocs(subcategoriesQuery)
+        console.log(`Subcategorías de ${parentDoc.id}:`, subcategoriesSnapshot.size)
+        
+        subcategoriesSnapshot.docs.forEach(subDoc => {
+          const subData = subDoc.data()
+          console.log('Subcategoría:', subDoc.id, subData)
+          allCategories.push({
+            id: subDoc.id,
+            ...subData,
+            parentCategoryId: parentDoc.id // Asegurar que tiene el parentCategoryId
+          } as CategoryWithId)
+        })
+      } catch (subError) {
+        console.warn(`Error obteniendo subcategorías de ${parentDoc.id}:`, subError)
       }
-    }) as CategoryWithId[]
+    }
     
     // Ordenar en JavaScript
-    categories.sort((a, b) => {
+    allCategories.sort((a, b) => {
       if (a.order !== b.order) {
         return (a.order || 0) - (b.order || 0)
       }
@@ -126,8 +155,8 @@ export const getCategories = async (storeId: string): Promise<CategoryWithId[]> 
       return aTime - bTime
     })
     
-    console.log('Categorías ordenadas:', categories)
-    return categories
+    console.log('Todas las categorías ordenadas:', allCategories)
+    return allCategories
   } catch (error) {
     console.error('Error getting categories:', error)
     return []
@@ -135,12 +164,20 @@ export const getCategories = async (storeId: string): Promise<CategoryWithId[]> 
 }
 
 // Obtener una categoría por ID
-export const getCategory = async (storeId: string, categoryId: string): Promise<CategoryWithId | null> => {
+export const getCategory = async (storeId: string, categoryId: string, parentCategoryId?: string): Promise<CategoryWithId | null> => {
   try {
     const db = getFirebaseDb()
     if (!db) return null
 
-    const categoryDoc = await getDoc(doc(db, 'stores', storeId, 'categories', categoryId))
+    let categoryDoc
+    
+    if (parentCategoryId) {
+      // Es una subcategoría
+      categoryDoc = await getDoc(doc(db, 'stores', storeId, 'categories', parentCategoryId, 'subcategorias', categoryId))
+    } else {
+      // Es una categoría padre
+      categoryDoc = await getDoc(doc(db, 'stores', storeId, 'categories', categoryId))
+    }
     
     if (categoryDoc.exists()) {
       return { id: categoryDoc.id, ...categoryDoc.data() } as CategoryWithId
@@ -164,11 +201,11 @@ export const createCategory = async (
       throw new Error('Firebase db not available')
     }
 
-    // Generar slug desde el nombre en español
-    const slug = generateSlug(categoryData.name.es)
+    // Generar slug desde el nombre
+    const slug = generateSlug(categoryData.name)
     
     // Verificar que el slug esté disponible
-    const isSlugAvailable = await checkSlugAvailability(storeId, slug)
+    const isSlugAvailable = await checkSlugAvailability(storeId, slug, undefined, categoryData.parentCategoryId || undefined)
     if (!isSlugAvailable) {
       throw new Error('El nombre de la categoría ya está en uso')
     }
@@ -189,12 +226,26 @@ export const createCategory = async (
       ...categoryData,
       slug,
       order: nextOrder,
-      parentCategoryId: categoryData.parentCategoryId || null, // Asegurar que sea null en lugar de undefined
+      parentCategoryId: categoryData.parentCategoryId || null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }
 
-    const docRef = await addDoc(collection(db, 'stores', storeId, 'categories'), newCategory)
+    let docRef
+    
+    if (categoryData.parentCategoryId) {
+      // Guardar como subcategoría en la subcolección
+      docRef = await addDoc(
+        collection(db, 'stores', storeId, 'categories', categoryData.parentCategoryId, 'subcategorias'), 
+        newCategory
+      )
+    } else {
+      // Guardar como categoría padre
+      docRef = await addDoc(
+        collection(db, 'stores', storeId, 'categories'), 
+        newCategory
+      )
+    }
     
     return { id: docRef.id, ...newCategory }
   } catch (error) {
@@ -207,7 +258,8 @@ export const createCategory = async (
 export const updateCategory = async (
   storeId: string, 
   categoryId: string, 
-  categoryData: Partial<Omit<Category, 'createdAt' | 'updatedAt' | 'slug'>>
+  categoryData: Partial<Omit<Category, 'createdAt' | 'updatedAt' | 'slug'>>,
+  parentCategoryId?: string
 ): Promise<void> => {
   try {
     const db = getFirebaseDb()
@@ -221,11 +273,11 @@ export const updateCategory = async (
     }
 
     // Si se está actualizando el nombre, regenerar el slug
-    if (categoryData.name?.es) {
-      const newSlug = generateSlug(categoryData.name.es)
+    if (categoryData.name) {
+      const newSlug = generateSlug(categoryData.name)
       
       // Verificar que el nuevo slug esté disponible
-      const isSlugAvailable = await checkSlugAvailability(storeId, newSlug, categoryId)
+      const isSlugAvailable = await checkSlugAvailability(storeId, newSlug, categoryId, parentCategoryId)
       if (!isSlugAvailable) {
         throw new Error('El nombre de la categoría ya está en uso')
       }
@@ -233,7 +285,19 @@ export const updateCategory = async (
       updateData.slug = newSlug
     }
 
-    await updateDoc(doc(db, 'stores', storeId, 'categories', categoryId), updateData)
+    if (parentCategoryId) {
+      // Actualizar subcategoría
+      await updateDoc(
+        doc(db, 'stores', storeId, 'categories', parentCategoryId, 'subcategorias', categoryId), 
+        updateData
+      )
+    } else {
+      // Actualizar categoría padre
+      await updateDoc(
+        doc(db, 'stores', storeId, 'categories', categoryId), 
+        updateData
+      )
+    }
   } catch (error) {
     console.error('Error updating category:', error)
     throw error
@@ -241,26 +305,31 @@ export const updateCategory = async (
 }
 
 // Eliminar categoría
-export const deleteCategory = async (storeId: string, categoryId: string): Promise<void> => {
+export const deleteCategory = async (storeId: string, categoryId: string, parentCategoryId?: string): Promise<void> => {
   try {
     const db = getFirebaseDb()
     if (!db) {
       throw new Error('Firebase db not available')
     }
 
-    // Verificar si la categoría tiene subcategorías
-    const subcategoriesQuery = query(
-      collection(db, 'stores', storeId, 'categories'),
-      where('parentCategoryId', '==', categoryId)
-    )
-    
-    const subcategoriesSnapshot = await getDocs(subcategoriesQuery)
-    
-    if (!subcategoriesSnapshot.empty) {
-      throw new Error('No se puede eliminar una categoría que tiene subcategorías. Elimina primero las subcategorías.')
-    }
+    if (parentCategoryId) {
+      // Eliminar subcategoría
+      await deleteDoc(doc(db, 'stores', storeId, 'categories', parentCategoryId, 'subcategorias', categoryId))
+    } else {
+      // Verificar si la categoría padre tiene subcategorías
+      const subcategoriesQuery = query(
+        collection(db, 'stores', storeId, 'categories', categoryId, 'subcategorias')
+      )
+      
+      const subcategoriesSnapshot = await getDocs(subcategoriesQuery)
+      
+      if (!subcategoriesSnapshot.empty) {
+        throw new Error('No se puede eliminar una categoría que tiene subcategorías. Elimina primero las subcategorías.')
+      }
 
-    await deleteDoc(doc(db, 'stores', storeId, 'categories', categoryId))
+      // Eliminar categoría padre
+      await deleteDoc(doc(db, 'stores', storeId, 'categories', categoryId))
+    }
   } catch (error) {
     console.error('Error deleting category:', error)
     throw error
@@ -272,14 +341,28 @@ export const getParentCategories = async (storeId: string): Promise<CategoryWith
   try {
     console.log('Obteniendo categorías padre para store:', storeId)
     
-    // Usar la función getCategories que ya funciona y filtrar
-    const allCategories = await getCategories(storeId)
-    console.log('Filtrando categorías padre de:', allCategories)
+    const db = getFirebaseDb()
+    if (!db) {
+      console.warn('Database not available')
+      return []
+    }
     
-    // Filtrar categorías padre (sin parentCategoryId o con parentCategoryId null/undefined/vacío)
-    const parentCategories = allCategories.filter(cat => !cat.parentCategoryId)
-    console.log('Categorías padre encontradas:', parentCategories)
+    const parentCategoriesQuery = query(
+      collection(db, 'stores', storeId, 'categories')
+    )
     
+    const querySnapshot = await getDocs(parentCategoriesQuery)
+    console.log('Categorías padre encontradas:', querySnapshot.size)
+    
+    const parentCategories = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as CategoryWithId[]
+    
+    // Ordenar por orden
+    parentCategories.sort((a, b) => (a.order || 0) - (b.order || 0))
+    
+    console.log('Categorías padre ordenadas:', parentCategories)
     return parentCategories
   } catch (error) {
     console.error('Error getting parent categories:', error)
@@ -294,18 +377,21 @@ export const getSubcategories = async (storeId: string, parentCategoryId: string
     if (!db) return []
 
     const subcategoriesQuery = query(
-      collection(db, 'stores', storeId, 'categories'),
-      where('parentCategoryId', '==', parentCategoryId),
-      orderBy('order'),
-      orderBy('createdAt')
+      collection(db, 'stores', storeId, 'categories', parentCategoryId, 'subcategorias')
     )
     
     const querySnapshot = await getDocs(subcategoriesQuery)
     
-    return querySnapshot.docs.map(doc => ({
+    const subcategories = querySnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
+      parentCategoryId: parentCategoryId // Asegurar que tiene el parentCategoryId
     })) as CategoryWithId[]
+    
+    // Ordenar por orden
+    subcategories.sort((a, b) => (a.order || 0) - (b.order || 0))
+    
+    return subcategories
   } catch (error) {
     console.error('Error getting subcategories:', error)
     return []
@@ -315,7 +401,7 @@ export const getSubcategories = async (storeId: string, parentCategoryId: string
 // Actualizar orden de categorías
 export const updateCategoriesOrder = async (
   storeId: string, 
-  categoriesOrder: { id: string; order: number }[]
+  categoriesOrder: { id: string; order: number; parentCategoryId?: string }[]
 ): Promise<void> => {
   try {
     const db = getFirebaseDb()
@@ -324,12 +410,27 @@ export const updateCategoriesOrder = async (
     }
 
     // Actualizar todas las categorías en lote
-    const batch = categoriesOrder.map(({ id, order }) => 
-      updateDoc(doc(db, 'stores', storeId, 'categories', id), { 
-        order,
-        updatedAt: serverTimestamp() 
-      })
-    )
+    const batch = categoriesOrder.map(({ id, order, parentCategoryId }) => {
+      if (parentCategoryId) {
+        // Actualizar subcategoría
+        return updateDoc(
+          doc(db, 'stores', storeId, 'categories', parentCategoryId, 'subcategorias', id), 
+          { 
+            order,
+            updatedAt: serverTimestamp() 
+          }
+        )
+      } else {
+        // Actualizar categoría padre
+        return updateDoc(
+          doc(db, 'stores', storeId, 'categories', id), 
+          { 
+            order,
+            updatedAt: serverTimestamp() 
+          }
+        )
+      }
+    })
 
     await Promise.all(batch)
   } catch (error) {
