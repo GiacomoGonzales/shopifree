@@ -566,7 +566,15 @@
       "allOptional": "todas opcionales",
       "enterLocalNumber": "Ingresa solo el número local (sin código de país)",
       "addressAutocomplete": "Empieza a escribir tu dirección...",
+      "locationSaved": "Ubicación guardada",
       "completed": "completado",
+      "creationSteps": {
+        "basicInfo": "Configurando información básica...",
+        "branding": "Aplicando colores y branding...",
+        "payments": "Configurando métodos de pago...",
+        "socialMedia": "Estableciendo redes sociales...",
+        "success": "¡Tienda creada exitosamente!"
+      },
       "errors": {
         "storeNameRequired": "El nombre de la tienda es obligatorio",
         "subdomainRequired": "El subdominio es obligatorio",

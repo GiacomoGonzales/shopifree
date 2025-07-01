@@ -4,7 +4,7 @@ interface PageLoadingStateProps {
   message?: string
 }
 
-export default function PageLoadingState({ message = "Cargando..." }: PageLoadingStateProps) {
+export default function PageLoadingState({ message = "Loading..." }: PageLoadingStateProps) {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center">

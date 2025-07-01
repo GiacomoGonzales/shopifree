@@ -753,7 +753,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <main className="flex-1 relative">
           {loading && (
             <div className="absolute inset-0 bg-white z-20">
-              <PageLoadingState message="Cargando página..." />
+              <PageLoadingState message={t('general')} />
             </div>
           )}
           <div className={`${loading ? 'invisible' : 'visible transition-all duration-200 ease-in-out opacity-100'}`}>

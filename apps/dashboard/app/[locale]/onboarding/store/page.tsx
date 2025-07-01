@@ -112,12 +112,12 @@ const monedas = [
   { code: 'AUD', symbol: 'A$', name: 'Dólar Australiano' }
 ]
 
-const creationSteps = [
-  { text: 'Configurando información básica...', progress: 20 },
-  { text: 'Aplicando colores y branding...', progress: 40 },
-  { text: 'Configurando métodos de pago...', progress: 60 },
-  { text: 'Estableciendo redes sociales...', progress: 80 },
-  { text: '¡Tienda creada exitosamente!', progress: 100 }
+const getCreationSteps = (t: any) => [
+  { text: t('creationSteps.basicInfo'), progress: 20 },
+  { text: t('creationSteps.branding'), progress: 40 },
+  { text: t('creationSteps.payments'), progress: 60 },
+  { text: t('creationSteps.socialMedia'), progress: 80 },
+  { text: t('creationSteps.success'), progress: 100 }
 ]
 
 function StoreOnboardingContent() {
@@ -373,6 +373,7 @@ function StoreOnboardingContent() {
     
     try {
       // Simular cada paso de creación con progreso
+      const creationSteps = getCreationSteps(t)
       for (let i = 0; i < creationSteps.length; i++) {
         setCreationStep(i)
         setCreationProgress(creationSteps[i].progress)
@@ -452,7 +453,7 @@ function StoreOnboardingContent() {
           <p className="text-gray-600 mb-6">
             {isComplete 
               ? t('creatingMessage')
-              : creationSteps[creationStep]?.text || t('creatingMessage')
+              : getCreationSteps(t)[creationStep]?.text || t('creatingMessage')
             }
           </p>
           
@@ -623,14 +624,9 @@ function StoreOnboardingContent() {
                     </div>
                   )}
                 </div>
-                {isGoogleMapsLoaded && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    ✨ {t('addressAutocomplete')} - Coordinates will be saved automatically
-                  </p>
-                )}
                 {formData.location.lat !== 0 && formData.location.lng !== 0 && (
-                  <p className="mt-1 text-xs text-green-600">
-                    📍 Coordinates: {formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
+                  <p className="mt-1 text-xs text-gray-500">
+                    ✓ {t('locationSaved')}
                   </p>
                 )}
                 {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}

@@ -544,6 +544,14 @@
       "address": "Address",
       "addressPlaceholder": "123 Street, City, Country",
       "addressAutocomplete": "Start typing your address...",
+      "locationSaved": "Location saved",
+      "creationSteps": {
+        "basicInfo": "Setting up basic information...",
+        "branding": "Applying colors and branding...",
+        "payments": "Configuring payment methods...",
+        "socialMedia": "Setting up social networks...",
+        "success": "Store created successfully!"
+      },
       "businessType": "Business type",
       "businessTypePlaceholder": "Select your business type",
       "localPhone": "Store phone",

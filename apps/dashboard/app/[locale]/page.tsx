@@ -112,7 +112,7 @@ function DashboardContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Verificando configuración...</p>
+          <p className="mt-2 text-gray-600">{t('authentication')}</p>
         </div>
       </div>
     )
@@ -123,7 +123,7 @@ function DashboardContent() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mx-auto"></div>
-        <p className="mt-2 text-gray-600">Redirigiendo...</p>
+        <p className="mt-2 text-gray-600">{t('general')}</p>
       </div>
     </div>
   )

@@ -74,7 +74,7 @@ export default function GeneralSettingsPage() {
             slogan: userStore.slogan || '',
             description: userStore.description || '',
             hasPhysicalLocation: userStore.hasPhysicalLocation || false,
-            address: userStore.address || '',
+            address: userStore.location?.address || userStore.address || '',
             location: {
               address: userStore.location?.address || userStore.address || '',
               lat: userStore.location?.lat || 0,
@@ -447,7 +447,7 @@ export default function GeneralSettingsPage() {
                 <input
                   ref={setAutocompleteRef}
                   type="text"
-                  value={formData.address}
+                  value={formData.location.address}
                   onChange={(e) => {
                     const value = e.target.value
                     setFormData(prev => ({
@@ -479,14 +479,9 @@ export default function GeneralSettingsPage() {
                   </div>
                 )}
               </div>
-              {isGoogleMapsLoaded && (
-                <p className="mt-1 text-xs text-gray-500">
-                  ✨ Autocompletado habilitado - Las coordenadas se guardarán automáticamente
-                </p>
-              )}
               {formData.location.lat !== 0 && formData.location.lng !== 0 && (
-                <p className="mt-1 text-xs text-green-600">
-                  📍 Coordenadas: {formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
+                <p className="mt-1 text-xs text-gray-500">
+                  ✓ Ubicación guardada
                 </p>
               )}
             </div>
