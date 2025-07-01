@@ -20,28 +20,28 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
     description: store.description || '',
     hasPhysicalLocation: store.hasPhysicalLocation || false,
     address: store.address || '',
-    tipoComercio: store.tipoComercio || '',
+    businessType: store.businessType || '',
     phone: store.phone || '',
     primaryColor: store.primaryColor || '#4F46E5',
     secondaryColor: store.secondaryColor || '#06B6D4',
     currency: store.currency || 'USD',
-    redes: {
-      facebook: store.redes?.facebook || '',
-      instagram: store.redes?.instagram || '',
-      whatsapp: store.redes?.whatsapp || '',
-      tiktok: store.redes?.tiktok || ''
+    socialMedia: {
+      facebook: store.socialMedia?.facebook || '',
+      instagram: store.socialMedia?.instagram || '',
+      whatsapp: store.socialMedia?.whatsapp || '',
+      tiktok: store.socialMedia?.tiktok || ''
     }
   })
 
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
 
   const handleChange = (field: string, value: any) => {
-    if (field.startsWith('redes.')) {
+    if (field.startsWith('socialMedia.')) {
       const socialField = field.split('.')[1]
       setFormData(prev => ({
         ...prev,
-        redes: {
-          ...prev.redes,
+        socialMedia: {
+          ...prev.socialMedia,
           [socialField]: value
         }
       }))
@@ -251,8 +251,8 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
               </label>
               <input
                 type="url"
-                value={formData.redes.facebook}
-                onChange={(e) => handleChange('redes.facebook', e.target.value)}
+                value={formData.socialMedia.facebook}
+                onChange={(e) => handleChange('socialMedia.facebook', e.target.value)}
                 placeholder={t('socialMedia.facebookPlaceholder')}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
@@ -264,8 +264,8 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
               </label>
               <input
                 type="url"
-                value={formData.redes.instagram}
-                onChange={(e) => handleChange('redes.instagram', e.target.value)}
+                value={formData.socialMedia.instagram}
+                onChange={(e) => handleChange('socialMedia.instagram', e.target.value)}
                 placeholder={t('socialMedia.instagramPlaceholder')}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
@@ -277,8 +277,8 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
               </label>
               <input
                 type="tel"
-                value={formData.redes.whatsapp}
-                onChange={(e) => handleChange('redes.whatsapp', e.target.value)}
+                value={formData.socialMedia.whatsapp}
+                onChange={(e) => handleChange('socialMedia.whatsapp', e.target.value)}
                 placeholder={t('socialMedia.whatsappPlaceholder')}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
@@ -290,8 +290,8 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
               </label>
               <input
                 type="url"
-                value={formData.redes.tiktok}
-                onChange={(e) => handleChange('redes.tiktok', e.target.value)}
+                value={formData.socialMedia.tiktok}
+                onChange={(e) => handleChange('socialMedia.tiktok', e.target.value)}
                 placeholder={t('socialMedia.tiktokPlaceholder')}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
