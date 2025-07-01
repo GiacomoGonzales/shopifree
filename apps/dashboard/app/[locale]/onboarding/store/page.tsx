@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+
+// Declaración de tipos para Google Maps API
+declare global {
+  interface Window {
+    google: any
+  }
+}
+import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '../../../../lib/simple-auth-context'
 import { createStore, checkSubdomainAvailability, validateSubdomain } from '../../../../lib/store'
 import { useTranslations } from 'next-intl'
@@ -14,6 +21,11 @@ interface StoreFormData {
   description: string
   hasPhysicalLocation: boolean
   address: string
+  location: {
+    address: string
+    lat: number
+    lng: number
+  }
   businessType: string
   countryCode: string
   localPhone: string
@@ -111,6 +123,8 @@ const creationSteps = [
 function StoreOnboardingContent() {
   const t = useTranslations('onboarding.store')
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
   const { user } = useAuth()
   
   const [currentStep, setCurrentStep] = useState(1)
@@ -123,6 +137,11 @@ function StoreOnboardingContent() {
     description: '',
     hasPhysicalLocation: false,
     address: '',
+    location: {
+      address: '',
+      lat: 0,
+      lng: 0
+    },
     businessType: '',
     countryCode: '+52', // México por defecto
     localPhone: '',
@@ -144,6 +163,8 @@ function StoreOnboardingContent() {
   const [creationProgress, setCreationProgress] = useState(0)
   const [errors, setErrors] = useState<Partial<Record<keyof StoreFormData, string>>>({})
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
+  const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
+  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
 
   // Validación de subdominio en tiempo real
   const checkSubdomain = async (subdomain: string) => {
@@ -183,6 +204,85 @@ function StoreOnboardingContent() {
     
     return () => clearTimeout(timeoutId)
   }, [formData.subdomain, currentStep])
+
+  // Cargar Google Maps API
+  useEffect(() => {
+    const loadGoogleMapsScript = () => {
+      // Verificar si el script ya está cargado
+      if (window.google && window.google.maps && window.google.maps.places) {
+        setIsGoogleMapsLoaded(true)
+        return
+      }
+
+      // Verificar si el script ya existe en el DOM
+      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+        // Esperar a que se cargue
+        const checkLoaded = setInterval(() => {
+          if (window.google && window.google.maps && window.google.maps.places) {
+            setIsGoogleMapsLoaded(true)
+            clearInterval(checkLoaded)
+          }
+        }, 100)
+        return
+      }
+
+      // Crear y añadir el script
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_MAPS_API_KEY || ''}&libraries=places&language=es`
+      script.async = true
+      script.defer = true
+      
+      script.onload = () => {
+        setIsGoogleMapsLoaded(true)
+      }
+      
+      script.onerror = () => {
+        console.error('Error loading Google Maps API')
+      }
+      
+      document.head.appendChild(script)
+    }
+
+    if (formData.hasPhysicalLocation && currentStep === 2) {
+      loadGoogleMapsScript()
+    }
+  }, [formData.hasPhysicalLocation, currentStep])
+
+  // Configurar el autocompletado cuando Google Maps esté cargado y el input esté disponible
+  useEffect(() => {
+    if (isGoogleMapsLoaded && autocompleteRef && formData.hasPhysicalLocation && currentStep === 2) {
+      const autocomplete = new window.google.maps.places.Autocomplete(autocompleteRef, {
+        types: ['address'],
+        componentRestrictions: { country: ['mx', 'ar', 'co', 'pe', 'cl', 've', 'ec', 'bo', 'py', 'uy', 'br', 'es', 'us'] }
+      })
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace()
+        
+        if (place.geometry && place.geometry.location) {
+          const lat = place.geometry.location.lat()
+          const lng = place.geometry.location.lng()
+          const address = place.formatted_address || place.name || ''
+          
+          // Actualizar la dirección y coordenadas en la nueva estructura
+          setFormData(prev => ({
+            ...prev,
+            address: address,
+            location: {
+              address: address,
+              lat: lat,
+              lng: lng
+            }
+          }))
+        }
+      })
+
+      return () => {
+        // Limpiar listeners si es necesario
+        window.google.maps.event.clearInstanceListeners(autocomplete)
+      }
+    }
+  }, [isGoogleMapsLoaded, autocompleteRef, formData.hasPhysicalLocation, currentStep])
 
   // Validar paso actual
   const validateCurrentStep = (): boolean => {
@@ -292,7 +392,11 @@ function StoreOnboardingContent() {
         slogan: formData.slogan,
         description: formData.description,
         hasPhysicalLocation: formData.hasPhysicalLocation,
-        address: formData.address,
+        // Solo incluir location si hay coordenadas, sino usar address legacy
+        ...(formData.location.lat !== 0 && formData.location.lng !== 0 
+          ? { location: formData.location }
+          : { address: formData.address }
+        ),
         businessType: formData.businessType,
         phone: phoneCompleto,
         primaryColor: formData.primaryColor,
@@ -342,13 +446,13 @@ function StoreOnboardingContent() {
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {isComplete ? '¡Tienda Creada!' : 'Creando tu tienda...'}
+            {isComplete ? t('creating') : t('creating')}
           </h2>
           
           <p className="text-gray-600 mb-6">
             {isComplete 
-              ? 'Tu tienda está lista para recibir clientes'
-              : creationSteps[creationStep]?.text || 'Iniciando configuración...'
+              ? t('creatingMessage')
+              : creationSteps[creationStep]?.text || t('creatingMessage')
             }
           </p>
           
@@ -363,7 +467,7 @@ function StoreOnboardingContent() {
           </div>
           
           <div className="text-sm text-gray-500">
-            {creationProgress}% completado
+            {creationProgress}% {t('completed', { count: creationProgress })}
           </div>
         </div>
       </div>
@@ -481,15 +585,54 @@ function StoreOnboardingContent() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('address')} <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder={t('addressPlaceholder')}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                    errors.address ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
+                <div className="relative">
+                  <input
+                    ref={setAutocompleteRef}
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setFormData(prev => ({
+                        ...prev,
+                        address: value,
+                        location: {
+                          ...prev.location,
+                          address: value
+                        }
+                      }))
+                    }}
+                    placeholder={isGoogleMapsLoaded ? t('addressAutocomplete') : t('addressPlaceholder')}
+                    className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                      errors.address ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {formData.hasPhysicalLocation && !isGoogleMapsLoaded && (
+                    <div className="absolute right-3 top-3">
+                      <svg className="w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                  )}
+                  {isGoogleMapsLoaded && formData.location.lat !== 0 && formData.location.lng !== 0 && (
+                    <div className="absolute right-3 top-3">
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {isGoogleMapsLoaded && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    ✨ {t('addressAutocomplete')} - Coordinates will be saved automatically
+                  </p>
+                )}
+                {formData.location.lat !== 0 && formData.location.lng !== 0 && (
+                  <p className="mt-1 text-xs text-green-600">
+                    📍 Coordinates: {formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
+                  </p>
+                )}
                 {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
               </div>
             )}
@@ -512,7 +655,7 @@ function StoreOnboardingContent() {
               >
                 <option value="">{t('businessTypePlaceholder')}</option>
                 {businessTypes.map(tipo => (
-                  <option key={tipo.value} value={tipo.value}>{tipo.labelEs}</option>
+                  <option key={tipo.value} value={tipo.value}>{locale === 'en' ? tipo.labelEn : tipo.labelEs}</option>
                 ))}
               </select>
               {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
@@ -546,7 +689,7 @@ function StoreOnboardingContent() {
               </div>
               {errors.localPhone && <p className="text-red-500 text-sm mt-1">{errors.localPhone}</p>}
               <p className="text-xs text-gray-500 mt-1 break-words">
-                Ingresa solo el número local (sin código de país)
+                {t('enterLocalNumber')}
               </p>
             </div>
           </div>
@@ -556,10 +699,10 @@ function StoreOnboardingContent() {
         return (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Logo Upload */}
+                                    {/* Logo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Logo <span className="text-gray-400 text-xs">(opcional)</span>
+                  Logo <span className="text-gray-400 text-xs">({t('optional')})</span>
                 </label>
                 <div className="relative">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group">
@@ -598,9 +741,9 @@ function StoreOnboardingContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium text-gray-700 group-hover:text-gray-800">Haz clic para subir</span> o arrastra aquí
+                          <span className="font-medium text-gray-700 group-hover:text-gray-800">{t('uploadHint')}</span>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG hasta 5MB</p>
+                        <p className="text-xs text-gray-500">{t('fileFormat')}</p>
                       </div>
                     )}
                   </div>
@@ -610,7 +753,7 @@ function StoreOnboardingContent() {
               {/* Store Photo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  {t('storePhoto')} <span className="text-gray-400 text-xs">(opcional)</span>
+                  {t('storePhoto')} <span className="text-gray-400 text-xs">({t('optional')})</span>
                 </label>
                 <div className="relative">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group">
@@ -649,9 +792,9 @@ function StoreOnboardingContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium text-gray-700 group-hover:text-gray-800">Haz clic para subir</span> o arrastra aquí
+                          <span className="font-medium text-gray-700 group-hover:text-gray-800">{t('uploadHint')}</span>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG hasta 5MB</p>
+                        <p className="text-xs text-gray-500">{t('fileFormat')}</p>
                       </div>
                     )}
                   </div>
@@ -661,7 +804,7 @@ function StoreOnboardingContent() {
 
             {/* Color Section */}
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900">Colores de tu marca</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('brandColors')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -741,7 +884,7 @@ function StoreOnboardingContent() {
 
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {t('socialMedia')} <span className="text-gray-400 text-sm font-normal">(todas opcionales)</span>
+                {t('socialMedia')} <span className="text-gray-400 text-sm font-normal">({t('allOptional')})</span>
               </h3>
               <div className="space-y-4">
                 <div>
@@ -805,7 +948,7 @@ function StoreOnboardingContent() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-gray-600 mt-2">Paso {currentStep} de {totalSteps}</p>
+            <p className="text-gray-600 mt-2">{t('stepOf', { current: currentStep, total: totalSteps })}</p>
             
             {/* Barra de progreso minimalista */}
             <div className="mt-4 w-full bg-gray-200 rounded-full h-1">
@@ -827,7 +970,7 @@ function StoreOnboardingContent() {
                 disabled={currentStep === 1}
                 className="px-4 sm:px-6 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
-                Anterior
+                {t('previousButton')}
               </button>
 
               {currentStep < totalSteps ? (
@@ -836,7 +979,7 @@ function StoreOnboardingContent() {
                   onClick={handleNext}
                   className="px-4 sm:px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base"
                 >
-                  Siguiente
+                  {t('nextButton')}
                 </button>
               ) : (
                 <button
