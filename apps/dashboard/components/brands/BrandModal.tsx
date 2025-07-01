@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { BrandWithId } from '../../lib/brands'
-import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile } from '../../lib/cloudinary'
+import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile, type CloudinaryFolder } from '../../lib/cloudinary'
 
 interface BrandModalProps {
   isOpen: boolean
@@ -159,8 +159,9 @@ export default function BrandModal({
         }
 
         // Subir nueva imagen
+        const folderType: CloudinaryFolder = 'brands'
         const uploadResult = await uploadImageToCloudinary(imageFile, {
-          folder: 'brands' as const,
+          folder: folderType,
           storeId: storeId
         })
 

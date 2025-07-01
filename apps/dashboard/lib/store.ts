@@ -38,6 +38,7 @@ export interface StoreConfig {
   socialMedia?: { // Cambiado de redes
     facebook?: string
     instagram?: string
+    whatsapp?: string
     tiktok?: string
     x?: string
     snapchat?: string

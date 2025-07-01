@@ -314,77 +314,7 @@
     "products": {
       "title": "Productos",
       "subtitle": "Gestiona tus productos",
-      "description": "Agrega, edita y organiza los productos de tu catálogo.",
-      "addProduct": "Agregar Producto",
-      "editProduct": "Editar Producto",
-      "generalInfo": {
-        "title": "Información General",
-        "subtitle": "Detalles básicos del producto",
-        "form": {
-          "name": "Nombre del producto",
-          "namePlaceholder": "Ej: Camiseta básica algodón",
-          "nameRequired": "El nombre del producto es obligatorio",
-          "description": "Descripción",
-          "descriptionPlaceholder": "Describe las características, beneficios y detalles del producto...",
-          "brand": "Marca",
-          "brandPlaceholder": "Selecciona una marca",
-          "noBrand": "Sin marca",
-          "category": "Categoría",
-          "categoryPlaceholder": "Selecciona una categoría",
-          "subcategory": "Subcategoría",
-          "subcategoryPlaceholder": "Selecciona una subcategoría",
-          "noCategory": "Sin categoría",
-          "sku": "SKU (Código interno)",
-          "skuPlaceholder": "Ej: CMST-001-M",
-          "skuHint": "Código único para identificar el producto",
-          "unit": "Unidad de medida",
-          "unitPlaceholder": "Selecciona la unidad",
-          "condition": "Condición",
-          "conditionPlaceholder": "Selecciona la condición",
-          "status": "Estado",
-          "statusPlaceholder": "Selecciona el estado"
-        },
-        "units": {
-          "unit": "Unidad",
-          "pair": "Par",
-          "liter": "Litro",
-          "meter": "Metro",
-          "box": "Caja",
-          "pack": "Pack",
-          "kilogram": "Kilogramo",
-          "gram": "Gramo",
-          "dozen": "Docena"
-        },
-        "conditions": {
-          "new": "Nuevo",
-          "used": "Usado",
-          "refurbished": "Reacondicionado"
-        },
-        "statuses": {
-          "visible": "Visible",
-          "draft": "Borrador",
-          "outOfStock": "Agotado"
-        },
-        "preview": {
-          "title": "Vista previa",
-          "product": "Producto"
-        }
-      },
-      "messages": {
-        "created": "Producto creado exitosamente",
-        "updated": "Producto actualizado exitosamente", 
-        "saved": "Cambios guardados automáticamente",
-        "error": "Error al procesar la solicitud",
-        "nameRequired": "El nombre del producto es obligatorio",
-        "mustCreateFirst": "Primero crea el producto para editar esta sección"
-      },
-      "actions": {
-        "save": "Guardar",
-        "saving": "Guardando...",
-        "cancel": "Cancelar",
-        "create": "Crear Producto",
-        "update": "Actualizar Producto"
-      }
+      "description": "Agrega, edita y organiza los productos de tu catálogo."
     },
     "categories": {
       "title": "Categorías",

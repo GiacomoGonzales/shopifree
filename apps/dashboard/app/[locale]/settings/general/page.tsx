@@ -281,7 +281,7 @@ export default function GeneralSettingsPage() {
       // Usar la función de reemplazo que elimina la imagen anterior
       const result = await replaceImageInCloudinary(
         file, 
-        { folder: 'logos' as const, storeId: store?.id },
+        { folder: 'logos', storeId: store?.id },
         formData.logoPublicId || undefined
       )
       
@@ -311,7 +311,7 @@ export default function GeneralSettingsPage() {
       // Usar la función de reemplazo que elimina la imagen anterior
       const result = await replaceImageInCloudinary(
         file, 
-        { folder: 'store_photos' as const, storeId: store?.id },
+        { folder: 'store_photos', storeId: store?.id },
         formData.storefrontImagePublicId || undefined
       )
       

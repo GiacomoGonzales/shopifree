@@ -314,77 +314,7 @@
     "products": {
       "title": "Products",
       "subtitle": "Manage your products",
-      "description": "Add, edit and organize your catalog products.",
-      "addProduct": "Add Product",
-      "editProduct": "Edit Product",
-      "generalInfo": {
-        "title": "General Information",
-        "subtitle": "Basic product details",
-        "form": {
-          "name": "Product name",
-          "namePlaceholder": "Ex: Basic cotton t-shirt",
-          "nameRequired": "Product name is required",
-          "description": "Description",
-          "descriptionPlaceholder": "Describe the features, benefits and details of the product...",
-          "brand": "Brand",
-          "brandPlaceholder": "Select a brand",
-          "noBrand": "No brand",
-          "category": "Category",
-          "categoryPlaceholder": "Select a category",
-          "subcategory": "Subcategory",
-          "subcategoryPlaceholder": "Select a subcategory",
-          "noCategory": "No category",
-          "sku": "SKU (Internal code)",
-          "skuPlaceholder": "Ex: TSHRT-001-M",
-          "skuHint": "Unique code to identify the product",
-          "unit": "Unit of measure",
-          "unitPlaceholder": "Select the unit",
-          "condition": "Condition",
-          "conditionPlaceholder": "Select the condition",
-          "status": "Status",
-          "statusPlaceholder": "Select the status"
-        },
-        "units": {
-          "unit": "Unit",
-          "pair": "Pair",
-          "liter": "Liter",
-          "meter": "Meter",
-          "box": "Box",
-          "pack": "Pack",
-          "kilogram": "Kilogram",
-          "gram": "Gram",
-          "dozen": "Dozen"
-        },
-        "conditions": {
-          "new": "New",
-          "used": "Used",
-          "refurbished": "Refurbished"
-        },
-        "statuses": {
-          "visible": "Visible",
-          "draft": "Draft",
-          "outOfStock": "Out of Stock"
-        },
-        "preview": {
-          "title": "Preview",
-          "product": "Product"
-        }
-      },
-      "messages": {
-        "created": "Product created successfully",
-        "updated": "Product updated successfully",
-        "saved": "Changes saved automatically",
-        "error": "Error processing request",
-        "nameRequired": "Product name is required",
-        "mustCreateFirst": "First create the product to edit this section"
-      },
-      "actions": {
-        "save": "Save",
-        "saving": "Saving...",
-        "cancel": "Cancel",
-        "create": "Create Product",
-        "update": "Update Product"
-      }
+      "description": "Add, edit and organize your catalog products."
     },
     "categories": {
       "title": "Categories",

@@ -5,13 +5,14 @@ interface CloudinaryUploadResponse {
   bytes: number
 }
 
-export type CloudinaryFolder = 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners'
-
 interface UploadOptions {
-  folder: CloudinaryFolder
+  folder: 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners'
   maxSizeBytes?: number
   storeId?: string // Para crear carpetas específicas por tienda
 }
+
+// Type alias para asegurar compatibilidad
+export type CloudinaryFolder = 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners'
 
 interface DeleteOptions {
   publicId: string
