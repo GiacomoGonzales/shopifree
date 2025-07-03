@@ -1,7 +1,6 @@
 import { 
   doc, 
   setDoc, 
-  getDoc, 
   query, 
   collection, 
   where, 
@@ -89,8 +88,8 @@ export interface StoreConfig {
     language?: 'es' | 'en'
   }
   ownerId: string
-  createdAt: any
-  updatedAt: any
+  createdAt: Date | unknown
+  updatedAt: Date | unknown
 }
 
 export type StoreWithId = StoreConfig & { id: string }
@@ -141,7 +140,7 @@ export const updateStore = async (storeId: string, data: Partial<StoreConfig>) =
 }
 
 // Update specific store field
-export const updateStoreField = async (storeId: string, field: string, value: any) => {
+export const updateStoreField = async (storeId: string, field: string, value: unknown) => {
   try {
     const db = getFirebaseDb()
     if (!db) {

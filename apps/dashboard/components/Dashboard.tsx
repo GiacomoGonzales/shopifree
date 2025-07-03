@@ -5,11 +5,15 @@ import { useTranslations } from 'next-intl'
 import DashboardLayout from './DashboardLayout'
 
 interface DashboardProps {
-  store: any
+  store: {
+    storeName?: string
+    slug?: string  
+    slogan?: string
+    currency?: string
+  }
 }
 
 export default function Dashboard({ store }: DashboardProps) {
-  const { user, userData } = useAuth()
   const t = useTranslations('dashboard')
   const tHome = useTranslations('pages.home')
 

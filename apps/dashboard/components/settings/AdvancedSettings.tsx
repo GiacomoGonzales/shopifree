@@ -5,12 +5,11 @@ import { useTranslations } from 'next-intl'
 import { StoreWithId } from '../../lib/store'
 
 interface AdvancedSettingsProps {
-  store: StoreWithId
   onUpdate: (data: Partial<StoreWithId>) => Promise<boolean>
   saving: boolean
 }
 
-export default function AdvancedSettings({ store, onUpdate, saving }: AdvancedSettingsProps) {
+export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsProps) {
   const t = useTranslations('pages.settings.advanced')
   const tActions = useTranslations('pages.settings.actions')
   

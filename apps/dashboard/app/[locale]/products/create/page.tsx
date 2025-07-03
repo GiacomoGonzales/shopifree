@@ -326,7 +326,7 @@ export default function CreateProductPage() {
     setDropdownOpen(false)
   }
 
-  const handleMetaFieldChange = (fieldId: string, value: string | string[], isMultiple: boolean = false) => {
+  const handleMetaFieldChange = (fieldId: string, value: string | string[]) => {
     setMetaFieldValues(prev => ({
       ...prev,
       [fieldId]: value

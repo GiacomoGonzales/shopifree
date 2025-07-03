@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useAuth } from '../lib/simple-auth-context'
-import { getLandingUrl } from '../lib/config'
 import PageLoadingState from './PageLoadingState'
 
 // Iconos para el menú
@@ -162,7 +161,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [pathname, currentPath])
 
   // Cerrar dropdown al hacer clic fuera
-  const handleClickOutside = (event: React.MouseEvent) => {
+  const handleClickOutside = () => {
     if (languageDropdownOpen) {
       setLanguageDropdownOpen(false)
     }
@@ -173,7 +172,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Obtener el locale actual de la URL
   const currentLocale = pathname.split('/')[1] || 'es'
-  const otherLocale = currentLocale === 'es' ? 'en' : 'es'
 
   // Función para obtener el título dinámico de la página actual
   const getPageTitle = () => {
@@ -316,7 +314,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const renderMenuItems = (isMobile: boolean = false) => {
     const items: JSX.Element[] = []
     
-    navigationItems.forEach((item, index) => {
+    navigationItems.forEach((item) => {
       const Icon = item.icon
       const isActive = isActiveRoute(item.href)
       

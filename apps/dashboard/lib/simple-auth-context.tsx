@@ -11,11 +11,11 @@ import { createUserDocument } from './user'
 interface UserData {
   uid: string
   email: string | null
-  [key: string]: any // Allow any additional fields
+  [key: string]: unknown // Allow any additional fields
 }
 
 interface DebugInfo {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface AuthContextType {

@@ -5,14 +5,35 @@ import { useState, useEffect } from 'react'
 // Declaración de tipos para Google Maps API
 declare global {
   interface Window {
-    google: any
+    google: {
+      maps: {
+        places: {
+          Autocomplete: new (input: HTMLInputElement, options?: unknown) => {
+            addListener: (eventName: string, handler: () => void) => void
+            getPlace: () => {
+              geometry?: {
+                location?: {
+                  lat: () => number
+                  lng: () => number
+                }
+              }
+              formatted_address?: string
+              name?: string
+            }
+          }
+        }
+        event: {
+          clearInstanceListeners: (instance: unknown) => void
+        }
+      }
+    }
   }
 }
 import { useTranslations } from 'next-intl'
 import { useAuth } from '../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../lib/store'
 import DashboardLayout from '../../../../components/DashboardLayout'
-import { uploadImageToCloudinary, validateImageFile, replaceImageInCloudinary, deleteImageFromCloudinary } from '../../../../lib/cloudinary'
+import { validateImageFile, replaceImageInCloudinary, deleteImageFromCloudinary } from '../../../../lib/cloudinary'
 
 const sections = [
   { id: 'info', key: 'info' },
@@ -240,7 +261,7 @@ export default function GeneralSettingsPage() {
     }
   }, [isGoogleMapsLoaded, autocompleteRef, formData.hasPhysicalLocation])
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | number | boolean) => {
     if (field.startsWith('socialMedia.')) {
       const socialField = field.split('.')[1]
       setFormData(prev => ({
@@ -391,7 +412,7 @@ export default function GeneralSettingsPage() {
     setSaving(true)
     try {
       // Crear una copia de formData sin el campo address legacy para evitar duplicación
-      const { address, ...dataToSave } = formData
+      const { address: _address, ...dataToSave } = formData
       
       // Si hay dirección en location, no enviar el campo address legacy
       const finalData = formData.location.address 

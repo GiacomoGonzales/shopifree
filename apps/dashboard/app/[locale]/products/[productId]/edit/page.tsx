@@ -12,8 +12,6 @@ import { uploadImageToCloudinary } from '../../../../../lib/cloudinary'
 import { Card } from '../../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../../packages/ui/src/components/Input'
-import { CATEGORY_OPTIONS, META_FIELDS_BY_CATEGORY } from '../../create/productCategorization'
-
 // Interfaces
 interface ProductVariant {
   id: string
@@ -30,28 +28,12 @@ interface MediaFile {
   uploading: boolean
 }
 
-interface MetaField {
-  id: string
-  name: string
-  type: 'text' | 'select' | 'tags'
-  options?: string[]
-  value?: string | string[]
-}
-
-interface CategoryNode {
-  id: string
-  name: string
-  children?: CategoryNode[]
-  isLeaf?: boolean
-}
-
 export default function EditProductPage() {
   const router = useRouter()
   const params = useParams()
   const productId = params.productId as string
   const { store, loading: storeLoading, currency, currencySymbol, currencyName, formatPrice } = useStore()
   
-  const [product, setProduct] = useState<ProductWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -70,7 +52,6 @@ export default function EditProductPage() {
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([])
   const [loadingCategories, setLoadingCategories] = useState(false)
   const [loadingSubcategories, setLoadingSubcategories] = useState(false)
-  const [categories, setCategories] = useState<string[]>([])
   const [price, setPrice] = useState('')
   const [comparePrice, setComparePrice] = useState('')
   const [cost, setCost] = useState('')
@@ -79,16 +60,12 @@ export default function EditProductPage() {
   const [weight, setWeight] = useState('')
   const [hasVariants, setHasVariants] = useState(false)
   const [variants, setVariants] = useState<ProductVariant[]>([])
-  const [categoryPath, setCategoryPath] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedSubcategory, setSelectedSubcategory] = useState('')
   const [metaFieldValues, setMetaFieldValues] = useState<Record<string, string | string[]>>({})
-  const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
   const [seoTitle, setSeoTitle] = useState('')
   const [metaDescription, setMetaDescription] = useState('')
   const [urlSlug, setUrlSlug] = useState('')
-  const [showAdvanced, setShowAdvanced] = useState(false)
   const [countryOrigin, setCountryOrigin] = useState('')
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [status, setStatus] = useState<'draft' | 'active' | 'archived'>('draft')
@@ -110,7 +87,7 @@ export default function EditProductPage() {
           return
         }
 
-        setProduct(productData)
+        // Product data loaded successfully
         
         // Prellenar todos los campos del formulario
         setProductName(productData.name)
