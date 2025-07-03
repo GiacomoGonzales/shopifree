@@ -119,15 +119,15 @@ export default function CategoriesPage() {
     setIsModalOpen(true)
   }
 
-  const handleSaveCategory = async (categoryData: Omit<CategoryWithId, 'id'>) => {
+  const handleSaveCategory = async (categoryData: Partial<CategoryWithId>) => {
     try {
       if (selectedCategory) {
         // Actualizar categoría existente
-        await updateCategory(storeId, selectedCategory.id, categoryData, selectedCategory.parentCategoryId || undefined)
+        await updateCategory(storeId, selectedCategory.id, categoryData as Omit<CategoryWithId, 'id'>, selectedCategory.parentCategoryId || undefined)
         showToast(t('messages.updated'), 'success')
       } else {
         // Crear nueva categoría
-        await createCategory(storeId, categoryData)
+        await createCategory(storeId, categoryData as Omit<CategoryWithId, 'id'>)
         showToast(t('messages.created'), 'success')
       }
 
