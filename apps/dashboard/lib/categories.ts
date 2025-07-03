@@ -265,7 +265,7 @@ export const updateCategory = async (
       throw new Error('Firebase db not available')
     }
 
-    const updateData: { [key: string]: unknown } = {
+    const updateData: Record<string, any> = {
       ...categoryData,
       updatedAt: serverTimestamp()
     }
