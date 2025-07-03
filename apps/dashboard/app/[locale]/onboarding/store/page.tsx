@@ -172,34 +172,36 @@ function StoreOnboardingContent() {
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
-  const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false)
-  const [subdomainAvailable, setSubdomainAvailable] = useState<boolean | null>(null)
-  const [subdomainError, setSubdomainError] = useState<string>('')
 
-  const checkSubdomain = useCallback(async (subdomain: string) => {
-    setIsCheckingSubdomain(true)
-    setSubdomainAvailable(null)
-    setSubdomainError('')
+  // Validación de subdominio simplificada (sin estado de loading)
+  const validateSubdomain = useCallback(async (subdomain: string) => {
+    if (!subdomain) return
     
     try {
       const result = await checkSubdomainAvailability(subdomain)
-      setSubdomainAvailable(result.available)
-      if (!result.available) {
-        setSubdomainError('Este subdominio no está disponible')
+      if (result) {
+        setSubdomainStatus('available')
+        setErrors(prev => ({ ...prev, subdomain: undefined }))
+      } else {
+        setSubdomainStatus('unavailable')
+        setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainTaken') }))
       }
     } catch (error) {
       console.error('Error checking subdomain:', error)
-      setSubdomainError('Error al verificar el subdominio')
-    } finally {
-      setIsCheckingSubdomain(false)
+      setSubdomainStatus('unavailable')
+      setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainCheckError') }))
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     if (formData.subdomain && currentStep === 1) {
-      checkSubdomain(formData.subdomain)
+      setSubdomainStatus('checking')
+      const timer = setTimeout(() => {
+        validateSubdomain(formData.subdomain)
+      }, 500)
+      return () => clearTimeout(timer)
     }
-  }, [formData.subdomain, currentStep, checkSubdomain])
+  }, [formData.subdomain, currentStep, validateSubdomain])
 
   // Cargar Google Maps API
   useEffect(() => {
