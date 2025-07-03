@@ -112,7 +112,7 @@ export default function BrandsPage() {
     setIsModalOpen(true)
   }
 
-  const handleSaveBrand = async (brandData: Omit<BrandWithId, 'id'>) => {
+  const handleSaveBrand = async (brandData: { name: string; description: string; image: string }) => {
     try {
       if (selectedBrand) {
         // Actualizar marca existente
