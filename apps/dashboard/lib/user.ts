@@ -2,24 +2,16 @@ import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { User as FirebaseUser } from 'firebase/auth'
 import { getFirebaseDb } from './firebase'
 
-interface UserData {
+export interface UserDocument {
   uid: string
   email: string | null
   displayName: string | null
   photoURL: string | null
   [key: string]: unknown
-}
-
-export interface UserDocument {
-  uid: string
-  email: string
-  name: string
-  role: string
-  [key: string]: unknown
-  createdAt: any
-  updatedAt: any
+  createdAt: unknown
+  updatedAt: unknown
   // Add any other custom fields you need
-  lastLoginAt?: any
+  lastLoginAt?: unknown
   isActive?: boolean
   phone?: string
   timezone?: string

@@ -85,7 +85,6 @@ export default function GeneralSettingsPage() {
   const [copySuccess, setCopySuccess] = useState(false)
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
-  const [address, setAddress] = useState(store?.address || '')
 
   const [formData, setFormData] = useState({
     storeName: '',
@@ -410,16 +409,11 @@ export default function GeneralSettingsPage() {
     
     setSaving(true)
     try {
-      // Crear una copia de formData sin el campo address legacy para evitar duplicación
-      const { address: _address, ...dataToSave } = formData
+      // Crear una copia de formData para guardar
+      const dataToSave = { ...formData }
       
-      // Si hay dirección en location, no enviar el campo address legacy
-      const finalData = formData.location.address 
-        ? dataToSave 
-        : { ...dataToSave, address: formData.address }
-      
-      await updateStore(store.id, finalData)
-      setStore(prev => prev ? { ...prev, ...finalData } : null)
+      await updateStore(store.id, dataToSave)
+      setStore(prev => prev ? { ...prev, ...dataToSave } : null)
       setSaveMessage(tActions('saved'))
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (error) {

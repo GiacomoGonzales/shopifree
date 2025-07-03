@@ -6,12 +6,14 @@ export interface UserDocument {
   uid: string
   email: string | null
   displayName: string | null
-  createdAt: any
-  updatedAt: any
+  createdAt: unknown
+  updatedAt: unknown
   // Add any other custom fields you need
   role?: string
-  lastLoginAt?: any
+  lastLoginAt?: unknown
   isActive?: boolean
+  phone?: string
+  photoURL?: string
 }
 
 /**
@@ -41,7 +43,7 @@ export const getUserDocument = async (uid: string): Promise<UserDocument | null>
 /**
  * Create or update user document in Firestore
  */
-export const createUserDocument = async (user: User, additionalData?: Record<string, any>): Promise<UserDocument> => {
+export const createUserDocument = async (user: User, additionalData?: Record<string, unknown>): Promise<UserDocument> => {
   try {
     const db = getFirebaseDb()
     if (!db) {

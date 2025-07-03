@@ -87,11 +87,11 @@ export const updateOrderStatus = async (
 }
 
 // Formatear fecha para mostrar
-export const formatOrderDate = (timestamp: any, locale: string = 'es-ES'): string => {
+export const formatOrderDate = (timestamp: unknown, locale: string = 'es-ES'): string => {
   if (!timestamp) return 'Fecha no disponible'
   
   try {
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+    const date = (timestamp as any)?.toDate ? (timestamp as any).toDate() : new Date(timestamp as string | number | Date)
     return new Intl.DateTimeFormat(locale, {
       year: 'numeric',
       month: 'short',

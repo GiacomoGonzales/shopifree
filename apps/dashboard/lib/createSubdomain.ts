@@ -13,10 +13,10 @@ export async function createSubdomain(subdomain: string): Promise<boolean> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ subdomain }),
+      body: JSON.stringify(subdomain) as string,
     });
     
-    const result = await response.json();
+    const result = await response.json() as { available: boolean; message?: string };
     
     if (!response.ok) {
       console.error('❌ [CLIENT] Error de API route:', result.error);

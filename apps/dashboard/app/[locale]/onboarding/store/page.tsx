@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 // Declaración de tipos para Google Maps API
 declare global {
@@ -200,35 +200,28 @@ function StoreOnboardingContent() {
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
+  const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false)
+  const [subdomainAvailable, setSubdomainAvailable] = useState<boolean | null>(null)
+  const [subdomainError, setSubdomainError] = useState<string>('')
 
-  // Validación de subdominio en tiempo real
-  const checkSubdomain = async (subdomain: string) => {
-    if (!subdomain) {
-      setSubdomainStatus('idle')
-      return
-    }
+  const checkSubdomain = useCallback(async (subdomain: string) => {
+    setIsCheckingSubdomain(true)
+    setSubdomainAvailable(null)
+    setSubdomainError('')
     
-    const validation = validateSubdomain(subdomain)
-    if (!validation.isValid) {
-      setErrors(prev => ({ ...prev, subdomain: validation.error }))
-      setSubdomainStatus('unavailable')
-      return
-    }
-    
-    setSubdomainStatus('checking')
     try {
-      const isAvailable = await checkSubdomainAvailability(subdomain)
-      setSubdomainStatus(isAvailable ? 'available' : 'unavailable')
-      if (!isAvailable) {
-        setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainTaken') }))
-      } else {
-        setErrors(prev => ({ ...prev, subdomain: undefined }))
+      const result = await checkSubdomainAvailability(subdomain)
+      setSubdomainAvailable(result.available)
+      if (!result.available) {
+        setSubdomainError('Este subdominio no está disponible')
       }
-    } catch {
-      setSubdomainStatus('unavailable')
-      setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainCheckError') }))
+    } catch (error) {
+      console.error('Error checking subdomain:', error)
+      setSubdomainError('Error al verificar el subdominio')
+    } finally {
+      setIsCheckingSubdomain(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (formData.subdomain && currentStep === 1) {

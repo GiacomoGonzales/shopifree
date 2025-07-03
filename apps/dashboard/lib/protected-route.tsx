@@ -6,7 +6,6 @@ import AuthGuard from '../components/AuthGuard'
 interface ProtectedRouteProps {
   children: ReactNode
   fallback?: ReactNode
-  requireUserDocument?: boolean
 }
 
 /**
@@ -15,8 +14,7 @@ interface ProtectedRouteProps {
  */
 export default function ProtectedRoute({ 
   children, 
-  fallback, 
-  requireUserDocument = true 
+  fallback 
 }: ProtectedRouteProps) {
   return (
     <AuthGuard fallback={fallback}>
@@ -33,14 +31,12 @@ export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   options?: {
     fallback?: ReactNode
-    requireUserDocument?: boolean
   }
 ) {
   const AuthenticatedComponent = (props: P) => {
     return (
       <ProtectedRoute 
         fallback={options?.fallback}
-        requireUserDocument={options?.requireUserDocument}
       >
         <WrappedComponent {...props} />
       </ProtectedRoute>

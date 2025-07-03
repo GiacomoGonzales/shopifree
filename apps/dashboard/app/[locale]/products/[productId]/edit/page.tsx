@@ -7,12 +7,11 @@ import { RichTextEditor } from '../../../../../components/RichTextEditor'
 import { useStore } from '../../../../../lib/hooks/useStore'
 import { getBrands, type BrandWithId } from '../../../../../lib/brands'
 import { getParentCategories, getSubcategories, type CategoryWithId } from '../../../../../lib/categories'
-import { getProduct, updateProduct, generateSlug, validateProduct, type ProductWithId } from '../../../../../lib/products'
+import { getProduct, updateProduct, generateSlug, validateProduct } from '../../../../../lib/products'
 import { uploadImageToCloudinary } from '../../../../../lib/cloudinary'
 import { Card } from '../../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../../packages/ui/src/components/Input'
-import { Product } from '@/lib/products'
 // Interfaces
 interface ProductVariant {
   id: string

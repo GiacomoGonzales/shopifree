@@ -35,7 +35,7 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
 
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | number | boolean) => {
     if (field.startsWith('socialMedia.')) {
       const socialField = field.split('.')[1]
       setFormData(prev => ({

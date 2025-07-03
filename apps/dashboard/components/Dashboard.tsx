@@ -1,6 +1,7 @@
 'use client'
 
-import { useAuth } from '../lib/simple-auth-context'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import DashboardLayout from './DashboardLayout'
 

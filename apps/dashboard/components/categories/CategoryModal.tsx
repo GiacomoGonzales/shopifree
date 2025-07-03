@@ -8,7 +8,7 @@ import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile }
 interface CategoryModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (categoryData: any) => Promise<void>
+  onSave: (categoryData: Partial<CategoryWithId>) => Promise<void>
   category?: CategoryWithId | null
   parentCategories: CategoryWithId[]
   storeId: string
@@ -133,7 +133,7 @@ export default function CategoryModal({
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     if (!validateForm()) return
