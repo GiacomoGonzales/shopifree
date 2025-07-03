@@ -19,9 +19,8 @@ import {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
-  const [storeData, setStoreData] = useState<any>(null)
+  const [storeData, setStoreData] = useState<{ id: string; storeName: string; currency: string } | null>(null)
   
   const { user } = useAuth()
   const t = useTranslations('pages.orders')
@@ -32,13 +31,10 @@ export default function OrdersPage() {
       if (!user?.uid) return
 
       try {
-        setLoading(true)
-        
         // Obtener datos de la tienda
         const store = await getUserStore(user.uid)
         if (!store) {
           console.error('No store found for user')
-          setLoading(false)
           return
         }
         
@@ -49,11 +45,9 @@ export default function OrdersPage() {
           store.id,
           (ordersData) => {
             setOrders(ordersData)
-            setLoading(false)
           },
           (error) => {
             console.error('Error loading orders:', error)
-            setLoading(false)
           }
         )
 
@@ -61,7 +55,6 @@ export default function OrdersPage() {
         return () => unsubscribe()
       } catch (error) {
         console.error('Error loading store:', error)
-        setLoading(false)
       }
     }
 

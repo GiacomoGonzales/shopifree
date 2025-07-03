@@ -1,11 +1,9 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
 import { useAuth } from '../../../lib/simple-auth-context'
 import DashboardLayout from '../../../components/DashboardLayout'
 
 export default function AccountPage() {
-  const t = useTranslations('pages.account')
   const { user, userData } = useAuth()
 
   return (

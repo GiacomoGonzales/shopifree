@@ -1,6 +1,5 @@
 import { 
   doc, 
-  setDoc, 
   getDoc, 
   getDocs,
   updateDoc,
@@ -8,7 +7,6 @@ import {
   query, 
   collection, 
   where,
-  orderBy,
   serverTimestamp,
   addDoc
 } from 'firebase/firestore'
@@ -22,8 +20,8 @@ export interface Category {
   imagePublicId: string
   parentCategoryId: string | null
   order: number
-  createdAt: any
-  updatedAt: any
+  createdAt: Date | unknown
+  updatedAt: Date | unknown
 }
 
 export type CategoryWithId = Category & { id: string }
@@ -150,8 +148,8 @@ export const getCategories = async (storeId: string): Promise<CategoryWithId[]> 
       if (!b.createdAt) return -1
       
       // Convertir timestamps a números para comparar
-      const aTime = a.createdAt.seconds || 0
-      const bTime = b.createdAt.seconds || 0
+      const aTime = (a.createdAt as { seconds?: number })?.seconds || 0
+      const bTime = (b.createdAt as { seconds?: number })?.seconds || 0
       return aTime - bTime
     })
     
@@ -267,7 +265,7 @@ export const updateCategory = async (
       throw new Error('Firebase db not available')
     }
 
-    let updateData: any = {
+    const updateData: { [key: string]: unknown } = {
       ...categoryData,
       updatedAt: serverTimestamp()
     }

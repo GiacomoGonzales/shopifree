@@ -1,6 +1,5 @@
 import { 
   doc, 
-  setDoc, 
   getDoc, 
   getDocs,
   updateDoc,
@@ -19,8 +18,8 @@ export interface Brand {
   description: string
   image: string
   order: number
-  createdAt: any
-  updatedAt: any
+  createdAt: Date | unknown
+  updatedAt: Date | unknown
 }
 
 export type BrandWithId = Brand & { id: string }
@@ -170,7 +169,7 @@ export const updateBrand = async (
       throw new Error('Firebase db not available')
     }
 
-    let updateData: any = {
+    const updateData = {
       ...brandData,
       updatedAt: serverTimestamp()
     }

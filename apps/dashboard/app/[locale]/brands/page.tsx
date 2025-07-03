@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { useParams } from 'next/navigation'
 import DashboardLayout from '../../../components/DashboardLayout'
 import BrandModal from '../../../components/brands/BrandModal'
 import BrandsList from '../../../components/brands/BrandsList'
@@ -53,8 +52,6 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
 export default function BrandsPage() {
   const t = useTranslations('pages.brands')
   const { user } = useAuth()
-  const params = useParams()
-  const locale = params.locale as string
   
   const [brands, setBrands] = useState<BrandWithId[]>([])
   const [loading, setLoading] = useState(true)
@@ -115,7 +112,7 @@ export default function BrandsPage() {
     setIsModalOpen(true)
   }
 
-  const handleSaveBrand = async (brandData: any) => {
+  const handleSaveBrand = async (brandData: Omit<BrandWithId, 'id'>) => {
     try {
       if (selectedBrand) {
         // Actualizar marca existente

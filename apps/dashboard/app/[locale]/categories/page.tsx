@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { useParams } from 'next/navigation'
 import DashboardLayout from '../../../components/DashboardLayout'
 import CategoryModal from '../../../components/categories/CategoryModal'
 import CategoriesList from '../../../components/categories/CategoriesList'
@@ -53,8 +52,6 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
 export default function CategoriesPage() {
   const t = useTranslations('pages.categories')
   const { user } = useAuth()
-  const params = useParams()
-  const locale = params.locale as string
   
   const [categories, setCategories] = useState<CategoryWithId[]>([])
   const [parentCategories, setParentCategories] = useState<CategoryWithId[]>([])
@@ -122,7 +119,7 @@ export default function CategoriesPage() {
     setIsModalOpen(true)
   }
 
-  const handleSaveCategory = async (categoryData: any) => {
+  const handleSaveCategory = async (categoryData: Omit<CategoryWithId, 'id'>) => {
     try {
       if (selectedCategory) {
         // Actualizar categoría existente

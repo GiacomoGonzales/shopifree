@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '../../../../components/DashboardLayout'
 import { RichTextEditor } from '../../../../components/RichTextEditor'
 import { useStore } from '../../../../lib/hooks/useStore'
 import { getBrands, type BrandWithId } from '../../../../lib/brands'
 import { getParentCategories, getSubcategories, type CategoryWithId } from '../../../../lib/categories'
-import { createProduct, generateSlug, validateProduct, type MediaFile as ProductMediaFile } from '../../../../lib/products'
+import { createProduct, generateSlug, validateProduct } from '../../../../lib/products'
 import { uploadImageToCloudinary } from '../../../../lib/cloudinary'
 import { Card } from '../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../packages/ui/src/components/Button'
@@ -31,14 +30,6 @@ interface MediaFile {
   uploading: boolean
 }
 
-interface MetaField {
-  id: string
-  name: string
-  type: 'text' | 'select' | 'tags'
-  options?: string[]
-  value?: string | string[]
-}
-
 interface CategoryNode {
   id: string
   name: string
@@ -47,7 +38,6 @@ interface CategoryNode {
 }
 
 export default function CreateProductPage() {
-  const t = useTranslations()
   const router = useRouter()
   const { store, loading: storeLoading, currency, currencySymbol, currencyName, formatPrice } = useStore()
   
@@ -65,7 +55,6 @@ export default function CreateProductPage() {
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([])
   const [loadingCategories, setLoadingCategories] = useState(false)
   const [loadingSubcategories, setLoadingSubcategories] = useState(false)
-  const [categories, setCategories] = useState<string[]>([])
   const [price, setPrice] = useState('')
   const [comparePrice, setComparePrice] = useState('')
   const [cost, setCost] = useState('')
@@ -76,7 +65,6 @@ export default function CreateProductPage() {
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [categoryPath, setCategoryPath] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedSubcategory, setSelectedSubcategory] = useState('')
   const [metaFieldValues, setMetaFieldValues] = useState<Record<string, string | string[]>>({})
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])

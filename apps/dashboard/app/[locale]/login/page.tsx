@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Button, Input } from '@shopifree/ui'
 import { signInWithEmail, signInWithGoogle } from '../../../lib/auth'
 import { useAuth } from '../../../lib/simple-auth-context'
 

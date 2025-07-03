@@ -1,10 +1,8 @@
 import { 
   doc, 
-  setDoc, 
   getDoc, 
   query, 
   collection, 
-  where, 
   getDocs,
   serverTimestamp,
   updateDoc,
@@ -76,14 +74,14 @@ export interface Product {
   
   // Metadatos
   storeId: string
-  createdAt: any
-  updatedAt: any
+  createdAt: Date | unknown
+  updatedAt: Date | unknown
 }
 
 export type ProductWithId = Product & { id: string }
 
 // Función auxiliar para limpiar valores undefined de un objeto
-const cleanUndefinedValues = (obj: any): any => {
+const cleanUndefinedValues = (obj: unknown): unknown => {
   if (obj === null || obj === undefined) {
     return null
   }
@@ -93,8 +91,8 @@ const cleanUndefinedValues = (obj: any): any => {
   }
   
   if (typeof obj === 'object') {
-    const cleaned: any = {}
-    for (const [key, value] of Object.entries(obj)) {
+    const cleaned: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (value !== undefined) {
         cleaned[key] = cleanUndefinedValues(value)
       }
@@ -320,15 +318,15 @@ export const sortProducts = (products: ProductWithId[], sortBy: SortOption): Pro
       return sortedProducts.sort((a, b) => b.price - a.price)
     case 'created-asc':
       return sortedProducts.sort((a, b) => {
-        const aTime = a.createdAt?.seconds || 0
-        const bTime = b.createdAt?.seconds || 0
+        const aTime = (a.createdAt as { seconds?: number })?.seconds || 0
+        const bTime = (b.createdAt as { seconds?: number })?.seconds || 0
         return aTime - bTime
       })
     case 'created-desc':
     default:
       return sortedProducts.sort((a, b) => {
-        const aTime = a.createdAt?.seconds || 0
-        const bTime = b.createdAt?.seconds || 0
+        const aTime = (a.createdAt as { seconds?: number })?.seconds || 0
+        const bTime = (b.createdAt as { seconds?: number })?.seconds || 0
         return bTime - aTime
       })
   }

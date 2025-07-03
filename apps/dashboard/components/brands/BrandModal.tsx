@@ -8,7 +8,7 @@ import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile, 
 interface BrandModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (brandData: any) => Promise<void>
+  onSave: (brandData: { name: string; description: string; image: string }) => Promise<void>
   brand?: BrandWithId | null
   storeId: string
 }
@@ -124,7 +124,8 @@ export default function BrandModal({
     
     const files = e.dataTransfer.files
     if (files && files[0]) {
-      handleImageChange({ target: { files } } as any)
+      const fakeEvent = { target: { files } } as React.ChangeEvent<HTMLInputElement>
+      handleImageChange(fakeEvent)
     }
   }
 

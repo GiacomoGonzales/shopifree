@@ -14,9 +14,7 @@ interface UploadOptions {
 // Type alias para asegurar compatibilidad
 export type CloudinaryFolder = 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners'
 
-interface DeleteOptions {
-  publicId: string
-}
+
 
 // Configuración de Cloudinary
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME

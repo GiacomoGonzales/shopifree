@@ -1,13 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../lib/simple-auth-context'
-import { getUserStore, StoreWithId } from '../../lib/store'
+import { getUserStore } from '../../lib/store'
 import AuthGuard from '../../components/AuthGuard'
-import StoreSetup from '../../components/StoreSetup'
-import Dashboard from '../../components/Dashboard'
-import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 // Force dynamic rendering
@@ -17,8 +14,6 @@ function DashboardContent() {
   const t = useTranslations('loading')
   const router = useRouter()
   const { user, userData } = useAuth()
-  const [hasStore, setHasStore] = useState(false)
-  const [storeData, setStoreData] = useState<StoreWithId | null>(null)
   const [storeLoading, setStoreLoading] = useState(true)
   const [onboardingChecked, setOnboardingChecked] = useState(false)
 
@@ -50,8 +45,6 @@ function DashboardContent() {
           
           if (userStore) {
             console.log('✅ Store found, redirecting to home')
-            setHasStore(true)
-            setStoreData(userStore)
             setOnboardingChecked(true)
             
             // Redirect to home page
@@ -65,16 +58,12 @@ function DashboardContent() {
           }
         } catch (error) {
           console.error('Error getting user store:', error)
-          setHasStore(false)
-          setStoreData(null)
         } finally {
           setStoreLoading(false)
         }
       } else if (user === null) {
         // User is not authenticated, reset states
         console.log('❌ User not authenticated, resetting states')
-        setHasStore(false)
-        setStoreData(null)
         setStoreLoading(false)
         setOnboardingChecked(false)
       } else {
@@ -88,23 +77,7 @@ function DashboardContent() {
     checkOnboardingStatus()
   }, [user?.uid, userData, router]) // Include userData and router in dependencies
 
-  const handleStoreCreated = async () => {
-    // After store creation, refresh the store data
-    if (user?.uid) {
-      setStoreLoading(true)
-      try {
-        const userStore = await getUserStore(user.uid)
-        if (userStore) {
-          setHasStore(true)
-          setStoreData(userStore)
-        }
-      } catch (error) {
-        console.error('Error refreshing store data:', error)
-      } finally {
-        setStoreLoading(false)
-      }
-    }
-  }
+
 
   // Show loading while checking onboarding status or store data
   if (storeLoading || !onboardingChecked) {

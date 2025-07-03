@@ -5,10 +5,31 @@ import { useState, useEffect } from 'react'
 // Declaración de tipos para Google Maps API
 declare global {
   interface Window {
-    google: any
+    google: {
+      maps: {
+        places: {
+          Autocomplete: new (input: HTMLInputElement, options?: unknown) => {
+            addListener: (eventName: string, handler: () => void) => void
+            getPlace: () => {
+              geometry?: {
+                location?: {
+                  lat: () => number
+                  lng: () => number
+                }
+              }
+              formatted_address?: string
+              name?: string
+            }
+          }
+        }
+        event: {
+          clearInstanceListeners: (instance: unknown) => void
+        }
+      }
+    }
   }
 }
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../../lib/simple-auth-context'
 import { createStore, checkSubdomainAvailability, validateSubdomain } from '../../../../lib/store'
 import { useTranslations } from 'next-intl'
@@ -123,7 +144,7 @@ const monedas = [
   { code: 'AUD', symbol: 'A$', name: 'Dólar Australiano' }
 ]
 
-const getCreationSteps = (t: any) => [
+const getCreationSteps = (t: (key: string) => string) => [
   { text: t('creationSteps.basicInfo'), progress: 20 },
   { text: t('creationSteps.branding'), progress: 40 },
   { text: t('creationSteps.payments'), progress: 60 },
@@ -134,8 +155,6 @@ const getCreationSteps = (t: any) => [
 function StoreOnboardingContent() {
   const t = useTranslations('onboarding.store')
   const router = useRouter()
-  const params = useParams()
-  const locale = params.locale as string
   const { user } = useAuth()
   
   const [currentStep, setCurrentStep] = useState(1)
@@ -205,7 +224,7 @@ function StoreOnboardingContent() {
       } else {
         setErrors(prev => ({ ...prev, subdomain: undefined }))
       }
-    } catch (error) {
+    } catch {
       setSubdomainStatus('unavailable')
       setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainCheckError') }))
     }
@@ -362,7 +381,7 @@ function StoreOnboardingContent() {
     }
   }
 
-  const handleInputChange = (field: keyof StoreFormData, value: any) => {
+  const handleInputChange = (field: keyof StoreFormData, value: string | boolean | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }))

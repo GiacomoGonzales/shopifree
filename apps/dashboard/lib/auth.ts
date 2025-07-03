@@ -31,17 +31,18 @@ export const signInWithEmail = async (email: string, password: string) => {
     
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     return { user: userCredential.user, error: null }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error signing in:', error)
     let errorMessage = 'Error al iniciar sesión'
     
-    if (error?.code === 'auth/user-not-found') {
+    const firebaseError = error as { code?: string }
+    if (firebaseError?.code === 'auth/user-not-found') {
       errorMessage = 'Usuario no encontrado'
-    } else if (error?.code === 'auth/wrong-password') {
+    } else if (firebaseError?.code === 'auth/wrong-password') {
       errorMessage = 'Contraseña incorrecta'
-    } else if (error?.code === 'auth/invalid-email') {
+    } else if (firebaseError?.code === 'auth/invalid-email') {
       errorMessage = 'Email inválido'
-    } else if (error?.code === 'auth/too-many-requests') {
+    } else if (firebaseError?.code === 'auth/too-many-requests') {
       errorMessage = 'Demasiados intentos. Intenta más tarde'
     }
     
@@ -62,17 +63,18 @@ export const registerWithEmail = async (email: string, password: string) => {
     
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
     return { user: userCredential.user, error: null }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error registering:', error)
     let errorMessage = 'Error al crear la cuenta'
     
-    if (error?.code === 'auth/email-already-in-use') {
+    const firebaseError = error as { code?: string }
+    if (firebaseError?.code === 'auth/email-already-in-use') {
       errorMessage = 'Este email ya está registrado'
-    } else if (error?.code === 'auth/invalid-email') {
+    } else if (firebaseError?.code === 'auth/invalid-email') {
       errorMessage = 'Email inválido'
-    } else if (error?.code === 'auth/weak-password') {
+    } else if (firebaseError?.code === 'auth/weak-password') {
       errorMessage = 'La contraseña es muy débil'
-    } else if (error?.code === 'auth/too-many-requests') {
+    } else if (firebaseError?.code === 'auth/too-many-requests') {
       errorMessage = 'Demasiados intentos. Intenta más tarde'
     }
     
@@ -94,13 +96,14 @@ export const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider()
     const userCredential = await signInWithPopup(auth, provider)
     return { user: userCredential.user, error: null }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error signing in with Google:', error)
     let errorMessage = 'Error al iniciar sesión con Google'
     
-    if (error?.code === 'auth/popup-blocked') {
+    const firebaseError = error as { code?: string }
+    if (firebaseError?.code === 'auth/popup-blocked') {
       errorMessage = 'Popup bloqueado. Permite popups para este sitio'
-    } else if (error?.code === 'auth/popup-closed-by-user') {
+    } else if (firebaseError?.code === 'auth/popup-closed-by-user') {
       errorMessage = 'Proceso cancelado por el usuario'
     }
     

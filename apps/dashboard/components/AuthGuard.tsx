@@ -9,7 +9,7 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const { user, userData, loading, authInitialized, error, isAuthenticated } = useAuth()
+  const { loading, authInitialized, error, isAuthenticated } = useAuth()
 
   useEffect(() => {
     // Redirect to login if Firebase is initialized and user is not authenticated
