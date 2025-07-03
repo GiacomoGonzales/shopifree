@@ -8,7 +8,8 @@ import {
   collection, 
   where,
   serverTimestamp,
-  addDoc
+  addDoc,
+  FieldValue
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 
@@ -265,7 +266,7 @@ export const updateCategory = async (
       throw new Error('Firebase db not available')
     }
 
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, string | number | FieldValue | null | undefined> = {
       ...categoryData,
       updatedAt: serverTimestamp()
     }
