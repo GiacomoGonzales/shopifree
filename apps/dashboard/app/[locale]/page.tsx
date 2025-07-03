@@ -77,7 +77,11 @@ function DashboardContent() {
     checkOnboardingStatus()
   }, [user?.uid, userData, router]) // Include userData and router in dependencies
 
-
+  useEffect(() => {
+    if (user) {
+      router.push('/home');
+    }
+  }, [router, user]);
 
   // Show loading while checking onboarding status or store data
   if (storeLoading || !onboardingChecked) {

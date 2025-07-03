@@ -231,14 +231,10 @@ function StoreOnboardingContent() {
   }
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (formData.subdomain && currentStep === 1) {
-        checkSubdomain(formData.subdomain)
-      }
-    }, 500)
-    
-    return () => clearTimeout(timeoutId)
-  }, [formData.subdomain, currentStep])
+    if (formData.subdomain && currentStep === 1) {
+      checkSubdomain(formData.subdomain)
+    }
+  }, [formData.subdomain, currentStep, checkSubdomain])
 
   // Cargar Google Maps API
   useEffect(() => {

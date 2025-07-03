@@ -12,6 +12,7 @@ import { uploadImageToCloudinary } from '../../../../../lib/cloudinary'
 import { Card } from '../../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../../packages/ui/src/components/Input'
+import { Product } from '@/lib/products'
 // Interfaces
 interface ProductVariant {
   id: string

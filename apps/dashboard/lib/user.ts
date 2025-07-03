@@ -1,15 +1,24 @@
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
-import { User } from 'firebase/auth'
+import { User as FirebaseUser } from 'firebase/auth'
 import { getFirebaseDb } from './firebase'
 
-export interface UserDocument {
+interface UserData {
   uid: string
   email: string | null
   displayName: string | null
+  photoURL: string | null
+  [key: string]: unknown
+}
+
+export interface UserDocument {
+  uid: string
+  email: string
+  name: string
+  role: string
+  [key: string]: unknown
   createdAt: any
   updatedAt: any
   // Add any other custom fields you need
-  role?: string
   lastLoginAt?: any
   isActive?: boolean
   phone?: string
@@ -49,7 +58,7 @@ export const getUserDocument = async (uid: string): Promise<UserDocument | null>
 /**
  * Create or update user document in Firestore
  */
-export const createUserDocument = async (user: User, additionalData?: Record<string, any>): Promise<UserDocument> => {
+export const createUserDocument = async (user: FirebaseUser, additionalData?: Record<string, unknown>): Promise<UserDocument> => {
   try {
     const db = getFirebaseDb()
     if (!db) {

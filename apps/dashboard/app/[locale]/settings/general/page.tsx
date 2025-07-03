@@ -85,13 +85,13 @@ export default function GeneralSettingsPage() {
   const [copySuccess, setCopySuccess] = useState(false)
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
+  const [address, setAddress] = useState(store?.address || '')
 
   const [formData, setFormData] = useState({
     storeName: '',
     slogan: '',
     description: '',
     hasPhysicalLocation: false,
-    address: '',
     location: {
       address: '',
       lat: 0,
@@ -143,7 +143,6 @@ export default function GeneralSettingsPage() {
             slogan: userStore.slogan || '',
             description: userStore.description || '',
             hasPhysicalLocation: userStore.hasPhysicalLocation || false,
-            address: userStore.location?.address || userStore.address || '',
             location: {
               address: userStore.location?.address || userStore.address || '',
               lat: userStore.location?.lat || 0,

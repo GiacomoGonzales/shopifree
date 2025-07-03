@@ -8,11 +8,14 @@ export interface OrderItem {
   quantity: number
   price: number
   subtotal: number
+  productId: string
 }
 
 export interface Order {
   id: string
-  createdAt: any
+  userId: string
+  createdAt: Date
+  updatedAt: Date
   clientName: string
   clientPhone: string
   clientAddress?: string
@@ -22,7 +25,7 @@ export interface Order {
   shippingCost: number
   total: number
   paymentMethod: 'cash' | 'transfer' | 'card' | 'other'
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'shipped' | 'delivered' | 'cancelled'
+  status: string
   storeId: string
 }
 
@@ -138,8 +141,8 @@ export const generateWhatsAppMessage = (
   }
 
   const greetings = {
-    es: `Hola! Te escribo desde ${storeName} sobre tu pedido #${order.id}.\n\nTu pedido está ahora en estado: ${statusTranslations.es[order.status]}`,
-    en: `Hello! I'm writing from ${storeName} about your order #${order.id}.\n\nYour order is now in status: ${statusTranslations.en[order.status]}`
+    es: `Hola! Te escribo desde ${storeName} sobre tu pedido #${order.id}.\n\nTu pedido está ahora en estado: ${statusTranslations.es[order.status as keyof typeof statusTranslations.es]}`,
+    en: `Hello! I'm writing from ${storeName} about your order #${order.id}.\n\nYour order is now in status: ${statusTranslations.en[order.status as keyof typeof statusTranslations.en]}`
   }
 
   return encodeURIComponent(greetings[locale as keyof typeof greetings] || greetings.es)
@@ -150,4 +153,12 @@ export const generateWhatsAppURL = (phone: string, message: string): string => {
   // Limpiar número de teléfono (quitar espacios, guiones, etc.)
   const cleanPhone = phone.replace(/[^\d+]/g, '')
   return `https://wa.me/${cleanPhone}?text=${message}`
+}
+
+export async function getOrders(userId: string): Promise<Order[]> {
+  // ... existing code ...
+}
+
+export async function updateOrderStatus(orderId: string, status: string): Promise<void> {
+  // ... existing code ...
 } 
