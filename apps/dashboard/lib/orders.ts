@@ -153,12 +153,4 @@ export const generateWhatsAppURL = (phone: string, message: string): string => {
   // Limpiar número de teléfono (quitar espacios, guiones, etc.)
   const cleanPhone = phone.replace(/[^\d+]/g, '')
   return `https://wa.me/${cleanPhone}?text=${message}`
-}
-
-export async function getOrders(userId: string): Promise<Order[]> {
-  // ... existing code ...
-}
-
-export async function updateOrderStatus(orderId: string, status: string): Promise<void> {
-  // ... existing code ...
 } 
