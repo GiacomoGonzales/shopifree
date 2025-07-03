@@ -129,7 +129,8 @@ export default function CategoryModal({
     
     const files = e.dataTransfer.files
     if (files && files[0]) {
-      handleImageChange({ target: { files } } as any)
+      const event = { target: { files } } as React.ChangeEvent<HTMLInputElement>
+      handleImageChange(event)
     }
   }
 

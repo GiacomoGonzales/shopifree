@@ -1,37 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-
-// Declaración de tipos para Google Maps API
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        places: {
-          Autocomplete: new (input: HTMLInputElement, options?: unknown) => {
-            addListener: (eventName: string, handler: () => void) => void
-            getPlace: () => {
-              geometry?: {
-                location?: {
-                  lat: () => number
-                  lng: () => number
-                }
-              }
-              formatted_address?: string
-              name?: string
-            }
-          }
-        }
-        event: {
-          clearInstanceListeners: (instance: unknown) => void
-        }
-      }
-    }
-  }
-}
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../../lib/simple-auth-context'
-import { createStore, checkSubdomainAvailability, validateSubdomain } from '../../../../lib/store'
+import { createStore, checkSubdomainAvailability } from '../../../../lib/store'
 import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
 

@@ -91,7 +91,12 @@ export const formatOrderDate = (timestamp: unknown, locale: string = 'es-ES'): s
   if (!timestamp) return 'Fecha no disponible'
   
   try {
-    const date = (timestamp as any)?.toDate ? (timestamp as any).toDate() : new Date(timestamp as string | number | Date)
+    // Type guard para objetos con método toDate
+    const hasToDate = (obj: unknown): obj is { toDate: () => Date } => {
+      return typeof obj === 'object' && obj !== null && 'toDate' in obj && typeof (obj as { toDate: unknown }).toDate === 'function'
+    }
+    
+    const date = hasToDate(timestamp) ? timestamp.toDate() : new Date(timestamp as string | number | Date)
     return new Intl.DateTimeFormat(locale, {
       year: 'numeric',
       month: 'short',

@@ -182,10 +182,10 @@ export async function checkSubdomainExists(subdomain: string): Promise<boolean> 
       return false;
     }
     
-    const data = await response.json();
+    const data = await response.json() as { domains?: Array<{ name: string }> };
     const domains = data.domains || [];
     
-    const exists = domains.some((domain: any) => domain.name === domainName);
+    const exists = domains.some((domain) => domain.name === domainName);
     console.log(exists ? '✅ El dominio SÍ existe en Vercel' : '❌ El dominio NO existe en Vercel');
     
     return exists;
@@ -200,7 +200,7 @@ export async function checkSubdomainExists(subdomain: string): Promise<boolean> 
  * Función para obtener todos los dominios del proyecto
  * @returns lista de dominios o null si hay error
  */
-export async function getProjectDomains(): Promise<any[] | null> {
+export async function getProjectDomains(): Promise<Array<{ name: string }> | null> {
   const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'prj_YgKbAHmwKcCff31cek9QUWknSiAX';
   const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
   
@@ -223,10 +223,10 @@ export async function getProjectDomains(): Promise<any[] | null> {
       return null;
     }
     
-    const data = await response.json();
+    const data = await response.json() as { domains?: Array<{ name: string }> };
     const domains = data.domains || [];
     
-    console.log('📋 Dominios encontrados:', domains.map((d: any) => d.name));
+    console.log('📋 Dominios encontrados:', domains.map((d) => d.name));
     
     return domains;
     
