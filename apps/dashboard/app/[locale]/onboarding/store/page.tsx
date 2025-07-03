@@ -102,7 +102,7 @@ const monedas = [
   { code: 'COP', symbol: '$', name: 'Peso Colombiano' },
   { code: 'ARS', symbol: '$', name: 'Peso Argentino' },
   { code: 'CLP', symbol: '$', name: 'Peso Chileno' },
-  { code: 'PEN', symbol: 'S/', name: 'Sol Peruano' },
+  { code: 'PEN', symbol: 'S/', name: 'Nuevo Sol' },
   { code: 'BRL', symbol: 'R$', name: 'Real Brasileño' },
   { code: 'UYU', symbol: '$', name: 'Peso Uruguayo' },
   { code: 'PYG', symbol: '₲', name: 'Guaraní Paraguayo' },

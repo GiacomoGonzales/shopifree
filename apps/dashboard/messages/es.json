@@ -314,7 +314,69 @@
     "products": {
       "title": "Productos",
       "subtitle": "Gestiona tus productos",
-      "description": "Agrega, edita y organiza los productos de tu catálogo."
+      "description": "Agrega, edita y organiza los productos de tu catálogo.",
+      "addProduct": "Agregar Producto",
+      "export": "Exportar",
+      "import": "Importar",
+      "searchPlaceholder": "Buscar productos",
+      "filter": "Filtrar",
+      "sort": "Ordenar",
+      "loading": "Cargando productos...",
+      "noProducts": "No se encontraron productos",
+      "noProductsMessage": "Intenta ajustar los filtros de búsqueda.",
+      "noProductsEmpty": "No hay productos",
+      "noProductsEmptyMessage": "Comienza agregando tu primer producto.",
+      "totalProducts": "productos en total",
+      "totalProduct": "producto en total",
+      "inDevelopment": "En desarrollo...",
+      "tabs": {
+        "all": "Todos",
+        "active": "Activos",
+        "draft": "Borradores",
+        "archived": "Archivados"
+      },
+      "table": {
+        "product": "Producto",
+        "status": "Estado",
+        "categories": "Categorías",
+        "brand": "Marca",
+        "actions": "Acciones",
+        "noCategory": "Sin categoría",
+        "noBrand": "Sin marca"
+      },
+      "status": {
+        "active": "Activo",
+        "draft": "Borrador",
+        "archived": "Archivado"
+      },
+      "actions": {
+        "preview": "Vista previa en tienda",
+        "edit": "Editar producto",
+        "delete": "Eliminar producto",
+        "confirmDelete": "¿Estás seguro de que quieres eliminar este producto?"
+      },
+      "sortOptions": {
+        "newest": "Más recientes",
+        "oldest": "Más antiguos",
+        "nameAsc": "Nombre A-Z",
+        "nameDesc": "Nombre Z-A",
+        "priceAsc": "Precio ↑",
+        "priceDesc": "Precio ↓"
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Siguiente",
+        "showing": "Mostrando",
+        "to": "a",
+        "of": "de",
+        "products": "productos"
+      },
+      "messages": {
+        "deleted": "Producto eliminado exitosamente",
+        "error": "Error al procesar la solicitud",
+        "deleteError": "Error al eliminar producto",
+        "loadError": "Error al cargar productos"
+      }
     },
     "categories": {
       "title": "Categorías",

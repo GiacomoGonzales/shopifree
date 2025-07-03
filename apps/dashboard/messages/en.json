@@ -314,7 +314,69 @@
     "products": {
       "title": "Products",
       "subtitle": "Manage your products",
-      "description": "Add, edit and organize your catalog products."
+      "description": "Add, edit and organize your catalog products.",
+      "addProduct": "Add Product",
+      "export": "Export",
+      "import": "Import",
+      "searchPlaceholder": "Search products",
+      "filter": "Filter",
+      "sort": "Sort",
+      "loading": "Loading products...",
+      "noProducts": "No products found",
+      "noProductsMessage": "Try adjusting the search filters.",
+      "noProductsEmpty": "No products",
+      "noProductsEmptyMessage": "Start by adding your first product.",
+      "totalProducts": "products in total",
+      "totalProduct": "product in total",
+      "inDevelopment": "In development...",
+      "tabs": {
+        "all": "All",
+        "active": "Active",
+        "draft": "Drafts",
+        "archived": "Archived"
+      },
+      "table": {
+        "product": "Product",
+        "status": "Status",
+        "categories": "Categories",
+        "brand": "Brand",
+        "actions": "Actions",
+        "noCategory": "No category",
+        "noBrand": "No brand"
+      },
+      "status": {
+        "active": "Active",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "actions": {
+        "preview": "Store preview",
+        "edit": "Edit product",
+        "delete": "Delete product",
+        "confirmDelete": "Are you sure you want to delete this product?"
+      },
+      "sortOptions": {
+        "newest": "Most recent",
+        "oldest": "Oldest",
+        "nameAsc": "Name A-Z",
+        "nameDesc": "Name Z-A",
+        "priceAsc": "Price ↑",
+        "priceDesc": "Price ↓"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "products": "products"
+      },
+      "messages": {
+        "deleted": "Product deleted successfully",
+        "error": "Error processing request",
+        "deleteError": "Error deleting product",
+        "loadError": "Error loading products"
+      }
     },
     "categories": {
       "title": "Categories",
