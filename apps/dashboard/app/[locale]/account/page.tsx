@@ -46,7 +46,7 @@ export default function AccountPage() {
                           type="text"
                           name="displayName"
                           id="displayName"
-                          value={userData?.displayName || ''}
+                          value={(userData?.displayName as string) || ''}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-600 focus:border-gray-600 sm:text-sm"
                           placeholder="Tu nombre completo"
                         />
@@ -60,7 +60,7 @@ export default function AccountPage() {
                           type="tel"
                           name="phone"
                           id="phone"
-                          value={userData?.phone || ''}
+                          value={(userData?.phone as string) || ''}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-600 focus:border-gray-600 sm:text-sm"
                           placeholder="+1234567890"
                         />
