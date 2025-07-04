@@ -15,12 +15,13 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
   
   const [activeSubTab, setActiveSubTab] = useState('checkout')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const [selectedLanguage, setSelectedLanguage] = useState('es')
 
   const handleSave = async () => {
     const success = await onUpdate({
       advanced: {
         checkout: { method: 'whatsapp' },
-        language: 'es'
+        language: selectedLanguage
       }
     })
     
@@ -39,18 +40,39 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
     switch (activeSubTab) {
       case 'checkout':
         return (
-          <div className="space-y-4">
-            <h4 className="text-lg font-medium">{t('checkout.title')}</h4>
-            <p className="text-sm text-gray-600">{t('checkout.description')}</p>
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input type="radio" name="checkout" value="whatsapp" className="mr-2" />
-                {t('checkout.whatsappCheckout')}
-              </label>
-              <label className="flex items-center">
-                <input type="radio" name="checkout" value="traditional" className="mr-2" />
-                {t('checkout.traditionalCheckout')}
-              </label>
+          <div className="space-y-8">
+            {/* Método de Checkout */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium">{t('checkout.title')}</h4>
+              <p className="text-sm text-gray-600">{t('checkout.description')}</p>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input type="radio" name="checkout" value="whatsapp" className="mr-2" />
+                  {t('checkout.whatsappCheckout')}
+                </label>
+                <label className="flex items-center">
+                  <input type="radio" name="checkout" value="traditional" className="mr-2" />
+                  {t('checkout.traditionalCheckout')}
+                </label>
+              </div>
+            </div>
+
+            {/* Idioma de la tienda */}
+            <div className="space-y-4 pt-8 border-t border-gray-200">
+              <h4 className="text-lg font-medium">Idioma de la tienda</h4>
+              <p className="text-sm text-gray-600">
+                Selecciona el idioma por defecto para elementos comunes de la tienda
+              </p>
+              <div>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                >
+                  <option value="es">Español</option>
+                  <option value="en">Inglés</option>
+                </select>
+              </div>
             </div>
           </div>
         )

@@ -1,0 +1,20 @@
+{
+  "cart": {
+    "title": "Cart"
+  },
+  "categories": {
+    "all": "All",
+    "featured": "Featured",
+    "new": "New"
+  },
+  "checkout": "Checkout",
+  "footer": {
+    "rights": "All rights reserved ©",
+    "poweredBy": "Powered by"
+  },
+  "contact": {
+    "whatsapp": "Contact via WhatsApp",
+    "phone": "Phone"
+  },
+  "loading": "Loading store..."
+} 

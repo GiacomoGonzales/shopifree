@@ -1,0 +1,20 @@
+{
+  "cart": {
+    "title": "Carrito"
+  },
+  "categories": {
+    "all": "Todo",
+    "featured": "Destacados",
+    "new": "Nuevos"
+  },
+  "checkout": "Finalizar compra",
+  "footer": {
+    "rights": "Todos los derechos reservados ©",
+    "poweredBy": "Potenciado por"
+  },
+  "contact": {
+    "whatsapp": "Contactar por WhatsApp",
+    "phone": "Teléfono"
+  },
+  "loading": "Cargando tienda..."
+} 

@@ -18,6 +18,21 @@ export interface StoreDataServer {
   hasPhysicalLocation: boolean
   ownerId: string
   theme?: string
+  advanced?: {
+    language?: string
+    checkout?: {
+      method: 'whatsapp' | 'traditional'
+    }
+    payments?: {
+      provider?: string
+      publicKey?: string
+      connected?: boolean
+    }
+    shipping?: {
+      enabled?: boolean
+      cost?: number
+    }
+  }
   createdAt?: Timestamp | Date | any
   updatedAt?: Timestamp | Date | any
 }
@@ -39,6 +54,21 @@ export interface StoreDataClient {
   hasPhysicalLocation: boolean
   ownerId: string
   theme?: string
+  advanced?: {
+    language?: string
+    checkout?: {
+      method: 'whatsapp' | 'traditional'
+    }
+    payments?: {
+      provider?: string
+      publicKey?: string
+      connected?: boolean
+    }
+    shipping?: {
+      enabled?: boolean
+      cost?: number
+    }
+  }
   createdAt?: string // ISO string
   updatedAt?: string // ISO string
 }
@@ -97,6 +127,7 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
       hasPhysicalLocation: serverStore.hasPhysicalLocation,
       ownerId: serverStore.ownerId,
       theme: serverStore.theme,
+      advanced: serverStore.advanced,
       createdAt: convertTimestamp(serverStore.createdAt),
       updatedAt: convertTimestamp(serverStore.updatedAt),
     }
@@ -182,6 +213,7 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       hasPhysicalLocation: rawData.hasPhysicalLocation || false,
       ownerId: rawData.ownerId || '',
       theme: rawData.theme || 'base-default',
+      advanced: rawData.advanced || { language: 'es' },
       createdAt: rawData.createdAt,
       updatedAt: rawData.updatedAt,
     }
