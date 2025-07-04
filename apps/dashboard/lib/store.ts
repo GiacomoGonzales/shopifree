@@ -34,6 +34,7 @@ export interface StoreConfig {
   storefrontImageUrl?: string // New Cloudinary URL for storefront image
   logoPublicId?: string // Cloudinary public_id for logo deletion
   storefrontImagePublicId?: string // Cloudinary public_id for storefront image deletion
+  theme?: string // ID del tema visual seleccionado
   socialMedia?: { // Cambiado de redes
     facebook?: string
     instagram?: string

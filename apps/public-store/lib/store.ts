@@ -17,6 +17,7 @@ export interface StoreDataServer {
   address?: string
   hasPhysicalLocation: boolean
   ownerId: string
+  theme?: string
   createdAt?: Timestamp | Date | any
   updatedAt?: Timestamp | Date | any
 }
@@ -37,6 +38,7 @@ export interface StoreDataClient {
   address?: string
   hasPhysicalLocation: boolean
   ownerId: string
+  theme?: string
   createdAt?: string // ISO string
   updatedAt?: string // ISO string
 }
@@ -94,6 +96,7 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
       address: serverStore.address,
       hasPhysicalLocation: serverStore.hasPhysicalLocation,
       ownerId: serverStore.ownerId,
+      theme: serverStore.theme,
       createdAt: convertTimestamp(serverStore.createdAt),
       updatedAt: convertTimestamp(serverStore.updatedAt),
     }
@@ -178,6 +181,7 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       address: rawData.address,
       hasPhysicalLocation: rawData.hasPhysicalLocation || false,
       ownerId: rawData.ownerId || '',
+      theme: rawData.theme || 'base-default',
       createdAt: rawData.createdAt,
       updatedAt: rawData.updatedAt,
     }
@@ -219,8 +223,8 @@ export const extractSubdomain = (host: string | null): string | null => {
   
   // For local development, handle localhost
   if (cleanHost === 'localhost' || cleanHost.includes('127.0.0.1')) {
-    // TEMPORALMENTE: Devolver 'tortugas' para probar tu tienda creada
-    return 'tortugas' // ← Cambiar esto por otro subdomain si quieres probar otra tienda
+    // TEMPORALMENTE: Devolver 'lunara' para probar tu tienda creada
+    return 'lunara' // ← Cambiar esto por otro subdomain si quieres probar otra tienda
   }
   
   // Remove specific domains to extract clean subdomain
