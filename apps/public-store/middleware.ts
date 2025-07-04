@@ -5,15 +5,23 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host')
   const subdomain = extractSubdomain(host)
   
-  // Si no hay subdominio válido, continuar normalmente (landing page)
+  // Si no hay subdominio válido, mostrar la landing page
   if (!subdomain) {
-    return NextResponse.next()
+    return NextResponse.rewrite(new URL('/', request.url))
   }
+
+  // Reescribir la URL para incluir el subdominio como parámetro
+  const url = new URL(request.url)
+  const path = url.pathname === '/' ? '' : url.pathname
+  const newUrl = new URL(`/${subdomain}${path}`, request.url)
   
-  // Si hay subdominio, establecer headers para que las páginas puedan acceder a esta información
-  const response = NextResponse.next()
+  // Mantener los query params
+  newUrl.search = url.search
   
-  // Agregar headers customizados para pasar el subdominio a las páginas
+  // Reescribir la request con el nuevo path que incluye el subdominio
+  const response = NextResponse.rewrite(newUrl)
+  
+  // Agregar headers customizados para acceder al subdominio en las páginas
   response.headers.set('x-subdomain', subdomain)
   response.headers.set('x-host', host || '')
   

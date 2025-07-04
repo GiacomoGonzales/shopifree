@@ -223,32 +223,23 @@ export const extractSubdomain = (host: string | null): string | null => {
   
   // For local development, handle localhost
   if (cleanHost === 'localhost' || cleanHost.includes('127.0.0.1')) {
-    // TEMPORALMENTE: Devolver 'lunara' para probar tu tienda creada
-    return 'lunara' // ← Cambiar esto por otro subdomain si quieres probar otra tienda
+    return 'lunara' // Para desarrollo local
   }
   
-  // Remove specific domains to extract clean subdomain
-  let subdomain = cleanHost
-    .replace('.shopifree.app', '')
-    .replace('.vercel.app', '')
-  
-  // If no domain was removed, try extracting subdomain (everything before the first dot)
-  if (subdomain === cleanHost) {
-    const parts = cleanHost.split('.')
-    if (parts.length < 2) return null
-    subdomain = parts[0]
+  // Handle production domains
+  if (cleanHost.endsWith('.shopifree.app')) {
+    const subdomain = cleanHost.replace('.shopifree.app', '')
+    // Ignore reserved subdomains
+    if (['www', 'app', 'api', 'admin', 'dashboard'].includes(subdomain)) {
+      return null
+    }
+    return subdomain
   }
   
-  // Ignore reserved subdomains that should show the main landing
-  const reservedSubdomains = ['www', 'shopifree', 'app', 'api', 'admin', 'dashboard']
-  if (reservedSubdomains.includes(subdomain)) {
-    return null
+  // Handle preview domains (Vercel)
+  if (cleanHost.endsWith('.vercel.app')) {
+    return 'lunara' // Para previews de Vercel
   }
   
-  // Ensure we have a valid subdomain
-  if (!subdomain || subdomain === cleanHost) {
-    return null
-  }
-  
-  return subdomain
+  return null
 } 
