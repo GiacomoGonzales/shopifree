@@ -5,9 +5,14 @@ export interface ThemeProps {
   tienda: Tienda
 }
 
-export interface ThemeLayoutProps extends ThemeProps {
+export interface ThemeLayoutProps {
+  tienda: Tienda
   children: React.ReactNode
 }
 
+// Tipos para los componentes dinámicos
 export type ThemeComponent = ComponentType<ThemeProps>
-export type ThemeLayoutComponent = ComponentType<ThemeLayoutProps> 
+export type ThemeLayoutComponent = ComponentType<{
+  tienda: Tienda
+  children?: React.ReactNode
+}> 

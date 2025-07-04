@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { getStoreBySubdomain } from '../../lib/store'
 import { Tienda } from '../../lib/types'
-import { ThemeComponent, ThemeLayoutComponent } from '../../themes/theme-component'
+import { ThemeComponent, ThemeLayoutComponent, ThemeLayoutProps } from '../../themes/theme-component'
 
 interface PageProps {
   params: {
@@ -23,7 +23,7 @@ const LoadingState = () => (
 )
 
 // Layout por defecto en caso de error
-const DefaultLayout = ({ children }: { children: React.ReactNode }) => (
+const DefaultLayout: ThemeLayoutComponent = ({ children, tienda }) => (
   <>
     <main className="min-h-screen bg-gray-50">{children}</main>
   </>

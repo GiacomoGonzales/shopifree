@@ -9,7 +9,6 @@ import ThemeGallery from '../../../components/themes/ThemeGallery'
 type Section = 'logo-colors' | 'pages' | 'banners' | 'filters' | 'themes'
 
 export default function StoreDesignPage() {
-  const t = useTranslations('pages.storeDesign')
   const [currentSection, setCurrentSection] = useState<Section>('logo-colors')
 
   const tabs = [
