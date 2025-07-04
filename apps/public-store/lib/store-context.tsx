@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import * as React from 'react'
 import { StoreDataClient } from './store'
 
 interface StoreContextType {
@@ -12,10 +12,10 @@ interface StoreContextType {
   setError: (error: string | null) => void
 }
 
-const StoreContext = createContext<StoreContextType | undefined>(undefined)
+const StoreContext = React.createContext<StoreContextType | undefined>(undefined)
 
 export const useStore = () => {
-  const context = useContext(StoreContext)
+  const context = React.useContext(StoreContext)
   if (context === undefined) {
     throw new Error('useStore must be used within a StoreProvider')
   }
@@ -31,9 +31,9 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
   children, 
   initialStore = null 
 }) => {
-  const [store, setStore] = useState<StoreDataClient | null>(initialStore)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [store, setStore] = React.useState<StoreDataClient | null>(initialStore)
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   const value: StoreContextType = {
     store,

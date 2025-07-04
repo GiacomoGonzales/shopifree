@@ -15,7 +15,7 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
   
   const [activeSubTab, setActiveSubTab] = useState('checkout')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
-  const [selectedLanguage, setSelectedLanguage] = useState('es')
+  const [selectedLanguage, setSelectedLanguage] = useState<'es' | 'en'>('es')
 
   const handleSave = async () => {
     const success = await onUpdate({
@@ -66,7 +66,7 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
               <div>
                 <select
                   value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  onChange={(e) => setSelectedLanguage(e.target.value as 'es' | 'en')}
                   className="w-full border border-gray-300 rounded-md p-2"
                 >
                   <option value="es">Español</option>
