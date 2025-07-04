@@ -1,7 +1,7 @@
-import { ThemeProps } from '../theme-component'
+import { ThemeComponentProps } from '../theme-component'
 import Image from 'next/image'
 
-export default function BaseDefaultHome({ tienda }: ThemeProps) {
+export default function BaseDefaultHome({ tienda }: ThemeComponentProps) {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">

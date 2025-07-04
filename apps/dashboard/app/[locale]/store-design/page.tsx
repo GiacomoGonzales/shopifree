@@ -1,6 +1,5 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
 import { useState } from 'react'
 import CurrentTheme from '../../../components/themes/CurrentTheme'

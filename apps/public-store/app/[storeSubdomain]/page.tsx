@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { getStoreBySubdomain } from '../../lib/store'
 import { Tienda } from '../../lib/types'
-import { ThemeComponent, ThemeLayoutComponent, ThemeLayoutProps } from '../../themes/theme-component'
+import { ThemeComponent, ThemeLayoutComponent, ThemeComponentProps, ThemeLayoutProps } from '../../themes/theme-component'
 
 interface PageProps {
   params: {
@@ -41,7 +41,7 @@ export default async function StorePage({ params }: PageProps) {
   const themeId = store.theme || 'base-default'
 
   // 3. Importar dinámicamente los componentes del tema
-  const ThemeLayout = dynamic<ThemeLayoutComponent>(
+  const ThemeLayout = dynamic<ThemeLayoutProps>(
     () => import(`../../themes/${themeId}/Layout`).catch(() => {
       console.error(`Theme Layout ${themeId} not found, using default layout`)
       return Promise.resolve(DefaultLayout)
@@ -52,7 +52,7 @@ export default async function StorePage({ params }: PageProps) {
     }
   )
 
-  const ThemeHome = dynamic<ThemeComponent>(
+  const ThemeHome = dynamic<ThemeComponentProps>(
     () => import(`../../themes/${themeId}/Home`).catch(() => {
       console.error(`Theme Home ${themeId} not found, falling back to base-default`)
       return import('../../themes/base-default/Home')

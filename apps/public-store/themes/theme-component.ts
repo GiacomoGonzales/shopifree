@@ -1,18 +1,13 @@
 import { Tienda } from '../lib/types'
-import { ComponentType, PropsWithChildren } from 'react'
+import { ComponentType } from 'react'
 
-export interface ThemeProps {
+export interface ThemeComponentProps {
   tienda: Tienda
 }
 
-export interface ThemeLayoutProps {
-  tienda: Tienda
+export interface ThemeLayoutProps extends ThemeComponentProps {
   children: React.ReactNode
 }
 
-// Tipos para los componentes dinámicos
-export type ThemeComponent = ComponentType<ThemeProps>
-export type ThemeLayoutComponent = ComponentType<{
-  tienda: Tienda
-  children?: React.ReactNode
-}> 
+export type ThemeComponent = ComponentType<ThemeComponentProps>
+export type ThemeLayoutComponent = ComponentType<ThemeLayoutProps> 
