@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button, Input } from '@shopifree/ui'
-import { checkSubdomainAvailability, validateSubdomain, createStore } from '../lib/store'
+import { checkSubdomainAvailability, validateSubdomain, createStore, type StoreConfig } from '../lib/store'
 import { createSubdomain } from '../lib/createSubdomain'
 import { getCurrentUser } from '../lib/auth'
 import LoadingAnimation from './LoadingAnimation'
@@ -189,10 +189,50 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
     setShowLoading(true)
 
     try {
-      const storeData = {
-        ...formData,
+      const storeData: Omit<StoreConfig, 'createdAt' | 'updatedAt'> = {
+        storeName: formData.storeName,
         subdomain: formData.subdomain.toLowerCase(),
-        ownerId: user.uid
+        slogan: formData.slogan,
+        description: formData.description,
+        hasPhysicalLocation: formData.hasPhysicalLocation,
+        address: formData.hasPhysicalLocation ? formData.address : undefined,
+        businessType: formData.businessType,
+        primaryColor: formData.primaryColor,
+        secondaryColor: formData.secondaryColor,
+        currency: formData.currency,
+        phone: formData.phone,
+        logo: formData.logo || undefined,
+        storePhoto: undefined,
+        logoUrl: undefined,
+        storefrontImageUrl: undefined,
+        logoPublicId: undefined,
+        storefrontImagePublicId: undefined,
+        theme: undefined,
+        socialMedia: {
+          facebook: '',
+          instagram: '',
+          whatsapp: formData.phone,
+          tiktok: '',
+          x: '',
+          snapchat: '',
+          linkedin: '',
+          telegram: '',
+          youtube: '',
+          pinterest: ''
+        },
+        ownerId: user.uid,
+        advanced: {
+          language: 'es' as const,
+          customDomain: undefined,
+          checkout: {
+            method: 'whatsapp' as const
+          },
+          payments: undefined,
+          shipping: undefined,
+          notifications: undefined,
+          seo: undefined,
+          integrations: undefined
+        }
       }
       
       // 1. Crear tienda en Firestore
