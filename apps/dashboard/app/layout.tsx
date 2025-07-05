@@ -1,5 +1,8 @@
+'use client'
+
 import type { Metadata } from 'next'
 import './globals.css'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'Dashboard - Shopifree',
@@ -23,5 +26,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return (
+    <html lang="es">
+      <body>
+        {children}
+        <Toaster richColors position="top-right" />
+      </body>
+    </html>
+  )
 }

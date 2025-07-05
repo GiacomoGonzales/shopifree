@@ -3,16 +3,30 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore'
 import { getFirebaseDb } from '../../../../lib/firebase'
 import { useStore } from '../../../../lib/hooks/useStore'
 import { StorePage } from '@shopifree/types'
 import { toast } from 'sonner'
 
 interface PageFormData {
-  title: string
+  title: {
+    es: string
+    en: string
+  }
   slug: string
-  content: string
+  content: {
+    es: string
+    en: string
+  }
+  seoTitle: {
+    es: string
+    en: string
+  }
+  seoDescription: {
+    es: string
+    en: string
+  }
   status: 'published' | 'draft'
 }
 
@@ -29,14 +43,29 @@ export default function EditContentPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<PageFormData>({
-    title: '',
+    title: {
+      es: '',
+      en: ''
+    },
     slug: '',
-    content: '',
+    content: {
+      es: '',
+      en: ''
+    },
+    seoTitle: {
+      es: '',
+      en: ''
+    },
+    seoDescription: {
+      es: '',
+      en: ''
+    },
     status: 'draft'
   })
-  const [errors, setErrors] = useState<Partial<PageFormData>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof PageFormData, string>>>({})
 
   const isNew = params.pageId === 'new'
+  const currentLanguage = store?.advanced?.language || 'es'
 
   useEffect(() => {
     if (!store?.id || isNew) {
@@ -47,7 +76,7 @@ export default function EditContentPage({ params }: PageProps) {
     const fetchPage = async () => {
       try {
         const db = getFirebaseDb()
-        const pageRef = doc(db, `stores/${store.id}/content/pages/${params.pageId}`)
+        const pageRef = doc(db, `stores/${store.id}/pages/${params.pageId}`)
         const pageSnap = await getDoc(pageRef)
 
         if (pageSnap.exists()) {
@@ -55,12 +84,14 @@ export default function EditContentPage({ params }: PageProps) {
           setFormData({
             title: pageData.title,
             slug: pageData.slug,
-            content: pageData.content as string,
+            content: pageData.content,
+            seoTitle: pageData.seoTitle,
+            seoDescription: pageData.seoDescription,
             status: pageData.status
           })
         } else {
           toast.error(t('errors.pageNotFound'))
-          router.push(`/${store.advanced?.language || 'es'}/content`)
+          router.push(`/${currentLanguage}/content`)
         }
       } catch (error) {
         console.error('Error fetching page:', error)
@@ -71,18 +102,18 @@ export default function EditContentPage({ params }: PageProps) {
     }
 
     fetchPage()
-  }, [store?.id, params.pageId, isNew, router, t])
+  }, [store?.id, params.pageId, isNew, router, t, currentLanguage])
 
   const validateForm = async (): Promise<boolean> => {
-    const newErrors: Partial<PageFormData> = {}
+    const newErrors: Partial<Record<keyof PageFormData, string>> = {}
 
     // Validar título
-    if (!formData.title || formData.title.length < 5) {
+    if (!formData.title[currentLanguage] || formData.title[currentLanguage].length < 5) {
       newErrors.title = t('validation.titleLength')
     }
 
     // Validar contenido
-    if (!formData.content || formData.content.length < 20) {
+    if (!formData.content[currentLanguage] || formData.content[currentLanguage].length < 20) {
       newErrors.content = t('validation.contentLength')
     }
 
@@ -93,7 +124,7 @@ export default function EditContentPage({ params }: PageProps) {
       // Verificar si el slug ya existe
       try {
         const db = getFirebaseDb()
-        const pagesRef = collection(db, `stores/${store?.id}/content/pages`)
+        const pagesRef = collection(db, `stores/${store?.id}/pages`)
         const q = query(pagesRef, where('slug', '==', formData.slug))
         const querySnapshot = await getDocs(q)
         
@@ -127,23 +158,23 @@ export default function EditContentPage({ params }: PageProps) {
     try {
       setSaving(true)
       const db = getFirebaseDb()
-      const pageData: Partial<StorePage> = {
+      const pageData = {
         ...formData,
-        updatedAt: new Date()
+        updatedAt: serverTimestamp()
       }
 
       if (isNew) {
-        pageData.createdAt = new Date()
-        const pageRef = doc(collection(db, `stores/${store.id}/content/pages`))
+        pageData.createdAt = serverTimestamp()
+        const pageRef = doc(collection(db, `stores/${store.id}/pages`))
         await setDoc(pageRef, pageData)
         toast.success(t('success.created'))
       } else {
-        const pageRef = doc(db, `stores/${store.id}/content/pages/${params.pageId}`)
+        const pageRef = doc(db, `stores/${store.id}/pages/${params.pageId}`)
         await updateDoc(pageRef, pageData)
         toast.success(t('success.updated'))
       }
 
-      router.push(`/${store.advanced?.language || 'es'}/content`)
+      router.push(`/${currentLanguage}/content`)
     } catch (error) {
       console.error('Error saving page:', error)
       toast.error(isNew ? t('errors.createPage') : t('errors.updatePage'))
@@ -197,14 +228,36 @@ export default function EditContentPage({ params }: PageProps) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('form.title')}
             </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-md ${
-                errors.title ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs text-gray-500">Español</label>
+                <input
+                  type="text"
+                  value={formData.title.es}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    title: { ...formData.title, es: e.target.value }
+                  })}
+                  className={`w-full px-3 py-2 border rounded-md ${
+                    errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">English</label>
+                <input
+                  type="text"
+                  value={formData.title.en}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    title: { ...formData.title, en: e.target.value }
+                  })}
+                  className={`w-full px-3 py-2 border rounded-md ${
+                    errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+            </div>
             {errors.title && (
               <p className="mt-1 text-sm text-red-600">{errors.title}</p>
             )}
@@ -218,7 +271,10 @@ export default function EditContentPage({ params }: PageProps) {
             <input
               type="text"
               value={formData.slug}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+              onChange={(e) => setFormData({
+                ...formData,
+                slug: e.target.value.toLowerCase().replace(/\s+/g, '-')
+              })}
               className={`w-full px-3 py-2 border rounded-md ${
                 errors.slug ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -235,7 +291,10 @@ export default function EditContentPage({ params }: PageProps) {
             </label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'published' | 'draft' })}
+              onChange={(e) => setFormData({
+                ...formData,
+                status: e.target.value as 'published' | 'draft'
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="draft">{t('status.draft')}</option>
@@ -248,17 +307,108 @@ export default function EditContentPage({ params }: PageProps) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('form.content')}
             </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              rows={10}
-              className={`w-full px-3 py-2 border rounded-md ${
-                errors.content ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs text-gray-500">Español</label>
+                <textarea
+                  value={formData.content.es}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    content: { ...formData.content, es: e.target.value }
+                  })}
+                  rows={10}
+                  className={`w-full px-3 py-2 border rounded-md ${
+                    errors.content ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">English</label>
+                <textarea
+                  value={formData.content.en}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    content: { ...formData.content, en: e.target.value }
+                  })}
+                  rows={10}
+                  className={`w-full px-3 py-2 border rounded-md ${
+                    errors.content ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+            </div>
             {errors.content && (
               <p className="mt-1 text-sm text-red-600">{errors.content}</p>
             )}
+          </div>
+
+          {/* SEO */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">SEO</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('form.seoTitle')}
+                </label>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-gray-500">Español</label>
+                    <input
+                      type="text"
+                      value={formData.seoTitle.es}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        seoTitle: { ...formData.seoTitle, es: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">English</label>
+                    <input
+                      type="text"
+                      value={formData.seoTitle.en}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        seoTitle: { ...formData.seoTitle, en: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('form.seoDescription')}
+                </label>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-gray-500">Español</label>
+                    <textarea
+                      value={formData.seoDescription.es}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        seoDescription: { ...formData.seoDescription, es: e.target.value }
+                      })}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">English</label>
+                    <textarea
+                      value={formData.seoDescription.en}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        seoDescription: { ...formData.seoDescription, en: e.target.value }
+                      })}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </form>
