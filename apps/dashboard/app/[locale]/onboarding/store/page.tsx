@@ -404,9 +404,16 @@ function StoreOnboardingContent() {
         logo: logoURL,
         storePhoto: storePhotoURL,
         socialMedia: formData.socialMedia,
-        ownerId: user.uid
+        ownerId: user.uid,
+        advanced: {
+          language: 'es', // Idioma por defecto
+          checkout: {
+            method: 'whatsapp'
+          }
+        }
       }
       
+      console.log('Creating store with data:', storeData)
       await createStore(storeData)
       
       // Pausa final antes de redireccionar
@@ -416,7 +423,6 @@ function StoreOnboardingContent() {
     } catch (error) {
       console.error('Error creating store:', error)
       alert(t('errors.createError'))
-    } finally {
       setCreatingStore(false)
       setCreationStep(0)
       setCreationProgress(0)

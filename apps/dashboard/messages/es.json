@@ -516,9 +516,63 @@
       "description": "Crea cupones, códigos de descuento y promociones especiales para tu tienda."
     },
     "content": {
-      "title": "Contenido",
-      "subtitle": "Gestiona el contenido de tu tienda",
-      "description": "Administra páginas, blogs, categorías y todo el contenido de tu tienda."
+      "title": "Páginas de contenido",
+      "subtitle": "Gestiona las páginas de contenido de tu tienda",
+      "table": {
+        "title": "Título",
+        "slug": "URL",
+        "status": "Estado",
+        "visibility": "Visibilidad",
+        "updated": "Actualizado",
+        "actions": "Acciones"
+      },
+      "status": {
+        "published": "Publicado",
+        "draft": "Borrador"
+      },
+      "actions": {
+        "createPage": "Crear página",
+        "createFirstPage": "Crear primera página",
+        "createFromTemplate": "Crear desde plantilla",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "save": "Guardar",
+        "saving": "Guardando...",
+        "cancel": "Cancelar"
+      },
+      "labels": {
+        "fixed": "Página fija"
+      },
+      "templates": {
+        "title": "Selecciona una plantilla"
+      },
+      "empty": {
+        "title": "No hay páginas creadas",
+        "description": "Crea tu primera página de contenido para tu tienda"
+      },
+      "help": {
+        "title": "Tips para gestionar tu contenido",
+        "tooltip": "Ver ayuda",
+        "tip1": "Crea páginas para mostrar información importante como 'Sobre nosotros' o 'Contacto'",
+        "tip2": "Usa URLs amigables y descriptivas para mejorar el SEO",
+        "tip3": "Mantén tus páginas actualizadas para dar la mejor información a tus clientes"
+      },
+      "errors": {
+        "fetchPages": "Error al cargar las páginas",
+        "createPage": "Error al crear la página",
+        "updatePage": "Error al actualizar la página",
+        "deletePage": "Error al eliminar la página",
+        "pageNotFound": "Página no encontrada",
+        "fetchPage": "Error al cargar la página",
+        "validation": "Error al validar el formulario",
+        "storeNotFound": "Tienda no encontrada",
+        "slugExists": "Ya existe una página con esta URL",
+        "createTemplate": "Error al crear la página desde plantilla",
+        "updateVisibility": "Error al actualizar la visibilidad"
+      },
+      "confirmations": {
+        "delete": "¿Estás seguro de que deseas eliminar esta página?"
+      }
     },
     "storeDesign": {
       "title": "Diseño de tienda",

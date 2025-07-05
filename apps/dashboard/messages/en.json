@@ -516,9 +516,82 @@
       "description": "Create coupons, discount codes and special promotions for your store."
     },
     "content": {
-      "title": "Content",
-      "subtitle": "Manage your store content",
-      "description": "Manage pages, blogs, categories and all your store content."
+      "title": "Content Pages",
+      "subtitle": "Manage your store's content pages",
+      "newPage": {
+        "title": "Create New Page"
+      },
+      "editPage": {
+        "title": "Edit Page"
+      },
+      "form": {
+        "title": "Title",
+        "slug": "Friendly URL",
+        "content": "Content",
+        "status": "Status"
+      },
+      "validation": {
+        "titleLength": "Title must be at least 5 characters long",
+        "contentLength": "Content must be at least 20 characters long",
+        "slugRequired": "URL is required",
+        "slugExists": "This URL is already in use"
+      },
+      "success": {
+        "created": "Page created successfully",
+        "updated": "Page updated successfully"
+      },
+      "table": {
+        "title": "Title",
+        "slug": "URL",
+        "status": "Status",
+        "visibility": "Visibility",
+        "updated": "Updated",
+        "actions": "Actions"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "actions": {
+        "createPage": "Create Page",
+        "createFirstPage": "Create First Page",
+        "createFromTemplate": "Create from Template",
+        "edit": "Edit",
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      },
+      "labels": {
+        "fixed": "Fixed Page"
+      },
+      "empty": {
+        "title": "No Pages Created",
+        "description": "Create your first content page for your store"
+      },
+      "help": {
+        "title": "Content Management Tips",
+        "tooltip": "View Help",
+        "tip1": "Create pages for important information like 'About Us' or 'Contact'",
+        "tip2": "Use descriptive URLs to improve SEO",
+        "tip3": "Keep your pages updated with the latest information for your customers"
+      },
+      "errors": {
+        "fetchPages": "Error loading pages",
+        "createPage": "Error creating page",
+        "updatePage": "Error updating page",
+        "deletePage": "Error deleting page",
+        "pageNotFound": "Page not found",
+        "fetchPage": "Error loading page",
+        "validation": "Error validating form",
+        "storeNotFound": "Store not found",
+        "slugExists": "This URL already exists",
+        "createTemplate": "Error creating page from template",
+        "updateVisibility": "Error updating visibility"
+      },
+      "confirmations": {
+        "delete": "Are you sure you want to delete this page?"
+      }
     },
     "storeDesign": {
       "title": "Store Design",

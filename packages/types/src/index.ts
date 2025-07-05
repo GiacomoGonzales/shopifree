@@ -152,4 +152,13 @@ export interface PaginatedResponse<T = any> {
   page: number;
   limit: number;
   totalPages: number;
-} 
+}
+
+// Exportar nuevos tipos de contenido y diseño
+export * from './store-content'
+export * from './info-pages'
+export { PAGE_TEMPLATES } from './store-content'
+
+// Re-exportar explícitamente los tipos de páginas informativas
+export type { InfoPage } from './info-pages'
+export { INFO_PAGES } from './info-pages' 

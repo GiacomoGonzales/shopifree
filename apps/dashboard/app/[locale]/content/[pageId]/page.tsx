@@ -1,0 +1,267 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import { getFirebaseDb } from '../../../../lib/firebase'
+import { useStore } from '../../../../lib/hooks/useStore'
+import { StorePage } from '@shopifree/types'
+import { toast } from 'sonner'
+
+interface PageFormData {
+  title: string
+  slug: string
+  content: string
+  status: 'published' | 'draft'
+}
+
+interface PageProps {
+  params: {
+    pageId: string
+  }
+}
+
+export default function EditContentPage({ params }: PageProps) {
+  const t = useTranslations('pages.content')
+  const router = useRouter()
+  const { store } = useStore()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState<PageFormData>({
+    title: '',
+    slug: '',
+    content: '',
+    status: 'draft'
+  })
+  const [errors, setErrors] = useState<Partial<PageFormData>>({})
+
+  const isNew = params.pageId === 'new'
+
+  useEffect(() => {
+    if (!store?.id || isNew) {
+      setLoading(false)
+      return
+    }
+
+    const fetchPage = async () => {
+      try {
+        const db = getFirebaseDb()
+        const pageRef = doc(db, `stores/${store.id}/content/pages/${params.pageId}`)
+        const pageSnap = await getDoc(pageRef)
+
+        if (pageSnap.exists()) {
+          const pageData = pageSnap.data() as StorePage
+          setFormData({
+            title: pageData.title,
+            slug: pageData.slug,
+            content: pageData.content as string,
+            status: pageData.status
+          })
+        } else {
+          toast.error(t('errors.pageNotFound'))
+          router.push(`/${store.advanced?.language || 'es'}/content`)
+        }
+      } catch (error) {
+        console.error('Error fetching page:', error)
+        toast.error(t('errors.fetchPage'))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPage()
+  }, [store?.id, params.pageId, isNew, router, t])
+
+  const validateForm = async (): Promise<boolean> => {
+    const newErrors: Partial<PageFormData> = {}
+
+    // Validar título
+    if (!formData.title || formData.title.length < 5) {
+      newErrors.title = t('validation.titleLength')
+    }
+
+    // Validar contenido
+    if (!formData.content || formData.content.length < 20) {
+      newErrors.content = t('validation.contentLength')
+    }
+
+    // Validar slug
+    if (!formData.slug) {
+      newErrors.slug = t('validation.slugRequired')
+    } else {
+      // Verificar si el slug ya existe
+      try {
+        const db = getFirebaseDb()
+        const pagesRef = collection(db, `stores/${store?.id}/content/pages`)
+        const q = query(pagesRef, where('slug', '==', formData.slug))
+        const querySnapshot = await getDocs(q)
+        
+        if (!isNew && querySnapshot.docs.length > 1) {
+          newErrors.slug = t('validation.slugExists')
+        } else if (isNew && querySnapshot.docs.length > 0) {
+          newErrors.slug = t('validation.slugExists')
+        }
+      } catch (error) {
+        console.error('Error checking slug:', error)
+        toast.error(t('errors.validation'))
+        return false
+      }
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!store?.id) {
+      toast.error(t('errors.storeNotFound'))
+      return
+    }
+
+    const isValid = await validateForm()
+    if (!isValid) return
+
+    try {
+      setSaving(true)
+      const db = getFirebaseDb()
+      const pageData: Partial<StorePage> = {
+        ...formData,
+        updatedAt: new Date()
+      }
+
+      if (isNew) {
+        pageData.createdAt = new Date()
+        const pageRef = doc(collection(db, `stores/${store.id}/content/pages`))
+        await setDoc(pageRef, pageData)
+        toast.success(t('success.created'))
+      } else {
+        const pageRef = doc(db, `stores/${store.id}/content/pages/${params.pageId}`)
+        await updateDoc(pageRef, pageData)
+        toast.success(t('success.updated'))
+      }
+
+      router.push(`/${store.advanced?.language || 'es'}/content`)
+    } catch (error) {
+      console.error('Error saving page:', error)
+      toast.error(isNew ? t('errors.createPage') : t('errors.updatePage'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="space-y-4">
+            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6">
+      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold">
+            {isNew ? t('newPage.title') : t('editPage.title')}
+          </h1>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              {t('actions.cancel')}
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {saving ? t('actions.saving') : t('actions.save')}
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          {/* Título */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.title')}
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className={`w-full px-3 py-2 border rounded-md ${
+                errors.title ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+            )}
+          </div>
+
+          {/* URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.slug')}
+            </label>
+            <input
+              type="text"
+              value={formData.slug}
+              onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+              className={`w-full px-3 py-2 border rounded-md ${
+                errors.slug ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.slug && (
+              <p className="mt-1 text-sm text-red-600">{errors.slug}</p>
+            )}
+          </div>
+
+          {/* Estado */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.status')}
+            </label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'published' | 'draft' })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="draft">{t('status.draft')}</option>
+              <option value="published">{t('status.published')}</option>
+            </select>
+          </div>
+
+          {/* Contenido */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.content')}
+            </label>
+            <textarea
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              rows={10}
+              className={`w-full px-3 py-2 border rounded-md ${
+                errors.content ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.content && (
+              <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+            )}
+          </div>
+        </div>
+      </form>
+    </div>
+  )
+} 

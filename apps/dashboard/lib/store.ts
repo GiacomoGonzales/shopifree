@@ -6,9 +6,155 @@ import {
   where, 
   getDocs,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  getDoc,
+  writeBatch
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
+
+// Definición local del tipo InfoPage
+interface InfoPage {
+  slug: string
+  type: string
+  fixed: boolean
+  visible: boolean
+  status: 'published' | 'draft'
+  title: {
+    es: string
+    en: string
+  }
+  seoTitle: {
+    es: string
+    en: string
+  }
+  seoDescription: {
+    es: string
+    en: string
+  }
+  content: {
+    es: string
+    en: string
+  }
+}
+
+// Definición local de páginas informativas
+const INFO_PAGES: InfoPage[] = [
+  {
+    slug: 'about-us',
+    type: 'about',
+    fixed: true,
+    visible: true,
+    status: 'published',
+    title: {
+      es: 'Quiénes somos',
+      en: 'About Us'
+    },
+    seoTitle: {
+      es: 'Sobre nosotros',
+      en: 'About Us'
+    },
+    seoDescription: {
+      es: 'Conoce más sobre nuestra empresa',
+      en: 'Learn more about our company'
+    },
+    content: {
+      es: '<p>Información sobre nuestra empresa.</p>',
+      en: '<p>Information about our company.</p>'
+    }
+  },
+  {
+    slug: 'contact',
+    type: 'contact',
+    fixed: true,
+    visible: true,
+    status: 'published',
+    title: {
+      es: 'Contáctanos',
+      en: 'Contact Us'
+    },
+    seoTitle: {
+      es: 'Contacto',
+      en: 'Contact'
+    },
+    seoDescription: {
+      es: 'Ponte en contacto con nosotros',
+      en: 'Get in touch with us'
+    },
+    content: {
+      es: '<p>Formulario de contacto y medios de comunicación.</p>',
+      en: '<p>Contact form and communication channels.</p>'
+    }
+  },
+  {
+    slug: 'terms',
+    type: 'terms',
+    fixed: true,
+    visible: true,
+    status: 'published',
+    title: {
+      es: 'Términos y condiciones',
+      en: 'Terms and Conditions'
+    },
+    seoTitle: {
+      es: 'Términos legales',
+      en: 'Legal Terms'
+    },
+    seoDescription: {
+      es: 'Términos y condiciones de uso',
+      en: 'Terms and conditions of use'
+    },
+    content: {
+      es: '<p>Términos y condiciones legales de uso de la tienda.</p>',
+      en: '<p>Legal terms and conditions for using our store.</p>'
+    }
+  },
+  {
+    slug: 'privacy',
+    type: 'privacy',
+    fixed: true,
+    visible: true,
+    status: 'published',
+    title: {
+      es: 'Política de privacidad',
+      en: 'Privacy Policy'
+    },
+    seoTitle: {
+      es: 'Privacidad',
+      en: 'Privacy'
+    },
+    seoDescription: {
+      es: 'Nuestra política de privacidad',
+      en: 'Our privacy policy'
+    },
+    content: {
+      es: '<p>Información sobre el manejo de datos personales.</p>',
+      en: '<p>Information about personal data handling.</p>'
+    }
+  },
+  {
+    slug: 'shipping',
+    type: 'shipping',
+    fixed: true,
+    visible: true,
+    status: 'published',
+    title: {
+      es: 'Envíos',
+      en: 'Shipping'
+    },
+    seoTitle: {
+      es: 'Política de envíos',
+      en: 'Shipping Policy'
+    },
+    seoDescription: {
+      es: 'Información sobre envíos y entregas',
+      en: 'Information about shipping and delivery'
+    },
+    content: {
+      es: '<p>Detalles sobre nuestras políticas de envío y entrega.</p>',
+      en: '<p>Details about our shipping and delivery policies.</p>'
+    }
+  }
+]
 
 export interface StoreConfig {
   storeName: string
@@ -48,12 +194,13 @@ export interface StoreConfig {
     pinterest?: string
   }
   // Configuración avanzada
-  advanced?: {
+  advanced: {
+    language: 'es' | 'en'
     customDomain?: {
       domain?: string
       verified?: boolean
     }
-    checkout?: {
+    checkout: {
       method: 'whatsapp' | 'traditional'
       whatsappMessage?: string
     }
@@ -86,7 +233,6 @@ export interface StoreConfig {
       googleAnalytics?: string
       metaPixel?: string
     }
-    language?: 'es' | 'en'
   }
   ownerId: string
   createdAt: Date | unknown
@@ -235,8 +381,12 @@ export const createStore = async (storeData: Omit<StoreConfig, 'createdAt' | 'up
       throw new Error('Firebase db not available')
     }
     
+    console.log('Creating store with data:', storeData)
+    
     // Generate store ID
     const storeRef = doc(collection(db, 'stores'))
+    const storeId = storeRef.id
+    console.log('Generated store ID:', storeId)
     
     const newStore: StoreConfig = {
       ...storeData,
@@ -244,11 +394,87 @@ export const createStore = async (storeData: Omit<StoreConfig, 'createdAt' | 'up
       updatedAt: serverTimestamp()
     }
     
+    // Crear la tienda
     await setDoc(storeRef, newStore)
+    console.log('Store document created successfully')
+
+    try {
+      // Crear la colección pages directamente
+      const pagesCollectionRef = collection(db, 'stores', storeId, 'pages')
+
+      // Usar batch para crear todas las páginas
+      const batch = writeBatch(db)
+
+      // Crear la página principal (única página fija)
+      const homePageRef = doc(pagesCollectionRef)
+      batch.set(homePageRef, {
+        title: {
+          es: 'Página principal',
+          en: 'Home'
+        },
+        slug: '/',
+        type: 'home',
+        content: {
+          es: '<h1>Bienvenido a tu tienda</h1><p>Aquí puedes personalizar tu página principal.</p>',
+          en: '<h1>Welcome to your store</h1><p>Here you can customize your home page.</p>'
+        },
+        seoTitle: {
+          es: 'Inicio',
+          en: 'Home'
+        },
+        seoDescription: {
+          es: 'Bienvenido a nuestra tienda online',
+          en: 'Welcome to our online store'
+        },
+        fixed: true, // Solo la página principal es fija
+        visible: true,
+        status: 'published',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      })
+
+      // Crear las páginas informativas desde INFO_PAGES
+      for (const page of INFO_PAGES) {
+        const pageRef = doc(pagesCollectionRef)
+        batch.set(pageRef, {
+          title: {
+            es: page.title.es,
+            en: page.title.en
+          },
+          slug: page.slug,
+          type: page.type,
+          content: {
+            es: page.content.es,
+            en: page.content.en
+          },
+          seoTitle: {
+            es: page.seoTitle.es,
+            en: page.seoTitle.en
+          },
+          seoDescription: {
+            es: page.seoDescription.es,
+            en: page.seoDescription.en
+          },
+          fixed: false, // Ninguna página informativa es fija
+          visible: true,
+          status: page.status,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        })
+      }
+
+      // Ejecutar el batch
+      await batch.commit()
+      console.log('All pages created successfully')
+
+    } catch (error) {
+      console.error('Error creating pages:', error)
+      throw error
+    }
     
-    return { id: storeRef.id, ...newStore }
+    return { id: storeId, ...newStore }
   } catch (error) {
-    console.error('Error creating store:', error)
+    console.error('Error in createStore:', error)
     throw error
   }
 } 
