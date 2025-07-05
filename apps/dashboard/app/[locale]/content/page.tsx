@@ -3,10 +3,29 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { collection, query, getDocs, Firestore, Timestamp, doc, setDoc, serverTimestamp, where, deleteDoc, updateDoc } from 'firebase/firestore'
+import { 
+  collection, 
+  query, 
+  getDocs, 
+  Firestore, 
+  Timestamp, 
+  doc, 
+  setDoc, 
+  serverTimestamp, 
+  where, 
+  deleteDoc, 
+  updateDoc 
+} from 'firebase/firestore'
 import { getFirebaseDb } from '../../../lib/firebase'
 import { useStore } from '../../../lib/hooks/useStore'
-import { PlusIcon, HelpCircleIcon, StarIcon, Trash2Icon, PencilIcon, LayoutTemplateIcon } from 'lucide-react'
+import { 
+  PlusIcon, 
+  HelpCircleIcon, 
+  StarIcon, 
+  Trash2Icon, 
+  PencilIcon, 
+  LayoutTemplateIcon 
+} from 'lucide-react'
 import DashboardLayout from '../../../components/DashboardLayout'
 
 // Definición temporal de plantillas mientras se arregla la exportación
