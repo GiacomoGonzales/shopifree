@@ -3,30 +3,34 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore'
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  serverTimestamp, 
+  Firestore,
+  DocumentData
+} from 'firebase/firestore'
 import { getFirebaseDb } from '../../../../lib/firebase'
 import { useStore } from '../../../../lib/hooks/useStore'
-import { StorePage } from '@shopifree/types'
 import { toast } from 'sonner'
 
+interface MultiLanguageField {
+  es: string
+  en: string
+}
+
 interface PageFormData {
-  title: {
-    es: string
-    en: string
-  }
+  title: MultiLanguageField
   slug: string
-  content: {
-    es: string
-    en: string
-  }
-  seoTitle: {
-    es: string
-    en: string
-  }
-  seoDescription: {
-    es: string
-    en: string
-  }
+  content: MultiLanguageField
+  seoTitle: MultiLanguageField
+  seoDescription: MultiLanguageField
   status: 'published' | 'draft'
 }
 
@@ -43,23 +47,11 @@ export default function EditContentPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<PageFormData>({
-    title: {
-      es: '',
-      en: ''
-    },
+    title: { es: '', en: '' },
     slug: '',
-    content: {
-      es: '',
-      en: ''
-    },
-    seoTitle: {
-      es: '',
-      en: ''
-    },
-    seoDescription: {
-      es: '',
-      en: ''
-    },
+    content: { es: '', en: '' },
+    seoTitle: { es: '', en: '' },
+    seoDescription: { es: '', en: '' },
     status: 'draft'
   })
   const [errors, setErrors] = useState<Partial<Record<keyof PageFormData, string>>>({})
@@ -76,18 +68,20 @@ export default function EditContentPage({ params }: PageProps) {
     const fetchPage = async () => {
       try {
         const db = getFirebaseDb()
-        const pageRef = doc(db, `stores/${store.id}/pages/${params.pageId}`)
+        if (!db) throw new Error('Firebase not initialized')
+
+        const pageRef = doc(db as Firestore, 'stores', store.id, 'pages', params.pageId)
         const pageSnap = await getDoc(pageRef)
 
         if (pageSnap.exists()) {
-          const pageData = pageSnap.data() as StorePage
+          const pageData = pageSnap.data() as DocumentData
           setFormData({
-            title: pageData.title,
-            slug: pageData.slug,
-            content: pageData.content,
-            seoTitle: pageData.seoTitle,
-            seoDescription: pageData.seoDescription,
-            status: pageData.status
+            title: pageData.title || { es: '', en: '' },
+            slug: pageData.slug || '',
+            content: pageData.content || { es: '', en: '' },
+            seoTitle: pageData.seoTitle || { es: '', en: '' },
+            seoDescription: pageData.seoDescription || { es: '', en: '' },
+            status: pageData.status || 'draft'
           })
         } else {
           toast.error(t('errors.pageNotFound'))
@@ -124,7 +118,9 @@ export default function EditContentPage({ params }: PageProps) {
       // Verificar si el slug ya existe
       try {
         const db = getFirebaseDb()
-        const pagesRef = collection(db, `stores/${store?.id}/pages`)
+        if (!db) throw new Error('Firebase not initialized')
+
+        const pagesRef = collection(db as Firestore, 'stores', store?.id || '', 'pages')
         const q = query(pagesRef, where('slug', '==', formData.slug))
         const querySnapshot = await getDocs(q)
         
@@ -158,18 +154,23 @@ export default function EditContentPage({ params }: PageProps) {
     try {
       setSaving(true)
       const db = getFirebaseDb()
+      if (!db) throw new Error('Firebase not initialized')
+
       const pageData = {
         ...formData,
         updatedAt: serverTimestamp()
       }
 
       if (isNew) {
-        pageData.createdAt = serverTimestamp()
-        const pageRef = doc(collection(db, `stores/${store.id}/pages`))
-        await setDoc(pageRef, pageData)
+        const pagesRef = collection(db as Firestore, 'stores', store.id, 'pages')
+        const newPageRef = doc(pagesRef)
+        await setDoc(newPageRef, {
+          ...pageData,
+          createdAt: serverTimestamp()
+        })
         toast.success(t('success.created'))
       } else {
-        const pageRef = doc(db, `stores/${store.id}/pages/${params.pageId}`)
+        const pageRef = doc(db as Firestore, 'stores', store.id, 'pages', params.pageId)
         await updateDoc(pageRef, pageData)
         toast.success(t('success.updated'))
       }
