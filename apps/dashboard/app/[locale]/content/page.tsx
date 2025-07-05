@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { collection, query, getDocs, Firestore, Timestamp, doc, setDoc, serverTimestamp, where, deleteDoc, updateDoc, getDoc } from 'firebase/firestore'
+import { collection, query, getDocs, Firestore, Timestamp, doc, setDoc, serverTimestamp, where, deleteDoc, updateDoc } from 'firebase/firestore'
 import { getFirebaseDb } from '../../../lib/firebase'
 import { useStore } from '../../../lib/hooks/useStore'
-import { StorePage } from '@shopifree/types'
 import { PlusIcon, HelpCircleIcon, StarIcon, Trash2Icon, PencilIcon, LayoutTemplateIcon } from 'lucide-react'
 import DashboardLayout from '../../../components/DashboardLayout'
 
@@ -207,7 +206,7 @@ export default function ContentPage() {
 
   useEffect(() => {
     fetchPages()
-  }, [store?.id])
+  }, [store?.id, storeLoading, t])
 
   const handleCreatePage = () => {
     if (!store?.id) {
