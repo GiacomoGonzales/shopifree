@@ -1,12 +1,9 @@
-'use client'
-
 import type { Metadata } from 'next'
 import './globals.css'
-import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
-  title: 'Dashboard - Shopifree',
-  description: 'Manage your online store',
+  title: 'ShopiFree - Dashboard',
+  description: 'Administra tu tienda online',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
@@ -21,6 +18,9 @@ export const metadata: Metadata = {
   },
 }
 
+// Componente del cliente separado
+import ClientLayout from './client-layout'
+
 export default function RootLayout({
   children,
 }: {
@@ -29,8 +29,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        {children}
-        <Toaster richColors position="top-right" />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   )
