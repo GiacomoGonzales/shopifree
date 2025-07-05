@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../../lib/simple-auth-context'
-import { createStore, checkSubdomainAvailability } from '../../../../lib/store'
+import { createStore, checkSubdomainAvailability, type StoreConfig } from '../../../../lib/store'
 import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
 
@@ -406,12 +406,12 @@ function StoreOnboardingContent() {
         socialMedia: formData.socialMedia,
         ownerId: user.uid,
         advanced: {
-          language: 'es', // Idioma por defecto
+          language: 'es' as const,
           checkout: {
-            method: 'whatsapp'
+            method: 'whatsapp' as const
           }
         }
-      }
+      } satisfies Omit<StoreConfig, 'createdAt' | 'updatedAt'>
       
       console.log('Creating store with data:', storeData)
       await createStore(storeData)
