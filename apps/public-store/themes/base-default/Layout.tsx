@@ -1,36 +1,53 @@
 import { ThemeLayoutProps } from '../theme-component'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import Header from './Header'
+import BannerCarousel from './BannerCarousel'
+import ProductNavBar from './ProductNavBar'
+import CollectionsCarousel from './CollectionsCarousel'
+import Testimonials from './Testimonials'
+import BrandsCarousel from './BrandsCarousel'
+import Footer from './Footer'
 
 export default function BaseDefaultLayout({ tienda, children }: ThemeLayoutProps) {
-  const t = useTranslations('common')
-
   return (
-    <div className="min-h-screen flex flex-col bg-white text-black">
-      {/* HEADER */}
-      <header className="w-full px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-        <h1 className="text-xl font-bold">{tienda.storeName}</h1>
-        <span className="text-sm text-gray-500">{t('cart.title')}</span>
-      </header>
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Header */}
+      <Header tienda={tienda} />
 
-      {/* CATEGORÍAS */}
-      <nav className="w-full overflow-x-auto px-4 py-2 bg-gray-100 border-b border-gray-300">
-        <ul className="flex gap-4 text-sm">
-          <li><Link href="#">{t('categories.all')}</Link></li>
-          <li><Link href="#">{t('categories.featured')}</Link></li>
-          <li><Link href="#">{t('categories.new')}</Link></li>
-        </ul>
-      </nav>
+      {/* Contenido principal */}
+      <main className="flex-1">
+        {/* Banner Carousel */}
+        <section className="max-w-7xl mx-auto px-4 py-6">
+          <BannerCarousel />
+        </section>
 
-      {/* CONTENIDO */}
-      <main className="flex-1 px-4 py-6">
-        {children}
+        {/* Barra de navegación de productos */}
+        <section className="max-w-7xl mx-auto px-4 py-4">
+          <ProductNavBar />
+        </section>
+
+        {/* Carruseles de colecciones */}
+        <section className="max-w-7xl mx-auto px-4 py-8">
+          <CollectionsCarousel />
+        </section>
+
+        {/* Contenido dinámico de la página */}
+        <section className="max-w-7xl mx-auto px-4 py-8">
+          {children}
+        </section>
+
+        {/* Testimoniales */}
+        <section className="py-8">
+          <Testimonials />
+        </section>
+
+        {/* Carrusel de marcas */}
+        <section className="py-8">
+          <BrandsCarousel />
+        </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="w-full px-4 py-4 border-t text-sm text-gray-500 text-center">
-        {t('footer.rights')}
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   )
 } 
