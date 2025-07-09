@@ -32,8 +32,10 @@ export interface StoreConfig {
   storePhoto?: string // Legacy field - deprecated
   logoUrl?: string // New Cloudinary URL for logo
   storefrontImageUrl?: string // New Cloudinary URL for storefront image
+  headerLogoUrl?: string // New Cloudinary URL for header logo
   logoPublicId?: string // Cloudinary public_id for logo deletion
   storefrontImagePublicId?: string // Cloudinary public_id for storefront image deletion
+  headerLogoPublicId?: string // Cloudinary public_id for header logo deletion
   heroImageUrl?: string // URL de la imagen hero de Cloudinary
   heroImagePublicId?: string // Public ID de la imagen hero para eliminación
   carouselImages?: Array<{
