@@ -4,12 +4,6 @@ import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cl
 import { doc, updateDoc } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
 
-interface CarouselImage {
-  url: string
-  publicId: string
-  order: number
-}
-
 export default function CarouselImagesUpload() {
   const { store, mutate } = useStore()
   const [isUploading, setIsUploading] = useState(false)
