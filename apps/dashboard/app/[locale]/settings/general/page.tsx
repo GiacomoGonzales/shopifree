@@ -335,7 +335,7 @@ export default function GeneralSettingsPage() {
       
       const result = await replaceImageInCloudinary(
         file, 
-        { folder: 'logos', storeId: store?.id, subfolder: 'header' },
+        { folder: 'logos', storeId: store?.id },
         formData.headerLogoPublicId || undefined
       )
       
