@@ -40,6 +40,7 @@
     "discounts": "Descuentos",
     "content": "Contenido",
     "storeDesign": "Diseño de tienda",
+  "carouselImages": "Imágenes del carrusel",
     "reports": "Reportes",
     "settings": "Configuración",
     "basicSettings": "General",
@@ -750,6 +751,7 @@
       "zonaHoraria": "Zona horaria",
       "continue": "Continuar",
       "saving": "Guardando...",
+      "enterLocalNumber": "Ingresa solo el número local (sin código de país)",
       "errors": {
         "nombreRequired": "El nombre completo es obligatorio",
         "telefonoRequired": "El teléfono es obligatorio",

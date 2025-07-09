@@ -4,6 +4,8 @@ import DashboardLayout from '../../../components/DashboardLayout'
 import { useState } from 'react'
 import CurrentTheme from '../../../components/themes/CurrentTheme'
 import ThemeGallery from '../../../components/themes/ThemeGallery'
+import HeroImageUpload from '../../../components/store-design/HeroImageUpload'
+import CarouselImagesUpload from '../../../components/store-design/CarouselImagesUpload'
 
 type Section = 'logo-colors' | 'pages' | 'banners' | 'filters' | 'themes'
 
@@ -78,15 +80,10 @@ export default function StoreDesignPage() {
       case 'banners':
         return (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Banners principales</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  Gestiona los banners que se mostrarán en la página principal de tu tienda.
-                </p>
-                {/* Aquí irá el gestor de banners */}
-              </div>
-            </div>
+            {/* Imagen Hero */}
+            <HeroImageUpload />
+
+            <CarouselImagesUpload />
 
             <div className="bg-white rounded-lg shadow">
               <div className="p-6">

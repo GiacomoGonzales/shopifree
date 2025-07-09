@@ -10,6 +10,13 @@ export interface StoreDataServer {
   slogan: string
   description: string
   logoUrl?: string
+  heroImageUrl?: string
+  headerLogoUrl?: string;
+  carouselImages?: Array<{
+    url: string
+    publicId: string
+    order: number
+  }>
   primaryColor: string
   secondaryColor: string
   currency: string
@@ -18,6 +25,18 @@ export interface StoreDataServer {
   hasPhysicalLocation: boolean
   ownerId: string
   theme?: string
+  socialMedia?: {
+    facebook?: string
+    instagram?: string
+    whatsapp?: string
+    tiktok?: string
+    x?: string
+    snapchat?: string
+    linkedin?: string
+    telegram?: string
+    youtube?: string
+    pinterest?: string
+  }
   advanced?: {
     language?: string
     checkout?: {
@@ -46,6 +65,13 @@ export interface StoreDataClient {
   slogan: string
   description: string
   logoUrl?: string
+  heroImageUrl?: string
+  headerLogoUrl?: string;
+  carouselImages?: Array<{
+    url: string
+    publicId: string
+    order: number
+  }>
   primaryColor: string
   secondaryColor: string
   currency: string
@@ -54,6 +80,18 @@ export interface StoreDataClient {
   hasPhysicalLocation: boolean
   ownerId: string
   theme?: string
+  socialMedia?: {
+    facebook?: string
+    instagram?: string
+    whatsapp?: string
+    tiktok?: string
+    x?: string
+    snapchat?: string
+    linkedin?: string
+    telegram?: string
+    youtube?: string
+    pinterest?: string
+  }
   advanced?: {
     language?: string
     checkout?: {
@@ -119,6 +157,9 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
       slogan: serverStore.slogan,
       description: serverStore.description,
       logoUrl: serverStore.logoUrl,
+      heroImageUrl: serverStore.heroImageUrl,
+      headerLogoUrl: serverStore.headerLogoUrl,
+      carouselImages: serverStore.carouselImages,
       primaryColor: serverStore.primaryColor,
       secondaryColor: serverStore.secondaryColor,
       currency: serverStore.currency,
@@ -127,6 +168,7 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
       hasPhysicalLocation: serverStore.hasPhysicalLocation,
       ownerId: serverStore.ownerId,
       theme: serverStore.theme,
+      socialMedia: serverStore.socialMedia,
       advanced: serverStore.advanced,
       createdAt: convertTimestamp(serverStore.createdAt),
       updatedAt: convertTimestamp(serverStore.updatedAt),
@@ -169,7 +211,7 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       console.error('❌ Firebase database not available')
       return null
     }
-
+  
     console.log('🔍 Searching for store with subdomain:', cleanSubdomain)
 
     // Query stores collection for documents where subdomain matches
@@ -205,6 +247,9 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       slogan: rawData.slogan || '',
       description: rawData.description || '',
       logoUrl: rawData.logoUrl,
+      heroImageUrl: rawData.heroImageUrl,
+      headerLogoUrl: rawData.headerLogoUrl,
+      carouselImages: rawData.carouselImages,
       primaryColor: rawData.primaryColor || '#3B82F6',
       secondaryColor: rawData.secondaryColor || '#EF4444',
       currency: rawData.currency || 'USD',
@@ -213,6 +258,7 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       hasPhysicalLocation: rawData.hasPhysicalLocation || false,
       ownerId: rawData.ownerId || '',
       theme: rawData.theme || 'base-default',
+      socialMedia: rawData.socialMedia,
       advanced: rawData.advanced || { language: 'es' },
       createdAt: rawData.createdAt,
       updatedAt: rawData.updatedAt,

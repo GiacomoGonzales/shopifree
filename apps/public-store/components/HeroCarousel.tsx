@@ -1,75 +1,76 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+'use client'
 
-interface CarouselProps {
-  images: { src: string; alt: string }[];
+import React, { useState, useEffect } from 'react'
+
+interface HeroCarouselProps {
+  images: string[]
 }
 
-export default function BannerCarousel({ images }: CarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+export default function HeroCarousel({ images }: HeroCarouselProps) {
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   if (!images || images.length === 0) {
-    return null;
+    return null
   }
 
   // Autoplay functionality
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1) return
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
+    }, 5000) // Change image every 5 seconds
 
-    return () => clearInterval(interval);
-  }, [images.length]);
+    return () => clearInterval(interval)
+  }, [images.length])
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => 
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
+    )
+  }
 
   const goToNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
+  }
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+    setCurrentIndex(index)
+  }
 
   // Si solo hay una imagen, la mostramos sin la funcionalidad de carrusel.
   if (images.length === 1) {
     return (
-      <div className="w-full bg-white">
-        <div className="w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
+      <div className="w-full max-w-7xl mx-auto px-4">
+        <div className="w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden rounded-xl shadow-lg">
           <img
-            src={images[0].src}
-            alt={images[0].alt}
+            src={images[0]}
+            alt="Hero image"
             className="w-full h-full object-cover"
-            loading="lazy"
+            loading="eager"
           />
         </div>
       </div>
-    );
+    )
   }
 
   // Si hay más de una imagen, renderizamos el carrusel completo.
   return (
-    <div className="w-full bg-white relative">
-      <div className="w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden relative">
-        {/* Imágenes del carrusel */}
+    <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden rounded-xl shadow-lg relative">
+        {/* Contenedor de imágenes con overflow hidden para evitar espacios */}
         <div 
-          className="flex transition-transform duration-500 ease-in-out h-full"
+          className="flex transition-transform duration-500 ease-in-out h-full w-full"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
-          {images.map((image, index) => (
+          {images.map((url, index) => (
             <div
               key={index}
-              className="min-w-full h-full flex-shrink-0"
+              className="min-w-full h-full flex-shrink-0 relative"
             >
               <img
-                src={image.src}
-                alt={image.alt}
+                src={url}
+                alt={`Slide ${index + 1}`}
                 className="w-full h-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
               />
@@ -80,7 +81,7 @@ export default function BannerCarousel({ images }: CarouselProps) {
         {/* Botones de navegación */}
         <button
           onClick={goToPrevious}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200 z-10"
           aria-label="Imagen anterior"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +91,7 @@ export default function BannerCarousel({ images }: CarouselProps) {
 
         <button
           onClick={goToNext}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200 z-10"
           aria-label="Imagen siguiente"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +100,7 @@ export default function BannerCarousel({ images }: CarouselProps) {
         </button>
 
         {/* Indicadores de posición */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
           {images.map((_, index) => (
             <button
               key={index}
@@ -115,5 +116,5 @@ export default function BannerCarousel({ images }: CarouselProps) {
         </div>
       </div>
     </div>
-  );
+  )
 } 

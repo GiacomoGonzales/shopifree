@@ -6,6 +6,7 @@ import { useAuth } from '../../../../lib/simple-auth-context'
 import { createStore, checkSubdomainAvailability } from '../../../../lib/store'
 import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
+import { uploadImageToCloudinary, validateImageFile } from '../../../../lib/cloudinary'
 
 interface StoreFormData {
   storeName: string
@@ -24,6 +25,10 @@ interface StoreFormData {
   localPhone: string
   logoFile: File | null
   storePhotoFile: File | null
+  logoUrl: string
+  logoPublicId: string
+  storefrontImageUrl: string
+  storefrontImagePublicId: string
   primaryColor: string
   secondaryColor: string
   currency: string
@@ -149,6 +154,10 @@ function StoreOnboardingContent() {
     localPhone: '',
     logoFile: null,
     storePhotoFile: null,
+    logoUrl: '',
+    logoPublicId: '',
+    storefrontImageUrl: '',
+    storefrontImagePublicId: '',
     primaryColor: '#3B82F6',
     secondaryColor: '#1F2937',
     currency: 'USD',
@@ -172,6 +181,8 @@ function StoreOnboardingContent() {
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [uploadingStorefront, setUploadingStorefront] = useState(false)
 
   // Validación de subdominio simplificada (sin estado de loading)
   const validateSubdomain = useCallback(async (subdomain: string) => {
@@ -362,6 +373,62 @@ function StoreOnboardingContent() {
     setFormData(prev => ({ ...prev, [field]: file }))
   }
 
+  // Función para subir logo a Cloudinary
+  const handleLogoUpload = async (file: File) => {
+    setUploadingLogo(true)
+    try {
+      const validation = validateImageFile(file)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+      
+      const result = await uploadImageToCloudinary(file, {
+        folder: 'logos',
+        storeId: 'temp' // Usamos 'temp' hasta que se cree la tienda
+      })
+      
+      setFormData(prev => ({
+        ...prev,
+        logoUrl: result.secure_url,
+        logoPublicId: result.public_id
+      }))
+      
+    } catch (error) {
+      console.error('Error uploading logo:', error)
+      alert('Error al subir logo')
+    } finally {
+      setUploadingLogo(false)
+    }
+  }
+
+  // Función para subir foto de tienda a Cloudinary
+  const handleStorefrontUpload = async (file: File) => {
+    setUploadingStorefront(true)
+    try {
+      const validation = validateImageFile(file)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+      
+      const result = await uploadImageToCloudinary(file, {
+        folder: 'store_photos',
+        storeId: 'temp' // Usamos 'temp' hasta que se cree la tienda
+      })
+      
+      setFormData(prev => ({
+        ...prev,
+        storefrontImageUrl: result.secure_url,
+        storefrontImagePublicId: result.public_id
+      }))
+      
+    } catch (error) {
+      console.error('Error uploading storefront image:', error)
+      alert('Error al subir imagen de tienda')
+    } finally {
+      setUploadingStorefront(false)
+    }
+  }
+
   const handleCreateStore = async () => {
     if (!validateCurrentStep() || !user?.uid) return
     
@@ -377,10 +444,6 @@ function StoreOnboardingContent() {
         setCreationProgress(creationSteps[i].progress)
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
-      
-      // Simular carga de archivos (en producción usarías Firebase Storage)
-      const logoURL = formData.logoFile ? 'https://placeholder-logo.jpg' : ''
-      const storePhotoURL = formData.storePhotoFile ? 'https://placeholder-store-photo.jpg' : ''
       
       // Combinar código de país con teléfono local
       const phoneCompleto = `${formData.countryCode}${formData.localPhone}`
@@ -401,8 +464,14 @@ function StoreOnboardingContent() {
         primaryColor: formData.primaryColor,
         secondaryColor: formData.secondaryColor,
         currency: formData.currency,
-        logo: logoURL,
-        storePhoto: storePhotoURL,
+        // Usar los campos de Cloudinary si existen, sino usar los legacy para compatibilidad
+        logoUrl: formData.logoUrl,
+        logoPublicId: formData.logoPublicId,
+        storefrontImageUrl: formData.storefrontImageUrl,
+        storefrontImagePublicId: formData.storefrontImagePublicId,
+        // Mantener campos legacy para compatibilidad
+        logo: formData.logoUrl || '',
+        storePhoto: formData.storefrontImageUrl || '',
         socialMedia: formData.socialMedia,
         ownerId: user.uid
       }
@@ -705,7 +774,13 @@ function StoreOnboardingContent() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleFileChange('logoFile', e.target.files?.[0] || null)}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0] || null
+                        handleFileChange('logoFile', file)
+                        if (file) {
+                          await handleLogoUpload(file)
+                        }
+                      }}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     {formData.logoFile ? (
@@ -715,14 +790,37 @@ function StoreOnboardingContent() {
                           alt="Preview del logo"
                           className="w-full h-32 object-contain rounded-lg"
                         />
+                        {uploadingLogo && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                            <div className="text-white text-center">
+                              <svg className="w-8 h-8 animate-spin mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              <p className="text-xs">Subiendo...</p>
+                            </div>
+                          </div>
+                        )}
                         <div className="mt-2 text-center">
                           <span className="text-xs text-gray-600 font-medium">{formData.logoFile.name}</span>
+                          {formData.logoUrl && (
+                            <div className="flex items-center justify-center mt-1">
+                              <svg className="w-3 h-3 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-xs text-green-600">Subido</span>
+                            </div>
+                          )}
                         </div>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleFileChange('logoFile', null)
+                            setFormData(prev => ({
+                              ...prev,
+                              logoUrl: '',
+                              logoPublicId: ''
+                            }))
                           }}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
                         >
@@ -756,7 +854,13 @@ function StoreOnboardingContent() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleFileChange('storePhotoFile', e.target.files?.[0] || null)}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0] || null
+                        handleFileChange('storePhotoFile', file)
+                        if (file) {
+                          await handleStorefrontUpload(file)
+                        }
+                      }}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     {formData.storePhotoFile ? (
@@ -766,14 +870,37 @@ function StoreOnboardingContent() {
                           alt="Preview de la foto de tienda"
                           className="w-full h-32 object-cover rounded-lg"
                         />
+                        {uploadingStorefront && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                            <div className="text-white text-center">
+                              <svg className="w-8 h-8 animate-spin mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              <p className="text-xs">Subiendo...</p>
+                            </div>
+                          </div>
+                        )}
                         <div className="mt-2 text-center">
                           <span className="text-xs text-gray-600 font-medium">{formData.storePhotoFile.name}</span>
+                          {formData.storefrontImageUrl && (
+                            <div className="flex items-center justify-center mt-1">
+                              <svg className="w-3 h-3 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-xs text-green-600">Subido</span>
+                            </div>
+                          )}
                         </div>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleFileChange('storePhotoFile', null)
+                            setFormData(prev => ({
+                              ...prev,
+                              storefrontImageUrl: '',
+                              storefrontImagePublicId: ''
+                            }))
                           }}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
                         >

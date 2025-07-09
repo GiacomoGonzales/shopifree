@@ -34,6 +34,13 @@ export interface StoreConfig {
   storefrontImageUrl?: string // New Cloudinary URL for storefront image
   logoPublicId?: string // Cloudinary public_id for logo deletion
   storefrontImagePublicId?: string // Cloudinary public_id for storefront image deletion
+  heroImageUrl?: string // URL de la imagen hero de Cloudinary
+  heroImagePublicId?: string // Public ID de la imagen hero para eliminación
+  carouselImages?: Array<{
+    url: string
+    publicId: string
+    order: number
+  }> // Imágenes del carrusel principal
   theme?: string // ID del tema visual seleccionado
   socialMedia?: { // Cambiado de redes
     facebook?: string

@@ -104,8 +104,10 @@ export default function GeneralSettingsPage() {
     currency: 'USD',
     logoUrl: '',
     storefrontImageUrl: '',
+    headerLogoUrl: '',
     logoPublicId: '',
     storefrontImagePublicId: '',
+    headerLogoPublicId: '',
     socialMedia: {
       facebook: '',
       instagram: '',
@@ -122,11 +124,13 @@ export default function GeneralSettingsPage() {
   // Estados para manejar la subida de imágenes
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingStorefront, setUploadingStorefront] = useState(false)
+  const [uploadingHeaderLogo, setUploadingHeaderLogo] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   
   // Estados para drag & drop feedback visual
   const [isDraggingOverLogo, setIsDraggingOverLogo] = useState(false)
   const [isDraggingOverStorefront, setIsDraggingOverStorefront] = useState(false)
+  const [isDraggingOverHeaderLogo, setIsDraggingOverHeaderLogo] = useState(false)
 
   // Cargar datos de la tienda
   useEffect(() => {
@@ -155,8 +159,10 @@ export default function GeneralSettingsPage() {
             currency: userStore.currency || 'USD',
             logoUrl: userStore.logoUrl || userStore.logo || '', // Fallback to legacy field
             storefrontImageUrl: userStore.storefrontImageUrl || userStore.storePhoto || '', // Fallback to legacy field
+            headerLogoUrl: userStore.headerLogoUrl || '',
             logoPublicId: userStore.logoPublicId || '',
             storefrontImagePublicId: userStore.storefrontImagePublicId || '',
+            headerLogoPublicId: userStore.headerLogoPublicId || '',
             socialMedia: {
               facebook: userStore.socialMedia?.facebook || '',
               instagram: userStore.socialMedia?.instagram || '',
@@ -316,6 +322,34 @@ export default function GeneralSettingsPage() {
     }
   }
 
+  // Handler para subir logo del header
+  const handleHeaderLogoUpload = async (file: File) => {
+    setUploadingHeaderLogo(true)
+    setUploadError(null)
+    
+    try {
+      const validation = validateImageFile(file)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+      
+      const result = await replaceImageInCloudinary(
+        file, 
+        { folder: 'logos', storeId: store?.id, subfolder: 'header' },
+        formData.headerLogoPublicId || undefined
+      )
+      
+      handleChange('headerLogoUrl', result.secure_url)
+      handleChange('headerLogoPublicId', result.public_id)
+      
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Error al subir imagen')
+      console.error('Error uploading header logo:', error)
+    } finally {
+      setUploadingHeaderLogo(false)
+    }
+  }
+
   // Handler para subir foto de tienda
   const handleStorefrontUpload = async (file: File) => {
     setUploadingStorefront(true)
@@ -372,6 +406,35 @@ export default function GeneralSettingsPage() {
     const files = e.dataTransfer.files
     if (files && files[0]) {
       handleLogoUpload(files[0])
+    }
+  }
+
+  // Handlers para drag & drop del logo del header
+  const handleHeaderLogoDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOverHeaderLogo(true)
+  }
+
+  const handleHeaderLogoDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOverHeaderLogo(false)
+  }
+
+  const handleHeaderLogoDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleHeaderLogoDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOverHeaderLogo(false)
+    
+    const files = e.dataTransfer.files
+    if (files && files[0]) {
+      handleHeaderLogoUpload(files[0])
     }
   }
 
@@ -878,6 +941,106 @@ export default function GeneralSettingsPage() {
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
                   {t('branding.logoHint')}
+                </p>
+              </div>
+
+              {/* Header Logo Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Logo para el encabezado (transparente)
+                </label>
+                <div className="relative">
+                  {formData.headerLogoUrl ? (
+                    <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
+                      <img
+                        src={formData.headerLogoUrl}
+                        alt="Header logo preview"
+                        className="w-full h-32 object-contain"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
+                        <div className="flex space-x-2">
+                          <label className="px-3 py-1 bg-white text-gray-700 text-xs rounded shadow hover:bg-gray-50 transition-colors cursor-pointer">
+                            {t('branding.changeImage')}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleHeaderLogoUpload(file)
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (formData.headerLogoPublicId) {
+                                await deleteImageFromCloudinary(formData.headerLogoPublicId)
+                              }
+                              handleChange('headerLogoUrl', '')
+                              handleChange('headerLogoPublicId', '')
+                            }}
+                            className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
+                          >
+                            {t('branding.removeImage')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200 cursor-pointer group ${
+                        isDraggingOverHeaderLogo
+                          ? 'border-gray-400 bg-gray-100 scale-105 shadow-lg' 
+                          : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+                      }`}
+                      onDragEnter={handleHeaderLogoDragEnter}
+                      onDragLeave={handleHeaderLogoDragLeave}
+                      onDragOver={handleHeaderLogoDragOver}
+                      onDrop={handleHeaderLogoDrop}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={uploadingHeaderLogo}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleHeaderLogoUpload(file)
+                        }}
+                      />
+                      {uploadingHeaderLogo ? (
+                        <div className="space-y-3">
+                          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100">
+                            <svg className="animate-spin h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </div>
+                          <p className="text-sm font-medium text-gray-600">{t('branding.uploading')}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-lg transition-colors ${
+                            isDraggingOverHeaderLogo 
+                              ? 'bg-gray-200' 
+                              : 'bg-gray-200 group-hover:bg-gray-300'
+                          }`}>
+                            <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 group-hover:text-gray-800">Sube un logo para el header</p>
+                            <p className="text-xs mt-1 text-gray-500">{t('branding.fileFormat')}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Idealmente un logo horizontal y transparente para que se vea bien en el encabezado.
                 </p>
               </div>
 

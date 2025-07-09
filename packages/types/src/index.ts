@@ -12,15 +12,43 @@ export interface User {
 // Store types
 export interface Store {
   id: string;
-  name: string;
+  subdomain: string;
+  storeName: string;
+  slogan?: string;
   description?: string;
-  domain: string;
+  hasPhysicalLocation: boolean;
+  address?: string;
+  location?: {
+    address?: string;
+    lat?: number;
+    lng?: number;
+  };
+  phone: string;
+  emailStore?: string;
+  currency: string;
+  logoUrl?: string;
+  heroImageUrl?: string;
+  storefrontImageUrl?: string;
+  headerLogoUrl?: string;
+  carouselImages?: Array<{
+    url: string;
+    publicId: string;
+    order: number;
+  }>;
+  primaryColor: string;
+  secondaryColor: string;
+  socialMedia?: {
+    [key: string]: string | undefined;
+  };
+  logo?: string; // Legacy
+  logoPublicId?: string;
+  storefrontImagePublicId?: string;
+  headerLogoPublicId?: string;
+  storePhoto?: string; // Legacy
+  businessType?: string;
   ownerId: string;
-  logo?: string;
   theme: StoreTheme;
   settings: StoreSettings;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface StoreTheme {

@@ -9,7 +9,14 @@ export interface Tienda {
   hasPhysicalLocation: boolean
   address?: string
   logoUrl?: string
+  heroImageUrl?: string
   storefrontImageUrl?: string
+  headerLogoUrl?: string
+  carouselImages?: Array<{
+    url: string
+    publicId: string
+    order: number
+  }>
   primaryColor: string
   secondaryColor: string
   currency: string

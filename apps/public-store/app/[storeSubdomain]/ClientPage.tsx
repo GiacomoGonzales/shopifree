@@ -58,7 +58,8 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
   const ThemeHome = dynamic<ThemeComponentProps>(
     () => import(`../../themes/${tienda.theme}/Home`).catch(() => {
       console.error(`Theme Home ${tienda.theme} not found, falling back to base-default`)
-      return import('../../themes/base-default/Home')
+      // Fallback a un componente simple si Home no existe
+      return Promise.resolve(() => <div>Contenido no encontrado.</div>)
     }),
     {
       loading: () => <LoadingState />,

@@ -1,16 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import dynamic from 'next/dynamic'
-
-// Importar ReactQuill dinámicamente para evitar problemas de SSR
-const ReactQuill = dynamic(() => import('react-quill'), { 
-  ssr: false,
-  loading: () => <div className="h-40 bg-gray-50 animate-pulse rounded-md" />
-})
-
-// Importar estilos CSS
-import 'react-quill/dist/quill.snow.css'
+import { useEffect, useRef, useState } from 'react'
+import type Quill from 'quill'
 
 interface RichTextEditorProps {
   value: string
@@ -29,39 +20,107 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   required = false,
   className = ""
 }) => {
+  const editorRef = useRef<HTMLDivElement>(null)
+  const quillRef = useRef<Quill | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [quillLoaded, setQuillLoaded] = useState(false)
 
-
-  // Configuración del toolbar personalizado (similar a la imagen)
-  const modules = {
-    toolbar: [
-      // Primera fila: Formato de texto y párrafo
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline'],
-      [{ 'color': [] }],
-      
-      // Segunda fila: Alineación y listas
-      [{ 'align': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      
-      // Tercera fila: Enlaces, imagen, video y código
-      ['link', 'image', 'video'],
-      ['code-block'],
-      ['clean']
-    ],
-  }
-
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 
-    'color',
-    'align', 'list',
-    'link', 'image', 'video',
-    'code-block'
-  ]
-
-  // Estilos personalizados para el editor
   useEffect(() => {
-    // Agregar estilos personalizados al editor
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !editorRef.current) return
+
+    // Cargar Quill dinámicamente
+    const loadQuill = async () => {
+      try {
+        // Cargar CSS primero
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = 'https://cdn.quilljs.com/1.3.7/quill.snow.css'
+        
+        if (!document.querySelector('link[href="https://cdn.quilljs.com/1.3.7/quill.snow.css"]')) {
+          document.head.appendChild(link)
+        }
+
+        // Cargar Quill JS
+        const QuillConstructor = (await import('quill')).default
+
+        if (quillRef.current) {
+          quillRef.current = null
+        }
+
+        // Configurar Quill
+        if (!editorRef.current) return
+        
+        quillRef.current = new QuillConstructor(editorRef.current, {
+          theme: 'snow',
+          placeholder,
+          modules: {
+            toolbar: [
+              [{ 'header': [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline'],
+              [{ 'color': [] }],
+              [{ 'align': [] }],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+              ['link'],
+              ['clean']
+            ],
+          },
+          formats: [
+            'header',
+            'bold', 'italic', 'underline', 
+            'color',
+            'align', 'list',
+            'link'
+          ]
+        })
+
+        // Establecer contenido inicial
+        if (value) {
+          quillRef.current.clipboard.dangerouslyPasteHTML(value)
+        }
+
+        // Escuchar cambios
+        quillRef.current.on('text-change', () => {
+          if (quillRef.current) {
+            const html = quillRef.current.root.innerHTML
+            onChange(html)
+          }
+        })
+
+        setQuillLoaded(true)
+
+      } catch (error) {
+        console.error('Error loading Quill:', error)
+      }
+    }
+
+    loadQuill()
+
+    return () => {
+      if (quillRef.current) {
+        quillRef.current = null
+      }
+    }
+  }, [mounted, placeholder])
+
+  // Actualizar contenido cuando cambie value desde fuera
+  useEffect(() => {
+    if (quillRef.current && value !== quillRef.current.root.innerHTML) {
+      const selection = quillRef.current.getSelection()
+      quillRef.current.clipboard.dangerouslyPasteHTML(value)
+      if (selection) {
+        quillRef.current.setSelection(selection)
+      }
+    }
+  }, [value])
+
+  // Estilos personalizados
+  useEffect(() => {
+    if (!quillLoaded) return
+
     const style = document.createElement('style')
     style.textContent = `
       .ql-editor {
@@ -79,10 +138,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         border-radius: 6px 6px 0 0;
         padding: 12px;
         background: #ffffff;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 4px;
       }
       
       .ql-container {
@@ -94,43 +149,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         font-family: inherit;
       }
       
-      .ql-toolbar .ql-picker-label {
-        color: #374151;
-      }
-      
-      .ql-toolbar .ql-stroke {
-        stroke: #6b7280;
-      }
-      
-      .ql-toolbar .ql-fill {
-        fill: #6b7280;
-      }
-      
-      .ql-toolbar button:hover,
-      .ql-toolbar button:focus {
-        color: #1f2937;
-      }
-      
-      .ql-toolbar button:hover .ql-stroke {
-        stroke: #1f2937;
-      }
-      
-      .ql-toolbar button:hover .ql-fill {
-        fill: #1f2937;
-      }
-      
-      .ql-toolbar .ql-active {
-        color: #3b82f6;
-      }
-      
-      .ql-toolbar .ql-active .ql-stroke {
-        stroke: #3b82f6;
-      }
-      
-      .ql-toolbar .ql-active .ql-fill {
-        fill: #3b82f6;
-      }
-      
       .ql-editor.ql-blank::before {
         color: #9ca3af;
         font-style: normal;
@@ -139,48 +157,31 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       .ql-editor:focus {
         outline: none;
       }
-      
-      .ql-container.ql-snow {
-        border: 1px solid #d1d5db;
-      }
-      
-      .ql-snow .ql-tooltip {
-        background: white;
-        border: 1px solid #d1d5db;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border-radius: 6px;
-      }
-      
-      .ql-toolbar .ql-formats {
-        margin-right: 8px;
-      }
-      
-      .ql-toolbar .ql-formats:last-child {
-        margin-right: 0;
-      }
-      
-      .ql-picker.ql-expanded .ql-picker-options {
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        background: white;
-      }
-      
-      .ql-editor p {
-        margin-bottom: 0.5em;
-      }
-      
-      .ql-editor ul, .ql-editor ol {
-        padding-left: 1.5em;
-        margin-bottom: 0.5em;
-      }
     `
     document.head.appendChild(style)
     
     return () => {
-      document.head.removeChild(style)
+      if (document.head.contains(style)) {
+        document.head.removeChild(style)
+      }
     }
-  }, [])
+  }, [quillLoaded])
+
+  if (!mounted) {
+    return (
+      <div className={`space-y-1 ${className}`}>
+        {label && (
+          <label className="block text-sm font-medium text-gray-700">
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+        )}
+        <div className="h-40 bg-gray-50 animate-pulse rounded-md border border-gray-300 flex items-center justify-center">
+          <span className="text-gray-500 text-sm">Cargando editor...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`space-y-1 ${className}`}>
@@ -191,15 +192,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </label>
       )}
       <div className="relative">
-        <ReactQuill
-          theme="snow"
-          value={value}
-          onChange={onChange}
-          modules={modules}
-          formats={formats}
-          placeholder={placeholder}
-          className="bg-white"
-        />
+        <div ref={editorRef} className="bg-white" />
+        {!quillLoaded && (
+          <div className="absolute inset-0 bg-gray-50 animate-pulse rounded-md border border-gray-300 flex items-center justify-center">
+            <span className="text-gray-500 text-sm">Inicializando editor...</span>
+          </div>
+        )}
       </div>
     </div>
   )

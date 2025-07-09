@@ -68,6 +68,7 @@ export interface UseStoreReturn {
   currencySymbol: string
   currencyName: string
   formatPrice: (amount: number | string) => string
+  mutate: (newStore: StoreWithId) => void
 }
 
 export const useStore = (): UseStoreReturn => {
@@ -112,6 +113,11 @@ export const useStore = (): UseStoreReturn => {
     return `${currencySymbol} ${numericAmount.toFixed(2)}`
   }
 
+  // Función para actualizar el estado de la tienda
+  const mutate = (newStore: StoreWithId) => {
+    setStore(newStore)
+  }
+
   return {
     store,
     loading,
@@ -119,6 +125,7 @@ export const useStore = (): UseStoreReturn => {
     currency,
     currencySymbol,
     currencyName,
-    formatPrice
+    formatPrice,
+    mutate
   }
 } 

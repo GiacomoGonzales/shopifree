@@ -1,91 +1,99 @@
-import { ThemeComponentProps } from '../theme-component'
-import Image from 'next/image'
+import { ThemeComponentProps } from "../theme-component";
 
-export default function BaseDefaultHome({ tienda }: ThemeComponentProps) {
+export default function Home({ tienda }: ThemeComponentProps) {
+  const primaryColor = tienda.primaryColor || '#111827';
+  const secondaryColor = tienda.secondaryColor || '#1F2937';
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl font-bold text-gray-900 mb-4">
-          Bienvenido a {tienda.storeName}
-        </h2>
-        {tienda.description && (
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {tienda.description}
-          </p>
-        )}
+    <main>
+      {/* Contenedor de categorías y controles */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Categorías a la izquierda */}
+            <div className="flex items-center space-x-6">
+              <h3 className="text-sm font-medium text-gray-700">Categorías:</h3>
+              <div className="flex items-center space-x-4">
+                <button 
+                  className="text-white px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  Todas
+                </button>
+                <button 
+                  className="text-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:text-white"
+                  style={{ backgroundColor: `${secondaryColor}99` }}
+                >
+                  Ropa
+                </button>
+                <button 
+                  className="text-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:text-white"
+                  style={{ backgroundColor: `${secondaryColor}99` }}
+                >
+                  Accesorios
+                </button>
+                <button 
+                  className="text-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:text-white"
+                  style={{ backgroundColor: `${secondaryColor}99` }}
+                >
+                  Zapatos
+                </button>
+              </div>
+            </div>
+
+            {/* Controles a la derecha */}
+            <div className="flex items-center space-x-4">
+              {/* Barra de búsqueda */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  className="w-64 px-4 py-2 pl-10 text-sm rounded-full border-0 text-white/90 placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                  style={{ backgroundColor: `${secondaryColor}99` }}
+                />
+                <svg 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+
+              {/* Botón de filtros */}
+              <button 
+                className="flex items-center space-x-2 text-white/90 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:text-white"
+                style={{ backgroundColor: `${secondaryColor}99` }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+                </svg>
+                <span>Filtros</span>
+              </button>
+
+              {/* Botón de ordenar */}
+              <button 
+                className="flex items-center space-x-2 text-white/90 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:text-white"
+                style={{ backgroundColor: `${secondaryColor}99` }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                </svg>
+                <span>Ordenar</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Store info cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Location card */}
-        {tienda.hasPhysicalLocation && tienda.address && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center mb-3">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
-                style={{ backgroundColor: `${tienda.primaryColor}20` }}
-              >
-                <svg className="w-5 h-5" style={{ color: tienda.primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Ubicación</h3>
-            </div>
-            <p className="text-gray-600">{tienda.address}</p>
-          </div>
-        )}
-
-        {/* Contact card */}
-        {tienda.phone && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center mb-3">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
-                style={{ backgroundColor: `${tienda.primaryColor}20` }}
-              >
-                <svg className="w-5 h-5" style={{ color: tienda.primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Contacto</h3>
-            </div>
-            <p className="text-gray-600">{tienda.phone}</p>
-          </div>
-        )}
-
-        {/* Social Media */}
-        {tienda.socialMedia && Object.keys(tienda.socialMedia).length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center mb-3">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
-                style={{ backgroundColor: `${tienda.secondaryColor}20` }}
-              >
-                <svg className="w-5 h-5" style={{ color: tienda.secondaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Redes Sociales</h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(tienda.socialMedia).map(([key, value]) => 
-                value && (
-                  <a
-                    key={key}
-                    href={value}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    {key}
-                  </a>
-                )
-              )}
-            </div>
-          </div>
-        )}
+      {/* Contenido principal */}
+      <div className="container mx-auto px-6 py-8">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Nuestros Productos</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {/* Las tarjetas de producto se agregarán aquí más adelante */}
+        </div>
       </div>
-    </div>
+    </main>
   )
 } 

@@ -52,6 +52,23 @@ export const availableThemes: Theme[] = [
       primary: '#4C1D95',
       secondary: '#6D28D9'
     }
+  },
+  {
+    id: 'minimal-clean',
+    nombre: 'Minimal Clean',
+    descripcion: 'Diseño completamente limpio y minimalista, perfecto para una apariencia moderna y profesional.',
+    preview: '/themes/minimal-clean/preview.jpg',
+    category: 'minimal',
+    features: [
+      'Diseño ultra limpio',
+      'Minimalismo extremo',
+      'Tipografía clara',
+      'Interfaz intuitiva'
+    ],
+    colors: {
+      primary: '#111827',
+      secondary: '#6B7280'
+    }
   }
 ]
 

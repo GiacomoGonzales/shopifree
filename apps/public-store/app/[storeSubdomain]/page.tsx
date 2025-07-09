@@ -26,7 +26,7 @@ export default async function StorePage({ params }: PageProps) {
   const tienda: Tienda = {
     ...store,
     theme: themeId,
-    socialMedia: {} // Inicializar campo requerido
+    socialMedia: store.socialMedia || {} // Inicializar campo requerido
   }
 
   // 3. Renderizar el componente del cliente

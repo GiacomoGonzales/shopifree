@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractSubdomain } from './lib/store'
 
+// Expresión regular para verificar si una ruta es para un archivo estático
+// Ignora rutas como /_next, /api, /favicon.ico, y cualquier ruta que contenga un punto (e.g., /images/banner.webp)
+const PUBLIC_FILE = /\\.(.*)$/
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
   const host = request.headers.get('host')
+
+  // Prevenir que el middleware se ejecute en rutas de archivos estáticos
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/static') ||
+    PUBLIC_FILE.test(pathname)
+  ) {
+    return NextResponse.next()
+  }
+
   const subdomain = extractSubdomain(host)
   
   // Si no hay subdominio válido, mostrar la landing page
