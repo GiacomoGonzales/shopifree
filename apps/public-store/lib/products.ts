@@ -21,6 +21,7 @@ export interface PublicProduct {
   rating?: number
   reviews?: number
   status: 'draft' | 'active' | 'archived'
+  slug?: string
   mediaFiles: Array<{
     id: string
     url: string
@@ -53,6 +54,7 @@ const transformToPublicProduct = (dbProduct: any): PublicProduct => {
     rating: 4.5, // Mock rating for now
     reviews: Math.floor(Math.random() * 200) + 50, // Mock reviews
     status: dbProduct.status || 'active', // Default to active if no status
+    slug: dbProduct.urlSlug || dbProduct.slug || `${dbProduct.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${dbProduct.id?.slice(-6)}` || `producto-${dbProduct.id?.slice(-6)}`,
     mediaFiles: dbProduct.mediaFiles || [],
     hasVariants: dbProduct.hasVariants || false,
     variants: dbProduct.variants || []
@@ -130,6 +132,64 @@ export const getStoreProducts = async (storeId: string): Promise<PublicProduct[]
     return products
   } catch (error) {
     console.error('❌ Error getting store products:', error)
+    return []
+  }
+}
+
+// Search products by query
+export const searchProducts = async (storeId: string, searchQuery: string, limit: number = 10): Promise<PublicProduct[]> => {
+  try {
+    console.log('🔍 Searching products for store:', storeId, 'Query:', searchQuery)
+    
+    if (!searchQuery || searchQuery.trim().length === 0) {
+      return []
+    }
+    
+    // Get all products first (since Firestore doesn't support full-text search natively)
+    const allProducts = await getStoreProducts(storeId)
+    
+    // Filter products based on search query
+    const searchTerms = searchQuery.toLowerCase().trim().split(' ')
+    
+    const filteredProducts = allProducts.filter(product => {
+      const productText = `${product.name} ${product.description}`.toLowerCase()
+      
+      // Check if all search terms are found in the product text
+      return searchTerms.every(term => productText.includes(term))
+    })
+    
+    console.log('🎯 Search results:', filteredProducts.length, 'products found')
+    
+    // Return limited results
+    return filteredProducts.slice(0, limit)
+  } catch (error) {
+    console.error('❌ Error searching products:', error)
+    return []
+  }
+}
+
+// Get search suggestions based on existing products
+export const getSearchSuggestions = async (storeId: string): Promise<string[]> => {
+  try {
+    const allProducts = await getStoreProducts(storeId)
+    
+    // Extract unique words from product names for suggestions
+    const suggestions = new Set<string>()
+    
+    allProducts.forEach(product => {
+      // Add product name words
+      const nameWords = product.name.toLowerCase().split(' ')
+      nameWords.forEach(word => {
+        if (word.length > 2) { // Only words longer than 2 characters
+          suggestions.add(word.charAt(0).toUpperCase() + word.slice(1))
+        }
+      })
+    })
+    
+    // Convert to array and return first 5
+    return Array.from(suggestions).slice(0, 5)
+  } catch (error) {
+    console.error('❌ Error getting search suggestions:', error)
     return []
   }
 }

@@ -13,5 +13,11 @@ export interface ThemeLayoutProps extends ThemeComponentProps {
   children: React.ReactNode
 }
 
+export interface ThemeProductProps {
+  tienda: Tienda
+  product: PublicProduct
+}
+
 export type ThemeComponent = ComponentType<ThemeComponentProps>
-export type ThemeLayoutComponent = ComponentType<ThemeLayoutProps> 
+export type ThemeLayoutComponent = ComponentType<ThemeLayoutProps>
+export type ThemeProductComponent = ComponentType<ThemeProductProps> 

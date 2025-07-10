@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
@@ -105,6 +106,13 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   
   // Usar productos reales si existen, si no usar ejemplos
   const productosAMostrar = productos && productos.length > 0 ? productos : productosEjemplo
+
+  useEffect(() => {
+    // Asegurar que la página se muestre desde arriba cuando se carga
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 100)
+  }, [tienda.id])
   
   // Debug logs para entender qué está pasando
   console.log('🛍️ Home component rendered with:', {
@@ -151,26 +159,59 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-neutral-50 to-white pt-20">
-        {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <div className="space-y-6 animate-slide-up">
-            <h1 className="text-5xl md:text-7xl font-extralight text-neutral-900 tracking-tight leading-tight">
-              {tienda?.storeName || 'Estilo Minimalista'}
-            </h1>
-            <p className="text-xl md:text-2xl text-neutral-600 font-light max-w-2xl mx-auto leading-relaxed">
-              {tienda?.description || 'Descubre nuestra colección única de productos cuidadosamente seleccionados para tu estilo de vida moderno'}
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
-            <button className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center space-x-2">
-              <span>Explorar Colección</span>
-              <Icons.ArrowRight />
-            </button>
-            <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
-              Ver Ofertas
-            </button>
+      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white" style={{ marginTop: '-80px', paddingTop: '120px' }}>
+        {/* Content Container */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[60vh]">
+            
+            {/* Left Column - Text Content */}
+            <div className="space-y-8 text-center lg:text-left">
+              <div className="space-y-6 animate-slide-up">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-extralight text-neutral-900 tracking-tight leading-tight">
+                  {tienda?.storeName || 'Estilo Minimalista'}
+                </h1>
+                <p className="text-lg md:text-xl lg:text-2xl text-neutral-600 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
+                  {tienda?.description || 'Descubre nuestra colección única de productos cuidadosamente seleccionados para tu estilo de vida moderno'}
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center animate-fade-in">
+                <button className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center space-x-2">
+                  <span>Explorar Colección</span>
+                  <Icons.ArrowRight />
+                </button>
+                <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
+                  Ver Ofertas
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column - Hero Image */}
+            <div className="relative lg:h-[60vh] h-[50vh] order-first lg:order-last">
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+                {tienda?.heroImageUrl ? (
+                  <img 
+                    src={tienda.heroImageUrl} 
+                    alt={`${tienda.storeName} - Imagen principal`}
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <div className="w-24 h-24 mx-auto bg-neutral-300 rounded-full flex items-center justify-center">
+                        <svg className="w-12 h-12 text-neutral-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <p className="text-neutral-500 font-light">Imagen de héroe</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Decorative accent */}
+              <div className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-neutral-900/10 to-transparent rounded-2xl -z-10"></div>
+            </div>
           </div>
         </div>
 
@@ -207,11 +248,12 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {productosAMostrar.map((producto, index) => (
-            <div 
-              key={producto.id} 
-              className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 hover-lift animate-fade-in group cursor-pointer"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
+                          <Link 
+                key={producto.id} 
+                href={`/${producto.slug}`}
+                className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 hover-lift animate-fade-in group cursor-pointer block"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
               {/* Product Image */}
               <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100">
                 <Image
@@ -264,7 +306,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                   </button>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

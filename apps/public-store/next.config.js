@@ -2,6 +2,7 @@
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['firebase', '@firebase/app', '@firebase/firestore'],
+    scrollRestoration: true,
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
   // Enable Firebase environment variables
