@@ -1,60 +1,137 @@
 import { ThemeComponentProps, ThemeLayoutProps } from "../theme-component";
 import HeroCarousel from '../../components/HeroCarousel';
+import { useState } from 'react';
 
 const Header = ({ tienda }: ThemeComponentProps) => {
   const primaryColor = tienda.primaryColor || '#111827';
   const secondaryColor = tienda.secondaryColor || '#1F2937';
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-20 px-4 py-6">
+    <header className="sticky top-0 z-20 px-4 py-3 md:py-6">
       <div 
-        className="backdrop-blur-sm shadow-lg rounded-full flex justify-between items-center px-6 py-3 mx-auto max-w-7xl"
+        className="backdrop-blur-sm shadow-lg rounded-full flex justify-between items-center px-4 md:px-6 py-3 mx-auto max-w-7xl"
         style={{ backgroundColor: `${primaryColor}40` }}
       >
-        <div className="flex items-center">
+        {/* Logo/Nombre de la tienda */}
+        <div className="flex items-center flex-shrink-0">
           {tienda.headerLogoUrl ? (
-            <img src={tienda.headerLogoUrl} alt={`${tienda.storeName} logo`} className="h-8 max-w-xs object-contain" />
+            <img 
+              src={tienda.headerLogoUrl} 
+              alt={`${tienda.storeName} logo`} 
+              className="h-6 md:h-8 max-w-xs object-contain" 
+            />
           ) : (
-            <div className="text-lg font-bold text-white tracking-wide">{tienda.storeName}</div>
+            <div className="text-base md:text-lg font-light text-white tracking-wide">
+              {tienda.storeName}
+            </div>
           )}
         </div>
-        <nav className="flex items-center space-x-4">
+
+        {/* Navegación desktop */}
+        <nav className="hidden md:flex items-center space-x-3 lg:space-x-4">
           <a 
             href="#" 
-            className="text-white px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200"
+            className="text-white px-4 lg:px-6 py-2 rounded-full text-sm font-light transition-colors duration-200"
             style={{ backgroundColor: secondaryColor }}
           >
             Products
           </a>
           <a 
             href="#" 
-            className="text-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:text-white"
+            className="text-white/90 px-4 lg:px-6 py-2 rounded-full text-sm font-light transition-colors duration-200 hover:text-white"
             style={{ backgroundColor: `${secondaryColor}99` }}
           >
             About us
           </a>
           <a 
             href="#" 
-            className="text-white/90 p-3 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
+            className="text-white/90 p-2 lg:p-3 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
             style={{ backgroundColor: `${secondaryColor}99` }}
             aria-label="Mi cuenta"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </a>
           <a 
             href="#" 
-            className="text-white/90 p-3 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
+            className="text-white/90 p-2 lg:p-3 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
             style={{ backgroundColor: `${secondaryColor}99` }}
             aria-label="Carrito de compras"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+            <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
           </a>
         </nav>
+
+        {/* Navegación móvil - Solo iconos esenciales */}
+        <div className="flex md:hidden items-center space-x-2">
+          <a 
+            href="#" 
+            className="text-white/90 p-2 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
+            style={{ backgroundColor: `${secondaryColor}99` }}
+            aria-label="Mi cuenta"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </a>
+          <a 
+            href="#" 
+            className="text-white/90 p-2 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
+            style={{ backgroundColor: `${secondaryColor}99` }}
+            aria-label="Carrito de compras"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            </svg>
+          </a>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-white/90 p-2 rounded-full transition-colors duration-200 hover:text-white flex items-center justify-center"
+            style={{ backgroundColor: `${secondaryColor}99` }}
+            aria-label="Menú"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={1.5} 
+                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} 
+              />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* Menú móvil desplegable */}
+      {isMenuOpen && (
+        <div className="md:hidden mt-2 mx-4">
+          <div 
+            className="backdrop-blur-sm shadow-lg rounded-2xl py-4 px-6 space-y-3"
+            style={{ backgroundColor: `${primaryColor}40` }}
+          >
+            <a 
+              href="#" 
+              className="block text-white px-4 py-3 rounded-full text-sm font-light transition-colors duration-200 text-center"
+              style={{ backgroundColor: secondaryColor }}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Products
+            </a>
+            <a 
+              href="#" 
+              className="block text-white/90 px-4 py-3 rounded-full text-sm font-light transition-colors duration-200 hover:text-white text-center"
+              style={{ backgroundColor: `${secondaryColor}99` }}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About us
+            </a>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
@@ -73,11 +150,11 @@ export default function BaseDefaultLayout({ tienda, children }: ThemeLayoutProps
     <div className="min-h-screen font-sans bg-[#1a1a1a] text-white">
       <Header tienda={tienda} />
       {heroImages.length > 0 && (
-        <div className="py-6">
+        <div className="py-2">
           <HeroCarousel images={heroImages} />
         </div>
       )}
-      <main className="max-w-7xl mx-auto px-4 py-12">
+      <main className="w-full px-4 py-2">
         {children}
       </main>
     </div>
