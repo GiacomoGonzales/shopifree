@@ -7,8 +7,8 @@ import { RichTextEditor } from '../../../../../components/RichTextEditor'
 import { useStore } from '../../../../../lib/hooks/useStore'
 import { getBrands, type BrandWithId } from '../../../../../lib/brands'
 import { getParentCategories, getSubcategories, type CategoryWithId } from '../../../../../lib/categories'
-import { getProduct, updateProduct, generateSlug, validateProduct } from '../../../../../lib/products'
-import { uploadImageToCloudinary } from '../../../../../lib/cloudinary'
+import { getProduct, updateProduct, type ProductWithId, generateSlug, validateProduct } from '../../../../../lib/products'
+import { uploadMediaToCloudinary, getFileType } from '../../../../../lib/cloudinary'
 import { Card } from '../../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../../packages/ui/src/components/Input'
@@ -26,6 +26,7 @@ interface MediaFile {
   file?: File
   cloudinaryPublicId?: string
   uploading: boolean
+  type: 'image' | 'video'
 }
 
 export default function EditProductPage() {
@@ -117,7 +118,8 @@ export default function EditProductPage() {
           id: file.id,
           url: file.url,
           cloudinaryPublicId: file.cloudinaryPublicId || undefined,
-          uploading: false
+          uploading: false,
+          type: file.url.includes('.mp4') || file.url.includes('.webm') || file.url.includes('.mov') ? 'video' : 'image'
         }))
         setMediaFiles(convertedMediaFiles)
         
@@ -237,7 +239,9 @@ export default function EditProductPage() {
 
   const handleFileUpload = async (files: FileList) => {
     Array.from(files).forEach(async (file) => {
-      if (file.type.startsWith('image/')) {
+      const fileType = getFileType(file)
+      
+      if (fileType === 'image' || fileType === 'video') {
         const fileId = Math.random().toString(36).substr(2, 9)
         const tempUrl = URL.createObjectURL(file)
         
@@ -246,13 +250,14 @@ export default function EditProductPage() {
           id: fileId,
           url: tempUrl,
           file,
-          uploading: true
+          uploading: true,
+          type: fileType
         }
         setMediaFiles(prev => [...prev, newFile])
         
         try {
-          // Subir a Cloudinary
-          const result = await uploadImageToCloudinary(file, {
+          // Subir a Cloudinary (imagen o video)
+          const result = await uploadMediaToCloudinary(file, {
             folder: 'products',
             storeId: store?.id
           })
@@ -260,7 +265,7 @@ export default function EditProductPage() {
           // Actualizar archivo con URL de Cloudinary
           setMediaFiles(prev => prev.map(f => 
             f.id === fileId ? {
-              id: fileId,
+              ...f,
               url: result.secure_url,
               cloudinaryPublicId: result.public_id,
               uploading: false
@@ -268,10 +273,13 @@ export default function EditProductPage() {
           ))
           
         } catch (error) {
-          console.error('Error uploading image:', error)
+          console.error('Error uploading media:', error)
           // Remover archivo si falla la subida
           setMediaFiles(prev => prev.filter(f => f.id !== fileId))
         }
+      } else {
+        // Mostrar error para tipos de archivo no soportados
+        console.error('Tipo de archivo no soportado:', file.type)
       }
     })
   }
@@ -486,23 +494,39 @@ export default function EditProductPage() {
                       <p className="text-sm text-gray-600">
                         <span className="font-medium">Haz clic para subir</span> o arrastra y suelta
                       </p>
-                      <p className="text-xs text-gray-500">PNG, JPG hasta 10MB</p>
+                      <p className="text-xs text-gray-500">PNG, JPG hasta 10MB • MP4, WebM hasta 50MB</p>
                     </div>
                   </div>
                 ) : (
                   // Vista con imágenes tipo Shopify
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                     <div className="flex gap-4">
-                      {/* Imagen principal */}
+                      {/* Media principal */}
                       <div className="relative group flex-shrink-0">
-                        <img
-                          src={mediaFiles[0].url}
-                          alt="Imagen principal"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                        />
+                        {mediaFiles[0].type === 'video' ? (
+                          <video
+                            src={mediaFiles[0].url}
+                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                            controls
+                            muted
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img
+                            src={mediaFiles[0].url}
+                            alt="Imagen principal"
+                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                          />
+                        )}
                         {mediaFiles[0].uploading && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
                             <span className="text-white text-xs">Procesando...</span>
+                          </div>
+                        )}
+                        {/* Indicador de tipo de archivo */}
+                        {mediaFiles[0].type === 'video' && (
+                          <div className="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-[10px] px-1 rounded">
+                            VIDEO
                           </div>
                         )}
                         <button
@@ -517,14 +541,29 @@ export default function EditProductPage() {
                       <div className="flex gap-2 flex-wrap">
                         {mediaFiles.slice(1).map(file => (
                           <div key={file.id} className="relative group">
-                            <img
-                              src={file.url}
-                              alt="Imagen adicional"
-                              className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                            />
+                            {file.type === 'video' ? (
+                              <video
+                                src={file.url}
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                muted
+                                preload="metadata"
+                              />
+                            ) : (
+                              <img
+                                src={file.url}
+                                alt="Media adicional"
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                              />
+                            )}
                             {file.uploading && (
                               <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
                                 <span className="text-white text-[10px]">...</span>
+                              </div>
+                            )}
+                            {/* Indicador de tipo de archivo */}
+                            {file.type === 'video' && (
+                              <div className="absolute top-0 left-0 bg-black bg-opacity-70 text-white text-[8px] px-1 rounded">
+                                VID
                               </div>
                             )}
                             <button
@@ -536,7 +575,7 @@ export default function EditProductPage() {
                           </div>
                         ))}
                         
-                        {/* Botón para agregar más imágenes */}
+                        {/* Botón para agregar más media */}
                         <div
                           className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100"
                           onClick={() => fileInputRef.current?.click()}
@@ -559,7 +598,7 @@ export default function EditProductPage() {
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/*"
+                  accept="image/*,video/*"
                   className="hidden"
                   onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
                 />

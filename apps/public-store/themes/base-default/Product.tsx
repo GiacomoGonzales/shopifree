@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ThemeProductProps } from '../theme-component'
 import { useCart } from '../../lib/cart-context'
+import { getCurrencySymbol } from '../../lib/store'
 
 const Icons = {
   Star: () => (
@@ -89,7 +90,7 @@ export default function Product({ tienda, product }: ThemeProductProps) {
         productId: product.id,
         name: product.name,
         price: selectedVariant?.price || product.price,
-        currency: product.currency,
+        currency: tienda.currency,
         image: productMedia[0]?.url || product.image,
         slug: product.slug || `producto-${product.id}`,
         variant: selectedVariant ? {
@@ -231,11 +232,11 @@ export default function Product({ tienda, product }: ThemeProductProps) {
               {/* Price */}
               <div className="flex items-center space-x-3 mb-6">
                 <span className="text-3xl font-light text-neutral-900">
-                  {product.currency}{currentPrice}
+                  {getCurrencySymbol(tienda.currency)} {currentPrice}
                 </span>
                 {hasDiscount && (
                   <span className="text-xl text-neutral-500 line-through font-light">
-                    {product.currency}{product.comparePrice}
+                    {getCurrencySymbol(tienda.currency)} {product.comparePrice}
                   </span>
                 )}
               </div>
@@ -265,7 +266,7 @@ export default function Product({ tienda, product }: ThemeProductProps) {
                       }`}
                     >
                       <div className="font-medium text-neutral-900">{variant.name}</div>
-                      <div className="text-sm text-neutral-600">{product.currency}{variant.price}</div>
+                      <div className="text-sm text-neutral-600">{getCurrencySymbol(tienda.currency)} {variant.price}</div>
                       <div className="text-xs text-neutral-500">Stock: {variant.stock}</div>
                     </button>
                   ))}

@@ -7,6 +7,7 @@ import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
 import { PublicProduct } from '../../lib/products'
 import { useCart } from '../../lib/cart-context'
+import { getCurrencySymbol } from '../../lib/store'
 
 interface HomeProps {
   tienda: Tienda
@@ -199,7 +200,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         productId: producto.id,
         name: producto.name,
         price: producto.price,
-        currency: producto.currency,
+        currency: tienda.currency,
         image: producto.image,
         slug: producto.slug || `producto-${producto.id}`
       }
@@ -387,11 +388,11 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <span className="text-xl font-medium text-neutral-900">
-                      {producto.currency}{producto.price}
+                      {getCurrencySymbol(tienda.currency)} {producto.price}
                     </span>
                     {producto.comparePrice && producto.comparePrice > producto.price && (
                       <span className="text-sm text-neutral-500 line-through font-light">
-                        {producto.currency}{producto.comparePrice}
+                        {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
                       </span>
                     )}
                   </div>

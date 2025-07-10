@@ -3,6 +3,8 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useCart } from '../../lib/cart-context'
+import { useStore } from '../../lib/store-context'
+import { getCurrencySymbol } from '../../lib/store'
 
 const Icons = {
   Close: () => (
@@ -44,6 +46,7 @@ const Icons = {
 
 export default function CartPanel() {
   const { state, closeCart, removeItem, updateQuantity } = useCart()
+  const { store } = useStore()
 
   // Cerrar carrito con Escape
   useEffect(() => {
@@ -206,7 +209,7 @@ export default function CartPanel() {
 
                       <div className="flex items-center justify-between mt-2">
                         <p className="text-sm font-medium text-neutral-900">
-                          {item.currency}{(item.variant?.price || item.price).toFixed(2)}
+                          {getCurrencySymbol(store?.currency || 'USD')} {(item.variant?.price || item.price).toFixed(2)}
                         </p>
 
                         {/* Controles de cantidad */}
@@ -248,7 +251,7 @@ export default function CartPanel() {
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-medium text-neutral-900">Total</span>
                     <span className="text-2xl font-bold text-neutral-900">
-                      ${state.totalPrice.toFixed(2)}
+                      {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
                     </span>
                   </div>
                   <p className="text-sm text-neutral-500">
@@ -265,7 +268,7 @@ export default function CartPanel() {
                 <div className="space-y-2 text-center">
                   <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
                     <Icons.Truck />
-                    <span>Envío gratis a partir de $150</span>
+                    <span>Envío gratis a partir de {getCurrencySymbol(store?.currency || 'USD')} 150</span>
                   </div>
                   <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
                     <Icons.Tag />

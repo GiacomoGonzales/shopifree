@@ -3,6 +3,8 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useCart } from '../../lib/cart-context'
+import { useStore } from '../../lib/store-context'
+import { getCurrencySymbol } from '../../lib/store'
 
 const Icons = {
   Close: () => (
@@ -39,6 +41,7 @@ const Icons = {
 
 export default function CartModal() {
   const { state, closeCart, removeItem, updateQuantity } = useCart()
+  const { store } = useStore()
 
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
@@ -144,7 +147,7 @@ export default function CartModal() {
                       )}
 
                       <p className="text-lg font-medium text-neutral-900 mb-3">
-                        {item.currency}{(item.variant?.price || item.price).toFixed(2)}
+                        {getCurrencySymbol(store?.currency || 'USD')} {(item.variant?.price || item.price).toFixed(2)}
                       </p>
 
                       {/* Controles de cantidad */}
@@ -188,12 +191,12 @@ export default function CartModal() {
                 <div>
                   <p className="text-sm text-neutral-500">Total ({state.totalItems} productos)</p>
                   <p className="text-2xl font-bold text-neutral-900">
-                    ${state.totalPrice.toFixed(2)}
+                    {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-neutral-500">Envío gratis</p>
-                  <p className="text-xs text-neutral-500">desde $150</p>
+                  <p className="text-xs text-neutral-500">desde {getCurrencySymbol(store?.currency || 'USD')} 150</p>
                 </div>
               </div>
 

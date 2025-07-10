@@ -320,4 +320,47 @@ export const extractSubdomain = (host: string | null): string | null => {
   }
   
   return null
+}
+
+/**
+ * Obtiene el símbolo de moneda basado en el código de moneda de la tienda
+ */
+export const getCurrencySymbol = (currencyCode: string): string => {
+  const currencySymbols: Record<string, string> = {
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'PEN': 'S/',
+    'COP': '$',
+    'MXN': '$',
+    'ARS': '$',
+    'CLP': '$',
+    'BRL': 'R$',
+    'JPY': '¥',
+    'CNY': '¥',
+    'KRW': '₩',
+    'INR': '₹',
+    'CAD': 'C$',
+    'AUD': 'A$',
+    'CHF': 'CHF',
+    'SEK': 'kr',
+    'NOK': 'kr',
+    'DKK': 'kr',
+    'PLN': 'zł',
+    'CZK': 'Kč',
+    'HUF': 'Ft',
+    'RUB': '₽',
+    'TRY': '₺',
+    'ZAR': 'R',
+    'SGD': 'S$',
+    'HKD': 'HK$',
+    'NZD': 'NZ$',
+    'THB': '฿',
+    'MYR': 'RM',
+    'IDR': 'Rp',
+    'PHP': '₱',
+    'VND': '₫'
+  }
+  
+  return currencySymbols[currencyCode] || currencyCode
 } 
