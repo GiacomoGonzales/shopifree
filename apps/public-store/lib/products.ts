@@ -22,9 +22,11 @@ export interface PublicProduct {
   reviews?: number
   status: 'draft' | 'active' | 'archived'
   slug?: string
+  selectedParentCategoryIds?: string[]
   mediaFiles: Array<{
     id: string
     url: string
+    type?: 'image' | 'video'
     cloudinaryPublicId?: string | null
   }>
   hasVariants: boolean
@@ -55,6 +57,7 @@ const transformToPublicProduct = (dbProduct: any): PublicProduct => {
     reviews: Math.floor(Math.random() * 200) + 50, // Mock reviews
     status: dbProduct.status || 'active', // Default to active if no status
     slug: dbProduct.urlSlug || dbProduct.slug || `${dbProduct.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${dbProduct.id?.slice(-6)}` || `producto-${dbProduct.id?.slice(-6)}`,
+    selectedParentCategoryIds: dbProduct.selectedParentCategoryIds || [],
     mediaFiles: dbProduct.mediaFiles || [],
     hasVariants: dbProduct.hasVariants || false,
     variants: dbProduct.variants || []

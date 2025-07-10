@@ -6,6 +6,8 @@ import { ThemeLayoutProps } from "../theme-component"
 import Image from 'next/image'
 import { searchProducts, getSearchSuggestions, PublicProduct } from '../../lib/products'
 import { useStore } from '../../lib/store-context'
+import { useCart } from '../../lib/cart-context'
+import Cart from '../../components/cart/Cart'
 
 // Iconos modernos para el header
 const Icons = {
@@ -68,8 +70,8 @@ const Icons = {
 
 export default function BaseDefaultLayout({ tienda, categorias = [], children }: ThemeLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
+  const { state: cartState, toggleCart } = useCart()
   
   // Estados para búsqueda
   const [searchOpen, setSearchOpen] = useState(false)
@@ -283,11 +285,14 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               </button>
 
               {/* Carrito */}
-              <button className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale">
+              <button 
+                onClick={toggleCart}
+                className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale"
+              >
                 <Icons.ShoppingBag />
-                {cartCount > 0 && (
+                {cartState.totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-neutral-900 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {cartCount}
+                    {cartState.totalItems}
                   </span>
                 )}
               </button>
@@ -633,8 +638,11 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
 
       {/* Contenido principal */}
       <main className="animate-fade-in bg-white">
-      {children}
-    </main>
+        {children}
+      </main>
+
+      {/* Carrito */}
+      <Cart />
 
       {/* Footer */}
       <footer className="bg-neutral-50 border-t border-neutral-200 mt-20">

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
 import { PublicProduct } from '../../lib/products'
+import { useCart } from '../../lib/cart-context'
 
 interface HomeProps {
   tienda: Tienda
@@ -53,6 +54,7 @@ const productosEjemplo: PublicProduct[] = [
     rating: 4.8,
     reviews: 124,
     status: 'active',
+    selectedParentCategoryIds: ['blusas'], // Ejemplo de categoría
     mediaFiles: [{ id: '1', url: '/images/banners/image1.webp' }],
     hasVariants: false,
     variants: []
@@ -67,6 +69,7 @@ const productosEjemplo: PublicProduct[] = [
     rating: 4.6,
     reviews: 89,
     status: 'active',
+    selectedParentCategoryIds: ['pantalones'], // Ejemplo de categoría
     mediaFiles: [{ id: '2', url: '/images/banners/image2.webp' }],
     hasVariants: false,
     variants: []
@@ -81,6 +84,7 @@ const productosEjemplo: PublicProduct[] = [
     rating: 4.9,
     reviews: 156,
     status: 'active',
+    selectedParentCategoryIds: ['casacas'], // Ejemplo de categoría
     mediaFiles: [{ id: '3', url: '/images/banners/image3.webp' }],
     hasVariants: false,
     variants: []
@@ -95,6 +99,7 @@ const productosEjemplo: PublicProduct[] = [
     rating: 4.7,
     reviews: 203,
     status: 'active',
+    selectedParentCategoryIds: ['accesorios'], // Ejemplo de categoría
     mediaFiles: [{ id: '4', url: '/images/banners/image1.webp' }],
     hasVariants: false,
     variants: []
@@ -103,9 +108,35 @@ const productosEjemplo: PublicProduct[] = [
 
 export default function Home({ tienda, productos, categorias = [] }: HomeProps) {
   const [activeCategory, setActiveCategory] = useState('todos')
+  const [addingToCart, setAddingToCart] = useState<string | null>(null)
+  const { addItem, openCart } = useCart()
   
   // Usar productos reales si existen, si no usar ejemplos
-  const productosAMostrar = productos && productos.length > 0 ? productos : productosEjemplo
+  const allProducts = productos && productos.length > 0 ? productos : productosEjemplo
+  
+  // Filtrar productos según la categoría activa
+  const productosAMostrar = useMemo(() => {
+    if (activeCategory === 'todos') {
+      return allProducts
+    }
+    
+    // Buscar la categoría seleccionada por slug
+    const categoriaSeleccionada = categorias.find(cat => cat.slug === activeCategory)
+    
+    // Filtrar productos que contengan el ID o slug de la categoría en selectedParentCategoryIds
+    return allProducts.filter(producto => {
+      // Si el producto tiene selectedParentCategoryIds, verificar si incluye la categoría
+      if (producto.selectedParentCategoryIds && Array.isArray(producto.selectedParentCategoryIds)) {
+        // Si tenemos categorías reales, buscar por ID
+        if (categoriaSeleccionada) {
+          return producto.selectedParentCategoryIds.includes(categoriaSeleccionada.id)
+        }
+        // Si no hay categorías reales, buscar por slug (para productos de ejemplo)
+        return producto.selectedParentCategoryIds.includes(activeCategory)
+      }
+      return false
+    })
+  }, [activeCategory, allProducts, categorias])
 
   useEffect(() => {
     // Asegurar que la página se muestre desde arriba cuando se carga
@@ -150,11 +181,42 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   // Usar categorías reales o fallback a categorías de ejemplo
   const categories = categorias.length > 0 
     ? ['todos', ...categorias.map(cat => cat.slug)]
-    : ['todos', 'nuevos', 'mujer', 'hombre', 'accesorios']
+    : ['todos', 'blusas', 'pantalones', 'casacas', 'accesorios']
     
   const categoryNames: Record<string, string> = categorias.length > 0
     ? { 'todos': 'Todos', ...Object.fromEntries(categorias.map(cat => [cat.slug, cat.name])) }
-    : { 'todos': 'Todos', 'nuevos': 'Nuevos', 'mujer': 'Mujer', 'hombre': 'Hombre', 'accesorios': 'Accesorios' }
+    : { 'todos': 'Todos', 'blusas': 'Blusas', 'pantalones': 'Pantalones', 'casacas': 'Casacas', 'accesorios': 'Accesorios' }
+
+  const handleAddToCart = async (producto: PublicProduct, event: React.MouseEvent) => {
+    event.preventDefault() // Prevenir navegación del Link
+    event.stopPropagation()
+    
+    setAddingToCart(producto.id)
+    
+    try {
+      const cartItem = {
+        id: producto.id,
+        productId: producto.id,
+        name: producto.name,
+        price: producto.price,
+        currency: producto.currency,
+        image: producto.image,
+        slug: producto.slug || `producto-${producto.id}`
+      }
+
+      addItem(cartItem, 1)
+      
+      // Pequeña pausa para mostrar el feedback visual
+      setTimeout(() => {
+        setAddingToCart(null)
+        openCart() // Abrir el carrito después de agregar
+      }, 800)
+      
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      setAddingToCart(null)
+    }
+  }
 
   return (
     <div className="bg-white">
@@ -246,8 +308,40 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
 
       {/* Products Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {productosAMostrar.map((producto, index) => (
+        {/* Contador de productos */}
+        <div className="mb-8 text-center">
+          <p className="text-neutral-600 font-light">
+            {productosAMostrar.length === 0 
+              ? `No hay productos en la categoría "${categoryNames[activeCategory] || activeCategory}"`
+              : `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+            }
+          </p>
+        </div>
+
+        {productosAMostrar.length === 0 ? (
+          /* Sin productos en la categoría */
+          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-neutral-900 mb-2">
+              No hay productos en esta categoría
+            </h3>
+            <p className="text-neutral-500 mb-6">
+              Prueba seleccionando una categoría diferente o explora todos los productos.
+            </p>
+            <button 
+              onClick={() => setActiveCategory('todos')}
+              className="bg-neutral-900 text-white px-6 py-3 rounded-md font-medium hover:bg-neutral-800 transition-colors"
+            >
+              Ver todos los productos
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {productosAMostrar.map((producto, index) => (
                           <Link 
                 key={producto.id} 
                 href={`/${producto.slug}`}
@@ -301,20 +395,31 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                       </span>
                     )}
                   </div>
-                  <button className="bg-neutral-900 text-white text-sm px-4 py-2 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-neutral-800">
-                    Añadir
+                  <button 
+                    onClick={(e) => handleAddToCart(producto, e)}
+                    disabled={addingToCart === producto.id}
+                    className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
+                      addingToCart === producto.id
+                        ? 'bg-green-600 text-white opacity-100'
+                        : 'bg-neutral-900 text-white opacity-0 group-hover:opacity-100 hover:bg-neutral-800'
+                    }`}
+                  >
+                    {addingToCart === producto.id ? '✓' : 'Añadir'}
                   </button>
                 </div>
               </div>
             </Link>
           ))}
-        </div>
+          </div>
+        )}
 
-        <div className="text-center mt-12">
-          <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
-            Ver Todos los Productos
-          </button>
-        </div>
+        {productosAMostrar.length > 0 && (
+          <div className="text-center mt-12">
+            <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
+              Ver Todos los Productos
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Features Section */}

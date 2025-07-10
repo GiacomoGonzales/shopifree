@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { Tienda } from '../../lib/types'
 import { ThemeLayoutComponent, ThemeLayoutProps, ThemeComponentProps } from '../../themes/theme-component'
 import { StoreProvider } from '../../lib/store-context'
+import { CartProvider } from '../../lib/cart-context'
 import { getStoreCategories, Category } from '../../lib/categories'
 import { getFeaturedProducts, PublicProduct } from '../../lib/products'
 
@@ -112,9 +113,11 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
   return (
     <StoreProvider initialStore={tienda}>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <ThemeLayout tienda={tienda} categorias={categories}>
-          <ThemeHome tienda={tienda} categorias={categories} productos={products} />
-        </ThemeLayout>
+        <CartProvider>
+          <ThemeLayout tienda={tienda} categorias={categories}>
+            <ThemeHome tienda={tienda} categorias={categories} productos={products} />
+          </ThemeLayout>
+        </CartProvider>
       </NextIntlClientProvider>
     </StoreProvider>
   )

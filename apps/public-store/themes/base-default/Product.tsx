@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ThemeProductProps } from '../theme-component'
+import { useCart } from '../../lib/cart-context'
 
 const Icons = {
   Star: () => (
@@ -42,6 +43,8 @@ export default function Product({ tienda, product }: ThemeProductProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const { addItem, openCart } = useCart()
 
   useEffect(() => {
     // Asegurar que la página se muestre desde arriba cuando se carga
@@ -50,10 +53,22 @@ export default function Product({ tienda, product }: ThemeProductProps) {
     }, 100)
   }, [product.id])
 
-  // Usar todas las imágenes del producto o solo la principal
-  const productImages = product.mediaFiles.length > 0 
-    ? product.mediaFiles.map(file => file.url)
-    : [product.image]
+  // Usar todos los archivos multimedia del producto o solo la imagen principal
+  const productMedia = product.mediaFiles.length > 0 
+    ? product.mediaFiles.map(file => ({
+        ...file,
+        type: file.type || (file.url.includes('.mp4') || file.url.includes('.webm') || file.url.includes('.mov') ? 'video' : 'image')
+      }))
+    : [{ id: 'main', url: product.image, type: 'image' as const }]
+
+  // Debug log para verificar los tipos de archivos
+  useEffect(() => {
+    console.log('🎬 Product media files:', productMedia.map(media => ({
+      id: media.id,
+      type: media.type,
+      url: media.url.substring(0, 50) + '...'
+    })))
+  }, [productMedia])
 
   const currentPrice = selectedVariant?.price || product.price
   const hasDiscount = product.comparePrice && product.comparePrice > currentPrice
@@ -62,6 +77,39 @@ export default function Product({ tienda, product }: ThemeProductProps) {
     const newQuantity = quantity + change
     if (newQuantity >= 1) {
       setQuantity(newQuantity)
+    }
+  }
+
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true)
+    
+    try {
+      const cartItem = {
+        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+        productId: product.id,
+        name: product.name,
+        price: selectedVariant?.price || product.price,
+        currency: product.currency,
+        image: productMedia[0]?.url || product.image,
+        slug: product.slug || `producto-${product.id}`,
+        variant: selectedVariant ? {
+          id: selectedVariant.id,
+          name: selectedVariant.name,
+          price: selectedVariant.price
+        } : undefined
+      }
+
+      addItem(cartItem, quantity)
+      
+      // Pequeña pausa para mostrar el feedback visual
+      setTimeout(() => {
+        setIsAddingToCart(false)
+        openCart() // Abrir el carrito después de agregar
+      }, 500)
+      
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      setIsAddingToCart(false)
     }
   }
 
@@ -80,35 +128,79 @@ export default function Product({ tienda, product }: ThemeProductProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* Product Images */}
+          {/* Product Media */}
           <div className="space-y-4">
-            {/* Main Image */}
+            {/* Main Media */}
             <div className="aspect-square overflow-hidden rounded-lg bg-neutral-100">
-              <img
-                src={productImages[selectedImageIndex]}
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-              />
+              {productMedia[selectedImageIndex].type === 'video' ? (
+                <video
+                  src={productMedia[selectedImageIndex].url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover video-display-force"
+                  style={{ 
+                    display: 'block',
+                    maxWidth: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    backgroundColor: '#f5f5f5'
+                  }}
+                >
+                  Tu navegador no soporta videos.
+                </video>
+              ) : (
+                <img
+                  src={productMedia[selectedImageIndex].url}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                />
+              )}
             </div>
             
-            {/* Thumbnail Images */}
-            {productImages.length > 1 && (
+            {/* Thumbnail Media */}
+            {productMedia.length > 1 && (
               <div className="grid grid-cols-4 gap-4">
-                {productImages.map((image, index) => (
+                {productMedia.map((media, index) => (
                   <button
-                    key={index}
+                    key={media.id}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square overflow-hidden rounded-lg border-2 transition-all duration-200 ${
+                    className={`aspect-square overflow-hidden rounded-lg border-2 transition-all duration-200 relative ${
                       selectedImageIndex === index 
                         ? 'border-neutral-900' 
                         : 'border-neutral-200 hover:border-neutral-400'
                     }`}
                   >
-                    <img
-                      src={image}
-                      alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    {media.type === 'video' ? (
+                      <>
+                        <video
+                          src={media.url}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                          style={{ 
+                            display: 'block',
+                            maxWidth: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            backgroundColor: '#f5f5f5'
+                          }}
+                        />
+                        {/* Video play icon overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </div>
+                      </>
+                    ) : (
+                      <img
+                        src={media.url}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </button>
                 ))}
               </div>
@@ -206,9 +298,26 @@ export default function Product({ tienda, product }: ThemeProductProps) {
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                <button className="w-full bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-4 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center justify-center space-x-2">
-                  <Icons.ShoppingBag />
-                  <span>Añadir al carrito</span>
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                  className={`w-full px-6 py-4 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center justify-center space-x-2 ${
+                    isAddingToCart 
+                      ? 'bg-green-600 text-white cursor-not-allowed' 
+                      : 'bg-neutral-900 text-white hover:bg-neutral-800'
+                  }`}
+                >
+                  {isAddingToCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      <span>Agregado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icons.ShoppingBag />
+                      <span>Añadir al carrito</span>
+                    </>
+                  )}
                 </button>
                 
                 <div className="grid grid-cols-2 gap-3">

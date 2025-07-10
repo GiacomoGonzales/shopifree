@@ -7,6 +7,7 @@ import { Tienda } from '../../../lib/types'
 import { PublicProduct } from '../../../lib/products'
 import { ThemeLayoutComponent, ThemeProductProps } from '../../../themes/theme-component'
 import { StoreProvider } from '../../../lib/store-context'
+import { CartProvider } from '../../../lib/cart-context'
 
 interface ProductClientPageProps {
   tienda: Tienda
@@ -113,9 +114,11 @@ export default function ProductClientPage({ tienda, product, locale }: ProductCl
   return (
     <StoreProvider initialStore={tienda}>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <ThemeLayout tienda={tienda} categorias={[]}>
-          <ThemeProduct tienda={tienda} product={product} />
-        </ThemeLayout>
+        <CartProvider>
+          <ThemeLayout tienda={tienda} categorias={[]}>
+            <ThemeProduct tienda={tienda} product={product} />
+          </ThemeLayout>
+        </CartProvider>
       </NextIntlClientProvider>
     </StoreProvider>
   )

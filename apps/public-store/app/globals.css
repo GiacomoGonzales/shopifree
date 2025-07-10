@@ -155,6 +155,29 @@
   .hover-scale:hover {
     @apply transform scale-105;
   }
+
+  /* Force video display on all devices and screen sizes */
+  .video-display-force {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Ensure videos work properly on desktop */
+  video {
+    display: block !important;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Fix video aspect ratio in containers */
+  .aspect-square video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
 }
 
 @keyframes fadeIn {
