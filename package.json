@@ -26,6 +26,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "embla-carousel-react": "^8.6.0"
+    "embla-carousel-react": "^8.6.0",
+    "keen-slider": "^6.8.6"
   }
 }

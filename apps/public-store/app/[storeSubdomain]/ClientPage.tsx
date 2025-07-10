@@ -6,6 +6,8 @@ import { NextIntlClientProvider } from 'next-intl'
 import { Tienda } from '../../lib/types'
 import { ThemeLayoutComponent, ThemeLayoutProps, ThemeComponentProps } from '../../themes/theme-component'
 import { StoreProvider } from '../../lib/store-context'
+import { getStoreCategories, Category } from '../../lib/categories'
+import { getFeaturedProducts, PublicProduct } from '../../lib/products'
 
 interface ClientPageProps {
   tienda: Tienda
@@ -30,7 +32,11 @@ const DefaultLayout: ThemeLayoutComponent = ({ children }) => (
 )
 
 export default function ClientPage({ tienda, locale }: ClientPageProps) {
+  console.log('🚀 ClientPage component initialized')
+  console.log('🏪 Received tienda:', tienda)
   const [messages, setMessages] = useState<any>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [products, setProducts] = useState<PublicProduct[]>([])
 
   useEffect(() => {
     // Cargar las traducciones
@@ -42,6 +48,40 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
         setMessages({})
       })
   }, [locale])
+
+  useEffect(() => {
+    // Cargar las categorías de la tienda
+    if (tienda.id) {
+      getStoreCategories(tienda.id)
+        .then(fetchedCategories => {
+          setCategories(fetchedCategories)
+        })
+        .catch(error => {
+          console.error('Error loading categories:', error)
+          setCategories([])
+        })
+    }
+  }, [tienda.id])
+
+  useEffect(() => {
+    // Cargar los productos destacados de la tienda
+    if (tienda.id) {
+      console.log('🔄 Fetching products for store:', tienda.id)
+      console.log('🏪 Store data:', tienda)
+      console.log('🗂️ Firebase path will be: stores/' + tienda.id + '/products')
+      getFeaturedProducts(tienda.id, 8) // Obtener 8 productos destacados
+        .then(fetchedProducts => {
+          console.log('✅ Products fetched successfully:', fetchedProducts.length, fetchedProducts)
+          setProducts(fetchedProducts)
+        })
+        .catch(error => {
+          console.error('❌ Error loading products:', error)
+          setProducts([])
+        })
+    } else {
+      console.error('❌ No store ID available!', tienda)
+    }
+  }, [tienda.id])
 
   // Importar dinámicamente los componentes del tema
   const ThemeLayout = dynamic<ThemeLayoutProps>(
@@ -75,8 +115,8 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
     <StoreProvider initialStore={tienda}>
       <NextIntlClientProvider locale={locale} messages={messages}>
         <Suspense fallback={<LoadingState />}>
-          <ThemeLayout tienda={tienda}>
-            <ThemeHome tienda={tienda} />
+          <ThemeLayout tienda={tienda} categorias={categories}>
+            <ThemeHome tienda={tienda} categorias={categories} productos={products} />
           </ThemeLayout>
         </Suspense>
       </NextIntlClientProvider>

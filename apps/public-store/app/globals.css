@@ -1,3 +1,270 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Variables de colores neutros minimalistas */
+    --background: 255 255 255;
+    --foreground: 23 23 23;
+    --card: 255 255 255;
+    --card-foreground: 23 23 23;
+    --popover: 255 255 255;
+    --popover-foreground: 23 23 23;
+    --primary: 23 23 23;
+    --primary-foreground: 255 255 255;
+    --secondary: 248 250 252;
+    --secondary-foreground: 23 23 23;
+    --muted: 248 250 252;
+    --muted-foreground: 100 116 139;
+    --accent: 241 245 249;
+    --accent-foreground: 23 23 23;
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --ring: 156 163 175;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    @apply bg-white text-neutral-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Global offset for fixed header */
+    padding-top: 80px;
+  }
+
+  /* Tipografía moderna y delgada */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-light tracking-tight text-neutral-900;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-extralight;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl font-light;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl font-light;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl font-normal;
+  }
+
+  p {
+    @apply text-neutral-600 leading-relaxed;
+  }
+
+  /* Botones con estilo moderno y minimalista */
+  .btn-primary {
+    @apply bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0;
+  }
+
+  .btn-secondary {
+    @apply bg-neutral-100 text-neutral-900 hover:bg-neutral-200 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border border-neutral-300;
+  }
+
+  .btn-outline {
+    @apply border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent;
+  }
+
+  /* Cards modernas con estilo minimalista */
+  .card {
+    @apply bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+
+  .card-title {
+    @apply text-2xl font-semibold leading-none tracking-tight text-neutral-900;
+  }
+
+  .card-content {
+    @apply p-6 pt-0;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Animaciones suaves */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* Efectos de hover modernos y sutiles */
+  .hover-lift {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .hover-lift:hover {
+    @apply transform -translate-y-1 shadow-lg;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 ease-in-out;
+  }
+
+  .hover-scale:hover {
+    @apply transform scale-105;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Swiper Styles - con estilo minimalista */
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
+@import 'swiper/css/autoplay';
+
+@layer components {
+  .swiper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .swiper-slide {
+    text-align: center;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  /* Hide default navigation buttons */
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none;
+  }
+
+  /* Hide default pagination */
+  .swiper-pagination {
+    display: none;
+  }
+
+  /* Custom pagination bullets con estilo minimalista */
+  .swiper-pagination-custom .swiper-bullet-custom {
+    width: 8px;
+    height: 8px;
+    background-color: hsl(var(--muted-foreground));
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.4;
+    margin: 0 4px;
+    display: inline-block;
+  }
+  
+  .swiper-pagination-custom .swiper-bullet-active-custom {
+    width: 24px;
+    border-radius: 4px;
+    background-color: hsl(var(--primary));
+    opacity: 1;
+  }
+  
+  .swiper-pagination-custom .swiper-bullet-custom:hover {
+    background-color: hsl(var(--primary));
+    opacity: 0.7;
+  }
+
+  /* Override para bullets estándar */
+  .swiper-pagination-bullet {
+    background-color: hsl(var(--muted-foreground)) !important;
+    opacity: 0.4 !important;
+    width: 8px !important;
+    height: 8px !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .swiper-pagination-bullet-active {
+    opacity: 1 !important;
+    width: 24px !important;
+    border-radius: 6px !important;
+    background-color: hsl(var(--primary)) !important;
+  }
+} 
