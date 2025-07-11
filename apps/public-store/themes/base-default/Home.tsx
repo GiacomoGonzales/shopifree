@@ -9,6 +9,24 @@ import { PublicProduct } from '../../lib/products'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 
+// Hook para detectar si estamos en móvil
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
+
+  return isMobile
+}
+
 interface HomeProps {
   tienda: Tienda
   productos?: PublicProduct[]
@@ -111,6 +129,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const [activeCategory, setActiveCategory] = useState('todos')
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const { addItem, openCart } = useCart()
+  const isMobile = useIsMobile()
   
   // Usar productos reales si existen, si no usar ejemplos
   const allProducts = productos && productos.length > 0 ? productos : productosEjemplo
@@ -356,10 +375,11 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     src={producto.mediaFiles[0].url}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     muted
-                    autoPlay
+                    autoPlay={isMobile}
                     loop
                     playsInline
                     preload="metadata"
+                    controls={!isMobile}
                   />
                 ) : (
                   <Image

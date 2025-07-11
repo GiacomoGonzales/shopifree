@@ -7,6 +7,24 @@ import { ThemeProductProps } from '../theme-component'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 
+// Hook para detectar si estamos en móvil
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
+
+  return isMobile
+}
+
 const Icons = {
   Star: () => (
     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -46,6 +64,7 @@ export default function Product({ tienda, product }: ThemeProductProps) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem, openCart } = useCart()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     // Asegurar que la página se muestre desde arriba cuando se carga
@@ -136,7 +155,10 @@ export default function Product({ tienda, product }: ThemeProductProps) {
               {productMedia[selectedImageIndex].type === 'video' ? (
                 <video
                   src={productMedia[selectedImageIndex].url}
-                  controls
+                  controls={!isMobile}
+                  autoPlay={isMobile}
+                  muted={isMobile}
+                  loop={isMobile}
                   playsInline
                   preload="metadata"
                   className="w-full h-full object-cover video-display-force"
