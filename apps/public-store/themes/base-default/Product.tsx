@@ -7,6 +7,7 @@ import { ThemeProductProps } from '../theme-component'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
+import HeartIcon from '../../components/HeartIcon'
 
 const Icons = {
   Star: () => (
@@ -315,10 +316,10 @@ export default function Product({ tienda, product }: ThemeProductProps) {
                 </button>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-4 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale inline-flex items-center justify-center space-x-2">
-                    <Icons.Heart />
+                  <div className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale inline-flex items-center justify-center space-x-2">
+                    <HeartIcon product={product} size="md" />
                     <span>Favoritos</span>
-                  </button>
+                  </div>
                   <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-4 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale inline-flex items-center justify-center space-x-2">
                     <Icons.Share />
                     <span>Compartir</span>

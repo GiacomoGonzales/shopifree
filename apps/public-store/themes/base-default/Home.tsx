@@ -9,6 +9,7 @@ import { PublicProduct } from '../../lib/products'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
+import HeartIcon from '../../components/HeartIcon'
 
 interface HomeProps {
   tienda: Tienda
@@ -380,6 +381,10 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
                   Nuevo
                 </span>
+                {/* Botón de favorito */}
+                <div className="absolute top-3 right-3 z-10">
+                  <HeartIcon product={producto} size="md" />
+                </div>
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
               </div>
 

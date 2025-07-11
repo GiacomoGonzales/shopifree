@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { StoreProvider } from '../lib/store-context'
+import { FavoritesProvider } from '../lib/favorites-context'
 import { getStoreBySubdomain, extractSubdomain, transformStoreForClient, StoreDataClient } from '../lib/store'
 import './globals.css'
 
@@ -157,7 +158,9 @@ export default async function RootLayout({
       </head>
       <body>
         <StoreProvider initialStore={store}>
-          {children}
+          <FavoritesProvider storeId={store?.id || ''} userId={null}>
+            {children}
+          </FavoritesProvider>
         </StoreProvider>
       </body>
     </html>

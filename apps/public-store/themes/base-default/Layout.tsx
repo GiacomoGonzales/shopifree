@@ -321,9 +321,9 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               </button>
 
               {/* Favoritos */}
-              <button className="hidden sm:flex p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale">
+              <Link href="/favoritos" className="hidden sm:flex p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale">
                 <Icons.Heart />
-              </button>
+              </Link>
 
               {/* Usuario */}
               <button className="hidden sm:flex p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale">
@@ -704,10 +704,10 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               <Icons.User />
               <span className="font-light">Mi cuenta</span>
             </a>
-            <a href="#" className="flex items-center space-x-3 py-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200">
+            <Link href="/favoritos" className="flex items-center space-x-3 py-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200">
               <Icons.Heart />
               <span className="font-light">Favoritos</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
