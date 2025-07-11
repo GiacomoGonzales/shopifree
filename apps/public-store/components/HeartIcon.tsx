@@ -48,16 +48,16 @@ export const HeartIcon = ({ product, size = 'md', className = '' }: HeartIconPro
       className={`
         relative p-2 rounded-full transition-all duration-200 group
         ${isProductFavorite 
-          ? 'text-red-500 hover:text-red-600' 
-          : 'text-neutral-400 hover:text-red-500'
+          ? 'text-red-500 md:hover:text-red-600' 
+          : 'text-neutral-400 md:hover:text-red-500'
         }
-        ${isAnimating ? 'animate-pulse scale-110' : 'hover:scale-105'}
+        ${isAnimating ? 'animate-pulse scale-110' : 'md:hover:scale-105'}
         ${className}
       `}
       title={isProductFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
     >
       {/* Fondo del botón con hover effect */}
-      <div className="absolute inset-0 rounded-full bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div className="absolute inset-0 rounded-full bg-white/80 backdrop-blur-sm opacity-0 md:group-hover:opacity-100 transition-opacity duration-200" />
       
       {/* Icono de corazón */}
       <svg 

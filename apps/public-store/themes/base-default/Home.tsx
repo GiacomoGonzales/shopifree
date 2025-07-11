@@ -352,7 +352,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                           <Link 
                 key={producto.id} 
                 href={`/${producto.slug}`}
-                className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 hover-lift animate-fade-in group cursor-pointer block"
+                className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
               {/* Product Image */}
@@ -361,7 +361,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                   <VideoPlayer
                     src={producto.mediaFiles[0].url}
                     alt={producto.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300 md:group-hover:scale-105"
                     showControls={false}
                     autoPlay={true}
                     loop={true}
@@ -374,7 +374,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     src={producto.image}
                     alt={producto.name}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover transition-transform duration-300 md:group-hover:scale-105"
                   />
                 )}
                 {/* Mostrar "Nuevo" para productos recientes - por ahora todos son nuevos */}
@@ -385,12 +385,12 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 <div className="absolute top-3 right-3 z-10">
                   <HeartIcon product={producto} size="md" />
                 </div>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
+                <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors duration-300"></div>
               </div>
 
               {/* Product Info */}
               <div className="p-6 pt-0 space-y-3 bg-white">
-                <h3 className="text-lg font-light text-neutral-900 group-hover:text-neutral-600 transition-colors duration-200 pt-6">
+                <h3 className="text-lg font-light text-neutral-900 md:group-hover:text-neutral-600 transition-colors duration-200 pt-6">
                   {producto.name}
                 </h3>
                 
@@ -426,7 +426,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
                       addingToCart === producto.id
                         ? 'bg-green-600 text-white opacity-100'
-                        : 'bg-neutral-900 text-white opacity-0 group-hover:opacity-100 hover:bg-neutral-800'
+                        : 'bg-neutral-900 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-neutral-800'
                     }`}
                   >
                     {addingToCart === producto.id ? '✓' : 'Añadir'}

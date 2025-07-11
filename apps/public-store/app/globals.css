@@ -37,25 +37,23 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Eliminar cualquier color amarillo de focus, outline, ring */
-  *:focus,
-  *:focus-visible,
-  *:focus-within {
-    outline-color: rgb(156 163 175) !important; /* neutral-400 */
-    ring-color: rgb(156 163 175) !important; /* neutral-400 */
+  /* Eliminar outline por defecto en todos los elementos */
+  *:focus {
+    outline: none !important;
   }
 
-  /* Asegurar que todos los elementos usen colores neutros */
-  button:focus,
-  input:focus,
-  textarea:focus,
-  select:focus,
-  a:focus,
-  div:focus,
-  [tabindex]:focus {
+  /* Solo mostrar outline cuando se navega con teclado */
+  *:focus-visible {
     outline: 2px solid rgb(156 163 175) !important; /* neutral-400 */
     outline-offset: 2px !important;
-    box-shadow: 0 0 0 2px rgb(156 163 175 / 0.2) !important; /* neutral-400 with opacity */
+  }
+
+  /* Asegurar que inputs y elementos de formulario siempre tengan focus visible */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid rgb(156 163 175) !important; /* neutral-400 */
+    outline-offset: 2px !important;
   }
 
   /* Tipografía moderna y delgada */
