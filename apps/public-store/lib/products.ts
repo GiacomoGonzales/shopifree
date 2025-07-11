@@ -45,6 +45,14 @@ const transformToPublicProduct = (dbProduct: any): PublicProduct => {
     ? dbProduct.mediaFiles[0].url 
     : '/api/placeholder/300/400'
 
+  // Transform mediaFiles to include type detection
+  const transformedMediaFiles = dbProduct.mediaFiles ? dbProduct.mediaFiles.map((file: any) => ({
+    id: file.id,
+    url: file.url,
+    type: file.type || (file.url.includes('.mp4') || file.url.includes('.webm') || file.url.includes('.mov') ? 'video' : 'image'),
+    cloudinaryPublicId: file.cloudinaryPublicId || null
+  })) : []
+
   const transformedProduct = {
     id: dbProduct.id,
     name: dbProduct.name || 'Producto sin nombre',
@@ -58,12 +66,12 @@ const transformToPublicProduct = (dbProduct: any): PublicProduct => {
     status: dbProduct.status || 'active', // Default to active if no status
     slug: dbProduct.urlSlug || dbProduct.slug || `${dbProduct.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${dbProduct.id?.slice(-6)}` || `producto-${dbProduct.id?.slice(-6)}`,
     selectedParentCategoryIds: dbProduct.selectedParentCategoryIds || [],
-    mediaFiles: dbProduct.mediaFiles || [],
+    mediaFiles: transformedMediaFiles,
     hasVariants: dbProduct.hasVariants || false,
     variants: dbProduct.variants || []
   }
   
-  console.log('✨ Product transformed:', transformedProduct.name, 'Price:', transformedProduct.price)
+  console.log('✨ Product transformed:', transformedProduct.name, 'Price:', transformedProduct.price, 'Media files:', transformedMediaFiles.length)
   return transformedProduct
 }
 

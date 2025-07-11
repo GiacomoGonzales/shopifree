@@ -351,16 +351,34 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
               >
               {/* Product Image */}
               <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100">
-                <Image
-                  src={producto.image}
-                  alt={producto.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
+                {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
+                  <video
+                    src={producto.mediaFiles[0].url}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <Image
+                    src={producto.image}
+                    alt={producto.name}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                )}
                 {/* Mostrar "Nuevo" para productos recientes - por ahora todos son nuevos */}
                 <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
                   Nuevo
                 </span>
+                {/* Indicador de video */}
+                {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' && (
+                  <div className="absolute top-3 right-3 bg-black bg-opacity-70 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    VIDEO
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
               </div>
 
