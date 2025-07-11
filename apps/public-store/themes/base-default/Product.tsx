@@ -6,24 +6,7 @@ import Image from 'next/image'
 import { ThemeProductProps } from '../theme-component'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
-
-// Hook para detectar si estamos en móvil
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    checkIsMobile()
-    window.addEventListener('resize', checkIsMobile)
-    
-    return () => window.removeEventListener('resize', checkIsMobile)
-  }, [])
-
-  return isMobile
-}
+import VideoPlayer from '../../components/VideoPlayer'
 
 const Icons = {
   Star: () => (
@@ -64,7 +47,6 @@ export default function Product({ tienda, product }: ThemeProductProps) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem, openCart } = useCart()
-  const isMobile = useIsMobile()
 
   useEffect(() => {
     // Asegurar que la página se muestre desde arriba cuando se carga
@@ -153,25 +135,17 @@ export default function Product({ tienda, product }: ThemeProductProps) {
             {/* Main Media */}
             <div className="aspect-square overflow-hidden rounded-lg bg-neutral-100">
               {productMedia[selectedImageIndex].type === 'video' ? (
-                <video
+                <VideoPlayer
                   src={productMedia[selectedImageIndex].url}
-                  controls={!isMobile}
-                  autoPlay={isMobile}
-                  muted={isMobile}
-                  loop={isMobile}
-                  playsInline
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                  showControls={true}
+                  autoPlay={true}
+                  loop={true}
+                  muted={true}
+                  playsInline={true}
                   preload="metadata"
-                  className="w-full h-full object-cover video-display-force"
-                  style={{ 
-                    display: 'block',
-                    maxWidth: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    backgroundColor: '#f5f5f5'
-                  }}
-                >
-                  Tu navegador no soporta videos.
-                </video>
+                />
               ) : (
                 <img
                   src={productMedia[selectedImageIndex].url}
@@ -196,19 +170,16 @@ export default function Product({ tienda, product }: ThemeProductProps) {
                   >
                     {media.type === 'video' ? (
                       <>
-                        <video
+                        <VideoPlayer
                           src={media.url}
+                          alt={`${product.name} ${index + 1}`}
                           className="w-full h-full object-cover"
-                          muted
-                          playsInline
+                          showControls={false}
+                          autoPlay={true}
+                          loop={true}
+                          muted={true}
+                          playsInline={true}
                           preload="metadata"
-                          style={{ 
-                            display: 'block',
-                            maxWidth: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            backgroundColor: '#f5f5f5'
-                          }}
                         />
                         {/* Video play icon overlay */}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">

@@ -8,24 +8,7 @@ import { Category } from '../../lib/categories'
 import { PublicProduct } from '../../lib/products'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
-
-// Hook para detectar si estamos en móvil
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    checkIsMobile()
-    window.addEventListener('resize', checkIsMobile)
-    
-    return () => window.removeEventListener('resize', checkIsMobile)
-  }, [])
-
-  return isMobile
-}
+import VideoPlayer from '../../components/VideoPlayer'
 
 interface HomeProps {
   tienda: Tienda
@@ -129,7 +112,6 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const [activeCategory, setActiveCategory] = useState('todos')
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const { addItem, openCart } = useCart()
-  const isMobile = useIsMobile()
   
   // Usar productos reales si existen, si no usar ejemplos
   const allProducts = productos && productos.length > 0 ? productos : productosEjemplo
@@ -371,15 +353,16 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
               {/* Product Image */}
               <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100">
                 {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
-                  <video
+                  <VideoPlayer
                     src={producto.mediaFiles[0].url}
+                    alt={producto.name}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    muted
-                    autoPlay={isMobile}
-                    loop
-                    playsInline
+                    showControls={false}
+                    autoPlay={true}
+                    loop={true}
+                    muted={true}
+                    playsInline={true}
                     preload="metadata"
-                    controls={!isMobile}
                   />
                 ) : (
                   <Image
