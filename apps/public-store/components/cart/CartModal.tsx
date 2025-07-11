@@ -43,23 +43,18 @@ export default function CartModal() {
   const { state, closeCart, removeItem, updateQuantity } = useCart()
   const { store } = useStore()
 
-  // Prevenir scroll del body cuando el modal está abierto
+  // Solo prevenir scroll del body en desktop, permitir scroll interno del modal en mobile
   useEffect(() => {
     if (state.isOpen) {
-      // Calcular el ancho de la barra de scroll antes de ocultarla
+      // En móvil no bloqueamos el scroll del body ya que el modal maneja su propio scroll
+      // Solo aplicamos esto para mantener consistencia visual
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      
-      // Aplicar padding-right para compensar la barra de scroll
-      document.body.style.overflow = 'hidden'
       document.body.style.paddingRight = `${scrollbarWidth}px`
     } else {
-      // Restaurar estilos originales
-      document.body.style.overflow = 'unset'
       document.body.style.paddingRight = '0px'
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
       document.body.style.paddingRight = '0px'
     }
   }, [state.isOpen])
@@ -75,7 +70,7 @@ export default function CartModal() {
   }
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden">
       {/* Header del modal */}
       <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-white">
         <button
@@ -99,7 +94,7 @@ export default function CartModal() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {state.items.length === 0 ? (
           /* Carrito vacío */
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
@@ -119,7 +114,7 @@ export default function CartModal() {
         ) : (
           <>
             {/* Lista de productos */}
-            <div className="flex-1 overflow-y-auto p-4 pb-32">
+            <div className="flex-1 overflow-y-auto p-4 pb-48">
               <div className="space-y-4">
                 {state.items.map((item) => (
                   <div key={item.id} className="flex items-start space-x-4 p-4 bg-neutral-50 rounded-lg">

@@ -35,8 +35,6 @@
   body {
     @apply bg-white text-neutral-900;
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Global offset for fixed header */
-    padding-top: 80px;
   }
 
   /* Tipografía moderna y delgada */

@@ -116,9 +116,9 @@ export default function Product({ tienda, product }: ThemeProductProps) {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen pt-20">
       {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <nav className="flex text-sm text-neutral-500 font-light">
           <Link href="/" className="hover:text-neutral-900 transition-colors">Inicio</Link>
           <span className="mx-2">/</span>
@@ -127,7 +127,7 @@ export default function Product({ tienda, product }: ThemeProductProps) {
       </div>
 
       {/* Product Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
           {/* Product Media */}

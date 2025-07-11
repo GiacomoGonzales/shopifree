@@ -223,13 +223,13 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white" style={{ marginTop: '-80px', paddingTop: '120px' }}>
+      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white pt-20">
         {/* Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[60vh]">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[55vh]">
             
             {/* Left Column - Text Content */}
-            <div className="space-y-8 text-center lg:text-left">
+            <div className="space-y-6 text-center lg:text-left">
               <div className="space-y-6 animate-slide-up">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-extralight text-neutral-900 tracking-tight leading-tight">
                   {tienda?.storeName || 'Estilo Minimalista'}
@@ -285,7 +285,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
       </section>
 
       {/* Featured Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-12">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl md:text-4xl font-light text-neutral-900">Explora por Categoría</h2>
           <p className="text-neutral-600 font-light">Encuentra exactamente lo que buscas</p>
@@ -309,7 +309,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
       </section>
 
       {/* Products Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-12">
         {/* Contador de productos */}
         <div className="mb-8 text-center">
           <p className="text-neutral-600 font-light">
