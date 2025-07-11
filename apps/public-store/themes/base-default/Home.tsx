@@ -121,12 +121,12 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     })
   }, [activeCategory, allProducts, categorias, selectedParentCategory, subcategoriesByParent])
 
-  useEffect(() => {
-    // Asegurar que la página se muestre desde arriba cuando se carga
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 100)
-  }, [tienda.id])
+  // Remover el scroll automático ya que se maneja en ClientPage
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     window.scrollTo({ top: 0, behavior: 'smooth' })
+  //   }, 100)
+  // }, [tienda.id])
   
   // Debug logs para entender qué está pasando
   console.log('🛍️ Home component rendered with:', {

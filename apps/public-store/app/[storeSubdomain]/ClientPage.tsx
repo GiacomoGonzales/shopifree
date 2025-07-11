@@ -1,18 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { Tienda } from '../../lib/types'
 import { ThemeLayoutComponent, ThemeLayoutProps, ThemeComponentProps } from '../../themes/theme-component'
 import { StoreProvider } from '../../lib/store-context'
 import { CartProvider } from '../../lib/cart-context'
-import { getStoreCategories, Category } from '../../lib/categories'
-import { getFeaturedProducts, PublicProduct } from '../../lib/products'
+import { LOADING_CONFIG } from '../../lib/loading-config'
+import { useStoreData } from '../../lib/hooks/useStoreData'
+import { Category } from '../../lib/categories'
+import { PublicProduct } from '../../lib/products'
 
 interface ClientPageProps {
   tienda: Tienda
-  locale: 'es' | 'en'
+  locale: string
 }
 
 // Layout por defecto en caso de error
@@ -25,86 +27,70 @@ const DefaultHome = () => (
   <div className="min-h-screen bg-white flex items-center justify-center">
     <div className="text-center">
       <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-3"></div>
-      <p className="text-neutral-600 font-light">Cargando contenido...</p>
+              <p className="text-neutral-600 font-light">{LOADING_CONFIG.LOADING_MESSAGES.store}</p>
     </div>
   </div>
 )
 
 export default function ClientPage({ tienda, locale }: ClientPageProps) {
-  const [messages, setMessages] = useState<any>(null)
-  const [categories, setCategories] = useState<Category[]>([])
-  const [products, setProducts] = useState<PublicProduct[]>([])
+  // Usar el hook personalizado para cargar datos de manera eficiente
+  const { categories, products, messages, isLoading, error } = useStoreData({
+    tienda,
+    locale,
+    productsLimit: 8
+  })
 
+  // Scroll al top solo una vez cuando se monta el componente
   useEffect(() => {
-    // Hacer scroll al top cuando se carga la página
     window.scrollTo(0, 0)
   }, [])
 
-  useEffect(() => {
-    // Cargar las traducciones
-    import(`../../messages/common/${locale}.json`)
-      .then(mod => setMessages(mod.default))
-      .catch(error => {
-        console.error('Error loading translations:', error)
-        // Fallback a un objeto vacío para evitar errores
-        setMessages({})
-      })
-  }, [locale])
+    // Importar componentes del tema de forma consolidada
+  const ThemeComponents = useMemo(() => {
+    const ThemeLayout = dynamic<ThemeLayoutProps>(
+      () => import(`../../themes/${tienda.theme}/Layout`).then(mod => mod.default).catch(() => {
+        console.error(`Theme Layout ${tienda.theme} not found, using default layout`)
+        return DefaultLayout
+      }),
+      { 
+        ssr: false,
+        loading: () => null
+      }
+    )
 
-  useEffect(() => {
-    // Cargar las categorías de la tienda
-    if (tienda.id) {
-      getStoreCategories(tienda.id)
-        .then(fetchedCategories => setCategories(fetchedCategories))
-        .catch(error => {
-          console.error('Error loading categories:', error)
-          setCategories([])
-        })
-    }
-  }, [tienda.id])
+    const ThemeHome = dynamic<ThemeComponentProps>(
+      () => import(`../../themes/${tienda.theme}/Home`).then(mod => mod.default).catch(() => {
+        console.error(`Theme Home ${tienda.theme} not found, falling back to base-default`)
+        return () => <div className="min-h-screen flex items-center justify-center">
+          <p className="text-neutral-600">Contenido no disponible</p>
+        </div>
+      }),
+      { 
+        ssr: false,
+        loading: () => null
+      }
+    )
 
-  useEffect(() => {
-    // Cargar los productos destacados de la tienda
-    if (tienda.id) {
-      getFeaturedProducts(tienda.id, 8) // Obtener 8 productos destacados
-        .then(fetchedProducts => setProducts(fetchedProducts))
-        .catch(error => {
-          console.error('❌ Error loading products:', error)
-          setProducts([])
-        })
-    }
-  }, [tienda.id])
+    return { ThemeLayout, ThemeHome }
+  }, [tienda.theme])
 
-  // Importar dinámicamente los componentes del tema con SSR habilitado
-  const ThemeLayout = dynamic<ThemeLayoutProps>(
-    () => import(`../../themes/${tienda.theme}/Layout`).then(mod => mod.default).catch(() => {
-      console.error(`Theme Layout ${tienda.theme} not found, using default layout`)
-      return DefaultLayout
-    }),
-    { 
-      ssr: true,
-      loading: () => <DefaultHome />
-    }
-  )
+  // Mostrar loading hasta que todos los datos estén listos
+  if (isLoading || !messages) {
+    return <DefaultHome />
+  }
 
-  const ThemeHome = dynamic<ThemeComponentProps>(
-    () => import(`../../themes/${tienda.theme}/Home`).then(mod => mod.default).catch(() => {
-      console.error(`Theme Home ${tienda.theme} not found, falling back to base-default`)
-      return () => <div>Contenido no encontrado.</div>
-    }),
-    { 
-      ssr: true,
-      loading: () => <DefaultHome />
-    }
-  )
-
-  // Si no hay mensajes aún, mostrar un loading consistente
-  if (!messages) {
+  // Mostrar error si algo falló
+  if (error) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-3"></div>
-          <p className="text-neutral-600 font-light">Cargando...</p>
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error al cargar la tienda</h2>
+          <p className="text-gray-600">{error}</p>
         </div>
       </div>
     )
@@ -114,9 +100,9 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
     <StoreProvider initialStore={tienda}>
       <NextIntlClientProvider locale={locale} messages={messages}>
         <CartProvider>
-          <ThemeLayout tienda={tienda} categorias={categories}>
-            <ThemeHome tienda={tienda} categorias={categories} productos={products} />
-          </ThemeLayout>
+          <ThemeComponents.ThemeLayout tienda={tienda} categorias={categories}>
+            <ThemeComponents.ThemeHome tienda={tienda} categorias={categories} productos={products} />
+          </ThemeComponents.ThemeLayout>
         </CartProvider>
       </NextIntlClientProvider>
     </StoreProvider>

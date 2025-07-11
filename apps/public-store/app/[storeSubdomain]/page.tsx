@@ -29,6 +29,13 @@ export default async function StorePage({ params }: PageProps) {
     socialMedia: store.socialMedia || {} // Inicializar campo requerido
   }
 
-  // 3. Renderizar el componente del cliente
-  return <ClientPage tienda={tienda} locale={locale} />
+  // 3. Renderizar el componente del cliente con preload hint
+  return (
+    <>
+      {/* Preload del tema para mejorar la carga inicial */}
+      <link rel="modulepreload" href={`/themes/${themeId}/Layout.js`} />
+      <link rel="modulepreload" href={`/themes/${themeId}/Home.js`} />
+      <ClientPage tienda={tienda} locale={locale} />
+    </>
+  )
 } 

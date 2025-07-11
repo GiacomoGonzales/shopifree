@@ -13,6 +13,11 @@ export interface Category {
 
 export async function getStoreCategories(storeId: string): Promise<Category[]> {
   try {
+    if (!storeId) {
+      console.warn('No store ID provided for categories')
+      return []
+    }
+    
     const db = getFirebaseDb()
     if (!db) {
       console.error('❌ Firebase database not available')

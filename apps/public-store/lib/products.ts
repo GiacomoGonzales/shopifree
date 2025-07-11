@@ -205,6 +205,11 @@ export const getStoreProduct = async (storeId: string, productId: string): Promi
 // Get featured products (first 6 active products)
 export const getFeaturedProducts = async (storeId: string, limit: number = 6): Promise<PublicProduct[]> => {
   try {
+    if (!storeId) {
+      console.warn('No store ID provided for featured products')
+      return []
+    }
+    
     const allProducts = await getStoreProducts(storeId)
     return allProducts.slice(0, limit)
   } catch (error) {
