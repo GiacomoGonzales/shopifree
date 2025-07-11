@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { searchProducts, getSearchSuggestions, PublicProduct } from '../../lib/products'
 import { useStore } from '../../lib/store-context'
 import { useCart } from '../../lib/cart-context'
+import { getCurrencySymbol } from '../../lib/store'
 import Cart from '../../components/cart/Cart'
 
 // Iconos modernos para el header
@@ -83,9 +84,35 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([])
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   
+  // Estados para navegación jerárquica
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+  
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const searchTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Separar categorías padre de subcategorías
+  const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
+  const subcategoriesByParent = categorias.reduce((acc, cat) => {
+    if (cat.parentCategoryId) {
+      if (!acc[cat.parentCategoryId]) {
+        acc[cat.parentCategoryId] = []
+      }
+      acc[cat.parentCategoryId].push(cat)
+    }
+    return acc
+  }, {} as Record<string, typeof categorias>)
+
+  // Usar solo categorías padre para la navegación principal
+  const categories = parentCategories.length > 0 
+    ? parentCategories.map(cat => ({ 
+        id: cat.id,
+        name: cat.name, 
+        slug: cat.slug,
+        href: `#${cat.slug}`,
+        hasSubcategories: subcategoriesByParent[cat.id]?.length > 0
+      }))
+    : []
 
   // Efecto para detectar scroll y cambiar estilo del header
   useEffect(() => {
@@ -215,17 +242,6 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
     }
   }
 
-  // Usar categorías reales o fallback a categorías de ejemplo
-  const categories = categorias.length > 0 
-    ? categorias.map(cat => ({ name: cat.name, href: `#${cat.slug}` }))
-    : [
-        { name: 'Nuevos', href: '#' },
-        { name: 'Mujer', href: '#' },
-        { name: 'Hombre', href: '#' },
-        { name: 'Accesorios', href: '#' },
-        { name: 'Ofertas', href: '#' },
-      ]
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -251,16 +267,46 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
             </div>
 
             {/* Navegación principal - Desktop */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-8 relative">
               {categories.map((category) => (
-                <a
-                  key={category.name}
-                  href={category.href}
-                  className="text-sm font-light text-neutral-600 hover:text-neutral-900 transition-colors duration-200 relative group"
+                <div 
+                  key={category.id}
+                  className="relative"
+                  onMouseEnter={() => category.hasSubcategories && setHoveredCategory(category.id)}
+                  onMouseLeave={() => setHoveredCategory(null)}
                 >
-                  {category.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-neutral-900 transition-all duration-200 group-hover:w-full"></span>
-                </a>
+                  <a
+                    href={category.href}
+                    className="text-sm font-light text-neutral-600 hover:text-neutral-900 transition-colors duration-200 relative group flex items-center"
+                  >
+                    {category.name}
+                    {category.hasSubcategories && (
+                      <span className="ml-1">
+                        <Icons.ChevronDown />
+                      </span>
+                    )}
+                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-neutral-900 transition-all duration-200 group-hover:w-full"></span>
+                  </a>
+                  
+                  {/* Dropdown de subcategorías */}
+                  {category.hasSubcategories && hoveredCategory === category.id && (
+                    <div className="absolute top-full left-0 pt-2 w-64 z-50">
+                      <div className="bg-white border border-neutral-200 rounded-lg shadow-lg">
+                        <div className="py-2">
+                          {subcategoriesByParent[category.id]?.map((subcategory) => (
+                            <a
+                              key={subcategory.id}
+                              href={`#${subcategory.slug}`}
+                              className="block px-4 py-2 text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition-colors duration-200"
+                            >
+                              {subcategory.name}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </nav>
 
@@ -425,7 +471,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                               <h4 className="text-sm font-medium text-neutral-900">{product.name}</h4>
                             </div>
                             <div className="text-sm font-medium text-neutral-900">
-                              {product.currency}{product.price}
+                              {getCurrencySymbol(tienda?.currency || 'USD')}{product.price}
                             </div>
                           </Link>
                         ))}
@@ -593,7 +639,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                             </div>
                             <div className="flex-1">
                               <h4 className="font-medium text-neutral-900">{product.name}</h4>
-                              <p className="text-lg font-medium text-neutral-900">{product.currency}{product.price}</p>
+                              <p className="text-lg font-medium text-neutral-900">{getCurrencySymbol(tienda?.currency || 'USD')}{product.price}</p>
                             </div>
                           </a>
                         ))}

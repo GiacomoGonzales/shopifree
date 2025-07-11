@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, query } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 
 export interface Category {
@@ -8,6 +8,7 @@ export interface Category {
   description?: string
   order?: number
   storeId: string
+  parentCategoryId?: string | null
 }
 
 export async function getStoreCategories(storeId: string): Promise<Category[]> {
@@ -18,16 +19,54 @@ export async function getStoreCategories(storeId: string): Promise<Category[]> {
       return []
     }
 
-    const categoriesRef = collection(db, 'stores', storeId, 'categories')
-    const querySnapshot = await getDocs(categoriesRef)
-
-    const categories: Category[] = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    } as Category))
+    console.log('Consultando categorías para store:', storeId)
+    
+    // Obtener categorías padre
+    const parentCategoriesQuery = query(
+      collection(db, 'stores', storeId, 'categories')
+    )
+    
+    const parentSnapshot = await getDocs(parentCategoriesQuery)
+    console.log('Categorías padre encontradas:', parentSnapshot.size)
+    
+    const allCategories: Category[] = []
+    
+    // Agregar categorías padre
+    parentSnapshot.docs.forEach(doc => {
+      const data = doc.data()
+      console.log('Categoría padre:', doc.id, data)
+      allCategories.push({
+        id: doc.id,
+        ...data
+      } as Category)
+    })
+    
+    // Obtener subcategorías de cada categoría padre
+    for (const parentDoc of parentSnapshot.docs) {
+      try {
+        const subcategoriesQuery = query(
+          collection(db, 'stores', storeId, 'categories', parentDoc.id, 'subcategorias')
+        )
+        
+        const subcategoriesSnapshot = await getDocs(subcategoriesQuery)
+        console.log(`Subcategorías de ${parentDoc.id}:`, subcategoriesSnapshot.size)
+        
+        subcategoriesSnapshot.docs.forEach(subDoc => {
+          const subData = subDoc.data()
+          console.log('Subcategoría:', subDoc.id, subData)
+          allCategories.push({
+            id: subDoc.id,
+            ...subData,
+            parentCategoryId: parentDoc.id // Asegurar que tiene el parentCategoryId
+          } as Category)
+        })
+      } catch (subError) {
+        console.warn(`Error obteniendo subcategorías de ${parentDoc.id}:`, subError)
+      }
+    }
 
     // Ordenar por el campo order si existe, o por nombre
-    return categories.sort((a, b) => {
+    return allCategories.sort((a, b) => {
       if (a.order !== undefined && b.order !== undefined) {
         return a.order - b.order
       }

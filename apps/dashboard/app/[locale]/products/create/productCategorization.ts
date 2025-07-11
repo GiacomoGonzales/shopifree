@@ -1152,6 +1152,23 @@ export const META_FIELDS_BY_CATEGORY: Record<string, MetaField[]> = {
     { id: 'features', name: 'Características', type: 'tags', options: ['Reflectivos', 'Bolsillos', 'Transpirable', 'Secado rápido', 'Compresión', 'Anti-odor'] },
     { id: 'activity', name: 'Actividad', type: 'tags', options: ['Running', 'Jogging', 'Fitness', 'Yoga', 'Casual'] }
   ],
+  // Vestidos
+  'fashion-clothing-dresses': [
+    { id: 'color', name: 'Color', type: 'tags', options: ['Negro', 'Blanco', 'Azul', 'Rojo', 'Verde', 'Rosa', 'Morado', 'Beige', 'Estampado'] },
+    { id: 'size', name: 'Talla', type: 'tags', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] },
+    { id: 'material', name: 'Material', type: 'select', options: ['Algodón', 'Seda', 'Lino', 'Poliéster', 'Satén', 'Encaje', 'Chiffon', 'Terciopelo'] },
+    { id: 'dress_length', name: 'Largo', type: 'select', options: ['Mini', 'Midi', 'Maxi', 'Largo al piso', 'Asimétrico'] },
+    { id: 'dress_style', name: 'Estilo', type: 'select', options: ['Casual', 'Formal', 'Cocktail', 'Fiesta', 'Noche', 'Playa', 'Oficina'] },
+    { id: 'sleeve_type', name: 'Tipo de manga', type: 'select', options: ['Sin mangas', 'Manga corta', 'Manga 3/4', 'Manga larga', 'Manga abullonada', 'Manga murciélago'] },
+    { id: 'neckline', name: 'Escote', type: 'select', options: ['Redondo', 'V', 'Cuadrado', 'Halter', 'Bardot', 'Asimétrico', 'Alto'] },
+    { id: 'silhouette', name: 'Silueta', type: 'select', options: ['Ajustado', 'Línea A', 'Imperio', 'Sirena', 'Recto', 'Envolvente', 'Globo'] },
+    { id: 'waist_line', name: 'Línea de cintura', type: 'select', options: ['Alta', 'Natural', 'Baja', 'Sin cintura', 'Elástica', 'Con cinturón'] },
+    { id: 'pattern', name: 'Patrón', type: 'tags', options: ['Liso', 'Floral', 'Rayas', 'Lunares', 'Geométrico', 'Animal print', 'Abstracto'] },
+    { id: 'season', name: 'Temporada', type: 'select', options: ['Primavera', 'Verano', 'Otoño', 'Invierno', 'Todo el año'] },
+    { id: 'occasion', name: 'Ocasión', type: 'tags', options: ['Casual', 'Trabajo', 'Fiesta', 'Boda', 'Graduación', 'Playa', 'Noche'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Con forro', 'Con bolsillos', 'Con cierre', 'Con abertura', 'Con cinturón', 'Con aplicaciones'] }
+  ],
+
   // Leggings (casual)
   'fashion-clothing-pants-leggings': [
     { id: 'color', name: 'Color', type: 'tags', options: ['Negro', 'Gris', 'Azul marino', 'Verde', 'Rosa', 'Morado', 'Estampados'] },

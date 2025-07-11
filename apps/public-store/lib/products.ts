@@ -82,11 +82,6 @@ export const getStoreProducts = async (storeId: string): Promise<PublicProduct[]
     const db = getFirebaseDb()
     if (!db) {
       console.error('❌ Firebase db not available - check environment variables')
-      console.log('Firebase config check:', {
-        hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-        hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        hasAuthDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-      })
       return []
     }
     
@@ -94,41 +89,19 @@ export const getStoreProducts = async (storeId: string): Promise<PublicProduct[]
     
     const productsCollectionRef = collection(db, 'stores', storeId, 'products')
     
-    // Primero vamos a ver TODOS los productos para debug
-    console.log('🔍 First checking ALL products in store...')
-    const allProductsSnapshot = await getDocs(productsCollectionRef)
-    console.log('📊 Total products in store (any status):', allProductsSnapshot.size)
+    // Obtener solo productos activos
+    console.log('📋 Executing query for ACTIVE products only...')
+    const activeProductsQuery = query(
+      productsCollectionRef,
+      where('status', '==', 'active')
+    )
     
-    if (allProductsSnapshot.size === 0) {
-      console.log('⚠️ No products found in store at all')
-      return []
-    }
-    
-    // Log de todos los productos para debug
-    allProductsSnapshot.forEach((doc) => {
-      const data = doc.data()
-      console.log('📋 Product found:', doc.id, {
-        status: data.status,
-        name: data.name,
-        price: data.price,
-        description: data.description,
-        hasAllFields: {
-          status: !!data.status,
-          name: !!data.name,
-          price: !!data.price,
-          description: !!data.description
-        }
-      })
-    })
-    
-    // TEMPORALMENTE: Obtener TODOS los productos sin filtrar por status
-    console.log('📋 Executing query for ALL products (no status filter for debug)...')
-    const querySnapshot = await getDocs(productsCollectionRef)
-    console.log('📊 Query completed. Documents found:', querySnapshot.size)
+    const querySnapshot = await getDocs(activeProductsQuery)
+    console.log('📊 Active products found:', querySnapshot.size)
     
     const products: PublicProduct[] = []
     querySnapshot.forEach((doc) => {
-      console.log('📄 Processing product:', doc.id, doc.data())
+      console.log('📄 Processing active product:', doc.id, doc.data().name)
       const productData = { id: doc.id, ...doc.data() }
       try {
         const transformedProduct = transformToPublicProduct(productData)
@@ -139,7 +112,7 @@ export const getStoreProducts = async (storeId: string): Promise<PublicProduct[]
       }
     })
     
-    console.log('🎉 Total products processed:', products.length)
+    console.log('🎉 Total active products processed:', products.length)
     return products
   } catch (error) {
     console.error('❌ Error getting store products:', error)

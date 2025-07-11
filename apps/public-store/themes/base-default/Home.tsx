@@ -44,101 +44,82 @@ const Icons = {
   ),
 }
 
-// Productos de ejemplo para mostrar el diseño
-const productosEjemplo: PublicProduct[] = [
-  {
-    id: '1',
-    name: 'Camiseta Básica',
-    description: 'Camiseta básica de algodón',
-    price: 29.99,
-    image: '/images/banners/image1.webp',
-    currency: '$',
-    rating: 4.8,
-    reviews: 124,
-    status: 'active',
-    selectedParentCategoryIds: ['blusas'], // Ejemplo de categoría
-    mediaFiles: [{ id: '1', url: '/images/banners/image1.webp' }],
-    hasVariants: false,
-    variants: []
-  },
-  {
-    id: '2',
-    name: 'Jeans Slim Fit',
-    description: 'Jeans de corte slim fit',
-    price: 79.99,
-    image: '/images/banners/image2.webp',
-    currency: '$',
-    rating: 4.6,
-    reviews: 89,
-    status: 'active',
-    selectedParentCategoryIds: ['pantalones'], // Ejemplo de categoría
-    mediaFiles: [{ id: '2', url: '/images/banners/image2.webp' }],
-    hasVariants: false,
-    variants: []
-  },
-  {
-    id: '3',
-    name: 'Chaqueta Casual',
-    description: 'Chaqueta casual para el día a día',
-    price: 129.99,
-    image: '/images/banners/image3.webp',
-    currency: '$',
-    rating: 4.9,
-    reviews: 156,
-    status: 'active',
-    selectedParentCategoryIds: ['casacas'], // Ejemplo de categoría
-    mediaFiles: [{ id: '3', url: '/images/banners/image3.webp' }],
-    hasVariants: false,
-    variants: []
-  },
-  {
-    id: '4',
-    name: 'Zapatillas Sport',
-    description: 'Zapatillas deportivas cómodas',
-    price: 99.99,
-    image: '/images/banners/image1.webp',
-    currency: '$',
-    rating: 4.7,
-    reviews: 203,
-    status: 'active',
-    selectedParentCategoryIds: ['accesorios'], // Ejemplo de categoría
-    mediaFiles: [{ id: '4', url: '/images/banners/image1.webp' }],
-    hasVariants: false,
-    variants: []
-  },
-]
-
 export default function Home({ tienda, productos, categorias = [] }: HomeProps) {
   const [activeCategory, setActiveCategory] = useState('todos')
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
+  const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null)
   const { addItem, openCart } = useCart()
   
-  // Usar productos reales si existen, si no usar ejemplos
-  const allProducts = productos && productos.length > 0 ? productos : productosEjemplo
+  // Usar solo productos reales
+  const allProducts = productos || []
+
+  // Separar categorías padre de subcategorías
+  const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
+  const subcategoriesByParent = categorias.reduce((acc, cat) => {
+    if (cat.parentCategoryId) {
+      if (!acc[cat.parentCategoryId]) {
+        acc[cat.parentCategoryId] = []
+      }
+      acc[cat.parentCategoryId].push(cat)
+    }
+    return acc
+  }, {} as Record<string, typeof categorias>)
+
+  // Determinar qué categorías mostrar
+  const categoriesToShow = selectedParentCategory 
+    ? subcategoriesByParent[selectedParentCategory] || []
+    : parentCategories
+
+  // Crear la lista de categorías para mostrar en las pastillas
+  const categories = ['todos', ...categoriesToShow.map(cat => cat.slug)]
+  
+  const categoryNames: Record<string, string> = { 
+    'todos': selectedParentCategory ? 'Todas las subcategorías' : 'Todos',
+    ...Object.fromEntries(categoriesToShow.map(cat => [cat.slug, cat.name]))
+  }
+
+  // Función para manejar click en categoría padre
+  const handleParentCategoryClick = (parentCategoryId: string) => {
+    setSelectedParentCategory(parentCategoryId)
+    setActiveCategory('todos')
+  }
+
+  // Función para volver a categorías padre
+  const handleBackToParentCategories = () => {
+    setSelectedParentCategory(null)
+    setActiveCategory('todos')
+  }
   
   // Filtrar productos según la categoría activa
   const productosAMostrar = useMemo(() => {
     if (activeCategory === 'todos') {
-      return allProducts
+      if (selectedParentCategory) {
+        // Mostrar productos de todas las subcategorías del padre seleccionado
+        const subcategoryIds = subcategoriesByParent[selectedParentCategory]?.map(sub => sub.id) || []
+        return allProducts.filter(producto => 
+          producto.selectedParentCategoryIds?.some(catId => 
+            catId === selectedParentCategory || subcategoryIds.includes(catId)
+          )
+        )
+      } else {
+        // Mostrar todos los productos
+        return allProducts
+      }
     }
     
     // Buscar la categoría seleccionada por slug
     const categoriaSeleccionada = categorias.find(cat => cat.slug === activeCategory)
     
-    // Filtrar productos que contengan el ID o slug de la categoría en selectedParentCategoryIds
+    // Filtrar productos que contengan el ID de la categoría en selectedParentCategoryIds
     return allProducts.filter(producto => {
-      // Si el producto tiene selectedParentCategoryIds, verificar si incluye la categoría
       if (producto.selectedParentCategoryIds && Array.isArray(producto.selectedParentCategoryIds)) {
-        // Si tenemos categorías reales, buscar por ID
         if (categoriaSeleccionada) {
           return producto.selectedParentCategoryIds.includes(categoriaSeleccionada.id)
         }
-        // Si no hay categorías reales, buscar por slug (para productos de ejemplo)
-        return producto.selectedParentCategoryIds.includes(activeCategory)
       }
       return false
     })
-  }, [activeCategory, allProducts, categorias])
+  }, [activeCategory, allProducts, categorias, selectedParentCategory, subcategoriesByParent])
 
   useEffect(() => {
     // Asegurar que la página se muestre desde arriba cuando se carga
@@ -153,14 +134,8 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     productosReales: productos?.length || 0,
     productosAMostrar: productosAMostrar.length,
     categoriasLength: categorias?.length,
-    usingExampleProducts: !productos || productos.length === 0
+    activeCategory: activeCategory
   })
-  
-  if (!productos || productos.length === 0) {
-    console.log('⚠️ Using example products because no real products were found')
-  } else {
-    console.log('✅ Using real products from database')
-  }
 
   const features = [
     {
@@ -179,15 +154,6 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
       description: '30 días para devoluciones sin preguntas'
     }
   ]
-
-  // Usar categorías reales o fallback a categorías de ejemplo
-  const categories = categorias.length > 0 
-    ? ['todos', ...categorias.map(cat => cat.slug)]
-    : ['todos', 'blusas', 'pantalones', 'casacas', 'accesorios']
-    
-  const categoryNames: Record<string, string> = categorias.length > 0
-    ? { 'todos': 'Todos', ...Object.fromEntries(categorias.map(cat => [cat.slug, cat.name])) }
-    : { 'todos': 'Todos', 'blusas': 'Blusas', 'pantalones': 'Pantalones', 'casacas': 'Casacas', 'accesorios': 'Accesorios' }
 
   const handleAddToCart = async (producto: PublicProduct, event: React.MouseEvent) => {
     event.preventDefault() // Prevenir navegación del Link
@@ -223,7 +189,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white pt-20">
+      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white pt-24 lg:pt-32">
         {/* Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[55vh]">
@@ -291,20 +257,58 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
           <p className="text-neutral-600 font-light">Encuentra exactamente lo que buscas</p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {categories.map((category) => (
+        {/* Breadcrumb navigation */}
+        {selectedParentCategory && (
+          <div className="flex items-center justify-center gap-2 mb-6">
             <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-6 py-2 rounded-full text-sm font-light transition-all duration-200 ${
-                activeCategory === category
-                  ? 'bg-neutral-900 text-white'
-                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
-              }`}
+              onClick={handleBackToParentCategories}
+              className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
             >
-              {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
+              Categorías
             </button>
-          ))}
+            <span className="text-neutral-300">›</span>
+            <span className="text-sm text-neutral-900 font-medium">
+              {parentCategories.find(cat => cat.id === selectedParentCategory)?.name}
+            </span>
+          </div>
+        )}
+
+        {/* Category pills */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {categories.map((category) => {
+            const isParentCategory = !selectedParentCategory && parentCategories.find(cat => cat.slug === category)
+            const hasSubcategories = isParentCategory && subcategoriesByParent[parentCategories.find(cat => cat.slug === category)?.id || '']?.length > 0
+            
+            return (
+              <button
+                key={category}
+                onClick={() => {
+                  if (hasSubcategories && category !== 'todos') {
+                    const parentCat = parentCategories.find(cat => cat.slug === category)
+                    if (parentCat) {
+                      handleParentCategoryClick(parentCat.id)
+                    }
+                  } else {
+                    setActiveCategory(category)
+                  }
+                }}
+                className={`px-6 py-2 rounded-full text-sm font-light transition-all duration-200 flex items-center ${
+                  activeCategory === category
+                    ? 'bg-neutral-900 text-white'
+                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                }`}
+              >
+                {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
+                {hasSubcategories && (
+                  <span className="ml-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </section>
 
@@ -376,12 +380,6 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
                   Nuevo
                 </span>
-                {/* Indicador de video */}
-                {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' && (
-                  <div className="absolute top-3 right-3 bg-black bg-opacity-70 text-white text-xs font-medium px-2 py-1 rounded-full">
-                    VIDEO
-                  </div>
-                )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
               </div>
 
