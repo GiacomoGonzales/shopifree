@@ -185,12 +185,24 @@ export default function CartPanel() {
                     style={{ transitionDelay: `${300 + (index * 50)}ms` }}
                   >
                     {/* Imagen del producto */}
-                    <div className="w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="relative w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden flex-shrink-0">
                       <img
-                        src={item.image}
+                        src={item.image.includes('.mp4') || item.image.includes('.webm') || item.image.includes('.mov') 
+                          ? item.image.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
+                          : item.image}
                         alt={item.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback si no existe el thumbnail
+                          const target = e.target as HTMLImageElement;
+                          if (target.src.includes('.jpg') && item.image.includes('.mp4')) {
+                            target.src = item.image.replace('.mp4', '.png'); // Try PNG thumbnail
+                          } else if (target.src.includes('.png') && item.image.includes('.mp4')) {
+                            target.src = '/api/placeholder/64/64'; // Final fallback
+                          }
+                        }}
                       />
+
                     </div>
 
                     {/* Información del producto */}

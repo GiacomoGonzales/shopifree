@@ -551,8 +551,20 @@ export default function ProductsPage() {
                                     {product.mediaFiles && product.mediaFiles.length > 0 ? (
                                       <img
                                         className="h-12 w-12 rounded-lg object-cover border border-gray-200"
-                                        src={product.mediaFiles[0].url}
+                                        src={product.mediaFiles[0].url.includes('.mp4') || product.mediaFiles[0].url.includes('.webm') || product.mediaFiles[0].url.includes('.mov') 
+                                          ? product.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
+                                          : product.mediaFiles[0].url}
                                         alt={product.name}
+                                        onError={(e) => {
+                                          // Fallback si no existe el thumbnail
+                                          const target = e.target as HTMLImageElement;
+                                          if (target.src.includes('.jpg') && product.mediaFiles[0].url.includes('.mp4')) {
+                                            target.src = product.mediaFiles[0].url.replace('.mp4', '.png'); // Try PNG thumbnail
+                                          } else if (target.src.includes('.png') && product.mediaFiles[0].url.includes('.mp4')) {
+                                            // Final fallback - mostrar placeholder
+                                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNiAyMEwyNCAzMkwzMiAyMEgxNloiIGZpbGw9IiM5Q0E0QUYiLz4KPC9zdmc+';
+                                          }
+                                        }}
                                       />
                                     ) : (
                                       <div className="h-12 w-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
@@ -696,8 +708,20 @@ export default function ProductsPage() {
                                 {product.mediaFiles && product.mediaFiles.length > 0 ? (
                                   <img
                                     className="h-16 w-16 rounded-lg object-cover border border-gray-200"
-                                    src={product.mediaFiles[0].url}
+                                    src={product.mediaFiles[0].url.includes('.mp4') || product.mediaFiles[0].url.includes('.webm') || product.mediaFiles[0].url.includes('.mov') 
+                                      ? product.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
+                                      : product.mediaFiles[0].url}
                                     alt={product.name}
+                                    onError={(e) => {
+                                      // Fallback si no existe el thumbnail
+                                      const target = e.target as HTMLImageElement;
+                                      if (target.src.includes('.jpg') && product.mediaFiles[0].url.includes('.mp4')) {
+                                        target.src = product.mediaFiles[0].url.replace('.mp4', '.png'); // Try PNG thumbnail
+                                      } else if (target.src.includes('.png') && product.mediaFiles[0].url.includes('.mp4')) {
+                                        // Final fallback - mostrar placeholder
+                                        target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkwzMiA0Mkw0NCAyNkgyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPC9zdmc+';
+                                      }
+                                    }}
                                   />
                                 ) : (
                                   <div className="h-16 w-16 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">

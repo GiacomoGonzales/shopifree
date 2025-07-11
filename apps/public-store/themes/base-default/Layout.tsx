@@ -404,7 +404,22 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                             className="flex items-center space-x-3 p-2 hover:bg-neutral-50 rounded-lg cursor-pointer transition-colors"
                           >
                             <div className="w-12 h-12 bg-neutral-200 rounded-lg overflow-hidden">
-                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                              <img 
+                                src={product.image.includes('.mp4') || product.image.includes('.webm') || product.image.includes('.mov') 
+                                  ? product.image.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
+                                  : product.image}
+                                alt={product.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // Fallback si no existe el thumbnail
+                                  const target = e.target as HTMLImageElement;
+                                  if (target.src.includes('.jpg') && product.image.includes('.mp4')) {
+                                    target.src = product.image.replace('.mp4', '.png'); // Try PNG thumbnail
+                                  } else if (target.src.includes('.png') && product.image.includes('.mp4')) {
+                                    target.src = '/api/placeholder/48/48'; // Final fallback
+                                  }
+                                }}
+                              />
                             </div>
                             <div className="flex-1">
                               <h4 className="text-sm font-medium text-neutral-900">{product.name}</h4>
@@ -559,7 +574,22 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                             className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
                           >
                             <div className="w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden">
-                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                              <img 
+                                src={product.image.includes('.mp4') || product.image.includes('.webm') || product.image.includes('.mov') 
+                                  ? product.image.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
+                                  : product.image}
+                                alt={product.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // Fallback si no existe el thumbnail
+                                  const target = e.target as HTMLImageElement;
+                                  if (target.src.includes('.jpg') && product.image.includes('.mp4')) {
+                                    target.src = product.image.replace('.mp4', '.png'); // Try PNG thumbnail
+                                  } else if (target.src.includes('.png') && product.image.includes('.mp4')) {
+                                    target.src = '/api/placeholder/64/64'; // Final fallback
+                                  }
+                                }}
+                              />
                             </div>
                             <div className="flex-1">
                               <h4 className="font-medium text-neutral-900">{product.name}</h4>
