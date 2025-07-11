@@ -326,9 +326,9 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               </Link>
 
               {/* Usuario */}
-              <button className="hidden sm:flex p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale">
+              <Link href="/mi-cuenta" className="hidden sm:flex p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale">
                 <Icons.User />
-              </button>
+              </Link>
 
               {/* Carrito */}
               <button 
@@ -355,8 +355,11 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
         </div>
 
         {/* Búsqueda Desktop Dropdown */}
-        {searchOpen && (
-          <div ref={searchRef} className="hidden md:block absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-lg">
+        <div ref={searchRef} className={`hidden md:block absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-lg transition-all duration-300 ease-out ${
+          searchOpen 
+            ? 'opacity-100 transform translate-y-0' 
+            : 'opacity-0 transform -translate-y-4 pointer-events-none'
+        }`}>
             <div className="max-w-2xl mx-auto px-4 py-6">
               {/* Barra de búsqueda */}
               <div className="relative">
@@ -492,7 +495,6 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               )}
             </div>
           </div>
-        )}
       </header>
 
       {/* Búsqueda Mobile Modal */}
@@ -700,10 +702,10 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
           </nav>
           
           <div className="px-4 py-6 border-t border-neutral-200 space-y-4">
-            <a href="#" className="flex items-center space-x-3 py-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200">
+            <Link href="/mi-cuenta" className="flex items-center space-x-3 py-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200">
               <Icons.User />
               <span className="font-light">Mi cuenta</span>
-            </a>
+            </Link>
             <Link href="/favoritos" className="flex items-center space-x-3 py-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200">
               <Icons.Heart />
               <span className="font-light">Favoritos</span>

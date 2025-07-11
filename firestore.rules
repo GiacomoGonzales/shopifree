@@ -2,18 +2,55 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 7, 21);
+    // Reglas para usuarios globales
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Reglas para tiendas
+    match /stores/{storeId} {
+      // Información básica de la tienda es pública
+      allow read: if true;
+      
+      // Solo el dueño puede modificar la tienda
+      allow write: if request.auth != null && 
+                      request.auth.uid == resource.data.ownerId;
+      
+      // Reglas para clientes de la tienda
+      match /customers/{customerId} {
+        allow read, write: if request.auth != null && 
+                             request.auth.uid == customerId;
+      }
+      
+      // Reglas para órdenes
+      match /orders/{orderId} {
+        allow read: if request.auth != null && 
+                      (request.auth.uid == resource.data.customerId || 
+                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId);
+        allow write: if request.auth != null && 
+                       request.auth.uid == resource.data.customerId;
+      }
+      
+      // Reglas para productos (solo lectura para clientes)
+      match /products/{productId} {
+        allow read: if true;
+        allow write: if request.auth != null && 
+                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
+      
+      // Reglas para categorías (solo lectura para clientes)
+      match /categories/{categoryId} {
+        allow read: if true;
+        allow write: if request.auth != null && 
+                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
+      
+      // Reglas para marcas (solo lectura para clientes)
+      match /brands/{brandId} {
+        allow read: if true;
+        allow write: if request.auth != null && 
+                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
     }
   }
 }

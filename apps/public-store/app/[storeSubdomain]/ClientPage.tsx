@@ -7,6 +7,7 @@ import { Tienda } from '../../lib/types'
 import { ThemeLayoutComponent, ThemeLayoutProps, ThemeComponentProps } from '../../themes/theme-component'
 import { StoreProvider } from '../../lib/store-context'
 import { CartProvider } from '../../lib/cart-context'
+import { StoreAuthProvider } from '../../lib/store-auth-context'
 import { LOADING_CONFIG } from '../../lib/loading-config'
 import { useStoreData } from '../../lib/hooks/useStoreData'
 import { Category } from '../../lib/categories'
@@ -98,13 +99,15 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
 
   return (
     <StoreProvider initialStore={tienda}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <CartProvider>
-          <ThemeComponents.ThemeLayout tienda={tienda} categorias={categories}>
-            <ThemeComponents.ThemeHome tienda={tienda} categorias={categories} productos={products} />
-          </ThemeComponents.ThemeLayout>
-        </CartProvider>
-      </NextIntlClientProvider>
+      <StoreAuthProvider storeId={tienda.id}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <CartProvider>
+            <ThemeComponents.ThemeLayout tienda={tienda} categorias={categories}>
+              <ThemeComponents.ThemeHome tienda={tienda} categorias={categories} productos={products} />
+            </ThemeComponents.ThemeLayout>
+          </CartProvider>
+        </NextIntlClientProvider>
+      </StoreAuthProvider>
     </StoreProvider>
   )
 } 

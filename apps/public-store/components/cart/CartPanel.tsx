@@ -97,8 +97,6 @@ export default function CartPanel() {
     }
   }, [state.isOpen])
 
-  if (!state.isOpen) return null
-
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
       removeItem(itemId)
@@ -111,28 +109,21 @@ export default function CartPanel() {
     <>
       {/* Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-500 ease-out ${
-          state.isOpen ? 'opacity-100' : 'opacity-0'
+        className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-300 ease-out ${
+          state.isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={closeCart}
       />
       
       {/* Panel deslizante */}
       <div 
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-all duration-500 ${
-          state.isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-all duration-300 ease-out ${
+          state.isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
         }`}
-        style={{ 
-          transitionTimingFunction: state.isOpen 
-            ? 'cubic-bezier(0.16, 1, 0.3, 1)' // Más suave al abrir
-            : 'cubic-bezier(0.7, 0, 0.84, 0)' // Más rápido al cerrar
-        }}
       >
         
         {/* Header del panel */}
-        <div className={`flex items-center justify-between p-6 border-b border-neutral-200 transition-all duration-300 delay-100 ${
-          state.isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-        }`}>
+        <div className="flex items-center justify-between p-6 border-b border-neutral-200">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
               <Icons.ShoppingBag />
@@ -153,9 +144,7 @@ export default function CartPanel() {
         </div>
 
         {/* Contenido del carrito */}
-        <div className={`flex flex-col h-full transition-all duration-400 delay-200 ${
-          state.isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}>
+        <div className="flex flex-col h-full">
           {state.items.length === 0 ? (
             /* Carrito vacío */
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
@@ -179,10 +168,7 @@ export default function CartPanel() {
                 {state.items.map((item, index) => (
                   <div 
                     key={item.id} 
-                    className={`flex items-start space-x-4 p-4 bg-neutral-50 rounded-lg transition-all duration-300 ${
-                      state.isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
-                    }`}
-                    style={{ transitionDelay: `${300 + (index * 50)}ms` }}
+                    className="flex items-start space-x-4 p-4 bg-neutral-50 rounded-lg"
                   >
                     {/* Imagen del producto */}
                     <div className="relative w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden flex-shrink-0">

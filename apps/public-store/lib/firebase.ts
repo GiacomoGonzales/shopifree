@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app'
 import { getFirestore, Firestore } from 'firebase/firestore'
+import { getAuth, Auth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,6 +23,7 @@ const isValidConfig = () => {
 // Initialize Firebase only if we have valid config
 let app: FirebaseApp | null = null
 let db: Firestore | null = null
+let auth: Auth | null = null
 
 const initializeFirebase = () => {
   if (!isValidConfig()) {
@@ -38,6 +40,7 @@ const initializeFirebase = () => {
     }
 
     db = getFirestore(app)
+    auth = getAuth(app)
     
     return app
   } catch (error) {
@@ -59,6 +62,13 @@ export const getFirebaseApp = () => {
     initializeFirebase()
   }
   return app
+}
+
+export const getFirebaseAuth = () => {
+  if (!auth && isValidConfig()) {
+    initializeFirebase()
+  }
+  return auth
 }
 
 export default getFirebaseApp 

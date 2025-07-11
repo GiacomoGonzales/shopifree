@@ -59,8 +59,6 @@ export default function CartModal() {
     }
   }, [state.isOpen])
 
-  if (!state.isOpen) return null
-
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
       removeItem(itemId)
@@ -70,7 +68,9 @@ export default function CartModal() {
   }
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden">
+    <div className={`fixed inset-0 bg-white z-50 flex flex-col overflow-hidden transition-all duration-300 ease-out ${
+      state.isOpen ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-full pointer-events-none'
+    }`}>
       {/* Header del modal */}
       <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-white">
         <button
