@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { ThemeLayoutProps } from "../theme-component"
 import Image from 'next/image'
 import { searchProducts, getSearchSuggestions, PublicProduct } from '../../lib/products'
@@ -73,6 +74,10 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { state: cartState, toggleCart } = useCart()
+  const pathname = usePathname()
+  const nextRouter = useRouter()
+
+
   
   // Estados para búsqueda
   const [searchOpen, setSearchOpen] = useState(false)
@@ -81,6 +86,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
   const [searchResults, setSearchResults] = useState<PublicProduct[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([])
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   
@@ -153,6 +159,9 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
   // Efecto para cerrar búsqueda al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // No hacer nada si el modal móvil está abierto
+      if (mobileSearchOpen) return
+      
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setSearchOpen(false)
         setShowSuggestions(false)
@@ -161,7 +170,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [mobileSearchOpen])
 
   // Función para manejar la búsqueda con debounce
   const handleSearch = async (query: string) => {
@@ -240,6 +249,12 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current)
     }
+  }
+
+  // Función para navegar desde el buscador móvil
+  const handleMobileProductNavigation = (productSlug: string) => {
+    setMobileSearchOpen(false)
+    nextRouter.push(`/${productSlug}`)
   }
 
   return (
@@ -497,9 +512,11 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
           </div>
       </header>
 
+
+
       {/* Búsqueda Mobile Modal */}
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-[9999] md:hidden">
           <div className="fixed inset-0 bg-white">
             {/* Header del modal */}
             <div className="flex items-center justify-between p-4 border-b border-neutral-200">
@@ -514,6 +531,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
 
             {/* Contenido del modal */}
             <div className="p-4">
+
               {/* Barra de búsqueda */}
               <div className="relative mb-6">
                 <input
@@ -603,6 +621,8 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                 </div>
               )}
 
+
+
               {/* Resultados de búsqueda móvil */}
               {showSuggestions && (
                 <div>
@@ -614,12 +634,13 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                   ) : searchResults.length > 0 ? (
                     <>
                       <h3 className="text-sm font-medium text-neutral-700 mb-3">Resultados ({searchResults.length})</h3>
-                      <div className="grid grid-cols-1 gap-3">
+                      <div className="space-y-3">
                         {searchResults.map((product) => (
-                          <a 
+                          <Link 
                             key={product.id} 
                             href={`/${product.slug}`}
                             className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                            onClick={() => setMobileSearchOpen(false)}
                           >
                             <div className="w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden">
                               <img 
@@ -634,7 +655,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                                   if (target.src.includes('.jpg') && product.image.includes('.mp4')) {
                                     target.src = product.image.replace('.mp4', '.png'); // Try PNG thumbnail
                                   } else if (target.src.includes('.png') && product.image.includes('.mp4')) {
-                                    target.src = '/api/placeholder/64/64'; // Final fallback
+                                    target.src = '/api/placeholder/48/48'; // Final fallback
                                   }
                                 }}
                               />
@@ -643,7 +664,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                               <h4 className="font-medium text-neutral-900">{product.name}</h4>
                               <p className="text-lg font-medium text-neutral-900">{getCurrencySymbol(tienda?.currency || 'USD')}{product.price}</p>
                             </div>
-                          </a>
+                          </Link>
                         ))}
                       </div>
                       <button 
@@ -666,7 +687,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
       )}
 
       {/* Menú móvil */}
-      <div className={`fixed inset-0 z-50 md:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-40 md:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         {/* Overlay */}
         <div 
           className={`fixed inset-0 bg-black transition-opacity duration-300 ${
