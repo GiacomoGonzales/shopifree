@@ -17,7 +17,13 @@ import {
   getDoc, 
   serverTimestamp,
   updateDoc,
-  deleteField
+  deleteField,
+  collection,
+  addDoc,
+  deleteDoc,
+  query,
+  where,
+  getDocs
 } from 'firebase/firestore'
 import { getFirebaseAuth, getFirebaseDb } from './firebase'
 
@@ -55,6 +61,10 @@ interface StoreAuthContextType {
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updateProfile: (data: Partial<StoreCustomerData>) => Promise<void>
+  addToFavorites: (productId: string, productData: any) => Promise<void>
+  removeFromFavorites: (productId: string) => Promise<void>
+  getFavorites: () => Promise<any[]>
+  isFavorite: (productId: string) => Promise<boolean>
   clearError: () => void
 }
 
@@ -140,6 +150,15 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
         customerData.displayName = displayName
       }
 
+      // Agregar información de ubicación si está disponible
+      if (userData?.location) {
+        customerData.location = {
+          address: userData.location.address,
+          lat: userData.location.lat,
+          lng: userData.location.lng
+        }
+      }
+
       await setDoc(customerRef, customerData)
       return customerData
     } else {
@@ -167,6 +186,11 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
         displayName: data.displayName,
         phone: data.phone,
         address: data.address,
+        location: data.location ? {
+          address: data.location.address,
+          lat: data.location.lat,
+          lng: data.location.lng
+        } : undefined,
         totalOrders: data.totalOrders || 0,
         totalSpent: data.totalSpent || 0,
         joinedAt: data.joinedAt?.toDate() || new Date(),
@@ -277,11 +301,37 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       const db = getFirebaseDb()
       if (!db) throw new Error('Firebase no está configurado')
 
-      const customerRef = doc(db, 'stores', storeId, 'customers', user.uid)
-      await updateDoc(customerRef, {
+      // Preparar datos para actualizar
+      const updateData: any = {
         ...data,
         updatedAt: serverTimestamp()
-      })
+      }
+
+      // Si hay datos de ubicación, guardarlos
+      if (data.location) {
+        updateData.location = {
+          address: data.location.address,
+          lat: data.location.lat,
+          lng: data.location.lng
+        }
+      }
+
+      // Actualizar en la colección de customers de la tienda
+      const customerRef = doc(db, 'stores', storeId, 'customers', user.uid)
+      await updateDoc(customerRef, updateData)
+
+      // También actualizar en la colección global de users para mantener sincronización
+      const globalUserRef = doc(db, 'users', user.uid)
+      const globalUpdateData: any = {
+        updatedAt: serverTimestamp()
+      }
+      
+      // Sincronizar campos básicos con usuario global
+      if (data.displayName) globalUpdateData.displayName = data.displayName
+      if (data.phone) globalUpdateData.phone = data.phone
+      if (data.location) globalUpdateData.location = data.location
+      
+      await updateDoc(globalUserRef, globalUpdateData)
 
       // Actualizar estado local
       setStoreCustomerData(prev => prev ? { ...prev, ...data } : null)
@@ -293,6 +343,99 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
   }
 
   const clearError = () => setError(null)
+
+  // Funciones para manejar favoritos (estructura mejorada)
+  const addToFavorites = async (productId: string, productData: any) => {
+    try {
+      if (!user) throw new Error('Usuario no autenticado')
+
+      const db = getFirebaseDb()
+      if (!db) throw new Error('Firebase no está configurado')
+
+      // Usar estructura centralizada en users
+      const favoritesRef = collection(db, 'users', user.uid, 'favorites')
+      
+      // Crear ID único combinando storeId y productId
+      const favoriteId = `${storeId}_${productId}`
+      
+      await setDoc(doc(favoritesRef, favoriteId), {
+        storeId,
+        productId,
+        productData,
+        storeName: storeCustomerData?.email || 'Tienda', // Temporal, se puede mejorar
+        addedAt: serverTimestamp()
+      })
+    } catch (error: any) {
+      console.error('Error agregando a favoritos:', error)
+      setError(getErrorMessage(error))
+      throw error
+    }
+  }
+
+  const removeFromFavorites = async (productId: string) => {
+    try {
+      if (!user) throw new Error('Usuario no autenticado')
+
+      const db = getFirebaseDb()
+      if (!db) throw new Error('Firebase no está configurado')
+
+      // Eliminar usando ID único
+      const favoriteId = `${storeId}_${productId}`
+      const favoriteRef = doc(db, 'users', user.uid, 'favorites', favoriteId)
+      await deleteDoc(favoriteRef)
+    } catch (error: any) {
+      console.error('Error eliminando de favoritos:', error)
+      setError(getErrorMessage(error))
+      throw error
+    }
+  }
+
+  const getFavorites = async (filterByStore: boolean = true): Promise<any[]> => {
+    try {
+      if (!user) return []
+
+      const db = getFirebaseDb()
+      if (!db) return []
+
+      const favoritesRef = collection(db, 'users', user.uid, 'favorites')
+      
+      let querySnapshot
+      if (filterByStore) {
+        // Obtener solo favoritos de esta tienda
+        const q = query(favoritesRef, where('storeId', '==', storeId))
+        querySnapshot = await getDocs(q)
+      } else {
+        // Obtener todos los favoritos del usuario
+        querySnapshot = await getDocs(favoritesRef)
+      }
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+    } catch (error: any) {
+      console.error('Error obteniendo favoritos:', error)
+      return []
+    }
+  }
+
+  const isFavorite = async (productId: string): Promise<boolean> => {
+    try {
+      if (!user) return false
+
+      const db = getFirebaseDb()
+      if (!db) return false
+
+      const favoriteId = `${storeId}_${productId}`
+      const favoriteRef = doc(db, 'users', user.uid, 'favorites', favoriteId)
+      const favoriteDoc = await getDoc(favoriteRef)
+      
+      return favoriteDoc.exists()
+    } catch (error: any) {
+      console.error('Error verificando favorito:', error)
+      return false
+    }
+  }
 
   // Función para obtener mensajes de error amigables
   const getErrorMessage = (error: any): string => {
@@ -381,6 +524,10 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
     logout,
     resetPassword,
     updateProfile,
+    addToFavorites,
+    removeFromFavorites,
+    getFavorites,
+    isFavorite,
     clearError
   }
 

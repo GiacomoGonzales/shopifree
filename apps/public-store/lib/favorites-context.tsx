@@ -65,12 +65,13 @@ export const FavoritesProvider = ({ children, storeId, userId }: FavoritesProvid
     }
   }
 
-  // Cargar favoritos desde Firestore
+  // Cargar favoritos desde Firestore (estructura mejorada)
   const loadFromFirestore = async (userId: string): Promise<PublicProduct[]> => {
     try {
       const db = getFirebaseDb()
       if (!db) return []
 
+      // Usar estructura centralizada: users/{userId}/favorites
       const favoritesRef = collection(db, 'users', userId, 'favorites')
       const q = query(favoritesRef, where('storeId', '==', storeId))
       const querySnapshot = await getDocs(q)
@@ -78,8 +79,8 @@ export const FavoritesProvider = ({ children, storeId, userId }: FavoritesProvid
       const firestoreFavorites: PublicProduct[] = []
       querySnapshot.forEach((doc) => {
         const data = doc.data()
-        if (data.product) {
-          firestoreFavorites.push(data.product)
+        if (data.productData) {
+          firestoreFavorites.push(data.productData)
         }
       })
       
@@ -90,59 +91,68 @@ export const FavoritesProvider = ({ children, storeId, userId }: FavoritesProvid
     }
   }
 
-  // Sincronizar favoritos de localStorage a Firestore
+  // Sincronizar favoritos de localStorage a Firestore (estructura mejorada)
   const syncToFirestore = async (userId: string, favorites: PublicProduct[]) => {
     try {
       const db = getFirebaseDb()
       if (!db) return
 
-      // Primero, eliminar favoritos existentes de esta tienda
+      // Usar estructura centralizada: users/{userId}/favorites
       const favoritesRef = collection(db, 'users', userId, 'favorites')
+      
+      // Primero, eliminar favoritos existentes de esta tienda
       const q = query(favoritesRef, where('storeId', '==', storeId))
       const querySnapshot = await getDocs(q)
-      
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref))
       await Promise.all(deletePromises)
 
       // Luego, agregar todos los favoritos actuales
-      const addPromises = favorites.map(product => 
-        setDoc(doc(favoritesRef, `${storeId}_${product.id}`), {
+      const addPromises = favorites.map(product => {
+        const favoriteId = `${storeId}_${product.id}`
+        return setDoc(doc(favoritesRef, favoriteId), {
           storeId,
-          product,
-          createdAt: new Date().toISOString()
+          productId: product.id,
+          productData: product,
+          storeName: storeId, // Se puede mejorar con el nombre real
+          addedAt: new Date().toISOString()
         })
-      )
+      })
       await Promise.all(addPromises)
     } catch (error) {
       console.error('Error syncing favorites to Firestore:', error)
     }
   }
 
-  // Agregar a favoritos en Firestore
+  // Agregar a favoritos en Firestore (estructura mejorada)
   const addToFirestore = async (userId: string, product: PublicProduct) => {
     try {
       const db = getFirebaseDb()
       if (!db) return
 
       const favoritesRef = collection(db, 'users', userId, 'favorites')
-      await setDoc(doc(favoritesRef, `${storeId}_${product.id}`), {
+      const favoriteId = `${storeId}_${product.id}`
+      
+      await setDoc(doc(favoritesRef, favoriteId), {
         storeId,
-        product,
-        createdAt: new Date().toISOString()
+        productId: product.id,
+        productData: product,
+        storeName: storeId, // Se puede mejorar con el nombre real
+        addedAt: new Date().toISOString()
       })
     } catch (error) {
       console.error('Error adding to Firestore favorites:', error)
     }
   }
 
-  // Eliminar de favoritos en Firestore
+  // Eliminar de favoritos en Firestore (estructura mejorada)
   const removeFromFirestore = async (userId: string, productId: string) => {
     try {
       const db = getFirebaseDb()
       if (!db) return
 
       const favoritesRef = collection(db, 'users', userId, 'favorites')
-      await deleteDoc(doc(favoritesRef, `${storeId}_${productId}`))
+      const favoriteId = `${storeId}_${productId}`
+      await deleteDoc(doc(favoritesRef, favoriteId))
     } catch (error) {
       console.error('Error removing from Firestore favorites:', error)
     }
