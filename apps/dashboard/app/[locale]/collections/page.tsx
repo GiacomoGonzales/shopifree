@@ -155,7 +155,7 @@ export default function CollectionsPage() {
     }
   }
 
-  const handleSaveCollection = async (collectionData: any) => {
+  const handleSaveCollection = async (collectionData: { title: string; description: string; image: string; productIds: string[] }) => {
     console.log('🔥 handleSaveCollection llamado con:', { storeId, collectionData, selectedCollection })
     
     if (!storeId) {

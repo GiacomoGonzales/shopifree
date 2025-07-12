@@ -6,10 +6,17 @@ import { CollectionWithId } from '../../lib/collections'
 import { ProductWithId } from '../../lib/products'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 
+interface CollectionData {
+  title: string
+  description: string
+  image: string
+  productIds: string[]
+}
+
 interface CollectionModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (collectionData: any) => void
+  onSave: (collectionData: CollectionData) => void
   collection?: CollectionWithId | null
   storeId: string
   products: ProductWithId[]
@@ -205,8 +212,6 @@ export default function CollectionModal({
   }
 
   if (!isOpen) return null
-
-  const selectedProducts = products.filter(p => selectedProductIds.includes(p.id))
 
   return (
     <>

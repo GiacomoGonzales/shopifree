@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { Timestamp } from 'firebase/firestore'
 import { 
   updateCustomer, 
   type CustomerWithId 
@@ -47,17 +48,17 @@ export default function CustomerModal({
   }, [customer])
 
   // Format date helper
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: Timestamp | Date | string | null | undefined) => {
     if (!timestamp) return t('table.never')
     
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+      const date = (timestamp as Timestamp).toDate ? (timestamp as Timestamp).toDate() : new Date(timestamp as string | Date)
       return date.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       })
-    } catch (err) {
+    } catch {
       return t('table.never')
     }
   }

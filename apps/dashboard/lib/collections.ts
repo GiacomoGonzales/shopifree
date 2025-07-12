@@ -245,7 +245,7 @@ export const updateCollection = async (
       throw new Error('Firebase db not available')
     }
 
-    const updateData: any = {
+    const updateData: Partial<Collection> & { updatedAt: unknown } = {
       ...collectionData,
       updatedAt: serverTimestamp()
     }

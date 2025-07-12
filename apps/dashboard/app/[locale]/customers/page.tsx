@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Timestamp } from 'firebase/firestore'
 import DashboardLayout from '../../../components/DashboardLayout'
 import CustomerModal from '../../../components/customers/CustomerModal'
 import { useStore } from '../../../lib/hooks/useStore'
@@ -17,12 +17,10 @@ import {
 } from '../../../lib/customers'
 
 export default function CustomersPage() {
-  const router = useRouter()
   const { store, loading: storeLoading } = useStore()
   const t = useTranslations('pages.customers')
   
   const [customers, setCustomers] = useState<CustomerWithId[]>([])
-  const [availableTags, setAvailableTags] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -37,11 +35,6 @@ export default function CustomersPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
   const [totalItems, setTotalItems] = useState(0)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [minSpent, setMinSpent] = useState<number | undefined>(undefined)
-  const [maxSpent, setMaxSpent] = useState<number | undefined>(undefined)
-  const [minOrders, setMinOrders] = useState<number | undefined>(undefined)
-  const [maxOrders, setMaxOrders] = useState<number | undefined>(undefined)
   const [message, setMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   
   const itemsPerPage = 15
@@ -49,13 +42,8 @@ export default function CustomersPage() {
   // Crear objeto de filtros
   const filters: CustomerFilters = useMemo(() => ({
     searchQuery: searchQuery.trim() || undefined,
-    sortBy,
-    tags: selectedTags.length > 0 ? selectedTags : undefined,
-    minSpent,
-    maxSpent,
-    minOrders,
-    maxOrders
-  }), [searchQuery, sortBy, selectedTags, minSpent, maxSpent, minOrders, maxOrders])
+    sortBy
+  }), [searchQuery, sortBy])
 
   // Cargar etiquetas disponibles
   useEffect(() => {
@@ -63,17 +51,17 @@ export default function CustomersPage() {
       if (!store?.id) return
       
       try {
-        const tags = await getCustomerTags(store.id)
-        setAvailableTags(tags)
-      } catch (err) {
-        console.error('Error loading tags:', err)
+        await getCustomerTags(store.id)
+        // Tags loaded successfully
+      } catch (error) {
+        console.error('Error loading tags:', error)
       }
     }
 
     if (!storeLoading && store?.id) {
       loadTags()
     }
-  }, [store?.id, storeLoading])
+  }, [store?.id, storeLoading, store])
 
   // Cargar clientes
   useEffect(() => {
@@ -116,7 +104,7 @@ export default function CustomersPage() {
   // Resetear página cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, sortBy, selectedTags, minSpent, maxSpent, minOrders, maxOrders])
+  }, [searchQuery, sortBy])
 
   // Auto-cerrar toast después de 5 segundos
   useEffect(() => {
@@ -197,17 +185,6 @@ export default function CustomersPage() {
     }
   }
 
-  // Función para limpiar filtros
-  const clearFilters = () => {
-    setSearchQuery('')
-    setSelectedTags([])
-    setMinSpent(undefined)
-    setMaxSpent(undefined)
-    setMinOrders(undefined)
-    setMaxOrders(undefined)
-    setSortBy('created-desc')
-  }
-
   // Función para aplicar filtros
   const applyFilters = () => {
     setShowFiltersModal(false)
@@ -215,15 +192,15 @@ export default function CustomersPage() {
   }
 
   // Función para formatear fecha
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: Timestamp | Date | string | null | undefined) => {
     if (!timestamp) return t('table.never')
     
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+      const date = (timestamp as Timestamp).toDate ? (timestamp as Timestamp).toDate() : new Date(timestamp as string | Date)
       return date.toLocaleDateString()
-    } catch (err) {
-      return t('table.never')
-    }
+          } catch {
+        return t('table.never')
+      }
   }
 
   // Función para formatear moneda
@@ -434,11 +411,6 @@ export default function CustomersPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.586V4z" />
                         </svg>
                         {t('filter')}
-                        {(selectedTags.length > 0 || minSpent !== undefined || maxSpent !== undefined || minOrders !== undefined || maxOrders !== undefined) && (
-                          <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                            {[selectedTags.length > 0, minSpent !== undefined, maxSpent !== undefined, minOrders !== undefined, maxOrders !== undefined].filter(Boolean).length}
-                          </span>
-                        )}
                       </button>
 
                       {/* Ordenar */}
@@ -500,10 +472,10 @@ export default function CustomersPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900">
-                      {searchQuery || selectedTags.length > 0 || minSpent !== undefined || maxSpent !== undefined || minOrders !== undefined || maxOrders !== undefined ? t('noCustomers') : t('noCustomersEmpty')}
+                      {searchQuery ? t('noCustomers') : t('noCustomersEmpty')}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      {searchQuery || selectedTags.length > 0 || minSpent !== undefined || maxSpent !== undefined || minOrders !== undefined || maxOrders !== undefined 
+                      {searchQuery 
                         ? t('noCustomersMessage')
                         : t('noCustomersEmptyMessage')
                       }
