@@ -16,7 +16,7 @@ export default async function LocaleLayout({
   params: { locale: string }
 }) {
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as any)) notFound()
+  if (!locales.includes(locale)) notFound()
 
   // Enable static rendering
   setRequestLocale(locale)
@@ -24,7 +24,7 @@ export default async function LocaleLayout({
   let messages
   try {
     messages = (await import(`../../messages/${locale}.json`)).default
-  } catch (error) {
+  } catch {
     messages = {}
   }
 

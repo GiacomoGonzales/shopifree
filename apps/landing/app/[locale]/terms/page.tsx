@@ -1,11 +1,8 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 export default function TermsPage() {
-  const t = useTranslations('home')
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -67,7 +64,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Limitación de responsabilidad</h2>
             <p className="text-gray-700 mb-4">
-              Shopifree se proporciona "tal como es" sin garantías de ningún tipo. No seremos responsables por daños directos, indirectos, incidentales o consecuentes.
+              Shopifree se proporciona &ldquo;tal como es&rdquo; sin garantías de ningún tipo. No seremos responsables por daños directos, indirectos, incidentales o consecuentes.
             </p>
           </section>
 

@@ -1,12 +1,9 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Button, Input } from '@shopifree/ui'
 
 export default function ContactPage() {
-  const t = useTranslations('home')
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

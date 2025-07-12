@@ -5,7 +5,8 @@ import {
   GoogleAuthProvider,
   User,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  AuthError
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
@@ -27,8 +28,9 @@ export const registerWithEmail = async (email: string, password: string) => {
     await saveUserToFirestore(user, 'es') // Default language
     
     return { user, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error) {
+    const authError = error as AuthError
+    return { user: null, error: authError.message }
   }
 }
 
@@ -48,9 +50,10 @@ export const signInWithEmail = async (email: string, password: string) => {
     console.log('✅ Login exitoso:', userCredential.user.uid)
     
     return { user: userCredential.user, error: null }
-  } catch (error: any) {
-    console.error('❌ Error en login:', error)
-    return { user: null, error: error.message }
+  } catch (error) {
+    const authError = error as AuthError
+    console.error('❌ Error en login:', authError)
+    return { user: null, error: authError.message }
   }
 }
 
@@ -77,9 +80,10 @@ export const signInWithGoogle = async () => {
     }
     
     return { user, error: null }
-  } catch (error: any) {
-    console.error('❌ Error en login con Google:', error)
-    return { user: null, error: error.message }
+  } catch (error) {
+    const authError = error as AuthError
+    console.error('❌ Error en login con Google:', authError)
+    return { user: null, error: authError.message }
   }
 }
 
