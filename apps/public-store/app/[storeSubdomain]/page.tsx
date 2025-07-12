@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getStoreBySubdomain } from '../../lib/store'
+import { getStoreBySubdomain, transformStoreForClient } from '../../lib/store'
 import { Tienda } from '../../lib/types'
 import ClientPage from './ClientPage'
 
@@ -11,27 +11,32 @@ interface PageProps {
 
 export default async function StorePage({ params }: PageProps) {
   // 1. Obtener datos de la tienda
-  const store = await getStoreBySubdomain(params.storeSubdomain)
+  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
   
-  if (!store) {
+  if (!serverStore) {
     notFound()
   }
 
-  // 2. Determinar el tema y validar el idioma
-  const themeId = store.theme || 'base-default'
-  const storeLanguage = store.advanced?.language
-  const locale = ['es', 'en'].includes(storeLanguage as 'es' | 'en') ? storeLanguage as 'es' | 'en' : 'es'
-
-  // Convertir StoreDataServer a Tienda
-  const tienda: Tienda = {
-    ...store,
-    theme: themeId,
-    socialMedia: store.socialMedia || {}, // Inicializar campo requerido
-    createdAt: store.createdAt ? new Date(store.createdAt as string).toISOString() : undefined,
-    updatedAt: store.updatedAt ? new Date(store.updatedAt as string).toISOString() : undefined
+  // 2. Transformar datos del servidor a formato cliente
+  const clientStore = transformStoreForClient(serverStore)
+  
+  if (!clientStore) {
+    notFound()
   }
 
-  // 3. Renderizar el componente del cliente con preload hint
+  // 3. Determinar el tema y validar el idioma
+  const themeId = clientStore.theme || 'base-default'
+  const storeLanguage = clientStore.advanced?.language
+  const locale = ['es', 'en'].includes(storeLanguage as 'es' | 'en') ? storeLanguage as 'es' | 'en' : 'es'
+
+  // Convertir StoreDataClient a Tienda
+  const tienda: Tienda = {
+    ...clientStore,
+    theme: themeId,
+    socialMedia: clientStore.socialMedia || {}, // Inicializar campo requerido
+  }
+
+  // 4. Renderizar el componente del cliente con preload hint
   return (
     <>
       {/* Preload del tema para mejorar la carga inicial */}
