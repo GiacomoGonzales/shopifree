@@ -35,6 +35,7 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
   const [totalItems, setTotalItems] = useState(0)
+  const [previewMessage, setPreviewMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   
   const itemsPerPage = 15
 
@@ -122,6 +123,16 @@ export default function ProductsPage() {
     setCurrentPage(1)
   }, [searchQuery, sortBy, statusFilter])
 
+  // Auto-cerrar toast después de 5 segundos
+  useEffect(() => {
+    if (previewMessage) {
+      const timer = setTimeout(() => {
+        setPreviewMessage(null)
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [previewMessage])
+
   // Función para obtener el nombre de la marca
   const getBrandName = (brandId?: string | null) => {
     if (!brandId) return ''
@@ -155,6 +166,36 @@ export default function ProductsPage() {
   // Función para editar producto
   const handleEdit = (productId: string) => {
     router.push(`/products/${productId}/edit`)
+  }
+
+  // Función para vista previa del producto en la tienda
+  const handlePreview = (product: ProductWithId) => {
+    if (!store?.subdomain) {
+      console.error('No subdomain available for preview')
+      setPreviewMessage({ message: 'Error: No se pudo obtener la información de la tienda', type: 'error' })
+      return
+    }
+
+    // Solo productos activos pueden ser previsualizados
+    if (product.status !== 'active') {
+      setPreviewMessage({ message: 'Solo los productos activos pueden ser previsualizados en la tienda', type: 'error' })
+      return
+    }
+
+    // Generar slug del producto si no existe
+    const productSlug = product.urlSlug || 
+      `${product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${product.id.slice(-6)}`
+    
+    // Construir URL de la tienda pública
+    const storeUrl = process.env.NODE_ENV === 'development' 
+      ? `http://localhost:3001/${store.subdomain}/${productSlug}`
+      : `https://${store.subdomain}.shopifree.app/${productSlug}`
+    
+    // Abrir en nueva pestaña
+    window.open(storeUrl, '_blank', 'noopener,noreferrer')
+    
+    // Mostrar mensaje de éxito
+    setPreviewMessage({ message: 'Abriendo vista previa del producto...', type: 'success' })
   }
 
   // Función para eliminar producto
@@ -635,10 +676,7 @@ export default function ProductsPage() {
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="flex items-center justify-end space-x-2">
                                   <button 
-                                    onClick={() => {
-                                      // TODO: Implementar vista previa del producto
-                                      console.log('Vista previa del producto:', product.id)
-                                    }}
+                                    onClick={() => handlePreview(product)}
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
                                     title={t('actions.preview')}
                                   >
@@ -797,10 +835,7 @@ export default function ProductsPage() {
                                 {/* Actions */}
                                 <div className="mt-3 flex items-center space-x-2">
                                   <button 
-                                    onClick={() => {
-                                      // TODO: Implementar vista previa del producto
-                                      console.log('Vista previa del producto:', product.id)
-                                    }}
+                                    onClick={() => handlePreview(product)}
                                     className="text-gray-400 hover:text-gray-600 transition-colors p-2"
                                     title={t('actions.preview')}
                                   >
@@ -860,6 +895,42 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast para mensajes de vista previa */}
+      {previewMessage && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+          previewMessage.type === 'success' 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              {previewMessage.type === 'success' ? (
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{previewMessage.message}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setPreviewMessage(null)}
+                className="inline-flex rounded-md p-1.5 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 } 

@@ -2,383 +2,576 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { CollectionWithId, Collection } from '../../lib/collections'
-import { ProductWithId, getProducts } from '../../lib/products'
-import { uploadImageToCloudinary } from '../../lib/cloudinary'
+import { CollectionWithId } from '../../lib/collections'
+import { ProductWithId } from '../../lib/products'
+import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 
 interface CollectionModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (collectionData: Omit<Collection, 'createdAt' | 'updatedAt' | 'slug' | 'order'>) => Promise<void>
+  onSave: (collectionData: any) => void
   collection?: CollectionWithId | null
   storeId: string
+  products: ProductWithId[]
 }
 
-export default function CollectionModal({ isOpen, onClose, onSave, collection, storeId }: CollectionModalProps) {
+export default function CollectionModal({
+  isOpen,
+  onClose,
+  onSave,
+  collection,
+  storeId,
+  products
+}: CollectionModalProps) {
   const t = useTranslations('pages.collections')
   
+  // Form state
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [image, setImage] = useState('')
-  const [visible, setVisible] = useState(true)
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
-  const [products, setProducts] = useState<ProductWithId[]>([])
-  const [loadingProducts, setLoadingProducts] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [uploadingImage, setUploadingImage] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
+  
+  // UI state
+  const [isUploading, setIsUploading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  // Cargar productos cuando se abre el modal
+  // Reset form when modal opens/closes or collection changes
   useEffect(() => {
-    if (isOpen && storeId) {
-      loadProducts()
+    if (isOpen) {
+      if (collection) {
+        // Editing existing collection
+        setTitle(collection.title)
+        setDescription(collection.description || '')
+        setImage(collection.image || '')
+        setSelectedProductIds(collection.productIds || [])
+      } else {
+        // Creating new collection
+        setTitle('')
+        setDescription('')
+        setImage('')
+        setSelectedProductIds([])
+      }
+      setImageFile(null)
+      setErrors({})
     }
-  }, [isOpen, storeId])
+  }, [isOpen, collection])
 
-  // Cargar datos de la colección cuando se edita
-  useEffect(() => {
-    if (collection) {
-      setTitle(collection.title)
-      setDescription(collection.description || '')
-      setImage(collection.image || '')
-      setVisible(collection.visible)
-      setSelectedProductIds(collection.productIds || [])
-    } else {
-      // Reset form for new collection
-      setTitle('')
-      setDescription('')
-      setImage('')
-      setVisible(true)
-      setSelectedProductIds([])
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!title.trim()) {
+      newErrors.title = t('messages.titleRequired')
     }
-    setImageFile(null)
-  }, [collection])
-
-  const loadProducts = async () => {
-    setLoadingProducts(true)
-    try {
-      const productsData = await getProducts(storeId)
-      setProducts(productsData)
-    } catch (error) {
-      console.error('Error loading products:', error)
-    } finally {
-      setLoadingProducts(false)
-    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setUploadingImage(true)
+  const handleImageUpload = async (file: File) => {
     try {
-      const result = await uploadImageToCloudinary(file, { folder: 'products' })
-      setImage(result.secure_url)
-      setImageFile(file)
+      setIsUploading(true)
+      
+      // Delete previous image if exists
+      if (image && collection?.image) {
+        try {
+          await deleteImageFromCloudinary(collection.image)
+        } catch (error) {
+          console.warn('Error deleting previous image:', error)
+        }
+      }
+      
+      const uploadResult = await uploadImageToCloudinary(file, {
+        folder: 'collections',
+        storeId: storeId
+      })
+      setImage(uploadResult.secure_url)
+      setImageFile(null)
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert(t('messages.imageUploadError'))
+      setErrors({ ...errors, image: t('messages.imageUploadError') })
     } finally {
-      setUploadingImage(false)
+      setIsUploading(false)
     }
   }
 
-  const handleRemoveImage = () => {
+  const handleImageRemove = async () => {
+    if (image) {
+      try {
+        await deleteImageFromCloudinary(image)
+      } catch (error) {
+        console.warn('Error deleting image:', error)
+      }
+    }
     setImage('')
     setImageFile(null)
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    console.log('🔥 Modal handleSubmit llamado con:', {
+      title: title.trim(),
+      description: description.trim(),
+      image,
+      selectedProductIds
+    })
+    
+    if (!validateForm()) {
+      console.error('❌ Validación de formulario falló')
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      
+      // Upload image if there's a new file
+      let finalImageUrl = image
+      if (imageFile) {
+        console.log('📸 Subiendo imagen nueva...')
+        const uploadResult = await uploadImageToCloudinary(imageFile, {
+          folder: 'collections',
+          storeId: storeId
+        })
+        finalImageUrl = uploadResult.secure_url
+        console.log('✅ Imagen subida:', finalImageUrl)
+      }
+
+      const collectionData = {
+        title: title.trim(),
+        description: description.trim(),
+        image: finalImageUrl,
+        productIds: selectedProductIds
+      }
+
+      console.log('📝 Datos finales a enviar:', collectionData)
+      await onSave(collectionData)
+      onClose()
+    } catch (error) {
+      console.error('❌ Error saving collection in modal:', error)
+      setErrors({ ...errors, general: t('messages.error') })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleProductToggle = (productId: string) => {
     setSelectedProductIds(prev => 
-      prev.includes(productId) 
+      prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     )
   }
 
-  const handleSelectAll = () => {
-    const filteredProducts = getFilteredProducts()
-    const allIds = filteredProducts.map(p => p.id)
-    setSelectedProductIds(allIds)
+  // Filter products based on search query
+  const filteredProducts = products.filter(product => {
+    if (!searchQuery.trim()) return true
+    const query = searchQuery.toLowerCase().trim()
+    return product.name.toLowerCase().includes(query) ||
+           product.description?.toLowerCase().includes(query)
+  })
+
+  // Handlers para drag & drop
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOver(true)
   }
 
-  const handleDeselectAll = () => {
-    setSelectedProductIds([])
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOver(false)
   }
 
-  const getFilteredProducts = () => {
-    return products.filter(product => 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
   }
 
-  const handleSave = async () => {
-    if (!title.trim()) {
-      alert(t('messages.titleRequired'))
-      return
-    }
-
-    if (selectedProductIds.length === 0) {
-      alert(t('messages.productsRequired'))
-      return
-    }
-
-    setSaving(true)
-    try {
-      await onSave({
-        title: title.trim(),
-        description: description.trim(),
-        image,
-        productIds: selectedProductIds,
-        visible
-      })
-      onClose()
-    } catch (error) {
-      console.error('Error saving collection:', error)
-      alert(t('messages.error'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleClose = () => {
-    if (!saving) {
-      onClose()
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOver(false)
+    
+    const files = e.dataTransfer.files
+    if (files && files[0]) {
+      setImageFile(files[0])
+      handleImageUpload(files[0])
     }
   }
 
   if (!isOpen) return null
 
-  const filteredProducts = getFilteredProducts()
+  const selectedProducts = products.filter(p => selectedProductIds.includes(p.id))
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {collection ? t('editCollection') : t('addCollection')}
-          </h2>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('form.title')} <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={t('form.titlePlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={saving}
-            />
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">
+              {collection ? t('editCollection') : t('addCollection')}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('form.description')}
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('form.descriptionPlaceholder')}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={saving}
-            />
-          </div>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="px-6 py-4 space-y-6">
+            {/* Title */}
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('form.title')} *
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={t('form.titlePlaceholder')}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600 ${
+                  errors.title ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
+            </div>
 
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('form.image')}
-            </label>
-            <p className="text-sm text-gray-500 mb-2">{t('form.imageHint')}</p>
-            
-            {image ? (
-              <div className="space-y-2">
-                <img
-                  src={image}
-                  alt="Collection"
-                  className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                />
-                <div className="flex gap-2">
-                  <label className="cursor-pointer bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
-                    {t('imageUpload.change')}
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('form.description')}
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('form.descriptionPlaceholder')}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-gray-600"
+              />
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                {t('form.image')}
+              </label>
+              <p className="text-sm text-gray-500 mb-3">{t('form.imageHint')}</p>
+              
+              <div className="relative">
+                {image ? (
+                  /* Vista previa de la imagen */
+                  <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
+                    <img
+                      src={image}
+                      alt="Preview"
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
+                      <div className="flex space-x-2">
+                        <label className="px-3 py-1 bg-white text-gray-700 text-xs rounded shadow hover:bg-gray-50 transition-colors cursor-pointer">
+                          {t('imageUpload.change')}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                setImageFile(file)
+                                handleImageUpload(file)
+                              }
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleImageRemove}
+                          className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
+                        >
+                          {t('imageUpload.remove')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Área de subida */
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer group ${
+                      isDraggingOver 
+                        ? 'border-gray-400 bg-gray-100 scale-105 shadow-lg' 
+                        : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+                    }`}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      disabled={uploadingImage || saving}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isUploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setImageFile(file)
+                          handleImageUpload(file)
+                        }
+                      }}
                     />
-                  </label>
-                  <button
-                    onClick={handleRemoveImage}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                    disabled={uploadingImage || saving}
-                  >
-                    {t('imageUpload.remove')}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <label className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 block">
-                {uploadingImage ? (
-                  <div className="text-blue-500">
-                    {t('imageUpload.uploading')}
-                  </div>
-                ) : (
-                  <div>
-                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <p className="mt-2 text-sm text-gray-600">{t('imageUpload.dropZone')}</p>
-                    <p className="text-xs text-gray-500">{t('imageUpload.formats')}</p>
+                    {isUploading ? (
+                      <div className="space-y-3">
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-lg bg-gray-100">
+                          <svg className="animate-spin h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-gray-600">
+                          {t('imageUpload.uploading')}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-lg transition-colors ${
+                          isDraggingOver 
+                            ? 'bg-gray-200' 
+                            : 'bg-gray-200 group-hover:bg-gray-300'
+                        }`}>
+                          {isDraggingOver ? (
+                            <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                            </svg>
+                          ) : (
+                            <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z" />
+                            </svg>
+                          )}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium transition-colors ${
+                            isDraggingOver 
+                              ? 'text-gray-700' 
+                              : 'text-gray-700 group-hover:text-gray-800'
+                          }`}>
+                            {isDraggingOver ? '¡Suelta aquí tu imagen!' : t('imageUpload.dropZone')}
+                          </p>
+                          <p className={`text-xs mt-1 transition-colors ${
+                            isDraggingOver 
+                              ? 'text-gray-500' 
+                              : 'text-gray-500'
+                          }`}>
+                            {t('imageUpload.formats')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  disabled={uploadingImage || saving}
-                />
-              </label>
-            )}
-          </div>
-
-          {/* Visibility */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="visible"
-              checked={visible}
-              onChange={(e) => setVisible(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              disabled={saving}
-            />
-            <label htmlFor="visible" className="ml-2 block text-sm text-gray-700">
-              {t('form.visible')}
-            </label>
-          </div>
-          <p className="text-sm text-gray-500">{t('form.visibleHint')}</p>
-
-          {/* Products Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('form.products')} <span className="text-red-500">*</span>
-            </label>
-            <p className="text-sm text-gray-500 mb-2">{t('form.productsHint')}</p>
-            
-            {loadingProducts ? (
-              <div className="text-center py-4">
-                <div className="text-gray-500">{t('form.searchProducts')}</div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Search */}
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder={t('form.searchProducts')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={saving}
-                />
+              {errors.image && (
+                <p className="mt-2 text-sm text-red-600">{errors.image}</p>
+              )}
+            </div>
 
-                {/* Selection Actions */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSelectAll}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                    disabled={saving}
-                  >
-                    {t('actions.selectAll')}
-                  </button>
-                  <span className="text-gray-300">|</span>
-                  <button
-                    onClick={handleDeselectAll}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                    disabled={saving}
-                  >
-                    {t('actions.deselectAll')}
-                  </button>
-                  <span className="text-sm text-gray-500 ml-auto">
-                    {selectedProductIds.length} {t('form.selectedProducts')}
-                  </span>
+            {/* Products */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('form.products')}
+              </label>
+              <p className="text-sm text-gray-500 mb-3">{t('form.productsHint')}</p>
+              
+              {products.length === 0 ? (
+                <div className="text-center py-8 border border-gray-200 rounded-md bg-gray-50">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No hay productos disponibles</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Crea algunos productos primero para poder agregarlos a la colección.
+                  </p>
                 </div>
-
-                {/* Products List */}
-                <div className="border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
-                  {filteredProducts.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
-                      {products.length === 0 ? t('form.noProductsAvailable') : t('form.noProductsFound')}
+              ) : (
+                <div className="space-y-4">
+                  {/* Search products */}
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                     </div>
-                  ) : (
-                    <div className="divide-y divide-gray-200">
-                      {filteredProducts.map((product) => (
-                        <div key={product.id} className="p-3 hover:bg-gray-50">
-                          <label className="flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedProductIds.includes(product.id)}
-                              onChange={() => handleProductToggle(product.id)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                              disabled={saving}
-                            />
-                            <div className="ml-3 flex-1 min-w-0">
-                              <div className="flex items-center">
-                                {product.mediaFiles && product.mediaFiles.length > 0 && (
-                                  <img
-                                    src={product.mediaFiles[0].url}
-                                    alt={product.name}
-                                    className="w-10 h-10 object-cover rounded mr-3"
-                                  />
-                                )}
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900 truncate">
-                                    {product.name}
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    ${product.price.toFixed(2)}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </label>
-                        </div>
-                      ))}
+                    <input
+                      type="text"
+                      placeholder="Buscar productos..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-600 focus:border-gray-600"
+                    />
+                  </div>
+
+                  {/* Selected products count */}
+                  {selectedProductIds.length > 0 && (
+                    <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-md">
+                      {selectedProductIds.length} {selectedProductIds.length === 1 ? 'producto seleccionado' : 'productos seleccionados'}
                     </div>
                   )}
+
+                  {/* Products list */}
+                  <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md">
+                    {filteredProducts.map((product) => {
+                      const isSelected = selectedProductIds.includes(product.id)
+                      return (
+                        <div
+                          key={product.id}
+                          className={`flex items-center space-x-3 p-3 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 ${
+                            isSelected ? 'bg-blue-50' : ''
+                          }`}
+                          onClick={() => handleProductToggle(product.id)}
+                        >
+                          <div className="flex-shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                handleProductToggle(product.id)
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="h-4 w-4 text-gray-600 focus:ring-gray-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          
+                          {product.mediaFiles && product.mediaFiles.length > 0 ? (
+                            (() => {
+                              const mediaUrl = product.mediaFiles[0].url
+                              const isVideo = mediaUrl.includes('/video/') || 
+                                             mediaUrl.match(/\.(mp4|webm|ogg|avi|mov)$/i)
+                              
+                              if (isVideo) {
+                                // Generar thumbnail para videos de Cloudinary
+                                let thumbnailUrl = mediaUrl
+                                if (mediaUrl.includes('cloudinary.com')) {
+                                  // Transformar URL de video a thumbnail
+                                  thumbnailUrl = mediaUrl.replace('/video/upload/', '/video/upload/so_0,w_200,h_200,c_fill,f_jpg/')
+                                }
+                                
+                                return (
+                                  <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                                    <img
+                                      src={thumbnailUrl}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        // Si falla el thumbnail, mostrar icono de video
+                                        e.currentTarget.style.display = 'none'
+                                        e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                                      }}
+                                    />
+                                    <div className="hidden absolute inset-0 bg-gray-100 flex items-center justify-center">
+                                      <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
+                                    </div>
+                                    {/* Indicador de video */}
+                                    <div className="absolute bottom-0 right-0 bg-black bg-opacity-60 text-white p-0.5 rounded-tl">
+                                      <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                )
+                              } else {
+                                return (
+                                  <img
+                                    src={mediaUrl}
+                                    alt={product.name}
+                                    className="w-10 h-10 rounded-lg object-cover"
+                                  />
+                                )
+                              }
+                            })()
+                          ) : (
+                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                              </svg>
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-sm font-medium text-gray-900">${product.price.toFixed(2)}</span>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                product.status === 'active' 
+                                  ? 'bg-green-100 text-green-800'
+                                  : product.status === 'draft'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {product.status}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
+              )}
+            </div>
+
+
+
+            {/* General Error */}
+            {errors.general && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{errors.general}</p>
               </div>
             )}
+          </form>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200"
+            >
+              {t('actions.cancel')}
+            </button>
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isSaving || isUploading}
+              className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
+            >
+              {isSaving 
+                ? t('actions.saving')
+                : collection 
+                  ? t('actions.update') 
+                  : t('actions.create')
+              }
+            </button>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            onClick={handleClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            disabled={saving}
-          >
-            {t('actions.cancel')}
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
-            disabled={saving || uploadingImage}
-          >
-            {saving ? t('actions.saving') : (collection ? t('actions.update') : t('actions.create'))}
-          </button>
-        </div>
       </div>
-    </div>
+
+
+    </>
   )
 } 

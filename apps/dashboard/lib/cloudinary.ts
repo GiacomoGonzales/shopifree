@@ -7,13 +7,13 @@ interface CloudinaryUploadResponse {
 }
 
 interface UploadOptions {
-  folder: 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners' | 'hero'
+  folder: 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners' | 'hero' | 'collections'
   maxSizeBytes?: number
   storeId?: string // Para crear carpetas específicas por tienda
 }
 
 // Type alias para asegurar compatibilidad
-export type CloudinaryFolder = 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners' | 'hero'
+export type CloudinaryFolder = 'logos' | 'store_photos' | 'categories' | 'brands' | 'products' | 'banners' | 'hero' | 'collections'
 
 // Configuración de Cloudinary
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
