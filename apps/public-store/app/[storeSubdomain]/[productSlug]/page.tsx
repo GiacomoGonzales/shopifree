@@ -42,7 +42,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const tienda: Tienda = {
     ...store,
     theme: themeId,
-    socialMedia: store.socialMedia || {} // Inicializar campo requerido
+    socialMedia: store.socialMedia || {}, // Inicializar campo requerido
+    createdAt: store.createdAt ? new Date(store.createdAt as string).toISOString() : undefined,
+    updatedAt: store.updatedAt ? new Date(store.updatedAt as string).toISOString() : undefined
   }
 
   // 4. Renderizar el componente del cliente

@@ -37,7 +37,9 @@ export default async function MiCuentaPage({ params }: MiCuentaPageProps) {
   const tienda: Tienda = {
     ...store,
     theme: store.theme || 'base-default',
-    socialMedia: store.socialMedia || {} // Inicializar campo requerido
+    socialMedia: store.socialMedia || {}, // Inicializar campo requerido
+    createdAt: store.createdAt ? new Date(store.createdAt as string).toISOString() : undefined,
+    updatedAt: store.updatedAt ? new Date(store.updatedAt as string).toISOString() : undefined
   }
 
   return <MiCuentaClient tienda={tienda} />

@@ -26,7 +26,9 @@ export default async function StorePage({ params }: PageProps) {
   const tienda: Tienda = {
     ...store,
     theme: themeId,
-    socialMedia: store.socialMedia || {} // Inicializar campo requerido
+    socialMedia: store.socialMedia || {}, // Inicializar campo requerido
+    createdAt: store.createdAt ? new Date(store.createdAt as string).toISOString() : undefined,
+    updatedAt: store.updatedAt ? new Date(store.updatedAt as string).toISOString() : undefined
   }
 
   // 3. Renderizar el componente del cliente con preload hint

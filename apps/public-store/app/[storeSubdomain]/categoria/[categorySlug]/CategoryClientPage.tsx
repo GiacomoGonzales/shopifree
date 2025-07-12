@@ -87,7 +87,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   const [mounted, setMounted] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [products, setProducts] = useState<PublicProduct[]>([])
-  const [messages, setMessages] = useState<any>(null)
+  const [messages, setMessages] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
   
   // Estados para filtros
@@ -149,7 +149,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
 
   // Aplicar filtros y ordenamiento
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = categoryProducts.filter(product => 
+    const filtered = categoryProducts.filter(product => 
       product.price >= priceFilter.min && product.price <= priceFilter.max
     )
 
@@ -311,7 +311,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
                       <button
                         key={option.value}
                         onClick={() => {
-                          setSortBy(option.value as any)
+                          setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
                           setShowSort(false)
                         }}
                         className={`w-full text-left px-4 py-2 hover:bg-neutral-50 transition-colors ${
@@ -397,7 +397,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   }
 
   return (
-    <NextIntlClientProvider locale="es" messages={messages}>
+    <NextIntlClientProvider locale="es" messages={messages as Record<string, string>}>
       <CartProvider>
         <ThemeLayout tienda={convertStoreToTienda(store)} categorias={categories || []}>
           <CategoryContent />

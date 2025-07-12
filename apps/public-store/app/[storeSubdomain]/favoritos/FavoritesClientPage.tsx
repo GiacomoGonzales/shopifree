@@ -32,7 +32,7 @@ const FavoritesClientPage = () => {
   const { favorites, isLoading } = useFavorites()
   const [mounted, setMounted] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
-  const [messages, setMessages] = useState<any>(null)
+  const [messages, setMessages] = useState<Record<string, unknown> | null>(null)
   const [storeLoading, setStoreLoading] = useState(true)
 
   // Cargar datos necesarios para el layout
@@ -240,7 +240,7 @@ const FavoritesClientPage = () => {
   }
 
   return (
-    <NextIntlClientProvider locale="es" messages={messages}>
+    <NextIntlClientProvider locale="es" messages={messages as Record<string, string>}>
       <CartProvider>
         <ThemeLayout tienda={convertStoreToTienda(store)} categorias={categories || []}>
           <FavoritesContent />

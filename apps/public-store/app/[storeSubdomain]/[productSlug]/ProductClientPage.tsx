@@ -59,7 +59,7 @@ const ProductLoading = () => (
 )
 
 export default function ProductClientPage({ tienda, product, locale }: ProductClientPageProps) {
-  const [messages, setMessages] = useState<any>(null)
+  const [messages, setMessages] = useState<Record<string, unknown> | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function ProductClientPage({ tienda, product, locale }: ProductCl
   }, [locale, tienda.id])
 
   // Importar dinámicamente los componentes del tema con SSR habilitado
-  const ThemeLayout = dynamic<any>(
+  const ThemeLayout = dynamic(
     () => import(`../../../themes/${tienda.theme}/Layout`).then(mod => mod.default).catch(() => {
       console.error(`Theme Layout ${tienda.theme} not found, using default layout`)
       return DefaultLayout
@@ -99,7 +99,7 @@ export default function ProductClientPage({ tienda, product, locale }: ProductCl
     }
   )
 
-  const ThemeProduct = dynamic<ThemeProductProps>(
+  const ThemeProduct = dynamic(
     () => import(`../../../themes/${tienda.theme}/Product`).then(mod => mod.default).catch(() => {
       console.error(`Theme Product ${tienda.theme} not found, using default product component`)
       return DefaultProduct
@@ -124,9 +124,11 @@ export default function ProductClientPage({ tienda, product, locale }: ProductCl
 
   return (
     <StoreProvider initialStore={tienda}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={messages as Record<string, string>}>
         <CartProvider>
+          {/* @ts-expect-error: Dynamic theme component typing issue */}
           <ThemeLayout tienda={tienda} categorias={categories}>
+            {/* @ts-expect-error: Dynamic theme component typing issue */}
             <ThemeProduct tienda={tienda} product={product} categorias={categories} />
           </ThemeLayout>
         </CartProvider>
