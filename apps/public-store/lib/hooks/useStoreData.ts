@@ -2,12 +2,12 @@ import { useEffect, useState, useCallback } from 'react'
 import { Tienda } from '../types'
 import { getStoreCategories, Category } from '../categories'
 import { getFeaturedProducts, PublicProduct } from '../products'
-import { robustLoad, LOADING_CONFIG } from '../loading-config'
+import { robustLoad } from '../loading-config'
 
 interface StoreDataState {
   categories: Category[]
   products: PublicProduct[]
-  messages: any
+  messages: Record<string, unknown> | null
   isLoading: boolean
   error: string | null
 }

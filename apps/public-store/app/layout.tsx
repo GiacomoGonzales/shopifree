@@ -116,7 +116,7 @@ export default async function RootLayout({
               
               <p className="text-gray-600 mb-2">
                 {subdomain ? (
-                  <>La tienda <span className="font-semibold">"{subdomain}"</span> no existe o no está disponible.</>
+                  <>La tienda <span className="font-semibold">&ldquo;{subdomain}&rdquo;</span> no existe o no está disponible.</>
                 ) : (
                   'La tienda solicitada no está disponible.'
                 )}

@@ -2,32 +2,31 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { 
-  User, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  AuthError
 } from 'firebase/auth'
 import { 
   doc, 
   setDoc, 
   getDoc, 
-  serverTimestamp,
-  updateDoc,
-  deleteField,
+  updateDoc, 
+  serverTimestamp, 
   collection,
-  addDoc,
-  deleteDoc,
   query,
   where,
-  getDocs
+  getDocs,
+  deleteDoc,
+  Timestamp
 } from 'firebase/firestore'
 import { getFirebaseAuth, getFirebaseDb } from './firebase'
 
-// Tipos para el contexto
 interface StoreCustomerData {
   uid: string
   email: string
@@ -49,6 +48,23 @@ interface StoreCustomerData {
   }
 }
 
+interface ProductData {
+  id: string
+  name: string
+  price: number
+  image?: string
+  [key: string]: unknown
+}
+
+interface FavoriteItem {
+  id: string
+  storeId: string
+  productId: string
+  productData: ProductData
+  storeName: string
+  addedAt: Timestamp | Date
+}
+
 interface StoreAuthContextType {
   user: User | null
   storeCustomerData: StoreCustomerData | null
@@ -61,9 +77,9 @@ interface StoreAuthContextType {
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updateProfile: (data: Partial<StoreCustomerData>) => Promise<void>
-  addToFavorites: (productId: string, productData: any) => Promise<void>
+  addToFavorites: (productId: string, productData: ProductData) => Promise<void>
   removeFromFavorites: (productId: string) => Promise<void>
-  getFavorites: () => Promise<any[]>
+  getFavorites: () => Promise<FavoriteItem[]>
   isFavorite: (productId: string) => Promise<boolean>
   clearError: () => void
 }
@@ -90,7 +106,7 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
     const userDoc = await getDoc(userRef)
 
     if (!userDoc.exists()) {
-      const userData: any = {
+      const userData: Record<string, unknown> = {
         uid: user.uid,
         email: user.email || '',
         role: 'customer',
@@ -128,7 +144,7 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       const globalUserDoc = await getDoc(globalUserRef)
       const globalUserData = globalUserDoc.data()
 
-      const customerData: any = {
+      const customerData: Record<string, unknown> = {
         uid: userId,
         email: globalUserData?.email || user?.email || '',
         phone: userData?.phone || '',
@@ -225,10 +241,11 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       
       setUser(firebaseUser)
       setStoreCustomerData(customerData as StoreCustomerData)
-    } catch (error: any) {
-      console.error('Error en login:', error)
-      setError(getErrorMessage(error))
-      throw error
+    } catch (error) {
+      const authError = error as AuthError
+      console.error('Error en login:', authError)
+      setError(getErrorMessage(authError))
+      throw authError
     } finally {
       setLoading(false)
     }
@@ -256,10 +273,11 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       
       setUser(firebaseUser)
       setStoreCustomerData(customerData as StoreCustomerData)
-    } catch (error: any) {
-      console.error('Error en registro:', error)
-      setError(getErrorMessage(error))
-      throw error
+    } catch (error) {
+      const authError = error as AuthError
+      console.error('Error en registro:', authError)
+      setError(getErrorMessage(authError))
+      throw authError
     } finally {
       setLoading(false)
     }
@@ -273,9 +291,10 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       await signOut(auth)
       setUser(null)
       setStoreCustomerData(null)
-    } catch (error: any) {
-      console.error('Error en logout:', error)
-      setError(getErrorMessage(error))
+    } catch (error) {
+      const authError = error as AuthError
+      console.error('Error en logout:', authError)
+      setError(getErrorMessage(authError))
     }
   }
 
@@ -286,10 +305,11 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       if (!auth) throw new Error('Firebase no está configurado')
 
       await sendPasswordResetEmail(auth, email)
-    } catch (error: any) {
-      console.error('Error en reset password:', error)
-      setError(getErrorMessage(error))
-      throw error
+    } catch (error) {
+      const authError = error as AuthError
+      console.error('Error en reset password:', authError)
+      setError(getErrorMessage(authError))
+      throw authError
     }
   }
 
@@ -302,7 +322,7 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       if (!db) throw new Error('Firebase no está configurado')
 
       // Preparar datos para actualizar
-      const updateData: any = {
+      const updateData = {
         ...data,
         updatedAt: serverTimestamp()
       }
@@ -322,7 +342,7 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
 
       // También actualizar en la colección global de users para mantener sincronización
       const globalUserRef = doc(db, 'users', user.uid)
-      const globalUpdateData: any = {
+      const globalUpdateData: { [key: string]: unknown } = {
         updatedAt: serverTimestamp()
       }
       
@@ -335,17 +355,18 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
 
       // Actualizar estado local
       setStoreCustomerData(prev => prev ? { ...prev, ...data } : null)
-    } catch (error: any) {
-      console.error('Error actualizando perfil:', error)
-      setError(getErrorMessage(error))
-      throw error
+    } catch (error) {
+      const authError = error as AuthError
+      console.error('Error actualizando perfil:', authError)
+      setError(getErrorMessage(authError))
+      throw authError
     }
   }
 
   const clearError = () => setError(null)
 
   // Funciones para manejar favoritos (estructura mejorada)
-  const addToFavorites = async (productId: string, productData: any) => {
+  const addToFavorites = async (productId: string, productData: ProductData) => {
     try {
       if (!user) throw new Error('Usuario no autenticado')
 
@@ -365,10 +386,11 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
         storeName: storeCustomerData?.email || 'Tienda', // Temporal, se puede mejorar
         addedAt: serverTimestamp()
       })
-    } catch (error: any) {
-      console.error('Error agregando a favoritos:', error)
-      setError(getErrorMessage(error))
-      throw error
+    } catch (error) {
+      const authError = error as Error
+      console.error('Error agregando a favoritos:', authError)
+      setError(getErrorMessage(authError))
+      throw authError
     }
   }
 
@@ -383,14 +405,15 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       const favoriteId = `${storeId}_${productId}`
       const favoriteRef = doc(db, 'users', user.uid, 'favorites', favoriteId)
       await deleteDoc(favoriteRef)
-    } catch (error: any) {
-      console.error('Error eliminando de favoritos:', error)
-      setError(getErrorMessage(error))
-      throw error
+    } catch (error) {
+      const authError = error as Error
+      console.error('Error eliminando de favoritos:', authError)
+      setError(getErrorMessage(authError))
+      throw authError
     }
   }
 
-  const getFavorites = async (filterByStore: boolean = true): Promise<any[]> => {
+  const getFavorites = async (filterByStore: boolean = true): Promise<FavoriteItem[]> => {
     try {
       if (!user) return []
 
@@ -412,8 +435,8 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }))
-    } catch (error: any) {
+      })) as FavoriteItem[]
+    } catch (error) {
       console.error('Error obteniendo favoritos:', error)
       return []
     }
@@ -431,30 +454,31 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       const favoriteDoc = await getDoc(favoriteRef)
       
       return favoriteDoc.exists()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error verificando favorito:', error)
       return false
     }
   }
 
   // Función para obtener mensajes de error amigables
-  const getErrorMessage = (error: any): string => {
-    if (error.code === 'auth/email-already-in-use') {
+  const getErrorMessage = (error: AuthError | Error): string => {
+    const authError = error as AuthError
+    if (authError.code === 'auth/email-already-in-use') {
       return 'Este correo ya está registrado. Inicia sesión o recupera tu contraseña.'
     }
-    if (error.code === 'auth/weak-password') {
+    if (authError.code === 'auth/weak-password') {
       return 'La contraseña debe tener al menos 6 caracteres.'
     }
-    if (error.code === 'auth/invalid-email') {
+    if (authError.code === 'auth/invalid-email') {
       return 'El formato del correo electrónico no es válido.'
     }
-    if (error.code === 'auth/user-not-found') {
+    if (authError.code === 'auth/user-not-found') {
       return 'No existe una cuenta con este correo electrónico.'
     }
-    if (error.code === 'auth/wrong-password') {
+    if (authError.code === 'auth/wrong-password') {
       return 'La contraseña es incorrecta.'
     }
-    if (error.code === 'auth/too-many-requests') {
+    if (authError.code === 'auth/too-many-requests') {
       return 'Demasiados intentos fallidos. Intenta más tarde.'
     }
     return error.message || 'Ha ocurrido un error inesperado.'

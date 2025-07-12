@@ -184,7 +184,7 @@ const getPrimaryCategory = (product: PublicProduct, categories: Category[]): Cat
 }
 
 // Función para establecer contexto de navegación (llamar antes de navegar)
-export const setNavigationContext = (context: any) => {
+export const setNavigationContext = (context: { type: string; categorySlug?: string; query?: string }) => {
   if (typeof window !== 'undefined') {
     sessionStorage.setItem('navigationContext', JSON.stringify(context))
   }

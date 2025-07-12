@@ -52,8 +52,8 @@ export interface StoreDataServer {
       cost?: number
     }
   }
-  createdAt?: Timestamp | Date | any
-  updatedAt?: Timestamp | Date | any
+  createdAt?: Timestamp | Date | string
+  updatedAt?: Timestamp | Date | string
 }
 
 // Tipo para datos de cliente (completamente serializable)
@@ -123,12 +123,12 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
 
   try {
     // Función helper para convertir timestamps
-    const convertTimestamp = (timestamp: any): string | undefined => {
+    const convertTimestamp = (timestamp: unknown): string | undefined => {
       if (!timestamp) return undefined
       
       // Firestore Timestamp
-      if (timestamp && typeof timestamp.toDate === 'function') {
-        return timestamp.toDate().toISOString()
+      if (timestamp && typeof (timestamp as Timestamp).toDate === 'function') {
+        return (timestamp as Timestamp).toDate().toISOString()
       }
       
       // JavaScript Date
@@ -137,8 +137,8 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
       }
       
       // Firestore seconds format
-      if (timestamp && typeof timestamp.seconds === 'number') {
-        return new Date(timestamp.seconds * 1000).toISOString()
+      if (timestamp && typeof (timestamp as { seconds: number }).seconds === 'number') {
+        return new Date((timestamp as { seconds: number }).seconds * 1000).toISOString()
       }
       
       // String (ya ISO)

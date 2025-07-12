@@ -4,7 +4,6 @@ import {
   query, 
   collection, 
   getDocs,
-  orderBy,
   where
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
@@ -39,36 +38,38 @@ export interface PublicProduct {
 }
 
 // Transform database product to public product format
-const transformToPublicProduct = (dbProduct: any): PublicProduct => {
+const transformToPublicProduct = (dbProduct: Record<string, unknown>): PublicProduct => {
   // Get the first media file as the main image, fallback to placeholder
-  const mainImage = dbProduct.mediaFiles && dbProduct.mediaFiles.length > 0 
-    ? dbProduct.mediaFiles[0].url 
-    : '/api/placeholder/300/400'
+  const mediaFiles = dbProduct.mediaFiles as Array<{ id: string; url: string; type?: string; cloudinaryPublicId?: string }> || []
+  const mainImage = mediaFiles.length > 0 ? mediaFiles[0].url : '/api/placeholder/300/400'
 
   // Transform mediaFiles to include type detection
-  const transformedMediaFiles = dbProduct.mediaFiles ? dbProduct.mediaFiles.map((file: any) => ({
+  const transformedMediaFiles = mediaFiles.map((file) => ({
     id: file.id,
     url: file.url,
-    type: file.type || (file.url.includes('.mp4') || file.url.includes('.webm') || file.url.includes('.mov') ? 'video' : 'image'),
+    type: (file.type || (file.url.includes('.mp4') || file.url.includes('.webm') || file.url.includes('.mov') ? 'video' : 'image')) as 'image' | 'video',
     cloudinaryPublicId: file.cloudinaryPublicId || null
-  })) : []
+  }))
+
+  const productName = dbProduct.name as string || 'Producto sin nombre'
+  const productId = dbProduct.id as string
 
   const transformedProduct = {
-    id: dbProduct.id,
-    name: dbProduct.name || 'Producto sin nombre',
-    description: dbProduct.description || 'Sin descripción',
-    price: dbProduct.price || 0,
-    comparePrice: dbProduct.comparePrice,
+    id: productId,
+    name: productName,
+    description: dbProduct.description as string || 'Sin descripción',
+    price: dbProduct.price as number || 0,
+    comparePrice: dbProduct.comparePrice as number | null,
     image: mainImage,
     currency: '$', // Default currency, could be from store settings
     rating: 4.5, // Mock rating for now
     reviews: Math.floor(Math.random() * 200) + 50, // Mock reviews
-    status: dbProduct.status || 'active', // Default to active if no status
-    slug: dbProduct.urlSlug || dbProduct.slug || `${dbProduct.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${dbProduct.id?.slice(-6)}` || `producto-${dbProduct.id?.slice(-6)}`,
-    selectedParentCategoryIds: dbProduct.selectedParentCategoryIds || [],
+    status: (dbProduct.status as 'draft' | 'active' | 'archived') || 'active', // Default to active if no status
+    slug: (dbProduct.urlSlug as string) || (dbProduct.slug as string) || `${productName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${productId.slice(-6)}` || `producto-${productId.slice(-6)}`,
+    selectedParentCategoryIds: dbProduct.selectedParentCategoryIds as string[] || [],
     mediaFiles: transformedMediaFiles,
-    hasVariants: dbProduct.hasVariants || false,
-    variants: dbProduct.variants || []
+    hasVariants: dbProduct.hasVariants as boolean || false,
+    variants: dbProduct.variants as Array<{ id: string; name: string; price: number; stock: number }> || []
   }
   
   console.log('✨ Product transformed:', transformedProduct.name, 'Price:', transformedProduct.price, 'Media files:', transformedMediaFiles.length)
