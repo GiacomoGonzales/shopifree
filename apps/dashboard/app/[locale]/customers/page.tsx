@@ -480,7 +480,7 @@ export default function CustomersPage() {
                         : t('noCustomersEmptyMessage')
                       }
                     </p>
-                    {!searchQuery && selectedTags.length === 0 && minSpent === undefined && maxSpent === undefined && minOrders === undefined && maxOrders === undefined && (
+                    {!searchQuery && (
                       <div className="mt-6">
                         <button
                           type="button"
