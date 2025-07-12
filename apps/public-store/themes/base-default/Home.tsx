@@ -5,11 +5,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
-import { PublicProduct } from '../../lib/products'
+import { PublicProduct, extractDynamicFilters, generatePriceRangeOptions, applyDynamicFilters, DynamicFilter, PriceRangeOption } from '../../lib/products'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
+import DynamicFilters from '../../components/DynamicFilters'
 
 interface HomeProps {
   tienda: Tienda
@@ -26,6 +27,11 @@ const Icons = {
   ArrowRight: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+    </svg>
+  ),
+  Sort: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
     </svg>
   ),
   ShieldCheck: () => (
@@ -52,6 +58,14 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const [showAllProducts, setShowAllProducts] = useState(false)
   const [productsToShow, setProductsToShow] = useState(8) // Initial number of products to show
   const { addItem, openCart } = useCart()
+  
+  // Estados para filtros dinámicos
+  const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter[]>([])
+  const [priceRangeOptions, setPriceRangeOptions] = useState<PriceRangeOption[]>([])
+  
+  // Estados para ordenamiento
+  const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'newest'>('newest')
+  const [showSort, setShowSort] = useState(false)
   
   // Usar solo productos reales
   const allProducts = productos || []
@@ -97,8 +111,8 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     setProductsToShow(8)
   }
   
-  // Filtrar productos según la categoría activa
-  const filteredProducts = useMemo(() => {
+  // Filtrar productos por categoría
+  const categoryFilteredProducts = useMemo(() => {
     if (activeCategory === 'todos') {
       if (selectedParentCategory) {
         // Mostrar productos de todas las subcategorías del padre seleccionado
@@ -127,6 +141,39 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
       return false
     })
   }, [activeCategory, allProducts, categorias, selectedParentCategory, subcategoriesByParent])
+
+  // Aplicar filtros dinámicos y ordenamiento a los productos filtrados por categoría
+  const filteredProducts = useMemo(() => {
+    const filtered = applyDynamicFilters(categoryFilteredProducts, dynamicFilters, priceRangeOptions)
+    
+    // Aplicar ordenamiento
+    switch (sortBy) {
+      case 'name':
+        filtered.sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price)
+        break
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price)
+        break
+      case 'newest':
+      default:
+        // Mantener orden original (más nuevos primero)
+        break
+    }
+    
+    return filtered
+  }, [categoryFilteredProducts, dynamicFilters, priceRangeOptions, sortBy])
+
+  // Actualizar filtros dinámicos cuando cambian los productos filtrados por categoría
+  useEffect(() => {
+    const newFilters = extractDynamicFilters(categoryFilteredProducts)
+    setDynamicFilters(newFilters)
+    
+    const newPriceRangeOptions = generatePriceRangeOptions(categoryFilteredProducts)
+    setPriceRangeOptions(newPriceRangeOptions)
+  }, [categoryFilteredProducts])
 
   // Productos a mostrar con paginación
   const productosAMostrar = useMemo(() => {
@@ -157,6 +204,35 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     setShowAllProducts(true)
   }
 
+  // Funciones para manejar filtros dinámicos
+  const handleFiltersChange = (newFilters: DynamicFilter[]) => {
+    setDynamicFilters(newFilters)
+    setShowAllProducts(false)
+    setProductsToShow(8)
+  }
+
+  const handlePriceRangeChange = (newOptions: PriceRangeOption[]) => {
+    setPriceRangeOptions(newOptions)
+    setShowAllProducts(false)
+    setProductsToShow(8)
+  }
+
+  const handleClearFilters = () => {
+    const clearedFilters = dynamicFilters.map(filter => ({
+      ...filter,
+      selectedOptions: []
+    }))
+    setDynamicFilters(clearedFilters)
+    
+    const clearedPriceRanges = priceRangeOptions.map(range => ({
+      ...range,
+      selected: false
+    }))
+    setPriceRangeOptions(clearedPriceRanges)
+    setShowAllProducts(false)
+    setProductsToShow(8)
+  }
+
   // Remover el scroll automático ya que se maneja en ClientPage
   // useEffect(() => {
   //   setTimeout(() => {
@@ -164,17 +240,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   //   }, 100)
   // }, [tienda.id])
   
-  // Debug logs para entender qué está pasando
-  console.log('🛍️ Home component rendered with:', {
-    tiendaId: tienda?.id,
-    productosReales: productos?.length || 0,
-    filteredProducts: filteredProducts.length,
-    productosAMostrar: productosAMostrar.length,
-    categoriasLength: categorias?.length,
-    activeCategory: activeCategory,
-    showAllProducts: showAllProducts,
-    productsToShow: productsToShow
-  })
+  // Debug logs removidos para evitar logs infinitos en producción
 
   const features = [
     {
@@ -353,16 +419,69 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
 
       {/* Products Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-12">
-        {/* Contador de productos */}
-        <div className="mb-8 text-center">
-          <p className="text-neutral-600 font-light">
-            {productosAMostrar.length === 0 
-              ? `No hay productos en la categoría "${categoryNames[activeCategory] || activeCategory}"`
-              : showAllProducts || filteredProducts.length <= 8
-                ? `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
-                : `Mostrando ${productosAMostrar.length} de ${filteredProducts.length} productos ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
-            }
-          </p>
+        {/* Filtros y contador de productos */}
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="text-center sm:text-left">
+            <p className="text-neutral-600 font-light">
+              {productosAMostrar.length === 0 
+                ? `No hay productos en la categoría "${categoryNames[activeCategory] || activeCategory}"`
+                : showAllProducts || filteredProducts.length <= 8
+                  ? `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+                  : `Mostrando ${productosAMostrar.length} de ${filteredProducts.length} productos ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+              }
+            </p>
+          </div>
+          
+          {/* Filtros dinámicos y ordenamiento */}
+          <div className="flex items-center gap-4">
+            <DynamicFilters
+              filters={dynamicFilters}
+              priceRangeOptions={priceRangeOptions}
+              onFiltersChange={handleFiltersChange}
+              onPriceRangeChange={handlePriceRangeChange}
+              onClearFilters={handleClearFilters}
+            />
+            
+            {/* Ordenamiento */}
+            <div className="relative">
+              <button
+                onClick={() => setShowSort(!showSort)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
+              >
+                <Icons.Sort />
+                <span className="font-light">Ordenar</span>
+                <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {showSort && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
+                  <div className="p-3">
+                    {[
+                      { value: 'newest', label: 'Más recientes' },
+                      { value: 'name', label: 'Nombre A-Z' },
+                      { value: 'price-low', label: 'Precio: menor a mayor' },
+                      { value: 'price-high', label: 'Precio: mayor a menor' }
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
+                          setShowSort(false)
+                        }}
+                        className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded text-sm font-light ${
+                          sortBy === option.value ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-600'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {productosAMostrar.length === 0 ? (

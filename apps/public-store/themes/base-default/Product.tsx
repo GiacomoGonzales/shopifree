@@ -69,14 +69,7 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
       }))
     : [{ id: 'main', url: product.image, type: 'image' as const }]
 
-  // Debug log para verificar los tipos de archivos
-  useEffect(() => {
-    console.log('🎬 Product media files:', productMedia.map(media => ({
-      id: media.id,
-      type: media.type,
-      url: media.url.substring(0, 50) + '...'
-    })))
-  }, [productMedia])
+  // Debug log removido para evitar logs infinitos en producción
 
   const currentPrice = selectedVariant?.price || product.price
   const hasDiscount = product.comparePrice && product.comparePrice > currentPrice

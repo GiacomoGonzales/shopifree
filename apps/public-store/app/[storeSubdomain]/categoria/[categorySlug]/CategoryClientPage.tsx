@@ -13,9 +13,10 @@ import { useBreadcrumbs, setNavigationContext } from '../../../../lib/hooks/useB
 import { CartProvider, useCart } from '../../../../lib/cart-context'
 import { ThemeLayoutComponent, ThemeLayoutProps } from '../../../../themes/theme-component'
 import { getStoreCategories, Category } from '../../../../lib/categories'
-import { getStoreProducts, PublicProduct } from '../../../../lib/products'
+import { getStoreProducts, PublicProduct, extractDynamicFilters, generatePriceRangeOptions, applyDynamicFilters, DynamicFilter, PriceRangeOption } from '../../../../lib/products'
 import { Tienda } from '../../../../lib/types'
 import { StoreDataClient } from '../../../../lib/store'
+import DynamicFilters from '../../../../components/DynamicFilters'
 
 // Layout por defecto en caso de error
 const DefaultLayout: ThemeLayoutComponent = ({ children }) => (
@@ -73,10 +74,7 @@ const Icons = {
 }
 
 // Tipos para filtros
-interface PriceFilter {
-  min: number
-  max: number
-}
+
 
 interface CategoryClientPageProps {
   categorySlug: string
@@ -92,9 +90,11 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   
   // Estados para filtros
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'newest'>('newest')
-  const [priceFilter, setPriceFilter] = useState<PriceFilter>({ min: 0, max: 1000 })
-  const [showFilters, setShowFilters] = useState(false)
   const [showSort, setShowSort] = useState(false)
+  
+  // Estados para filtros dinámicos
+  const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter[]>([])
+  const [priceRangeOptions, setPriceRangeOptions] = useState<PriceRangeOption[]>([])
   
   // Paginación
   const [currentPage, setCurrentPage] = useState(1)
@@ -135,8 +135,31 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     return categories.find(cat => cat.slug === categorySlug)
   }, [categories, categorySlug])
 
-  // Generar breadcrumbs inteligentes
-  const breadcrumbs = useBreadcrumbs({ categories, currentCategory })
+  // Generar breadcrumbs simples para evitar bucles infinitos
+  const breadcrumbs = useMemo(() => {
+    const baseBreadcrumbs: Array<{label: string, href: string, isActive?: boolean}> = [{ label: 'Inicio', href: '/' }]
+    
+    if (currentCategory) {
+      // Verificar si es subcategoría
+      const parentCategory = categories.find(cat => cat.id === currentCategory.parentCategoryId)
+      
+      if (parentCategory) {
+        // Es subcategoría, agregar padre primero
+        baseBreadcrumbs.push({
+          label: parentCategory.name,
+          href: `/categoria/${parentCategory.slug}`
+        })
+      }
+      
+      baseBreadcrumbs.push({
+        label: currentCategory.name,
+        href: `/categoria/${currentCategory.slug}`,
+        isActive: true
+      })
+    }
+    
+    return baseBreadcrumbs
+  }, [currentCategory?.id, currentCategory?.name, currentCategory?.slug, currentCategory?.parentCategoryId, categories.length])
 
   // Filtrar productos por categoría
   const categoryProducts = useMemo(() => {
@@ -147,11 +170,10 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     )
   }, [products, currentCategory])
 
-  // Aplicar filtros y ordenamiento
+  // Aplicar filtros dinámicos y ordenamiento
   const filteredAndSortedProducts = useMemo(() => {
-    const filtered = categoryProducts.filter(product => 
-      product.price >= priceFilter.min && product.price <= priceFilter.max
-    )
+    // Aplicar filtros dinámicos
+    const filtered = applyDynamicFilters(categoryProducts, dynamicFilters, priceRangeOptions)
 
     // Ordenar productos
     switch (sortBy) {
@@ -171,7 +193,16 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     }
 
     return filtered
-  }, [categoryProducts, priceFilter, sortBy])
+  }, [categoryProducts, dynamicFilters, priceRangeOptions, sortBy])
+
+  // Actualizar filtros dinámicos cuando cambian los productos de la categoría
+  useEffect(() => {
+    const newFilters = extractDynamicFilters(categoryProducts)
+    setDynamicFilters(newFilters)
+    
+    const newPriceRangeOptions = generatePriceRangeOptions(categoryProducts)
+    setPriceRangeOptions(newPriceRangeOptions)
+  }, [categoryProducts])
 
   // Paginación
   const paginatedProducts = useMemo(() => {
@@ -181,6 +212,32 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   }, [filteredAndSortedProducts, currentPage, productsPerPage])
 
   const totalPages = Math.ceil(filteredAndSortedProducts.length / productsPerPage)
+
+  // Funciones para manejar filtros dinámicos
+  const handleFiltersChange = (newFilters: DynamicFilter[]) => {
+    setDynamicFilters(newFilters)
+    setCurrentPage(1) // Reset pagination
+  }
+
+  const handlePriceRangeChange = (newOptions: PriceRangeOption[]) => {
+    setPriceRangeOptions(newOptions)
+    setCurrentPage(1) // Reset pagination
+  }
+
+  const handleClearFilters = () => {
+    const clearedFilters = dynamicFilters.map(filter => ({
+      ...filter,
+      selectedOptions: []
+    }))
+    setDynamicFilters(clearedFilters)
+    
+    const clearedPriceRanges = priceRangeOptions.map(range => ({
+      ...range,
+      selected: false
+    }))
+    setPriceRangeOptions(clearedPriceRanges)
+    setCurrentPage(1) // Reset pagination
+  }
 
   // Importar layout del tema
   const ThemeLayout = useMemo(() => {
@@ -242,66 +299,31 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
           
           {/* Controles de filtro y ordenamiento */}
           <div className="flex items-center gap-4 mt-4 md:mt-0">
-            {/* Filtros */}
-            <div className="relative">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-md hover:bg-neutral-50 transition-colors"
-              >
-                <Icons.Filter />
-                <span>Filtros</span>
-                <Icons.ChevronDown />
-              </button>
-              
-              {showFilters && (
-                <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
-                  <div className="p-4">
-                    <h3 className="font-medium text-neutral-900 mb-4">Filtrar por precio</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm text-neutral-600 mb-1">Precio mínimo</label>
-                        <input
-                          type="number"
-                          value={priceFilter.min}
-                          onChange={(e) => setPriceFilter(prev => ({ ...prev, min: Number(e.target.value) }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-neutral-600 mb-1">Precio máximo</label>
-                        <input
-                          type="number"
-                          value={priceFilter.max}
-                          onChange={(e) => setPriceFilter(prev => ({ ...prev, max: Number(e.target.value) }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                        />
-                      </div>
-                      <button
-                        onClick={() => setPriceFilter({ min: 0, max: 1000 })}
-                        className="w-full px-3 py-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-                      >
-                        Limpiar filtros
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Filtros dinámicos */}
+                         <DynamicFilters
+                filters={dynamicFilters}
+                priceRangeOptions={priceRangeOptions}
+                onFiltersChange={handleFiltersChange}
+                onPriceRangeChange={handlePriceRangeChange}
+                onClearFilters={handleClearFilters}
+              />
 
             {/* Ordenamiento */}
             <div className="relative">
               <button
                 onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-md hover:bg-neutral-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
               >
                 <Icons.Sort />
-                <span>Ordenar</span>
-                <Icons.ChevronDown />
+                <span className="font-light">Ordenar</span>
+                <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
               
               {showSort && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
-                  <div className="py-2">
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
+                  <div className="p-3">
                     {[
                       { value: 'newest', label: 'Más recientes' },
                       { value: 'name', label: 'Nombre A-Z' },
@@ -314,7 +336,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
                           setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
                           setShowSort(false)
                         }}
-                        className={`w-full text-left px-4 py-2 hover:bg-neutral-50 transition-colors ${
+                        className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded text-sm font-light ${
                           sortBy === option.value ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-600'
                         }`}
                       >
@@ -341,7 +363,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
               No se encontraron productos que coincidan con tus filtros.
             </p>
             <button
-              onClick={() => setPriceFilter({ min: 0, max: 1000 })}
+              onClick={handleClearFilters}
               className="bg-neutral-900 text-white px-6 py-3 rounded-md font-medium hover:bg-neutral-800 transition-colors"
             >
               Limpiar filtros
