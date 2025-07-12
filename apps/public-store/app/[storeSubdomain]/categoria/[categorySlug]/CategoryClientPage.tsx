@@ -9,7 +9,7 @@ import { getCurrencySymbol } from '../../../../lib/store'
 import HeartIcon from '../../../../components/HeartIcon'
 import VideoPlayer from '../../../../components/VideoPlayer'
 import Breadcrumbs from '../../../../components/Breadcrumbs'
-import { useBreadcrumbs, setNavigationContext } from '../../../../lib/hooks/useBreadcrumbs'
+import { setNavigationContext } from '../../../../lib/hooks/useBreadcrumbs'
 import { CartProvider, useCart } from '../../../../lib/cart-context'
 import { ThemeLayoutComponent, ThemeLayoutProps } from '../../../../themes/theme-component'
 import { getStoreCategories, Category } from '../../../../lib/categories'
@@ -159,7 +159,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     }
     
     return baseBreadcrumbs
-  }, [currentCategory?.id, currentCategory?.name, currentCategory?.slug, currentCategory?.parentCategoryId, categories.length])
+  }, [currentCategory, categories])
 
   // Filtrar productos por categoría
   const categoryProducts = useMemo(() => {
