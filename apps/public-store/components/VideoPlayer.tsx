@@ -19,10 +19,8 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({
   src,
-  alt,
   className = '',
   showControls = false,
-  autoPlay = true,
   loop = true,
   muted = true,
   playsInline = true,
@@ -31,7 +29,7 @@ export default function VideoPlayer({
   onPlay,
   onPause
 }: VideoPlayerProps) {
-  const { videoRef, isInView, isPlaying } = useVideoAutoPlay(0.3)
+  const { videoRef } = useVideoAutoPlay(0.3)
 
   const handlePlay = () => {
     onPlay?.()

@@ -32,7 +32,7 @@ export default function AuthModal({ onClose, storeName }: AuthModalProps) {
     try {
       await login(formData.email, formData.password)
       onClose()
-    } catch (error) {
+    } catch {
       // El error se maneja en el contexto
     }
   }
@@ -51,7 +51,7 @@ export default function AuthModal({ onClose, storeName }: AuthModalProps) {
         phone: formData.phone
       })
       onClose()
-    } catch (error) {
+    } catch {
       // El error se maneja en el contexto
     }
   }
@@ -61,7 +61,7 @@ export default function AuthModal({ onClose, storeName }: AuthModalProps) {
     try {
       await resetPassword(formData.email)
       setResetEmailSent(true)
-    } catch (error) {
+    } catch {
       // El error se maneja en el contexto
     }
   }

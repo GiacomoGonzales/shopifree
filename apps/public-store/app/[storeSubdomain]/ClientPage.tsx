@@ -10,8 +10,6 @@ import { CartProvider } from '../../lib/cart-context'
 import { StoreAuthProvider } from '../../lib/store-auth-context'
 import { LOADING_CONFIG } from '../../lib/loading-config'
 import { useStoreData } from '../../lib/hooks/useStoreData'
-import { Category } from '../../lib/categories'
-import { PublicProduct } from '../../lib/products'
 
 interface ClientPageProps {
   tienda: Tienda
@@ -22,6 +20,7 @@ interface ClientPageProps {
 const DefaultLayout: ThemeLayoutComponent = ({ children }) => (
   <main className="min-h-screen bg-gray-50">{children}</main>
 )
+DefaultLayout.displayName = 'DefaultLayout'
 
 // Componente de fallback para Home
 const DefaultHome = () => (
@@ -62,9 +61,11 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
     const ThemeHome = dynamic<ThemeComponentProps>(
       () => import(`../../themes/${tienda.theme}/Home`).then(mod => mod.default).catch(() => {
         console.error(`Theme Home ${tienda.theme} not found, falling back to base-default`)
-        return () => <div className="min-h-screen flex items-center justify-center">
+        const FallbackHome = () => <div className="min-h-screen flex items-center justify-center">
           <p className="text-neutral-600">Contenido no disponible</p>
         </div>
+        FallbackHome.displayName = 'FallbackHome'
+        return FallbackHome
       }),
       { 
         ssr: false,
@@ -100,7 +101,7 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
   return (
     <StoreProvider initialStore={tienda}>
       <StoreAuthProvider storeId={tienda.id}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages as Record<string, string>}>
           <CartProvider>
             <ThemeComponents.ThemeLayout tienda={tienda} categorias={categories}>
               <ThemeComponents.ThemeHome tienda={tienda} categorias={categories} productos={products} />

@@ -165,7 +165,7 @@ export default function CartPanel() {
             <>
               {/* Lista de productos */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {state.items.map((item, index) => (
+                {state.items.map((item) => (
                   <div 
                     key={item.id} 
                     className="flex items-start space-x-4 p-4 bg-neutral-50 rounded-lg"

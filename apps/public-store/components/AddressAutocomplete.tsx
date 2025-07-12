@@ -10,7 +10,23 @@ interface AddressAutocompleteProps {
 
 declare global {
   interface Window {
-    google: any
+    google: {
+      maps: {
+        places: {
+          Autocomplete: new (input: HTMLInputElement, options?: unknown) => {
+            addListener: (event: string, callback: () => void) => void
+            getPlace: () => {
+              geometry?: { location: { lat: () => number; lng: () => number } }
+              formatted_address?: string
+              name?: string
+            }
+          }
+        }
+        event?: {
+          clearInstanceListeners: (instance: unknown) => void
+        }
+      }
+    }
     initMap: () => void
   }
 }
@@ -23,8 +39,7 @@ export default function AddressAutocomplete({
   className = ""
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const autocompleteRef = useRef<any>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const autocompleteRef = useRef<{ addListener: (event: string, callback: () => void) => void; getPlace: () => { geometry?: { location: { lat: () => number; lng: () => number } }; formatted_address?: string; name?: string } } | null>(null)
   const [hasCoordinates, setHasCoordinates] = useState(false)
 
   const API_KEY = process.env.NEXT_PUBLIC_MAPS_API_KEY
@@ -67,10 +82,10 @@ export default function AddressAutocomplete({
       )
 
       // Listener para cuando se selecciona una dirección
-      autocompleteRef.current.addListener('place_changed', () => {
-        const place = autocompleteRef.current.getPlace()
+      autocompleteRef.current?.addListener('place_changed', () => {
+        const place = autocompleteRef.current?.getPlace()
         
-        if (place.geometry && place.geometry.location) {
+        if (place && place.geometry && place.geometry.location) {
           const lat = place.geometry.location.lat()
           const lng = place.geometry.location.lng()
           const address = place.formatted_address || place.name || ''
@@ -91,7 +106,7 @@ export default function AddressAutocomplete({
         window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current)
       }
     }
-  }, [API_KEY, disabled])
+  }, [API_KEY, disabled, onChange, value])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
@@ -127,10 +142,7 @@ export default function AddressAutocomplete({
       
       {/* Indicador de estado */}
       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-        {isLoading && (
-          <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin"></div>
-        )}
-        {hasCoordinates && !isLoading && (
+        {hasCoordinates && (
           <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
             <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
