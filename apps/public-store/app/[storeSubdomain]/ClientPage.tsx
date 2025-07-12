@@ -38,7 +38,7 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
   const { categories, products, messages, isLoading, error } = useStoreData({
     tienda,
     locale,
-    productsLimit: 8
+    productsLimit: 50 // Increased limit to show more products, pagination handled in Home component
   })
 
   // Scroll al top solo una vez cuando se monta el componente

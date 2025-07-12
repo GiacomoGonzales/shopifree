@@ -109,7 +109,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
         id: cat.id,
         name: cat.name, 
         slug: cat.slug,
-        href: `#${cat.slug}`,
+        href: `/categoria/${cat.slug}`,
         hasSubcategories: subcategoriesByParent[cat.id]?.length > 0
       }))
     : []
@@ -275,7 +275,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                   onMouseEnter={() => category.hasSubcategories && setHoveredCategory(category.id)}
                   onMouseLeave={() => setHoveredCategory(null)}
                 >
-                  <a
+                  <Link
                     href={category.href}
                     className="text-sm font-light text-neutral-600 hover:text-neutral-900 transition-colors duration-200 relative group flex items-center"
                   >
@@ -286,7 +286,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                       </span>
                     )}
                     <span className="absolute -bottom-1 left-0 w-0 h-px bg-neutral-900 transition-all duration-200 group-hover:w-full"></span>
-                  </a>
+                  </Link>
                   
                   {/* Dropdown de subcategorías */}
                   {category.hasSubcategories && hoveredCategory === category.id && (
@@ -294,13 +294,13 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                       <div className="bg-white border border-neutral-200 rounded-lg shadow-lg">
                         <div className="py-2">
                           {subcategoriesByParent[category.id]?.map((subcategory) => (
-                            <a
+                            <Link
                               key={subcategory.id}
-                              href={`#${subcategory.slug}`}
+                              href={`/categoria/${subcategory.slug}`}
                               className="block px-4 py-2 text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition-colors duration-200"
                             >
                               {subcategory.name}
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -691,13 +691,14 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
           
           <nav className="px-4 py-6 space-y-4">
             {categories.map((category) => (
-              <a
+              <Link
                 key={category.name}
                 href={category.href}
                 className="block py-3 text-neutral-900 font-light border-b border-neutral-100 hover:text-neutral-600 transition-colors duration-200"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 {category.name}
-              </a>
+              </Link>
             ))}
           </nav>
           
@@ -749,9 +750,9 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               <ul className="space-y-2">
                 {categories.map((category) => (
                   <li key={category.name}>
-                    <a href={category.href} className="text-neutral-600 hover:text-neutral-900 transition-colors duration-200 font-light">
+                    <Link href={category.href} className="text-neutral-600 hover:text-neutral-900 transition-colors duration-200 font-light">
                       {category.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

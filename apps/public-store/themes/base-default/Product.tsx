@@ -8,6 +8,8 @@ import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
+import Breadcrumbs from '../../components/Breadcrumbs'
+import { useBreadcrumbs } from '../../lib/hooks/useBreadcrumbs'
 
 const Icons = {
   Star: () => (
@@ -42,12 +44,15 @@ const Icons = {
   ),
 }
 
-export default function Product({ tienda, product }: ThemeProductProps) {
+export default function Product({ tienda, product, categorias = [] }: ThemeProductProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem, openCart } = useCart()
+  
+  // Generar breadcrumbs inteligentes
+  const breadcrumbs = useBreadcrumbs({ product, categories: categorias })
 
   useEffect(() => {
     // Asegurar que la página se muestre desde arriba cuando se carga
@@ -120,11 +125,7 @@ export default function Product({ tienda, product }: ThemeProductProps) {
     <div className="bg-white min-h-screen pt-20">
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <nav className="flex text-sm text-neutral-500 font-light">
-          <Link href="/" className="hover:text-neutral-900 transition-colors">Inicio</Link>
-          <span className="mx-2">/</span>
-          <span className="text-neutral-900">{product.name}</span>
-        </nav>
+        <Breadcrumbs items={breadcrumbs} />
       </div>
 
       {/* Product Section */}

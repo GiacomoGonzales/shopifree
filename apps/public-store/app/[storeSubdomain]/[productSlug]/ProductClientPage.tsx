@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { Tienda } from '../../../lib/types'
 import { PublicProduct } from '../../../lib/products'
+import { getStoreCategories, Category } from '../../../lib/categories'
 import { ThemeLayoutComponent, ThemeProductProps } from '../../../themes/theme-component'
 import { StoreProvider } from '../../../lib/store-context'
 import { CartProvider } from '../../../lib/cart-context'
@@ -59,6 +60,7 @@ const ProductLoading = () => (
 
 export default function ProductClientPage({ tienda, product, locale }: ProductClientPageProps) {
   const [messages, setMessages] = useState<any>(null)
+  const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
     // Hacer scroll al top cuando se carga la página
@@ -66,15 +68,24 @@ export default function ProductClientPage({ tienda, product, locale }: ProductCl
   }, [])
 
   useEffect(() => {
-    // Cargar las traducciones
-    import(`../../../messages/common/${locale}.json`)
-      .then(mod => setMessages(mod.default))
-      .catch(error => {
-        console.error('Error loading translations:', error)
-        // Fallback a un objeto vacío para evitar errores
+    // Cargar las traducciones y categorías
+    const loadData = async () => {
+      try {
+        const [messagesModule, categoriesData] = await Promise.all([
+          import(`../../../messages/common/${locale}.json`).catch(() => ({ default: {} })),
+          getStoreCategories(tienda.id).catch(() => [])
+        ])
+        
+        setMessages(messagesModule.default)
+        setCategories(categoriesData)
+      } catch (error) {
+        console.error('Error loading data:', error)
         setMessages({})
-      })
-  }, [locale])
+      }
+    }
+    
+    loadData()
+  }, [locale, tienda.id])
 
   // Importar dinámicamente los componentes del tema con SSR habilitado
   const ThemeLayout = dynamic<any>(
@@ -115,8 +126,8 @@ export default function ProductClientPage({ tienda, product, locale }: ProductCl
     <StoreProvider initialStore={tienda}>
       <NextIntlClientProvider locale={locale} messages={messages}>
         <CartProvider>
-          <ThemeLayout tienda={tienda} categorias={[]}>
-            <ThemeProduct tienda={tienda} product={product} />
+          <ThemeLayout tienda={tienda} categorias={categories}>
+            <ThemeProduct tienda={tienda} product={product} categorias={categories} />
           </ThemeLayout>
         </CartProvider>
       </NextIntlClientProvider>

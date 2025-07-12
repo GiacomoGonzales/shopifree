@@ -18,7 +18,7 @@ interface UseStoreDataOptions {
   productsLimit?: number
 }
 
-export const useStoreData = ({ tienda, locale, productsLimit = 8 }: UseStoreDataOptions) => {
+export const useStoreData = ({ tienda, locale, productsLimit = 50 }: UseStoreDataOptions) => {
   const [state, setState] = useState<StoreDataState>({
     categories: [],
     products: [],

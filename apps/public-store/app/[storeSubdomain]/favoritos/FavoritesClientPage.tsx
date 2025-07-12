@@ -9,6 +9,7 @@ import { useFavorites } from '../../../lib/favorites-context'
 import { getCurrencySymbol } from '../../../lib/store'
 import HeartIcon from '../../../components/HeartIcon'
 import VideoPlayer from '../../../components/VideoPlayer'
+import { setNavigationContext } from '../../../lib/hooks/useBreadcrumbs'
 import { CartProvider } from '../../../lib/cart-context'
 import { ThemeLayoutComponent, ThemeLayoutProps } from '../../../themes/theme-component'
 import { getStoreCategories, Category } from '../../../lib/categories'
@@ -152,6 +153,12 @@ const FavoritesClientPage = () => {
               <Link 
                 key={producto.id} 
                 href={`/${producto.slug}`}
+                onClick={() => {
+                  // Establecer contexto de navegación para breadcrumbs inteligentes
+                  setNavigationContext({
+                    type: 'favorites'
+                  })
+                }}
                 className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 hover-lift animate-fade-in group cursor-pointer block relative"
                 style={{ animationDelay: `${index * 100}ms` }}
               >

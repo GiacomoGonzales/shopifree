@@ -16,6 +16,7 @@ export interface ThemeLayoutProps extends ThemeComponentProps {
 export interface ThemeProductProps {
   tienda: Tienda
   product: PublicProduct
+  categorias?: Category[]
 }
 
 export type ThemeComponent = ComponentType<ThemeComponentProps>

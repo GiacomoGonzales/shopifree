@@ -49,6 +49,8 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const [activeCategory, setActiveCategory] = useState('todos')
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null)
+  const [showAllProducts, setShowAllProducts] = useState(false)
+  const [productsToShow, setProductsToShow] = useState(8) // Initial number of products to show
   const { addItem, openCart } = useCart()
   
   // Usar solo productos reales
@@ -83,16 +85,20 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const handleParentCategoryClick = (parentCategoryId: string) => {
     setSelectedParentCategory(parentCategoryId)
     setActiveCategory('todos')
+    setShowAllProducts(false)
+    setProductsToShow(8)
   }
 
   // Función para volver a categorías padre
   const handleBackToParentCategories = () => {
     setSelectedParentCategory(null)
     setActiveCategory('todos')
+    setShowAllProducts(false)
+    setProductsToShow(8)
   }
   
   // Filtrar productos según la categoría activa
-  const productosAMostrar = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     if (activeCategory === 'todos') {
       if (selectedParentCategory) {
         // Mostrar productos de todas las subcategorías del padre seleccionado
@@ -122,6 +128,35 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     })
   }, [activeCategory, allProducts, categorias, selectedParentCategory, subcategoriesByParent])
 
+  // Productos a mostrar con paginación
+  const productosAMostrar = useMemo(() => {
+    if (showAllProducts) {
+      return filteredProducts
+    }
+    return filteredProducts.slice(0, productsToShow)
+  }, [filteredProducts, showAllProducts, productsToShow])
+
+  // Reset pagination when category changes
+  useEffect(() => {
+    setShowAllProducts(false)
+    setProductsToShow(8)
+  }, [activeCategory, selectedParentCategory])
+
+  // Función para cargar más productos
+  const handleLoadMore = () => {
+    const newProductsToShow = productsToShow + 8
+    if (newProductsToShow >= filteredProducts.length) {
+      setShowAllProducts(true)
+    } else {
+      setProductsToShow(newProductsToShow)
+    }
+  }
+
+  // Función para mostrar todos los productos
+  const handleShowAllProducts = () => {
+    setShowAllProducts(true)
+  }
+
   // Remover el scroll automático ya que se maneja en ClientPage
   // useEffect(() => {
   //   setTimeout(() => {
@@ -133,9 +168,12 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   console.log('🛍️ Home component rendered with:', {
     tiendaId: tienda?.id,
     productosReales: productos?.length || 0,
+    filteredProducts: filteredProducts.length,
     productosAMostrar: productosAMostrar.length,
     categoriasLength: categorias?.length,
-    activeCategory: activeCategory
+    activeCategory: activeCategory,
+    showAllProducts: showAllProducts,
+    productsToShow: productsToShow
   })
 
   const features = [
@@ -320,7 +358,9 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
           <p className="text-neutral-600 font-light">
             {productosAMostrar.length === 0 
               ? `No hay productos en la categoría "${categoryNames[activeCategory] || activeCategory}"`
-              : `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+              : showAllProducts || filteredProducts.length <= 8
+                ? `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+                : `Mostrando ${productosAMostrar.length} de ${filteredProducts.length} productos ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
             }
           </p>
         </div>
@@ -438,11 +478,39 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
           </div>
         )}
 
-        {productosAMostrar.length > 0 && (
+        {productosAMostrar.length > 0 && filteredProducts.length > 8 && (
           <div className="text-center mt-12">
-            <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
-              Ver Todos los Productos
-            </button>
+            {!showAllProducts ? (
+              <div className="space-y-3">
+                <p className="text-sm text-neutral-500">
+                  Mostrando {productosAMostrar.length} de {filteredProducts.length} productos
+                </p>
+                <div className="flex justify-center gap-3">
+                  <button 
+                    onClick={handleLoadMore}
+                    className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale"
+                  >
+                    Ver más productos
+                  </button>
+                  <button 
+                    onClick={handleShowAllProducts}
+                    className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out hover-lift"
+                  >
+                    Ver todos ({filteredProducts.length})
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button 
+                onClick={() => {
+                  setShowAllProducts(false)
+                  setProductsToShow(8)
+                }}
+                className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale"
+              >
+                Ver menos productos
+              </button>
+            )}
           </div>
         )}
       </section>
