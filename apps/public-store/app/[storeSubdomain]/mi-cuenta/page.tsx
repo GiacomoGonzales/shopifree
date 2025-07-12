@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { getStoreBySubdomain } from '../../../lib/store'
+import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
 import { Tienda } from '../../../lib/types'
 import MiCuentaClient from './MiCuentaClient'
 
@@ -27,19 +27,24 @@ export async function generateMetadata({ params }: MiCuentaPageProps): Promise<M
 
 export default async function MiCuentaPage({ params }: MiCuentaPageProps) {
   // Obtener datos de la tienda
-  const store = await getStoreBySubdomain(params.storeSubdomain)
+  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
   
-  if (!store) {
+  if (!serverStore) {
     redirect('/not-found')
   }
 
-  // Convertir StoreDataServer a Tienda
+  // Transformar datos del servidor a formato cliente
+  const clientStore = transformStoreForClient(serverStore)
+  
+  if (!clientStore) {
+    redirect('/not-found')
+  }
+
+  // Convertir StoreDataClient a Tienda
   const tienda: Tienda = {
-    ...store,
-    theme: store.theme || 'base-default',
-    socialMedia: store.socialMedia || {}, // Inicializar campo requerido
-    createdAt: store.createdAt ? new Date(store.createdAt as string).toISOString() : undefined,
-    updatedAt: store.updatedAt ? new Date(store.updatedAt as string).toISOString() : undefined
+    ...clientStore,
+    theme: clientStore.theme || 'base-default',
+    socialMedia: clientStore.socialMedia || {}, // Inicializar campo requerido
   }
 
   return <MiCuentaClient tienda={tienda} />
