@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { brandColors } from '@shopifree/ui'
 import { StoreWithId } from '../../lib/store'
 
 interface BasicSettingsProps {
@@ -22,8 +23,8 @@ export default function BasicSettings({ store, onUpdate, saving }: BasicSettings
     address: store.address || '',
     businessType: store.businessType || '',
     phone: store.phone || '',
-    primaryColor: store.primaryColor || '#4F46E5',
-    secondaryColor: store.secondaryColor || '#06B6D4',
+    primaryColor: store.primaryColor || brandColors.primary,
+    secondaryColor: store.secondaryColor || brandColors.secondary,
     currency: store.currency || 'USD',
     socialMedia: {
       facebook: store.socialMedia?.facebook || '',

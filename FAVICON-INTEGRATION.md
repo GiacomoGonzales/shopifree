@@ -1,8 +1,11 @@
-# ✅ Favicon Integration Complete - All Apps
+# ⚠️ MIGRADO - Favicon Integration (OBSOLETO)
 
-## 🎯 **Integración realizada:**
+> **⚠️ NOTA DE MIGRACIÓN**: Este documento contiene referencias a rutas obsoletas.  
+> El sistema ha sido migrado al sistema de temas centralizado. Ver `THEME-MIGRATION.md` para detalles.
 
-El favicon `favicon.png` ubicado en `public/brand/icons/` ha sido integrado exitosamente en **todas las aplicaciones** de Shopifree.
+## 🎯 **Integración realizada (HISTÓRICA):**
+
+El favicon `favicon.png` ubicado en `public/brand/icons/` (OBSOLETO → distribuido por app) ha sido integrado exitosamente en **todas las aplicaciones** de Shopifree.
 
 ## 📱 **Aplicaciones actualizadas:**
 

@@ -1,4 +1,7 @@
-# 🎨 Guía de Setup de Logo - Shopifree
+# ⚠️ MIGRADO - Guía de Setup de Logo (OBSOLETO)
+
+> **⚠️ NOTA DE MIGRACIÓN**: Este documento contiene referencias a rutas obsoletas.  
+> El sistema ha sido migrado al sistema de temas centralizado. Ver `THEME-MIGRATION.md` para detalles.
 
 ¡Perfecto! He creado toda la estructura de carpetas para organizar el logo y assets de tu proyecto.
 

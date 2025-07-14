@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input } from '@shopifree/ui'
+import { Button, Input, brandColors } from '@shopifree/ui'
 import { checkSubdomainAvailability, validateSubdomain, createStore } from '../lib/store'
 import { createSubdomain } from '../lib/createSubdomain'
 import { getCurrentUser } from '../lib/auth'
@@ -85,8 +85,8 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
     hasPhysicalLocation: false,
     address: '',
     businessType: '',
-    primaryColor: '#3B82F6',
-    secondaryColor: '#EF4444',
+    primaryColor: brandColors.primary,
+    secondaryColor: brandColors.secondary,
     currency: 'USD',
     phone: '',
     logo: ''

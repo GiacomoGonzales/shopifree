@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { brandColors } from '@shopifree/ui'
 
 // Declaración de tipos para Google Maps API
 declare global {
@@ -99,8 +100,8 @@ export default function GeneralSettingsPage() {
     businessType: '',
     phone: '',
     emailStore: '',
-    primaryColor: '#4F46E5',
-    secondaryColor: '#06B6D4',
+    primaryColor: brandColors.primary,
+    secondaryColor: brandColors.secondary,
     currency: 'USD',
     logoUrl: '',
     storefrontImageUrl: '',
@@ -154,8 +155,8 @@ export default function GeneralSettingsPage() {
             businessType: userStore.businessType || '',
             phone: userStore.phone || '',
             emailStore: userStore.emailStore || '',
-            primaryColor: userStore.primaryColor || '#4F46E5',
-            secondaryColor: userStore.secondaryColor || '#06B6D4',
+            primaryColor: userStore.primaryColor || (brandColors.primary as string),
+            secondaryColor: userStore.secondaryColor || (brandColors.secondary as string),
             currency: userStore.currency || 'USD',
             logoUrl: userStore.logoUrl || userStore.logo || '', // Fallback to legacy field
             storefrontImageUrl: userStore.storefrontImageUrl || userStore.storePhoto || '', // Fallback to legacy field

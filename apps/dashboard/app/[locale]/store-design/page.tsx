@@ -2,7 +2,6 @@
 
 import DashboardLayout from '../../../components/DashboardLayout'
 import { useState } from 'react'
-import CurrentTheme from '../../../components/themes/CurrentTheme'
 import ThemeGallery from '../../../components/themes/ThemeGallery'
 import HeroImageUpload from '../../../components/store-design/HeroImageUpload'
 import CarouselImagesUpload from '../../../components/store-design/CarouselImagesUpload'
@@ -124,8 +123,7 @@ export default function StoreDesignPage() {
 
       case 'themes':
         return (
-          <div className="space-y-6">
-            <CurrentTheme />
+          <div>
             <ThemeGallery />
           </div>
         )

@@ -7,6 +7,7 @@ import { createStore, checkSubdomainAvailability } from '../../../../lib/store'
 import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
 import { uploadImageToCloudinary, validateImageFile } from '../../../../lib/cloudinary'
+import { brandColors } from '@shopifree/ui'
 
 interface StoreFormData {
   storeName: string
@@ -158,8 +159,8 @@ function StoreOnboardingContent() {
     logoPublicId: '',
     storefrontImageUrl: '',
     storefrontImagePublicId: '',
-    primaryColor: '#3B82F6',
-    secondaryColor: '#1F2937',
+    primaryColor: brandColors.primary,
+    secondaryColor: brandColors.secondary,
     currency: 'USD',
     socialMedia: {
       facebook: '',
@@ -948,7 +949,7 @@ function StoreOnboardingContent() {
                         type="text"
                         value={formData.primaryColor}
                         onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                        placeholder="#3B82F6"
+                        placeholder={brandColors.primary}
                         className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono text-sm"
                       />
                     </div>
@@ -974,7 +975,7 @@ function StoreOnboardingContent() {
                         type="text"
                         value={formData.secondaryColor}
                         onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
-                        placeholder="#1F2937"
+                        placeholder={brandColors.secondary}
                         className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 font-mono text-sm"
                       />
                     </div>

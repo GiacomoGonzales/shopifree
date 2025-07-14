@@ -1,3 +1,4 @@
+import { brandColors } from '@shopifree/ui'
 import { Theme } from './theme-types'
 
 export const availableThemes: Theme[] = [
@@ -15,8 +16,26 @@ export const availableThemes: Theme[] = [
       'Optimizado para móviles'
     ],
     colors: {
-      primary: '#2D3748',
-      secondary: '#4A5568'
+      primary: brandColors.neutral[800],
+      secondary: brandColors.neutral[600]
+    }
+  },
+  {
+    id: 'mobile-modern',
+    nombre: 'Mobile Modern',
+    descripcion: 'Diseño optimizado para móviles con colores vibrantes y una experiencia táctil moderna. Ideal para audiencias jóvenes.',
+    preview: '/themes/mobile-modern/preview.jpg',
+    category: 'modern',
+    recommended: true,
+    features: [
+      'Mobile-first',
+      'Colores vibrantes',
+      'Experiencia táctil',
+      'Navegación intuitiva'
+    ],
+    colors: {
+      primary: brandColors.blue[500],
+      secondary: brandColors.success
     }
   },
   {
@@ -32,8 +51,8 @@ export const availableThemes: Theme[] = [
       'Galería moderna'
     ],
     colors: {
-      primary: '#1A202C',
-      secondary: '#718096'
+      primary: brandColors.neutral[900],
+      secondary: brandColors.neutral[500]
     }
   },
   {
@@ -49,25 +68,25 @@ export const availableThemes: Theme[] = [
       'Secciones especiales para productos destacados'
     ],
     colors: {
-      primary: '#4C1D95',
-      secondary: '#6D28D9'
+      primary: brandColors.indigo[700],
+      secondary: brandColors.indigo[500]
     }
   },
   {
     id: 'minimal-clean',
     nombre: 'Minimal Clean',
-    descripcion: 'Diseño completamente limpio y minimalista, perfecto para una apariencia moderna y profesional.',
+    descripcion: 'Diseño ultraminimalista con líneas limpias y espacios amplios. Perfecto para productos premium.',
     preview: '/themes/minimal-clean/preview.jpg',
     category: 'minimal',
     features: [
-      'Diseño ultra limpio',
-      'Minimalismo extremo',
-      'Tipografía clara',
-      'Interfaz intuitiva'
+      'Ultra minimalista',
+      'Espacios amplios',
+      'Líneas limpias',
+      'Productos premium'
     ],
     colors: {
-      primary: '#111827',
-      secondary: '#6B7280'
+      primary: brandColors.neutral[900],
+      secondary: brandColors.neutral[400]
     }
   }
 ]

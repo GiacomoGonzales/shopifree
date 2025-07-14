@@ -131,26 +131,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
       
       .ql-toolbar {
-        border-top: 1px solid #d1d5db;
-        border-left: 1px solid #d1d5db;
-        border-right: 1px solid #d1d5db;
-        border-bottom: 1px solid #e5e7eb;
+        border-top: 1px solid rgb(var(--dashboard-border));
+        border-left: 1px solid rgb(var(--dashboard-border));
+        border-right: 1px solid rgb(var(--dashboard-border));
+        border-bottom: 1px solid rgb(var(--dashboard-border));
         border-radius: 6px 6px 0 0;
         padding: 12px;
-        background: #ffffff;
+        background: rgb(var(--dashboard-card-bg));
       }
       
       .ql-container {
-        border-bottom: 1px solid #d1d5db;
-        border-left: 1px solid #d1d5db;
-        border-right: 1px solid #d1d5db;
+        border-bottom: 1px solid rgb(var(--dashboard-border));
+        border-left: 1px solid rgb(var(--dashboard-border));
+        border-right: 1px solid rgb(var(--dashboard-border));
         border-top: none;
         border-radius: 0 0 6px 6px;
         font-family: inherit;
       }
       
       .ql-editor.ql-blank::before {
-        color: #9ca3af;
+        color: rgb(var(--dashboard-muted-foreground));
         font-style: normal;
       }
       
