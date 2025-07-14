@@ -165,8 +165,8 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
                     }`}
                     style={{ 
                       backgroundColor: 'rgb(var(--theme-secondary))',
-                      ringColor: selectedImageIndex === index ? 'rgb(var(--theme-accent))' : 'transparent'
-                    }}
+                      '--tw-ring-color': selectedImageIndex === index ? 'rgb(var(--theme-accent))' : 'transparent'
+                    } as React.CSSProperties}
                   >
                     <Image
                       src={image.url}

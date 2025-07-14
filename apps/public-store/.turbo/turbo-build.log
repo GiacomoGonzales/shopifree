@@ -1,0 +1,10 @@
+
+> @shopifree/public-store@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.30
+  - Environments: .env.local
+  - Experiments (use with caution):
+    · scrollRestoration
+
+^C^C
