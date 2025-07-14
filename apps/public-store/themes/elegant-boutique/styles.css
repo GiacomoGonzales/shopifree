@@ -1,0 +1,358 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ================================
+   ELEGANT BOUTIQUE THEME VARIABLES
+   ================================ */
+:root {
+  /* === COLORES PRINCIPALES === */
+  --theme-primary: 139 125 107;      /* Warm taupe #8B7D6B */
+  --theme-secondary: 245 243 239;    /* Warm cream #F5F3EF */
+  --theme-accent: 184 134 11;        /* Elegant gold #B8860B */
+  
+  /* === COLORES NEUTROS === */
+  --theme-neutral-dark: 78 70 65;     /* Dark brown #4E4641 */
+  --theme-neutral-medium: 163 155 149; /* Warm gray #A39B95 */
+  --theme-neutral-light: 250 248 246;  /* Off white #FAF8F6 */
+  --theme-neutral-50: 252 251 249;     /* Lightest cream #FCFBF9 */
+  
+  /* === COLORES DE ESTADO === */
+  --theme-success: 107 142 35;        /* Olive green #6B8E23 */
+  --theme-warning: 210 105 30;        /* Amber #D2691E */
+  --theme-error: 160 82 45;           /* Brick red #A0522D */
+  
+  /* === TIPOGRAFÍA === */
+  --theme-font-heading: 'Playfair Display', serif;
+  --theme-font-body: 'Inter', sans-serif;
+  
+  /* === ESPACIADO === */
+  --theme-section-padding: 5rem;      /* 80px */
+  --theme-card-padding: 2rem;         /* 32px */
+  --theme-element-gap: 2rem;          /* 32px */
+  --theme-grid-gap: 2rem;             /* 32px */
+  
+  /* === BORDES Y SOMBRAS === */
+  --theme-border-radius: 0.125rem;    /* 2px - más angular/elegante */
+  --theme-border-radius-lg: 0.25rem;  /* 4px */
+  --theme-shadow-sm: 0 2px 8px rgba(78, 70, 65, 0.08);
+  --theme-shadow-md: 0 4px 20px rgba(78, 70, 65, 0.12);
+  --theme-shadow-lg: 0 8px 32px rgba(78, 70, 65, 0.16);
+  
+  /* === TRANSICIONES === */
+  --theme-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --theme-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================
+   CLASES UTILITARIAS DEL TEMA
+   ================================ */
+
+/* === TIPOGRAFÍA === */
+.text-serif {
+  font-family: var(--theme-font-heading);
+}
+
+.text-sans {
+  font-family: var(--theme-font-body);
+}
+
+/* === LOGO === */
+.logo-boutique {
+  border-radius: 0.5rem; /* 8px - esquinas redondeadas elegantes */
+  overflow: hidden;
+  transition: var(--theme-transition);
+}
+
+.logo-boutique:hover {
+  transform: scale(1.05);
+}
+
+/* === BOTONES === */
+.btn-boutique-primary {
+  @apply px-6 py-3 rounded-sm font-medium transition-all duration-300;
+  background-color: rgb(var(--theme-primary));
+  color: rgb(var(--theme-neutral-light));
+  font-family: var(--theme-font-body);
+  letter-spacing: 0.025em;
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.btn-boutique-primary:hover {
+  background-color: rgb(var(--theme-neutral-dark));
+  transform: translateY(-1px);
+  box-shadow: var(--theme-shadow-md);
+}
+
+.btn-boutique-secondary {
+  @apply px-6 py-3 rounded-sm font-medium transition-all duration-300;
+  background-color: rgb(var(--theme-secondary));
+  color: rgb(var(--theme-neutral-dark));
+  border: 1px solid rgb(var(--theme-primary) / 0.2);
+  font-family: var(--theme-font-body);
+  letter-spacing: 0.025em;
+}
+
+.btn-boutique-secondary:hover {
+  background-color: rgb(var(--theme-primary) / 0.1);
+  border-color: rgb(var(--theme-primary));
+  transform: translateY(-1px);
+}
+
+.btn-boutique-outline {
+  @apply px-6 py-3 rounded-sm font-medium transition-all duration-300;
+  background-color: transparent;
+  color: rgb(var(--theme-accent));
+  border: 1px solid rgb(var(--theme-accent));
+  font-family: var(--theme-font-body);
+  letter-spacing: 0.025em;
+}
+
+.btn-boutique-outline:hover {
+  background-color: rgb(var(--theme-accent));
+  color: rgb(var(--theme-neutral-light));
+  transform: translateY(-1px);
+  box-shadow: var(--theme-shadow-sm);
+}
+
+/* === CARDS === */
+.card-boutique {
+  @apply rounded-sm transition-all duration-300;
+  background-color: rgb(var(--theme-neutral-light));
+  border: 1px solid rgb(var(--theme-primary) / 0.1);
+  box-shadow: var(--theme-shadow-sm);
+  padding: var(--theme-card-padding);
+}
+
+.card-boutique:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--theme-shadow-md);
+  border-color: rgb(var(--theme-primary) / 0.2);
+}
+
+/* === SEPARADORES === */
+.separator-elegant {
+  position: relative;
+  text-align: center;
+  margin: var(--theme-section-padding) 0;
+}
+
+.separator-elegant::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(var(--theme-accent) / 0.3) 20%,
+    rgb(var(--theme-accent)) 50%,
+    rgb(var(--theme-accent) / 0.3) 80%,
+    transparent
+  );
+}
+
+.separator-elegant::after {
+  content: '◆';
+  position: relative;
+  background-color: rgb(var(--theme-neutral-light));
+  color: rgb(var(--theme-accent));
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  font-family: var(--theme-font-heading);
+}
+
+/* === EFECTOS HOVER === */
+.hover-elegant {
+  transition: var(--theme-transition);
+}
+
+.hover-elegant:hover {
+  transform: translateY(-1px);
+  opacity: 0.8;
+  /* Efecto más sutil sin sombra problemática */
+}
+
+/* === NAVEGACIÓN === */
+.nav-elegant {
+  position: relative;
+}
+
+.nav-elegant::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: rgb(var(--theme-accent));
+  transition: var(--theme-transition);
+  transform: translateX(-50%);
+}
+
+.nav-elegant:hover::after,
+.nav-elegant.active::after {
+  width: 100%;
+}
+
+/* === PRODUCTOS === */
+.product-badge-boutique {
+  @apply absolute top-3 left-3 px-3 py-1 rounded-sm text-xs font-medium;
+  background-color: rgb(var(--theme-accent));
+  color: rgb(var(--theme-neutral-light));
+  font-family: var(--theme-font-body);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.product-image-boutique {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--theme-border-radius);
+}
+
+.product-image-boutique::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(184, 134, 11, 0.1) 50%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: var(--theme-transition);
+  transform: translateX(-100%);
+}
+
+.product-image-boutique:hover::after {
+  opacity: 1;
+  transform: translateX(100%);
+}
+
+/* === GRID LAYOUTS === */
+.grid-boutique {
+  display: grid;
+  gap: var(--theme-grid-gap);
+}
+
+.grid-boutique-products {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .grid-boutique-products {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* === ANIMACIONES === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-elegant {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--theme-secondary)) 25%,
+    rgb(var(--theme-accent) / 0.1) 50%,
+    rgb(var(--theme-secondary)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* === FORMULARIOS === */
+.input-boutique {
+  @apply w-full px-4 py-3 rounded-sm border transition-all duration-300;
+  border-color: rgb(var(--theme-primary) / 0.2);
+  background-color: rgb(var(--theme-neutral-light));
+  color: rgb(var(--theme-neutral-dark));
+  font-family: var(--theme-font-body);
+}
+
+.input-boutique:focus {
+  outline: none;
+  border-color: rgb(var(--theme-accent));
+  box-shadow: 0 0 0 3px rgb(var(--theme-accent) / 0.1);
+}
+
+.input-boutique::placeholder {
+  color: rgb(var(--theme-neutral-medium));
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 768px) {
+  :root {
+    --theme-section-padding: 3rem;
+    --theme-card-padding: 1.5rem;
+    --theme-element-gap: 1.5rem;
+    --theme-grid-gap: 1.5rem;
+  }
+  
+  /* Header móvil mejorado */
+  .mobile-header-logo {
+    max-width: 150px; /* Limitar ancho del nombre en móvil */
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --theme-section-padding: 2rem;
+    --theme-card-padding: 1rem;
+    --theme-element-gap: 1rem;
+    --theme-grid-gap: 1rem;
+  }
+  
+  /* Header móvil en pantallas muy pequeñas */
+  .mobile-header-logo {
+    max-width: 120px; /* Aún más restrictivo en pantallas pequeñas */
+  }
+}
+
+/* === SCROLLBAR PERSONALIZADO === */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(var(--theme-secondary));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--theme-primary));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--theme-accent));
+}
+
+/* === SELECCIÓN DE TEXTO === */
+::selection {
+  background-color: rgb(var(--theme-accent) / 0.2);
+  color: rgb(var(--theme-neutral-dark));
+} 

@@ -88,6 +88,26 @@ export const availableThemes: Theme[] = [
       primary: brandColors.neutral[900],
       secondary: brandColors.neutral[400]
     }
+  },
+  {
+    id: 'elegant-boutique',
+    nombre: 'Elegant Boutique',
+    descripcion: 'Diseño sofisticado y elegante inspirado en boutiques de lujo. Perfecto para marcas premium y productos de alta gama.',
+    preview: '/themes/elegant-boutique/preview.jpg',
+    category: 'classic',
+    recommended: true,
+    features: [
+      'Estilo boutique premium',
+      'Tipografía serif elegante',
+      'Colores neutros cálidos',
+      'Espaciado generoso',
+      'Navegación sofisticada',
+      'Animaciones sutiles'
+    ],
+    colors: {
+      primary: '#8B7D6B', // Warm taupe
+      secondary: '#B8860B'  // Elegant gold
+    }
   }
 ]
 
