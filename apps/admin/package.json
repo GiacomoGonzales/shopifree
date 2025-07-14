@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
-    "build": "next build",
+    "build": "cd ../../packages/ui && npm run build && cd ../../apps/admin && next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",

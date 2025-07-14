@@ -342,20 +342,25 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
 
       // También actualizar en la colección global de users para mantener sincronización
       const globalUserRef = doc(db, 'users', user.uid)
-      const globalUpdateData = {
+      const globalUpdateData: {
+        updatedAt: ReturnType<typeof serverTimestamp>
+        displayName?: string
+        phone?: string
+        location?: {
+          address: string
+          lat: number
+          lng: number
+        }
+      } = {
         updatedAt: serverTimestamp()
       }
       
       // Sincronizar campos básicos con usuario global
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (data.displayName) (globalUpdateData as any).displayName = data.displayName
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (data.phone) (globalUpdateData as any).phone = data.phone
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (data.location) (globalUpdateData as any).location = data.location
+      if (data.displayName) globalUpdateData.displayName = data.displayName
+      if (data.phone) globalUpdateData.phone = data.phone
+      if (data.location) globalUpdateData.location = data.location
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await updateDoc(globalUserRef, globalUpdateData as any)
+      await updateDoc(globalUserRef, globalUpdateData)
 
       // Actualizar estado local
       setStoreCustomerData(prev => prev ? { ...prev, ...data } : null)

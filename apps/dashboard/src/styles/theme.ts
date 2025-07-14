@@ -1,4 +1,27 @@
-import { createTheme, brandColors } from '@shopifree/ui';
+import { createTheme, brandColors, Theme } from '@shopifree/ui';
+
+/**
+ * Interfaz extendida para el tema del dashboard con colores personalizados
+ */
+interface DashboardTheme extends Theme {
+  colors: Theme['colors'] & {
+    sidebar: {
+      background: string;
+      foreground: string;
+      active: string;
+      activeForeground: string;
+    };
+    header: {
+      background: string;
+      foreground: string;
+    };
+    card: {
+      background: string;
+      border: string;
+      shadow: string;
+    };
+  };
+}
 
 /**
  * Tema personalizado para el Dashboard de Shopifree
@@ -60,19 +83,19 @@ export const dashboardCSSVariables = `
   --dashboard-muted: ${dashboardTheme.colors.muted};
   
   /* Sidebar */
-  --dashboard-sidebar-bg: ${(dashboardTheme.colors as any).sidebar.background};
-  --dashboard-sidebar-fg: ${(dashboardTheme.colors as any).sidebar.foreground};
-  --dashboard-sidebar-active: ${(dashboardTheme.colors as any).sidebar.active};
-  --dashboard-sidebar-active-fg: ${(dashboardTheme.colors as any).sidebar.activeForeground};
+  --dashboard-sidebar-bg: ${(dashboardTheme as DashboardTheme).colors.sidebar.background};
+  --dashboard-sidebar-fg: ${(dashboardTheme as DashboardTheme).colors.sidebar.foreground};
+  --dashboard-sidebar-active: ${(dashboardTheme as DashboardTheme).colors.sidebar.active};
+  --dashboard-sidebar-active-fg: ${(dashboardTheme as DashboardTheme).colors.sidebar.activeForeground};
   
   /* Header */
-  --dashboard-header-bg: ${(dashboardTheme.colors as any).header.background};
-  --dashboard-header-fg: ${(dashboardTheme.colors as any).header.foreground};
+  --dashboard-header-bg: ${(dashboardTheme as DashboardTheme).colors.header.background};
+  --dashboard-header-fg: ${(dashboardTheme as DashboardTheme).colors.header.foreground};
   
   /* Cards */
-  --dashboard-card-bg: ${(dashboardTheme.colors as any).card.background};
-  --dashboard-card-border: ${(dashboardTheme.colors as any).card.border};
-  --dashboard-card-shadow: ${(dashboardTheme.colors as any).card.shadow};
+  --dashboard-card-bg: ${(dashboardTheme as DashboardTheme).colors.card.background};
+  --dashboard-card-border: ${(dashboardTheme as DashboardTheme).colors.card.border};
+  --dashboard-card-shadow: ${(dashboardTheme as DashboardTheme).colors.card.shadow};
 }
 `;
 

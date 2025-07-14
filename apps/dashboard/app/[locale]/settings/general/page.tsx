@@ -87,7 +87,42 @@ export default function GeneralSettingsPage() {
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
 
-  const [formData, setFormData] = useState({
+  interface FormData {
+    storeName: string;
+    slogan: string;
+    description: string;
+    hasPhysicalLocation: boolean;
+    location: {
+      address: string;
+      lat: number;
+      lng: number;
+    };
+    businessType: string;
+    phone: string;
+    emailStore: string;
+    primaryColor: string;
+    secondaryColor: string;
+    currency: string;
+    logoUrl: string;
+    storefrontImageUrl: string;
+    headerLogoUrl: string;
+    logoPublicId: string;
+    storefrontImagePublicId: string;
+    headerLogoPublicId: string;
+    socialMedia: {
+      facebook: string;
+      instagram: string;
+      tiktok: string;
+      x: string;
+      snapchat: string;
+      linkedin: string;
+      telegram: string;
+      youtube: string;
+      pinterest: string;
+    };
+  }
+
+  const [formData, setFormData] = useState<FormData>({
     storeName: '',
     slogan: '',
     description: '',
@@ -155,8 +190,8 @@ export default function GeneralSettingsPage() {
             businessType: userStore.businessType || '',
             phone: userStore.phone || '',
             emailStore: userStore.emailStore || '',
-            primaryColor: userStore.primaryColor || (brandColors.primary as string),
-            secondaryColor: userStore.secondaryColor || (brandColors.secondary as string),
+            primaryColor: userStore.primaryColor || brandColors.primary,
+            secondaryColor: userStore.secondaryColor || brandColors.secondary,
             currency: userStore.currency || 'USD',
             logoUrl: userStore.logoUrl || userStore.logo || '', // Fallback to legacy field
             storefrontImageUrl: userStore.storefrontImageUrl || userStore.storePhoto || '', // Fallback to legacy field

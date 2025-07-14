@@ -1,4 +1,38 @@
-import { createTheme, brandColors } from '@shopifree/ui';
+import { createTheme, brandColors, Theme } from '@shopifree/ui';
+
+/**
+ * Interfaz extendida para el tema de la tienda con colores personalizados
+ */
+interface StoreTheme extends Theme {
+  colors: Theme['colors'] & {
+    product: {
+      background: string;
+      border: string;
+      shadow: string;
+      hoverShadow: string;
+    };
+    cart: {
+      background: string;
+      foreground: string;
+      count: string;
+    };
+    price: {
+      current: string;
+      original: string;
+      discount: string;
+    };
+    rating: {
+      filled: string;
+      empty: string;
+    };
+    badge: {
+      new: string;
+      sale: string;
+      featured: string;
+      outOfStock: string;
+    };
+  };
+}
 
 /**
  * Tema personalizado para la Tienda Pública de Shopifree
@@ -71,30 +105,30 @@ export const storeCSSVariables = `
   --store-muted: ${storeTheme.colors.muted};
   
   /* Productos */
-  --store-product-bg: ${(storeTheme.colors as any).product.background};
-  --store-product-border: ${(storeTheme.colors as any).product.border};
-  --store-product-shadow: ${(storeTheme.colors as any).product.shadow};
-  --store-product-hover-shadow: ${(storeTheme.colors as any).product.hoverShadow};
+  --store-product-bg: ${(storeTheme as StoreTheme).colors.product.background};
+  --store-product-border: ${(storeTheme as StoreTheme).colors.product.border};
+  --store-product-shadow: ${(storeTheme as StoreTheme).colors.product.shadow};
+  --store-product-hover-shadow: ${(storeTheme as StoreTheme).colors.product.hoverShadow};
   
   /* Carrito */
-  --store-cart-bg: ${(storeTheme.colors as any).cart.background};
-  --store-cart-fg: ${(storeTheme.colors as any).cart.foreground};
-  --store-cart-count: ${(storeTheme.colors as any).cart.count};
+  --store-cart-bg: ${(storeTheme as StoreTheme).colors.cart.background};
+  --store-cart-fg: ${(storeTheme as StoreTheme).colors.cart.foreground};
+  --store-cart-count: ${(storeTheme as StoreTheme).colors.cart.count};
   
   /* Precios */
-  --store-price-current: ${(storeTheme.colors as any).price.current};
-  --store-price-original: ${(storeTheme.colors as any).price.original};
-  --store-price-discount: ${(storeTheme.colors as any).price.discount};
+  --store-price-current: ${(storeTheme as StoreTheme).colors.price.current};
+  --store-price-original: ${(storeTheme as StoreTheme).colors.price.original};
+  --store-price-discount: ${(storeTheme as StoreTheme).colors.price.discount};
   
   /* Ratings */
-  --store-rating-filled: ${(storeTheme.colors as any).rating.filled};
-  --store-rating-empty: ${(storeTheme.colors as any).rating.empty};
+  --store-rating-filled: ${(storeTheme as StoreTheme).colors.rating.filled};
+  --store-rating-empty: ${(storeTheme as StoreTheme).colors.rating.empty};
   
   /* Badges */
-  --store-badge-new: ${(storeTheme.colors as any).badge.new};
-  --store-badge-sale: ${(storeTheme.colors as any).badge.sale};
-  --store-badge-featured: ${(storeTheme.colors as any).badge.featured};
-  --store-badge-out-of-stock: ${(storeTheme.colors as any).badge.outOfStock};
+  --store-badge-new: ${(storeTheme as StoreTheme).colors.badge.new};
+  --store-badge-sale: ${(storeTheme as StoreTheme).colors.badge.sale};
+  --store-badge-featured: ${(storeTheme as StoreTheme).colors.badge.featured};
+  --store-badge-out-of-stock: ${(storeTheme as StoreTheme).colors.badge.outOfStock};
 }
 `;
 

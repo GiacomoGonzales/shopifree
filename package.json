@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
+    "build": "npm run theme:build && turbo run build",
+    "postinstall": "npm run theme:build",
     "type-check": "turbo run type-check",
     "lint": "turbo run lint",
     "test": "turbo run test",
@@ -28,6 +29,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "packageManager": "npm@8.0.0",
   "dependencies": {
     "embla-carousel-react": "^8.6.0",
     "keen-slider": "^6.8.6"
