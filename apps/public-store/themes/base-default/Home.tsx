@@ -18,6 +18,9 @@ interface HomeProps {
   categorias?: Category[]
 }
 
+// Tipos para el selector de vista
+type ProductViewMode = 'expanded' | 'compact' | 'list'
+
 const Icons = {
   Star: () => (
     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -32,6 +35,22 @@ const Icons = {
   Sort: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+    </svg>
+  ),
+  // Iconos para el selector de vista
+  GridExpanded: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75h16.5v16.5H3.75V3.75zM3.75 8.25h16.5M8.25 3.75v16.5" />
+    </svg>
+  ),
+  GridCompact: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+    </svg>
+  ),
+  ListView: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
     </svg>
   ),
   ShieldCheck: () => (
@@ -66,6 +85,72 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   // Estados para ordenamiento
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'newest'>('newest')
   const [showSort, setShowSort] = useState(false)
+  
+  // Estado para el selector de vista (solo móvil)
+  const [viewMode, setViewMode] = useState<ProductViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('productViewMode') as ProductViewMode) || 'expanded'
+    }
+    return 'expanded'
+  })
+  
+  // Función para cambiar el modo de vista
+  const handleViewModeChange = (mode: ProductViewMode) => {
+    setViewMode(mode)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('productViewMode', mode)
+    }
+  }
+  
+  // Función para cambiar vista de forma cíclica
+  const handleViewModeToggle = () => {
+    const modes: ProductViewMode[] = ['expanded', 'compact', 'list']
+    const currentIndex = modes.indexOf(viewMode)
+    const nextIndex = (currentIndex + 1) % modes.length
+    handleViewModeChange(modes[nextIndex])
+  }
+  
+  // Función para obtener el icono actual según la vista
+  const getCurrentViewIcon = () => {
+    switch (viewMode) {
+      case 'expanded':
+        return <Icons.GridExpanded />
+      case 'compact':
+        return <Icons.GridCompact />
+      case 'list':
+        return <Icons.ListView />
+      default:
+        return <Icons.GridExpanded />
+    }
+  }
+  
+  // Función para obtener el título según la vista
+  const getCurrentViewTitle = () => {
+    switch (viewMode) {
+      case 'expanded':
+        return 'Vista expandida'
+      case 'compact':
+        return 'Vista compacta'
+      case 'list':
+        return 'Vista lista'
+      default:
+        return 'Cambiar vista'
+    }
+  }
+  
+  // Función para obtener las clases de la grilla según el modo de vista
+  const getGridClasses = (mode: ProductViewMode) => {
+    switch (mode) {
+      case 'expanded':
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+      case 'compact':
+        return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
+      case 'list':
+        return 'grid-cols-1 gap-4'
+      default:
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+    }
+  }
   
   // Usar solo productos reales
   const allProducts = productos || []
@@ -434,52 +519,125 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
           
           {/* Filtros dinámicos y ordenamiento */}
           <div className="flex items-center gap-4">
-            <DynamicFilters
-              filters={dynamicFilters}
-              priceRangeOptions={priceRangeOptions}
-              onFiltersChange={handleFiltersChange}
-              onPriceRangeChange={handlePriceRangeChange}
-              onClearFilters={handleClearFilters}
-            />
-            
-            {/* Ordenamiento */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
-              >
-                <Icons.Sort />
-                <span className="font-light">Ordenar</span>
-                <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+            {/* Desktop: Filtros y ordenamiento normales */}
+            <div className="hidden md:flex items-center gap-4">
+              <DynamicFilters
+                filters={dynamicFilters}
+                priceRangeOptions={priceRangeOptions}
+                onFiltersChange={handleFiltersChange}
+                onPriceRangeChange={handlePriceRangeChange}
+                onClearFilters={handleClearFilters}
+              />
               
-              {showSort && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
-                  <div className="p-3">
-                    {[
-                      { value: 'newest', label: 'Más recientes' },
-                      { value: 'name', label: 'Nombre A-Z' },
-                      { value: 'price-low', label: 'Precio: menor a mayor' },
-                      { value: 'price-high', label: 'Precio: mayor a menor' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
-                          setShowSort(false)
-                        }}
-                        className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded text-sm font-light ${
-                          sortBy === option.value ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-600'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
+              {/* Ordenamiento - Desktop */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowSort(!showSort)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
+                >
+                  <Icons.Sort />
+                  <span className="font-light">Ordenar</span>
+                  <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showSort && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
+                    <div className="p-3">
+                      {[
+                        { value: 'newest', label: 'Más recientes' },
+                        { value: 'name', label: 'Nombre A-Z' },
+                        { value: 'price-low', label: 'Precio: menor a mayor' },
+                        { value: 'price-high', label: 'Precio: mayor a menor' }
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
+                            setShowSort(false)
+                          }}
+                          className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded-md text-sm font-light ${
+                            sortBy === option.value 
+                              ? 'bg-neutral-100 font-medium' 
+                              : ''
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+            
+            {/* Mobile: Tres botones alineados */}
+            <div className="md:hidden flex items-center justify-between w-full gap-3">
+              {/* Filtros - Izquierda */}
+              <div className="flex-1">
+                <DynamicFilters
+                  filters={dynamicFilters}
+                  priceRangeOptions={priceRangeOptions}
+                  onFiltersChange={handleFiltersChange}
+                  onPriceRangeChange={handlePriceRangeChange}
+                  onClearFilters={handleClearFilters}
+                />
+              </div>
+              
+              {/* Ordenamiento - Centro */}
+              <div className="relative flex-1">
+                <button
+                  onClick={() => setShowSort(!showSort)}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900 w-full"
+                >
+                  <Icons.Sort />
+                  <span className="font-light">Ordenar</span>
+                  <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showSort && (
+                  <div className="absolute top-full left-0 mt-2 w-full bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
+                    <div className="p-3">
+                      {[
+                        { value: 'newest', label: 'Más recientes' },
+                        { value: 'name', label: 'Nombre A-Z' },
+                        { value: 'price-low', label: 'Precio: menor a mayor' },
+                        { value: 'price-high', label: 'Precio: mayor a menor' }
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
+                            setShowSort(false)
+                          }}
+                          className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded-md text-sm font-light ${
+                            sortBy === option.value 
+                              ? 'bg-neutral-100 font-medium' 
+                              : ''
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Selector de vista - Derecha */}
+              <div className="flex-1">
+                <button
+                  onClick={handleViewModeToggle}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900 w-full"
+                  title={getCurrentViewTitle()}
+                >
+                  {getCurrentViewIcon()}
+                  <span className="hidden sm:inline font-light">Vista</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -506,16 +664,22 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className={`grid ${getGridClasses(viewMode)}`}>
             {productosAMostrar.map((producto, index) => (
-                          <Link 
+              <Link 
                 key={producto.id} 
                 href={`/${producto.slug}`}
-                className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block"
+                className={`bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block ${
+                  viewMode === 'list' ? 'flex flex-row items-center gap-4' : 'flex flex-col'
+                }`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
               {/* Product Image */}
-              <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100">
+              <div className={`relative overflow-hidden bg-neutral-100 ${
+                viewMode === 'list' 
+                  ? 'w-20 h-20 rounded-lg flex-shrink-0' 
+                  : 'aspect-square rounded-t-lg'
+              }`}>
                 {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
                   <VideoPlayer
                     src={producto.mediaFiles[0].url}
@@ -536,25 +700,38 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     className="object-cover transition-transform duration-300 md:group-hover:scale-105"
                   />
                 )}
-                {/* Mostrar "Nuevo" para productos recientes - por ahora todos son nuevos */}
-                <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
-                  Nuevo
-                </span>
-                {/* Botón de favorito */}
-                <div className="absolute top-3 right-3 z-10">
-                  <HeartIcon product={producto} size="md" />
-                </div>
+                {/* Mostrar "Nuevo" para productos recientes - Oculto en vista lista */}
+                {viewMode !== 'list' && (
+                  <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    Nuevo
+                  </span>
+                )}
+                {/* Botón de favorito - Oculto en vista lista */}
+                {viewMode !== 'list' && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <HeartIcon product={producto} size="md" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors duration-300"></div>
               </div>
 
               {/* Product Info */}
-              <div className="p-6 pt-0 space-y-3 bg-white">
-                <h3 className="text-lg font-light text-neutral-900 md:group-hover:text-neutral-600 transition-colors duration-200 pt-6">
+              <div className={`bg-white ${
+                viewMode === 'list' 
+                  ? 'flex-1 p-4 space-y-2' 
+                  : 'p-6 pt-0 space-y-3'
+              }`}>
+                <h3 className={`font-light text-neutral-900 md:group-hover:text-neutral-600 transition-colors duration-200 ${
+                  viewMode === 'list' ? 'text-base' : 'text-lg pt-6'
+                } ${
+                  viewMode === 'compact' ? 'text-sm' : ''
+                }`}>
                   {producto.name}
                 </h3>
                 
-                {/* Rating */}
-                <div className="flex items-center space-x-2">
+                {/* Rating - Oculto en vista compacta */}
+                {viewMode !== 'compact' && (
+                  <div className="flex items-center space-x-2">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className={`w-3 h-3 ${i < Math.floor(producto.rating || 0) ? 'text-yellow-400' : 'text-neutral-300'}`}>
@@ -562,34 +739,57 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                       </div>
                     ))}
                   </div>
-                  <span className="text-sm text-neutral-500 font-light">
-                    {producto.rating || 0} ({producto.reviews || 0})
-                  </span>
-                </div>
+                    <span className="text-sm text-neutral-500 font-light">
+                      {producto.rating || 0} ({producto.reviews || 0})
+                    </span>
+                  </div>
+                )}
 
                 {/* Price */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl font-medium text-neutral-900">
+                <div className={`${viewMode === 'compact' ? 'space-y-2' : 'flex items-center justify-between'}`}>
+                  <div className={`${viewMode === 'compact' ? 'flex items-center justify-between' : 'flex items-center space-x-2'}`}>
+                    <span className={`font-medium text-neutral-900 ${
+                      viewMode === 'compact' ? 'text-sm' : 'text-xl'
+                    }`}>
                       {getCurrencySymbol(tienda.currency)} {producto.price}
                     </span>
-                    {producto.comparePrice && producto.comparePrice > producto.price && (
-                      <span className="text-sm text-neutral-500 line-through font-light">
-                        {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
-                      </span>
+                    {viewMode === 'compact' && (
+                      <button 
+                        onClick={(e) => handleAddToCart(producto, e)}
+                        disabled={addingToCart === producto.id}
+                        className={`w-6 h-6 rounded-full transition-all duration-200 text-xs flex items-center justify-center ${
+                          addingToCart === producto.id
+                            ? 'bg-green-600 text-white opacity-100'
+                            : 'bg-neutral-900 text-white opacity-100 hover:bg-neutral-800'
+                        }`}
+                      >
+                        {addingToCart === producto.id ? '✓' : '+'}
+                      </button>
                     )}
                   </div>
-                  <button 
-                    onClick={(e) => handleAddToCart(producto, e)}
-                    disabled={addingToCart === producto.id}
-                    className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
-                      addingToCart === producto.id
-                        ? 'bg-green-600 text-white opacity-100'
-                        : 'bg-neutral-900 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-neutral-800'
-                    }`}
-                  >
-                    {addingToCart === producto.id ? '✓' : 'Añadir'}
-                  </button>
+                  {producto.comparePrice && producto.comparePrice > producto.price && viewMode === 'compact' && (
+                    <span className="text-xs text-neutral-500 line-through font-light">
+                      {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
+                    </span>
+                  )}
+                  {producto.comparePrice && producto.comparePrice > producto.price && viewMode !== 'compact' && (
+                    <span className="text-sm text-neutral-500 line-through font-light">
+                      {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
+                    </span>
+                  )}
+                  {viewMode !== 'compact' && (
+                    <button 
+                      onClick={(e) => handleAddToCart(producto, e)}
+                      disabled={addingToCart === producto.id}
+                      className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
+                        addingToCart === producto.id
+                          ? 'bg-green-600 text-white opacity-100'
+                          : 'bg-neutral-900 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-neutral-800'
+                      }`}
+                    >
+                      {addingToCart === producto.id ? '✓' : 'Añadir'}
+                    </button>
+                  )}
                 </div>
               </div>
             </Link>
