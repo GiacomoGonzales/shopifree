@@ -175,7 +175,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         const storeFiltersConfig = await getStoreConfiguredFilters(tienda.id)
         
         // Use configured filters if available, otherwise fallback to automatic extraction
-        const newFilters = storeFiltersConfig.enabled 
+        const newFilters = storeFiltersConfig.length > 0
           ? extractConfiguredFilters(categoryFilteredProducts, storeFiltersConfig)
           : extractDynamicFilters(categoryFilteredProducts)
         

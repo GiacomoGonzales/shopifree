@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { Timestamp } from 'firebase/firestore'
 import DashboardLayout from '../../../components/DashboardLayout'
@@ -15,6 +15,187 @@ import {
   type CustomerFilters,
   type CustomerSortOption 
 } from '../../../lib/customers'
+
+// Componente CustomerCard para la vista móvil
+interface CustomerCardProps {
+  customer: CustomerWithId
+  onViewDetails: (customer: CustomerWithId) => void
+  onDelete: (customerId: string) => void
+  deleting: string | null
+  formatCurrency: (amount: number) => string
+  t: any
+}
+
+function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurrency, t }: CustomerCardProps) {
+  const [showMenu, setShowMenu] = useState(false)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 })
+  const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showMenu])
+
+  // Calculate menu position when opening
+  const handleToggleMenu = () => {
+    if (!showMenu && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect()
+      setMenuPosition({
+        top: buttonRect.bottom + window.scrollY + 4,
+        right: window.innerWidth - buttonRect.right + window.scrollX
+      })
+    }
+    setShowMenu(!showMenu)
+  }
+
+  return (
+    <div className="p-4 hover:bg-gray-50 relative">
+      <div className="flex items-start space-x-4">
+        {/* Checkbox */}
+        <div className="flex-shrink-0 pt-1">
+          <input
+            type="checkbox"
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          />
+        </div>
+        
+        {/* Customer Avatar */}
+        <div className="flex-shrink-0">
+          <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+            <span className="text-lg font-medium text-gray-700">
+              {customer.displayName.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        </div>
+
+        {/* Customer Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-gray-900 truncate">
+                {customer.displayName}
+              </h3>
+              <p className="text-sm text-gray-500 truncate">
+                {customer.email}
+              </p>
+              {customer.phone && (
+                <p className="text-sm text-gray-500">
+                  {customer.phone}
+                </p>
+              )}
+            </div>
+
+                         {/* Actions Menu */}
+             <div className="flex items-center ml-2">
+               <button
+                 ref={buttonRef}
+                 onClick={handleToggleMenu}
+                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                 title="Opciones"
+               >
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                 </svg>
+               </button>
+             </div>
+
+             {/* Fixed positioned dropdown menu - appears above all containers */}
+             {showMenu && (
+               <>
+                 {/* Overlay para cerrar el menú */}
+                 <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                 
+                 <div 
+                   ref={menuRef}
+                   className="fixed w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                   style={{
+                     top: `${menuPosition.top}px`,
+                     right: `${menuPosition.right}px`
+                   }}
+                 >
+                   <div className="py-1">
+                     <button
+                       onClick={() => {
+                         onViewDetails(customer)
+                         setShowMenu(false)
+                       }}
+                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                     >
+                       <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                       </svg>
+                       Ver detalles
+                     </button>
+                     
+                     <button
+                       onClick={() => {
+                         if (window.confirm(t('actions.confirmDelete'))) {
+                           onDelete(customer.id)
+                         }
+                         setShowMenu(false)
+                       }}
+                       disabled={deleting === customer.id}
+                       className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                       {deleting === customer.id ? (
+                         <svg className="animate-spin w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24">
+                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                         </svg>
+                       ) : (
+                         <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                         </svg>
+                       )}
+                       {t('actions.delete')}
+                     </button>
+                   </div>
+                 </div>
+               </>
+             )}
+          </div>
+
+          {/* Stats */}
+          <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+            <div>
+              <span className="font-medium text-gray-900">{formatCurrency(customer.totalSpent || 0)}</span>
+              <span className="ml-1">gastado</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-900">{customer.orderCount || 0}</span>
+              <span className="ml-1">pedidos</span>
+            </div>
+          </div>
+
+          {/* Tags */}
+          {customer.tags && customer.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {customer.tags.map((tag, index) => (
+                <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function CustomersPage() {
   const { store, loading: storeLoading } = useStore()
@@ -337,36 +518,34 @@ export default function CustomersPage() {
         <div className="max-w-7xl mx-auto">
           {/* Botones de acción flotantes */}
           <div className="px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col sm:flex-row justify-between sm:justify-end items-stretch sm:items-center gap-4">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <button 
-                  onClick={handleExport}
-                  className="inline-flex items-center justify-center px-4 py-3 sm:px-3 sm:py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px] sm:min-h-auto"
-                >
-                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {t('export')}
-                </button>
-                <button 
-                  className="inline-flex items-center justify-center px-4 py-3 sm:px-3 sm:py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px] sm:min-h-auto"
-                  disabled
-                >
-                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  {t('import')}
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center justify-center px-4 py-3 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 min-h-[44px] sm:min-h-auto"
-                >
-                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  {t('addCustomer')}
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleExport}
+                className="p-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+                title={t('export')}
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </button>
+              <button 
+                className="p-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 opacity-50 cursor-not-allowed"
+                title={t('import')}
+                disabled
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                {t('addCustomer')}
+              </button>
             </div>
           </div>
 
@@ -493,7 +672,7 @@ export default function CustomersPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-x-auto">
                     {/* Desktop Table View */}
                     <div className="hidden lg:block">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -628,111 +807,19 @@ export default function CustomersPage() {
                       </table>
                     </div>
 
-                    {/* Mobile Card View */}
+                                        {/* Mobile Card View */}
                     <div className="lg:hidden">
                       <div className="divide-y divide-gray-200">
                         {customers.map((customer) => (
-                          <div key={customer.id} className="p-4 hover:bg-gray-50">
-                            <div className="flex items-start space-x-4">
-                              {/* Checkbox */}
-                              <div className="flex-shrink-0 pt-1">
-                                <input
-                                  type="checkbox"
-                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                />
-                              </div>
-                              
-                              {/* Customer Avatar */}
-                              <div className="flex-shrink-0">
-                                <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                                  <span className="text-lg font-medium text-gray-700">
-                                    {customer.displayName.charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Customer Info */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm font-medium text-gray-900 truncate">
-                                      {customer.displayName}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 truncate">
-                                      {customer.email}
-                                    </p>
-                                    {customer.phone && (
-                                      <p className="text-sm text-gray-500">
-                                        {customer.phone}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-
-                                                                 {/* Stats */}
-                                 <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                                   <div>
-                                     <span className="font-medium text-gray-900">{formatCurrency(customer.totalSpent || 0)}</span>
-                                     <span className="ml-1">gastado</span>
-                                   </div>
-                                   <div>
-                                     <span className="font-medium text-gray-900">{customer.orderCount || 0}</span>
-                                     <span className="ml-1">pedidos</span>
-                                   </div>
-                                 </div>
- 
-                                 {/* Tags */}
-                                 {customer.tags && customer.tags.length > 0 && (
-                                   <div className="mt-2 flex flex-wrap gap-1">
-                                     {customer.tags.map((tag, index) => (
-                                       <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                         {tag}
-                                       </span>
-                                     ))}
-                                   </div>
-                                 )}
-
-                                {/* Actions */}
-                                <div className="mt-3 flex items-center space-x-2">
-                                  <button 
-                                    onClick={() => handleViewDetails(customer)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-                                    title={t('actions.viewDetails')}
-                                  >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                  </button>
-                                  <button 
-                                    onClick={() => {
-                                      if (window.confirm(t('actions.confirmDelete'))) {
-                                        handleDelete(customer.id)
-                                      }
-                                    }}
-                                    disabled={deleting === customer.id}
-                                    className={`transition-colors p-2 ${
-                                      deleting === customer.id 
-                                        ? 'text-gray-400 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-red-600'
-                                    }`}
-                                    title={t('actions.delete')}
-                                  >
-                                    {deleting === customer.id ? (
-                                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                      </svg>
-                                    ) : (
-                                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                      </svg>
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          <CustomerCard
+                            key={customer.id}
+                            customer={customer}
+                            onViewDetails={handleViewDetails}
+                            onDelete={handleDelete}
+                            deleting={deleting}
+                            formatCurrency={formatCurrency}
+                            t={t}
+                          />
                         ))}
                       </div>
                     </div>

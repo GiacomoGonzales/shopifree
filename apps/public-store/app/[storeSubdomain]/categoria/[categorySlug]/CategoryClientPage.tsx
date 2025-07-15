@@ -206,7 +206,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
         const storeFiltersConfig = await getStoreConfiguredFilters(store.id)
         
         // Use configured filters if available, otherwise fallback to automatic extraction
-        const newFilters = storeFiltersConfig.enabled 
+        const newFilters = storeFiltersConfig.length > 0
           ? extractConfiguredFilters(categoryProducts, storeFiltersConfig)
           : extractDynamicFilters(categoryProducts)
         

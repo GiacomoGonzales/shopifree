@@ -127,11 +127,10 @@ export default function CustomerModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
-        
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+    <div className="fixed inset-0 z-50 bg-gray-50">
+      <div className="h-full flex flex-col">
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full bg-white shadow-sm">
           {/* Header */}
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between">
@@ -152,35 +151,49 @@ export default function CustomerModal({
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                    title="Editar cliente"
                   >
-                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    {t('actions.edit')}
                   </button>
                 ) : (
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1">
                     <button
                       onClick={handleCancel}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                      title="Cancelar"
                     >
-                      {t('form.cancel')}
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                      className="p-2 text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors duration-200 disabled:opacity-50"
+                      title={saving ? "Guardando..." : "Guardar"}
                     >
-                      {saving ? t('form.saving') : t('form.save')}
+                      {saving ? (
+                        <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
                     </button>
                   </div>
                 )}
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                  title="Cerrar"
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -195,7 +208,7 @@ export default function CustomerModal({
                 onClick={() => setActiveTab('info')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'info'
-                    ? 'border-indigo-500 text-indigo-600'
+                    ? 'border-gray-900 text-gray-900'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -205,7 +218,7 @@ export default function CustomerModal({
                 onClick={() => setActiveTab('orders')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'orders'
-                    ? 'border-indigo-500 text-indigo-600'
+                    ? 'border-gray-900 text-gray-900'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -215,7 +228,7 @@ export default function CustomerModal({
                 onClick={() => setActiveTab('notes')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'notes'
-                    ? 'border-indigo-500 text-indigo-600'
+                    ? 'border-gray-900 text-gray-900'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -225,7 +238,8 @@ export default function CustomerModal({
           </div>
 
           {/* Content */}
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 flex-1 overflow-y-auto">
+            <div className="h-full min-h-[600px]">
             {activeTab === 'info' && (
               <div className="space-y-6">
                 {/* Personal Information */}
@@ -305,12 +319,12 @@ export default function CustomerModal({
                         value={newTag}
                         onChange={(e) => setNewTag(e.target.value)}
                         placeholder={t('details.tagPlaceholder')}
-                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                         onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
                       />
                       <button
                         onClick={handleAddTag}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                       >
                         {t('details.addTag')}
                       </button>
@@ -329,7 +343,7 @@ export default function CustomerModal({
                         checked={preferences.newsletter}
                         onChange={(e) => setPreferences({ ...preferences, newsletter: e.target.checked })}
                         disabled={!isEditing}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:opacity-50"
+                        className="h-4 w-4 text-gray-900 focus:ring-gray-500 border-gray-300 rounded disabled:opacity-50"
                       />
                       <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-900">
                         {t('details.newsletter')}
@@ -342,7 +356,7 @@ export default function CustomerModal({
                         checked={preferences.notifyOrderStatus}
                         onChange={(e) => setPreferences({ ...preferences, notifyOrderStatus: e.target.checked })}
                         disabled={!isEditing}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:opacity-50"
+                        className="h-4 w-4 text-gray-900 focus:ring-gray-500 border-gray-300 rounded disabled:opacity-50"
                       />
                       <label htmlFor="notifications" className="ml-2 block text-sm text-gray-900">
                         {t('details.notifications')}
@@ -374,7 +388,7 @@ export default function CustomerModal({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={6}
-                    className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                     placeholder={t('details.notePlaceholder')}
                   />
                 ) : (
@@ -388,6 +402,8 @@ export default function CustomerModal({
                 )}
               </div>
             )}
+            </div>
+          </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,11 @@
-import { doc, getDoc } from 'firebase/firestore'
+import { 
+  doc, 
+  getDoc, 
+  collection,
+  getDocs,
+  query,
+  orderBy 
+} from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 import { PublicProduct } from './products'
 
@@ -6,17 +13,10 @@ export interface StoreFilterConfig {
   id: string
   name: string
   type: 'text' | 'select' | 'tags' | 'range'
-  enabled: boolean
   visible: boolean
   order: number
   options: string[]
   productCount: number
-}
-
-export interface StoreFiltersSettings {
-  enabled: boolean
-  availableFilters: StoreFilterConfig[]
-  displayOrder: string[]
 }
 
 export interface DynamicFilter {
@@ -28,35 +28,36 @@ export interface DynamicFilter {
 }
 
 /**
- * Get configured filters for a store from the database
+ * Get configured filters for a store from the new subcollection
  */
-export async function getStoreConfiguredFilters(storeId: string): Promise<StoreFiltersSettings> {
+export async function getStoreConfiguredFilters(storeId: string): Promise<StoreFilterConfig[]> {
   try {
     const db = getFirebaseDb()
     if (!db) throw new Error('Firebase not initialized')
 
-    const storeRef = doc(db, 'stores', storeId)
-    const storeDoc = await getDoc(storeRef)
+    // Query the filters subcollection, ordered by order field for visible filters
+    const filtersRef = collection(db, 'stores', storeId, 'filters')
+    const q = query(filtersRef, orderBy('order', 'asc'))
+    const querySnapshot = await getDocs(q)
     
-    if (!storeDoc.exists()) {
-      throw new Error('Store not found')
-    }
+    const filters: StoreFilterConfig[] = []
+    querySnapshot.forEach(doc => {
+      const data = doc.data()
+      filters.push({
+        id: doc.id,
+        name: data.name,
+        type: data.type,
+        visible: data.visible,
+        order: data.order,
+        options: data.options,
+        productCount: data.productCount
+      })
+    })
     
-    const storeData = storeDoc.data()
-    const filtersSettings = storeData?.settings?.filters as StoreFiltersSettings
-    
-    return filtersSettings || {
-      enabled: false,
-      availableFilters: [],
-      displayOrder: []
-    }
+    return filters
   } catch (error) {
-    console.error('Error loading store filters settings:', error)
-    return {
-      enabled: false,
-      availableFilters: [],
-      displayOrder: []
-    }
+    console.error('Error loading store filters from subcollection:', error)
+    return []
   }
 }
 
@@ -65,16 +66,16 @@ export async function getStoreConfiguredFilters(storeId: string): Promise<StoreF
  */
 export const extractConfiguredFilters = (
   products: PublicProduct[], 
-  storeConfig: StoreFiltersSettings
+  storeFilters: StoreFilterConfig[]
 ): DynamicFilter[] => {
-  if (!storeConfig.enabled || storeConfig.availableFilters.length === 0) {
+  if (storeFilters.length === 0) {
     return []
   }
 
   const filtersMap = new Map<string, Set<string>>()
   
   // Only extract values for configured and visible filters
-  const visibleFilters = storeConfig.availableFilters.filter(f => f.visible)
+  const visibleFilters = storeFilters.filter(f => f.visible)
   
   // Extract values from products for each configured filter
   products.forEach(product => {
@@ -106,14 +107,14 @@ export const extractConfiguredFilters = (
     }
   })
   
-  // Convert to DynamicFilter array using display order
+  // Convert to DynamicFilter array using order from configuration
   const filters: DynamicFilter[] = []
   
-  storeConfig.displayOrder.forEach(filterId => {
-    const filterConfig = visibleFilters.find(f => f.id === filterId)
-    const valueSet = filtersMap.get(filterId)
+  // Sort visible filters by order and create filters only for those with values
+  visibleFilters.sort((a, b) => a.order - b.order).forEach(filterConfig => {
+    const valueSet = filtersMap.get(filterConfig.id)
     
-    if (filterConfig && valueSet && valueSet.size > 0) {
+    if (valueSet && valueSet.size > 0) {
       filters.push({
         id: filterConfig.id,
         name: filterConfig.name,

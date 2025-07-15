@@ -52,6 +52,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '475px',
+      },
       colors: {
         // Colores de marca centralizados
         'brand-primary': brandColors.primary,
