@@ -1,4 +1,14 @@
-import { doc, updateDoc, getDoc } from 'firebase/firestore'
+import { 
+  doc, 
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  writeBatch,
+  getDoc,
+  setDoc,
+  deleteDoc
+} from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 import { getProducts, ProductWithId } from './products'
 
@@ -6,17 +16,10 @@ export interface StoreFilterConfig {
   id: string
   name: string
   type: 'text' | 'select' | 'tags' | 'range'
-  enabled: boolean
   visible: boolean
   order: number
   options: string[]
   productCount: number
-}
-
-export interface StoreFiltersSettings {
-  enabled: boolean
-  availableFilters: StoreFilterConfig[]
-  displayOrder: string[]
 }
 
 /**
@@ -30,7 +33,7 @@ export async function extractFiltersFromProducts(storeId: string): Promise<Store
     const filterCounts = new Map<string, number>()
     
     // Extract metadata from all products
-    products.forEach((product: ProductWithId) => {
+    products.forEach(product => {
       if (product.metaFieldValues) {
         Object.entries(product.metaFieldValues).forEach(([fieldId, value]) => {
           if (!filtersMap.has(fieldId)) {
@@ -65,7 +68,6 @@ export async function extractFiltersFromProducts(storeId: string): Promise<Store
           id: fieldId,
           name: getFilterDisplayName(fieldId),
           type: getFilterType(fieldId),
-          enabled: true,
           visible: true,
           order: filters.length,
           options: Array.from(valueSet).sort(),
@@ -146,21 +148,29 @@ export async function saveStoreFilters(storeId: string, filters: StoreFilterConf
     const db = getFirebaseDb()
     if (!db) throw new Error('Firebase not initialized')
 
-    const storeRef = doc(db, 'stores', storeId)
-    
-    const filtersSettings: StoreFiltersSettings = {
-      enabled: true,
-      availableFilters: filters,
-      displayOrder: filters
-        .filter(f => f.visible)
-        .sort((a, b) => a.order - b.order)
-        .map(f => f.id)
-    }
-    
-    await updateDoc(storeRef, {
-      'settings.filters': filtersSettings,
-      updatedAt: new Date()
+    // Get a new batch
+    const batch = writeBatch(db)
+
+    // Reference to the filters collection
+    const filtersRef = collection(db, 'stores', storeId, 'filters')
+
+    // Delete all existing filters first
+    const existingFilters = await getDocs(filtersRef)
+    existingFilters.forEach(doc => {
+      batch.delete(doc.ref)
     })
+
+    // Add all new filters
+    filters.forEach(filter => {
+      const filterDoc = doc(filtersRef, filter.id)
+      batch.set(filterDoc, {
+        ...filter,
+        updatedAt: new Date()
+      })
+    })
+
+    // Commit the batch
+    await batch.commit()
   } catch (error) {
     console.error('Error saving store filters:', error)
     throw error
@@ -175,52 +185,28 @@ export async function getStoreFilters(storeId: string): Promise<StoreFilterConfi
     const db = getFirebaseDb()
     if (!db) throw new Error('Firebase not initialized')
 
-    const storeRef = doc(db, 'stores', storeId)
-    const storeDoc = await getDoc(storeRef)
+    // Query the filters subcollection, ordered by order field
+    const filtersRef = collection(db, 'stores', storeId, 'filters')
+    const q = query(filtersRef, orderBy('order', 'asc'))
+    const querySnapshot = await getDocs(q)
     
-    if (!storeDoc.exists()) {
-      throw new Error('Store not found')
-    }
+    const filters: StoreFilterConfig[] = []
+    querySnapshot.forEach(doc => {
+      const data = doc.data()
+      filters.push({
+        id: doc.id,
+        name: data.name,
+        type: data.type,
+        visible: data.visible,
+        order: data.order,
+        options: data.options,
+        productCount: data.productCount
+      })
+    })
     
-    const storeData = storeDoc.data()
-    const filtersSettings = storeData?.settings?.filters as StoreFiltersSettings
-    
-    return filtersSettings?.availableFilters || []
+    return filters
   } catch (error) {
     console.error('Error loading store filters:', error)
     return []
-  }
-}
-
-/**
- * Get store filters settings (complete configuration)
- */
-export async function getStoreFiltersSettings(storeId: string): Promise<StoreFiltersSettings> {
-  try {
-    const db = getFirebaseDb()
-    if (!db) throw new Error('Firebase not initialized')
-
-    const storeRef = doc(db, 'stores', storeId)
-    const storeDoc = await getDoc(storeRef)
-    
-    if (!storeDoc.exists()) {
-      throw new Error('Store not found')
-    }
-    
-    const storeData = storeDoc.data()
-    const filtersSettings = storeData?.settings?.filters as StoreFiltersSettings
-    
-    return filtersSettings || {
-      enabled: false,
-      availableFilters: [],
-      displayOrder: []
-    }
-  } catch (error) {
-    console.error('Error loading store filters settings:', error)
-    return {
-      enabled: false,
-      availableFilters: [],
-      displayOrder: []
-    }
   }
 } 

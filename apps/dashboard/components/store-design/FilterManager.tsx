@@ -7,7 +7,7 @@ import {
   StoreFilterConfig, 
   extractFiltersFromProducts, 
   saveStoreFilters, 
-  getStoreFilters 
+  getStoreFilters
 } from '../../lib/store-filters'
 
 interface FilterManagerProps {
@@ -63,7 +63,22 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       
       // Extract fresh filters from products
       const extractedFilters = await extractFiltersFromProducts(store.id)
-      setAvailableFilters(extractedFilters)
+      
+      // Preserve visibility and order from existing filters
+      const updatedFilters = extractedFilters.map(newFilter => {
+        const existingFilter = availableFilters.find(f => f.id === newFilter.id)
+        if (existingFilter) {
+          return {
+            ...newFilter,
+            visible: existingFilter.visible,
+            order: existingFilter.order
+          }
+        }
+        return newFilter
+      })
+
+      setAvailableFilters(updatedFilters)
+      await saveFilters(updatedFilters)
       
       setSuccessMessage('Filtros actualizados desde los productos')
       setTimeout(() => setSuccessMessage(null), 3000)
@@ -78,7 +93,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
   const handleFilterToggle = async (filterId: string) => {
     const updatedFilters = availableFilters.map(filter => 
       filter.id === filterId 
-        ? { ...filter, visible: !filter.visible, enabled: !filter.visible ? true : filter.enabled }
+        ? { ...filter, visible: !filter.visible }
         : filter
     )
     
@@ -202,158 +217,158 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
             </p>
           </div>
         ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="all-filters">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                    {/* Visible filters (draggable) */}
-                    {getVisibleFilters().map((filter, index) => (
-                      <Draggable key={filter.id} draggableId={filter.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow ${
-                              snapshot.isDragging ? 'shadow-lg opacity-80' : ''
-                            }`}
-                          >
-                            <div className="p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4 flex-1">
-                                  {/* Drag handle */}
-                                  <div
-                                    {...provided.dragHandleProps}
-                                    className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1"
-                                    title="Arrastra para reordenar"
-                                  >
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                                      <circle cx="2" cy="2" r="1"/>
-                                      <circle cx="6" cy="2" r="1"/>
-                                      <circle cx="2" cy="6" r="1"/>
-                                      <circle cx="6" cy="6" r="1"/>
-                                      <circle cx="2" cy="10" r="1"/>
-                                      <circle cx="6" cy="10" r="1"/>
-                                    </svg>
-                                  </div>
-
-                                  {/* Icono del filtro */}
-                                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
-                                    </svg>
-                                  </div>
-
-                                  {/* Información del filtro */}
-                                  <div className="flex-1 mr-4">
-                                    <div className="flex items-center gap-2">
-                                      <h3 className="text-sm font-medium text-gray-900">
-                                        {filter.name}
-                                      </h3>
-                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                        filter.type === 'tags' ? 'bg-blue-100 text-blue-800' :
-                                        filter.type === 'select' ? 'bg-green-100 text-green-800' :
-                                        filter.type === 'range' ? 'bg-purple-100 text-purple-800' :
-                                        'bg-gray-100 text-gray-800'
-                                      }`}>
-                                        {filter.type}
-                                      </span>
-                                      <span className="text-sm font-medium text-blue-600">
-                                        #{index + 1}
-                                      </span>
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-1 line-clamp-2 pr-8">
-                                      {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
-                                      {filter.options.length > 3 && '...'}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                      Filtro activo • <span className="ml-1">{filter.productCount} productos</span>
-                                    </p>
-                                  </div>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="all-filters">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                  {/* Visible filters (draggable) */}
+                  {getVisibleFilters().map((filter, index) => (
+                    <Draggable key={filter.id} draggableId={filter.id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={`bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+                            snapshot.isDragging ? 'shadow-lg opacity-80' : ''
+                          }`}
+                        >
+                          <div className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4 flex-1">
+                                {/* Drag handle */}
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1"
+                                  title="Arrastra para reordenar"
+                                >
+                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                                    <circle cx="2" cy="2" r="1"/>
+                                    <circle cx="6" cy="2" r="1"/>
+                                    <circle cx="2" cy="6" r="1"/>
+                                    <circle cx="6" cy="6" r="1"/>
+                                    <circle cx="2" cy="10" r="1"/>
+                                    <circle cx="6" cy="10" r="1"/>
+                                  </svg>
                                 </div>
 
-                                {/* Acciones */}
-                                <div className="flex items-center space-x-2">
-                                  <label className="flex items-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={filter.visible}
-                                      onChange={() => handleFilterToggle(filter.id)}
-                                      className="rounded border-gray-300 text-black focus:ring-gray-500"
-                                      disabled={saving}
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">Visible</span>
-                                  </label>
+                                {/* Icono del filtro */}
+                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+                                  </svg>
+                                </div>
+
+                                {/* Información del filtro */}
+                                <div className="flex-1 mr-4">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-medium text-gray-900">
+                                      {filter.name}
+                                    </h3>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                      filter.type === 'tags' ? 'bg-blue-100 text-blue-800' :
+                                      filter.type === 'select' ? 'bg-green-100 text-green-800' :
+                                      filter.type === 'range' ? 'bg-purple-100 text-purple-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {filter.type}
+                                    </span>
+                                    <span className="text-sm font-medium text-blue-600">
+                                      #{index + 1}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-gray-500 mt-1 line-clamp-2 pr-8">
+                                    {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
+                                    {filter.options.length > 3 && '...'}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    Filtro activo • <span className="ml-1">{filter.productCount} productos</span>
+                                  </p>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    
-                    {/* Hidden filters (non-draggable) */}
-                    {availableFilters.filter(f => !f.visible).map((filter) => (
-                      <div key={filter.id} className="bg-white border rounded-lg shadow-sm opacity-75">
-                        <div className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 flex-1">
-                              {/* Icono de oculto */}
-                              <div className="w-5 h-5 flex items-center justify-center text-gray-300">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464M9.878 9.878a3 3 0 104.243 4.243m0 0L16.536 16.536M14.12 14.12L16.536 16.536" />
-                                </svg>
-                              </div>
 
-                              {/* Icono del filtro deshabilitado */}
-                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
-                                </svg>
+                              {/* Acciones */}
+                              <div className="flex items-center space-x-2">
+                                <label className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={filter.visible}
+                                    onChange={() => handleFilterToggle(filter.id)}
+                                    className="rounded border-gray-300 text-black focus:ring-gray-500"
+                                    disabled={saving}
+                                  />
+                                  <span className="ml-2 text-sm text-gray-700">Visible</span>
+                                </label>
                               </div>
-
-                              {/* Información del filtro */}
-                              <div className="flex-1 mr-4">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="text-sm font-medium text-gray-500">
-                                    {filter.name}
-                                  </h3>
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                    {filter.type}
-                                  </span>
-                                </div>
-                                <p className="text-sm text-gray-400 mt-1 line-clamp-2 pr-8">
-                                  {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
-                                  {filter.options.length > 3 && '...'}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  Filtro oculto • <span className="ml-1">{filter.productCount} productos</span>
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Acciones */}
-                            <div className="flex items-center space-x-2">
-                              <label className="flex items-center">
-                                <input
-                                  type="checkbox"
-                                  checked={filter.visible}
-                                  onChange={() => handleFilterToggle(filter.id)}
-                                  className="rounded border-gray-300 text-black focus:ring-gray-500"
-                                  disabled={saving}
-                                />
-                                <span className="ml-2 text-sm text-gray-700">Visible</span>
-                              </label>
                             </div>
                           </div>
                         </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  
+                  {/* Hidden filters (non-draggable) */}
+                  {availableFilters.filter(f => !f.visible).map((filter) => (
+                    <div key={filter.id} className="bg-white border rounded-lg shadow-sm opacity-75">
+                      <div className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 flex-1">
+                            {/* Icono de oculto */}
+                            <div className="w-5 h-5 flex items-center justify-center text-gray-300">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464M9.878 9.878a3 3 0 104.243 4.243m0 0L16.536 16.536M14.12 14.12L16.536 16.536" />
+                              </svg>
+                            </div>
+
+                            {/* Icono del filtro deshabilitado */}
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+                              </svg>
+                            </div>
+
+                            {/* Información del filtro */}
+                            <div className="flex-1 mr-4">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-medium text-gray-500">
+                                  {filter.name}
+                                </h3>
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                  {filter.type}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-400 mt-1 line-clamp-2 pr-8">
+                                {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
+                                {filter.options.length > 3 && '...'}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Filtro oculto • <span className="ml-1">{filter.productCount} productos</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Acciones */}
+                          <div className="flex items-center space-x-2">
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={filter.visible}
+                                onChange={() => handleFilterToggle(filter.id)}
+                                className="rounded border-gray-300 text-black focus:ring-gray-500"
+                                disabled={saving}
+                              />
+                              <span className="ml-2 text-sm text-gray-700">Visible</span>
+                            </label>
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                    
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                    </div>
+                  ))}
+                  
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
       </div>
 
