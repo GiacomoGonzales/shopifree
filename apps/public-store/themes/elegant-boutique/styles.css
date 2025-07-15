@@ -46,18 +46,50 @@
    ESTILOS GLOBALES DEL TEMA
    ================================ */
 
-/* Asegurar que el body tenga la altura correcta */
+/* Asegurar que el body tenga la altura correcta - más específico */
 html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Evitar el problema de viewport height en móvil */
 @media (max-width: 768px) {
   html, body {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Asegurar que el contenedor principal no tenga altura extra */
+  .min-h-screen {
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    max-height: 100vh !important;
+    max-height: -webkit-fill-available !important;
+  }
+  
+  /* Eliminar cualquier padding/margin extra en móvil */
+  body {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    position: relative !important;
+  }
+  
+  /* Asegurar que el footer no tenga espacio extra después */
+  footer {
+    margin-bottom: 0 !important;
+    padding-bottom: 1rem !important;
+    position: relative !important;
+  }
+  
+  /* Eliminar cualquier espacio después del footer */
+  footer::after {
+    content: '' !important;
+    display: block !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
