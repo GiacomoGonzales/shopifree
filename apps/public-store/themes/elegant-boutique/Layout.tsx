@@ -877,13 +877,13 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
       <ElegantBoutiqueCart />
 
       {/* Footer */}
-      <footer className="border-t mt-20" style={{ 
+      <footer className="border-t mt-8 md:mt-16" style={{ 
         backgroundColor: 'rgb(var(--theme-secondary))', 
         borderColor: 'rgb(var(--theme-primary) / 0.1)' 
       }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: 'var(--theme-section-padding) 1rem' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: '2rem 1rem' }}>
           {/* Separador elegante */}
-          <div className="separator-elegant mb-12"></div>
+          <div className="separator-elegant mb-6 md:mb-12"></div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {/* Información de la tienda */}

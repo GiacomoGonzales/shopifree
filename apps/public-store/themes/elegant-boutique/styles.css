@@ -132,7 +132,13 @@
 .separator-elegant {
   position: relative;
   text-align: center;
-  margin: var(--theme-section-padding) 0;
+  margin: 1.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .separator-elegant {
+    margin: var(--theme-section-padding) 0;
+  }
 }
 
 .separator-elegant::before {
