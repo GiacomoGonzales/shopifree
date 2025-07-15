@@ -9,7 +9,7 @@ import { searchProducts, getSearchSuggestions, PublicProduct } from '../../lib/p
 import { useStore } from '../../lib/store-context'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
-import Cart from '../../components/cart/Cart'
+import ElegantBoutiqueCart from './Cart'
 import './styles.css'
 
 // Iconos elegantes para el header
@@ -175,6 +175,18 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [mobileSearchOpen])
 
+  // Efecto para cerrar búsqueda cuando cambia la ruta (navegación completada)
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setSearchOpen(false)
+      setMobileSearchOpen(false)
+      setShowSuggestions(false)
+    }
+
+    // Cerrar búsqueda cuando la ruta cambia
+    handleRouteChange()
+  }, [pathname])
+
   // Función para manejar la búsqueda con debounce
   const handleSearch = async (query: string) => {
     setSearchQuery(query)
@@ -217,9 +229,12 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
   // Función para ejecutar búsqueda y guardar en historial
   const executeSearch = (query: string) => {
     if (query.trim()) {
+      // Agregar al historial
       const newHistory = [query, ...searchHistory.filter(item => item !== query)].slice(0, 5)
       setSearchHistory(newHistory)
       localStorage.setItem('searchHistory', JSON.stringify(newHistory))
+      
+      // Ejecutar búsqueda para mostrar productos dinámicamente
       handleSearch(query)
     }
   }
@@ -499,9 +514,10 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
             ? 'opacity-100 transform translate-y-0' 
             : 'opacity-0 transform -translate-y-4 pointer-events-none'
         }`} style={{ 
-          backgroundColor: 'rgba(var(--theme-neutral-light), 0.98)',
+          backgroundColor: 'rgb(var(--theme-neutral-light))',
           borderColor: 'rgb(var(--theme-primary) / 0.1)',
-          backdropFilter: 'blur(20px)'
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 8px 32px rgba(78, 70, 65, 0.15)'
         }}>
           <div className="max-w-2xl mx-auto px-4 py-8">
             {/* Barra de búsqueda */}
@@ -514,7 +530,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && executeSearch(searchQuery)}
-                  className="input-boutique text-lg py-4"
+                  className="input-boutique-search text-lg py-4"
                 />
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
                   <Icons.Search />
@@ -618,7 +634,12 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
                       ))}
                     </div>
                     <button 
-                      onClick={() => executeSearch(searchQuery)}
+                      onClick={() => {
+                        // Cerrar búsqueda y navegar a home con query
+                        setSearchOpen(false)
+                        setMobileSearchOpen(false)
+                        nextRouter.push(`/?search=${encodeURIComponent(searchQuery)}`)
+                      }}
                       className="mt-4 w-full btn-boutique-primary"
                     >
                       Ver todos los resultados
@@ -664,7 +685,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && executeSearch(searchQuery)}
-                  className="input-boutique pl-10"
+                  className="input-boutique-search-mobile"
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
                   <Icons.Search />
@@ -680,15 +701,116 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
                 )}
               </div>
 
-              {/* Contenido similar al desktop pero adaptado para móvil */}
-              {/* ... contenido de búsqueda móvil ... */}
+              {/* Contenido de búsqueda móvil */}
+              {!searchQuery && (
+                <div className="space-y-6">
+                  {/* Historial de búsqueda */}
+                  {searchHistory.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium mb-3 flex items-center text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                        <Icons.Clock />
+                        <span className="ml-2">Búsquedas recientes</span>
+                      </h3>
+                      <div className="space-y-2">
+                        {searchHistory.map((item, index) => (
+                          <button
+                            key={index}
+                            onClick={() => executeSearch(item)}
+                            className="w-full text-left px-3 py-2 rounded-sm hover-elegant transition-colors text-sans"
+                            style={{ color: 'rgb(var(--theme-neutral-dark))' }}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sugerencias populares */}
+                  {searchSuggestions.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium mb-3 flex items-center text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                        <Icons.TrendingUp />
+                        <span className="ml-2">Sugerencias</span>
+                      </h3>
+                      <div className="space-y-2">
+                        {searchSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => executeSearch(suggestion)}
+                            className="w-full text-left px-3 py-2 rounded-sm hover-elegant transition-colors text-sans"
+                            style={{ color: 'rgb(var(--theme-neutral-dark))' }}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Resultados de búsqueda móvil */}
+              {showSuggestions && (
+                <div>
+                  {isSearching ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="shimmer-elegant w-8 h-8 rounded-full"></div>
+                      <span className="ml-3 text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>Buscando...</span>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      <h3 className="text-sm font-medium mb-3 text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>Resultados ({searchResults.length})</h3>
+                      <div className="space-y-3">
+                        {searchResults.map((product) => (
+                          <Link 
+                            key={product.id} 
+                            href={`/${product.slug}`}
+                            className="flex items-center space-x-3 p-3 rounded-sm hover-elegant transition-colors"
+                            style={{ backgroundColor: 'rgba(var(--theme-secondary), 0.5)' }}
+                          >
+                            <div className="w-16 h-16 rounded-sm overflow-hidden" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
+                              <img 
+                                src={product.image.includes('.mp4') || product.image.includes('.webm') || product.image.includes('.mov') 
+                                  ? product.image.replace(/\.(mp4|webm|mov)$/, '.jpg')
+                                  : product.image}
+                                alt={product.name} 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sans" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>{product.name}</h4>
+                              <p className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>{getCurrencySymbol(tienda?.currency || 'USD')}{product.price}</p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                      <button 
+                        onClick={() => {
+                          // Cerrar búsqueda y navegar a home con query
+                          setSearchOpen(false)
+                          setMobileSearchOpen(false)
+                          nextRouter.push(`/?search=${encodeURIComponent(searchQuery)}`)
+                        }}
+                        className="mt-4 w-full btn-boutique-primary"
+                      >
+                        Ver todos los resultados
+                      </button>
+                    </>
+                  ) : searchQuery.length >= 2 && !isSearching ? (
+                    <div className="text-center py-8">
+                      <p className="text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>No se encontraron productos para "{searchQuery}"</p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* Menú móvil */}
-      <div className={`fixed inset-0 z-40 md:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-[60] md:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         {/* Overlay */}
         <div 
           className={`fixed inset-0 transition-opacity duration-300 ${
@@ -752,7 +874,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
       </main>
 
       {/* Carrito */}
-      <Cart />
+      <ElegantBoutiqueCart />
 
       {/* Footer */}
       <footer className="border-t mt-20" style={{ 

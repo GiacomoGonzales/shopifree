@@ -527,6 +527,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     muted={true}
                     playsInline={true}
                     preload="metadata"
+                    poster={producto.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
                   />
                 ) : (
                   <Image

@@ -687,7 +687,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
       )}
 
       {/* Menú móvil */}
-      <div className={`fixed inset-0 z-40 md:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-[60] md:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         {/* Overlay */}
         <div 
           className={`fixed inset-0 bg-black transition-opacity duration-300 ${

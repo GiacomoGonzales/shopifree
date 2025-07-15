@@ -80,7 +80,7 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
 
   return (
     <div style={{ backgroundColor: 'rgb(var(--theme-neutral-light))' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: 'var(--theme-section-padding) 1rem' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 elegant-boutique-product-container">
         {/* Breadcrumb */}
         <nav className="mb-8">
           <div className="flex items-center space-x-3 text-sm text-sans">
@@ -133,6 +133,8 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
                   loop={true}
                   muted={true}
                   playsInline={true}
+                  preload="metadata"
+                  poster={images[selectedImageIndex].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
                 />
               ) : (
                 <div className="product-image-boutique w-full h-full">
@@ -168,12 +170,27 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
                       '--tw-ring-color': selectedImageIndex === index ? 'rgb(var(--theme-accent))' : 'transparent'
                     } as React.CSSProperties}
                   >
-                    <Image
-                      src={image.url}
-                      alt={`${product.name} ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+                    {image.type === 'video' ? (
+                      <VideoPlayer
+                        src={image.url}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        showControls={false}
+                        autoPlay={false}
+                        loop={false}
+                        muted={true}
+                        playsInline={true}
+                        preload="metadata"
+                        poster={image.url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
+                      />
+                    ) : (
+                      <Image
+                        src={image.url}
+                        alt={`${product.name} ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    )}
                   </button>
                 ))}
               </div>
@@ -240,12 +257,13 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
               >
                 Descripción
               </h3>
-              <p 
-                className="leading-relaxed text-sans"
+              <div 
+                className="leading-relaxed text-sans product-description-elegant"
                 style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-              >
-                {product.description || 'Pieza elegante cuidadosamente seleccionada para nuestra colección premium. Diseñada con los más altos estándares de calidad y sofisticación.'}
-              </p>
+                dangerouslySetInnerHTML={{
+                  __html: product.description || 'Pieza elegante cuidadosamente seleccionada para nuestra colección premium. Diseñada con los más altos estándares de calidad y sofisticación.'
+                }}
+              />
             </div>
 
             {/* Cantidad y agregar al carrito */}

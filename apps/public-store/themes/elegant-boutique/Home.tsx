@@ -764,6 +764,7 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
                       muted={true}
                       playsInline={true}
                       preload="metadata"
+                      poster={producto.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
                     />
                   ) : (
                     <div className="product-image-boutique w-full h-full">

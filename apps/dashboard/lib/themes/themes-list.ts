@@ -24,7 +24,7 @@ export const availableThemes: Theme[] = [
     id: 'mobile-modern',
     nombre: 'Mobile Modern',
     descripcion: 'Diseño optimizado para móviles con colores vibrantes y una experiencia táctil moderna. Ideal para audiencias jóvenes.',
-    preview: '/themes/mobile-modern/preview.jpg',
+    preview: '/themes/mobile-modern/preview.svg',
     category: 'modern',
     recommended: true,
     features: [
@@ -42,7 +42,7 @@ export const availableThemes: Theme[] = [
     id: 'minimal-sushi',
     nombre: 'Minimal Sushi',
     descripcion: 'Diseño minimalista con énfasis en la tipografía y el espacio en blanco. Ideal para tiendas de moda y lifestyle.',
-    preview: '/themes/minimal-sushi/preview.jpg',
+    preview: '/themes/minimal-sushi/preview.svg',
     category: 'minimal',
     features: [
       'Estilo minimalista',
@@ -59,7 +59,7 @@ export const availableThemes: Theme[] = [
     id: 'pet-friendly',
     nombre: 'Pet Friendly',
     descripcion: 'Tema alegre y colorido perfecto para tiendas de mascotas y productos relacionados con animales.',
-    preview: '/themes/pet-friendly/preview.jpg',
+    preview: '/themes/pet-friendly/preview.svg',
     category: 'bold',
     features: [
       'Colores vibrantes',
@@ -76,7 +76,7 @@ export const availableThemes: Theme[] = [
     id: 'minimal-clean',
     nombre: 'Minimal Clean',
     descripcion: 'Diseño ultraminimalista con líneas limpias y espacios amplios. Perfecto para productos premium.',
-    preview: '/themes/minimal-clean/preview.jpg',
+    preview: '/themes/minimal-clean/preview.svg',
     category: 'minimal',
     features: [
       'Ultra minimalista',

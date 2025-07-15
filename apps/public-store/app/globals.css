@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Variables del sistema de temas centralizado para Tienda Pública */
-    --store-primary: 79 70 229; /* brandColors.primary -> #4F46E5 */
+    --store-primary: 107 114 128; /* Neutral gray -> #6B7280 */
     --store-secondary: 6 182 212; /* brandColors.secondary -> #06B6D4 */
     --store-accent: 245 158 11; /* brandColors.accent -> #F59E0B */
     --store-success: 16 185 129; /* brandColors.success -> #10B981 */

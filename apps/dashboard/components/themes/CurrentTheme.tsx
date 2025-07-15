@@ -50,8 +50,10 @@ export default function CurrentTheme() {
                 fill
                 className="object-cover transform scale-105"
                 onError={(e) => {
+                  console.warn(`Failed to load current theme preview: ${currentTheme.preview}`)
+                  // Fallback to placeholder
                   const target = e.target as HTMLImageElement;
-                  target.src = '/themes/placeholder-theme.jpg';
+                  target.src = '/themes/placeholder-theme.svg';
                 }}
               />
             </div>

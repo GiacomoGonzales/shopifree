@@ -140,6 +140,7 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
                   muted={true}
                   playsInline={true}
                   preload="metadata"
+                  poster={productMedia[selectedImageIndex].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
                 />
               ) : (
                 <img
@@ -170,11 +171,12 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
                           alt={`${product.name} ${index + 1}`}
                           className="w-full h-full object-cover"
                           showControls={false}
-                          autoPlay={true}
-                          loop={true}
+                          autoPlay={false}
+                          loop={false}
                           muted={true}
                           playsInline={true}
                           preload="metadata"
+                          poster={media.url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
                         />
                         {/* Video play icon overlay */}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">

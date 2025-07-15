@@ -77,22 +77,25 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
         )}
 
         {/* Actual Image */}
-        <Image
-          src={theme.preview}
-          alt={`Vista previa del tema ${theme.nombre}`}
-          fill
-          className={`
-            object-cover transition-all duration-500
-            ${imageLoaded ? 'opacity-100' : 'opacity-0'}
-            ${isSelected ? 'scale-105' : 'group-hover:scale-105'}
-          `}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => {
-            setImageError(true)
-            setImageLoaded(false)
-          }}
-          priority={isSelected} // Prioridad para el tema seleccionado
-        />
+        {!imageError && (
+          <Image
+            src={theme.preview}
+            alt={`Vista previa del tema ${theme.nombre}`}
+            fill
+            className={`
+              object-cover transition-all duration-500
+              ${imageLoaded ? 'opacity-100' : 'opacity-0'}
+              ${isSelected ? 'scale-105' : 'group-hover:scale-105'}
+            `}
+            onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              console.warn(`Failed to load theme preview: ${theme.preview}`)
+              setImageError(true)
+              setImageLoaded(false)
+            }}
+            priority={isSelected} // Prioridad para el tema seleccionado
+          />
+        )}
         
         {/* Overlay gradiente para mejor legibilidad */}
         <div className={`

@@ -670,7 +670,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 key={producto.id} 
                 href={`/${producto.slug}`}
                 className={`bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block ${
-                  viewMode === 'list' ? 'flex flex-row items-center gap-4' : 'flex flex-col'
+                  viewMode === 'list' ? 'flex flex-row items-center gap-4 p-4' : 'flex flex-col'
                 }`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -691,6 +691,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     muted={true}
                     playsInline={true}
                     preload="metadata"
+                    poster={producto.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
                   />
                 ) : (
                   <Image
@@ -702,7 +703,11 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 )}
                 {/* Mostrar "Nuevo" para productos recientes - Oculto en vista lista */}
                 {viewMode !== 'list' && (
-                  <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
+                  <span className={`absolute bg-neutral-900 text-white font-medium rounded-full ${
+                    viewMode === 'compact' 
+                      ? 'top-2 left-2 px-1.5 py-0.5 text-xs' 
+                      : 'top-3 left-3 px-2 py-1 text-xs'
+                  }`} style={{ fontSize: viewMode === 'compact' ? '0.625rem' : '0.75rem' }}>
                     Nuevo
                   </span>
                 )}
@@ -718,7 +723,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
               {/* Product Info */}
               <div className={`bg-white ${
                 viewMode === 'list' 
-                  ? 'flex-1 p-4 space-y-2' 
+                  ? 'flex-1 space-y-2' 
                   : 'p-6 pt-0 space-y-3'
               }`}>
                 <h3 className={`font-light text-neutral-900 md:group-hover:text-neutral-600 transition-colors duration-200 ${
