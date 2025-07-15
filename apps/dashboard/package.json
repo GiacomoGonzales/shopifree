@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next out",
-    "prebuild": "echo 'Building dashboard...'"
+    "clean": "rm -rf .next out"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

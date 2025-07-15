@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run theme:build && node build-dashboard.js",
+  "buildCommand": "cd packages/ui && npm run build && cd ../types && npm run build && cd ../../apps/dashboard && npm run build",
   "outputDirectory": "apps/dashboard/.next",
   "installCommand": "npm install",
   "framework": "nextjs"

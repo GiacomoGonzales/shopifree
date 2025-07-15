@@ -1,0 +1,26 @@
+
+> @shopifree/dashboard@1.0.0 prebuild
+> echo 'Building dashboard...'
+
+'Building dashboard...'
+
+> @shopifree/dashboard@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.30
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+uncaughtException [Error: EPERM: operation not permitted, open 'C:\Users\giaco\Shopifree\apps\dashboard\.next\trace'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'open',
+  path: 'C:\\Users\\giaco\\Shopifree\\apps\\dashboard\\.next\\trace'
+}
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Users\giaco\Shopifree\apps\dashboard
+npm error workspace @shopifree/dashboard@1.0.0
+npm error location C:\Users\giaco\Shopifree\apps\dashboard
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
