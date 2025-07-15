@@ -470,8 +470,8 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
       <div className="separator-elegant"></div>
 
       {/* Featured Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: 'var(--theme-section-padding) 1rem' }}>
-        <div className="text-center space-y-6 mb-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: '2rem 1rem' }}>
+        <div className="text-center space-y-6 mb-8">
           <h2 
             className="text-3xl md:text-4xl font-light text-serif"
             style={{ color: 'rgb(var(--theme-neutral-dark))' }}
@@ -554,7 +554,7 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
       </section>
 
       {/* Products Grid */}
-      <section id="productos-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: 'var(--theme-section-padding) 1rem' }}>
+      <section id="productos-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: '1rem 1rem' }}>
         {/* Filtros y contador */}
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="text-center sm:text-left">

@@ -25,7 +25,7 @@
   --theme-font-body: 'Inter', sans-serif;
   
   /* === ESPACIADO === */
-  --theme-section-padding: 5rem;      /* 80px */
+  --theme-section-padding: 3rem;      /* 48px */
   --theme-card-padding: 2rem;         /* 32px */
   --theme-element-gap: 2rem;          /* 32px */
   --theme-grid-gap: 2rem;             /* 32px */
