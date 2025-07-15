@@ -85,11 +85,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Temporalmente deshabilitado para debugging
-  matcher: [],
-  
-  // Configuración original comentada:
-  // matcher: [
-  //   '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  // ],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 } 
