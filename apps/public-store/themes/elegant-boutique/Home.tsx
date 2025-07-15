@@ -504,7 +504,7 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
         )}
 
         {/* Category pills */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
           {categories.map((category) => {
             const isParentCategory = !selectedParentCategory && parentCategories.find(cat => cat.slug === category)
             const hasSubcategories = isParentCategory && subcategoriesByParent[parentCategories.find(cat => cat.slug === category)?.id || '']?.length > 0
@@ -556,7 +556,7 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
       {/* Products Grid */}
       <section id="productos-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ padding: 'var(--theme-section-padding) 1rem' }}>
         {/* Filtros y contador */}
-        <div className="mb-12 flex flex-col sm:flex-row justify-between items-center gap-6">
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="text-center sm:text-left">
             <p className="font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
               {productosAMostrar.length === 0 
