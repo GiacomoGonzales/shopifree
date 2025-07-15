@@ -281,7 +281,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                                       className="rounded border-gray-300 text-black focus:ring-gray-500"
                                       disabled={saving}
                                     />
-                                    <span className="ml-2 text-sm text-gray-700">Mostrar en tienda</span>
+                                    <span className="ml-2 text-sm text-gray-700">Visible</span>
                                   </label>
                                 </div>
                               </div>
@@ -341,7 +341,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                                   className="rounded border-gray-300 text-black focus:ring-gray-500"
                                   disabled={saving}
                                 />
-                                <span className="ml-2 text-sm text-gray-700">Mostrar en tienda</span>
+                                <span className="ml-2 text-sm text-gray-700">Visible</span>
                               </label>
                             </div>
                           </div>
