@@ -125,7 +125,7 @@ export default function ElegantBoutiqueCart() {
         
         {/* Panel deslizante */}
         <div 
-          className={`fixed top-0 right-0 h-full w-96 z-50 transform transition-all duration-300 ease-out ${
+          className={`fixed top-0 right-0 h-full w-96 z-50 transform transition-all duration-300 ease-out flex flex-col ${
             state.isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
           }`}
           style={{
@@ -135,15 +135,15 @@ export default function ElegantBoutiqueCart() {
         >
           
           {/* Header del panel */}
-          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'rgb(var(--theme-primary) / 0.1)' }}>
+          <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: 'rgb(var(--theme-primary) / 0.1)' }}>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
                 <div style={{ color: 'rgb(var(--theme-accent))' }}>
                   <Icons.ShoppingBag />
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                <h2 className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
                   Tu Carrito
                 </h2>
                 <p className="text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
@@ -161,7 +161,7 @@ export default function ElegantBoutiqueCart() {
           </div>
 
           {/* Contenido del carrito */}
-          <div className="flex flex-col h-full">
+          <div className="flex-1 flex flex-col min-h-0">
             {state.items.length === 0 ? (
               /* Carrito vacío */
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
@@ -185,14 +185,14 @@ export default function ElegantBoutiqueCart() {
             ) : (
               <>
                 {/* Lista de productos */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: '0' }}>
                   {state.items.map((item) => (
                     <div 
                       key={item.id} 
-                      className="flex items-start space-x-4 p-4 rounded-sm card-boutique"
+                      className="flex items-start space-x-3 p-3 rounded-sm card-boutique"
                     >
                       {/* Imagen del producto */}
-                      <div className="relative w-16 h-16 rounded-sm overflow-hidden flex-shrink-0 product-image-boutique" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
+                      <div className="relative w-14 h-14 rounded-sm overflow-hidden flex-shrink-0 product-image-boutique" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
                         <img
                           src={item.image.includes('.mp4') || item.image.includes('.webm') || item.image.includes('.mov') 
                             ? item.image.replace(/\.(mp4|webm|mov)$/, '.jpg')
@@ -204,7 +204,7 @@ export default function ElegantBoutiqueCart() {
                             if (target.src.includes('.jpg') && item.image.includes('.mp4')) {
                               target.src = item.image.replace('.mp4', '.png');
                             } else if (target.src.includes('.png') && item.image.includes('.mp4')) {
-                              target.src = '/api/placeholder/64/64';
+                              target.src = '/api/placeholder/56/56';
                             }
                           }}
                         />
@@ -265,17 +265,14 @@ export default function ElegantBoutiqueCart() {
                 </div>
 
                 {/* Footer del carrito */}
-                <div className="border-t p-6 space-y-6" style={{ borderColor: 'rgb(var(--theme-primary) / 0.1)' }}>
-                  {/* Separador elegante */}
-                  <div className="separator-elegant"></div>
-                  
+                <div className="flex-shrink-0 border-t p-4" style={{ borderColor: 'rgb(var(--theme-primary) / 0.1)' }}>
                   {/* Total y botón */}
-                  <div className="card-boutique p-6 space-y-4">
+                  <div className="card-boutique p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                      <span className="text-base font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
                         Total
                       </span>
-                      <span className="text-2xl font-bold text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>
+                      <span className="text-xl font-bold text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>
                         {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
                       </span>
                     </div>
@@ -288,19 +285,13 @@ export default function ElegantBoutiqueCart() {
                     </button>
                   </div>
 
-                  {/* Información adicional */}
-                  <div className="space-y-3 text-center">
-                    <div className="flex items-center justify-center space-x-2 text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                  {/* Información adicional compacta */}
+                  <div className="mt-3 text-center">
+                    <div className="flex items-center justify-center space-x-2 text-xs text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
                       <div style={{ color: 'rgb(var(--theme-accent))' }}>
                         <Icons.Truck />
                       </div>
                       <span>Envío gratis desde {getCurrencySymbol(store?.currency || 'USD')} 150</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-2 text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                      <div style={{ color: 'rgb(var(--theme-accent))' }}>
-                        <Icons.Tag />
-                      </div>
-                      <span>¿Tienes un cupón de descuento? Lo podrás aplicar en el checkout</span>
                     </div>
                   </div>
                 </div>

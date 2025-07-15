@@ -3,25 +3,34 @@ import { redirect } from 'next/navigation'
 import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
 import { Tienda } from '../../../lib/types'
 import MiCuentaClient from './MiCuentaClient'
+import dynamic from 'next/dynamic'
+
+// Importar dinámicamente el componente específico del tema Elegant Boutique
+const MiCuentaElegant = dynamic(
+  () => import('../../../themes/elegant-boutique/MiCuenta').then(mod => mod.default).catch(() => {
+    console.error('Elegant Boutique MiCuenta component not found, using default')
+    return MiCuentaClient
+  }),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900"></div>
+      </div>
+    )
+  }
+)
 
 interface MiCuentaPageProps {
   params: { storeSubdomain: string }
 }
 
 export async function generateMetadata({ params }: MiCuentaPageProps): Promise<Metadata> {
-  const tienda = await getStoreBySubdomain(params.storeSubdomain)
+  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
   
-  if (!tienda) {
-    return {
-      title: 'Mi Cuenta',
-      description: 'Accede a tu cuenta'
-    }
-  }
-
   return {
-    title: `Mi Cuenta - ${tienda.storeName}`,
-    description: `Accede a tu cuenta en ${tienda.storeName}. Ve tu historial de pedidos, actualiza tu información personal y gestiona tus preferencias.`,
-    robots: 'noindex, nofollow' // Página privada
+    title: `Mi Cuenta - ${serverStore?.storeName || 'Tienda'}`,
+    description: `Gestiona tu cuenta en ${serverStore?.storeName || 'nuestra tienda'}`,
   }
 }
 
@@ -47,5 +56,11 @@ export default async function MiCuentaPage({ params }: MiCuentaPageProps) {
     socialMedia: clientStore.socialMedia || {}, // Inicializar campo requerido
   }
 
+  // Usar el componente específico del tema si es Elegant Boutique
+  if (tienda.theme === 'elegant-boutique') {
+    return <MiCuentaElegant tienda={tienda} />
+  }
+
+  // Para otros temas, usar el componente por defecto
   return <MiCuentaClient tienda={tienda} />
 } 

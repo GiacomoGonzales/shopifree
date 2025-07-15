@@ -156,8 +156,8 @@ export default function DynamicFilters({
       
       {/* Desktop dropdown */}
       {showFilters && (
-        <div className="hidden md:block absolute top-full right-0 mt-2 w-80 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 max-h-96 overflow-y-auto animate-fade-in">
-          <div className="p-6">
+        <div className="hidden md:block absolute top-full right-0 mt-2 w-80 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 max-h-96 flex flex-col animate-fade-in">
+          <div className="p-6 flex-1 overflow-y-auto" style={{ maxHeight: '300px' }}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-light text-neutral-900">Filtros</h3>
               {hasActiveFilters && (
@@ -243,47 +243,48 @@ export default function DynamicFilters({
               </div>
             )}
 
-            {/* Botones de acción para desktop */}
-            {(hasTempChanges || hasActiveFilters) && (
-              <div className="mt-6 pt-6 border-t border-neutral-100 space-y-3">
+          </div>
+
+          {/* Botones fijos en la parte inferior - Desktop */}
+          {(hasTempChanges || hasActiveFilters) && (
+            <div className="flex-shrink-0 border-t border-neutral-100 p-4 bg-white rounded-b-lg space-y-3">
+              <button
+                onClick={handleApplyFilters}
+                className="w-full bg-neutral-900 text-white py-2 rounded-md font-medium text-sm hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                Aplicar Filtros
+                {getTempActiveFiltersCount() > 0 && (
+                  <span className="bg-white text-neutral-900 text-xs font-medium rounded-full px-2 py-0.5 min-w-[18px] h-4 flex items-center justify-center">
+                    {getTempActiveFiltersCount()}
+                  </span>
+                )}
+              </button>
+
+              {hasActiveFilters && (
                 <button
-                  onClick={handleApplyFilters}
-                  className="w-full bg-neutral-900 text-white py-2 rounded-md font-medium text-sm hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center gap-2"
+                  onClick={handleClearFilters}
+                  className="w-full bg-neutral-100 text-neutral-700 py-2 rounded-md font-medium text-sm hover:bg-neutral-200 transition-colors duration-200 flex items-center justify-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                   </svg>
-                  Aplicar Filtros
-                  {getTempActiveFiltersCount() > 0 && (
-                    <span className="bg-white text-neutral-900 text-xs font-medium rounded-full px-2 py-0.5 min-w-[18px] h-4 flex items-center justify-center">
-                      {getTempActiveFiltersCount()}
-                    </span>
-                  )}
+                  Limpiar Todo
                 </button>
-
-                {hasActiveFilters && (
-                  <button
-                    onClick={handleClearFilters}
-                    className="w-full bg-neutral-100 text-neutral-700 py-2 rounded-md font-medium text-sm hover:bg-neutral-200 transition-colors duration-200 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                    Limpiar Todo
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
       {/* Modal de pantalla completa para móvil con animación suave */}
-      <div className={`fixed inset-0 bg-white z-50 md:hidden flex flex-col overflow-hidden transition-all duration-300 ease-out ${
+      <div className={`fixed inset-0 bg-white z-50 md:hidden flex flex-col transition-all duration-300 ease-out ${
         showFilters ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'
       }`}>
         {/* Header con título y botón de cerrar */}
-        <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-white">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-white flex-shrink-0">
           <h3 className="text-xl font-light text-neutral-900">Filtros</h3>
           <button
             onClick={handleCloseFilters}
@@ -296,7 +297,7 @@ export default function DynamicFilters({
         </div>
 
         {/* Contenido scrolleable */}
-        <div className="flex-1 overflow-y-auto p-4 pb-32">
+        <div className="flex-1 overflow-y-auto p-4">
           {/* Filtro de precio */}
           {tempPriceRangeOptions.length > 0 && (
             <div className="mb-8">
@@ -371,8 +372,8 @@ export default function DynamicFilters({
           )}
         </div>
 
-        {/* Footer fijo con botones */}
-        <div className="bg-white border-t border-neutral-200 p-4 space-y-3">
+        {/* Botones de acción fijos en la parte inferior - Mobile */}
+        <div className="flex-shrink-0 bg-white border-t border-neutral-200 p-4 space-y-3">
           {/* Botón de aplicar filtros */}
           <button
             onClick={handleApplyFilters}
