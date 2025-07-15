@@ -106,10 +106,12 @@ export default function DynamicFilters({
     setShowFilters(false)
   }
 
-  // Prevenir scroll del body cuando el modal está abierto en móvil
+  // Prevenir scroll del body cuando el modal está abierto SOLO en móvil
   useEffect(() => {
-    if (showFilters) {
-      // Similar al carrito, ajustar padding para compensar scrollbar
+    const isMobile = window.innerWidth < 768 // md breakpoint
+    
+    if (showFilters && isMobile) {
+      // Solo bloquear scroll en móvil donde se muestra como modal
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       document.body.style.paddingRight = `${scrollbarWidth}px`
       document.body.style.overflow = 'hidden'
