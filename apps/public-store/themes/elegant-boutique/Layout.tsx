@@ -267,7 +267,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'rgb(var(--theme-neutral-light))' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'rgb(var(--theme-neutral-light))' }}>
       {/* Header */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled 
@@ -869,7 +869,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
       </div>
 
       {/* Contenido principal */}
-      <main className="animate-fadeInUp" style={{ paddingTop: '8rem' /* Ajustado para header más alto */ }}>
+      <main className="animate-fadeInUp flex-1" style={{ paddingTop: '8rem' /* Ajustado para header más alto */ }}>
         {children}
       </main>
 
@@ -877,7 +877,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
       <ElegantBoutiqueCart />
 
       {/* Footer */}
-      <footer className="border-t mt-8 md:mt-16" style={{ 
+      <footer className="border-t mt-auto" style={{ 
         backgroundColor: 'rgb(var(--theme-secondary))', 
         borderColor: 'rgb(var(--theme-primary) / 0.1)' 
       }}>

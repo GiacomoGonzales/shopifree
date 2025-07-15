@@ -43,6 +43,25 @@
 }
 
 /* ================================
+   ESTILOS GLOBALES DEL TEMA
+   ================================ */
+
+/* Asegurar que el body tenga la altura correcta */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Evitar el problema de viewport height en móvil */
+@media (max-width: 768px) {
+  html, body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* ================================
    CLASES UTILITARIAS DEL TEMA
    ================================ */
 
