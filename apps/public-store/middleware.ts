@@ -85,15 +85,11 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Aplicar el middleware a todas las rutas excepto archivos estáticos y API
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  // Temporalmente deshabilitado para debugging
+  matcher: [],
+  
+  // Configuración original comentada:
+  // matcher: [
+  //   '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  // ],
 } 
