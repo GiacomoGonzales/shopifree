@@ -148,7 +148,7 @@ export default function DynamicFilters({
 
       {/* Overlay para móvil con animación */}
       <div 
-        className={`fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300 ease-out ${
+        className={`fixed inset-0 bg-black/50 z-[9998] md:hidden transition-opacity duration-300 ease-out ${
           showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={handleCloseFilters}
@@ -280,9 +280,13 @@ export default function DynamicFilters({
       )}
 
       {/* Modal de pantalla completa para móvil con animación suave */}
-      <div className={`fixed inset-0 bg-white z-50 md:hidden flex flex-col transition-all duration-300 ease-out ${
+      <div className={`fixed inset-0 bg-white z-[9999] md:hidden flex flex-col transition-all duration-300 ease-out ${
         showFilters ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'
-      }`}>
+      }`} style={{ 
+        maxHeight: '100vh',
+        height: '100vh',
+        overflowY: 'hidden'
+      }}>
         {/* Header con título y botón de cerrar */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-white flex-shrink-0">
           <h3 className="text-xl font-light text-neutral-900">Filtros</h3>
@@ -297,7 +301,11 @@ export default function DynamicFilters({
         </div>
 
         {/* Contenido scrolleable */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4" style={{ 
+          maxHeight: 'calc(100vh - 140px)', /* Restar altura del header y botones */
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch'
+        }}>
           {/* Filtro de precio */}
           {tempPriceRangeOptions.length > 0 && (
             <div className="mb-8">
