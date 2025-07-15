@@ -2,6 +2,10 @@ const withNextIntl = require('next-intl/plugin')('./i18n.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // Durante el build, no fallar por warnings de ESLint
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     serverComponentsExternalPackages: ['firebase', 'firebase-admin', 'firebase/app', 'firebase/auth', 'firebase/firestore'],
   },

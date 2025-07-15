@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "cd ../../packages/ui && npm run build && cd ../../apps/dashboard && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next out"
+    "clean": "rm -rf .next out",
+    "prebuild": "echo 'Building dashboard...'"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
