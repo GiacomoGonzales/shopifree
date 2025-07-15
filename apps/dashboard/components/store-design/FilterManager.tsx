@@ -89,15 +89,22 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return
 
-    const reorderedFilters = Array.from(availableFilters)
-    const [reorderedItem] = reorderedFilters.splice(result.source.index, 1)
-    reorderedFilters.splice(result.destination.index, 0, reorderedItem)
+    // Only reorder visible filters
+    const visibleFilters = availableFilters.filter(f => f.visible).sort((a, b) => a.order - b.order)
+    const hiddenFilters = availableFilters.filter(f => !f.visible)
+    
+    const reorderedVisible = Array.from(visibleFilters)
+    const [reorderedItem] = reorderedVisible.splice(result.source.index, 1)
+    reorderedVisible.splice(result.destination.index, 0, reorderedItem)
 
-    // Update order
-    const updatedFilters = reorderedFilters.map((filter, index) => ({
+    // Update order for visible filters
+    const updatedVisible = reorderedVisible.map((filter, index) => ({
       ...filter,
       order: index
     }))
+
+    // Combine with hidden filters (keep their original order)
+    const updatedFilters = [...updatedVisible, ...hiddenFilters]
 
     setAvailableFilters(updatedFilters)
     await saveFilters(updatedFilters)
@@ -127,7 +134,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
   }
 
   const getVisibleFilters = () => {
-    return availableFilters.filter(filter => filter.visible)
+    return availableFilters.filter(filter => filter.visible).sort((a, b) => a.order - b.order)
   }
 
   if (loading) {
@@ -190,14 +197,15 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
         </div>
       )}
 
-      {/* Available filters */}
+      {/* Available filters with integrated drag & drop */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6">
           <h4 className="text-lg font-medium text-gray-900 mb-4">
             Filtros disponibles ({availableFilters.length})
           </h4>
           <p className="text-sm text-gray-500 mb-6">
-            Estos filtros se generan automáticamente basándose en los metadatos de tus productos.
+            Estos filtros se generan automáticamente basándose en los metadatos de tus productos. 
+            Arrastra los filtros visibles para cambiar su orden.
           </p>
           
           {availableFilters.length === 0 ? (
@@ -211,103 +219,120 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {availableFilters.map((filter) => (
-                <div key={filter.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <h5 className="font-medium text-gray-900">{filter.name}</h5>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        filter.type === 'tags' ? 'bg-blue-100 text-blue-800' :
-                        filter.type === 'select' ? 'bg-green-100 text-green-800' :
-                        filter.type === 'range' ? 'bg-purple-100 text-purple-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {filter.type}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {filter.productCount} productos
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
-                      {filter.options.length > 3 && '...'}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filter.visible}
-                        onChange={() => handleFilterToggle(filter.id)}
-                        className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
-                        disabled={saving}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Mostrar en tienda</span>
-                    </label>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Display order */}
-      {getVisibleFilters().length > 0 && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6">
-            <h4 className="text-lg font-medium text-gray-900 mb-4">
-              Orden de visualización
-            </h4>
-            <p className="text-sm text-gray-500 mb-6">
-              Arrastra los filtros para cambiar el orden en que aparecerán en tu tienda.
-            </p>
-            
             <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="filters">
+              <Droppable droppableId="all-filters">
                 {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                    {getVisibleFilters()
-                      .sort((a, b) => a.order - b.order)
-                      .map((filter, index) => (
-                        <Draggable key={filter.id} draggableId={filter.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`flex items-center p-3 border border-gray-200 rounded-lg bg-white transition-shadow ${
-                                snapshot.isDragging ? 'shadow-lg' : ''
-                              }`}
-                            >
-                              <div className="flex items-center space-x-3 w-full">
-                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                    {/* Visible filters (draggable) */}
+                    {getVisibleFilters().map((filter, index) => (
+                      <Draggable key={filter.id} draggableId={filter.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`flex items-center justify-between p-4 border-2 border-blue-200 bg-blue-50 rounded-lg transition-all ${
+                              snapshot.isDragging ? 'shadow-lg border-blue-300' : ''
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div {...provided.dragHandleProps} className="cursor-move">
+                                <svg className="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
-                                <div className="flex-1">
-                                  <span className="font-medium text-gray-900">{filter.name}</span>
-                                  <span className="ml-2 text-sm text-gray-500">
-                                    ({filter.options.length} opciones)
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3">
+                                  <h5 className="font-medium text-gray-900">{filter.name}</h5>
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    filter.type === 'tags' ? 'bg-blue-100 text-blue-800' :
+                                    filter.type === 'select' ? 'bg-green-100 text-green-800' :
+                                    filter.type === 'range' ? 'bg-purple-100 text-purple-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {filter.type}
+                                  </span>
+                                  <span className="text-sm text-gray-500">
+                                    {filter.productCount} productos
+                                  </span>
+                                  <span className="text-sm font-medium text-blue-600">
+                                    #{index + 1}
                                   </span>
                                 </div>
-                                <div className="text-sm text-gray-400">
-                                  {index + 1}
-                                </div>
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
+                                  {filter.options.length > 3 && '...'}
+                                </p>
                               </div>
                             </div>
-                          )}
-                        </Draggable>
-                      ))}
+                            
+                            <div className="flex items-center">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={filter.visible}
+                                  onChange={() => handleFilterToggle(filter.id)}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  disabled={saving}
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Mostrar en tienda</span>
+                              </label>
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    
+                    {/* Hidden filters (non-draggable) */}
+                    {availableFilters.filter(f => !f.visible).map((filter) => (
+                      <div key={filter.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-5 h-5 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464M9.878 9.878a3 3 0 104.243 4.243m0 0L16.536 16.536M14.12 14.12L16.536 16.536" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3">
+                              <h5 className="font-medium text-gray-500">{filter.name}</h5>
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                {filter.type}
+                              </span>
+                              <span className="text-sm text-gray-400">
+                                {filter.productCount} productos
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-400 mt-1">
+                              {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
+                              {filter.options.length > 3 && '...'}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={filter.visible}
+                              onChange={() => handleFilterToggle(filter.id)}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              disabled={saving}
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Mostrar en tienda</span>
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                    
                     {provided.placeholder}
                   </div>
                 )}
               </Droppable>
             </DragDropContext>
-          </div>
+          )}
         </div>
-      )}
+      </div>
+
+
 
       {/* Saving indicator */}
       {saving && (
