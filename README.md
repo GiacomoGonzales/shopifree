@@ -177,4 +177,4 @@ Este proyecto es privado y pertenece a Shopifree.
 
 ---
 
-**¡Construye tu tienda online con Shopifree! 🛍️** 
+**¡Construye tu tienda online con Shopifree! 🛍️** // test despliegue
