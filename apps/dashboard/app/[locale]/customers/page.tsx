@@ -23,7 +23,7 @@ interface CustomerCardProps {
   onDelete: (customerId: string) => void
   deleting: string | null
   formatCurrency: (amount: number) => string
-  t: any
+  t: (key: string) => string
 }
 
 function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurrency, t }: CustomerCardProps) {

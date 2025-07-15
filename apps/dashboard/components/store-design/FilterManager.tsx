@@ -34,12 +34,11 @@ interface FilterManagerProps {
 
 interface SortableFilterItemProps {
   filter: StoreFilterConfig
-  index: number
   onToggle: (filterId: string) => void
   saving: boolean
 }
 
-function SortableFilterItem({ filter, index, onToggle, saving }: SortableFilterItemProps) {
+function SortableFilterItem({ filter, onToggle, saving }: SortableFilterItemProps) {
   const {
     attributes,
     listeners,
@@ -423,11 +422,10 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                   items={getVisibleFilters().map(f => f.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {getVisibleFilters().map((filter, index) => (
+                  {getVisibleFilters().map((filter) => (
                     <SortableFilterItem
                       key={filter.id}
                       filter={filter}
-                      index={index}
                       onToggle={handleFilterToggle}
                       saving={saving}
                     />

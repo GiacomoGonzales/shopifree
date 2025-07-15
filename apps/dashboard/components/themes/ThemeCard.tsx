@@ -88,7 +88,7 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
               ${isSelected ? 'scale-105' : 'group-hover:scale-105'}
             `}
             onLoad={() => setImageLoaded(true)}
-            onError={(e) => {
+            onError={() => {
               console.warn(`Failed to load theme preview: ${theme.preview}`)
               setImageError(true)
               setImageLoaded(false)

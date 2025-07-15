@@ -4,13 +4,10 @@ import {
   getDocs,
   query,
   orderBy,
-  writeBatch,
-  getDoc,
-  setDoc,
-  deleteDoc
+  writeBatch
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
-import { getProducts, ProductWithId } from './products'
+import { getProducts } from './products'
 
 export interface StoreFilterConfig {
   id: string
