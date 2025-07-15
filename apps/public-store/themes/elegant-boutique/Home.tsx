@@ -5,7 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
-import { PublicProduct, extractDynamicFilters, generatePriceRangeOptions, applyDynamicFilters, DynamicFilter, PriceRangeOption } from '../../lib/products'
+import { PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRangeOption } from '../../lib/products'
+import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../lib/store-filters'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
@@ -257,12 +258,33 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
 
   // Actualizar filtros dinámicos
   useEffect(() => {
-    const newFilters = extractDynamicFilters(categoryFilteredProducts)
-    setDynamicFilters(newFilters)
+    const loadFilters = async () => {
+      try {
+        // Get store filter configuration
+        const storeFiltersConfig = await getStoreConfiguredFilters(tienda.id)
+        
+        // Use configured filters if available, otherwise fallback to automatic extraction
+        const newFilters = storeFiltersConfig.enabled 
+          ? extractConfiguredFilters(categoryFilteredProducts, storeFiltersConfig)
+          : extractDynamicFilters(categoryFilteredProducts)
+        
+        setDynamicFilters(newFilters)
+        
+        const newPriceRangeOptions = generatePriceRangeOptions(categoryFilteredProducts)
+        setPriceRangeOptions(newPriceRangeOptions)
+      } catch (error) {
+        console.error('Error loading filters:', error)
+        // Fallback to automatic extraction
+        const newFilters = extractDynamicFilters(categoryFilteredProducts)
+        setDynamicFilters(newFilters)
+        
+        const newPriceRangeOptions = generatePriceRangeOptions(categoryFilteredProducts)
+        setPriceRangeOptions(newPriceRangeOptions)
+      }
+    }
     
-    const newPriceRangeOptions = generatePriceRangeOptions(categoryFilteredProducts)
-    setPriceRangeOptions(newPriceRangeOptions)
-  }, [categoryFilteredProducts])
+    loadFilters()
+  }, [categoryFilteredProducts, tienda.id])
 
   // Productos a mostrar con paginación
   const productosAMostrar = useMemo(() => {

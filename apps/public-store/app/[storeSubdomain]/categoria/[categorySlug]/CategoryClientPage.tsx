@@ -13,7 +13,8 @@ import { setNavigationContext } from '../../../../lib/hooks/useBreadcrumbs'
 import { CartProvider, useCart } from '../../../../lib/cart-context'
 import { ThemeLayoutComponent, ThemeLayoutProps } from '../../../../themes/theme-component'
 import { getStoreCategories, Category } from '../../../../lib/categories'
-import { getStoreProducts, PublicProduct, extractDynamicFilters, generatePriceRangeOptions, applyDynamicFilters, DynamicFilter, PriceRangeOption } from '../../../../lib/products'
+import { getStoreProducts, PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRangeOption } from '../../../../lib/products'
+import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../../../lib/store-filters'
 import { Tienda } from '../../../../lib/types'
 import { StoreDataClient } from '../../../../lib/store'
 import DynamicFilters from '../../../../components/DynamicFilters'
@@ -197,12 +198,35 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
 
   // Actualizar filtros dinámicos cuando cambian los productos de la categoría
   useEffect(() => {
-    const newFilters = extractDynamicFilters(categoryProducts)
-    setDynamicFilters(newFilters)
+    const loadFilters = async () => {
+      if (!store?.id) return
+      
+      try {
+        // Get store filter configuration
+        const storeFiltersConfig = await getStoreConfiguredFilters(store.id)
+        
+        // Use configured filters if available, otherwise fallback to automatic extraction
+        const newFilters = storeFiltersConfig.enabled 
+          ? extractConfiguredFilters(categoryProducts, storeFiltersConfig)
+          : extractDynamicFilters(categoryProducts)
+        
+        setDynamicFilters(newFilters)
+        
+        const newPriceRangeOptions = generatePriceRangeOptions(categoryProducts)
+        setPriceRangeOptions(newPriceRangeOptions)
+      } catch (error) {
+        console.error('Error loading filters:', error)
+        // Fallback to automatic extraction
+        const newFilters = extractDynamicFilters(categoryProducts)
+        setDynamicFilters(newFilters)
+        
+        const newPriceRangeOptions = generatePriceRangeOptions(categoryProducts)
+        setPriceRangeOptions(newPriceRangeOptions)
+      }
+    }
     
-    const newPriceRangeOptions = generatePriceRangeOptions(categoryProducts)
-    setPriceRangeOptions(newPriceRangeOptions)
-  }, [categoryProducts])
+    loadFilters()
+  }, [categoryProducts, store?.id])
 
   // Paginación
   const paginatedProducts = useMemo(() => {

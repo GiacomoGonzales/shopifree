@@ -5,6 +5,7 @@ import { useState } from 'react'
 import ThemeGallery from '../../../components/themes/ThemeGallery'
 import HeroImageUpload from '../../../components/store-design/HeroImageUpload'
 import CarouselImagesUpload from '../../../components/store-design/CarouselImagesUpload'
+import FilterManager from '../../../components/store-design/FilterManager'
 
 type Section = 'logo-colors' | 'pages' | 'banners' | 'filters' | 'themes'
 
@@ -97,29 +98,7 @@ export default function StoreDesignPage() {
         )
 
       case 'filters':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Filtros disponibles</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  Configura los filtros que tus clientes podrán usar para encontrar productos.
-                </p>
-                {/* Aquí irá la configuración de filtros */}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Orden de visualización</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  Organiza el orden en que se mostrarán los filtros en tu tienda.
-                </p>
-                {/* Aquí irá el ordenador de filtros */}
-              </div>
-            </div>
-          </div>
-        )
+        return <FilterManager />
 
       case 'themes':
         return (

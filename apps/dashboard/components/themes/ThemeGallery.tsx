@@ -207,56 +207,7 @@ export default function ThemeGallery() {
             ))}
           </div>
 
-          {/* Info section */}
-          <div className="mt-12 pt-8 border-t border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div className="space-y-2">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h4 className="font-semibold text-gray-900">Responsive</h4>
-                <p className="text-sm text-gray-600">Todos los temas se adaptan perfectamente a móviles y tablets</p>
-              </div>
 
-              <div className="space-y-2">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h4 className="font-semibold text-gray-900">Rápidos</h4>
-                <p className="text-sm text-gray-600">Optimizados para cargar rápidamente y ofrecer la mejor experiencia</p>
-              </div>
-
-              <div className="space-y-2">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-                  </svg>
-                </div>
-                <h4 className="font-semibold text-gray-900">Personalizables</h4>
-                <p className="text-sm text-gray-600">Puedes ajustar colores, logos y contenido según tu marca</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Preview note */}
-          <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-start">
-              <svg className="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <div>
-                <h4 className="text-sm font-medium text-amber-800">Imágenes de ejemplo</h4>
-                <p className="text-sm text-amber-700 mt-1">
-                  Las imágenes mostradas son ejemplos temporales. Una vez que agregues tus productos y contenido, 
-                  verás cómo se ve realmente tu tienda con el tema seleccionado.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </>
