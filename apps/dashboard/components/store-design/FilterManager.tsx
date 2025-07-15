@@ -75,10 +75,10 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
     }
   }
 
-  const handleFilterToggle = async (filterId: string, field: 'enabled' | 'visible') => {
+  const handleFilterToggle = async (filterId: string) => {
     const updatedFilters = availableFilters.map(filter => 
       filter.id === filterId 
-        ? { ...filter, [field]: !filter[field] }
+        ? { ...filter, visible: !filter.visible, enabled: !filter.visible ? true : filter.enabled }
         : filter
     )
     
@@ -127,7 +127,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
   }
 
   const getVisibleFilters = () => {
-    return availableFilters.filter(filter => filter.enabled && filter.visible)
+    return availableFilters.filter(filter => filter.visible)
   }
 
   if (loading) {
@@ -235,27 +235,16 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                     </p>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filter.enabled}
-                        onChange={() => handleFilterToggle(filter.id, 'enabled')}
-                        className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
-                        disabled={saving}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Habilitado</span>
-                    </label>
-                    
+                  <div className="flex items-center">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
                         checked={filter.visible}
-                        onChange={() => handleFilterToggle(filter.id, 'visible')}
-                        disabled={!filter.enabled || saving}
-                        className="rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
+                        onChange={() => handleFilterToggle(filter.id)}
+                        className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                        disabled={saving}
                       />
-                      <span className="ml-2 text-sm text-gray-700">Visible</span>
+                      <span className="ml-2 text-sm text-gray-700">Mostrar en tienda</span>
                     </label>
                   </div>
                 </div>

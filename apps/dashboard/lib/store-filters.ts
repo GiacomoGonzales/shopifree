@@ -152,7 +152,7 @@ export async function saveStoreFilters(storeId: string, filters: StoreFilterConf
       enabled: true,
       availableFilters: filters,
       displayOrder: filters
-        .filter(f => f.enabled && f.visible)
+        .filter(f => f.visible)
         .sort((a, b) => a.order - b.order)
         .map(f => f.id)
     }

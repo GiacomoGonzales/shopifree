@@ -74,7 +74,7 @@ export const extractConfiguredFilters = (
   const filtersMap = new Map<string, Set<string>>()
   
   // Only extract values for configured and visible filters
-  const visibleFilters = storeConfig.availableFilters.filter(f => f.enabled && f.visible)
+  const visibleFilters = storeConfig.availableFilters.filter(f => f.visible)
   
   // Extract values from products for each configured filter
   products.forEach(product => {
