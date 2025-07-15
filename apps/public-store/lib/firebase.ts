@@ -13,11 +13,24 @@ const firebaseConfig = {
 
 // Check if we're in the browser and have valid config
 const isValidConfig = () => {
-  return (
+  const hasConfig = !!(
     firebaseConfig.apiKey &&
     firebaseConfig.authDomain &&
     firebaseConfig.projectId
   )
+  
+  if (!hasConfig) {
+    console.warn('Firebase configuration is missing or incomplete:', {
+      apiKey: !!firebaseConfig.apiKey,
+      authDomain: !!firebaseConfig.authDomain,
+      projectId: !!firebaseConfig.projectId,
+      storageBucket: !!firebaseConfig.storageBucket,
+      messagingSenderId: !!firebaseConfig.messagingSenderId,
+      appId: !!firebaseConfig.appId
+    })
+  }
+  
+  return hasConfig
 }
 
 // Initialize Firebase only if we have valid config
@@ -51,10 +64,15 @@ const initializeFirebase = () => {
 
 // Export functions that lazily initialize Firebase
 export const getFirebaseDb = () => {
-  if (!db && isValidConfig()) {
-    initializeFirebase()
+  try {
+    if (!db && isValidConfig()) {
+      initializeFirebase()
+    }
+    return db
+  } catch (error) {
+    console.error('Error getting Firebase database:', error)
+    return null
   }
-  return db
 }
 
 export const getFirebaseApp = () => {
