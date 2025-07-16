@@ -811,12 +811,175 @@
     "content": {
       "title": "Content",
       "subtitle": "Manage your store content",
-      "description": "Manage pages, blogs, categories and all your store content."
+      "description": "Manage pages, blogs, categories and all your store content.",
+      "tabs": {
+        "pages": "Pages",
+        "filters": "Filters"
+      },
+      "pages": {
+        "title": "Available Pages",
+        "description": "Customize the content and visibility of your store pages."
+      },
+      "filters": {
+        "title": "Product Filters",
+        "description": "Manage the available filters for your products."
+      }
     },
     "storeDesign": {
       "title": "Store Design",
       "subtitle": "Customize your store design",
-      "description": "Customize the design, colors, themes and visual appearance of your store."
+      "description": "Customize the design, colors, themes and visual appearance of your store.",
+      "tabs": {
+        "logoColors": "Logo & Colors",
+        "banners": "Banners & Sections",
+        "themes": "Themes"
+      },
+      "sections": {
+        "logo": {
+          "title": "Logo",
+          "description": "Upload your store logo. We recommend using a PNG image with transparent background."
+        },
+        "colors": {
+          "title": "Colors",
+          "description": "Customize the main colors of your store."
+        },
+        "customSections": {
+          "title": "Custom Sections",
+          "description": "Add and customize additional sections for your store."
+        },
+        "hero": {
+          "title": "Hero Image",
+          "description": "This image will be displayed at the top of your store as a cover. Use a high-quality horizontal image to highlight your brand.",
+          "upload": "Upload an image",
+          "dragAndDrop": "or drag and drop",
+          "fileTypes": "PNG, JPG up to 5MB",
+          "change": "Change",
+          "delete": "Delete",
+          "uploading": "Uploading image..."
+        },
+        "carousel": {
+          "title": "Carousel Images",
+          "description": "Upload up to {maxImages} images for your store's main carousel. We recommend horizontal images of 1920x600px for best display.",
+          "upload": "Upload images",
+          "dragAndDrop": "or drag and drop",
+          "fileTypes": "PNG, JPG up to 5MB each",
+          "imagesUploaded": "{current}/{max} images uploaded",
+          "delete": "Delete",
+          "processing": "Processing images...",
+          "maxImagesError": "You already have the maximum of {max} images",
+          "tips": {
+            "drag": "• You can drag images to reorder them",
+            "size": "• Recommended size: 1920x600px (16:5 ratio)",
+            "formats": "• Supported formats: JPG, PNG"
+          }
+        }
+      },
+      "themes": {
+        "gallery": {
+          "title": "Theme Gallery",
+          "description": "Choose the perfect design for your store. Each theme is optimized to provide the best experience for your customers and reflect your brand's personality.",
+          "selected": "Selected",
+          "recommended": "⭐ Recommended",
+          "preview": "Preview",
+          "features": "Features",
+          "colors": "Colors",
+          "primaryColor": "Primary color",
+          "secondaryColor": "Secondary color",
+          "moreFeatures": "+{count} more",
+          "currentTheme": "Current Theme",
+          "selectTheme": "Select Theme",
+          "applying": "Applying...",
+          "loading": "Applying theme..."
+        },
+        "currentTheme": {
+          "title": "Current Theme",
+          "description": "This is the theme currently applied to your store.",
+          "active": "Active",
+          "recommended": "⭐ Recommended",
+          "features": "Features",
+          "colors": "Colors",
+          "primaryColor": "Primary color",
+          "secondaryColor": "Secondary color",
+          "moreFeatures": "+{count} more",
+          "currentlyApplied": "Currently Applied Theme",
+          "changeTheme": {
+            "title": "Want to change your theme?",
+            "description": "You can explore and select a new theme in the gallery below. Changes will be applied immediately to your store."
+          }
+        },
+        "notifications": {
+          "alreadySelected": "This theme is already selected",
+          "storeNotFound": "Store information not found",
+          "invalidTheme": "The selected theme is not valid",
+          "applying": "Applying theme...",
+          "success": "Perfect! {themeName} has been applied to your store",
+          "error": "There was a problem applying the theme. Please try again."
+        },
+        "themesList": {
+          "baseDefault": {
+            "name": "Base Theme",
+            "description": "A clean and professional design that adapts to all types of businesses. Perfect for starting your online store.",
+            "features": {
+              "responsive": "Responsive design",
+              "highContrast": "High contrast",
+              "easyNavigation": "Easy navigation",
+              "mobileOptimized": "Mobile optimized"
+            }
+          },
+          "mobilemodern": {
+            "name": "Mobile Modern",
+            "description": "Mobile-optimized design with vibrant colors and a modern touch experience. Perfect for young audiences.",
+            "features": {
+              "mobileFirst": "Mobile-first",
+              "vibrantColors": "Vibrant colors",
+              "touchExperience": "Touch experience",
+              "intuitiveNavigation": "Intuitive navigation"
+            }
+          },
+          "minimalSushi": {
+            "name": "Minimal Sushi",
+            "description": "Minimalist design with emphasis on typography and white space. Perfect for fashion and lifestyle stores.",
+            "features": {
+              "minimalistStyle": "Minimalist style",
+              "elegantTypography": "Elegant typography",
+              "subtleAnimations": "Subtle animations",
+              "modernGallery": "Modern gallery"
+            }
+          },
+          "petFriendly": {
+            "name": "Pet Friendly",
+            "description": "Cheerful and colorful theme perfect for pet stores and animal-related products.",
+            "features": {
+              "vibrantColors": "Vibrant colors",
+              "customIcons": "Custom icons",
+              "friendlyDesign": "Friendly design",
+              "specialSections": "Special sections for featured products"
+            }
+          },
+          "minimalClean": {
+            "name": "Minimal Clean",
+            "description": "Ultra-minimalist design with clean lines and ample spaces. Perfect for premium products.",
+            "features": {
+              "ultraMinimalist": "Ultra minimalist",
+              "wideSpaces": "Wide spaces",
+              "cleanLines": "Clean lines",
+              "premiumProducts": "Premium products"
+            }
+          },
+          "elegantBoutique": {
+            "name": "Elegant Boutique",
+            "description": "Sophisticated and elegant design inspired by luxury boutiques. Perfect for premium brands and high-end products.",
+            "features": {
+              "premiumStyle": "Premium boutique style",
+              "serifTypography": "Elegant serif typography",
+              "warmNeutrals": "Warm neutral colors",
+              "generousSpacing": "Generous spacing",
+              "sophisticatedNav": "Sophisticated navigation",
+              "subtleAnimations": "Subtle animations"
+            }
+          }
+        }
+      }
     },
     "reports": {
       "title": "Reports",
@@ -1140,5 +1303,163 @@
     "dataAvailable": "Available",
     "dataNotAvailable": "Not available",
     "firebaseInitialized": "Initialized"
+  },
+  "pages": {
+    "storeDesign": {
+      "title": "Store Design",
+      "subtitle": "Customize your store design",
+      "description": "Customize the design, colors, themes and visual appearance of your store.",
+      "tabs": {
+        "logoColors": "Logo & Colors",
+        "banners": "Banners & Sections",
+        "themes": "Themes"
+      },
+      "sections": {
+        "logo": {
+          "title": "Logo",
+          "description": "Upload your store logo. We recommend using a PNG image with transparent background."
+        },
+        "colors": {
+          "title": "Colors",
+          "description": "Customize the main colors of your store."
+        },
+        "customSections": {
+          "title": "Custom Sections",
+          "description": "Add and customize additional sections for your store."
+        },
+        "hero": {
+          "title": "Hero Image",
+          "description": "This image will be displayed at the top of your store as a cover. Use a high-quality horizontal image to highlight your brand.",
+          "upload": "Upload an image",
+          "dragAndDrop": "or drag and drop",
+          "fileTypes": "PNG, JPG up to 5MB",
+          "change": "Change",
+          "delete": "Delete",
+          "uploading": "Uploading image..."
+        },
+        "carousel": {
+          "title": "Carousel Images",
+          "description": "Upload up to {maxImages} images for your store's main carousel. We recommend horizontal images of 1920x600px for best display.",
+          "upload": "Upload images",
+          "dragAndDrop": "or drag and drop",
+          "fileTypes": "PNG, JPG up to 5MB each",
+          "imagesUploaded": "{current}/{max} images uploaded",
+          "delete": "Delete",
+          "processing": "Processing images...",
+          "maxImagesError": "You already have the maximum of {max} images",
+          "tips": {
+            "drag": "• You can drag images to reorder them",
+            "size": "• Recommended size: 1920x600px (16:5 ratio)",
+            "formats": "• Supported formats: JPG, PNG"
+          }
+        },
+        "themes": {
+          "gallery": {
+            "title": "Theme Gallery",
+            "description": "Choose the perfect design for your store. Each theme is optimized to provide the best experience for your customers and reflect your brand's personality.",
+            "selected": "Selected",
+            "recommended": "⭐ Recommended",
+            "preview": "Preview",
+            "features": "Features",
+            "colors": "Colors",
+            "primaryColor": "Primary color",
+            "secondaryColor": "Secondary color",
+            "moreFeatures": "+{count} more",
+            "currentTheme": "Current Theme",
+            "selectTheme": "Select Theme",
+            "applying": "Applying...",
+            "loading": "Applying theme..."
+          },
+          "currentTheme": {
+            "title": "Current Theme",
+            "description": "This is the theme currently applied to your store.",
+            "active": "Active",
+            "recommended": "⭐ Recommended",
+            "features": "Features",
+            "colors": "Colors",
+            "primaryColor": "Primary color",
+            "secondaryColor": "Secondary color",
+            "moreFeatures": "+{count} more",
+            "currentlyApplied": "Currently Applied Theme",
+            "changeTheme": {
+              "title": "Want to change your theme?",
+              "description": "You can explore and select a new theme in the gallery below. Changes will be applied immediately to your store."
+            }
+          },
+          "notifications": {
+            "alreadySelected": "This theme is already selected",
+            "storeNotFound": "Store information not found",
+            "invalidTheme": "The selected theme is not valid",
+            "applying": "Applying theme...",
+            "success": "Perfect! {themeName} has been applied to your store",
+            "error": "There was a problem applying the theme. Please try again."
+          },
+          "themesList": {
+            "baseDefault": {
+              "name": "Base Theme",
+              "description": "A clean and professional design that adapts to all types of businesses. Perfect for starting your online store.",
+              "features": {
+                "responsive": "Responsive design",
+                "highContrast": "High contrast",
+                "easyNavigation": "Easy navigation",
+                "mobileOptimized": "Mobile optimized"
+              }
+            },
+            "mobilemodern": {
+              "name": "Mobile Modern",
+              "description": "Mobile-optimized design with vibrant colors and a modern touch experience. Perfect for young audiences.",
+              "features": {
+                "mobileFirst": "Mobile-first",
+                "vibrantColors": "Vibrant colors",
+                "touchExperience": "Touch experience",
+                "intuitiveNavigation": "Intuitive navigation"
+              }
+            },
+            "minimalSushi": {
+              "name": "Minimal Sushi",
+              "description": "Minimalist design with emphasis on typography and white space. Perfect for fashion and lifestyle stores.",
+              "features": {
+                "minimalistStyle": "Minimalist style",
+                "elegantTypography": "Elegant typography",
+                "subtleAnimations": "Subtle animations",
+                "modernGallery": "Modern gallery"
+              }
+            },
+            "petFriendly": {
+              "name": "Pet Friendly",
+              "description": "Cheerful and colorful theme perfect for pet stores and animal-related products.",
+              "features": {
+                "vibrantColors": "Vibrant colors",
+                "customIcons": "Custom icons",
+                "friendlyDesign": "Friendly design",
+                "specialSections": "Special sections for featured products"
+              }
+            },
+            "minimalClean": {
+              "name": "Minimal Clean",
+              "description": "Ultra-minimalist design with clean lines and ample spaces. Perfect for premium products.",
+              "features": {
+                "ultraMinimalist": "Ultra minimalist",
+                "wideSpaces": "Wide spaces",
+                "cleanLines": "Clean lines",
+                "premiumProducts": "Premium products"
+              }
+            },
+            "elegantBoutique": {
+              "name": "Elegant Boutique",
+              "description": "Sophisticated and elegant design inspired by luxury boutiques. Perfect for premium brands and high-end products.",
+              "features": {
+                "premiumStyle": "Premium boutique style",
+                "serifTypography": "Elegant serif typography",
+                "warmNeutrals": "Warm neutral colors",
+                "generousSpacing": "Generous spacing",
+                "sophisticatedNav": "Sophisticated navigation",
+                "subtleAnimations": "Subtle animations"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 } 

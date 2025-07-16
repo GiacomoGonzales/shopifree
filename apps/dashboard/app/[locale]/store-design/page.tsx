@@ -2,35 +2,28 @@
 
 import DashboardLayout from '../../../components/DashboardLayout'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import ThemeGallery from '../../../components/themes/ThemeGallery'
 import HeroImageUpload from '../../../components/store-design/HeroImageUpload'
 import CarouselImagesUpload from '../../../components/store-design/CarouselImagesUpload'
-import FilterManager from '../../../components/store-design/FilterManager'
 
-type Section = 'logo-colors' | 'pages' | 'banners' | 'filters' | 'themes'
+type Section = 'logo-colors' | 'banners' | 'themes'
 
 export default function StoreDesignPage() {
+  const t = useTranslations('pages.storeDesign')
   const [currentSection, setCurrentSection] = useState<Section>('logo-colors')
 
   const tabs = [
     { 
-      name: 'Logo y colores',
+      name: t('tabs.logoColors'),
       id: 'logo-colors' as Section
     },
     { 
-      name: 'Páginas',
-      id: 'pages' as Section
-    },
-    { 
-      name: 'Banners y secciones',
+      name: t('tabs.banners'),
       id: 'banners' as Section
     },
     { 
-      name: 'Filtros',
-      id: 'filters' as Section
-    },
-    { 
-      name: 'Temas',
+      name: t('tabs.themes'),
       id: 'themes' as Section
     },
   ]
@@ -43,9 +36,9 @@ export default function StoreDesignPage() {
             {/* Sección de Logo */}
             <div className="bg-white rounded-lg shadow">
               <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Logo</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('sections.logo.title')}</h4>
                 <p className="text-sm text-gray-500 mb-4">
-                  Sube el logo de tu tienda. Recomendamos una imagen PNG con fondo transparente.
+                  {t('sections.logo.description')}
                 </p>
                 {/* Aquí irá el componente de subida de logo */}
               </div>
@@ -54,25 +47,12 @@ export default function StoreDesignPage() {
             {/* Sección de Colores */}
             <div className="bg-white rounded-lg shadow">
               <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Colores</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('sections.colors.title')}</h4>
                 <p className="text-sm text-gray-500 mb-4">
-                  Personaliza los colores principales de tu tienda.
+                  {t('sections.colors.description')}
                 </p>
                 {/* Aquí irán los selectores de color */}
               </div>
-            </div>
-          </div>
-        )
-      
-      case 'pages':
-        return (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Páginas disponibles</h4>
-              <p className="text-sm text-gray-500 mb-4">
-                Personaliza el contenido y la visibilidad de las páginas de tu tienda.
-              </p>
-              {/* Aquí irá la lista de páginas configurables */}
             </div>
           </div>
         )
@@ -87,18 +67,15 @@ export default function StoreDesignPage() {
 
             <div className="bg-white rounded-lg shadow">
               <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Secciones personalizadas</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('sections.customSections.title')}</h4>
                 <p className="text-sm text-gray-500 mb-4">
-                  Añade y personaliza secciones adicionales para tu tienda.
+                  {t('sections.customSections.description')}
                 </p>
                 {/* Aquí irá el gestor de secciones */}
               </div>
             </div>
           </div>
         )
-
-      case 'filters':
-        return <FilterManager />
 
       case 'themes':
         return (

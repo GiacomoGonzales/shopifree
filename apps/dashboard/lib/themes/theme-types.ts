@@ -1,9 +1,7 @@
 export interface Theme {
   id: string
-  nombre: string
-  descripcion: string
+  translationKey: string
   preview: string
-  features?: string[] // Características especiales del tema (opcional)
   colors?: {
     primary: string
     secondary: string

@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useStore } from '../../lib/hooks/useStore'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 import { doc, updateDoc } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
 
 export default function CarouselImagesUpload() {
+  const t = useTranslations('pages.storeDesign.sections.carousel')
   const { store, mutate } = useStore()
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +24,7 @@ export default function CarouselImagesUpload() {
       const filesToUpload = Array.from(files).slice(0, remainingSlots)
 
       if (filesToUpload.length === 0) {
-        setError(`Ya tienes el máximo de ${maxImages} imágenes`)
+        setError(t('maxImagesError', { max: maxImages }))
         return
       }
 
@@ -57,7 +59,7 @@ export default function CarouselImagesUpload() {
         })
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al subir imágenes')
+      setError(err instanceof Error ? err.message : t('uploadError'))
       console.error('Error uploading carousel images:', err)
     } finally {
       setIsUploading(false)
@@ -96,7 +98,7 @@ export default function CarouselImagesUpload() {
         })
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar imagen')
+      setError(err instanceof Error ? err.message : t('deleteError'))
       console.error('Error deleting carousel image:', err)
     } finally {
       setIsUploading(false)
@@ -149,7 +151,7 @@ export default function CarouselImagesUpload() {
         })
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al reordenar imágenes')
+      setError(err instanceof Error ? err.message : t('reorderError'))
       console.error('Error reordering carousel images:', err)
     } finally {
       setIsUploading(false)
@@ -175,10 +177,9 @@ export default function CarouselImagesUpload() {
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6">
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Imágenes del Carrusel</h4>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">{t('title')}</h4>
         <p className="text-sm text-gray-500 mb-4">
-          Sube hasta {maxImages} imágenes para el carrusel principal de tu tienda. 
-          Recomendamos imágenes horizontales de 1920x600px para mejor visualización.
+          {t('description', { maxImages })}
         </p>
 
         {/* Área de subida con imágenes existentes */}
@@ -218,7 +219,7 @@ export default function CarouselImagesUpload() {
                         className="px-2 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
                         disabled={isUploading}
                       >
-                        Eliminar
+                        {t('delete')}
                       </button>
                     </div>
                   </div>
@@ -247,15 +248,15 @@ export default function CarouselImagesUpload() {
                 </svg>
                 <div className="mt-4 flex text-sm text-gray-600 justify-center">
                   <span className="relative rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                    Sube imágenes
+                    {t('upload')}
                   </span>
-                  <p className="pl-1">o arrastra y suelta</p>
+                  <p className="pl-1">{t('dragAndDrop')}</p>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  PNG, JPG hasta 5MB cada una
+                  {t('fileTypes')}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {carouselImages.length}/{maxImages} imágenes subidas
+                  {t('imagesUploaded', { current: carouselImages.length, max: maxImages })}
                 </p>
               </div>
               <input
@@ -277,7 +278,7 @@ export default function CarouselImagesUpload() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Procesando imágenes...
+            {t('processing')}
           </div>
         )}
         {error && (
@@ -288,9 +289,9 @@ export default function CarouselImagesUpload() {
 
         {/* Información adicional */}
         <div className="mt-6 text-xs text-gray-500">
-          <p className="mb-1">• Puedes arrastrar las imágenes para reordenarlas</p>
-          <p className="mb-1">• Tamaño recomendado: 1920x600px (proporción 16:5)</p>
-          <p>• Formatos soportados: JPG, PNG</p>
+          <p className="mb-1">{t('tips.drag')}</p>
+          <p className="mb-1">{t('tips.size')}</p>
+          <p>{t('tips.formats')}</p>
         </div>
       </div>
     </div>

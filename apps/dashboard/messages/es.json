@@ -774,12 +774,175 @@
     "content": {
       "title": "Contenido",
       "subtitle": "Gestiona el contenido de tu tienda",
-      "description": "Administra páginas, blogs, categorías y todo el contenido de tu tienda."
+      "description": "Administra páginas, blogs, categorías y todo el contenido de tu tienda.",
+      "tabs": {
+        "pages": "Páginas",
+        "filters": "Filtros"
+      },
+      "pages": {
+        "title": "Páginas disponibles",
+        "description": "Personaliza el contenido y la visibilidad de las páginas de tu tienda."
+      },
+      "filters": {
+        "title": "Filtros de productos",
+        "description": "Gestiona los filtros disponibles para tus productos."
+      }
     },
     "storeDesign": {
       "title": "Diseño de tienda",
       "subtitle": "Personaliza el diseño de tu tienda",
-      "description": "Personaliza el diseño, colores, temas y aspecto visual de tu tienda."
+      "description": "Personaliza el diseño, colores, temas y aspecto visual de tu tienda.",
+      "tabs": {
+        "logoColors": "Logo y colores",
+        "banners": "Banners y secciones",
+        "themes": "Temas"
+      },
+      "sections": {
+        "logo": {
+          "title": "Logo",
+          "description": "Sube el logo de tu tienda. Recomendamos una imagen PNG con fondo transparente."
+        },
+        "colors": {
+          "title": "Colores",
+          "description": "Personaliza los colores principales de tu tienda."
+        },
+        "customSections": {
+          "title": "Secciones personalizadas",
+          "description": "Añade y personaliza secciones adicionales para tu tienda."
+        },
+        "hero": {
+          "title": "Imagen Hero",
+          "description": "Esta imagen se mostrará al inicio de tu tienda como portada. Usa una imagen horizontal de alta calidad para destacar tu marca.",
+          "upload": "Sube una imagen",
+          "dragAndDrop": "o arrastra y suelta",
+          "fileTypes": "PNG, JPG hasta 5MB",
+          "change": "Cambiar",
+          "delete": "Eliminar",
+          "uploading": "Subiendo imagen..."
+        },
+        "carousel": {
+          "title": "Imágenes del Carrusel",
+          "description": "Sube hasta {maxImages} imágenes para el carrusel principal de tu tienda. Recomendamos imágenes horizontales de 1920x600px para mejor visualización.",
+          "upload": "Sube imágenes",
+          "dragAndDrop": "o arrastra y suelta",
+          "fileTypes": "PNG, JPG hasta 5MB cada una",
+          "imagesUploaded": "{current}/{max} imágenes subidas",
+          "delete": "Eliminar",
+          "processing": "Procesando imágenes...",
+          "maxImagesError": "Ya tienes el máximo de {max} imágenes",
+          "tips": {
+            "drag": "• Puedes arrastrar las imágenes para reordenarlas",
+            "size": "• Tamaño recomendado: 1920x600px (proporción 16:5)",
+            "formats": "• Formatos soportados: JPG, PNG"
+          }
+        },
+        "themes": {
+          "gallery": {
+            "title": "Galería de Temas",
+            "description": "Elige el diseño perfecto para tu tienda. Cada tema está optimizado para ofrecer la mejor experiencia a tus clientes y reflejar la personalidad de tu marca.",
+            "selected": "Seleccionado",
+            "recommended": "⭐ Recomendado",
+            "preview": "Vista previa",
+            "features": "Características",
+            "colors": "Colores",
+            "primaryColor": "Color primario",
+            "secondaryColor": "Color secundario",
+            "moreFeatures": "+{count} más",
+            "currentTheme": "Tema Actual",
+            "selectTheme": "Seleccionar Tema",
+            "applying": "Aplicando...",
+            "loading": "Aplicando tema..."
+          },
+          "currentTheme": {
+            "title": "Tema Actual",
+            "description": "Este es el tema que está actualmente aplicado a tu tienda.",
+            "active": "Activo",
+            "recommended": "⭐ Recomendado",
+            "features": "Características",
+            "colors": "Colores",
+            "primaryColor": "Color primario",
+            "secondaryColor": "Color secundario",
+            "moreFeatures": "+{count} más",
+            "currentlyApplied": "Tema Actualmente Aplicado",
+            "changeTheme": {
+              "title": "¿Quieres cambiar tu tema?",
+              "description": "Puedes explorar y seleccionar un nuevo tema en la galería de abajo. Los cambios se aplicarán inmediatamente a tu tienda."
+            }
+          },
+          "notifications": {
+            "alreadySelected": "Este tema ya está seleccionado",
+            "storeNotFound": "No se encontró la información de la tienda",
+            "invalidTheme": "El tema seleccionado no es válido",
+            "applying": "Aplicando tema...",
+            "success": "¡Perfecto! {themeName} ha sido aplicado a tu tienda",
+            "error": "Hubo un problema al aplicar el tema. Por favor, intenta de nuevo."
+          },
+          "themesList": {
+            "baseDefault": {
+              "name": "Tema Base",
+              "description": "Un diseño limpio y profesional que se adapta a todo tipo de negocios. Perfecto para comenzar tu tienda online.",
+              "features": {
+                "responsive": "Diseño adaptable",
+                "highContrast": "Alto contraste",
+                "easyNavigation": "Fácil navegación",
+                "mobileOptimized": "Optimizado para móviles"
+              }
+            },
+            "mobilemodern": {
+              "name": "Mobile Modern",
+              "description": "Diseño optimizado para móviles con colores vibrantes y una experiencia táctil moderna. Ideal para audiencias jóvenes.",
+              "features": {
+                "mobileFirst": "Mobile-first",
+                "vibrantColors": "Colores vibrantes",
+                "touchExperience": "Experiencia táctil",
+                "intuitiveNavigation": "Navegación intuitiva"
+              }
+            },
+            "minimalSushi": {
+              "name": "Minimal Sushi",
+              "description": "Diseño minimalista con énfasis en la tipografía y el espacio en blanco. Ideal para tiendas de moda y lifestyle.",
+              "features": {
+                "minimalistStyle": "Estilo minimalista",
+                "elegantTypography": "Tipografía elegante",
+                "subtleAnimations": "Animaciones sutiles",
+                "modernGallery": "Galería moderna"
+              }
+            },
+            "petFriendly": {
+              "name": "Pet Friendly",
+              "description": "Tema alegre y colorido perfecto para tiendas de mascotas y productos relacionados con animales.",
+              "features": {
+                "vibrantColors": "Colores vibrantes",
+                "customIcons": "Iconos personalizados",
+                "friendlyDesign": "Diseño amigable",
+                "specialSections": "Secciones especiales para productos destacados"
+              }
+            },
+            "minimalClean": {
+              "name": "Minimal Clean",
+              "description": "Diseño ultraminimalista con líneas limpias y espacios amplios. Perfecto para productos premium.",
+              "features": {
+                "ultraMinimalist": "Ultra minimalista",
+                "wideSpaces": "Espacios amplios",
+                "cleanLines": "Líneas limpias",
+                "premiumProducts": "Productos premium"
+              }
+            },
+            "elegantBoutique": {
+              "name": "Elegant Boutique",
+              "description": "Diseño sofisticado y elegante inspirado en boutiques de lujo. Perfecto para marcas premium y productos de alta gama.",
+              "features": {
+                "premiumStyle": "Estilo boutique premium",
+                "serifTypography": "Tipografía serif elegante",
+                "warmNeutrals": "Colores neutros cálidos",
+                "generousSpacing": "Espaciado generoso",
+                "sophisticatedNav": "Navegación sofisticada",
+                "subtleAnimations": "Animaciones sutiles"
+              }
+            }
+          }
+        }
+      }
     },
     "reports": {
       "title": "Reportes",

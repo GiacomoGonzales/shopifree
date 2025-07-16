@@ -4,17 +4,10 @@ import { Theme } from './theme-types'
 export const availableThemes: Theme[] = [
   {
     id: 'base-default',
-    nombre: 'Tema Base',
-    descripcion: 'Un diseño limpio y profesional que se adapta a todo tipo de negocios. Perfecto para comenzar tu tienda online.',
+    translationKey: 'baseDefault',
     preview: '/themes/base-default/preview.jpg',
     category: 'classic',
     recommended: true,
-    features: [
-      'Diseño adaptable',
-      'Alto contraste',
-      'Fácil navegación',
-      'Optimizado para móviles'
-    ],
     colors: {
       primary: brandColors.neutral[800],
       secondary: brandColors.neutral[600]
@@ -22,17 +15,10 @@ export const availableThemes: Theme[] = [
   },
   {
     id: 'mobile-modern',
-    nombre: 'Mobile Modern',
-    descripcion: 'Diseño optimizado para móviles con colores vibrantes y una experiencia táctil moderna. Ideal para audiencias jóvenes.',
+    translationKey: 'mobilemodern',
     preview: '/themes/mobile-modern/preview.svg',
     category: 'modern',
     recommended: true,
-    features: [
-      'Mobile-first',
-      'Colores vibrantes',
-      'Experiencia táctil',
-      'Navegación intuitiva'
-    ],
     colors: {
       primary: brandColors.blue[500],
       secondary: brandColors.success
@@ -40,16 +26,9 @@ export const availableThemes: Theme[] = [
   },
   {
     id: 'minimal-sushi',
-    nombre: 'Minimal Sushi',
-    descripcion: 'Diseño minimalista con énfasis en la tipografía y el espacio en blanco. Ideal para tiendas de moda y lifestyle.',
+    translationKey: 'minimalSushi',
     preview: '/themes/minimal-sushi/preview.svg',
     category: 'minimal',
-    features: [
-      'Estilo minimalista',
-      'Tipografía elegante',
-      'Animaciones sutiles',
-      'Galería moderna'
-    ],
     colors: {
       primary: brandColors.neutral[900],
       secondary: brandColors.neutral[500]
@@ -57,16 +36,9 @@ export const availableThemes: Theme[] = [
   },
   {
     id: 'pet-friendly',
-    nombre: 'Pet Friendly',
-    descripcion: 'Tema alegre y colorido perfecto para tiendas de mascotas y productos relacionados con animales.',
+    translationKey: 'petFriendly',
     preview: '/themes/pet-friendly/preview.svg',
     category: 'bold',
-    features: [
-      'Colores vibrantes',
-      'Iconos personalizados',
-      'Diseño amigable',
-      'Secciones especiales para productos destacados'
-    ],
     colors: {
       primary: brandColors.indigo[700],
       secondary: brandColors.indigo[500]
@@ -74,16 +46,9 @@ export const availableThemes: Theme[] = [
   },
   {
     id: 'minimal-clean',
-    nombre: 'Minimal Clean',
-    descripcion: 'Diseño ultraminimalista con líneas limpias y espacios amplios. Perfecto para productos premium.',
+    translationKey: 'minimalClean',
     preview: '/themes/minimal-clean/preview.svg',
     category: 'minimal',
-    features: [
-      'Ultra minimalista',
-      'Espacios amplios',
-      'Líneas limpias',
-      'Productos premium'
-    ],
     colors: {
       primary: brandColors.neutral[900],
       secondary: brandColors.neutral[400]
@@ -91,19 +56,10 @@ export const availableThemes: Theme[] = [
   },
   {
     id: 'elegant-boutique',
-    nombre: 'Elegant Boutique',
-    descripcion: 'Diseño sofisticado y elegante inspirado en boutiques de lujo. Perfecto para marcas premium y productos de alta gama.',
+    translationKey: 'elegantBoutique',
     preview: '/themes/elegant-boutique/preview.jpg',
     category: 'classic',
     recommended: true,
-    features: [
-      'Estilo boutique premium',
-      'Tipografía serif elegante',
-      'Colores neutros cálidos',
-      'Espaciado generoso',
-      'Navegación sofisticada',
-      'Animaciones sutiles'
-    ],
     colors: {
       primary: '#8B7D6B', // Warm taupe
       secondary: '#B8860B'  // Elegant gold

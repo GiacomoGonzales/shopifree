@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useStore } from '../../lib/hooks/useStore'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 import { doc, updateDoc } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
 
 export default function HeroImageUpload() {
+  const t = useTranslations('pages.storeDesign.sections.hero')
   const { store, mutate } = useStore()
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -86,9 +88,9 @@ export default function HeroImageUpload() {
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6">
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Imagen Hero</h4>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">{t('title')}</h4>
         <p className="text-sm text-gray-500 mb-4">
-          Esta imagen se mostrará al inicio de tu tienda como portada. Usa una imagen horizontal de alta calidad para destacar tu marca.
+          {t('description')}
         </p>
 
         {/* Vista previa de la imagen */}
@@ -102,7 +104,7 @@ export default function HeroImageUpload() {
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
               <div className="flex space-x-2">
                 <label className="px-3 py-1 bg-white text-gray-700 text-xs rounded shadow hover:bg-gray-50 transition-colors cursor-pointer">
-                  Cambiar
+                  {t('change')}
                   <input
                     type="file"
                     accept="image/jpeg,image/png"
@@ -117,7 +119,7 @@ export default function HeroImageUpload() {
                   onClick={handleImageDelete}
                   className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
                 >
-                  Eliminar
+                  {t('delete')}
                 </button>
               </div>
             </div>
@@ -152,11 +154,11 @@ export default function HeroImageUpload() {
                 </svg>
                 <div className="mt-4 flex text-sm text-gray-600">
                   <span className="relative rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                    Sube una imagen
+                    {t('upload')}
                   </span>
-                  <p className="pl-1">o arrastra y suelta</p>
+                  <p className="pl-1">{t('dragAndDrop')}</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">PNG, JPG hasta 5MB</p>
+                <p className="text-xs text-gray-500 mt-2">{t('fileTypes')}</p>
               </div>
               <input
                 type="file"
@@ -171,10 +173,10 @@ export default function HeroImageUpload() {
           </div>
         )}
 
-        {/* Estado de carga y errores */}
+        {/* Estados de carga y errores */}
         {isUploading && (
           <div className="mt-4 text-sm text-gray-500">
-            Subiendo imagen...
+            {t('uploading')}
           </div>
         )}
         {error && (

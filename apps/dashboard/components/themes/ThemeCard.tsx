@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { Theme } from '../../lib/themes/theme-types'
 import { useState } from 'react'
 
@@ -10,8 +11,13 @@ interface ThemeCardProps {
 }
 
 export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: ThemeCardProps) {
+  const t = useTranslations('pages.storeDesign.sections.themes')
+  const themeT = useTranslations(`pages.storeDesign.sections.themes.themesList.${theme.translationKey}`)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+
+  // Get features from translations
+  const features = Object.entries(themeT.raw('features') as Record<string, string>).map(([_, value]) => value)
 
   return (
     <div
@@ -32,7 +38,7 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
-            Seleccionado
+            {t('gallery.selected')}
           </div>
         </div>
       )}
@@ -41,13 +47,13 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
       {theme.recommended && !isSelected && (
         <div className="absolute top-3 left-3 z-10">
           <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-            ⭐ Recomendado
+            {t('gallery.recommended')}
           </div>
         </div>
       )}
 
       {/* Preview Image Container */}
-      <div className="relative h-56 w-full overflow-hidden bg-gray-100">
+      <div className="relative h-48 w-full overflow-hidden">
         {/* Loading placeholder */}
         {!imageLoaded && !imageError && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
@@ -71,7 +77,7 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
-              <p className="text-xs text-gray-500">Vista previa</p>
+              <p className="text-xs text-gray-500">{t('gallery.preview')}</p>
             </div>
           </div>
         )}
@@ -80,7 +86,7 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
         {!imageError && (
           <Image
             src={theme.preview}
-            alt={`Vista previa del tema ${theme.nombre}`}
+            alt={`${t('gallery.preview')} ${themeT('name')}`}
             fill
             className={`
               object-cover transition-all duration-500
@@ -93,45 +99,38 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
               setImageError(true)
               setImageLoaded(false)
             }}
-            priority={isSelected} // Prioridad para el tema seleccionado
+            priority={isSelected}
           />
         )}
-        
-        {/* Overlay gradiente para mejor legibilidad */}
-        <div className={`
-          absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent 
-          transition-opacity duration-300
-          ${imageLoaded ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'}
-        `} />
       </div>
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-6">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <h3 className={`
               text-lg font-semibold transition-colors duration-200
               ${isSelected ? 'text-blue-900' : 'text-gray-900 group-hover:text-gray-700'}
             `}>
-              {theme.nombre}
+              {themeT('name')}
             </h3>
             <p className={`
               mt-1 text-sm leading-relaxed
               ${isSelected ? 'text-blue-700' : 'text-gray-600'}
             `}>
-              {theme.descripcion}
+              {themeT('description')}
             </p>
           </div>
         </div>
 
         {/* Features list */}
-        {theme.features && theme.features.length > 0 && (
+        {features.length > 0 && (
           <div className="mt-4">
             <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wide mb-2">
-              Características
+              {t('gallery.features')}
             </h4>
             <div className="flex flex-wrap gap-1">
-              {theme.features.slice(0, 4).map((feature, index) => (
+              {features.slice(0, 4).map((feature, index) => (
                 <span 
                   key={index} 
                   className={`
@@ -145,9 +144,9 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
                   {feature}
                 </span>
               ))}
-              {theme.features.length > 4 && (
+              {features.length > 4 && (
                 <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-500">
-                  +{theme.features.length - 4} más
+                  {t('gallery.moreFeatures', { count: features.length - 4 })}
                 </span>
               )}
             </div>
@@ -158,18 +157,18 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
         {theme.colors && (
           <div className="mt-4">
             <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wide mb-2">
-              Colores
+              {t('gallery.colors')}
             </h4>
             <div className="flex space-x-2">
               <div 
                 className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
                 style={{ backgroundColor: theme.colors.primary }}
-                title="Color primario"
+                title={t('gallery.primaryColor')}
               />
               <div 
                 className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
                 style={{ backgroundColor: theme.colors.secondary }}
-                title="Color secundario"
+                title={t('gallery.secondaryColor')}
               />
             </div>
           </div>
@@ -194,12 +193,12 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Aplicando...
+                {t('gallery.applying')}
               </div>
             ) : isSelected ? (
-              'Tema Actual'
+              t('gallery.currentTheme')
             ) : (
-              'Seleccionar Tema'
+              t('gallery.selectTheme')
             )}
           </button>
         </div>
@@ -213,7 +212,7 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p className="text-sm text-gray-600 mt-2">Aplicando tema...</p>
+            <p className="text-sm text-gray-600 mt-2">{t('gallery.loading')}</p>
           </div>
         </div>
       )}

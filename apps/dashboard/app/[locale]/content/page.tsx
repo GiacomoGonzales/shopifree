@@ -1,63 +1,80 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
+import FilterManager from '../../../components/store-design/FilterManager'
+
+type Section = 'pages' | 'filters'
 
 export default function ContentPage() {
   const t = useTranslations('pages.content')
+  const [currentSection, setCurrentSection] = useState<Section>('pages')
+
+  const tabs = [
+    { 
+      name: 'Páginas',
+      id: 'pages' as Section
+    },
+    { 
+      name: 'Filtros',
+      id: 'filters' as Section
+    }
+  ]
+
+  const renderContent = () => {
+    switch (currentSection) {
+      case 'pages':
+        return (
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6">
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Páginas disponibles</h4>
+              <p className="text-sm text-gray-500 mb-4">
+                Personaliza el contenido y la visibilidad de las páginas de tu tienda.
+              </p>
+              {/* Aquí irá la lista de páginas configurables */}
+            </div>
+          </div>
+        )
+
+      case 'filters':
+        return <FilterManager />
+
+      default:
+        return null
+    }
+  }
 
   return (
     <DashboardLayout>
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="md:flex md:items-center md:justify-between">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                {t('title')}
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                {t('subtitle')}
-              </p>
-            </div>
-            <div className="mt-4 flex md:mt-0 md:ml-4">
-              <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-              >
-                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Crear Página
-              </button>
+          {/* Navegación por pestañas - Carrusel horizontal */}
+          <div className="border-b border-gray-200">
+            <div className="overflow-x-auto scrollbar-hide">
+              <nav className="flex space-x-8 min-w-max" aria-label="Tabs">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setCurrentSection(tab.id)}
+                    className={`
+                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex-shrink-0
+                      ${tab.id === currentSection
+                        ? 'border-gray-900 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }
+                    `}
+                  >
+                    {tab.name}
+                  </button>
+                ))}
+              </nav>
             </div>
           </div>
 
-          <div className="mt-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  {t('title')}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {t('description')}
-                </p>
-                
-                <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-teal-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <p className="text-sm text-teal-700">
-                        En desarrollo...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Contenedor principal */}
+          <div className="mt-6">
+            {renderContent()}
           </div>
         </div>
       </div>

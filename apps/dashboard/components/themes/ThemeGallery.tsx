@@ -1,4 +1,5 @@
 import { useStore } from '../../lib/hooks/useStore'
+import { useTranslations } from 'next-intl'
 import { availableThemes, DEFAULT_THEME_ID, isValidTheme } from '../../lib/themes/themes-list'
 import { updateStoreField } from '../../lib/store'
 import ThemeCard from './ThemeCard'
@@ -13,6 +14,7 @@ interface Notification {
 }
 
 export default function ThemeGallery() {
+  const t = useTranslations('pages.storeDesign.sections.themes')
   const { store } = useStore()
   const [loadingThemeId, setLoadingThemeId] = useState<string | null>(null)
   const [selectedThemeId, setSelectedThemeId] = useState<string>(store?.theme || DEFAULT_THEME_ID)
@@ -54,13 +56,13 @@ export default function ThemeGallery() {
   const handleThemeSelect = async (themeId: string) => {
     // Evitar seleccionar el tema actual
     if (themeId === selectedThemeId) {
-      showNotification('info', 'Este tema ya está seleccionado')
+      showNotification('info', t('notifications.alreadySelected'))
       return
     }
 
     // Validaciones
     if (!store?.id) {
-      showNotification('error', 'No se encontró la información de la tienda')
+      showNotification('error', t('notifications.storeNotFound'))
       return
     }
 
@@ -69,7 +71,7 @@ export default function ThemeGallery() {
     }
 
     if (!isValidTheme(themeId)) {
-      showNotification('error', 'El tema seleccionado no es válido')
+      showNotification('error', t('notifications.invalidTheme'))
       return
     }
 
@@ -80,17 +82,18 @@ export default function ThemeGallery() {
       setSelectedThemeId(themeId)
 
       // Mostrar notificación de proceso
-      showNotification('info', 'Aplicando tema...')
+      showNotification('info', t('notifications.applying'))
 
       // Actualizar en Firestore
       await updateStoreField(store.id, 'theme', themeId)
 
       // Obtener información del tema seleccionado
       const selectedTheme = availableThemes.find(theme => theme.id === themeId)
-      const themeName = selectedTheme?.nombre || 'el tema seleccionado'
+      const themeT = useTranslations(`pages.storeDesign.sections.themes.themesList.${selectedTheme?.translationKey}`)
+      const themeName = themeT ? themeT('name') : 'el tema seleccionado'
 
       // Mostrar mensaje de éxito
-      showNotification('success', `¡Perfecto! ${themeName} ha sido aplicado a tu tienda`)
+      showNotification('success', t('notifications.success', { themeName }))
       
     } catch (error) {
       console.error('Error al actualizar el tema:', error)
@@ -98,7 +101,7 @@ export default function ThemeGallery() {
       // Revertir el estado local si hay error
       setSelectedThemeId(store?.theme || DEFAULT_THEME_ID)
       
-      showNotification('error', 'Hubo un problema al aplicar el tema. Por favor, intenta de nuevo.')
+      showNotification('error', t('notifications.error'))
     } finally {
       setLoadingThemeId(null)
     }
@@ -186,11 +189,10 @@ export default function ThemeGallery() {
           {/* Header */}
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Galería de Temas
+              {t('gallery.title')}
             </h3>
             <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Elige el diseño perfecto para tu tienda. Cada tema está optimizado para ofrecer 
-              la mejor experiencia a tus clientes y reflejar la personalidad de tu marca.
+              {t('gallery.description')}
             </p>
           </div>
 
