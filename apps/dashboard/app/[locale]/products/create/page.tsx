@@ -13,6 +13,7 @@ import { Card } from '../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../packages/ui/src/components/Input'
 import { CATEGORY_OPTIONS, META_FIELDS_BY_CATEGORY } from './productCategorization'
+import { useTranslations } from 'next-intl'
 
 // Interfaces
 interface ProductVariant {
@@ -42,6 +43,7 @@ interface CategoryNode {
 export default function CreateProductPage() {
   const router = useRouter()
   const { store, loading: storeLoading, currency, currencySymbol, currencyName, formatPrice } = useStore()
+  const t = useTranslations('pages.products.create')
   
   // Estados del formulario
   const [productName, setProductName] = useState('')
@@ -469,9 +471,9 @@ export default function CreateProductPage() {
               onClick={() => router.back()}
               className="mb-4"
             >
-              ← Volver a productos
+              {t('backToProducts')}
             </Button>
-            <h1 className="text-3xl font-bold text-gray-900">Agregar producto</h1>
+            <h1 className="text-3xl font-normal text-gray-800">{t('title')}</h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -480,20 +482,20 @@ export default function CreateProductPage() {
               
               {/* 1. Nombre y descripción */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Información del producto</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('productInfo')}</h2>
                 <div className="space-y-4">
                   <Input
-                    label="Nombre del producto"
-                    placeholder="Camiseta de manga corta"
+                    label={t('productName')}
+                    placeholder={t('productNamePlaceholder')}
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
                     required
                   />
                   <RichTextEditor
-                    label="Descripción"
+                    label={t('description')}
                     value={description}
                     onChange={setDescription}
-                    placeholder="Describe tu producto con formato de texto enriquecido..."
+                    placeholder={t('descriptionPlaceholder')}
                     required={false}
                   />
                 </div>
@@ -501,7 +503,7 @@ export default function CreateProductPage() {
 
               {/* 2. Multimedia */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Multimedia</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('multimedia')}</h2>
                 
                 {mediaFiles.length === 0 ? (
                   // Vista inicial sin imágenes
@@ -521,9 +523,9 @@ export default function CreateProductPage() {
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">Haz clic para subir</span> o arrastra y suelta
+                        <span className="font-medium">{t('uploadHint')}</span>
                       </p>
-                      <p className="text-xs text-gray-500">PNG, JPG hasta 10MB • MP4, WebM hasta 50MB</p>
+                      <p className="text-xs text-gray-500">{t('uploadFormats')}</p>
                     </div>
                   </div>
                 ) : (
@@ -635,11 +637,11 @@ export default function CreateProductPage() {
 
               {/* 3. Precios */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Precios</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('pricing')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Precio ({currencyName})
+                      {t('price')} ({currencyName})
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -656,7 +658,7 @@ export default function CreateProductPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Precio de comparación ({currencyName})
+                      {t('comparePrice')} ({currencyName})
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -681,14 +683,14 @@ export default function CreateProductPage() {
                       onChange={(e) => setChargeTaxes(e.target.checked)}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Cobrar impuestos sobre este producto</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('chargeTaxes')}</span>
                   </label>
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Coste por artículo ({currencyName})
+                      {t('costPerItem')} ({currencyName})
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -704,13 +706,13 @@ export default function CreateProductPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Beneficio</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('profit')}</label>
                     <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-900">
                       {formatPrice(profit)}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Margen</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('margin')}</label>
                     <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-900">
                       {margin}%
                     </div>
@@ -909,7 +911,7 @@ export default function CreateProductPage() {
               {/* 5. Variantes */}
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Variantes</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('variants.title')}</h2>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
@@ -917,14 +919,14 @@ export default function CreateProductPage() {
                       onChange={(e) => setHasVariants(e.target.checked)}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Este producto tiene variantes</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('variants.hasVariants')}</span>
                   </label>
                 </div>
 
                 {hasVariants && (
                   <div className="space-y-4">
                     <Button onClick={addVariant} variant="secondary" size="sm">
-                      + Agregar otra opción
+                      {t('variants.addOption')}
                     </Button>
                     
                     {variants.length > 0 && (
@@ -1003,7 +1005,7 @@ export default function CreateProductPage() {
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h2 className="text-lg font-semibold text-gray-900">Envío</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('shipping.title')}</h2>
                   <span className="text-gray-400">
                     {showAdvanced ? '−' : '+'}
                   </span>
@@ -1018,28 +1020,28 @@ export default function CreateProductPage() {
                         onChange={(e) => setRequiresShipping(e.target.checked)}
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Este es un producto físico</span>
+                      <span className="ml-2 text-sm text-gray-700">{t('shipping.requiresShipping')}</span>
                     </label>
 
                     {requiresShipping && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <Input
-                          label="Peso (kg)"
+                          label={t('shipping.weight')}
                           type="number"
-                          placeholder="0.5"
+                          placeholder={t('shipping.weightPlaceholder')}
                           value={weight}
                           onChange={(e) => setWeight(e.target.value)}
                         />
                         <Input
-                          label="País/Región de origen"
-                          placeholder="Seleccionar"
+                          label={t('shipping.countryOrigin')}
+                          placeholder={t('shipping.countryOriginPlaceholder')}
                           value={countryOrigin}
                           onChange={(e) => setCountryOrigin(e.target.value)}
                         />
                         <div className="md:col-span-2">
                           <Input
-                            label="Código del sistema armonizado (SA)"
-                            placeholder="Buscar por palabra clave o código del producto"
+                            label={t('shipping.harmonizedCode')}
+                            placeholder={t('shipping.harmonizedCodePlaceholder')}
                             value={harmonizedCode}
                             onChange={(e) => setHarmonizedCode(e.target.value)}
                           />
@@ -1052,7 +1054,7 @@ export default function CreateProductPage() {
 
               {/* 7. SEO */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Optimización para motores de búsqueda</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('seo.title')}</h2>
                 
                 {/* Vista previa de Google */}
                 <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
@@ -1072,26 +1074,26 @@ export default function CreateProductPage() {
 
                 <div className="space-y-4">
                   <Input
-                    label="Título de la página"
-                    placeholder="Título que aparecerá en Google"
+                    label={t('seo.pageTitle')}
+                    placeholder={t('seo.pageTitlePlaceholder')}
                     value={seoTitle}
                     onChange={(e) => setSeoTitle(e.target.value)}
                   />
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Meta descripción
+                      {t('seo.metaDescription')}
                     </label>
                     <textarea
                       rows={3}
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                      placeholder="Descripción que aparecerá en los resultados de búsqueda..."
+                      placeholder={t('seo.metaDescriptionPlaceholder')}
                       value={metaDescription}
                       onChange={(e) => setMetaDescription(e.target.value)}
                     />
                   </div>
                   <Input
-                    label="Identificador de URL"
-                    placeholder="producto-123"
+                    label={t('seo.urlHandle')}
+                    placeholder={t('seo.urlHandlePlaceholder')}
                     value={urlSlug}
                     onChange={(e) => setUrlSlug(e.target.value)}
                   />
@@ -1102,81 +1104,81 @@ export default function CreateProductPage() {
             {/* Barra lateral */}
             <div className="space-y-6">
               <Card className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Estado</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('status.title')}</h3>
                 <select 
                   value={productStatus}
                   onChange={(e) => setProductStatus(e.target.value as 'draft' | 'active' | 'archived')}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 >
-                  <option value="draft">Borrador</option>
-                  <option value="active">Activo</option>
-                  <option value="archived">Archivado</option>
+                  <option value="draft">{t('status.draft')}</option>
+                  <option value="active">{t('status.active')}</option>
+                  <option value="archived">{t('status.archived')}</option>
                 </select>
               </Card>
 
 
 
               <Card className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Organización del producto</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('organization.title')}</h3>
+                <p className="text-sm text-gray-500 mb-4">{t('organization.subtitle')}</p>
                 <div className="space-y-4">
                   {/* Categorías principales - Selección múltiple */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Categorías ({selectedParentCategoryIds.length} seleccionadas)
+                      {t('organization.mainCategories')} ({selectedParentCategoryIds.length} {t('organization.mainCategoriesSelected')})
                     </label>
                     {loadingCategories ? (
-                      <p className="text-sm text-gray-500">Cargando categorías...</p>
+                      <div className="animate-pulse h-10 bg-gray-100 rounded"></div>
                     ) : (
-                      <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
-                        {dynamicParentCategories.length === 0 ? (
-                          <p className="text-sm text-gray-500 text-center py-2">No hay categorías disponibles</p>
-                        ) : (
-                          dynamicParentCategories.map(category => (
-                            <label key={category.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                              <input
-                                type="checkbox"
-                                checked={selectedParentCategoryIds.includes(category.id)}
-                                onChange={() => handleParentCategoryToggle(category.id)}
-                                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                              />
-                              <span className="text-sm text-gray-700">{category.name}</span>
-                            </label>
-                          ))
-                        )}
+                      <div className="space-y-2 border border-gray-200 rounded-md p-2">
+                        {dynamicParentCategories.map((category) => (
+                          <label key={category.id} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedParentCategoryIds.includes(category.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedParentCategoryIds([...selectedParentCategoryIds, category.id])
+                                } else {
+                                  setSelectedParentCategoryIds(selectedParentCategoryIds.filter(id => id !== category.id))
+                                }
+                              }}
+                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                            />
+                            <span className="ml-2 text-sm text-gray-900">{category.name}</span>
+                          </label>
+                        ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Subcategorías - Solo si hay categorías seleccionadas */}
+                  {/* Subcategorías */}
                   {selectedParentCategoryIds.length > 0 && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Subcategorías ({selectedSubcategoryIds.length} seleccionadas)
+                        {t('organization.subCategories')} ({selectedSubcategoryIds.length} {t('organization.subCategoriesSelected')})
                       </label>
                       {loadingSubcategories ? (
-                        <p className="text-sm text-gray-500">Cargando subcategorías...</p>
+                        <div className="animate-pulse h-10 bg-gray-100 rounded"></div>
                       ) : (
-                        <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
-                          {dynamicSubcategories.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-2">
-                              {selectedParentCategoryIds.length === 0 
-                                ? 'Selecciona una categoría primero' 
-                                : 'Las categorías seleccionadas no tienen subcategorías'
-                              }
-                            </p>
-                          ) : (
-                            dynamicSubcategories.map(subcategory => (
-                              <label key={subcategory.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedSubcategoryIds.includes(subcategory.id)}
-                                  onChange={() => handleSubcategoryToggle(subcategory.id)}
-                                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                />
-                                <span className="text-sm text-gray-700">{subcategory.name}</span>
-                              </label>
-                            ))
-                          )}
+                        <div className="space-y-2 border border-gray-200 rounded-md p-2">
+                          {dynamicSubcategories.map((subcategory) => (
+                            <label key={subcategory.id} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedSubcategoryIds.includes(subcategory.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedSubcategoryIds([...selectedSubcategoryIds, subcategory.id])
+                                  } else {
+                                    setSelectedSubcategoryIds(selectedSubcategoryIds.filter(id => id !== subcategory.id))
+                                  }
+                                }}
+                                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                              />
+                              <span className="ml-2 text-sm text-gray-900">{subcategory.name}</span>
+                            </label>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -1184,36 +1186,34 @@ export default function CreateProductPage() {
 
                   {/* Resumen de categorías seleccionadas */}
                   {(selectedParentCategoryIds.length > 0 || selectedSubcategoryIds.length > 0) && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <h4 className="text-sm font-medium text-blue-900 mb-2">Categorías seleccionadas:</h4>
-                      
+                    <div className="bg-blue-50 p-4 rounded-md">
+                      <h4 className="text-sm font-medium text-blue-900 mb-2">{t('organization.selectedCategories')}</h4>
                       {selectedParentCategoryIds.length > 0 && (
                         <div className="mb-2">
-                          <span className="text-xs font-medium text-blue-700">Categorías principales:</span>
+                          <p className="text-xs font-medium text-blue-800">{t('organization.mainCategoriesLabel')}</p>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {selectedParentCategoryIds.map(categoryId => {
-                              const category = dynamicParentCategories.find(c => c.id === categoryId)
-                              return category ? (
-                                <span key={categoryId} className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            {selectedParentCategoryIds.map(id => {
+                              const category = dynamicParentCategories.find(c => c.id === id)
+                              return category && (
+                                <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                   {category.name}
                                 </span>
-                              ) : null
+                              )
                             })}
                           </div>
                         </div>
                       )}
-                      
                       {selectedSubcategoryIds.length > 0 && (
                         <div>
-                          <span className="text-xs font-medium text-blue-700">Subcategorías:</span>
+                          <p className="text-xs font-medium text-blue-800">{t('organization.subCategoriesLabel')}</p>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {selectedSubcategoryIds.map(subcategoryId => {
-                              const subcategory = dynamicSubcategories.find(s => s.id === subcategoryId)
-                              return subcategory ? (
-                                <span key={subcategoryId} className="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                            {selectedSubcategoryIds.map(id => {
+                              const subcategory = dynamicSubcategories.find(c => c.id === id)
+                              return subcategory && (
+                                <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                   {subcategory.name}
                                 </span>
-                              ) : null
+                              )
                             })}
                           </div>
                         </div>
@@ -1222,26 +1222,25 @@ export default function CreateProductPage() {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('organization.brand')}
+                    </label>
                     <select
                       value={selectedBrandId}
                       onChange={(e) => setSelectedBrandId(e.target.value)}
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                      disabled={loadingBrands}
                     >
-                      <option value="">Seleccionar marca</option>
-                      {brands.map(brand => (
+                      <option value="">{t('organization.brandPlaceholder')}</option>
+                      {brands.map((brand) => (
                         <option key={brand.id} value={brand.id}>
                           {brand.name}
                         </option>
                       ))}
                     </select>
-                    {loadingBrands && (
-                      <p className="mt-1 text-sm text-gray-500">Cargando marcas...</p>
-                    )}
                   </div>
-                  <Input label="Colecciones" placeholder="" />
-                  <Input label="Etiquetas" placeholder="" />
+
+                  <Input label={t('organization.collections')} placeholder="" />
+                  <Input label={t('organization.tags')} placeholder="" />
                 </div>
               </Card>
             </div>
@@ -1267,7 +1266,7 @@ export default function CreateProductPage() {
             
             <div className="flex justify-end space-x-3">
               <Button variant="secondary" onClick={() => router.back()} disabled={saving}>
-                Descartar
+                {t('buttons.discard')}
               </Button>
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? (
@@ -1276,10 +1275,10 @@ export default function CreateProductPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Guardando...
+                    {t('buttons.saving')}
                   </>
                 ) : (
-                  'Guardar producto'
+                  t('buttons.save')
                 )}
               </Button>
             </div>

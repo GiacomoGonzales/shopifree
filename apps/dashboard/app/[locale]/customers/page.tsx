@@ -173,11 +173,11 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
           <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
             <div>
               <span className="font-medium text-gray-900">{formatCurrency(customer.totalSpent || 0)}</span>
-              <span className="ml-1">gastado</span>
+              <span className="ml-1">{t('table.totalSpent').toLowerCase()}</span>
             </div>
             <div>
               <span className="font-medium text-gray-900">{customer.orderCount || 0}</span>
-              <span className="ml-1">pedidos</span>
+              <span className="ml-1">{t('table.orders').toLowerCase()}</span>
             </div>
           </div>
 
@@ -518,7 +518,7 @@ export default function CustomersPage() {
         <div className="max-w-7xl mx-auto">
           {/* Botones de acción flotantes */}
           <div className="px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end gap-2">
               <button 
                 onClick={handleExport}
                 className="p-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
@@ -539,7 +539,7 @@ export default function CustomersPage() {
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

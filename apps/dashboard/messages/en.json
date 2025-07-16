@@ -330,6 +330,73 @@
       "totalProducts": "products in total",
       "totalProduct": "product in total",
       "inDevelopment": "In development...",
+      "create": {
+        "title": "Add product",
+        "backToProducts": "← Back to products",
+        "productInfo": "Product Information",
+        "productName": "Product name",
+        "productNamePlaceholder": "Short sleeve t-shirt",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe your product with rich text formatting...",
+        "multimedia": "Multimedia",
+        "uploadHint": "Click to upload or drag and drop",
+        "uploadFormats": "PNG, JPG up to 10MB • MP4, WebM up to 50MB",
+        "pricing": "Pricing",
+        "price": "Price",
+        "comparePrice": "Compare at price",
+        "chargeTaxes": "Charge taxes on this product",
+        "costPerItem": "Cost per item",
+        "profit": "Profit",
+        "margin": "Margin",
+        "organization": "Product Organization",
+        "variants": {
+          "title": "Variants",
+          "hasVariants": "This product has variants",
+          "addOption": "+ Add another option"
+        },
+        "shipping": {
+          "title": "Shipping",
+          "requiresShipping": "This product requires shipping",
+          "weight": "Weight (kg)",
+          "weightPlaceholder": "0.5",
+          "countryOrigin": "Country/Region of origin",
+          "countryOriginPlaceholder": "Select",
+          "harmonizedCode": "Harmonized System (HS) code",
+          "harmonizedCodePlaceholder": "Search by keyword or product code"
+        },
+        "seo": {
+          "title": "SEO",
+          "pageTitle": "Page title",
+          "pageTitlePlaceholder": "Title that will appear on Google",
+          "metaDescription": "Meta description",
+          "metaDescriptionPlaceholder": "Description that will appear in search results...",
+          "urlHandle": "URL handle",
+          "urlHandlePlaceholder": "product-123"
+        },
+        "status": {
+          "title": "Status",
+          "draft": "Draft",
+          "active": "Active",
+          "archived": "Archived"
+        },
+        "organization": {
+          "title": "Product Organization",
+          "subtitle": "Organize your product by selecting categories and brand",
+          "mainCategories": "Main Categories",
+          "mainCategoriesSelected": "selected",
+          "brand": "Brand",
+          "brandPlaceholder": "Select brand",
+          "category": "Category",
+          "categoryPlaceholder": "Select category",
+          "collections": "Collections",
+          "tags": "Tags"
+        },
+        "buttons": {
+          "discard": "Discard",
+          "saving": "Saving...",
+          "save": "Save product"
+        }
+      },
       "tabs": {
         "all": "All",
         "active": "Active",
