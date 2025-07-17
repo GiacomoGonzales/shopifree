@@ -1,0 +1,97 @@
+{
+  "title": "Soporte",
+  "subtitle": "Ayuda y asistencia",
+  "description": "Encuentra respuestas a tus preguntas y contacta con nuestro equipo de soporte.",
+  "sections": {
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "description": "Encuentra respuestas a las preguntas más comunes sobre Shopifree",
+      "action": "Ver FAQ",
+      "categories": {
+        "general": "General",
+        "products": "Productos",
+        "orders": "Pedidos",
+        "payments": "Pagos",
+        "shipping": "Envíos",
+        "customization": "Personalización"
+      }
+    },
+    "contact": {
+      "title": "Contactar Soporte",
+      "description": "Envíanos un mensaje y te responderemos lo antes posible",
+      "action": "Contactar",
+      "form": {
+        "title": "Formulario de Contacto",
+        "subject": {
+          "label": "Asunto",
+          "placeholder": "Describe brevemente tu consulta"
+        },
+        "message": {
+          "label": "Mensaje",
+          "placeholder": "Describe tu problema o consulta en detalle..."
+        },
+        "submit": "Enviar Mensaje"
+      }
+    }
+  },
+  "contactMethods": {
+    "title": "Métodos de Contacto",
+    "email": {
+      "title": "Email",
+      "description": "Envíanos un email a support@shopifree.app",
+      "action": "Enviar Email"
+    },
+    "whatsapp": {
+      "title": "WhatsApp",
+      "description": "Chatea con nosotros por WhatsApp",
+      "action": "Iniciar Chat"
+    },
+    "chat": {
+      "title": "Chat en Vivo",
+      "description": "Chatea con nuestro equipo de soporte en tiempo real",
+      "action": "Iniciar Chat",
+      "status": {
+        "online": "Estamos en línea",
+        "offline": "Estamos fuera de línea"
+      }
+    }
+  },
+  "resources": {
+    "title": "Recursos de Ayuda",
+    "documentation": {
+      "title": "Documentación",
+      "description": "Guías y documentación detallada",
+      "action": "Ver Documentación"
+    },
+    "tutorials": {
+      "title": "Video Tutoriales",
+      "description": "Guías paso a paso en video",
+      "action": "Ver Tutoriales"
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "Consejos, actualizaciones y mejores prácticas",
+      "action": "Leer Blog"
+    }
+  },
+  "messages": {
+    "sent": "Mensaje enviado exitosamente",
+    "error": "Error al enviar mensaje",
+    "invalidForm": "Por favor completa todos los campos requeridos",
+    "sending": "Enviando mensaje...",
+    "tryAgain": "Por favor intenta de nuevo más tarde"
+  },
+  "priorities": {
+    "low": "Prioridad Baja",
+    "medium": "Prioridad Media",
+    "high": "Prioridad Alta",
+    "urgent": "Urgente"
+  },
+  "categories": {
+    "technical": "Problema Técnico",
+    "billing": "Facturación",
+    "feature": "Solicitud de Función",
+    "account": "Cuenta",
+    "other": "Otro"
+  }
+} 

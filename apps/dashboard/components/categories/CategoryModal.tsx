@@ -22,7 +22,7 @@ export default function CategoryModal({
   parentCategories,
   storeId
 }: CategoryModalProps) {
-  const t = useTranslations('pages.categories')
+  const t = useTranslations('categories')
   
   const [formData, setFormData] = useState({
     name: '',
@@ -72,7 +72,7 @@ export default function CategoryModal({
     const newErrors: Record<string, string> = {}
 
     if (!formData.name.trim()) {
-      newErrors.name = t('messages.nameRequired')
+      newErrors.name = t('validation.nameRequired')
     }
 
     setErrors(newErrors)
@@ -85,7 +85,7 @@ export default function CategoryModal({
 
     const validation = validateImageFile(file)
     if (!validation.isValid) {
-      setErrors({ ...errors, image: validation.error || t('messages.imageUploadError') })
+      setErrors({ ...errors, image: validation.error || t('validation.imageUploadError') })
       return
     }
 

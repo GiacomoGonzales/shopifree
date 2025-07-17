@@ -21,7 +21,7 @@ export default function ProductSelector({
   selectedProductIds,
   title
 }: ProductSelectorProps) {
-  const t = useTranslations('pages.collections.productSelector')
+  const t = useTranslations('collections.productSelector')
   const [searchQuery, setSearchQuery] = useState('')
   const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedProductIds)
 

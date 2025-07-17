@@ -10,7 +10,7 @@ import CarouselImagesUpload from '../../../components/store-design/CarouselImage
 type Section = 'logo-colors' | 'banners' | 'themes'
 
 export default function StoreDesignPage() {
-  const t = useTranslations('pages.storeDesign')
+  const t = useTranslations('storeDesign')
   const [currentSection, setCurrentSection] = useState<Section>('logo-colors')
 
   const tabs = [
@@ -93,6 +93,11 @@ export default function StoreDesignPage() {
     <DashboardLayout>
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
+            <p className="mt-1 text-sm text-gray-500">{t('description')}</p>
+          </div>
+
           {/* Navegación por pestañas - Carrusel horizontal */}
           <div className="border-b border-gray-200">
             <div className="overflow-x-auto scrollbar-hide">

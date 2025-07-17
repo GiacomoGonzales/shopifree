@@ -1,0 +1,64 @@
+{
+  "title": "Marketing",
+  "subtitle": "Promociona tu tienda",
+  "description": "Herramientas para promocionar tu tienda, crear campañas y aumentar las ventas.",
+  "sections": {
+    "promotions": {
+      "title": "Promociones",
+      "description": "Crea descuentos y ofertas especiales",
+      "actions": {
+        "create": "Crear Promoción",
+        "edit": "Editar Promoción",
+        "delete": "Eliminar Promoción"
+      }
+    },
+    "email": {
+      "title": "Email Marketing",
+      "description": "Envía newsletters a tus clientes",
+      "actions": {
+        "createCampaign": "Crear Campaña",
+        "sendNewsletter": "Enviar Newsletter",
+        "manageSubscribers": "Gestionar Suscriptores"
+      }
+    },
+    "social": {
+      "title": "Redes Sociales",
+      "description": "Gestiona tu presencia en redes sociales",
+      "actions": {
+        "connect": "Conectar Cuenta",
+        "post": "Crear Publicación",
+        "schedule": "Programar Publicación"
+      }
+    },
+    "seo": {
+      "title": "SEO",
+      "description": "Optimiza tu tienda para motores de búsqueda",
+      "actions": {
+        "analyze": "Analizar SEO",
+        "optimize": "Optimizar Contenido",
+        "keywords": "Gestionar Palabras Clave"
+      }
+    },
+    "analytics": {
+      "title": "Analíticas",
+      "description": "Monitorea el rendimiento de tu marketing",
+      "metrics": {
+        "visitors": "Visitantes",
+        "conversions": "Conversiones",
+        "revenue": "Ingresos",
+        "engagement": "Interacción"
+      }
+    }
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "scheduled": "Programado",
+    "draft": "Borrador"
+  },
+  "messages": {
+    "comingSoon": "Las herramientas de marketing te ayudarán a promocionar tu tienda y aumentar las ventas. ¡Próximamente disponibles!",
+    "success": "Operación completada exitosamente",
+    "error": "Ocurrió un error al procesar tu solicitud"
+  }
+} 

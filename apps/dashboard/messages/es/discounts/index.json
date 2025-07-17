@@ -1,0 +1,88 @@
+{
+  "title": "Descuentos",
+  "subtitle": "Gestiona promociones y descuentos",
+  "description": "Crea cupones, códigos de descuento y promociones especiales para tu tienda.",
+  "addDiscount": "Agregar Descuento",
+  "sections": {
+    "coupons": {
+      "title": "Cupones",
+      "description": "Crea y gestiona cupones de descuento",
+      "actions": {
+        "create": "Crear Cupón",
+        "edit": "Editar Cupón",
+        "delete": "Eliminar Cupón"
+      }
+    },
+    "promotions": {
+      "title": "Promociones",
+      "description": "Crea ofertas y promociones especiales",
+      "actions": {
+        "create": "Crear Promoción",
+        "edit": "Editar Promoción",
+        "delete": "Eliminar Promoción"
+      }
+    },
+    "automaticDiscounts": {
+      "title": "Descuentos Automáticos",
+      "description": "Configura descuentos que se aplican automáticamente",
+      "actions": {
+        "create": "Crear Descuento Automático",
+        "edit": "Editar Descuento Automático",
+        "delete": "Eliminar Descuento Automático"
+      }
+    }
+  },
+  "form": {
+    "code": {
+      "label": "Código de Descuento",
+      "placeholder": "Ingresa el código de descuento",
+      "hint": "Los clientes ingresarán este código al finalizar la compra"
+    },
+    "type": {
+      "label": "Tipo de Descuento",
+      "percentage": "Porcentaje",
+      "fixed": "Monto Fijo",
+      "shipping": "Envío Gratis"
+    },
+    "value": {
+      "label": "Valor del Descuento",
+      "placeholder": "Ingresa el valor del descuento"
+    },
+    "minPurchase": {
+      "label": "Compra Mínima",
+      "placeholder": "Ingresa el monto mínimo de compra",
+      "hint": "Opcional: Monto mínimo de compra requerido"
+    },
+    "startDate": {
+      "label": "Fecha de Inicio",
+      "placeholder": "Selecciona la fecha de inicio"
+    },
+    "endDate": {
+      "label": "Fecha de Fin",
+      "placeholder": "Selecciona la fecha de fin",
+      "hint": "Opcional: Deja en blanco si no hay fecha de fin"
+    },
+    "usageLimit": {
+      "label": "Límite de Uso",
+      "placeholder": "Ingresa el límite de uso",
+      "hint": "Opcional: Número máximo de veces que se puede usar este descuento"
+    }
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "scheduled": "Programado",
+    "expired": "Expirado"
+  },
+  "messages": {
+    "created": "Descuento creado exitosamente",
+    "updated": "Descuento actualizado exitosamente",
+    "deleted": "Descuento eliminado exitosamente",
+    "error": "Error al procesar la solicitud",
+    "codeRequired": "El código de descuento es obligatorio",
+    "valueRequired": "El valor del descuento es obligatorio",
+    "invalidValue": "Valor de descuento inválido",
+    "duplicateCode": "Este código de descuento ya existe",
+    "comingSoon": "Las herramientas de gestión de descuentos te ayudarán a crear y gestionar promociones para tu tienda. ¡Próximamente disponibles!"
+  }
+} 

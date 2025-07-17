@@ -23,7 +23,7 @@ export default function OrdersPage() {
   const [storeData, setStoreData] = useState<{ id: string; storeName: string; currency: string } | null>(null)
   
   const { user } = useAuth()
-  const t = useTranslations('pages.orders')
+  const t = useTranslations('orders')
 
   // Cargar datos de la tienda y suscribirse a pedidos
   useEffect(() => {

@@ -1,0 +1,139 @@
+{
+  "title": "Crea tu tienda",
+  "subtitle": "Configura tu tienda online con información básica",
+  "navigation": {
+    "stepOf": "Paso {current} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "steps": {
+    "info": {
+      "title": "Información de la tienda",
+      "fields": {
+        "storeName": {
+          "label": "Nombre de la tienda",
+          "placeholder": "Mi Tienda Increíble",
+          "error": "El nombre de la tienda es obligatorio"
+        },
+        "businessType": {
+          "label": "Tipo de comercio",
+          "placeholder": "Selecciona tu tipo de negocio",
+          "error": "El tipo de comercio es obligatorio",
+          "options": {
+            "fashion": "Moda y accesorios",
+            "technology": "Tecnología y electrónica",
+            "health": "Salud y belleza",
+            "food": "Alimentos y bebidas",
+            "restaurant": "Restaurante y comida rápida",
+            "home": "Hogar y decoración",
+            "sports": "Deportes y recreación",
+            "education": "Educación y formación",
+            "toys": "Juguetes y niños",
+            "pets": "Mascotas",
+            "service": "Servicios profesionales",
+            "wholesale": "Venta por mayor",
+            "retail": "Venta por menor",
+            "handcrafts": "Manualidades y arte",
+            "eco": "Productos ecológicos o sostenibles",
+            "other": "Otro (personalizado)"
+          }
+        },
+        "subdomain": {
+          "label": "Subdominio",
+          "placeholder": "mi-tienda",
+          "hint": "Tu tienda estará disponible en",
+          "error": "El subdominio es obligatorio",
+          "errorTaken": "Este subdominio ya está en uso",
+          "errorNotAvailable": "El subdominio no está disponible",
+          "errorCheck": "Error al verificar disponibilidad del subdominio"
+        },
+        "slogan": {
+          "label": "Eslogan",
+          "placeholder": "La mejor tienda online",
+          "error": "El eslogan es obligatorio"
+        },
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Describe tu tienda y lo que vendes...",
+          "error": "La descripción es obligatoria"
+        }
+      }
+    },
+    "contact": {
+      "title": "Datos de contacto",
+      "fields": {
+        "hasPhysicalLocation": {
+          "label": "¿Tienes un local físico?"
+        },
+        "address": {
+          "label": "Dirección",
+          "placeholder": "Calle 123, Ciudad, País",
+          "hint": "Empieza a escribir tu dirección...",
+          "locationSaved": "Ubicación guardada",
+          "error": "La dirección es obligatoria cuando tienes un local físico"
+        },
+        "phone": {
+          "label": "Teléfono de la tienda",
+          "placeholder": "1234567890",
+          "hint": "Ingresa solo el número local (sin código de país)",
+          "error": "El teléfono de la tienda es obligatorio",
+          "errorInvalid": "Por favor ingresa un número de teléfono válido"
+        },
+        "currency": {
+          "label": "Moneda de la tienda",
+          "hint": "Esta será la moneda principal para mostrar precios",
+          "error": "La moneda es obligatoria"
+        }
+      }
+    },
+    "branding": {
+      "title": "Personaliza tu marca",
+      "fields": {
+        "logo": {
+          "label": "Logo",
+          "hint": "PNG, JPG hasta 5MB",
+          "error": "El logo es obligatorio",
+          "uploadHint": "Haz clic para subir o arrastra aquí"
+        },
+        "storePhoto": {
+          "label": "Imagen principal (portada)",
+          "hint": "Esta imagen se mostrará como portada principal de tu tienda",
+          "error": "La imagen de portada es obligatoria",
+          "uploadHint": "Haz clic para subir o arrastra aquí"
+        },
+        "colors": {
+          "title": "Colores de tu marca",
+          "primary": "Color primario",
+          "secondary": "Color secundario"
+        }
+      }
+    }
+  },
+  "actions": {
+    "uploadHint": "Haz clic para subir o arrastra aquí",
+    "fileFormat": "PNG, JPG hasta 5MB",
+    "createStore": "Crear tienda"
+  },
+  "progress": {
+    "creating": "Creando tu tienda...",
+    "created": "¡Tienda creada exitosamente!",
+    "createdMessage": "Tu tienda ha sido creada correctamente",
+    "creatingMessage": "Por favor espera mientras configuramos tu tienda",
+    "redirecting": "Redirigiendo al dashboard...",
+    "redirectingMessage": "Preparando tu panel de control",
+    "completed": "{count}% completado",
+    "steps": {
+      "basicInfo": "Configurando información básica...",
+      "contact": "Configurando datos de contacto...",
+      "branding": "Aplicando branding..."
+    }
+  },
+  "success": {
+    "title": "¡Tienda creada exitosamente!",
+    "message": "Tu tienda ha sido creada correctamente",
+    "completed": "100% completado"
+  },
+  "errors": {
+    "createError": "Error al crear la tienda. Inténtalo de nuevo."
+  }
+} 

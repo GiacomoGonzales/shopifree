@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
 
 export default function DiscountsPage() {
-  const t = useTranslations('pages.discounts')
+  const t = useTranslations('discounts')
 
   return (
     <DashboardLayout>
@@ -27,7 +27,7 @@ export default function DiscountsPage() {
                 <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Crear Descuento
+                {t('addDiscount')}
               </button>
             </div>
           </div>
@@ -35,13 +35,6 @@ export default function DiscountsPage() {
           <div className="mt-8">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  {t('title')}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {t('description')}
-                </p>
-                
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex">
                     <div className="flex-shrink-0">
@@ -51,7 +44,7 @@ export default function DiscountsPage() {
                     </div>
                     <div className="ml-3 flex-1">
                       <p className="text-sm text-yellow-700">
-                        En desarrollo...
+                        {t('messages.comingSoon')}
                       </p>
                     </div>
                   </div>

@@ -1,0 +1,164 @@
+{
+  "title": "Diseño de tienda",
+  "subtitle": "Personaliza el diseño de tu tienda",
+  "description": "Personaliza el diseño, colores, temas y aspecto visual de tu tienda.",
+  "tabs": {
+    "logoColors": "Logo y colores",
+    "banners": "Banners y secciones",
+    "themes": "Temas"
+  },
+  "sections": {
+    "logo": {
+      "title": "Logo",
+      "description": "Sube el logo de tu tienda. Recomendamos una imagen PNG con fondo transparente.",
+      "upload": "Subir logo",
+      "change": "Cambiar logo",
+      "remove": "Eliminar logo",
+      "preview": "Vista previa del logo",
+      "dragAndDrop": "o arrastra y suelta",
+      "fileTypes": "PNG, JPG hasta 5MB",
+      "uploading": "Subiendo logo..."
+    },
+    "colors": {
+      "title": "Colores",
+      "description": "Personaliza los colores principales de tu tienda.",
+      "primary": {
+        "label": "Color Primario",
+        "description": "Color principal usado para botones y elementos importantes"
+      },
+      "secondary": {
+        "label": "Color Secundario",
+        "description": "Color de acento usado para destacados y elementos secundarios"
+      },
+      "preview": "Vista previa de colores",
+      "reset": "Restablecer por defecto"
+    },
+    "hero": {
+      "title": "Imagen Hero",
+      "description": "Esta imagen se mostrará al inicio de tu tienda como portada. Usa una imagen horizontal de alta calidad para destacar tu marca.",
+      "upload": "Sube una imagen",
+      "dragAndDrop": "o arrastra y suelta",
+      "fileTypes": "PNG, JPG hasta 5MB",
+      "change": "Cambiar",
+      "delete": "Eliminar",
+      "uploading": "Subiendo imagen..."
+    },
+    "carousel": {
+      "title": "Imágenes del Carrusel",
+      "description": "Sube hasta {maxImages} imágenes para el carrusel principal de tu tienda. Recomendamos imágenes horizontales de 1920x600px para mejor visualización.",
+      "upload": "Sube imágenes",
+      "dragAndDrop": "o arrastra y suelta",
+      "fileTypes": "PNG, JPG hasta 5MB cada una",
+      "imagesUploaded": "{current}/{max} imágenes subidas",
+      "delete": "Eliminar",
+      "processing": "Procesando imágenes...",
+      "maxImagesError": "Ya tienes el máximo de {max} imágenes",
+      "tips": {
+        "drag": "• Puedes arrastrar las imágenes para reordenarlas",
+        "size": "• Tamaño recomendado: 1920x600px (proporción 16:5)",
+        "formats": "• Formatos soportados: JPG, PNG"
+      }
+    },
+    "customSections": {
+      "title": "Secciones personalizadas",
+      "description": "Añade y personaliza secciones adicionales para tu tienda."
+    },
+    "themes": {
+      "gallery": {
+        "title": "Galería de Temas",
+        "description": "Elige el diseño perfecto para tu tienda. Cada tema está optimizado para ofrecer la mejor experiencia a tus clientes y reflejar la personalidad de tu marca.",
+        "selected": "Seleccionado",
+        "recommended": "⭐ Recomendado",
+        "preview": "Vista previa",
+        "features": "Características",
+        "colors": "Colores",
+        "primaryColor": "Color primario",
+        "secondaryColor": "Color secundario",
+        "moreFeatures": "+{count} más",
+        "currentTheme": "Tema Actual",
+        "selectTheme": "Seleccionar Tema",
+        "applying": "Aplicando tema..."
+      },
+      "themesList": {
+        "baseDefault": {
+          "name": "Tema Base",
+          "description": "Un diseño limpio y profesional que se adapta a todo tipo de negocios. Perfecto para comenzar tu tienda online.",
+          "features": {
+            "responsive": "Diseño responsive",
+            "highContrast": "Alto contraste",
+            "easyNavigation": "Navegación fácil",
+            "mobileOptimized": "Optimizado para móviles"
+          }
+        },
+        "mobilemodern": {
+          "name": "Moderno Móvil",
+          "description": "Diseño optimizado para móviles con colores vibrantes y una experiencia táctil moderna. Perfecto para audiencias jóvenes.",
+          "features": {
+            "mobileFirst": "Mobile-first",
+            "vibrantColors": "Colores vibrantes",
+            "touchExperience": "Experiencia táctil",
+            "intuitiveNavigation": "Navegación intuitiva"
+          }
+        },
+        "minimalSushi": {
+          "name": "Sushi Minimalista",
+          "description": "Diseño minimalista con énfasis en la tipografía y espacios en blanco. Perfecto para tiendas de moda y estilo de vida.",
+          "features": {
+            "minimalistStyle": "Estilo minimalista",
+            "elegantTypography": "Tipografía elegante",
+            "subtleAnimations": "Animaciones sutiles",
+            "modernGallery": "Galería moderna"
+          }
+        },
+        "petFriendly": {
+          "name": "Pet Friendly",
+          "description": "Tema alegre y colorido perfecto para tiendas de mascotas y productos relacionados con animales.",
+          "features": {
+            "vibrantColors": "Colores vibrantes",
+            "customIcons": "Iconos personalizados",
+            "friendlyDesign": "Diseño amigable",
+            "specialSections": "Secciones especiales para productos destacados"
+          }
+        },
+        "minimalClean": {
+          "name": "Minimalista Limpio",
+          "description": "Diseño ultra-minimalista con líneas limpias y espacios amplios. Perfecto para productos premium.",
+          "features": {
+            "ultraMinimalist": "Ultra minimalista",
+            "wideSpaces": "Espacios amplios",
+            "cleanLines": "Líneas limpias",
+            "premiumProducts": "Productos premium"
+          }
+        },
+        "elegantBoutique": {
+          "name": "Boutique Elegante",
+          "description": "Diseño sofisticado y elegante inspirado en boutiques de lujo. Perfecto para marcas premium y productos de alta gama.",
+          "features": {
+            "premiumStyle": "Estilo boutique premium",
+            "serifTypography": "Tipografía serif elegante",
+            "warmNeutrals": "Colores neutros cálidos",
+            "generousSpacing": "Espaciado generoso",
+            "sophisticatedNav": "Navegación sofisticada",
+            "subtleAnimations": "Animaciones sutiles"
+          }
+        }
+      }
+    }
+  },
+  "messages": {
+    "saved": "Cambios guardados exitosamente",
+    "error": "Ocurrió un error al guardar los cambios",
+    "uploadError": "Error al subir el archivo",
+    "deleteError": "Error al eliminar el archivo",
+    "invalidFile": "Tipo o tamaño de archivo inválido",
+    "themeApplied": "Tema aplicado exitosamente"
+  },
+  "notifications": {
+    "alreadySelected": "Este tema ya está seleccionado",
+    "storeNotFound": "Tienda no encontrada",
+    "invalidTheme": "Selección de tema inválida",
+    "applying": "Aplicando tema...",
+    "success": "Tema {themeName} aplicado exitosamente",
+    "error": "Error al aplicar el tema"
+  }
+} 

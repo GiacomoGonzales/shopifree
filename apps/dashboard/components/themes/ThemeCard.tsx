@@ -1,200 +1,126 @@
-import Image from 'next/image'
+import React from 'react'
 import { useTranslations } from 'next-intl'
 import { Theme } from '../../lib/themes/theme-types'
-import { useState } from 'react'
 
 interface ThemeCardProps {
   theme: Theme
   isSelected: boolean
-  onSelect: (themeId: string) => void
-  isLoading?: boolean
+  isLoading: boolean
+  onSelect: () => void
 }
 
-export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: ThemeCardProps) {
-  const t = useTranslations('pages.storeDesign.sections.themes')
-  const themeT = useTranslations(`pages.storeDesign.sections.themes.themesList.${theme.translationKey}`)
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
+export default function ThemeCard({ theme, isSelected, isLoading, onSelect }: ThemeCardProps) {
+  const t = useTranslations('storeDesign.sections.themes')
+  const themeT = useTranslations(`storeDesign.sections.themes.themesList.${theme.translationKey}`)
 
   // Get features from translations
-  const features = Object.entries(themeT.raw('features') as Record<string, string>).map(([_, value]) => value)
+  const features = Object.entries(themeT.raw('features') as Record<string, string>)
 
   return (
-    <div
-      className={`
-        group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden
-        ${isSelected 
-          ? 'border-blue-500 bg-blue-50 shadow-lg ring-4 ring-blue-100' 
-          : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
-        }
-        ${isLoading ? 'pointer-events-none opacity-60' : ''}
-      `}
-      onClick={() => !isLoading && onSelect(theme.id)}
-    >
-      {/* Selected indicator badge */}
-      {isSelected && (
-        <div className="absolute top-3 right-3 z-10">
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500 text-white shadow-sm">
-            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            {t('gallery.selected')}
-          </div>
-        </div>
-      )}
-
-      {/* Recommended badge */}
-      {theme.recommended && !isSelected && (
-        <div className="absolute top-3 left-3 z-10">
-          <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-            {t('gallery.recommended')}
-          </div>
-        </div>
-      )}
-
-      {/* Preview Image Container */}
-      <div className="relative h-48 w-full overflow-hidden">
-        {/* Loading placeholder */}
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="w-16 h-2 bg-gray-200 rounded animate-pulse"></div>
-            </div>
+    <div className={`
+      relative rounded-lg border overflow-hidden transition-all duration-200
+      ${isSelected ? 'border-gray-900 shadow-lg' : 'border-gray-200 hover:border-gray-300'}
+    `}>
+      {/* Imagen de vista previa */}
+      <div className="aspect-video relative">
+        <img
+          src={theme.preview}
+          alt={themeT('name')}
+          className="w-full h-full object-cover"
+        />
+        {isSelected && (
+          <div className="absolute top-2 right-2">
+            <span className="bg-gray-900 text-white text-xs px-2 py-1 rounded-full">
+              {t('gallery.selected')}
+            </span>
           </div>
         )}
-
-        {/* Error placeholder */}
-        {imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <p className="text-xs text-gray-500">{t('gallery.preview')}</p>
-            </div>
+        {theme.recommended && (
+          <div className="absolute top-2 left-2">
+            <span className="bg-yellow-400 text-gray-900 text-xs px-2 py-1 rounded-full">
+              {t('gallery.recommended')}
+            </span>
           </div>
-        )}
-
-        {/* Actual Image */}
-        {!imageError && (
-          <Image
-            src={theme.preview}
-            alt={`${t('gallery.preview')} ${themeT('name')}`}
-            fill
-            className={`
-              object-cover transition-all duration-500
-              ${imageLoaded ? 'opacity-100' : 'opacity-0'}
-              ${isSelected ? 'scale-105' : 'group-hover:scale-105'}
-            `}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {
-              console.warn(`Failed to load theme preview: ${theme.preview}`)
-              setImageError(true)
-              setImageLoaded(false)
-            }}
-            priority={isSelected}
-          />
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <h3 className={`
-              text-lg font-semibold transition-colors duration-200
-              ${isSelected ? 'text-blue-900' : 'text-gray-900 group-hover:text-gray-700'}
-            `}>
-              {themeT('name')}
-            </h3>
-            <p className={`
-              mt-1 text-sm leading-relaxed
-              ${isSelected ? 'text-blue-700' : 'text-gray-600'}
-            `}>
-              {themeT('description')}
-            </p>
-          </div>
+      {/* Información del tema */}
+      <div className="p-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-1">
+          {themeT('name')}
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          {themeT('description')}
+        </p>
+
+        {/* Características */}
+        <div className="mb-4">
+          <h4 className="text-sm font-medium text-gray-900 mb-2">
+            {t('gallery.features')}
+          </h4>
+          <ul className="space-y-1">
+            {features.slice(0, 3).map(([key, value]) => (
+              <li key={key} className="text-sm text-gray-600 flex items-center">
+                <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                {value}
+              </li>
+            ))}
+            {features.length > 3 && (
+              <li className="text-sm text-gray-500">
+                {t('gallery.moreFeatures', { count: features.length - 3 })}
+              </li>
+            )}
+          </ul>
         </div>
 
-        {/* Features list */}
-        {features.length > 0 && (
-          <div className="mt-4">
-            <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wide mb-2">
-              {t('gallery.features')}
-            </h4>
-            <div className="flex flex-wrap gap-1">
-              {features.slice(0, 4).map((feature, index) => (
-                <span 
-                  key={index} 
-                  className={`
-                    inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
-                    ${isSelected 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-gray-100 text-gray-700'
-                    }
-                  `}
-                >
-                  {feature}
-                </span>
-              ))}
-              {features.length > 4 && (
-                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-500">
-                  {t('gallery.moreFeatures', { count: features.length - 4 })}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Color palette preview */}
+        {/* Colores */}
         {theme.colors && (
-          <div className="mt-4">
-            <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wide mb-2">
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">
               {t('gallery.colors')}
             </h4>
-            <div className="flex space-x-2">
-              <div 
-                className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
-                style={{ backgroundColor: theme.colors.primary }}
-                title={t('gallery.primaryColor')}
-              />
-              <div 
-                className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
-                style={{ backgroundColor: theme.colors.secondary }}
-                title={t('gallery.secondaryColor')}
-              />
+            <div className="flex space-x-4">
+              <div>
+                <div
+                  className="w-6 h-6 rounded-full mb-1"
+                  style={{ backgroundColor: theme.colors.primary }}
+                />
+                <span className="text-xs text-gray-500">{t('gallery.primaryColor')}</span>
+              </div>
+              <div>
+                <div
+                  className="w-6 h-6 rounded-full mb-1"
+                  style={{ backgroundColor: theme.colors.secondary }}
+                />
+                <span className="text-xs text-gray-500">{t('gallery.secondaryColor')}</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Action button */}
-        <div className="mt-5 pt-4 border-t border-gray-100">
+        {/* Botón de selección */}
+        <div className="mt-4">
           <button
+            onClick={onSelect}
+            disabled={isLoading || isSelected}
             className={`
-              w-full py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200
+              w-full py-2 px-4 rounded-md text-sm font-medium
               ${isSelected
-                ? 'bg-blue-500 text-white shadow-sm'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 group-hover:bg-blue-50 group-hover:text-blue-700'
+                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                : 'bg-gray-900 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900'
               }
-              ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
-            disabled={isLoading}
           >
             {isLoading ? (
-              <div className="flex items-center justify-center">
+              <span className="flex items-center justify-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 {t('gallery.applying')}
-              </div>
+              </span>
             ) : isSelected ? (
               t('gallery.currentTheme')
             ) : (
@@ -203,19 +129,6 @@ export default function ThemeCard({ theme, isSelected, onSelect, isLoading }: Th
           </button>
         </div>
       </div>
-
-      {/* Loading overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-          <div className="text-center">
-            <svg className="animate-spin h-8 w-8 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p className="text-sm text-gray-600 mt-2">{t('gallery.loading')}</p>
-          </div>
-        </div>
-      )}
     </div>
   )
 } 

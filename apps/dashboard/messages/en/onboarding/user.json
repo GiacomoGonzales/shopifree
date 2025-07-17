@@ -1,0 +1,33 @@
+{
+  "title": "Complete your profile",
+  "subtitle": "We need some basic information to get started",
+  "fields": {
+    "nombre": {
+      "label": "Full name",
+      "placeholder": "Enter your full name",
+      "error": "Full name is required"
+    },
+    "telefono": {
+      "label": "Phone",
+      "placeholder": "1234567890",
+      "hint": "Enter only the local number (without country code)",
+      "error": "Phone is required",
+      "invalidError": "Please enter a valid phone number"
+    },
+    "correo": {
+      "label": "Email",
+      "hint": "This email comes from your authentication and cannot be changed"
+    },
+    "zonaHoraria": {
+      "label": "Time zone",
+      "error": "Time zone is required"
+    }
+  },
+  "actions": {
+    "continue": "Continue",
+    "saving": "Saving..."
+  },
+  "errors": {
+    "saveError": "Error saving your information. Please try again."
+  }
+} 

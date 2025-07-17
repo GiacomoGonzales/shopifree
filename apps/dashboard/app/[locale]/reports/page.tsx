@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
 
 export default function ReportsPage() {
-  const t = useTranslations('pages.reports')
+  const t = useTranslations('reports')
 
   return (
     <DashboardLayout>
@@ -24,6 +24,7 @@ export default function ReportsPage() {
           <div className="mt-8">
             {/* Grid de estadísticas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Ventas del mes */}
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
                   <div className="flex items-center">
@@ -35,7 +36,7 @@ export default function ReportsPage() {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Ventas del mes
+                          {t('stats.monthlySales.title')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           $0.00
@@ -46,6 +47,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* Pedidos */}
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
                   <div className="flex items-center">
@@ -57,7 +59,7 @@ export default function ReportsPage() {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Pedidos
+                          {t('stats.orders.title')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           0
@@ -68,6 +70,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* Productos */}
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
                   <div className="flex items-center">
@@ -79,7 +82,7 @@ export default function ReportsPage() {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Productos
+                          {t('stats.products.title')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           0
@@ -90,6 +93,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* Visitas */}
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
                   <div className="flex items-center">
@@ -102,7 +106,7 @@ export default function ReportsPage() {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">
-                          Visitas
+                          {t('stats.visits.title')}
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           0
@@ -114,15 +118,29 @@ export default function ReportsPage() {
               </div>
             </div>
 
+            {/* Mensaje de próximamente */}
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  {t('title')}
+                  {t('comingSoon.title')}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {t('description')}
+                  {t('comingSoon.description')}
                 </p>
                 
+                {/* Lista de características próximas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  {Object.entries(t.raw('comingSoon.features')).map(([key, value]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-600">{value as string}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mensaje de estado actual */}
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex">
                     <div className="flex-shrink-0">
@@ -132,7 +150,7 @@ export default function ReportsPage() {
                     </div>
                     <div className="ml-3 flex-1">
                       <p className="text-sm text-yellow-700">
-                        Los reportes detallados estarán disponibles cuando comiences a recibir pedidos y visitantes.
+                        {t('sections.overview.noData')}
                       </p>
                     </div>
                   </div>

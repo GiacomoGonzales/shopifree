@@ -10,8 +10,8 @@ interface AdvancedSettingsProps {
 }
 
 export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsProps) {
-  const t = useTranslations('pages.settings.advanced')
-  const tActions = useTranslations('pages.settings.actions')
+  const t = useTranslations('settings.advanced')
+  const tActions = useTranslations('settings.actions')
   
   const [activeSubTab, setActiveSubTab] = useState('checkout')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)

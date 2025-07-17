@@ -1,0 +1,105 @@
+{
+  "title": "Reports",
+  "subtitle": "Analytics and statistics",
+  "description": "View sales reports, best-selling products and store statistics.",
+  "stats": {
+    "monthlySales": {
+      "title": "Monthly sales",
+      "description": "Total sales for the current month",
+      "noData": "No sales data available"
+    },
+    "orders": {
+      "title": "Orders",
+      "description": "Total number of orders received",
+      "noData": "No orders yet"
+    },
+    "products": {
+      "title": "Products",
+      "description": "Total number of active products",
+      "noData": "No products added"
+    },
+    "visits": {
+      "title": "Visits",
+      "description": "Total number of store visits",
+      "noData": "No visits recorded"
+    }
+  },
+  "sections": {
+    "overview": {
+      "title": "Overview",
+      "description": "Key metrics and performance indicators",
+      "noData": "Start receiving orders and visitors to see detailed reports."
+    },
+    "sales": {
+      "title": "Sales Report",
+      "description": "Detailed sales analysis and trends",
+      "filters": {
+        "dateRange": "Date range",
+        "category": "Category",
+        "brand": "Brand",
+        "status": "Status"
+      },
+      "metrics": {
+        "totalSales": "Total sales",
+        "averageOrder": "Average order value",
+        "topProducts": "Top selling products",
+        "topCategories": "Top categories"
+      }
+    },
+    "customers": {
+      "title": "Customer Analytics",
+      "description": "Customer behavior and demographics",
+      "metrics": {
+        "totalCustomers": "Total customers",
+        "newCustomers": "New customers",
+        "returningCustomers": "Returning customers",
+        "averageSpend": "Average spend per customer"
+      }
+    },
+    "inventory": {
+      "title": "Inventory Report",
+      "description": "Stock levels and product performance",
+      "metrics": {
+        "totalStock": "Total stock value",
+        "lowStock": "Low stock items",
+        "outOfStock": "Out of stock items",
+        "topSellers": "Top sellers"
+      }
+    }
+  },
+  "filters": {
+    "period": {
+      "title": "Time period",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "custom": "Custom range"
+    },
+    "export": {
+      "title": "Export data",
+      "pdf": "Export as PDF",
+      "csv": "Export as CSV",
+      "excel": "Export as Excel"
+    }
+  },
+  "messages": {
+    "noData": "No data available for the selected period",
+    "loading": "Loading report data...",
+    "error": "Error loading report data",
+    "exportSuccess": "Report exported successfully",
+    "exportError": "Error exporting report"
+  },
+  "comingSoon": {
+    "title": "Detailed Reports Coming Soon",
+    "description": "Detailed reports will be available when you start receiving orders and visitors.",
+    "features": {
+      "sales": "Sales analytics",
+      "customers": "Customer insights",
+      "inventory": "Inventory management",
+      "marketing": "Marketing performance"
+    }
+  }
+} 

@@ -6,7 +6,7 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
 
 export default function CarouselImagesUpload() {
-  const t = useTranslations('pages.storeDesign.sections.carousel')
+  const t = useTranslations('storeDesign.sections.carousel')
   const { store, mutate } = useStore()
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,35 +66,31 @@ export default function CarouselImagesUpload() {
     }
   }
 
-  const handleImageDelete = async (index: number) => {
+  const handleImageDelete = async (publicId: string) => {
     try {
       setIsUploading(true)
       setError(null)
 
-      const imageToDelete = carouselImages[index]
-      
       // Eliminar imagen de Cloudinary
-      if (imageToDelete.publicId) {
-        await deleteImageFromCloudinary(imageToDelete.publicId)
-      }
+      await deleteImageFromCloudinary(publicId)
 
-      // Actualizar array eliminando la imagen y reordenando
-      const newCarouselImages = carouselImages
-        .filter((_, i) => i !== index)
-        .map((img, i) => ({ ...img, order: i }))
+      // Filtrar y reordenar las imágenes restantes
+      const updatedImages = carouselImages
+        .filter(img => img.publicId !== publicId)
+        .map((img, index) => ({ ...img, order: index }))
 
-      // Actualizar Firestore
+      // Actualizar en Firestore
       const db = getFirebaseDb()
       if (store?.id && db) {
         const storeRef = doc(db, 'stores', store.id)
         await updateDoc(storeRef, {
-          carouselImages: newCarouselImages
+          carouselImages: updatedImages
         })
 
-        // Actualizar estado local
+        // Actualizar el estado local
         mutate({
           ...store,
-          carouselImages: newCarouselImages
+          carouselImages: updatedImages
         })
       }
     } catch (err) {
@@ -109,69 +105,41 @@ export default function CarouselImagesUpload() {
     setDraggedIndex(index)
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const newImages = [...carouselImages]
+    const draggedImage = newImages[draggedIndex]
+    newImages.splice(draggedIndex, 1)
+    newImages.splice(index, 0, draggedImage)
+
+    // Actualizar órdenes
+    const updatedImages = newImages.map((img, idx) => ({
+      ...img,
+      order: idx
+    }))
+
+    // Actualizar en Firestore
+    const db = getFirebaseDb()
+    if (store?.id && db) {
+      const storeRef = doc(db, 'stores', store.id)
+      updateDoc(storeRef, {
+        carouselImages: updatedImages
+      })
+
+      // Actualizar el estado local
+      mutate({
+        ...store,
+        carouselImages: updatedImages
+      })
+    }
+
+    setDraggedIndex(index)
   }
 
-  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault()
-    
-    if (draggedIndex === null || draggedIndex === dropIndex) {
-      setDraggedIndex(null)
-      return
-    }
-
-    try {
-      setIsUploading(true)
-      
-      const newCarouselImages = [...carouselImages]
-      const draggedImage = newCarouselImages[draggedIndex]
-      
-      // Remover imagen de posición original
-      newCarouselImages.splice(draggedIndex, 1)
-      
-      // Insertar en nueva posición
-      newCarouselImages.splice(dropIndex, 0, draggedImage)
-      
-      // Actualizar orden
-      const reorderedImages = newCarouselImages.map((img, i) => ({ ...img, order: i }))
-
-      // Actualizar Firestore
-      const db = getFirebaseDb()
-      if (store?.id && db) {
-        const storeRef = doc(db, 'stores', store.id)
-        await updateDoc(storeRef, {
-          carouselImages: reorderedImages
-        })
-
-        // Actualizar estado local
-        mutate({
-          ...store,
-          carouselImages: reorderedImages
-        })
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('reorderError'))
-      console.error('Error reordering carousel images:', err)
-    } finally {
-      setIsUploading(false)
-      setDraggedIndex(null)
-    }
-  }
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      handleImageUpload(files)
-    }
-  }
-
-  const handleDragAndDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const files = e.dataTransfer.files
-    if (files && files.length > 0) {
-      handleImageUpload(files)
-    }
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
   }
 
   return (
@@ -182,117 +150,79 @@ export default function CarouselImagesUpload() {
           {t('description', { maxImages })}
         </p>
 
-        {/* Área de subida con imágenes existentes */}
-        <div
-          className={`
-            border-2 border-dashed border-gray-300 rounded-lg p-6
-            ${isUploading ? 'bg-gray-50' : 'hover:bg-gray-50'}
-            transition-colors duration-200
-          `}
-          onDragOver={handleDragOver}
-          onDrop={handleDragAndDrop}
-        >
-          {/* Grid de imágenes existentes */}
-          {carouselImages.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {carouselImages.map((image, index) => (
-                <div
-                  key={image.publicId}
-                  className="relative group cursor-move"
-                  draggable
-                  onDragStart={() => handleDragStart(index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                >
-                  <img
-                    src={image.url}
-                    alt={`Carousel image ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-lg">
-                    <div className="flex space-x-2">
-                      <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded shadow">
-                        {index + 1}
-                      </span>
-                      <button
-                        onClick={() => handleImageDelete(index)}
-                        className="px-2 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
-                        disabled={isUploading}
-                      >
-                        {t('delete')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Área de subida cuando no hay imágenes o hay espacio para más */}
-          {carouselImages.length < maxImages && (
-            <label className="cursor-pointer w-full">
-              <div className="text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="mt-4 flex text-sm text-gray-600 justify-center">
-                  <span className="relative rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                    {t('upload')}
-                  </span>
-                  <p className="pl-1">{t('dragAndDrop')}</p>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  {t('fileTypes')}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {t('imagesUploaded', { current: carouselImages.length, max: maxImages })}
-                </p>
-              </div>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/jpeg,image/png"
-                multiple
-                onChange={handleFileSelect}
-                disabled={isUploading}
-              />
-            </label>
-          )}
-        </div>
-
-        {/* Estados de carga y errores */}
-        {isUploading && (
-          <div className="mt-4 text-sm text-gray-500 flex items-center">
-            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            {t('processing')}
-          </div>
-        )}
-        {error && (
-          <div className="mt-4 text-sm text-red-600 bg-red-50 p-3 rounded-md">
-            {error}
-          </div>
-        )}
-
-        {/* Información adicional */}
-        <div className="mt-6 text-xs text-gray-500">
-          <p className="mb-1">{t('tips.drag')}</p>
-          <p className="mb-1">{t('tips.size')}</p>
+        {/* Tips */}
+        <div className="mb-4 text-sm text-gray-500">
+          <p>{t('tips.drag')}</p>
+          <p>{t('tips.size')}</p>
           <p>{t('tips.formats')}</p>
         </div>
+
+        {/* Vista previa de imágenes */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+          {carouselImages
+            .sort((a, b) => a.order - b.order)
+            .map((image, index) => (
+              <div
+                key={image.publicId}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                className="relative group cursor-move"
+              >
+                <img
+                  src={image.url}
+                  alt={`Carousel ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+                <div className="absolute top-2 right-2">
+                  <button
+                    onClick={() => handleImageDelete(image.publicId)}
+                    disabled={isUploading}
+                    className="bg-white text-red-600 px-2 py-1 rounded text-sm shadow hover:bg-gray-50"
+                  >
+                    {t('delete')}
+                  </button>
+                </div>
+              </div>
+            ))}
+
+          {carouselImages.length < maxImages && (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+              <label className="cursor-pointer">
+                <div className="space-y-1">
+                  <div className="text-gray-600">{t('upload')}</div>
+                  <div className="text-sm text-gray-500">{t('dragAndDrop')}</div>
+                  <div className="text-xs text-gray-400">{t('fileTypes')}</div>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* Contador de imágenes */}
+        <div className="text-sm text-gray-500">
+          {t('imagesUploaded', {
+            current: carouselImages.length,
+            max: maxImages
+          })}
+        </div>
+
+        {isUploading && (
+          <div className="mt-2 text-sm text-gray-500">{t('processing')}</div>
+        )}
+
+        {error && (
+          <div className="mt-2 text-sm text-red-600">{error}</div>
+        )}
       </div>
     </div>
   )

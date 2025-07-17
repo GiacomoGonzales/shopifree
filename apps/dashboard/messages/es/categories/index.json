@@ -1,0 +1,85 @@
+{
+  "title": "Categorías",
+  "subtitle": "Organiza tus productos por categorías",
+  "description": "Crea y gestiona categorías para organizar mejor tu catálogo de productos.",
+  "addCategory": "Agregar categoría",
+  "parentCategory": "Categoría padre",
+  "subcategory": "Subcategoría",
+  "slug": "Slug",
+  "dragToReorder": "Arrastra para reordenar",
+  "orphanedSubcategories": "Subcategorías huérfanas",
+  "noCategories": "No hay categorías",
+  "noCategoriesMessage": "Comienza creando tu primera categoría para organizar tus productos.",
+  "loading": "Cargando categorías...",
+  "actions": {
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "expand": "Expandir subcategorías",
+    "collapse": "Contraer subcategorías",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar esta categoría?",
+    "confirmDeleteWithSubcategories": "Esta categoría tiene subcategorías. ¿Estás seguro de que deseas eliminarla?"
+  },
+  "modal": {
+    "createTitle": "Crear categoría",
+    "editTitle": "Editar categoría",
+    "name": "Nombre",
+    "namePlaceholder": "Nombre de la categoría",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Descripción de la categoría (opcional)",
+    "parentCategory": "Categoría padre",
+    "parentCategoryPlaceholder": "Seleccionar categoría padre (opcional)",
+    "noParentCategory": "Sin categoría padre",
+    "image": "Imagen",
+    "imageUpload": "Subir imagen",
+    "imageUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "imageFormats": "PNG, JPG hasta 5MB",
+    "removeImage": "Eliminar imagen",
+    "changeImage": "Cambiar imagen",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "saving": "Guardando...",
+    "uploading": "Subiendo imagen..."
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "nameMinLength": "El nombre debe tener al menos 2 caracteres",
+    "nameMaxLength": "El nombre no puede tener más de 100 caracteres",
+    "descriptionMaxLength": "La descripción no puede tener más de 500 caracteres",
+    "imageRequired": "La imagen es obligatoria",
+    "imageUploadError": "Error al subir la imagen",
+    "invalidImageFormat": "Formato de imagen no válido. Solo se permiten PNG, JPG y JPEG.",
+    "imageTooLarge": "La imagen es demasiado grande. Máximo 5MB."
+  },
+  "messages": {
+    "created": "Categoría creada correctamente",
+    "updated": "Categoría actualizada correctamente",
+    "deleted": "Categoría eliminada correctamente",
+    "orderUpdated": "Orden actualizado correctamente",
+    "error": "Error al procesar la solicitud",
+    "loadError": "Error al cargar las categorías",
+    "saveError": "Error al guardar la categoría",
+    "deleteError": "Error al eliminar la categoría",
+    "imageUploadError": "Error al subir la imagen",
+    "imageDeleteError": "Error al eliminar la imagen",
+    "duplicateName": "Ya existe una categoría con este nombre",
+    "cannotDeleteWithProducts": "No se puede eliminar una categoría que tiene productos asociados"
+  },
+  "stats": {
+    "totalCategories": "Total de categorías",
+    "parentCategories": "Categorías padre",
+    "subcategories": "Subcategorías",
+    "categoriesWithProducts": "Con productos"
+  },
+  "filters": {
+    "all": "Todas",
+    "parentOnly": "Solo categorías padre",
+    "subcategoriesOnly": "Solo subcategorías",
+    "withProducts": "Con productos",
+    "withoutProducts": "Sin productos"
+  },
+  "empty": {
+    "title": "No hay categorías",
+    "description": "Organiza tus productos creando categorías y subcategorías.",
+    "createFirst": "Crear primera categoría"
+  }
+} 

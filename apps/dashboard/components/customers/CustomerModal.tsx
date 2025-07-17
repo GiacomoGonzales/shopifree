@@ -23,7 +23,7 @@ export default function CustomerModal({
   onClose, 
   onCustomerUpdated 
 }: CustomerModalProps) {
-  const t = useTranslations('pages.customers')
+  const t = useTranslations('customers')
   type TabType = 'info' | 'orders' | 'notes'
   const [activeTab, setActiveTab] = useState<TabType>('info')
   const [isEditing, setIsEditing] = useState(false)

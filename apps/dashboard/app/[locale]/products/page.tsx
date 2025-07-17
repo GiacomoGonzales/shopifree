@@ -18,7 +18,7 @@ import { getParentCategories, getSubcategories, type CategoryWithId } from '../.
 export default function ProductsPage() {
   const router = useRouter()
   const { store, loading: storeLoading } = useStore()
-  const t = useTranslations('pages.products')
+  const t = useTranslations('products')
   
   const [paginatedProducts, setPaginatedProducts] = useState<ProductWithId[]>([])
   const [brands, setBrands] = useState<BrandWithId[]>([])
@@ -172,13 +172,13 @@ export default function ProductsPage() {
   const handlePreview = (product: ProductWithId) => {
     if (!store?.subdomain) {
       console.error('No subdomain available for preview')
-      setPreviewMessage({ message: 'Error: No se pudo obtener la información de la tienda', type: 'error' })
+      setPreviewMessage({ message: t('messages.storeError'), type: 'error' })
       return
     }
 
     // Solo productos activos pueden ser previsualizados
     if (product.status !== 'active') {
-      setPreviewMessage({ message: 'Solo los productos activos pueden ser previsualizados en la tienda', type: 'error' })
+      setPreviewMessage({ message: t('messages.previewError'), type: 'error' })
       return
     }
 
@@ -195,7 +195,7 @@ export default function ProductsPage() {
     window.open(storeUrl, '_blank', 'noopener,noreferrer')
     
     // Mostrar mensaje de éxito
-    setPreviewMessage({ message: 'Abriendo vista previa del producto...', type: 'success' })
+    setPreviewMessage({ message: t('messages.previewSuccess'), type: 'success' })
   }
 
   // Función para eliminar producto

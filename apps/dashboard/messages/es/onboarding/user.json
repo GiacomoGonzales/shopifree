@@ -1,0 +1,33 @@
+{
+  "title": "Completa tu perfil",
+  "subtitle": "Necesitamos información básica para comenzar",
+  "fields": {
+    "nombre": {
+      "label": "Nombre completo",
+      "placeholder": "Ingresa tu nombre completo",
+      "error": "El nombre completo es obligatorio"
+    },
+    "telefono": {
+      "label": "Teléfono",
+      "placeholder": "1234567890",
+      "hint": "Ingresa solo el número local (sin código de país)",
+      "error": "El teléfono es obligatorio",
+      "invalidError": "Por favor ingresa un número de teléfono válido"
+    },
+    "correo": {
+      "label": "Correo electrónico",
+      "hint": "Este correo proviene de tu autenticación y no se puede cambiar"
+    },
+    "zonaHoraria": {
+      "label": "Zona horaria",
+      "error": "La zona horaria es obligatoria"
+    }
+  },
+  "actions": {
+    "continue": "Continuar",
+    "saving": "Guardando..."
+  },
+  "errors": {
+    "saveError": "Error al guardar tu información. Inténtalo de nuevo."
+  }
+} 

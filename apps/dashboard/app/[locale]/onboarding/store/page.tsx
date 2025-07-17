@@ -76,22 +76,22 @@ const countryCodes = [
 ]
 
 const businessTypes = [
-  { value: 'fashion', labelEs: 'Moda y accesorios', labelEn: 'Fashion & Accessories' },
-  { value: 'technology', labelEs: 'Tecnología y electrónica', labelEn: 'Technology & Electronics' },
-  { value: 'health', labelEs: 'Salud y belleza', labelEn: 'Health & Beauty' },
-  { value: 'food', labelEs: 'Alimentos y bebidas', labelEn: 'Food & Beverages' },
-  { value: 'restaurant', labelEs: 'Restaurante y comida rápida', labelEn: 'Restaurant & Fast Food' },
-  { value: 'home', labelEs: 'Hogar y decoración', labelEn: 'Home & Decoration' },
-  { value: 'sports', labelEs: 'Deportes y recreación', labelEn: 'Sports & Recreation' },
-  { value: 'education', labelEs: 'Educación y formación', labelEn: 'Education & Training' },
-  { value: 'toys', labelEs: 'Juguetes y niños', labelEn: 'Toys & Kids' },
-  { value: 'pets', labelEs: 'Mascotas', labelEn: 'Pets' },
-  { value: 'service', labelEs: 'Servicios profesionales', labelEn: 'Professional Services' },
-  { value: 'wholesale', labelEs: 'Venta por mayor', labelEn: 'Wholesale' },
-  { value: 'retail', labelEs: 'Venta por menor', labelEn: 'Retail' },
-  { value: 'handcrafts', labelEs: 'Manualidades y arte', labelEn: 'Handcrafts & Art' },
-  { value: 'eco', labelEs: 'Productos ecológicos o sostenibles', labelEn: 'Eco-friendly or Sustainable Products' },
-  { value: 'other', labelEs: 'Otro (personalizado)', labelEn: 'Other (custom)' }
+  { value: 'fashion' },
+  { value: 'technology' },
+  { value: 'health' },
+  { value: 'food' },
+  { value: 'restaurant' },
+  { value: 'home' },
+  { value: 'sports' },
+  { value: 'education' },
+  { value: 'toys' },
+  { value: 'pets' },
+  { value: 'service' },
+  { value: 'wholesale' },
+  { value: 'retail' },
+  { value: 'handcrafts' },
+  { value: 'eco' },
+  { value: 'other' }
 ]
 
 const monedas = [
@@ -123,11 +123,9 @@ const monedas = [
 ]
 
 const getCreationSteps = (t: (key: string) => string) => [
-  { text: t('creationSteps.basicInfo'), progress: 20 },
-  { text: t('creationSteps.branding'), progress: 40 },
-  { text: t('creationSteps.payments'), progress: 60 },
-  { text: t('creationSteps.socialMedia'), progress: 80 },
-  { text: t('creationSteps.success'), progress: 100 }
+  { text: 'basicInfo', progress: 33 },
+  { text: 'contact', progress: 66 },
+  { text: 'branding', progress: 100 }
 ]
 
 function StoreOnboardingContent() {
@@ -136,7 +134,7 @@ function StoreOnboardingContent() {
   const { user } = useAuth()
   
   const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 5
+  const totalSteps = 3
   
   const [formData, setFormData] = useState<StoreFormData>({
     storeName: '',
@@ -178,6 +176,7 @@ function StoreOnboardingContent() {
   const [creatingStore, setCreatingStore] = useState(false)
   const [creationStep, setCreationStep] = useState(0)
   const [creationProgress, setCreationProgress] = useState(0)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof StoreFormData, string>>>({})
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle')
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
@@ -299,43 +298,42 @@ function StoreOnboardingContent() {
     const newErrors: Partial<Record<keyof StoreFormData, string>> = {}
     
     switch (currentStep) {
-      case 1:
+      case 1: // Información de la tienda
         if (!formData.storeName.trim()) {
-          newErrors.storeName = t('errors.storeNameRequired')
+          newErrors.storeName = t('steps.info.fields.storeName.error')
         }
         if (!formData.subdomain.trim()) {
-          newErrors.subdomain = t('errors.subdomainRequired')
+          newErrors.subdomain = t('steps.info.fields.subdomain.error')
         } else if (subdomainStatus !== 'available') {
-          newErrors.subdomain = t('errors.subdomainNotAvailable')
+          newErrors.subdomain = t('steps.info.fields.subdomain.errorNotAvailable')
+        }
+        if (!formData.businessType) {
+          newErrors.businessType = t('steps.info.fields.businessType.error')
+        }
+        if (!formData.slogan.trim()) {
+          newErrors.slogan = t('steps.info.fields.slogan.error')
+        }
+        if (!formData.description.trim()) {
+          newErrors.description = t('steps.info.fields.description.error')
         }
         break
         
-      case 2:
-        if (!formData.description.trim()) {
-          newErrors.description = t('errors.descriptionRequired')
+      case 2: // Datos de contacto
+        if (!formData.currency) {
+          newErrors.currency = t('steps.contact.fields.currency.error')
         }
         if (formData.hasPhysicalLocation && !formData.address.trim()) {
-          newErrors.address = t('errors.addressRequired')
-        }
-        break
-        
-      case 3:
-        if (!formData.businessType) {
-          newErrors.businessType = t('errors.businessTypeRequired')
+          newErrors.address = t('steps.contact.fields.address.error')
         }
         if (!formData.localPhone.trim()) {
-          newErrors.localPhone = t('errors.localPhoneRequired')
+          newErrors.localPhone = t('steps.contact.fields.phone.error')
         } else if (!/^[\d\s-()]+$/.test(formData.localPhone)) {
-          newErrors.localPhone = t('errors.localPhoneInvalid')
+          newErrors.localPhone = t('steps.contact.fields.phone.errorInvalid')
         }
         break
         
-      case 4:
-        // Colores son obligatorios, pero ya tienen valores por defecto
-        break
-        
-      case 5:
-        // Moneda es obligatoria, pero ya tiene valor por defecto
+      case 3: // Branding
+        // Los colores son obligatorios pero ya tienen valores por defecto
         break
     }
 
@@ -465,6 +463,7 @@ function StoreOnboardingContent() {
         primaryColor: formData.primaryColor,
         secondaryColor: formData.secondaryColor,
         currency: formData.currency,
+        language: 'es', // Mantener el valor por defecto
         // Usar los campos de Cloudinary si existen, sino usar los legacy para compatibilidad
         logoUrl: formData.logoUrl,
         logoPublicId: formData.logoPublicId,
@@ -482,19 +481,19 @@ function StoreOnboardingContent() {
       // Pausa final antes de redireccionar
       await new Promise(resolve => setTimeout(resolve, 2000))
       
+      setIsRedirecting(true)
       router.push('/')
     } catch (error) {
       console.error('Error creating store:', error)
       alert(t('errors.createError'))
-    } finally {
       setCreatingStore(false)
       setCreationStep(0)
       setCreationProgress(0)
     }
   }
 
-  // Modal de creación
-  if (creatingStore) {
+  // En el modal de creación o redirección
+  if (creatingStore || isRedirecting) {
     const isComplete = creationProgress === 100
     
     return (
@@ -515,13 +514,22 @@ function StoreOnboardingContent() {
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {isComplete ? t('creating') : t('creating')}
+            {isRedirecting 
+              ? t('progress.redirecting')
+              : (isComplete 
+                ? t('success.title')
+                : t('progress.creating')
+              )
+            }
           </h2>
           
           <p className="text-gray-600 mb-6">
-            {isComplete 
-              ? t('creatingMessage')
-              : getCreationSteps(t)[creationStep]?.text || t('creatingMessage')
+            {isRedirecting 
+              ? t('progress.redirectingMessage')
+              : (isComplete 
+                ? t('success.message')
+                : t(`progress.steps.${getCreationSteps(t)[creationStep]?.text}`) || t('progress.creatingMessage')
+              )
             }
           </p>
           
@@ -536,7 +544,10 @@ function StoreOnboardingContent() {
           </div>
           
           <div className="text-sm text-gray-500">
-            {creationProgress}% {t('completed', { count: creationProgress })}
+            {isComplete 
+              ? t('success.completed')
+              : t('progress.completed', { count: creationProgress })
+            }
           </div>
         </div>
       </div>
@@ -546,18 +557,18 @@ function StoreOnboardingContent() {
   // Renderizar paso actual
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 1:
+      case 1: // Información de la tienda
         return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('storeName')} <span className="text-red-500">*</span>
+                {t('steps.info.fields.storeName.label')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.storeName}
                 onChange={(e) => handleInputChange('storeName', e.target.value)}
-                placeholder={t('storeNamePlaceholder')}
+                placeholder={t('steps.info.fields.storeName.placeholder')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                   errors.storeName ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -567,14 +578,35 @@ function StoreOnboardingContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('subdomain')} <span className="text-red-500">*</span>
+                {t('steps.info.fields.businessType.label')} <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.businessType}
+                onChange={(e) => handleInputChange('businessType', e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                  errors.businessType ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">{t('steps.info.fields.businessType.placeholder')}</option>
+                {businessTypes.map(tipo => (
+                  <option key={tipo.value} value={tipo.value}>
+                    {t(`steps.info.fields.businessType.options.${tipo.value}`)}
+                  </option>
+                ))}
+              </select>
+              {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('steps.info.fields.subdomain.label')} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
                   value={formData.subdomain}
                   onChange={(e) => handleInputChange('subdomain', e.target.value.toLowerCase())}
-                  placeholder={t('subdomainPlaceholder')}
+                  placeholder={t('steps.info.fields.subdomain.placeholder')}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                     errors.subdomain ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -597,7 +629,7 @@ function StoreOnboardingContent() {
               </div>
               {formData.subdomain && (
                 <p className="text-xs text-gray-500 mt-1">
-                  {t('subdomainHint')}: <strong>{formData.subdomain}.shopifree.app</strong>
+                  {t('steps.info.fields.subdomain.hint')}: <strong>{formData.subdomain}.shopifree.app</strong>
                 </p>
               )}
               {errors.subdomain && <p className="text-red-500 text-sm mt-1">{errors.subdomain}</p>}
@@ -605,36 +637,56 @@ function StoreOnboardingContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('slogan')} <span className="text-gray-400 text-xs">(opcional)</span>
+                {t('steps.info.fields.slogan.label')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.slogan}
                 onChange={(e) => handleInputChange('slogan', e.target.value)}
-                placeholder={t('sloganPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+                placeholder={t('steps.info.fields.slogan.placeholder')}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                  errors.slogan ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.slogan && <p className="text-red-500 text-sm mt-1">{errors.slogan}</p>}
             </div>
-          </div>
-        )
 
-      case 2:
-        return (
-          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('description')} <span className="text-red-500">*</span>
+                {t('steps.info.fields.description.label')} <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder={t('descriptionPlaceholder')}
+                placeholder={t('steps.info.fields.description.placeholder')}
                 rows={4}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                   errors.description ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
               {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+            </div>
+          </div>
+        )
+
+      case 2: // Datos de contacto
+        return (
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('steps.contact.fields.currency.label')} <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.currency}
+                onChange={(e) => handleInputChange('currency', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
+              >
+                {monedas.map(moneda => (
+                  <option key={moneda.code} value={moneda.code}>
+                    {moneda.symbol} {moneda.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -645,14 +697,14 @@ function StoreOnboardingContent() {
                   onChange={(e) => handleInputChange('hasPhysicalLocation', e.target.checked)}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">{t('hasPhysicalLocation')}</span>
+                <span className="text-sm font-medium text-gray-700">{t('steps.contact.fields.hasPhysicalLocation.label')}</span>
               </label>
             </div>
 
             {formData.hasPhysicalLocation && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('address')} <span className="text-red-500">*</span>
+                  {t('steps.contact.fields.address.label')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -670,7 +722,7 @@ function StoreOnboardingContent() {
                         }
                       }))
                     }}
-                    placeholder={isGoogleMapsLoaded ? t('addressAutocomplete') : t('addressPlaceholder')}
+                    placeholder={isGoogleMapsLoaded ? t('steps.contact.fields.address.hint') : t('steps.contact.fields.address.placeholder')}
                     className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                       errors.address ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -694,42 +746,16 @@ function StoreOnboardingContent() {
                 </div>
                 {formData.location.lat !== 0 && formData.location.lng !== 0 && (
                   <p className="mt-1 text-xs text-gray-500">
-                    ✓ {t('locationSaved')}
+                    ✓ {t('steps.contact.fields.address.locationSaved')}
                   </p>
                 )}
                 {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
               </div>
             )}
-          </div>
-        )
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('businessType')} <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.businessType}
-                onChange={(e) => handleInputChange('businessType', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.businessType ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">{t('businessTypePlaceholder')}</option>
-                {businessTypes.map(tipo => (
-                  <option key={tipo.value} value={tipo.value}>
-                    {t(`businessTypes.${tipo.value}`)}
-                  </option>
-                ))}
-              </select>
-              {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('localPhone')} <span className="text-red-500">*</span>
+                {t('steps.contact.fields.phone.label')} <span className="text-red-500">*</span>
               </label>
               <div className="flex space-x-1 sm:space-x-2">
                 <select
@@ -747,7 +773,7 @@ function StoreOnboardingContent() {
                   type="tel"
                   value={formData.localPhone}
                   onChange={(e) => handleInputChange('localPhone', e.target.value)}
-                  placeholder="1234567890"
+                  placeholder={t('steps.contact.fields.phone.placeholder')}
                   className={`flex-1 px-2 sm:px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 text-xs sm:text-sm ${
                     errors.localPhone ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -755,23 +781,23 @@ function StoreOnboardingContent() {
               </div>
               {errors.localPhone && <p className="text-red-500 text-sm mt-1">{errors.localPhone}</p>}
               <p className="text-xs text-gray-500 mt-1 break-words">
-                {t('enterLocalNumber')}
+                {t('steps.contact.fields.phone.hint')}
               </p>
             </div>
           </div>
         )
 
-      case 4:
+      case 3: // Branding
         return (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Logo Upload */}
-              <div>
+              {/* Logo Upload */}
+              <div className="flex flex-col h-full">
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Logo <span className="text-gray-400 text-xs">({t('optional')})</span>
+                  {t('steps.branding.fields.logo.label')} <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group">
+                <div className="relative flex-1">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group h-full flex flex-col justify-center">
                     <input
                       type="file"
                       accept="image/*"
@@ -785,12 +811,14 @@ function StoreOnboardingContent() {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     {formData.logoFile ? (
-                      <div className="relative w-full h-full">
-                        <img
-                          src={URL.createObjectURL(formData.logoFile)}
-                          alt="Preview del logo"
-                          className="w-full h-32 object-contain rounded-lg"
-                        />
+                      <div className="relative w-full h-full min-h-[200px] flex flex-col">
+                        <div className="flex-1 flex items-center justify-center">
+                          <img
+                            src={URL.createObjectURL(formData.logoFile)}
+                            alt="Preview del logo"
+                            className="max-w-full max-h-[160px] object-contain rounded-lg"
+                          />
+                        </div>
                         {uploadingLogo && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
                             <div className="text-white text-center">
@@ -836,22 +864,22 @@ function StoreOnboardingContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium text-gray-700 group-hover:text-gray-800">{t('uploadHint')}</span>
+                          <span className="font-medium text-gray-700 group-hover:text-gray-800">{t('steps.branding.fields.logo.uploadHint')}</span>
                         </div>
-                        <p className="text-xs text-gray-500">{t('fileFormat')}</p>
+                        <p className="text-xs text-gray-500">{t('actions.fileFormat')}</p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Store Photo Upload */}
-              <div>
+              {/* Hero Image Upload */}
+              <div className="flex flex-col h-full">
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  {t('storePhoto')} <span className="text-gray-400 text-xs">({t('optional')})</span>
+                  {t('steps.branding.fields.storePhoto.label')} <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group">
+                <div className="relative flex-1">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer group h-full flex flex-col justify-center">
                     <input
                       type="file"
                       accept="image/*"
@@ -865,12 +893,14 @@ function StoreOnboardingContent() {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     {formData.storePhotoFile ? (
-                      <div className="relative w-full h-full">
-                        <img
-                          src={URL.createObjectURL(formData.storePhotoFile)}
-                          alt="Preview de la foto de tienda"
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
+                      <div className="relative w-full h-full min-h-[200px] flex flex-col">
+                        <div className="flex-1 flex items-center justify-center">
+                          <img
+                            src={URL.createObjectURL(formData.storePhotoFile)}
+                            alt="Preview de la imagen de portada"
+                            className="max-w-full max-h-[160px] object-cover rounded-lg"
+                          />
+                        </div>
                         {uploadingStorefront && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
                             <div className="text-white text-center">
@@ -916,9 +946,10 @@ function StoreOnboardingContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium text-gray-700 group-hover:text-gray-800">{t('uploadHint')}</span>
+                          <span className="font-medium text-gray-700 group-hover:text-gray-800">{t('steps.branding.fields.storePhoto.uploadHint')}</span>
                         </div>
-                        <p className="text-xs text-gray-500">{t('fileFormat')}</p>
+                        <p className="text-xs text-gray-500">{t('actions.fileFormat')}</p>
+                        <p className="text-xs text-gray-500">{t('steps.branding.fields.storePhoto.hint')}</p>
                       </div>
                     )}
                   </div>
@@ -928,22 +959,22 @@ function StoreOnboardingContent() {
 
             {/* Color Section */}
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900">{t('brandColors')}</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('steps.branding.fields.colors.title')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    {t('primaryColor')} <span className="text-red-500">*</span>
+                    {t('steps.branding.fields.colors.primary')} <span className="text-red-500">*</span>
                   </label>
-                                     <div className="flex items-center space-x-4">
-                     <div className="relative">
-                       <input
-                         type="color"
-                         value={formData.primaryColor}
-                         onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                         className="w-16 h-16 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors appearance-none"
-                         style={{ backgroundColor: formData.primaryColor }}
-                       />
-                     </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={formData.primaryColor}
+                        onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                        className="w-16 h-16 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors appearance-none"
+                        style={{ backgroundColor: formData.primaryColor }}
+                      />
+                    </div>
                     <div className="flex-1">
                       <input
                         type="text"
@@ -958,18 +989,18 @@ function StoreOnboardingContent() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    {t('secondaryColor')} <span className="text-red-500">*</span>
+                    {t('steps.branding.fields.colors.secondary')} <span className="text-red-500">*</span>
                   </label>
-                                     <div className="flex items-center space-x-4">
-                     <div className="relative">
-                       <input
-                         type="color"
-                         value={formData.secondaryColor}
-                         onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
-                         className="w-16 h-16 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors appearance-none"
-                         style={{ backgroundColor: formData.secondaryColor }}
-                       />
-                     </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={formData.secondaryColor}
+                        onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
+                        className="w-16 h-16 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors appearance-none"
+                        style={{ backgroundColor: formData.secondaryColor }}
+                      />
+                    </div>
                     <div className="flex-1">
                       <input
                         type="text"
@@ -980,126 +1011,6 @@ function StoreOnboardingContent() {
                       />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-
-      case 5:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('currency')} <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.currency}
-                onChange={(e) => handleInputChange('currency', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-              >
-                {monedas.map(moneda => (
-                  <option key={moneda.code} value={moneda.code}>
-                    {moneda.symbol} {moneda.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {t('socialMedia')} <span className="text-gray-400 text-sm font-normal">({t('allOptional')})</span>
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.facebook}
-                    onChange={(e) => handleRedesChange('facebook', e.target.value)}
-                    placeholder="https://facebook.com/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.instagram}
-                    onChange={(e) => handleRedesChange('instagram', e.target.value)}
-                    placeholder="https://instagram.com/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">X (Twitter)</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.x}
-                    onChange={(e) => handleRedesChange('x', e.target.value)}
-                    placeholder="https://x.com/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">TikTok</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.tiktok}
-                    onChange={(e) => handleRedesChange('tiktok', e.target.value)}
-                    placeholder="https://tiktok.com/@mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Snapchat</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.snapchat}
-                    onChange={(e) => handleRedesChange('snapchat', e.target.value)}
-                    placeholder="https://snapchat.com/add/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.linkedin}
-                    onChange={(e) => handleRedesChange('linkedin', e.target.value)}
-                    placeholder="https://linkedin.com/company/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Telegram</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.telegram}
-                    onChange={(e) => handleRedesChange('telegram', e.target.value)}
-                    placeholder="https://t.me/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">YouTube</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.youtube}
-                    onChange={(e) => handleRedesChange('youtube', e.target.value)}
-                    placeholder="https://youtube.com/@mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Pinterest</label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia.pinterest}
-                    onChange={(e) => handleRedesChange('pinterest', e.target.value)}
-                    placeholder="https://pinterest.com/mi-tienda"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"
-                  />
                 </div>
               </div>
             </div>
@@ -1122,7 +1033,7 @@ function StoreOnboardingContent() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-gray-600 mt-2">{t('stepOf', { current: currentStep, total: totalSteps })}</p>
+            <p className="text-gray-600 mt-2">{t('navigation.stepOf', { current: currentStep, total: totalSteps })}</p>
             
             {/* Barra de progreso minimalista */}
             <div className="mt-4 w-full bg-gray-200 rounded-full h-1">
@@ -1144,7 +1055,7 @@ function StoreOnboardingContent() {
                 disabled={currentStep === 1}
                 className="px-4 sm:px-6 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
-                {t('previousButton')}
+                {t('navigation.previous')}
               </button>
 
               {currentStep < totalSteps ? (
@@ -1153,7 +1064,7 @@ function StoreOnboardingContent() {
                   onClick={handleNext}
                   className="px-4 sm:px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base"
                 >
-                  {t('nextButton')}
+                  {t('navigation.next')}
                 </button>
               ) : (
                 <button
@@ -1161,7 +1072,7 @@ function StoreOnboardingContent() {
                   onClick={handleCreateStore}
                   className="px-4 sm:px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base"
                 >
-                  {t('createStore')}
+                  {t('actions.createStore')}
                 </button>
               )}
             </div>

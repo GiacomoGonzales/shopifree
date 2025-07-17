@@ -1,0 +1,104 @@
+{
+  "title": "Content",
+  "subtitle": "Manage your store content",
+  "description": "Manage pages, blogs, categories and all your store content.",
+  "tabs": {
+    "pages": "Pages",
+    "filters": "Filters"
+  },
+  "pages": {
+    "title": "Available Pages",
+    "description": "Customize the content and visibility of your store pages.",
+    "sections": {
+      "home": {
+        "title": "Home Page",
+        "description": "Main landing page of your store"
+      },
+      "about": {
+        "title": "About Us",
+        "description": "Information about your business"
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Contact information and form"
+      },
+      "terms": {
+        "title": "Terms & Conditions",
+        "description": "Legal terms and conditions"
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "description": "Privacy policy and data handling"
+      }
+    },
+    "actions": {
+      "edit": "Edit Page",
+      "preview": "Preview",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "hidden": "Hidden"
+    }
+  },
+  "filters": {
+    "title": "Product Filters",
+    "description": "Manage the available filters for your products.",
+    "sections": {
+      "categories": {
+        "title": "Categories",
+        "description": "Product categories and subcategories"
+      },
+      "attributes": {
+        "title": "Attributes",
+        "description": "Product attributes like size, color, etc."
+      },
+      "tags": {
+        "title": "Tags",
+        "description": "Custom tags for products"
+      },
+      "price": {
+        "title": "Price Ranges",
+        "description": "Price range filters"
+      }
+    },
+    "actions": {
+      "addFilter": "Add Filter",
+      "editFilter": "Edit Filter",
+      "deleteFilter": "Delete Filter",
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    }
+  },
+  "editor": {
+    "title": "Content Editor",
+    "toolbar": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "link": "Insert Link",
+      "image": "Insert Image",
+      "heading": "Heading",
+      "list": "List",
+      "quote": "Quote"
+    },
+    "placeholders": {
+      "title": "Enter title...",
+      "content": "Start writing your content..."
+    }
+  },
+  "messages": {
+    "saved": "Changes saved successfully",
+    "published": "Page published successfully",
+    "unpublished": "Page unpublished successfully",
+    "error": "An error occurred while processing your request",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "filterCreated": "Filter created successfully",
+    "filterUpdated": "Filter updated successfully",
+    "filterDeleted": "Filter deleted successfully"
+  }
+} 

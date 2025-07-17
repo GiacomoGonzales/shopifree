@@ -1,0 +1,32 @@
+{
+  "title": "Panel de Control",
+  "description": "Bienvenido a tu panel de control. Aquí puedes gestionar todos los aspectos de tu tienda online.",
+  "welcome": {
+    "title": "¡Bienvenido a tu Dashboard!",
+    "subtitle": "Gestiona tu tienda online desde aquí"
+  },
+  "sections": {
+    "overview": {
+      "title": "Resumen de tu tienda",
+      "description": "Vista general del estado de tu tienda"
+    },
+    "quickActions": {
+      "title": "Acciones rápidas",
+      "addProduct": "Agregar producto",
+      "viewOrders": "Ver pedidos",
+      "manageCustomers": "Gestionar clientes",
+      "viewReports": "Ver reportes"
+    },
+    "stats": {
+      "title": "Estadísticas",
+      "totalProducts": "Productos totales",
+      "totalOrders": "Pedidos totales",
+      "totalCustomers": "Clientes totales",
+      "revenue": "Ingresos"
+    }
+  },
+  "status": {
+    "inDevelopment": "En desarrollo...",
+    "comingSoon": "Próximamente disponible"
+  }
+} 

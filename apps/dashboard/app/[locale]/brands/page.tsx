@@ -20,37 +20,14 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
   }, [onClose])
 
   return (
-    <div className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg border ${
-      type === 'success' 
-        ? 'bg-gray-50 text-gray-800 border-gray-200' 
-        : 'bg-red-50 text-red-800 border-red-200'
-    }`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {type === 'success' ? (
-            <svg className="w-5 h-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          )}
-          <span>{message}</span>
-        </div>
-        <button 
-          onClick={onClose}
-          className={`ml-4 ${type === 'success' ? 'text-gray-400 hover:text-gray-600' : 'text-red-400 hover:text-red-600'}`}
-        >
-          ×
-        </button>
-      </div>
+    <div className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+      {message}
     </div>
   )
 }
 
 export default function BrandsPage() {
-  const t = useTranslations('pages.brands')
+  const t = useTranslations('brands')
   const { user } = useAuth()
   
   const [brands, setBrands] = useState<BrandWithId[]>([])
@@ -143,33 +120,37 @@ export default function BrandsPage() {
 
   const handleDeleteBrand = async (brandId: string) => {
     try {
-      // Buscar la marca a eliminar
-      const brandToDelete = brands.find(brand => brand.id === brandId)
-      
-      await deleteBrand(storeId, brandId)
-      
-      // Si la marca tenía imagen, intentar eliminarla de Cloudinary
-      if (brandToDelete?.image && brandToDelete.image.includes('cloudinary')) {
+      // Encontrar la marca para obtener la URL de la imagen
+      const brandToDelete = brands.find(b => b.id === brandId)
+      if (!brandToDelete) return
+
+      // Si la marca tiene una imagen, eliminarla de Cloudinary
+      if (brandToDelete.image) {
         try {
+          // Extraer public_id de la URL de Cloudinary
           const urlParts = brandToDelete.image.split('/')
           const lastPart = urlParts[urlParts.length - 1]
           const publicId = lastPart.split('.')[0]
-          await deleteImageFromCloudinary(`brands/${publicId}`)
-        } catch (deleteError) {
-          console.warn('Error deleting image from Cloudinary:', deleteError)
+          
+          if (publicId && brandToDelete.image.includes('cloudinary')) {
+            await deleteImageFromCloudinary(`brands/${publicId}`)
+          }
+        } catch (deleteImageError) {
+          console.warn('Error deleting brand image:', deleteImageError)
           // No bloquear el proceso si no se puede eliminar la imagen
         }
       }
+
+      // Eliminar la marca
+      await deleteBrand(storeId, brandId)
+      
+      // Actualizar la lista de marcas
+      setBrands(brands.filter(b => b.id !== brandId))
       
       showToast(t('messages.deleted'), 'success')
-
-      // Recargar datos
-      const allBrands = await getBrands(storeId)
-      setBrands(allBrands)
     } catch (error) {
       console.error('Error deleting brand:', error)
-      const errorMessage = error instanceof Error ? error.message : t('messages.error')
-      showToast(errorMessage, 'error')
+      showToast(t('messages.error'), 'error')
     }
   }
 

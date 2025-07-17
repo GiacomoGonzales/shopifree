@@ -1,0 +1,64 @@
+{
+  "title": "Marketing",
+  "subtitle": "Promote your store",
+  "description": "Tools to promote your store, create campaigns and increase sales.",
+  "sections": {
+    "promotions": {
+      "title": "Promotions",
+      "description": "Create discounts and special offers",
+      "actions": {
+        "create": "Create Promotion",
+        "edit": "Edit Promotion",
+        "delete": "Delete Promotion"
+      }
+    },
+    "email": {
+      "title": "Email Marketing",
+      "description": "Send newsletters to your customers",
+      "actions": {
+        "createCampaign": "Create Campaign",
+        "sendNewsletter": "Send Newsletter",
+        "manageSubscribers": "Manage Subscribers"
+      }
+    },
+    "social": {
+      "title": "Social Media",
+      "description": "Manage your social media presence",
+      "actions": {
+        "connect": "Connect Account",
+        "post": "Create Post",
+        "schedule": "Schedule Post"
+      }
+    },
+    "seo": {
+      "title": "SEO",
+      "description": "Optimize your store for search engines",
+      "actions": {
+        "analyze": "Analyze SEO",
+        "optimize": "Optimize Content",
+        "keywords": "Manage Keywords"
+      }
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "Track your marketing performance",
+      "metrics": {
+        "visitors": "Visitors",
+        "conversions": "Conversions",
+        "revenue": "Revenue",
+        "engagement": "Engagement"
+      }
+    }
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "scheduled": "Scheduled",
+    "draft": "Draft"
+  },
+  "messages": {
+    "comingSoon": "Marketing tools will help you promote your store and increase sales. Coming soon!",
+    "success": "Operation completed successfully",
+    "error": "An error occurred while processing your request"
+  }
+} 

@@ -1,0 +1,103 @@
+{
+  "title": "Productos",
+  "subtitle": "Gestiona los productos de tu tienda",
+  "description": "Agrega, edita y organiza los productos de tu catálogo.",
+  "addProduct": "Agregar producto",
+  "export": "Exportar",
+  "import": "Importar",
+  "searchPlaceholder": "Buscar productos",
+  "filter": "Filtrar",
+  "sort": "Ordenar",
+  "loading": "Cargando productos...",
+  "noProducts": "No se encontraron productos",
+  "noProductsMessage": "Intenta ajustar los filtros de búsqueda.",
+  "noProductsEmpty": "No hay productos",
+  "noProductsEmptyMessage": "Comienza agregando tu primer producto.",
+  "totalProducts": "productos en total",
+  "totalProduct": "producto en total",
+  "inDevelopment": "En desarrollo...",
+  "tabs": {
+    "all": "Todos",
+    "active": "Activos",
+    "draft": "Borradores",
+    "archived": "Archivados"
+  },
+  "status": {
+    "active": "Activo",
+    "draft": "Borrador",
+    "archived": "Archivado"
+  },
+  "table": {
+    "product": "Producto",
+    "status": "Estado",
+    "categories": "Categorías",
+    "brand": "Marca",
+    "actions": "Acciones",
+    "noCategory": "Sin categoría",
+    "noBrand": "Sin marca"
+  },
+  "actions": {
+    "preview": "Vista previa",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar este producto?",
+    "duplicate": "Duplicar",
+    "archive": "Archivar",
+    "activate": "Activar"
+  },
+  "sortOptions": {
+    "newest": "Más recientes",
+    "oldest": "Más antiguos",
+    "nameAsc": "Nombre (A-Z)",
+    "nameDesc": "Nombre (Z-A)",
+    "priceAsc": "Precio (menor a mayor)",
+    "priceDesc": "Precio (mayor a menor)"
+  },
+  "pagination": {
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "products": "productos"
+  },
+  "filters": {
+    "title": "Filtros",
+    "category": "Categoría",
+    "brand": "Marca",
+    "priceRange": "Rango de precio",
+    "status": "Estado",
+    "apply": "Aplicar filtros",
+    "clear": "Limpiar filtros",
+    "minPrice": "Precio mínimo",
+    "maxPrice": "Precio máximo"
+  },
+  "bulkActions": {
+    "title": "Acciones masivas",
+    "selected": "seleccionados",
+    "selectAll": "Seleccionar todos",
+    "deselectAll": "Deseleccionar todos",
+    "delete": "Eliminar seleccionados",
+    "archive": "Archivar seleccionados",
+    "activate": "Activar seleccionados",
+    "confirmBulkDelete": "¿Estás seguro de que deseas eliminar los productos seleccionados?"
+  },
+  "messages": {
+    "error": "Error al cargar los datos",
+    "loadError": "Error al cargar los productos",
+    "deleteError": "Error al eliminar el producto",
+    "deleteSuccess": "Producto eliminado correctamente",
+    "archiveSuccess": "Producto archivado correctamente",
+    "activateSuccess": "Producto activado correctamente",
+    "previewSuccess": "Abriendo vista previa del producto...",
+    "previewError": "Solo los productos activos pueden ser previsualizados en la tienda",
+    "storeError": "Error: No se pudo obtener la información de la tienda"
+  },
+  "create": {
+    "title": "Agregar producto",
+    "backToProducts": "← Volver a productos",
+    "save": "Guardar producto",
+    "saveAndContinue": "Guardar y continuar editando",
+    "cancel": "Cancelar"
+  }
+} 

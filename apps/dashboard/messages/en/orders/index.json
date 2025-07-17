@@ -1,0 +1,83 @@
+{
+  "title": "Orders",
+  "subtitle": "Manage your store orders",
+  "description": "View, update and manage all your online store orders.",
+  "noOrders": "No orders",
+  "noOrdersDescription": "Orders will appear here when customers make purchases.",
+  "table": {
+    "date": "Date",
+    "customer": "Customer",
+    "total": "Total",
+    "paymentMethod": "Payment method",
+    "status": "Status",
+    "actions": "Actions",
+    "viewDetails": "View details"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "paymentMethods": {
+    "cash": "Cash",
+    "card": "Card",
+    "transfer": "Transfer",
+    "paypal": "PayPal",
+    "stripe": "Stripe",
+    "other": "Other"
+  },
+  "details": {
+    "title": "Order details",
+    "customerInfo": "Customer information",
+    "name": "Name",
+    "phone": "Phone",
+    "address": "Address",
+    "notes": "Notes",
+    "orderItems": "Order items",
+    "product": "Product",
+    "presentation": "Presentation",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+    "orderSummary": "Order summary",
+    "itemsSubtotal": "Items subtotal",
+    "shippingCost": "Shipping cost",
+    "total": "Total",
+    "actions": "Actions",
+    "updateStatus": "Update status",
+    "updating": "Updating...",
+    "replyWhatsApp": "Reply via WhatsApp",
+    "resendEmail": "Resend email",
+    "close": "Close"
+  },
+  "actions": {
+    "markAsConfirmed": "Mark as confirmed",
+    "markAsPreparing": "Mark as preparing",
+    "markAsReady": "Mark as ready",
+    "markAsShipped": "Mark as shipped",
+    "markAsDelivered": "Mark as delivered",
+    "markAsCancelled": "Mark as cancelled"
+  },
+  "filters": {
+    "all": "All",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "loading": {
+    "orders": "Loading orders...",
+    "updating": "Updating status..."
+  },
+  "messages": {
+    "statusUpdated": "Status updated successfully",
+    "errorUpdating": "Error updating status",
+    "orderNotFound": "Order not found"
+  }
+} 

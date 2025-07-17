@@ -1,0 +1,49 @@
+{
+  "title": "Brands",
+  "subtitle": "Manage brands",
+  "description": "Manage the brands of products you sell in your store.",
+  "addBrand": "Add Brand",
+  "editBrand": "Edit Brand",
+  "deleteBrand": "Delete Brand",
+  "noBrands": "You don't have brands yet",
+  "noBrandsMessage": "Create your first brand to organize your products.",
+  "dragToReorder": "Drag to reorder",
+  "brand": "Brand",
+  "order": "Order",
+  "form": {
+    "name": "Name",
+    "description": "Description",
+    "namePlaceholder": "Ex: Nike, Adidas, Samsung",
+    "descriptionPlaceholder": "Describe this brand...",
+    "image": "Brand image",
+    "imageHint": "Required: Brand logo (max. 5MB)"
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "create": "Create Brand",
+    "update": "Update Brand",
+    "confirmDelete": "Are you sure you want to delete this brand?",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "messages": {
+    "created": "Brand created successfully",
+    "updated": "Brand updated successfully",
+    "deleted": "Brand deleted successfully",
+    "orderUpdated": "Brand order updated successfully",
+    "error": "Error processing request",
+    "nameRequired": "Name is required",
+    "imageRequired": "Image is required",
+    "imageUploadError": "Error uploading image",
+    "imageUploadSuccess": "Image uploaded successfully"
+  },
+  "imageUpload": {
+    "dropZone": "Drag an image here or click to select",
+    "uploading": "Uploading image...",
+    "change": "Change image",
+    "remove": "Remove image",
+    "formats": "Formats: JPG, PNG, WebP (max. 5MB)"
+  }
+} 

@@ -75,8 +75,8 @@ const monedas = [
 
 export default function GeneralSettingsPage() {
   const { user } = useAuth()
-  const t = useTranslations('pages.settings.basic')
-  const tActions = useTranslations('pages.settings.actions')
+  const t = useTranslations('settings')
+  const tActions = useTranslations('settings.actions')
   
   const [activeSection, setActiveSection] = useState('info')
   const [store, setStore] = useState<StoreWithId | null>(null)

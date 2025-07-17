@@ -1,0 +1,49 @@
+{
+  "title": "Marcas",
+  "subtitle": "Gestiona las marcas",
+  "description": "Administra las marcas de los productos que vendes en tu tienda.",
+  "addBrand": "Agregar Marca",
+  "editBrand": "Editar Marca",
+  "deleteBrand": "Eliminar Marca",
+  "noBrands": "No tienes marcas aún",
+  "noBrandsMessage": "Crea tu primera marca para organizar tus productos.",
+  "dragToReorder": "Arrastra para reordenar",
+  "brand": "Marca",
+  "order": "Orden",
+  "form": {
+    "name": "Nombre",
+    "description": "Descripción",
+    "namePlaceholder": "Ej: Nike, Adidas, Samsung",
+    "descriptionPlaceholder": "Describe esta marca...",
+    "image": "Imagen de la marca",
+    "imageHint": "Obligatorio: Logo de la marca (máx. 5MB)"
+  },
+  "actions": {
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar",
+    "create": "Crear Marca",
+    "update": "Actualizar Marca",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar esta marca?",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "messages": {
+    "created": "Marca creada exitosamente",
+    "updated": "Marca actualizada exitosamente",
+    "deleted": "Marca eliminada exitosamente",
+    "orderUpdated": "Orden de marcas actualizado correctamente",
+    "error": "Error al procesar la solicitud",
+    "nameRequired": "El nombre es obligatorio",
+    "imageRequired": "La imagen es obligatoria",
+    "imageUploadError": "Error al subir la imagen",
+    "imageUploadSuccess": "Imagen subida exitosamente"
+  },
+  "imageUpload": {
+    "dropZone": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "uploading": "Subiendo imagen...",
+    "change": "Cambiar imagen",
+    "remove": "Eliminar imagen",
+    "formats": "Formatos: JPG, PNG, WebP (máx. 5MB)"
+  }
+} 

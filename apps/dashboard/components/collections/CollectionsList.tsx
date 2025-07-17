@@ -40,7 +40,7 @@ interface SortableItemProps {
 }
 
 function SortableItem({ collection, onEdit, onDelete, onToggleVisibility }: SortableItemProps) {
-  const t = useTranslations('pages.collections')
+  const t = useTranslations('collections')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -255,7 +255,7 @@ export default function CollectionsList({
   onReorder,
   loading = false
 }: CollectionsListProps) {
-  const t = useTranslations('pages.collections')
+  const t = useTranslations('collections')
   const [localCollections, setLocalCollections] = useState<CollectionWithId[]>(collections)
   const [isDragging, setIsDragging] = useState(false)
   

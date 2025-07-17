@@ -1,0 +1,105 @@
+{
+  "title": "Reportes",
+  "subtitle": "Análisis y estadísticas",
+  "description": "Visualiza reportes de ventas, productos más vendidos y estadísticas de tu tienda.",
+  "stats": {
+    "monthlySales": {
+      "title": "Ventas del mes",
+      "description": "Total de ventas del mes actual",
+      "noData": "No hay datos de ventas disponibles"
+    },
+    "orders": {
+      "title": "Pedidos",
+      "description": "Número total de pedidos recibidos",
+      "noData": "Aún no hay pedidos"
+    },
+    "products": {
+      "title": "Productos",
+      "description": "Número total de productos activos",
+      "noData": "No hay productos agregados"
+    },
+    "visits": {
+      "title": "Visitas",
+      "description": "Número total de visitas a la tienda",
+      "noData": "No se han registrado visitas"
+    }
+  },
+  "sections": {
+    "overview": {
+      "title": "Resumen",
+      "description": "Métricas clave e indicadores de rendimiento",
+      "noData": "Comienza a recibir pedidos y visitantes para ver reportes detallados."
+    },
+    "sales": {
+      "title": "Reporte de Ventas",
+      "description": "Análisis detallado y tendencias de ventas",
+      "filters": {
+        "dateRange": "Rango de fechas",
+        "category": "Categoría",
+        "brand": "Marca",
+        "status": "Estado"
+      },
+      "metrics": {
+        "totalSales": "Total de ventas",
+        "averageOrder": "Valor promedio de pedido",
+        "topProducts": "Productos más vendidos",
+        "topCategories": "Categorías principales"
+      }
+    },
+    "customers": {
+      "title": "Análisis de Clientes",
+      "description": "Comportamiento y demografía de clientes",
+      "metrics": {
+        "totalCustomers": "Total de clientes",
+        "newCustomers": "Clientes nuevos",
+        "returningCustomers": "Clientes recurrentes",
+        "averageSpend": "Gasto promedio por cliente"
+      }
+    },
+    "inventory": {
+      "title": "Reporte de Inventario",
+      "description": "Niveles de stock y rendimiento de productos",
+      "metrics": {
+        "totalStock": "Valor total del inventario",
+        "lowStock": "Productos con bajo stock",
+        "outOfStock": "Productos agotados",
+        "topSellers": "Más vendidos"
+      }
+    }
+  },
+  "filters": {
+    "period": {
+      "title": "Período de tiempo",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "last7Days": "Últimos 7 días",
+      "last30Days": "Últimos 30 días",
+      "thisMonth": "Este mes",
+      "lastMonth": "Mes anterior",
+      "custom": "Rango personalizado"
+    },
+    "export": {
+      "title": "Exportar datos",
+      "pdf": "Exportar como PDF",
+      "csv": "Exportar como CSV",
+      "excel": "Exportar como Excel"
+    }
+  },
+  "messages": {
+    "noData": "No hay datos disponibles para el período seleccionado",
+    "loading": "Cargando datos del reporte...",
+    "error": "Error al cargar datos del reporte",
+    "exportSuccess": "Reporte exportado exitosamente",
+    "exportError": "Error al exportar reporte"
+  },
+  "comingSoon": {
+    "title": "Reportes Detallados Próximamente",
+    "description": "Los reportes detallados estarán disponibles cuando comiences a recibir pedidos y visitantes.",
+    "features": {
+      "sales": "Análisis de ventas",
+      "customers": "Insights de clientes",
+      "inventory": "Gestión de inventario",
+      "marketing": "Rendimiento de marketing"
+    }
+  }
+} 

@@ -1,0 +1,88 @@
+{
+  "title": "Discounts",
+  "subtitle": "Manage promotions and discounts",
+  "description": "Create coupons, discount codes and special promotions for your store.",
+  "addDiscount": "Add Discount",
+  "sections": {
+    "coupons": {
+      "title": "Coupons",
+      "description": "Create and manage discount coupons",
+      "actions": {
+        "create": "Create Coupon",
+        "edit": "Edit Coupon",
+        "delete": "Delete Coupon"
+      }
+    },
+    "promotions": {
+      "title": "Promotions",
+      "description": "Create special offers and promotions",
+      "actions": {
+        "create": "Create Promotion",
+        "edit": "Edit Promotion",
+        "delete": "Delete Promotion"
+      }
+    },
+    "automaticDiscounts": {
+      "title": "Automatic Discounts",
+      "description": "Set up discounts that apply automatically",
+      "actions": {
+        "create": "Create Automatic Discount",
+        "edit": "Edit Automatic Discount",
+        "delete": "Delete Automatic Discount"
+      }
+    }
+  },
+  "form": {
+    "code": {
+      "label": "Discount Code",
+      "placeholder": "Enter discount code",
+      "hint": "Customers will enter this code at checkout"
+    },
+    "type": {
+      "label": "Discount Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed Amount",
+      "shipping": "Free Shipping"
+    },
+    "value": {
+      "label": "Discount Value",
+      "placeholder": "Enter discount value"
+    },
+    "minPurchase": {
+      "label": "Minimum Purchase",
+      "placeholder": "Enter minimum purchase amount",
+      "hint": "Optional: Minimum purchase amount required"
+    },
+    "startDate": {
+      "label": "Start Date",
+      "placeholder": "Select start date"
+    },
+    "endDate": {
+      "label": "End Date",
+      "placeholder": "Select end date",
+      "hint": "Optional: Leave blank for no end date"
+    },
+    "usageLimit": {
+      "label": "Usage Limit",
+      "placeholder": "Enter usage limit",
+      "hint": "Optional: Maximum number of times this discount can be used"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "scheduled": "Scheduled",
+    "expired": "Expired"
+  },
+  "messages": {
+    "created": "Discount created successfully",
+    "updated": "Discount updated successfully",
+    "deleted": "Discount deleted successfully",
+    "error": "Error processing request",
+    "codeRequired": "Discount code is required",
+    "valueRequired": "Discount value is required",
+    "invalidValue": "Invalid discount value",
+    "duplicateCode": "This discount code already exists",
+    "comingSoon": "Discount management tools will help you create and manage promotions for your store. Coming soon!"
+  }
+} 

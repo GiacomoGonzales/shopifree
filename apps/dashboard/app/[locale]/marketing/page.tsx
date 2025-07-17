@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
 
 export default function MarketingPage() {
-  const t = useTranslations('pages.marketing')
+  const t = useTranslations('marketing')
 
   return (
     <DashboardLayout>
@@ -24,6 +24,7 @@ export default function MarketingPage() {
           <div className="mt-8">
             {/* Herramientas de marketing */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {/* Promociones */}
               <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
                 <div className="p-6">
                   <div className="flex items-center">
@@ -33,13 +34,14 @@ export default function MarketingPage() {
                       </svg>
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">Promociones</h3>
-                      <p className="text-sm text-gray-500">Crea descuentos y ofertas especiales</p>
+                      <h3 className="text-lg font-medium text-gray-900">{t('sections.promotions.title')}</h3>
+                      <p className="text-sm text-gray-500">{t('sections.promotions.description')}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Email Marketing */}
               <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
                 <div className="p-6">
                   <div className="flex items-center">
@@ -49,39 +51,34 @@ export default function MarketingPage() {
                       </svg>
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">Email Marketing</h3>
-                      <p className="text-sm text-gray-500">Envía newsletters a tus clientes</p>
+                      <h3 className="text-lg font-medium text-gray-900">{t('sections.email.title')}</h3>
+                      <p className="text-sm text-gray-500">{t('sections.email.description')}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* SEO */}
               <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
                 <div className="p-6">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <svg className="h-8 w-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      <svg className="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">Redes Sociales</h3>
-                      <p className="text-sm text-gray-500">Conecta con redes sociales</p>
+                      <h3 className="text-lg font-medium text-gray-900">{t('sections.seo.title')}</h3>
+                      <p className="text-sm text-gray-500">{t('sections.seo.description')}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Mensaje de próximamente */}
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  {t('title')}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {t('description')}
-                </p>
-                
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
                   <div className="flex">
                     <div className="flex-shrink-0">
@@ -91,7 +88,7 @@ export default function MarketingPage() {
                     </div>
                     <div className="ml-3 flex-1">
                       <p className="text-sm text-purple-700">
-                        Las herramientas de marketing te ayudarán a promocionar tu tienda y aumentar las ventas. ¡Próximamente disponibles!
+                        {t('messages.comingSoon')}
                       </p>
                     </div>
                   </div>

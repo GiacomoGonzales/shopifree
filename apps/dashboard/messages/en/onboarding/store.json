@@ -1,0 +1,139 @@
+{
+  "title": "Create your store",
+  "subtitle": "Set up your online store with basic information",
+  "navigation": {
+    "stepOf": "Step {current} of {total}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "steps": {
+    "info": {
+      "title": "Store Information",
+      "fields": {
+        "storeName": {
+          "label": "Store name",
+          "placeholder": "My Awesome Store",
+          "error": "Store name is required"
+        },
+        "businessType": {
+          "label": "Business type",
+          "placeholder": "Select your business type",
+          "error": "Business type is required",
+          "options": {
+            "fashion": "Fashion & Accessories",
+            "technology": "Technology & Electronics",
+            "health": "Health & Beauty",
+            "food": "Food & Beverages",
+            "restaurant": "Restaurant & Fast Food",
+            "home": "Home & Decoration",
+            "sports": "Sports & Recreation",
+            "education": "Education & Training",
+            "toys": "Toys & Kids",
+            "pets": "Pets",
+            "service": "Professional Services",
+            "wholesale": "Wholesale",
+            "retail": "Retail",
+            "handcrafts": "Handcrafts & Art",
+            "eco": "Eco-friendly or Sustainable Products",
+            "other": "Other (custom)"
+          }
+        },
+        "subdomain": {
+          "label": "Subdomain",
+          "placeholder": "my-store",
+          "hint": "Your store will be available at",
+          "error": "Subdomain is required",
+          "errorTaken": "This subdomain is already taken",
+          "errorNotAvailable": "Subdomain is not available",
+          "errorCheck": "Error checking subdomain availability"
+        },
+        "slogan": {
+          "label": "Slogan",
+          "placeholder": "The best online store",
+          "error": "Slogan is required"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Describe your store and what you sell...",
+          "error": "Description is required"
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact Information",
+      "fields": {
+        "hasPhysicalLocation": {
+          "label": "Do you have a physical location?"
+        },
+        "address": {
+          "label": "Address",
+          "placeholder": "123 Street, City, Country",
+          "hint": "Start typing your address...",
+          "locationSaved": "Location saved",
+          "error": "Address is required when you have a physical location"
+        },
+        "phone": {
+          "label": "Store phone",
+          "placeholder": "1234567890",
+          "hint": "Enter only the local number (without country code)",
+          "error": "Store phone is required",
+          "errorInvalid": "Please enter a valid phone number"
+        },
+        "currency": {
+          "label": "Store currency",
+          "hint": "This will be the main currency for displaying prices",
+          "error": "Currency is required"
+        }
+      }
+    },
+    "branding": {
+      "title": "Customize your brand",
+      "fields": {
+        "logo": {
+          "label": "Logo",
+          "hint": "PNG, JPG up to 5MB",
+          "error": "Logo is required",
+          "uploadHint": "Click to upload or drag here"
+        },
+        "storePhoto": {
+          "label": "Main image (cover)",
+          "hint": "This image will be displayed as the main cover of your store",
+          "error": "Cover image is required",
+          "uploadHint": "Click to upload or drag here"
+        },
+        "colors": {
+          "title": "Brand colors",
+          "primary": "Primary color",
+          "secondary": "Secondary color"
+        }
+      }
+    }
+  },
+  "actions": {
+    "uploadHint": "Click to upload or drag here",
+    "fileFormat": "PNG, JPG up to 5MB",
+    "createStore": "Create store"
+  },
+  "progress": {
+    "creating": "Creating your store...",
+    "created": "Store created successfully!",
+    "createdMessage": "Your store has been created successfully",
+    "creatingMessage": "Please wait while we set up your store",
+    "redirecting": "Redirecting to dashboard...",
+    "redirectingMessage": "Preparing your control panel",
+    "completed": "{count}% completed",
+    "steps": {
+      "basicInfo": "Setting up basic information...",
+      "contact": "Setting up contact information...",
+      "branding": "Applying branding..."
+    }
+  },
+  "success": {
+    "title": "Store created successfully!",
+    "message": "Your store has been created successfully",
+    "completed": "100% completed"
+  },
+  "errors": {
+    "createError": "Error creating store. Please try again."
+  }
+} 

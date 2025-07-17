@@ -50,7 +50,7 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
 }
 
 export default function CategoriesPage() {
-  const t = useTranslations('pages.categories')
+  const t = useTranslations('categories')
   const { user } = useAuth()
   
   const [categories, setCategories] = useState<CategoryWithId[]>([])

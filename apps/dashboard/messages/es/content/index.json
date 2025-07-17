@@ -1,0 +1,104 @@
+{
+  "title": "Contenido",
+  "subtitle": "Gestiona el contenido de tu tienda",
+  "description": "Administra páginas, blogs, categorías y todo el contenido de tu tienda.",
+  "tabs": {
+    "pages": "Páginas",
+    "filters": "Filtros"
+  },
+  "pages": {
+    "title": "Páginas Disponibles",
+    "description": "Personaliza el contenido y la visibilidad de las páginas de tu tienda.",
+    "sections": {
+      "home": {
+        "title": "Página de Inicio",
+        "description": "Página principal de tu tienda"
+      },
+      "about": {
+        "title": "Sobre Nosotros",
+        "description": "Información sobre tu negocio"
+      },
+      "contact": {
+        "title": "Contacto",
+        "description": "Información de contacto y formulario"
+      },
+      "terms": {
+        "title": "Términos y Condiciones",
+        "description": "Términos y condiciones legales"
+      },
+      "privacy": {
+        "title": "Política de Privacidad",
+        "description": "Política de privacidad y manejo de datos"
+      }
+    },
+    "actions": {
+      "edit": "Editar Página",
+      "preview": "Vista Previa",
+      "publish": "Publicar",
+      "unpublish": "Despublicar",
+      "save": "Guardar Cambios",
+      "cancel": "Cancelar"
+    },
+    "status": {
+      "published": "Publicada",
+      "draft": "Borrador",
+      "hidden": "Oculta"
+    }
+  },
+  "filters": {
+    "title": "Filtros de Productos",
+    "description": "Gestiona los filtros disponibles para tus productos.",
+    "sections": {
+      "categories": {
+        "title": "Categorías",
+        "description": "Categorías y subcategorías de productos"
+      },
+      "attributes": {
+        "title": "Atributos",
+        "description": "Atributos de productos como talla, color, etc."
+      },
+      "tags": {
+        "title": "Etiquetas",
+        "description": "Etiquetas personalizadas para productos"
+      },
+      "price": {
+        "title": "Rangos de Precio",
+        "description": "Filtros por rango de precios"
+      }
+    },
+    "actions": {
+      "addFilter": "Agregar Filtro",
+      "editFilter": "Editar Filtro",
+      "deleteFilter": "Eliminar Filtro",
+      "save": "Guardar Cambios",
+      "cancel": "Cancelar"
+    }
+  },
+  "editor": {
+    "title": "Editor de Contenido",
+    "toolbar": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "underline": "Subrayado",
+      "link": "Insertar Enlace",
+      "image": "Insertar Imagen",
+      "heading": "Encabezado",
+      "list": "Lista",
+      "quote": "Cita"
+    },
+    "placeholders": {
+      "title": "Ingresa el título...",
+      "content": "Comienza a escribir tu contenido..."
+    }
+  },
+  "messages": {
+    "saved": "Cambios guardados exitosamente",
+    "published": "Página publicada exitosamente",
+    "unpublished": "Página despublicada exitosamente",
+    "error": "Ocurrió un error al procesar tu solicitud",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar este elemento?",
+    "filterCreated": "Filtro creado exitosamente",
+    "filterUpdated": "Filtro actualizado exitosamente",
+    "filterDeleted": "Filtro eliminado exitosamente"
+  }
+} 

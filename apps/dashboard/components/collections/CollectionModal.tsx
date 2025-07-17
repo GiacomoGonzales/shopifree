@@ -30,7 +30,7 @@ export default function CollectionModal({
   storeId,
   products
 }: CollectionModalProps) {
-  const t = useTranslations('pages.collections')
+  const t = useTranslations('collections')
   
   // Form state
   const [title, setTitle] = useState('')

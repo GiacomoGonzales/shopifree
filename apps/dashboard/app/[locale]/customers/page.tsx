@@ -199,7 +199,7 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
 
 export default function CustomersPage() {
   const { store, loading: storeLoading } = useStore()
-  const t = useTranslations('pages.customers')
+  const t = useTranslations('customers')
   
   const [customers, setCustomers] = useState<CustomerWithId[]>([])
   const [loading, setLoading] = useState(true)

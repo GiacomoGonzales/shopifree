@@ -124,17 +124,17 @@ function UserOnboardingContent() {
     const newErrors: Partial<UserFormData> = {}
     
     if (!formData.displayName.trim()) {
-      newErrors.displayName = t('errors.nombreRequired')
+      newErrors.displayName = t('fields.nombre.error')
     }
     
     if (!formData.localPhone.trim()) {
-      newErrors.localPhone = t('errors.telefonoRequired')
+      newErrors.localPhone = t('fields.telefono.error')
     } else if (!/^[\d\s-()]+$/.test(formData.localPhone)) {
-      newErrors.localPhone = t('errors.telefonoInvalid')
+      newErrors.localPhone = t('fields.telefono.invalidError')
     }
     
     if (!formData.timezone) {
-      newErrors.timezone = t('errors.zonaHorariaRequired')
+      newErrors.timezone = t('fields.zonaHoraria.error')
     }
 
     setErrors(newErrors)
@@ -205,13 +205,13 @@ function UserOnboardingContent() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('nombre')} <span className="text-red-500">*</span>
+                {t('fields.nombre.label')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.displayName}
                 onChange={(e) => handleInputChange('displayName', e.target.value)}
-                placeholder={t('nombrePlaceholder')}
+                placeholder={t('fields.nombre.placeholder')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                   errors.displayName ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -221,7 +221,7 @@ function UserOnboardingContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('telefono')} <span className="text-red-500">*</span>
+                {t('fields.telefono.label')} <span className="text-red-500">*</span>
               </label>
               <div className="flex space-x-1 sm:space-x-2">
                 <select
@@ -239,7 +239,7 @@ function UserOnboardingContent() {
                   type="tel"
                   value={formData.localPhone}
                   onChange={(e) => handleInputChange('localPhone', e.target.value)}
-                  placeholder="1234567890"
+                  placeholder={t('fields.telefono.placeholder')}
                   className={`flex-1 px-2 sm:px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 text-xs sm:text-sm ${
                     errors.localPhone ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -247,13 +247,13 @@ function UserOnboardingContent() {
               </div>
               {errors.localPhone && <p className="text-red-500 text-sm mt-1">{errors.localPhone}</p>}
               <p className="text-xs text-gray-500 mt-1 break-words">
-                {t('enterLocalNumber')}
+                {t('fields.telefono.hint')}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('correo')}
+                {t('fields.correo.label')}
               </label>
               <input
                 type="email"
@@ -261,12 +261,12 @@ function UserOnboardingContent() {
                 disabled={!!user?.email}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
               />
-              <p className="text-xs text-gray-500 mt-1">{t('correoHint')}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('fields.correo.hint')}</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('zonaHoraria')} <span className="text-red-500">*</span>
+                {t('fields.zonaHoraria.label')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.timezone}
@@ -289,7 +289,7 @@ function UserOnboardingContent() {
               disabled={loading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t('saving') : t('continue')}
+              {loading ? t('actions.saving') : t('actions.continue')}
             </button>
           </form>
         </div>

@@ -42,7 +42,7 @@ function SortableItem({
   onEdit, 
   onDelete
 }: SortableItemProps) {
-  const t = useTranslations('pages.brands')
+  const t = useTranslations('brands')
   
   const {
     attributes,
@@ -160,7 +160,7 @@ export default function BrandsList({
   onReorder,
   loading = false
 }: BrandsListProps) {
-  const t = useTranslations('pages.brands')
+  const t = useTranslations('brands')
   
   const sensors = useSensors(
     useSensor(PointerSensor),

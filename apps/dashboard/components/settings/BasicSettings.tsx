@@ -12,8 +12,8 @@ interface BasicSettingsProps {
 }
 
 export default function BasicSettings({ store, onUpdate, saving }: BasicSettingsProps) {
-  const t = useTranslations('pages.settings.basic')
-  const tActions = useTranslations('pages.settings.actions')
+  const t = useTranslations('settings')
+  const tActions = useTranslations('settings.actions')
   
   const [formData, setFormData] = useState({
     storeName: store.storeName || '',

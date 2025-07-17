@@ -1,0 +1,335 @@
+{
+  "title": "Settings",
+  "subtitle": "Store settings",
+  "description": "Configure general store settings, contact information and preferences.",
+  "tabs": {
+    "basic": "General",
+    "advanced": "Advanced Settings"
+  },
+  "sections": {
+    "info": "Store information",
+    "contact": "Contact",
+    "branding": "Branding",
+    "sales": "Sales",
+    "social": "Social media",
+    "location": "Location"
+  },
+  "storeInfo": {
+    "title": "Store Information",
+    "subtitle": "Configure your store's basic information",
+    "storeName": {
+      "label": "Store name",
+      "placeholder": "My Awesome Store"
+    },
+    "subdomain": {
+      "label": "Subdomain",
+      "hint": "Read-only - Your store is available at:"
+    },
+    "storeUrl": {
+      "label": "Your store URL",
+      "hint": "This is your store's web address. Customers can visit it from any browser."
+    },
+    "slogan": {
+      "label": "Slogan",
+      "placeholder": "The best online store"
+    },
+    "description": {
+      "label": "Store description",
+      "placeholder": "Describe your store and what you sell..."
+    }
+  },
+  "contact": {
+    "title": "Contact Information",
+    "subtitle": "Configure your store's contact information",
+    "hasPhysicalLocation": "Has physical location?",
+    "address": {
+      "label": "Address",
+      "placeholder": "123 Street, City, Country",
+      "autocomplete": "Start typing your address...",
+      "coordinates": "Coordinates saved automatically"
+    },
+    "businessType": {
+      "label": "Business type",
+      "placeholder": "Select your business type",
+      "options": {
+        "retail": "Retail",
+        "wholesale": "Wholesale",
+        "service": "Professional Services",
+        "restaurant": "Restaurant & Fast Food",
+        "fashion": "Fashion & Accessories",
+        "technology": "Technology & Electronics",
+        "health": "Health & Beauty",
+        "sports": "Sports & Recreation",
+        "education": "Education & Training",
+        "food": "Food & Beverages",
+        "home": "Home & Decoration",
+        "toys": "Toys & Kids",
+        "pets": "Pets",
+        "handcrafts": "Handcrafts & Art",
+        "eco": "Eco-friendly or Sustainable Products",
+        "other": "Other (custom)"
+      }
+    },
+    "phone": {
+      "label": "Contact phone",
+      "placeholder": "+1234567890"
+    },
+    "emailStore": {
+      "label": "Store email address",
+      "placeholder": "store@mydomain.com",
+      "hint": "Optional: Public contact email for your store"
+    }
+  },
+  "branding": {
+    "title": "Branding",
+    "subtitle": "Customize colors and visual identity of your store",
+    "logo": {
+      "label": "Logo",
+      "upload": "Upload logo",
+      "hint": "Recommended: 200x200px, PNG or JPG format",
+      "uploadHint": "Drag an image here or click to select",
+      "required": "required"
+    },
+    "storePhoto": {
+      "label": "Store photo",
+      "upload": "Upload photo",
+      "hint": "Optional: Photo of your physical store",
+      "uploadHint": "Drag an image here or click to select"
+    },
+    "colors": {
+      "primary": "Primary color",
+      "secondary": "Secondary color"
+    },
+    "fileFormat": "PNG, JPG or JPEG up to 5MB",
+    "optional": "optional",
+    "uploading": "Uploading image...",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Error uploading image",
+    "changeImage": "Change",
+    "removeImage": "Remove"
+  },
+  "sales": {
+    "title": "Sales Configuration",
+    "subtitle": "Configure currency and sales methods for your store",
+    "currency": {
+      "label": "Currency",
+      "hint": "Main currency to display prices in your store"
+    },
+    "checkoutMethod": {
+      "label": "Checkout method",
+      "whatsapp": {
+        "label": "WhatsApp Sales",
+        "description": "Customers contact you via WhatsApp to place orders"
+      },
+      "traditional": {
+        "label": "Traditional checkout",
+        "description": "Integrated shopping cart (Coming soon)"
+      }
+    }
+  },
+  "socialMedia": {
+    "title": "Social Media",
+    "subtitle": "Connect your social networks so customers can find you",
+    "networks": {
+      "facebook": {
+        "label": "Facebook",
+        "placeholder": "https://facebook.com/my-store"
+      },
+      "instagram": {
+        "label": "Instagram",
+        "placeholder": "https://instagram.com/my-store"
+      },
+      "tiktok": {
+        "label": "TikTok",
+        "placeholder": "https://tiktok.com/@my-store"
+      },
+      "x": {
+        "label": "X (Twitter)",
+        "placeholder": "https://x.com/my-store"
+      },
+      "snapchat": {
+        "label": "Snapchat",
+        "placeholder": "https://snapchat.com/add/my-store"
+      },
+      "linkedin": {
+        "label": "LinkedIn",
+        "placeholder": "https://linkedin.com/company/my-store"
+      },
+      "telegram": {
+        "label": "Telegram",
+        "placeholder": "https://t.me/my-store"
+      },
+      "youtube": {
+        "label": "YouTube",
+        "placeholder": "https://youtube.com/@my-store"
+      },
+      "pinterest": {
+        "label": "Pinterest",
+        "placeholder": "https://pinterest.com/my-store"
+      }
+    }
+  },
+  "advanced": {
+    "tabs": {
+      "domain": "Custom Domain",
+      "checkout": "Checkout Method",
+      "payments": "Payment Gateway",
+      "shipping": "Shipping",
+      "notifications": "Notifications",
+      "seo": "SEO",
+      "integrations": "Integrations",
+      "language": "Language"
+    },
+    "domain": {
+      "title": "Configure Custom Domain",
+      "description": "Use your own domain for your store",
+      "customDomain": {
+        "label": "Custom domain",
+        "placeholder": "my-store.com"
+      },
+      "verifyDomain": "Verify domain",
+      "verificationStatus": "Verification status",
+      "verified": "Verified",
+      "notVerified": "Not verified",
+      "cnameGuide": {
+        "title": "CNAME Configuration Guide",
+        "instructions": "Add a CNAME record in your DNS provider:",
+        "record": "CNAME: www → shopifree.app"
+      }
+    },
+    "checkout": {
+      "title": "Checkout Method",
+      "description": "Configure how to receive orders",
+      "whatsapp": {
+        "label": "WhatsApp Sales",
+        "description": "Customers send orders via WhatsApp (Free Plan)"
+      },
+      "traditional": {
+        "label": "Traditional checkout",
+        "description": "Integrated cart and checkout (Premium/Pro Plans)"
+      },
+      "premiumRequired": "Requires paid plan",
+      "whatsappMessage": {
+        "label": "Predefined WhatsApp message",
+        "placeholder": "Hello! I'm interested in this product from {storeName}:"
+      }
+    },
+    "payments": {
+      "title": "Payment Gateway",
+      "description": "Configure your payment method",
+      "provider": {
+        "label": "Provider",
+        "placeholder": "Select a provider",
+        "options": {
+          "culqi": "Culqi",
+          "mercadopago": "MercadoPago"
+        }
+      },
+      "keys": {
+        "public": {
+          "label": "Public key",
+          "placeholder": "pk_test_..."
+        },
+        "secret": {
+          "label": "Secret key",
+          "placeholder": "sk_test_..."
+        }
+      },
+      "testConnection": "Test connection",
+      "connectionStatus": "Connection status",
+      "connected": "Connected",
+      "notConnected": "Not connected"
+    },
+    "shipping": {
+      "title": "Shipping Configuration",
+      "description": "Configure shipping options",
+      "enableShipping": "Enable shipping module",
+      "shippingType": "Shipping type",
+      "freeShipping": "Free shipping",
+      "fixedCost": "Fixed cost",
+      "minimumAmount": "Free shipping by minimum amount",
+      "shippingCost": {
+        "label": "Shipping cost",
+        "placeholder": "15.00"
+      },
+      "minimumOrder": {
+        "label": "Minimum amount for free shipping",
+        "placeholder": "50.00"
+      },
+      "checkoutText": {
+        "label": "Text visible in checkout",
+        "placeholder": "Home delivery available"
+      },
+      "estimatedTime": {
+        "label": "Estimated delivery time",
+        "placeholder": "24-48 hours"
+      }
+    },
+    "notifications": {
+      "title": "Automatic Notifications",
+      "description": "Configure automatic notification sending",
+      "email": "Email notifications",
+      "whatsapp": "WhatsApp notifications",
+      "alternativeEmail": {
+        "label": "Alternative email",
+        "placeholder": "sales@my-store.com",
+        "hint": "Additional email to receive notifications"
+      }
+    },
+    "seo": {
+      "title": "SEO Configuration",
+      "description": "Optimize your store for search engines",
+      "seoTitle": {
+        "label": "SEO Title",
+        "placeholder": "My Store - The best online store"
+      },
+      "metaDescription": {
+        "label": "Meta description",
+        "placeholder": "Find the best products in our online store..."
+      },
+      "ogImage": {
+        "label": "Open Graph Image",
+        "upload": "Upload OG image",
+        "hint": "Recommended: 1200x630px for social media"
+      },
+      "customSlug": {
+        "label": "Custom slug",
+        "placeholder": "my-special-store",
+        "hint": "Optional: Custom URL for your store"
+      }
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "Connect analytics and marketing tools",
+      "googleAnalytics": {
+        "label": "Google Analytics",
+        "placeholder": "GA4-XXXXXXXXXX"
+      },
+      "metaPixel": {
+        "label": "Meta Pixel (Facebook)",
+        "placeholder": "1234567890123456"
+      }
+    },
+    "language": {
+      "title": "Store Language",
+      "description": "Select your store's primary language",
+      "storeLanguage": "Store language",
+      "options": {
+        "spanish": "Spanish",
+        "english": "English"
+      }
+    }
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saved": "Changes saved",
+    "error": "Error saving",
+    "cancel": "Cancel",
+    "uploading": "Uploading...",
+    "upload": "Upload file",
+    "remove": "Remove",
+    "verify": "Verify",
+    "test": "Test"
+  }
+} 

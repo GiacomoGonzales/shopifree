@@ -20,7 +20,7 @@ export default function BrandModal({
   brand,
   storeId
 }: BrandModalProps) {
-  const t = useTranslations('pages.brands')
+  const t = useTranslations('brands')
   
   const [formData, setFormData] = useState({
     name: '',

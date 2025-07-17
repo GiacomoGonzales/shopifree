@@ -1,0 +1,32 @@
+{
+  "title": "Dashboard",
+  "description": "Welcome to your dashboard. Here you can manage all aspects of your online store.",
+  "welcome": {
+    "title": "Welcome to your Dashboard!",
+    "subtitle": "Manage your online store from here"
+  },
+  "sections": {
+    "overview": {
+      "title": "Store Overview",
+      "description": "General view of your store's status"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "addProduct": "Add product",
+      "viewOrders": "View orders",
+      "manageCustomers": "Manage customers",
+      "viewReports": "View reports"
+    },
+    "stats": {
+      "title": "Statistics",
+      "totalProducts": "Total products",
+      "totalOrders": "Total orders",
+      "totalCustomers": "Total customers",
+      "revenue": "Revenue"
+    }
+  },
+  "status": {
+    "inDevelopment": "In development...",
+    "comingSoon": "Coming soon"
+  }
+} 

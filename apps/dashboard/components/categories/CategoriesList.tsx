@@ -50,7 +50,7 @@ function SortableItem({
   isExpanded = false,
   onToggleExpand
 }: SortableItemProps) {
-  const t = useTranslations('pages.categories')
+  const t = useTranslations('categories')
   
   const {
     attributes,
@@ -182,7 +182,7 @@ export default function CategoriesList({
   onReorder,
   loading = false
 }: CategoriesListProps) {
-  const t = useTranslations('pages.categories')
+  const t = useTranslations('categories')
   
   // Estado para controlar qué categorías están expandidas
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())

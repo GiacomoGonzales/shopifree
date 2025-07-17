@@ -1,0 +1,83 @@
+{
+  "title": "Pedidos",
+  "subtitle": "Gestiona los pedidos de tu tienda",
+  "description": "Visualiza, actualiza y gestiona todos los pedidos de tu tienda online.",
+  "noOrders": "No hay pedidos",
+  "noOrdersDescription": "Los pedidos aparecerán aquí cuando los clientes realicen compras.",
+  "table": {
+    "date": "Fecha",
+    "customer": "Cliente",
+    "total": "Total",
+    "paymentMethod": "Método de pago",
+    "status": "Estado",
+    "actions": "Acciones",
+    "viewDetails": "Ver detalles"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "confirmed": "Confirmado",
+    "preparing": "Preparando",
+    "ready": "Listo",
+    "shipped": "Enviado",
+    "delivered": "Entregado",
+    "cancelled": "Cancelado"
+  },
+  "paymentMethods": {
+    "cash": "Efectivo",
+    "card": "Tarjeta",
+    "transfer": "Transferencia",
+    "paypal": "PayPal",
+    "stripe": "Stripe",
+    "other": "Otro"
+  },
+  "details": {
+    "title": "Detalles del pedido",
+    "customerInfo": "Información del cliente",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "address": "Dirección",
+    "notes": "Notas",
+    "orderItems": "Productos del pedido",
+    "product": "Producto",
+    "presentation": "Presentación",
+    "quantity": "Cantidad",
+    "subtotal": "Subtotal",
+    "orderSummary": "Resumen del pedido",
+    "itemsSubtotal": "Subtotal de productos",
+    "shippingCost": "Costo de envío",
+    "total": "Total",
+    "actions": "Acciones",
+    "updateStatus": "Actualizar estado",
+    "updating": "Actualizando...",
+    "replyWhatsApp": "Responder por WhatsApp",
+    "resendEmail": "Reenviar email",
+    "close": "Cerrar"
+  },
+  "actions": {
+    "markAsConfirmed": "Marcar como confirmado",
+    "markAsPreparing": "Marcar como preparando",
+    "markAsReady": "Marcar como listo",
+    "markAsShipped": "Marcar como enviado",
+    "markAsDelivered": "Marcar como entregado",
+    "markAsCancelled": "Marcar como cancelado"
+  },
+  "filters": {
+    "all": "Todos",
+    "pending": "Pendientes",
+    "confirmed": "Confirmados",
+    "preparing": "Preparando",
+    "ready": "Listos",
+    "shipped": "Enviados",
+    "delivered": "Entregados",
+    "cancelled": "Cancelados"
+  },
+  "loading": {
+    "orders": "Cargando pedidos...",
+    "updating": "Actualizando estado..."
+  },
+  "messages": {
+    "statusUpdated": "Estado actualizado correctamente",
+    "errorUpdating": "Error al actualizar el estado",
+    "orderNotFound": "Pedido no encontrado"
+  }
+} 

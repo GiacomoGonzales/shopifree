@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
 
 export default function HomePage() {
-  const t = useTranslations('pages.home')
+  const t = useTranslations('home')
 
   return (
     <DashboardLayout>
@@ -29,7 +29,7 @@ export default function HomePage() {
                     </div>
                     <div className="ml-3 flex-1">
                       <p className="text-sm text-gray-800">
-                        En desarrollo...
+                        {t('status.inDevelopment')}
                       </p>
                     </div>
                   </div>
