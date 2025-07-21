@@ -9,7 +9,7 @@
   "sections": {
     "info": "Información de la tienda",
     "contact": "Contacto",
-    "branding": "Branding",
+    "branding": "Marca",
     "sales": "Ventas",
     "social": "Redes sociales",
     "location": "Localización"
@@ -17,319 +17,188 @@
   "storeInfo": {
     "title": "Información de la Tienda",
     "subtitle": "Configura la información básica de tu tienda",
-    "storeName": {
-      "label": "Nombre de la tienda",
-      "placeholder": "Mi Tienda Increíble"
-    },
-    "subdomain": {
-      "label": "Subdominio",
-      "hint": "Solo lectura - Tu tienda está disponible en:"
-    },
-    "storeUrl": {
-      "label": "URL de tu tienda",
-      "hint": "Esta es la dirección web de tu tienda. Los clientes pueden visitarla desde cualquier navegador."
-    },
-    "slogan": {
-      "label": "Eslogan",
-      "placeholder": "La mejor tienda online"
-    },
-    "description": {
-      "label": "Descripción de la tienda",
-      "placeholder": "Describe tu tienda y lo que vendes..."
-    }
+    "storeName": "Nombre de la tienda",
+    "storeNamePlaceholder": "Mi Tienda Increíble",
+    "storeUrl": "URL de tu tienda",
+    "storeUrlHint": "Esta es la dirección web de tu tienda. Los clientes pueden visitarla desde cualquier navegador.",
+    "slogan": "Eslogan",
+    "sloganPlaceholder": "La mejor tienda online",
+    "description": "Descripción de la tienda",
+    "descriptionPlaceholder": "Describe tu tienda y lo que vendes..."
   },
   "contact": {
     "title": "Información de Contacto",
-    "subtitle": "Configura la información de contacto de tu tienda",
-    "hasPhysicalLocation": "¿Tiene local físico?",
-    "address": {
-      "label": "Dirección",
-      "placeholder": "Calle 123, Ciudad, País",
-      "autocomplete": "Empieza a escribir tu dirección...",
-      "coordinates": "Coordenadas guardadas automáticamente"
+    "subtitle": "Configura los datos de contacto de tu tienda",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+1234567890",
+    "emailStore": "Correo electrónico de la tienda",
+    "emailStorePlaceholder": "tienda@ejemplo.com",
+    "emailStoreHint": "Este correo será visible para tus clientes",
+    "businessType": "Tipo de negocio",
+    "businessTypePlaceholder": "Selecciona el tipo de negocio",
+    "businessTypes": {
+      "fashion": "Moda y accesorios",
+      "technology": "Tecnología",
+      "health": "Salud y belleza",
+      "food": "Alimentos y bebidas",
+      "restaurant": "Restaurante",
+      "home": "Hogar y decoración",
+      "sports": "Deportes",
+      "education": "Educación",
+      "toys": "Juguetes",
+      "pets": "Mascotas",
+      "service": "Servicios",
+      "wholesale": "Mayorista",
+      "retail": "Minorista",
+      "handcrafts": "Artesanías",
+      "eco": "Productos ecológicos",
+      "other": "Otro"
     },
-    "businessType": {
-      "label": "Tipo de comercio",
-      "placeholder": "Selecciona tu tipo de negocio",
-      "options": {
-        "retail": "Venta por menor",
-        "wholesale": "Venta por mayor",
-        "service": "Servicios profesionales",
-        "restaurant": "Restaurante y comida rápida",
-        "fashion": "Moda y accesorios",
-        "technology": "Tecnología y electrónica",
-        "health": "Salud y belleza",
-        "sports": "Deportes y recreación",
-        "education": "Educación y formación",
-        "food": "Alimentos y bebidas",
-        "home": "Hogar y decoración",
-        "toys": "Juguetes y niños",
-        "pets": "Mascotas",
-        "handcrafts": "Manualidades y arte",
-        "eco": "Productos ecológicos o sostenibles",
-        "other": "Otro (personalizado)"
-      }
-    },
-    "phone": {
-      "label": "Teléfono de contacto",
-      "placeholder": "+1234567890"
-    },
-    "emailStore": {
-      "label": "Correo electrónico de la tienda",
-      "placeholder": "tienda@midominio.com",
-      "hint": "Opcional: Email de contacto público de tu tienda"
-    }
+    "hasPhysicalLocation": "Tengo un local físico",
+    "address": "Dirección",
+    "addressPlaceholder": "Ingresa la dirección de tu local",
+    "addressSaved": "Ubicación guardada correctamente"
   },
   "branding": {
     "title": "Imagen de Marca",
     "subtitle": "Personaliza los colores y la identidad visual de tu tienda",
-    "logo": {
-      "label": "Logo",
-      "upload": "Subir logo",
-      "hint": "Recomendado: 200x200px, formato PNG o JPG",
-      "uploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-      "required": "obligatorio"
-    },
-    "storePhoto": {
-      "label": "Foto del local",
-      "upload": "Subir foto",
-      "hint": "Opcional: Foto de tu local físico",
-      "uploadHint": "Arrastra una imagen aquí o haz clic para seleccionar"
-    },
-    "colors": {
-      "primary": "Color primario",
-      "secondary": "Color secundario"
-    },
+    "logo": "Logo",
+    "logoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
+    "storePhoto": "Foto del local",
+    "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "storePhotoHint": "Opcional: Foto de tu local físico",
+    "primaryColor": "Color primario",
+    "secondaryColor": "Color secundario",
     "fileFormat": "PNG, JPG o JPEG hasta 5MB",
     "optional": "opcional",
     "uploading": "Subiendo imagen...",
-    "uploadSuccess": "Imagen subida exitosamente",
-    "uploadError": "Error al subir imagen",
     "changeImage": "Cambiar",
     "removeImage": "Eliminar"
   },
   "sales": {
     "title": "Configuración de Ventas",
     "subtitle": "Configura la moneda y métodos de venta de tu tienda",
-    "currency": {
-      "label": "Moneda",
-      "hint": "Moneda principal para mostrar precios en tu tienda"
-    },
-    "checkoutMethod": {
-      "label": "Método de checkout",
-      "whatsapp": {
-        "label": "Ventas por WhatsApp",
-        "description": "Los clientes te contactan por WhatsApp para realizar pedidos"
-      },
-      "traditional": {
-        "label": "Checkout tradicional",
-        "description": "Carrito de compras integrado (Próximamente)"
-      }
-    }
+    "currency": "Moneda",
+    "currencyHint": "Moneda principal para mostrar precios en tu tienda",
+    "checkoutMethod": "Método de venta",
+    "whatsappSales": "Ventas por WhatsApp",
+    "whatsappSalesDescription": "Los clientes te contactan por WhatsApp para realizar pedidos",
+    "traditionalCheckout": "Checkout tradicional",
+    "traditionalCheckoutDescription": "Carrito de compras integrado (Próximamente)",
+    "checkoutMethodSaved": "Método de venta guardado correctamente"
   },
   "socialMedia": {
     "title": "Redes Sociales",
     "subtitle": "Conecta tus redes sociales para que los clientes puedan encontrarte",
-    "networks": {
-      "facebook": {
-        "label": "Facebook",
-        "placeholder": "https://facebook.com/mi-tienda"
-      },
-      "instagram": {
-        "label": "Instagram",
-        "placeholder": "https://instagram.com/mi-tienda"
-      },
-      "tiktok": {
-        "label": "TikTok",
-        "placeholder": "https://tiktok.com/@mi-tienda"
-      },
-      "x": {
-        "label": "X (Twitter)",
-        "placeholder": "https://x.com/mi-tienda"
-      },
-      "snapchat": {
-        "label": "Snapchat",
-        "placeholder": "https://snapchat.com/add/mi-tienda"
-      },
-      "linkedin": {
-        "label": "LinkedIn",
-        "placeholder": "https://linkedin.com/company/mi-tienda"
-      },
-      "telegram": {
-        "label": "Telegram",
-        "placeholder": "https://t.me/mi-tienda"
-      },
-      "youtube": {
-        "label": "YouTube",
-        "placeholder": "https://youtube.com/@mi-tienda"
-      },
-      "pinterest": {
-        "label": "Pinterest",
-        "placeholder": "https://pinterest.com/mi-tienda"
-      }
-    }
+    "facebook": "Facebook",
+    "facebookPlaceholder": "https://facebook.com/mi-tienda",
+    "instagram": "Instagram",
+    "instagramPlaceholder": "https://instagram.com/mi-tienda",
+    "tiktok": "TikTok",
+    "tiktokPlaceholder": "https://tiktok.com/@mi-tienda",
+    "x": "X (Twitter)",
+    "xPlaceholder": "https://x.com/mi-tienda",
+    "snapchat": "Snapchat",
+    "snapchatPlaceholder": "https://snapchat.com/add/mi-tienda",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/company/mi-tienda",
+    "telegram": "Telegram",
+    "telegramPlaceholder": "https://t.me/mi-tienda",
+    "youtube": "YouTube",
+    "youtubePlaceholder": "https://youtube.com/@mi-tienda",
+    "pinterest": "Pinterest",
+    "pinterestPlaceholder": "https://pinterest.com/mi-tienda"
   },
   "advanced": {
     "tabs": {
-      "domain": "Dominio Personalizado",
       "checkout": "Método de Checkout",
       "payments": "Pasarela de Pago",
       "shipping": "Envíos",
-      "notifications": "Notificaciones",
-      "seo": "SEO",
-      "integrations": "Integraciones",
-      "language": "Idioma"
-    },
-    "domain": {
-      "title": "Configurar Dominio Personalizado",
-      "description": "Usa tu propio dominio para tu tienda",
-      "customDomain": {
-        "label": "Dominio personalizado",
-        "placeholder": "mi-tienda.com"
-      },
-      "verifyDomain": "Verificar dominio",
-      "verificationStatus": "Estado de verificación",
-      "verified": "Verificado",
-      "notVerified": "No verificado",
-      "cnameGuide": {
-        "title": "Guía para configurar CNAME",
-        "instructions": "Agrega un registro CNAME en tu proveedor de DNS:",
-        "record": "CNAME: www → shopifree.app"
-      }
+      "seo": "SEO"
     },
     "checkout": {
       "title": "Método de Checkout",
       "description": "Configura cómo recibir los pedidos",
-      "whatsapp": {
-        "label": "Venta por WhatsApp",
-        "description": "Los clientes envían pedidos por WhatsApp (Plan Free)"
-      },
-      "traditional": {
-        "label": "Checkout tradicional",
-        "description": "Carrito y checkout integrado (Planes Premium/Pro)"
-      },
-      "premiumRequired": "Requiere plan de pago",
-      "whatsappMessage": {
-        "label": "Mensaje predefinido WhatsApp",
-        "placeholder": "¡Hola! Me interesa este producto de {storeName}:"
+      "whatsappCheckout": "Venta por WhatsApp (Plan Free)",
+      "traditionalCheckout": "Checkout tradicional (Planes Premium/Pro)",
+      "language": {
+        "title": "Idioma de la tienda",
+        "description": "Selecciona el idioma por defecto para elementos comunes de la tienda",
+        "spanish": "Español",
+        "english": "Inglés"
       }
     },
     "payments": {
       "title": "Pasarela de Pago",
       "description": "Configura tu método de pago",
-      "provider": {
-        "label": "Proveedor",
-        "placeholder": "Selecciona un proveedor",
-        "options": {
-          "culqi": "Culqi",
-          "mercadopago": "MercadoPago"
-        }
-      },
-      "keys": {
-        "public": {
-          "label": "Clave pública",
-          "placeholder": "pk_test_..."
-        },
-        "secret": {
-          "label": "Clave secreta",
-          "placeholder": "sk_test_..."
-        }
-      },
-      "testConnection": "Probar conexión",
-      "connectionStatus": "Estado de conexión",
-      "connected": "Conectado",
-      "notConnected": "No conectado"
+      "provider": "Proveedor",
+      "selectProvider": "Selecciona un proveedor",
+      "culqi": "Culqi",
+      "mercadopago": "MercadoPago",
+      "comingSoon": "Próximamente"
     },
     "shipping": {
       "title": "Configuración de Envíos",
       "description": "Configura las opciones de envío",
       "enableShipping": "Activar módulo de envíos",
-      "shippingType": "Tipo de envío",
-      "freeShipping": "Envío gratis",
-      "fixedCost": "Costo fijo",
-      "minimumAmount": "Envío gratis por monto mínimo",
-      "shippingCost": {
-        "label": "Costo de envío",
-        "placeholder": "15.00"
-      },
-      "minimumOrder": {
-        "label": "Monto mínimo para envío gratis",
-        "placeholder": "50.00"
-      },
-      "checkoutText": {
-        "label": "Texto visible en checkout",
-        "placeholder": "Envío a domicilio disponible"
-      },
-      "estimatedTime": {
-        "label": "Tiempo estimado de entrega",
-        "placeholder": "24-48 horas"
-      }
-    },
-    "notifications": {
-      "title": "Notificaciones Automáticas",
-      "description": "Configura el envío automático de notificaciones",
-      "email": "Notificaciones por correo electrónico",
-      "whatsapp": "Notificaciones por WhatsApp",
-      "alternativeEmail": {
-        "label": "Email alternativo",
-        "placeholder": "ventas@mi-tienda.com",
-        "hint": "Email adicional para recibir notificaciones"
-      }
+      "comingSoon": "Próximamente"
     },
     "seo": {
       "title": "Configuración SEO",
       "description": "Optimiza tu tienda para motores de búsqueda",
-      "seoTitle": {
-        "label": "Título SEO",
-        "placeholder": "Mi Tienda - La mejor tienda online"
+      "seoTitle": "Título SEO",
+      "seoTitlePlaceholder": "Mi Tienda - La mejor tienda online",
+      "comingSoon": "Próximamente"
+    }
+  },
+  "account": {
+    "title": "Mi Cuenta",
+    "subtitle": "Gestiona tu información personal y preferencias",
+    "personalInfo": {
+      "title": "Información Personal",
+      "email": {
+        "label": "Email",
+        "hint": "El email no se puede cambiar"
       },
-      "metaDescription": {
-        "label": "Meta descripción",
-        "placeholder": "Encuentra los mejores productos en nuestra tienda online..."
+      "displayName": {
+        "label": "Nombre completo",
+        "placeholder": "Tu nombre completo"
       },
-      "ogImage": {
-        "label": "Imagen Open Graph",
-        "upload": "Subir imagen OG",
-        "hint": "Recomendado: 1200x630px para redes sociales"
-      },
-      "customSlug": {
-        "label": "Slug personalizado",
-        "placeholder": "mi-tienda-especial",
-        "hint": "Opcional: URL personalizada para tu tienda"
+      "phone": {
+        "label": "Teléfono",
+        "placeholder": "+1234567890"
       }
     },
-    "integrations": {
-      "title": "Integraciones",
-      "description": "Conecta herramientas de análisis y marketing",
-      "googleAnalytics": {
-        "label": "Google Analytics",
-        "placeholder": "GA4-XXXXXXXXXX"
+    "accountInfo": {
+      "title": "Información de Cuenta",
+      "status": {
+        "label": "Estado",
+        "active": "Activa"
       },
-      "metaPixel": {
-        "label": "Meta Pixel (Facebook)",
-        "placeholder": "1234567890123456"
+      "registrationDate": {
+        "label": "Fecha de registro",
+        "notAvailable": "No disponible"
+      },
+      "lastLogin": {
+        "label": "Último acceso",
+        "notAvailable": "No disponible"
+      },
+      "userId": {
+        "label": "ID de usuario"
       }
     },
-    "language": {
-      "title": "Idioma de la Tienda",
-      "description": "Selecciona el idioma principal de tu tienda",
-      "storeLanguage": "Idioma de la tienda",
-      "options": {
-        "spanish": "Español",
-        "english": "Inglés"
-      }
+    "actions": {
+      "title": "Acciones de Cuenta",
+      "changePassword": "Cambiar Contraseña",
+      "deleteAccount": "Eliminar Cuenta",
+      "saveChanges": "Guardar Cambios"
     }
   },
   "actions": {
     "save": "Guardar cambios",
     "saving": "Guardando...",
-    "saved": "Cambios guardados",
-    "error": "Error al guardar",
-    "cancel": "Cancelar",
-    "uploading": "Subiendo...",
-    "upload": "Subir archivo",
-    "remove": "Remover",
-    "verify": "Verificar",
-    "test": "Probar"
+    "saved": "¡Cambios guardados!",
+    "error": "Error al guardar los cambios"
   }
 } 

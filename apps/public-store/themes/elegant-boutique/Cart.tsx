@@ -280,7 +280,24 @@ export default function ElegantBoutiqueCart() {
                       {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
                     </p>
                     
-                    <button className="w-full btn-boutique-primary">
+                    <button 
+                      onClick={() => {
+                        // En desarrollo localhost usa 'lunara', en producción extraer del hostname
+                        const hostname = window.location.hostname
+                        let subdomain = 'lunara' // Default para desarrollo
+                        
+                        if (hostname.includes('.shopifree.app')) {
+                          subdomain = hostname.split('.')[0]
+                        } else if (hostname.includes('.vercel.app')) {
+                          subdomain = 'lunara'
+                        } else if (hostname === 'localhost') {
+                          subdomain = 'lunara'
+                        }
+                        
+                        window.location.href = `/${subdomain}/checkout`
+                      }}
+                      className="w-full btn-boutique-primary"
+                    >
                       Finalizar compra
                     </button>
                   </div>
@@ -456,7 +473,24 @@ export default function ElegantBoutiqueCart() {
                     {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
                   </p>
                   
-                  <button className="w-full btn-boutique-primary">
+                  <button 
+                    onClick={() => {
+                      // En desarrollo localhost usa 'lunara', en producción extraer del hostname
+                      const hostname = window.location.hostname
+                      let subdomain = 'lunara' // Default para desarrollo
+                      
+                      if (hostname.includes('.shopifree.app')) {
+                        subdomain = hostname.split('.')[0]
+                      } else if (hostname.includes('.vercel.app')) {
+                        subdomain = 'lunara'
+                      } else if (hostname === 'localhost') {
+                        subdomain = 'lunara'
+                      }
+                      
+                      window.location.href = `/${subdomain}/checkout`
+                    }}
+                    className="w-full btn-boutique-primary"
+                  >
                     Finalizar compra
                   </button>
                 </div>

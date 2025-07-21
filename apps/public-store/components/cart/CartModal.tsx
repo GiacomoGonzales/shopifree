@@ -40,7 +40,7 @@ const Icons = {
 }
 
 export default function CartModal() {
-  const { state, closeCart, removeItem, updateQuantity } = useCart()
+  const { state, closeCart, removeItem, updateQuantity, openCheckout } = useCart()
   const { store } = useStore()
 
   // Solo prevenir scroll del body en desktop, permitir scroll interno del modal en mobile
@@ -208,7 +208,13 @@ export default function CartModal() {
               </div>
 
               {/* Botón de checkout */}
-              <button className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors text-lg">
+              <button 
+                onClick={() => {
+                  closeCart()
+                  openCheckout()
+                }}
+                className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors text-lg"
+              >
                 Finalizar compra
               </button>
 

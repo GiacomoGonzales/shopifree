@@ -1,0 +1,74 @@
+{
+  "title": "Add product",
+  "backToProducts": "← Back to products",
+  "productInfo": "Product information",
+  "productName": "Product name",
+  "productNamePlaceholder": "E.g.: Cotton T-shirt",
+  "description": "Description",
+  "descriptionPlaceholder": "Describe your product...",
+  "multimedia": "Multimedia",
+  "uploadHint": "Drag images or click to select",
+  "uploadFormats": "Accepts images, videos or 3D models",
+  "pricing": "Pricing",
+  "price": "Price",
+  "comparePrice": "Compare price",
+  "chargeTaxes": "Charge taxes on this product",
+  "costPerItem": "Cost per item",
+  "profit": "Profit",
+  "margin": "Margin",
+  "variants": {
+    "title": "Variants",
+    "hasVariants": "This product has variants",
+    "addOption": "Add option",
+    "variant": "Variant",
+    "price": "Price",
+    "available": "Available",
+    "actions": "Actions",
+    "remove": "Remove"
+  },
+  "shipping": {
+    "title": "Shipping",
+    "requiresShipping": "This product requires shipping",
+    "weight": "Weight",
+    "weightPlaceholder": "0.0",
+    "countryOrigin": "Country of origin",
+    "countryOriginPlaceholder": "Select a country",
+    "harmonizedCode": "Harmonized code",
+    "harmonizedCodePlaceholder": "Search or enter code"
+  },
+  "seo": {
+    "title": "SEO",
+    "pageTitle": "Page title",
+    "pageTitlePlaceholder": "Title that will appear in search results",
+    "metaDescription": "Meta description",
+    "metaDescriptionPlaceholder": "Description that will appear in search results",
+    "urlHandle": "URL handle",
+    "urlHandlePlaceholder": "product-name"
+  },
+  "status": {
+    "title": "Status",
+    "draft": "Draft",
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "organization": {
+    "title": "Organization",
+    "subtitle": "Organize your product for better management",
+    "mainCategories": "Main categories",
+    "mainCategoriesSelected": "selected",
+    "subCategories": "Subcategories",
+    "subCategoriesSelected": "selected",
+    "selectedCategories": "Selected categories",
+    "mainCategoriesLabel": "Main:",
+    "subCategoriesLabel": "Subcategories:",
+    "brand": "Brand",
+    "brandPlaceholder": "Select a brand",
+    "collections": "Collections",
+    "tags": "Tags"
+  },
+  "buttons": {
+    "save": "Save product",
+    "saving": "Saving...",
+    "discard": "Discard"
+  }
+} 

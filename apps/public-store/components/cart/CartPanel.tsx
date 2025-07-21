@@ -45,7 +45,7 @@ const Icons = {
 }
 
 export default function CartPanel() {
-  const { state, closeCart, removeItem, updateQuantity } = useCart()
+  const { state, closeCart, removeItem, updateQuantity, openCheckout } = useCart()
   const { store } = useStore()
 
   // Cerrar carrito con Escape
@@ -257,7 +257,13 @@ export default function CartPanel() {
                   </p>
                   
                   {/* Botón de checkout dentro de la caja del total */}
-                  <button className="w-full bg-neutral-900 text-white py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors">
+                  <button 
+                    onClick={() => {
+                      closeCart()
+                      openCheckout()
+                    }}
+                    className="w-full bg-neutral-900 text-white py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
+                  >
                     Finalizar compra
                   </button>
                 </div>

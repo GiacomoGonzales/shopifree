@@ -45,32 +45,56 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
             <div className="space-y-4">
               <h4 className="text-lg font-medium">{t('checkout.title')}</h4>
               <p className="text-sm text-gray-600">{t('checkout.description')}</p>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input type="radio" name="checkout" value="whatsapp" className="mr-2" />
-                  {t('checkout.whatsappCheckout')}
-                </label>
-                <label className="flex items-center">
-                  <input type="radio" name="checkout" value="traditional" className="mr-2" />
-                  {t('checkout.traditionalCheckout')}
-                </label>
+              <div className="space-y-4">
+                <div className="relative flex items-start">
+                  <div className="flex items-center h-5">
+                    <input
+                      id="whatsapp-checkout"
+                      name="checkout-method"
+                      type="radio"
+                      checked={true}
+                      readOnly
+                      className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="whatsapp-checkout" className="font-medium text-gray-700">
+                      {t('checkout.whatsappCheckout')}
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="relative flex items-start opacity-50">
+                  <div className="flex items-center h-5">
+                    <input
+                      id="traditional-checkout"
+                      name="checkout-method"
+                      type="radio"
+                      disabled
+                      className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="traditional-checkout" className="font-medium text-gray-700">
+                      {t('checkout.traditionalCheckout')}
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Idioma de la tienda */}
             <div className="space-y-4 pt-8 border-t border-gray-200">
-              <h4 className="text-lg font-medium">Idioma de la tienda</h4>
-              <p className="text-sm text-gray-600">
-                Selecciona el idioma por defecto para elementos comunes de la tienda
-              </p>
+              <h4 className="text-lg font-medium">{t('checkout.language.title')}</h4>
+              <p className="text-sm text-gray-600">{t('checkout.language.description')}</p>
               <div>
                 <select
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value as 'es' | 'en')}
                   className="w-full border border-gray-300 rounded-md p-2"
                 >
-                  <option value="es">Español</option>
-                  <option value="en">Inglés</option>
+                  <option value="es">{t('checkout.language.spanish')}</option>
+                  <option value="en">{t('checkout.language.english')}</option>
                 </select>
               </div>
             </div>
@@ -89,6 +113,7 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
                 <option value="mercadopago">{t('payments.mercadopago')}</option>
               </select>
             </div>
+            <p className="text-sm text-gray-500 italic mt-4">{t('payments.comingSoon')}</p>
           </div>
         )
       case 'shipping':
@@ -97,9 +122,10 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
             <h4 className="text-lg font-medium">{t('shipping.title')}</h4>
             <p className="text-sm text-gray-600">{t('shipping.description')}</p>
             <label className="flex items-center">
-              <input type="checkbox" className="mr-2" />
+              <input type="checkbox" className="mr-2" disabled />
               {t('shipping.enableShipping')}
             </label>
+            <p className="text-sm text-gray-500 italic mt-4">{t('shipping.comingSoon')}</p>
           </div>
         )
       case 'seo':
@@ -109,8 +135,14 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
             <p className="text-sm text-gray-600">{t('seo.description')}</p>
             <div>
               <label className="block text-sm font-medium mb-1">{t('seo.seoTitle')}</label>
-              <input type="text" className="w-full border border-gray-300 rounded-md p-2" />
+              <input 
+                type="text" 
+                placeholder={t('seo.seoTitlePlaceholder')}
+                disabled
+                className="w-full border border-gray-300 rounded-md p-2 bg-gray-50" 
+              />
             </div>
+            <p className="text-sm text-gray-500 italic mt-4">{t('seo.comingSoon')}</p>
           </div>
         )
       default:

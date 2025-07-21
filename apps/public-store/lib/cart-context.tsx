@@ -22,6 +22,7 @@ export interface CartItem {
 export interface CartState {
   items: CartItem[]
   isOpen: boolean
+  isCheckoutOpen: boolean
   totalItems: number
   totalPrice: number
 }
@@ -35,6 +36,8 @@ export interface CartContextType {
   openCart: () => void
   closeCart: () => void
   toggleCart: () => void
+  openCheckout: () => void
+  closeCheckout: () => void
 }
 
 // Acciones del reducer
@@ -46,12 +49,15 @@ type CartAction =
   | { type: 'OPEN_CART' }
   | { type: 'CLOSE_CART' }
   | { type: 'TOGGLE_CART' }
+  | { type: 'OPEN_CHECKOUT' }
+  | { type: 'CLOSE_CHECKOUT' }
   | { type: 'LOAD_CART'; payload: { items: CartItem[] } }
 
 // Estado inicial
 const initialState: CartState = {
   items: [],
   isOpen: false,
+  isCheckoutOpen: false,
   totalItems: 0,
   totalPrice: 0
 }
@@ -179,6 +185,20 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       }
     }
     
+    case 'OPEN_CHECKOUT': {
+      return {
+        ...state,
+        isCheckoutOpen: true
+      }
+    }
+    
+    case 'CLOSE_CHECKOUT': {
+      return {
+        ...state,
+        isCheckoutOpen: false
+      }
+    }
+    
     default:
       return state
   }
@@ -201,7 +221,9 @@ export const useCart = () => {
       clearCart: () => {},
       openCart: () => {},
       closeCart: () => {},
-      toggleCart: () => {}
+      toggleCart: () => {},
+      openCheckout: () => {},
+      closeCheckout: () => {}
     }
   }
   return context
@@ -272,6 +294,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'TOGGLE_CART' })
   }
 
+  const openCheckout = () => {
+    dispatch({ type: 'OPEN_CHECKOUT' })
+  }
+
+  const closeCheckout = () => {
+    dispatch({ type: 'CLOSE_CHECKOUT' })
+  }
+
   const value: CartContextType = {
     state,
     addItem,
@@ -280,7 +310,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearCart,
     openCart,
     closeCart,
-    toggleCart
+    toggleCart,
+    openCheckout,
+    closeCheckout
   }
 
   return (

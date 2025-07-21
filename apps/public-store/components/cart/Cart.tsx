@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react'
 import CartPanel from './CartPanel'
 import CartModal from './CartModal'
+import CheckoutModal from '../checkout/CheckoutModal'
+import { useCart } from '../../lib/cart-context'
 
 export default function Cart() {
+  const { state, closeCheckout } = useCart()
   const [isMobile, setIsMobile] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
@@ -35,6 +38,10 @@ export default function Cart() {
   return (
     <>
       {isMobile ? <CartModal /> : <CartPanel />}
+      <CheckoutModal 
+        isOpen={state.isCheckoutOpen} 
+        onClose={closeCheckout} 
+      />
     </>
   )
 } 

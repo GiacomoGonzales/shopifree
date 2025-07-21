@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../../components/DashboardLayout'
 import { RichTextEditor } from '../../../../components/RichTextEditor'
 import { useStore } from '../../../../lib/hooks/useStore'
@@ -13,7 +14,6 @@ import { Card } from '../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../packages/ui/src/components/Input'
 import { CATEGORY_OPTIONS, META_FIELDS_BY_CATEGORY } from './productCategorization'
-import { useTranslations } from 'next-intl'
 
 // Interfaces
 interface ProductVariant {
