@@ -142,7 +142,158 @@
       "title": "Configuración de Envíos",
       "description": "Configura las opciones de envío",
       "enableShipping": "Activar módulo de envíos",
-      "comingSoon": "Próximamente"
+      
+             "modes": {
+         "title": "Tipos de Envío",
+         "storePickup": "Recojo en tienda",
+         "localDelivery": "Envío local",
+         "nationalShipping": "Envío nacional", 
+         "internationalShipping": "Envío internacional"
+       },
+      
+      "storePickup": {
+        "title": "Recojo en Tienda",
+        "enable": "Activar recojo en tienda",
+        "address": "Dirección del local",
+        "addressPlaceholder": "Av. Ejemplo 123, Lima, Perú",
+        "schedules": "Horarios de recojo disponibles",
+        "addSchedule": "Agregar horario",
+        "day": "Día",
+        "openTime": "Hora de apertura",
+        "closeTime": "Hora de cierre",
+        "preparationTime": "Tiempo estimado de preparación",
+        "preparationTimePlaceholder": "2-4 horas",
+        "days": {
+          "monday": "Lunes",
+          "tuesday": "Martes", 
+          "wednesday": "Miércoles",
+          "thursday": "Jueves",
+          "friday": "Viernes",
+          "saturday": "Sábado",
+          "sunday": "Domingo"
+        }
+      },
+      
+      "localDelivery": {
+        "title": "Envío Local",
+        "subtitle": "Domicilios con zonas personalizadas",
+        "enable": "Activar mapa de zonas de reparto",
+        "zones": "Zonas de entrega",
+        "addZone": "Añadir zona de entrega",
+        "zoneName": "Nombre de la zona",
+        "zoneNamePlaceholder": "Centro de Lima",
+        "deliveryPrice": "Precio de delivery",
+        "estimatedTime": "Tiempo estimado de entrega",
+        "estimatedTimePlaceholder": "30-60 minutos",
+        "allowGPS": "Permitir GPS del cliente",
+        "noCoverageMessage": "Mensaje para zonas no cubiertas",
+        "noCoverageMessagePlaceholder": "Lo sentimos, no hacemos entregas en tu zona",
+        "zoneType": {
+          "polygon": "Dibujar zona (polígono)",
+          "radius": "Zona circular (radio)"
+        },
+        "radius": "Radio (km)",
+        "mapInstructions": "Usa el mapa interactivo para definir las zonas de entrega"
+      },
+      
+      "nationalShipping": {
+        "title": "Envío Nacional",
+        "subtitle": "Dentro del país",
+        "enable": "Activar envío nacional",
+        "type": "Tipo de tarificación",
+        "types": {
+          "fixed": "Precio fijo",
+          "by_region": "Por ciudad o región", 
+          "by_weight": "Por peso"
+        },
+        "fixedPrice": "Precio fijo nacional",
+        "regions": "Regiones",
+        "addRegion": "Añadir región",
+        "regionName": "Nombre de región",
+        "regionNamePlaceholder": "Lima, Cusco, Arequipa",
+        "regionPrice": "Precio por región",
+        "weightRanges": "Rangos de peso",
+        "addWeightRange": "Añadir rango de peso",
+        "minWeight": "Peso mínimo (kg)",
+        "maxWeight": "Peso máximo (kg)",
+        "price": "Precio",
+        "carrier": {
+          "title": "Transportista",
+          "name": "Empresa de envío",
+          "nameOptions": {
+            "serpost": "Serpost",
+            "olva": "Olva Courier",
+            "shalom": "Shalom",
+            "custom": "Otro"
+          },
+          "trackingEnabled": "¿Permitir seguimiento del pedido?",
+          "trackingUrl": "URL de seguimiento"
+        },
+        "automaticRates": {
+          "title": "Tarifas automáticas",
+          "enabled": "¿Usas tarifas automáticas de alguna API?",
+          "apiKey": "API Key"
+        }
+      },
+      
+      "internationalShipping": {
+        "title": "Envío Internacional",
+        "enable": "Activar envío internacional",
+        "countries": "Países de destino",
+        "countriesPlaceholder": "Selecciona países...",
+        "basePrice": "Precio base internacional",
+        "weightRate": "Tarifa por peso (por kg)",
+        "volumeRate": "Tarifa por volumen (por cm³)",
+        "customMessage": "Mensaje personalizado para clientes internacionales",
+        "customMessagePlaceholder": "Envíos internacionales pueden tardar 7-15 días...",
+        "customsInfo": {
+          "title": "Información de aduanas",
+          "restrictedCategories": "Categorías restringidas",
+          "additionalInfo": "Información adicional"
+        }
+      },
+      
+      "general": {
+        "title": "Reglas Adicionales de Envío",
+        "freeShipping": {
+          "title": "Envío gratis",
+          "enabled": "Activar envío gratis",
+          "minimumAmount": "Si el pedido supera",
+          "minimumAmountSuffix": "soles",
+          "applicableProducts": "Para productos marcados como 'envío gratis'"
+        },
+        "preparationTime": "Tiempo de preparación del pedido",
+        "preparationTimePlaceholder": "1-2 días hábiles",
+        "notifications": {
+          "title": "Notificación automática al cliente",
+          "email": "Por email",
+          "whatsapp": "Por WhatsApp"
+        }
+      },
+      
+      "display": {
+        "title": "Información para el Cliente",
+        "subtitle": "Visible en tienda pública",
+        "showEstimatedTimes": "Mostrar tiempos de entrega estimados por zona",
+        "showPricesInCheckout": "Mostrar precios de envío en el checkout", 
+        "policyText": "Texto de política de envío",
+        "policyTextPlaceholder": "Envíos gratuitos en compras mayores a S/150...",
+        "policyUrl": "O enlace a página de política"
+      },
+      
+      
+      
+      "actions": {
+        "save": "Guardar configuración",
+        "saving": "Guardando...",
+        "saved": "Configuración guardada",
+        "error": "Error al guardar",
+        "addZone": "Agregar zona",
+        "editZone": "Editar zona",
+        "deleteZone": "Eliminar zona",
+        "confirm": "Confirmar",
+        "cancel": "Cancelar"
+      }
     },
     "seo": {
       "title": "Configuración SEO",

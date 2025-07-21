@@ -3,25 +3,52 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { StoreWithId } from '../../lib/store'
+import ShippingConfiguration from './ShippingConfiguration'
 
 interface AdvancedSettingsProps {
+  store?: StoreWithId | null
   onUpdate: (data: Partial<StoreWithId>) => Promise<boolean>
   saving: boolean
 }
 
-export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsProps) {
+export default function AdvancedSettings({ store, onUpdate, saving }: AdvancedSettingsProps) {
   const t = useTranslations('settings.advanced')
   const tActions = useTranslations('settings.actions')
   
   const [activeSubTab, setActiveSubTab] = useState('checkout')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState<'es' | 'en'>('es')
+  const [shippingData, setShippingData] = useState<any>(null)
+
+  // Función para limpiar valores undefined de un objeto
+  const cleanUndefinedValues = (obj: any): any => {
+    if (obj === null || obj === undefined) return null
+    if (typeof obj !== 'object') return obj
+    if (Array.isArray(obj)) return obj.map(cleanUndefinedValues)
+    
+    const cleaned: any = {}
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      if (value !== undefined) {
+        cleaned[key] = cleanUndefinedValues(value)
+      }
+    })
+    return cleaned
+  }
 
   const handleSave = async () => {
+    console.log('Saving shipping data:', shippingData)
+    
+    // Limpiar datos de shipping antes de guardar
+    const cleanedShippingData = shippingData ? cleanUndefinedValues(shippingData) : null
+    console.log('Cleaned shipping data:', cleanedShippingData)
+    
     const success = await onUpdate({
       advanced: {
+        ...store?.advanced,
         checkout: { method: 'whatsapp' },
-        language: selectedLanguage
+        language: selectedLanguage,
+        ...(cleanedShippingData && { shipping: cleanedShippingData })
       }
     })
     
@@ -40,46 +67,47 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
     switch (activeSubTab) {
       case 'checkout':
         return (
-          <div className="space-y-8">
-            {/* Método de Checkout */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium">{t('checkout.title')}</h4>
-              <p className="text-sm text-gray-600">{t('checkout.description')}</p>
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="space-y-8">
+              {/* Método de Checkout */}
               <div className="space-y-4">
-                <div className="relative flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="whatsapp-checkout"
-                      name="checkout-method"
-                      type="radio"
-                      checked={true}
-                      readOnly
-                      className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
-                    />
+                <h4 className="text-lg font-medium">{t('checkout.title')}</h4>
+                <p className="text-sm text-gray-600">{t('checkout.description')}</p>
+                <div className="space-y-4">
+                  <div className="relative flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="whatsapp-checkout"
+                        name="checkout-method"
+                        type="radio"
+                        checked={true}
+                        readOnly
+                        className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
+                      />
+                    </div>
+                    <div className="ml-3 text-sm">
+                      <label htmlFor="whatsapp-checkout" className="font-medium text-gray-700">
+                        {t('checkout.whatsappCheckout')}
+                      </label>
+                    </div>
                   </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="whatsapp-checkout" className="font-medium text-gray-700">
-                      {t('checkout.whatsappCheckout')}
-                    </label>
+                  
+                  <div className="relative flex items-start opacity-50">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="traditional-checkout"
+                        name="checkout-method"
+                        type="radio"
+                        disabled
+                        className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
+                      />
+                    </div>
+                    <div className="ml-3 text-sm">
+                      <label htmlFor="traditional-checkout" className="font-medium text-gray-700">
+                        {t('checkout.traditionalCheckout')}
+                      </label>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="relative flex items-start opacity-50">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="traditional-checkout"
-                      name="checkout-method"
-                      type="radio"
-                      disabled
-                      className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="traditional-checkout" className="font-medium text-gray-700">
-                      {t('checkout.traditionalCheckout')}
-                    </label>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -98,51 +126,55 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
                 </select>
               </div>
             </div>
+            </div>
           </div>
         )
       case 'payments':
         return (
-          <div className="space-y-4">
-            <h4 className="text-lg font-medium">{t('payments.title')}</h4>
-            <p className="text-sm text-gray-600">{t('payments.description')}</p>
-            <div>
-              <label className="block text-sm font-medium mb-1">{t('payments.provider')}</label>
-              <select className="w-full border border-gray-300 rounded-md p-2">
-                <option value="">{t('payments.selectProvider')}</option>
-                <option value="culqi">{t('payments.culqi')}</option>
-                <option value="mercadopago">{t('payments.mercadopago')}</option>
-              </select>
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium">{t('payments.title')}</h4>
+              <p className="text-sm text-gray-600">{t('payments.description')}</p>
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('payments.provider')}</label>
+                <select className="w-full border border-gray-300 rounded-md p-2">
+                  <option value="">{t('payments.selectProvider')}</option>
+                  <option value="culqi">{t('payments.culqi')}</option>
+                  <option value="mercadopago">{t('payments.mercadopago')}</option>
+                </select>
+              </div>
+              <p className="text-sm text-gray-500 italic mt-4">{t('payments.comingSoon')}</p>
             </div>
-            <p className="text-sm text-gray-500 italic mt-4">{t('payments.comingSoon')}</p>
           </div>
         )
       case 'shipping':
         return (
-          <div className="space-y-4">
-            <h4 className="text-lg font-medium">{t('shipping.title')}</h4>
-            <p className="text-sm text-gray-600">{t('shipping.description')}</p>
-            <label className="flex items-center">
-              <input type="checkbox" className="mr-2" disabled />
-              {t('shipping.enableShipping')}
-            </label>
-            <p className="text-sm text-gray-500 italic mt-4">{t('shipping.comingSoon')}</p>
+          <div className="space-y-6">
+            <ShippingConfiguration
+              store={store}
+              onUpdate={onUpdate}
+              saving={saving}
+              onShippingDataChange={setShippingData}
+            />
           </div>
         )
       case 'seo':
         return (
-          <div className="space-y-4">
-            <h4 className="text-lg font-medium">{t('seo.title')}</h4>
-            <p className="text-sm text-gray-600">{t('seo.description')}</p>
-            <div>
-              <label className="block text-sm font-medium mb-1">{t('seo.seoTitle')}</label>
-              <input 
-                type="text" 
-                placeholder={t('seo.seoTitlePlaceholder')}
-                disabled
-                className="w-full border border-gray-300 rounded-md p-2 bg-gray-50" 
-              />
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium">{t('seo.title')}</h4>
+              <p className="text-sm text-gray-600">{t('seo.description')}</p>
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('seo.seoTitle')}</label>
+                <input 
+                  type="text" 
+                  placeholder={t('seo.seoTitlePlaceholder')}
+                  disabled
+                  className="w-full border border-gray-300 rounded-md p-2 bg-gray-50" 
+                />
+              </div>
+              <p className="text-sm text-gray-500 italic mt-4">{t('seo.comingSoon')}</p>
             </div>
-            <p className="text-sm text-gray-500 italic mt-4">{t('seo.comingSoon')}</p>
           </div>
         )
       default:
@@ -181,7 +213,7 @@ export default function AdvancedSettings({ onUpdate, saving }: AdvancedSettingsP
       </div>
 
       {/* Content */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div>
         {renderContent()}
       </div>
 

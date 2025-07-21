@@ -80,6 +80,13 @@ service cloud.firestore {
         allow write: if isAuthenticated() && 
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
+      
+      // Reglas para zonas de entrega
+      match /deliveryZones/{zoneId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && 
+                      request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
     }
   }
 }

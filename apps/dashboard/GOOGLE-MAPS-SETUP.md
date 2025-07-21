@@ -1,96 +1,85 @@
-# Configuración de Google Maps API para Autocompletado de Direcciones
+# Configuración de Google Maps API
 
-## Descripción
-El dashboard incluye funcionalidad de autocompletado de direcciones usando Google Places API. Esto permite que los usuarios escriban direcciones que se autocompletan automáticamente y se guardan las coordenadas (latitud y longitud) en Firestore.
+Este proyecto utiliza Google Maps API para la funcionalidad de zonas de entrega en el dashboard.
 
-## Requisitos
-1. Cuenta de Google Cloud Platform
-2. Proyecto con facturación habilitada
-3. APIs habilitadas: Places API y Maps JavaScript API
+## Configuración requerida
 
-## Configuración
+### 1. Obtener API Key de Google Maps
 
-### 1. Obtener API Key
 1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crea un proyecto o selecciona uno existente
+2. Crea un nuevo proyecto o selecciona uno existente
 3. Habilita las siguientes APIs:
-   - **Places API**
-   - **Maps JavaScript API**
-4. Ve a "Credenciales" y crea una API Key
-5. Configura restricciones para tu dominio
+   - Maps JavaScript API
+   - Places API
+   - Geocoding API (opcional, para autocompletado de direcciones)
 
-### 2. Configurar Variables de Entorno
+4. Ve a "Credenciales" > "Crear credenciales" > "Clave de API"
+5. Copia la clave API generada
+
+### 2. Configurar variables de entorno
+
 Agrega la siguiente variable a tu archivo `.env.local`:
 
 ```bash
-NEXT_PUBLIC_MAPS_API_KEY=tu_api_key_de_google_maps
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_clave_api_aqui
 ```
 
-### 3. Funcionalidades Implementadas
+### 3. Restricciones de seguridad (Recomendado)
 
-#### En Settings General (`/settings/general`)
-- Autocompletado de direcciones cuando "¿Tiene local físico?" está marcado
-- Guardado automático de coordenadas (lat, lng) en Firestore
-- Indicadores visuales de estado (cargando, coordenadas guardadas)
+En Google Cloud Console, configura restricciones para tu API Key:
 
-#### En Onboarding de Tienda
-- La misma funcionalidad está disponible durante la configuración inicial
+**Restricciones de aplicación:**
+- Selecciona "Referentes HTTP (sitios web)"
+- Agrega los dominios permitidos:
+  - `localhost:3001/*` (para desarrollo)
+  - `*.shopifree.app/*` (para producción)
+  - Tu dominio personalizado si aplica
 
-### 4. Estructura de Datos en Firestore
+**Restricciones de API:**
+- Limita a las APIs necesarias:
+  - Maps JavaScript API
+  - Places API
+  - Geocoding API
 
-```typescript
-interface StoreConfig {
-  // ... otros campos
-  address?: string // Dirección legacy
-  location?: {
-    address: string // Dirección completa
-    lat: number     // Latitud
-    lng: number     // Longitud
-  }
+### 4. Funcionalidades disponibles
+
+Con esta configuración, el mapa de zonas de entrega te permitirá:
+
+- ✅ Dibujar polígonos personalizados para zonas de entrega
+- ✅ Crear zonas circulares con radio específico
+- ✅ Configurar precios y tiempos de entrega por zona
+- ✅ Guardar zonas en Firestore automáticamente
+- ✅ Visualizar todas las zonas existentes en el mapa
+- ✅ Eliminar zonas directamente desde el mapa
+
+### 5. Estructura en Firestore
+
+Las zonas se guardan en la siguiente estructura:
+
+```
+stores/{storeId}/deliveryZones/{zoneId}
+{
+  nombre: "Zona Lima Norte",
+  tipo: "poligono", // o "circulo"
+  precio: 6.5,
+  coordenadas: [...], // array de lat/lng o centro+radio
+  estimatedTime: "30-60 minutos" // opcional
 }
 ```
 
-### 5. Compatibilidad
-- La funcionalidad es totalmente compatible con direcciones existentes
-- Si no hay API key configurada, funciona como input de texto normal
-- Las coordenadas se guardan automáticamente al seleccionar una dirección del autocompletado
+### 6. Troubleshooting
 
-### 6. Países Soportados
-El autocompletado está configurado para los siguientes países:
-- México (MX)
-- Argentina (AR) 
-- Colombia (CO)
-- Perú (PE)
-- Chile (CL)
-- Venezuela (VE)
-- Ecuador (EC)
-- Bolivia (BO)
-- Paraguay (PY)
-- Uruguay (UY)
-- Brasil (BR)
-- España (ES)
-- Estados Unidos (US)
+**Error: "Google Maps JavaScript API error: RefererNotAllowedMapError"**
+- Verifica que tu dominio esté incluido en las restricciones de la API Key
+
+**Error: "La clave API de Google Maps no está configurada"**
+- Asegúrate de tener `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` en tu `.env.local`
+- Reinicia el servidor de desarrollo después de agregar la variable
+
+**Error: "This page can't load Google Maps correctly"**
+- Verifica que las APIs necesarias estén habilitadas en Google Cloud Console
+- Revisa que la API Key tenga permisos para las APIs requeridas
 
 ### 7. Costos
-Revisa la [documentación de precios de Google Maps](https://developers.google.com/maps/documentation/places/web-service/usage-and-billing) para Places API.
 
-### 8. Troubleshooting
-
-#### La API no funciona
-- Verifica que la API key esté correctamente configurada
-- Asegúrate de que Places API esté habilitada
-- Revisa las restricciones de dominio
-- Verifica que el proyecto tenga facturación habilitada
-
-#### No aparecen sugerencias
-- Verifica la configuración de países soportados
-- Revisa la consola del navegador para errores
-- Asegúrate de que el input tenga al menos 3 caracteres
-
-## Implementación Técnica
-
-La funcionalidad está implementada directamente en:
-- `apps/dashboard/app/[locale]/settings/general/page.tsx`
-- También disponible en el onboarding de la tienda
-
-Las coordenadas se guardan en la estructura `location` del documento de la tienda en Firestore, manteniendo compatibilidad con el campo `address` existente. 
+Google Maps ofrece $200 USD de crédito gratuito mensual, lo cual generalmente cubre el uso de aplicaciones pequeñas a medianas. Para más información sobre precios, consulta [Google Maps Platform Pricing](https://developers.google.com/maps/pricing). 

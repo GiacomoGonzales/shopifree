@@ -142,7 +142,158 @@
       "title": "Shipping Configuration",
       "description": "Configure shipping options",
       "enableShipping": "Enable shipping module",
-      "comingSoon": "Coming soon"
+      
+             "modes": {
+         "title": "Shipping Types",
+         "storePickup": "Store pickup",
+         "localDelivery": "Local delivery",
+         "nationalShipping": "National shipping", 
+         "internationalShipping": "International shipping"
+       },
+      
+      "storePickup": {
+        "title": "Store Pickup",
+        "enable": "Enable store pickup",
+        "address": "Store address",
+        "addressPlaceholder": "123 Main St, City, Country",
+        "schedules": "Available pickup hours",
+        "addSchedule": "Add schedule",
+        "day": "Day",
+        "openTime": "Open time",
+        "closeTime": "Close time",
+        "preparationTime": "Estimated preparation time",
+        "preparationTimePlaceholder": "2-4 hours",
+        "days": {
+          "monday": "Monday",
+          "tuesday": "Tuesday", 
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday",
+          "sunday": "Sunday"
+        }
+      },
+      
+      "localDelivery": {
+        "title": "Local Delivery",
+        "subtitle": "Home delivery with custom zones",
+        "enable": "Enable delivery zone map",
+        "zones": "Delivery zones",
+        "addZone": "Add delivery zone",
+        "zoneName": "Zone name",
+        "zoneNamePlaceholder": "Downtown",
+        "deliveryPrice": "Delivery price",
+        "estimatedTime": "Estimated delivery time",
+        "estimatedTimePlaceholder": "30-60 minutes",
+        "allowGPS": "Allow customer GPS",
+        "noCoverageMessage": "Message for uncovered areas",
+        "noCoverageMessagePlaceholder": "Sorry, we don't deliver to your area",
+        "zoneType": {
+          "polygon": "Draw zone (polygon)",
+          "radius": "Circular zone (radius)"
+        },
+        "radius": "Radius (km)",
+        "mapInstructions": "Use the interactive map to define delivery zones"
+      },
+      
+      "nationalShipping": {
+        "title": "National Shipping",
+        "subtitle": "Within the country",
+        "enable": "Enable national shipping",
+        "type": "Pricing type",
+        "types": {
+          "fixed": "Fixed price",
+          "by_region": "By city or region", 
+          "by_weight": "By weight"
+        },
+        "fixedPrice": "National fixed price",
+        "regions": "Regions",
+        "addRegion": "Add region",
+        "regionName": "Region name",
+        "regionNamePlaceholder": "New York, California, Texas",
+        "regionPrice": "Price per region",
+        "weightRanges": "Weight ranges",
+        "addWeightRange": "Add weight range",
+        "minWeight": "Minimum weight (kg)",
+        "maxWeight": "Maximum weight (kg)",
+        "price": "Price",
+        "carrier": {
+          "title": "Shipping carrier",
+          "name": "Shipping company",
+          "nameOptions": {
+            "fedex": "FedEx",
+            "ups": "UPS",
+            "usps": "USPS",
+            "custom": "Other"
+          },
+          "trackingEnabled": "Allow order tracking?",
+          "trackingUrl": "Tracking URL"
+        },
+        "automaticRates": {
+          "title": "Automatic rates",
+          "enabled": "Do you use automatic rates from an API?",
+          "apiKey": "API Key"
+        }
+      },
+      
+      "internationalShipping": {
+        "title": "International Shipping",
+        "enable": "Enable international shipping",
+        "countries": "Destination countries",
+        "countriesPlaceholder": "Select countries...",
+        "basePrice": "International base price",
+        "weightRate": "Rate per weight (per kg)",
+        "volumeRate": "Rate per volume (per cm³)",
+        "customMessage": "Custom message for international customers",
+        "customMessagePlaceholder": "International shipments may take 7-15 days...",
+        "customsInfo": {
+          "title": "Customs information",
+          "restrictedCategories": "Restricted categories",
+          "additionalInfo": "Additional information"
+        }
+      },
+      
+      "general": {
+        "title": "Additional Shipping Rules",
+        "freeShipping": {
+          "title": "Free shipping",
+          "enabled": "Enable free shipping",
+          "minimumAmount": "If order exceeds",
+          "minimumAmountSuffix": "dollars",
+          "applicableProducts": "For products marked as 'free shipping'"
+        },
+        "preparationTime": "Order preparation time",
+        "preparationTimePlaceholder": "1-2 business days",
+        "notifications": {
+          "title": "Automatic customer notification",
+          "email": "By email",
+          "whatsapp": "By WhatsApp"
+        }
+      },
+      
+      "display": {
+        "title": "Customer Information",
+        "subtitle": "Visible in public store",
+        "showEstimatedTimes": "Show estimated delivery times by zone",
+        "showPricesInCheckout": "Show shipping prices in checkout", 
+        "policyText": "Shipping policy text",
+        "policyTextPlaceholder": "Free shipping on orders over $150...",
+        "policyUrl": "Or link to policy page"
+      },
+      
+      
+      
+      "actions": {
+        "save": "Save configuration",
+        "saving": "Saving...",
+        "saved": "Configuration saved",
+        "error": "Error saving",
+        "addZone": "Add zone",
+        "editZone": "Edit zone",
+        "deleteZone": "Delete zone",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      }
     },
     "seo": {
       "title": "SEO Configuration",

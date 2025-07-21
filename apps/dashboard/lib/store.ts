@@ -74,11 +74,102 @@ export interface StoreConfig {
     }
     shipping?: {
       enabled?: boolean
-      type?: 'free' | 'fixed' | 'minimum'
-      cost?: number
-      minimumOrderAmount?: number
-      checkoutText?: string
-      estimatedTime?: string
+      // Tipos de envío disponibles
+      modes?: {
+        storePickup?: boolean
+        localDelivery?: boolean
+        nationalShipping?: boolean
+        internationalShipping?: boolean
+      }
+      
+      // Configuración recojo en tienda
+      storePickup?: {
+        enabled?: boolean
+        address?: string
+        schedules?: Array<{
+          day: string
+          openTime: string
+          closeTime: string
+        }>
+        preparationTime?: string
+      }
+      
+      // Configuración envío local
+      localDelivery?: {
+        enabled?: boolean
+        zones?: Array<{
+          id: string
+          name: string
+          type: 'polygon' | 'radius'
+          coordinates?: Array<{ lat: number; lng: number }>
+          center?: { lat: number; lng: number }
+          radius?: number
+          price: number
+          estimatedTime?: string
+        }>
+        allowGPS?: boolean
+        noCoverageMessage?: string
+      }
+      
+      // Configuración envío nacional
+      nationalShipping?: {
+        enabled?: boolean
+        type?: 'fixed' | 'by_weight' | 'by_region'
+        fixedPrice?: number
+        regions?: Array<{
+          name: string
+          price: number
+          estimatedTime?: string
+        }>
+        weightRanges?: Array<{
+          minWeight: number
+          maxWeight: number
+          price: number
+        }>
+        carrier?: {
+          name?: string
+          trackingEnabled?: boolean
+          trackingUrl?: string
+        }
+        automaticRates?: {
+          enabled?: boolean
+          apiKey?: string
+        }
+      }
+      
+      // Configuración envío internacional
+      internationalShipping?: {
+        enabled?: boolean
+        countries?: string[]
+        basePrice?: number
+        weightRate?: number
+        volumeRate?: number
+        customMessage?: string
+        customsInfo?: {
+          restrictedCategories?: string[]
+          additionalInfo?: string
+        }
+      }
+      
+      // Reglas generales
+      freeShipping?: {
+        enabled?: boolean
+        minimumAmount?: number
+        applicableProducts?: string[]
+      }
+      preparationTime?: string
+      notifications?: {
+        email?: boolean
+        whatsapp?: boolean
+      }
+      
+      // Información para el cliente
+      displayInfo?: {
+        showEstimatedTimes?: boolean
+        showPricesInCheckout?: boolean
+        policyText?: string
+        policyUrl?: string
+      }
     }
     notifications?: {
       email?: boolean
