@@ -36,6 +36,15 @@ export interface Tienda {
     shipping?: {
       enabled?: boolean
       cost?: number
+      modes?: {
+        storePickup?: boolean
+        localDelivery?: boolean
+        nationalShipping?: boolean
+        internationalShipping?: boolean
+      }
+      localDelivery?: {
+        enabled?: boolean
+      }
     }
   }
   socialMedia?: {

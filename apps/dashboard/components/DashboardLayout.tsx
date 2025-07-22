@@ -99,6 +99,11 @@ const MenuIcons = {
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
     </svg>
+  ),
+  Shipping: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </svg>
   )
 }
 
@@ -202,6 +207,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const settingsSubrouteToTranslationKey: Record<string, string> = {
       'general': 'basicSettings',
       'basic': 'basicSettings', // Backward compatibility
+      'shipping': 'shippingSettings',
       'advanced': 'advancedSettings'
     }
 
@@ -276,6 +282,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         key: 'basicSettings', 
         href: `/${currentLocale}/settings/general`, 
         label: t('basicSettings') || (currentLocale === 'es' ? 'General' : 'General')
+      },
+      { 
+        key: 'shippingSettings', 
+        href: `/${currentLocale}/settings/shipping`, 
+        label: t('shippingSettings') || (currentLocale === 'es' ? 'Envíos' : 'Shipping')
       },
       { 
         key: 'advancedSettings', 

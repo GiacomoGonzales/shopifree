@@ -50,6 +50,15 @@ export interface StoreDataServer {
     shipping?: {
       enabled?: boolean
       cost?: number
+      modes?: {
+        storePickup?: boolean
+        localDelivery?: boolean
+        nationalShipping?: boolean
+        internationalShipping?: boolean
+      }
+      localDelivery?: {
+        enabled?: boolean
+      }
     }
   }
   createdAt?: Timestamp | Date | string
@@ -105,6 +114,15 @@ export interface StoreDataClient {
     shipping?: {
       enabled?: boolean
       cost?: number
+      modes?: {
+        storePickup?: boolean
+        localDelivery?: boolean
+        nationalShipping?: boolean
+        internationalShipping?: boolean
+      }
+      localDelivery?: {
+        enabled?: boolean
+      }
     }
   }
   createdAt?: string // ISO string

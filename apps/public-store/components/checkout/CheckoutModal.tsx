@@ -83,6 +83,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
   const [addressCoordinates, setAddressCoordinates] = useState<{ lat: number; lng: number } | undefined>()
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
   
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
@@ -237,6 +238,91 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }
   }
 
+  // Función para usar geolocalización
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Tu navegador no soporta geolocalización')
+      return
+    }
+
+    setIsGettingLocation(true)
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords
+          console.log('Got location:', { latitude, longitude })
+          
+          // Guardar coordenadas
+          setAddressCoordinates({ lat: latitude, lng: longitude })
+          
+          // Convertir coordenadas a dirección usando Google Geocoder
+          if (window.google && window.google.maps) {
+            const geocoder = new google.maps.Geocoder()
+            
+            geocoder.geocode(
+              { location: { lat: latitude, lng: longitude } },
+              (results, status) => {
+                if (status === 'OK' && results?.[0]) {
+                  const address = results[0].formatted_address
+                  console.log('Geocoded address:', address)
+                  
+                  // Actualizar campo de dirección
+                  setCustomerData(prev => ({ ...prev, address }))
+                  
+                  // Marcar como autocompletado para cálculo inmediato
+                  shippingCalculator.onManualInput() // Reset flag
+                  // Trigger immediate calculation with the new coordinates
+                  setTimeout(() => {
+                    if (shippingCalculator.calculateShipping) {
+                      shippingCalculator.calculateShipping(address, { lat: latitude, lng: longitude })
+                    }
+                  }, 100)
+                } else {
+                  console.error('Geocoding failed:', status)
+                  alert('No pudimos obtener la dirección de tu ubicación. Por favor escribe tu dirección manualmente.')
+                }
+                setIsGettingLocation(false)
+              }
+            )
+          } else {
+            console.error('Google Maps not loaded')
+            alert('Google Maps no está disponible. Por favor escribe tu dirección manualmente.')
+            setIsGettingLocation(false)
+          }
+        } catch (error) {
+          console.error('Error processing location:', error)
+          alert('Error al procesar tu ubicación. Por favor escribe tu dirección manualmente.')
+          setIsGettingLocation(false)
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error)
+        let message = 'No pudimos obtener tu ubicación. Por favor escribe tu dirección manualmente.'
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Permiso de ubicación denegado. Por favor escribe tu dirección manualmente.'
+            break
+          case error.POSITION_UNAVAILABLE:
+            message = 'Tu ubicación no está disponible. Por favor escribe tu dirección manualmente.'
+            break
+          case error.TIMEOUT:
+            message = 'Tiempo de espera agotado. Por favor escribe tu dirección manualmente.'
+            break
+        }
+        
+        alert(message)
+        setIsGettingLocation(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutos
+      }
+    )
+  }
+
   const generateWhatsAppMessage = () => {
     const currencySymbol = getCurrencySymbol(store?.currency || 'USD')
     
@@ -380,7 +466,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       type="text"
                       value={customerData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                       placeholder="Tu nombre completo"
                       required
                     />
@@ -399,7 +485,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         type="tel"
                         value={customerData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                         placeholder="+51 999 999 999"
                         required
                       />
@@ -419,7 +505,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         type="email"
                         value={customerData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                         placeholder="tu@email.com"
                       />
                     </div>
@@ -441,7 +527,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           value={customerData.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
                           onBlur={shippingCalculator.onAddressBlur}
-                          className="flex-1 px-3 py-2 pr-10 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                          className="flex-1 px-3 py-2 pr-10 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                           placeholder={isGoogleMapsLoaded ? "Empieza a escribir tu dirección..." : "Av. Principal 123"}
                           required
                         />
@@ -471,6 +557,32 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         </p>
                       )}
                     </div>
+                    
+                    {/* Botón de geolocalización (siempre disponible) */}
+                    {isGoogleMapsLoaded && (
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={handleUseMyLocation}
+                          disabled={isGettingLocation}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isGettingLocation ? (
+                            <>
+                              <svg className="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Obteniendo ubicación...
+                            </>
+                          ) : (
+                            <>
+                              📍 Usar mi ubicación actual
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
 
 
@@ -484,7 +596,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       type="text"
                       value={customerData.reference}
                       onChange={(e) => handleInputChange('reference', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                       placeholder="Frente al parque, casa blanca"
                     />
                   </div>
@@ -502,7 +614,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         value={customerData.notes}
                         onChange={(e) => handleInputChange('notes', e.target.value)}
                         rows={3}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
                         placeholder="Instrucciones especiales para la entrega..."
                       />
                     </div>
@@ -606,11 +718,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           </span>
                         </div>
                       ) : shippingCalculator.error ? (
-                        <div className="text-orange-600 flex items-center space-x-1">
+                        <div className="text-blue-600 flex items-center space-x-1">
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                           </svg>
-                          <span>{shippingCalculator.error}</span>
+                          <span>Estás fuera de la zona de cobertura, pero aún así puedes continuar con el pedido y coordinar la entrega vía WhatsApp</span>
                         </div>
                       ) : customerData.address.length >= 5 ? (
                         <div className="text-gray-500 flex items-center space-x-1">

@@ -45,12 +45,12 @@ En Google Cloud Console, configura restricciones para tu API Key:
 
 Con esta configuración, el mapa de zonas de entrega te permitirá:
 
-- ✅ Dibujar polígonos personalizados para zonas de entrega
-- ✅ Crear zonas circulares con radio específico
-- ✅ Configurar precios y tiempos de entrega por zona
-- ✅ Guardar zonas en Firestore automáticamente
-- ✅ Visualizar todas las zonas existentes en el mapa
-- ✅ Eliminar zonas directamente desde el mapa
+- ✅ **Dibujar directamente en el mapa**: Usar herramientas de dibujo para crear polígonos y círculos
+- ✅ **Configuración completa por zona**: Nombre, precio y tiempo estimado de entrega  
+- ✅ **Persistencia automática**: Guardar zonas en Firestore inmediatamente
+- ✅ **Visualización en tiempo real**: Ver todas las zonas existentes en el mapa
+- ✅ **Gestión desde el mapa**: Eliminar zonas haciendo clic directamente en ellas
+- ✅ **Mensaje personalizable**: Configurar mensaje para direcciones fuera de cobertura
 
 ### 5. Estructura en Firestore
 

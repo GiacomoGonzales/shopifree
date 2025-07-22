@@ -9,6 +9,13 @@ Este documento explica cómo funciona el sistema de cálculo automático de env�
 - **Verificación de zonas**: Compara la ubicación del cliente con las zonas de entrega configuradas en el dashboard
 - **Cálculo en tiempo real**: Actualiza automáticamente el costo de envío cuando el cliente ingresa su dirección
 
+### ✅ Geolocalización del Cliente (Nuevo)
+- **Botón "📍 Usar mi ubicación actual"**: Permite obtener la ubicación GPS del dispositivo
+- **Conversión automática**: Convierte coordenadas GPS a dirección usando Google Geocoding API
+- **Cálculo inmediato**: Ejecuta verificación de zona automáticamente al obtener la ubicación
+- **Configuración por tienda**: Solo aparece si `allowGPS` está activado en configuración avanzada
+- **Manejo de errores**: Mensajes específicos para diferentes tipos de errores de geolocalización
+
 ### ✅ Algoritmos de Verificación
 - **Polígonos**: Usa el algoritmo Ray Casting para verificar si un punto está dentro de un polígono
 - **Círculos**: Calcula la distancia usando la fórmula de Haversine y compara con el radio
@@ -37,20 +44,70 @@ Hook React para manejar el cálculo de envío:
 ### `components/checkout/CheckoutModal.tsx`
 Componente de checkout actualizado:
 - Integración con Google Maps autocompletado
+- **Botón de geolocalización**: Función `handleUseMyLocation()`
+- **Conversión GPS a dirección**: Usando `google.maps.Geocoder`
 - Cálculo automático de envío
 - UI mejorada con información de zona
 
+## Formas de Ingresar Dirección
+
+### 1. 📝 Campo de Autocompletado (Google Places)
+```
+┌─ Dirección * ──────────────────────────────────────┐
+│ 🗺️ [Empieza a escribir tu dirección...]           │
+│ ▼ Av. Javier Prado Este 123, San Isidro, Lima     │
+│ ▼ Av. Javier Prado Este 456, Surco, Lima          │
+└────────────────────────────────────────────────────┘
+✓ Autocompletado de direcciones habilitado
+```
+- **Comportamiento**: Cálculo inmediato al seleccionar
+- **Coordenadas**: Automáticas desde Google Places
+- **Precisión**: Alta (coordenadas exactas)
+
+### 2. 📍 Botón "Usar mi ubicación actual"
+```
+┌────────────────────────────────────────────────────┐
+│              📍 Usar mi ubicación actual           │
+└────────────────────────────────────────────────────┘
+```
+- **Disponible**: Siempre (cuando Google Maps está cargado)
+- **Proceso**: GPS → Coordenadas → Geocoding reverso → Dirección
+- **Comportamiento**: Cálculo inmediato tras obtener dirección
+- **Precisión**: Muy alta (GPS del dispositivo)
+
+### 3. ⌨️ Escritura Manual
+```
+┌─ Dirección * ──────────────────────────────────────┐
+│ 🗺️ [Av. Lima 123...]                              │
+└────────────────────────────────────────────────────┘
+```
+- **Comportamiento**: Cálculo onBlur (al quitar foco)
+- **Coordenadas**: Via geocoding de la dirección escrita
+- **Precisión**: Variable (depende de la exactitud del texto)
+
 ## Flujo de Funcionamiento
 
-1. **Cliente ingresa dirección**: Usa autocompletado de Google Maps
-2. **Detección de tipo de entrada**: Distingue entre escribir manualmente vs seleccionar del autocompletado
-3. **Cálculo onBlur para escritura manual**: Solo calcula cuando pierde el foco del campo (onBlur)
-4. **Cálculo inmediato para autocompletado**: Cuando se selecciona del menú, calcula inmediatamente
-5. **Obtención de coordenadas**: Se extraen lat/lng automáticamente o vía geocoding
-6. **Verificación de zonas**: Se consultan las zonas configuradas en Firestore
-7. **Cálculo de envío**: Se ejecutan algoritmos de verificación geoespacial
-8. **Actualización de UI**: Se muestra costo, zona y tiempo estimado
-9. **Total final**: Se suma envío al subtotal automáticamente
+### Flujo con Autocompletado
+1. **Cliente escribe dirección**: Aparecen sugerencias de Google Places
+2. **Selecciona opción**: Se obtienen coordenadas automáticamente
+3. **Cálculo inmediato**: Se verifican zonas y muestra costo
+4. **Total actualizado**: Incluye envío automáticamente
+
+### Flujo con Geolocalización (Nuevo)
+1. **Cliente presiona botón GPS**: "📍 Usar mi ubicación actual"
+2. **Solicitud de permiso**: Navigator pide autorización
+3. **Obtención de coordenadas**: GPS del dispositivo
+4. **Geocoding reverso**: Coordenadas → Dirección legible
+5. **Rellenado automático**: Campo de dirección se completa
+6. **Cálculo inmediato**: Se verifica zona y muestra costo
+7. **Total actualizado**: Incluye envío automáticamente
+
+### Flujo Manual
+1. **Cliente escribe dirección**: Texto libre
+2. **Pierde foco del campo**: Evento onBlur se activa
+3. **Geocoding**: Dirección → Coordenadas (si es posible)
+4. **Verificación de zonas**: Se comparan coordenadas
+5. **Actualización de UI**: Se muestra resultado
 
 ## Configuración Requerida
 
@@ -68,8 +125,11 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu_proyecto_id
 
 ### APIs Requeridas en Google Cloud
 - **Maps JavaScript API**: Para autocompletado de direcciones
-- **Geocoding API**: Para convertir direcciones a coordenadas
+- **Geocoding API**: Para convertir direcciones a coordenadas y viceversa
 - **Places API**: Para autocompletado mejorado
+
+### Configuración en Dashboard
+El botón de geolocalización aparece automáticamente cuando Google Maps está cargado. No requiere configuración adicional en el dashboard.
 
 ## Estados de Envío
 
@@ -80,9 +140,9 @@ Envío: S/ 10.00
 Total: S/ 119.00 (Subtotal: S/ 109.00 + Envío: S/ 10.00)
 ```
 
-### ⚠️ Fuera de Zona de Cobertura
+### ℹ️ Fuera de Zona de Cobertura
 ```
-⚠ Esta dirección está fuera de nuestras zonas de entrega
+ℹ️ Estás fuera de la zona de cobertura, pero aún así puedes continuar con el pedido y coordinar la entrega vía WhatsApp
 Envío: A coordinar
 Total: S/ 109.00
 ```
@@ -92,10 +152,23 @@ Total: S/ 109.00
 Envío: Calculando... [spinner]
 ```
 
-### 💭 Escribiendo (Nuevo)
+### 📍 Obteniendo Ubicación (Nuevo)
+```
+Botón: [🔄] Obteniendo ubicación...
+```
+
+### 💭 Escribiendo
 ```
 ℹ️ Selecciona del autocompletado o termina de escribir tu dirección
 Envío: A coordinar
+```
+
+### ❌ Errores de Geolocalización (Nuevos)
+```
+❌ Permiso denegado: "Permiso de ubicación denegado. Por favor escribe tu dirección manualmente."
+❌ Ubicación no disponible: "Tu ubicación no está disponible. Por favor escribe tu dirección manualmente."
+❌ Timeout: "Tiempo de espera agotado. Por favor escribe tu dirección manualmente."
+❌ Google Maps no disponible: "Google Maps no está disponible. Por favor escribe tu dirección manualmente."
 ```
 
 ### ❌ Error de Geocoding
@@ -104,15 +177,9 @@ No se pudo encontrar la ubicación de la dirección proporcionada
 Envío: A coordinar
 ```
 
-### ❌ Error de Cobertura (Autocompletado)
+### ℹ️ Fuera de Cobertura (Mensaje Positivo)
 ```
-Esta dirección está fuera de nuestras zonas de entrega
-Envío: A coordinar
-```
-
-### ❌ Error de Cobertura (Manual)
-```
-No encontramos esta dirección en nuestras zonas de cobertura
+Estás fuera de la zona de cobertura, pero aún así puedes continuar con el pedido y coordinar la entrega vía WhatsApp
 Envío: A coordinar
 ```
 
@@ -137,6 +204,7 @@ stores/{storeId}/deliveryZones/{zoneId}
 
 #### **Inmediatamente:**
 - Al seleccionar una dirección del autocompletado de Google Maps
+- **Al usar geolocalización**: Después de obtener coordenadas GPS y convertir a dirección
 - El usuario obtiene coordenadas exactas → cálculo instantáneo
 
 #### **Al finalizar escritura:**
@@ -149,18 +217,82 @@ stores/{storeId}/deliveryZones/{zoneId}
 - Con direcciones muy cortas (< 10 caracteres)
 - Sin mensajes de error que cambien constantemente
 
+## Funcionalidad de Geolocalización
+
+### 🌍 Configuración del GPS
+```javascript
+navigator.geolocation.getCurrentPosition(
+  // Success callback
+  // Error callback
+  {
+    enableHighAccuracy: true,  // GPS de alta precisión
+    timeout: 10000,           // 10 segundos máximo
+    maximumAge: 300000        // Cache por 5 minutos
+  }
+)
+```
+
+### 🔄 Proceso de Conversión
+1. **GPS**: `{ latitude: -12.0464, longitude: -77.0428 }`
+2. **Geocoder**: `new google.maps.Geocoder()`
+3. **Reverse Geocoding**: Coordenadas → Dirección
+4. **Resultado**: `"Av. Javier Prado Este 123, San Isidro, Lima, Perú"`
+
+### ⚙️ Ventajas de la Geolocalización
+- **Precisión máxima**: Coordenadas exactas del GPS
+- **Experiencia rápida**: Un clic y listo
+- **Menos errores**: No depende de que el usuario escriba correctamente
+- **Accesibilidad**: Ideal para usuarios en móviles
+
+### 🔒 Consideraciones de Privacidad
+- **Permiso explícito**: El usuario debe autorizar el acceso
+- **Uso temporal**: Solo durante el checkout
+- **No almacenamiento**: No se guarda la ubicación GPS (solo la dirección final)
+- **Fallback disponible**: Siempre pueden escribir manualmente
+
 ## Beneficios
 
 ### Para los Clientes
 - **Transparencia**: Conocen el costo exacto antes de confirmar
 - **Rapidez**: No necesitan esperar confirmación del comerciante
 - **Precisión**: Verificación automática de cobertura
+- **Conveniencia**: Opción de GPS para móviles
 - **UX sin distracciones**: Pueden escribir libremente sin mensajes cambiantes
+- **Interfaz suave**: Focus neutro y no agresivo en los campos del formulario
 
 ### Para los Comerciantes
 - **Automatización**: Menos coordinación manual de envíos
 - **Eficiencia**: Pedidos más completos desde el inicio
 - **Control**: Zonas configuradas exactamente según su capacidad
+- **Datos precisos**: Direcciones más exactas con GPS
+
+## Estilos de Interfaz
+
+### 🎨 Focus States Suaves
+Todos los campos del formulario utilizan un estilo de focus suave y neutral:
+
+```css
+/* Estilo anterior (agresivo) */
+focus:ring-2 focus:ring-gray-900 focus:border-gray-900
+
+/* Estilo actual (suave) */
+focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400
+```
+
+**Características:**
+- **Ring más delgado**: `ring-1` en lugar de `ring-2`
+- **Color neutro**: `gray-400` en lugar de `gray-900`
+- **Menos contraste**: Más suave para los ojos
+- **Outline eliminado**: `outline-none` para control total del estilo
+
+**Campos afectados:**
+- ✅ Nombre completo
+- ✅ Teléfono  
+- ✅ Email
+- ✅ Dirección
+- ✅ Referencia
+- ✅ Notas adicionales
+- ✅ Botón de geolocalización
 
 ## Troubleshooting
 

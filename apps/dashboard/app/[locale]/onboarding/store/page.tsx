@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import AuthGuard from '../../../../components/AuthGuard'
 import { uploadImageToCloudinary, validateImageFile } from '../../../../lib/cloudinary'
 import { brandColors } from '@shopifree/ui'
+import { googleMapsLoader } from '../../../../lib/google-maps'
 
 interface StoreFormData {
   storeName: string
@@ -214,46 +215,17 @@ function StoreOnboardingContent() {
     }
   }, [formData.subdomain, currentStep, validateSubdomain])
 
-  // Cargar Google Maps API
+  // Cargar Google Maps API usando el loader centralizado
   useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      // Verificar si el script ya está cargado
-      if (window.google && window.google.maps && window.google.maps.places) {
-        setIsGoogleMapsLoaded(true)
-        return
-      }
-
-      // Verificar si el script ya existe en el DOM
-      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-        // Esperar a que se cargue
-        const checkLoaded = setInterval(() => {
-          if (window.google && window.google.maps && window.google.maps.places) {
-            setIsGoogleMapsLoaded(true)
-            clearInterval(checkLoaded)
-          }
-        }, 100)
-        return
-      }
-
-      // Crear y añadir el script
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_MAPS_API_KEY || ''}&libraries=places&language=es`
-      script.async = true
-      script.defer = true
-      
-      script.onload = () => {
-        setIsGoogleMapsLoaded(true)
-      }
-      
-      script.onerror = () => {
-        console.error('Error loading Google Maps API')
-      }
-      
-      document.head.appendChild(script)
-    }
-
     if (formData.hasPhysicalLocation && currentStep === 2) {
-      loadGoogleMapsScript()
+      googleMapsLoader.load()
+        .then(() => {
+          console.log('Google Maps loaded for StoreOnboarding')
+          setIsGoogleMapsLoaded(true)
+        })
+        .catch((error: Error) => {
+          console.error('Error loading Google Maps:', error)
+        })
     }
   }, [formData.hasPhysicalLocation, currentStep])
 

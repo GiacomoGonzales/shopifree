@@ -74,9 +74,113 @@
     outline: 2px solid rgb(var(--dashboard-primary)) !important;
     outline-offset: 2px !important;
   }
+
+  /* Estilos específicos para checkboxes - colores neutros sin focus */
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgb(var(--dashboard-neutral-300));
+    border-radius: 0.25rem;
+    background-color: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+  }
+
+  input[type="checkbox"]:hover {
+    border-color: rgb(var(--dashboard-neutral-400));
+  }
+
+  input[type="checkbox"]:checked {
+    background-color: rgb(var(--dashboard-neutral-800));
+    border-color: rgb(var(--dashboard-neutral-800));
+  }
+
+  input[type="checkbox"]:checked::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+  }
+
+  /* Eliminar focus outline específicamente para checkboxes */
+  input[type="checkbox"]:focus,
+  input[type="checkbox"]:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Estado disabled para checkboxes */
+  input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  input[type="checkbox"]:disabled:hover {
+    border-color: rgb(var(--dashboard-neutral-300));
+  }
 }
 
 @layer components {
+  /* Checkbox personalizado para el dashboard */
+  .checkbox-dashboard {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgb(var(--dashboard-neutral-300));
+    border-radius: 0.25rem;
+    background-color: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .checkbox-dashboard:hover {
+    border-color: rgb(var(--dashboard-neutral-400));
+  }
+
+  .checkbox-dashboard:checked {
+    background-color: rgb(var(--dashboard-neutral-800));
+    border-color: rgb(var(--dashboard-neutral-800));
+  }
+
+  .checkbox-dashboard:checked::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+  }
+
+  .checkbox-dashboard:focus,
+  .checkbox-dashboard:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .checkbox-dashboard:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .checkbox-dashboard:disabled:hover {
+    border-color: rgb(var(--dashboard-neutral-300));
+  }
+
   /* Botones del dashboard con tema */
   .btn-dashboard-primary {
     @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;

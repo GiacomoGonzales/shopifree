@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { StoreWithId } from '../../lib/store'
-import ShippingConfiguration from './ShippingConfiguration'
 
 interface AdvancedSettingsProps {
   store?: StoreWithId | null
@@ -18,37 +17,15 @@ export default function AdvancedSettings({ store, onUpdate, saving }: AdvancedSe
   const [activeSubTab, setActiveSubTab] = useState('checkout')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState<'es' | 'en'>('es')
-  const [shippingData, setShippingData] = useState<any>(null)
 
-  // Función para limpiar valores undefined de un objeto
-  const cleanUndefinedValues = (obj: any): any => {
-    if (obj === null || obj === undefined) return null
-    if (typeof obj !== 'object') return obj
-    if (Array.isArray(obj)) return obj.map(cleanUndefinedValues)
-    
-    const cleaned: any = {}
-    Object.keys(obj).forEach(key => {
-      const value = obj[key]
-      if (value !== undefined) {
-        cleaned[key] = cleanUndefinedValues(value)
-      }
-    })
-    return cleaned
-  }
+
 
   const handleSave = async () => {
-    console.log('Saving shipping data:', shippingData)
-    
-    // Limpiar datos de shipping antes de guardar
-    const cleanedShippingData = shippingData ? cleanUndefinedValues(shippingData) : null
-    console.log('Cleaned shipping data:', cleanedShippingData)
-    
     const success = await onUpdate({
       advanced: {
         ...store?.advanced,
         checkout: { method: 'whatsapp' },
-        language: selectedLanguage,
-        ...(cleanedShippingData && { shipping: cleanedShippingData })
+        language: selectedLanguage
       }
     })
     
@@ -61,7 +38,7 @@ export default function AdvancedSettings({ store, onUpdate, saving }: AdvancedSe
     }
   }
 
-  const subTabs = ['checkout', 'payments', 'shipping', 'seo']
+  const subTabs = ['checkout', 'payments', 'seo']
 
   const renderContent = () => {
     switch (activeSubTab) {
@@ -147,17 +124,7 @@ export default function AdvancedSettings({ store, onUpdate, saving }: AdvancedSe
             </div>
           </div>
         )
-      case 'shipping':
-        return (
-          <div className="space-y-6">
-            <ShippingConfiguration
-              store={store}
-              onUpdate={onUpdate}
-              saving={saving}
-              onShippingDataChange={setShippingData}
-            />
-          </div>
-        )
+
       case 'seo':
         return (
           <div className="bg-white shadow rounded-lg p-6">

@@ -35,6 +35,7 @@ import { useAuth } from '../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../lib/store'
 import DashboardLayout from '../../../../components/DashboardLayout'
 import { validateImageFile, replaceImageInCloudinary, deleteImageFromCloudinary } from '../../../../lib/cloudinary'
+import { googleMapsLoader } from '../../../../lib/google-maps'
 
 const sections = [
   { id: 'info', key: 'info' },
@@ -237,46 +238,17 @@ export default function GeneralSettingsPage() {
     loadStore()
   }, [user?.uid])
 
-  // Cargar Google Maps API
+  // Cargar Google Maps API usando el loader centralizado
   useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      // Verificar si el script ya está cargado
-      if (window.google && window.google.maps && window.google.maps.places) {
-        setIsGoogleMapsLoaded(true)
-        return
-      }
-
-      // Verificar si el script ya existe en el DOM
-      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-        // Esperar a que se cargue
-        const checkLoaded = setInterval(() => {
-          if (window.google && window.google.maps && window.google.maps.places) {
-            setIsGoogleMapsLoaded(true)
-            clearInterval(checkLoaded)
-          }
-        }, 100)
-        return
-      }
-
-      // Crear y añadir el script
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_MAPS_API_KEY || ''}&libraries=places&language=es`
-      script.async = true
-      script.defer = true
-      
-      script.onload = () => {
-        setIsGoogleMapsLoaded(true)
-      }
-      
-      script.onerror = () => {
-        console.error('Error loading Google Maps API')
-      }
-      
-      document.head.appendChild(script)
-    }
-
     if (formData.hasPhysicalLocation) {
-      loadGoogleMapsScript()
+      googleMapsLoader.load()
+        .then(() => {
+          console.log('Google Maps loaded for GeneralSettings')
+          setIsGoogleMapsLoaded(true)
+        })
+        .catch((error: Error) => {
+          console.error('Error loading Google Maps:', error)
+        })
     }
   }, [formData.hasPhysicalLocation])
 
@@ -751,7 +723,7 @@ export default function GeneralSettingsPage() {
               type="checkbox"
               checked={formData.hasPhysicalLocation}
               onChange={(e) => handleChange('hasPhysicalLocation', e.target.checked)}
-              className="h-4 w-4 text-gray-800 focus:ring-gray-600 border-gray-300 rounded"
+              className="checkbox-dashboard"
             />
             <label className="ml-3 block text-sm font-medium text-gray-700">
               {t('contact.hasPhysicalLocation')}

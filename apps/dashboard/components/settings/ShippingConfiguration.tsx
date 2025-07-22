@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { StoreWithId } from '../../lib/store'
+import { useAuth } from '../../lib/simple-auth-context'
 import DeliveryZoneMap from './DeliveryZoneMap'
 
 interface ShippingData {
@@ -35,8 +36,8 @@ interface ShippingData {
       price: number
       estimatedTime?: string
     }>
-    allowGPS: boolean
-    noCoverageMessage: string
+    allowGPS?: boolean
+    noCoverageMessage?: string
   }
   nationalShipping: {
     enabled: boolean
@@ -100,6 +101,7 @@ interface ShippingConfigurationProps {
 }
 
 export default function ShippingConfiguration({ store, onUpdate, saving, onShippingDataChange }: ShippingConfigurationProps) {
+  const { user } = useAuth()
   const t = useTranslations('settings.advanced.shipping')
   const tActions = useTranslations('settings.actions')
   
@@ -119,9 +121,7 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
     },
     localDelivery: {
       enabled: true, // Siempre habilitado cuando se selecciona el modo
-      zones: [],
-      allowGPS: true,
-      noCoverageMessage: ''
+      zones: []
     },
     nationalShipping: {
       enabled: true, // Siempre habilitado cuando se selecciona el modo
@@ -178,9 +178,7 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
         },
         localDelivery: {
           enabled: true,
-          zones: existingShipping.localDelivery?.zones || [],
-          allowGPS: existingShipping.localDelivery?.allowGPS !== undefined ? existingShipping.localDelivery.allowGPS : true,
-          noCoverageMessage: existingShipping.localDelivery?.noCoverageMessage || ''
+          zones: existingShipping.localDelivery?.zones || []
         },
         nationalShipping: {
           enabled: true,
@@ -274,34 +272,7 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
     }))
   }
 
-  const addZone = () => {
-    const newZone = {
-      id: Date.now().toString(),
-      name: '',
-      type: 'radius' as const,
-      center: { lat: -12.0464, lng: -77.0428 }, // Lima default
-      radius: 5,
-      price: 0
-    }
-    
-    setShippingData(prev => ({
-      ...prev,
-      localDelivery: {
-        ...prev.localDelivery,
-        zones: [...prev.localDelivery.zones, newZone]
-      }
-    }))
-  }
 
-  const removeZone = (zoneId: string) => {
-    setShippingData(prev => ({
-      ...prev,
-      localDelivery: {
-        ...prev.localDelivery,
-        zones: prev.localDelivery.zones.filter(zone => zone.id !== zoneId)
-      }
-    }))
-  }
 
   const addRegion = () => {
     setShippingData(prev => ({
@@ -379,10 +350,10 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
 
   // Componente para recojo en tienda
   const StorePickupSection = () => {
-    if (!shippingData.modes.storePickup) return null
+    const isEnabled = shippingData.modes.storePickup
 
     return (
-      <div className="space-y-6 border-t pt-6">
+      <div className={`space-y-6 border-t pt-6 ${!isEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-2">{t('storePickup.title')}</h4>
           
@@ -487,142 +458,20 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
 
   // Componente para envío local
   const LocalDeliverySection = () => {
-    if (!shippingData.modes.localDelivery) return null
+    const isEnabled = shippingData.modes.localDelivery
 
     return (
-      <div className="space-y-6 border-t pt-6">
+              <div className={`space-y-6 border-t pt-6 ${!isEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-2">{t('localDelivery.title')}</h4>
           <p className="text-sm text-gray-600 mb-4">{t('localDelivery.subtitle')}</p>
           
           <div className="space-y-4">
-            <DeliveryZoneMap />
+            <DeliveryZoneMap key={`delivery-zone-map-${user?.uid || 'anonymous'}`} />
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t('localDelivery.zones')}
-                </label>
-                <button
-                  type="button"
-                  onClick={addZone}
-                  className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
-                >
-                  {t('localDelivery.addZone')}
-                </button>
-              </div>
-              
-              <div className="space-y-3">
-                {shippingData.localDelivery.zones.map((zone, index) => (
-                  <div key={zone.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('localDelivery.zoneName')}
-                        </label>
-                        <input
-                          type="text"
-                          value={zone.name}
-                          onChange={(e) => {
-                            const newZones = [...shippingData.localDelivery.zones]
-                            newZones[index].name = e.target.value
-                            updateShippingData('localDelivery.zones', newZones)
-                          }}
-                          placeholder={t('localDelivery.zoneNamePlaceholder')}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('localDelivery.deliveryPrice')}
-                        </label>
-                        <input
-                          type="number"
-                          value={zone.price}
-                          onChange={(e) => {
-                            const newZones = [...shippingData.localDelivery.zones]
-                            newZones[index].price = Number(e.target.value)
-                            updateShippingData('localDelivery.zones', newZones)
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('localDelivery.estimatedTime')}
-                        </label>
-                        <input
-                          type="text"
-                          value={zone.estimatedTime || ''}
-                          onChange={(e) => {
-                            const newZones = [...shippingData.localDelivery.zones]
-                            newZones[index].estimatedTime = e.target.value
-                            updateShippingData('localDelivery.zones', newZones)
-                          }}
-                          placeholder={t('localDelivery.estimatedTimePlaceholder')}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                        />
-                      </div>
-                    </div>
-                    
-                    {zone.type === 'radius' && (
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('localDelivery.radius')}
-                        </label>
-                        <input
-                          type="number"
-                          value={zone.radius || 5}
-                          onChange={(e) => {
-                            const newZones = [...shippingData.localDelivery.zones]
-                            newZones[index].radius = Number(e.target.value)
-                            updateShippingData('localDelivery.zones', newZones)
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="mt-4 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => removeZone(zone.id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        {t('actions.deleteZone')}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={shippingData.localDelivery.allowGPS}
-                  onChange={(e) => updateShippingData('localDelivery.allowGPS', e.target.checked)}
-                  className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                />
-                <span className="ml-2 text-sm text-gray-700">{t('localDelivery.allowGPS')}</span>
-              </label>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('localDelivery.noCoverageMessage')}
-                </label>
-                <input
-                  type="text"
-                  value={shippingData.localDelivery.noCoverageMessage}
-                  onChange={(e) => updateShippingData('localDelivery.noCoverageMessage', e.target.value)}
-                  placeholder={t('localDelivery.noCoverageMessagePlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                />
-              </div>
-            </div>
+
+
           </div>
         </div>
       </div>
@@ -631,10 +480,10 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
 
   // Componente para envío nacional
   const NationalShippingSection = () => {
-    if (!shippingData.modes.nationalShipping) return null
+    const isEnabled = shippingData.modes.nationalShipping
 
     return (
-      <div className="space-y-6 border-t pt-6">
+      <div className={`space-y-6 border-t pt-6 ${!isEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-2">{t('nationalShipping.title')}</h4>
           <p className="text-sm text-gray-600 mb-4">{t('nationalShipping.subtitle')}</p>
@@ -873,10 +722,10 @@ export default function ShippingConfiguration({ store, onUpdate, saving, onShipp
 
   // Componente para envío internacional
   const InternationalShippingSection = () => {
-    if (!shippingData.modes.internationalShipping) return null
+    const isEnabled = shippingData.modes.internationalShipping
 
     return (
-      <div className="space-y-6 border-t pt-6">
+      <div className={`space-y-6 border-t pt-6 ${!isEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-2">{t('internationalShipping.title')}</h4>
           

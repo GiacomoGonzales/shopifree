@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore } from '../../lib/store'
@@ -21,6 +21,7 @@ import {
   getFirestore 
 } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
+import { googleMapsLoader } from '../../lib/google-maps'
 
 interface DeliveryZone {
   id: string
@@ -89,7 +90,11 @@ const drawingManagerOptions = {
   }
 }
 
-export default function DeliveryZoneMap() {
+interface DeliveryZoneMapProps {
+  isVisible?: boolean
+}
+
+export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapProps) {
   const { user } = useAuth()
   const t = useTranslations('settings.advanced.shipping.localDelivery')
   
@@ -108,6 +113,32 @@ export default function DeliveryZoneMap() {
   const [error, setError] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [userReady, setUserReady] = useState(false)
+  const [loadingStuck, setLoadingStuck] = useState(false)
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Efecto para detectar cuando el mapa se queda atascado en loading
+  useEffect(() => {
+    // Si el componente está visible y Google Maps ya está cargado pero isLoaded es false
+    if (isVisible && window.google?.maps && !isLoaded) {
+      // Iniciar temporizador
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.log('Map loading appears to be stuck, offering reload...')
+        setLoadingStuck(true)
+      }, 5000) // Esperar 5 segundos antes de considerar que está atascado
+    }
+
+    // Limpiar temporizador cuando el componente se desmonta o el mapa se carga
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current)
+      }
+    }
+  }, [isVisible, isLoaded])
+
+  // Función para recargar la página
+  const reloadPage = () => {
+    window.location.reload()
+  }
 
   // Obtener el ID de la tienda
   useEffect(() => {
@@ -142,15 +173,28 @@ export default function DeliveryZoneMap() {
     getStoreId()
   }, [user?.uid])
 
+  // Estado para controlar si ya se cargaron las zonas una vez
+  const [zonesLoaded, setZonesLoaded] = useState(false)
+  
+  // Función para forzar recarga de zonas
+  const forceReloadZones = () => {
+    setZonesLoaded(false)
+  }
+
   // Cargar zonas existentes
   useEffect(() => {
     const loadZones = async () => {
       if (!storeId || !user?.uid) {
-        console.log('No storeId or user available, skipping zones load', { storeId, userId: user?.uid })
+        console.log('No storeId or user available, skipping zones load', { 
+          storeId, 
+          userId: user?.uid
+        })
         return
       }
 
-      try {
+      // Solo cargar si no se han cargado antes o si el componente está visible
+      if (!zonesLoaded && isVisible) {
+        try {
         setLoading(true)
         setError(null) // Limpiar error anterior
         console.log('Loading delivery zones for store:', storeId)
@@ -181,6 +225,7 @@ export default function DeliveryZoneMap() {
 
         console.log('Loaded zones:', zonesData)
         setZones(zonesData)
+        setZonesLoaded(true) // Marcar que las zonas ya se cargaron
         
         // Si no hay error hasta aquí, limpiar cualquier error previo
         setError(null)
@@ -199,13 +244,19 @@ export default function DeliveryZoneMap() {
       } finally {
         setLoading(false)
       }
+      } // Cerrar el if (!zonesLoaded && isVisible)
     }
 
     loadZones()
-  }, [storeId])
+  }, [storeId, isVisible, user?.uid, zonesLoaded])
 
   const onLoad = useCallback(() => {
+    console.log('Map loaded successfully')
     setIsLoaded(true)
+    setLoadingStuck(false)
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current)
+    }
   }, [])
 
   const onShapeComplete = useCallback((shape: google.maps.Polygon | google.maps.Circle) => {
@@ -437,6 +488,33 @@ export default function DeliveryZoneMap() {
 
   return (
     <div className="space-y-4">
+      {/* Mensaje cuando el mapa se queda atascado */}
+      {loadingStuck && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-yellow-800">El mapa parece estar atascado</h3>
+              <p className="mt-1 text-sm text-yellow-700">
+                Google Maps ya está cargado pero el mapa no se muestra correctamente.
+              </p>
+              <div className="mt-3">
+                <button
+                  onClick={reloadPage}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                >
+                  Recargar página
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mostrar error menor sin bloquear el mapa */}
       {error && !error.includes('Base de datos no disponible') && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
@@ -580,11 +658,7 @@ export default function DeliveryZoneMap() {
             <button
               onClick={() => {
                 if (storeId && user?.uid) {
-                  setLoading(true)
-                  // Trigger reload by calling the same logic as useEffect
-                  setTimeout(() => {
-                    setLoading(false)
-                  }, 1000)
+                  forceReloadZones() // Forzar recarga de zonas
                 }
               }}
               className="text-sm text-gray-600 hover:text-gray-800 flex items-center space-x-1"
