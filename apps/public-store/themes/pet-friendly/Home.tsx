@@ -19,45 +19,125 @@ interface HomeProps {
   categorias?: Category[]
 }
 
-const Icons = {
+// Iconos específicos para tema de mascotas
+const PetIcons = {
+  ArrowRight: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+    </svg>
+  ),
+  Heart: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+  ),
   Star: () => (
     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   ),
-  ArrowRight: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+  Paw: () => (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M8.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7 8.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm10 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM12 24c-2.7 0-4.9-2.2-4.9-4.9 0-1.6.8-3.1 2.2-4 .2-.1.5-.2.7-.2s.5.1.7.2c1.4.9 2.2 2.4 2.2 4 0 2.7-2.2 4.9-4.9 4.9z"/>
     </svg>
   ),
-  Sort: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+  Bowl: () => (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 2.21.72 4.26 1.94 5.92L12 24l8.06-6.08C21.28 16.26 22 14.21 22 12zM12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8z"/>
     </svg>
   ),
-  ShieldCheck: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  Bone: () => (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M5.5 3C3.57 3 2 4.57 2 6.5 2 8.43 3.57 10 5.5 10c.34 0 .67-.06.98-.15L12 14.38l5.52-4.53c.31.09.64.15.98.15 1.93 0 3.5-1.57 3.5-3.5S20.43 3 18.5 3 15 4.57 15 6.5c0 .34.06.67.15.98L12 11.62 8.85 7.48c.09-.31.15-.64.15-.98C9 4.57 7.43 3 5.5 3z"/>
     </svg>
   ),
   Truck: () => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   ),
-  Refresh: () => (
+  Shield: () => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     </svg>
   ),
+  Clock: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Filter: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+    </svg>
+  ),
+  Sort: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+    </svg>
+  )
 }
 
-export default function Home({ tienda, productos, categorias = [] }: HomeProps) {
+// Productos destacados del carrusel (datos de ejemplo para mascotas)
+const featuredBanners = [
+  {
+    id: 1,
+    title: "🦴 Comida Premium para Perros",
+    subtitle: "Nutrición completa y balanceada",
+    description: "Los mejores ingredientes naturales para la salud de tu mascota",
+    buttonText: "Ver Productos",
+    image: "/images/banners/dog-food-banner.jpg",
+    backgroundColor: "from-orange-400 to-orange-600",
+    textColor: "text-white"
+  },
+  {
+    id: 2,
+    title: "🐱 Alimento para Gatos",
+    subtitle: "Sabor irresistible y saludable",
+    description: "Fórmulas especiales adaptadas a cada etapa de vida",
+    buttonText: "Explorar",
+    image: "/images/banners/cat-food-banner.jpg",
+    backgroundColor: "from-purple-400 to-purple-600",
+    textColor: "text-white"
+  },
+  {
+    id: 3,
+    title: "🎾 Juguetes y Accesorios",
+    subtitle: "Diversión garantizada",
+    description: "Todo lo que necesitas para mantener feliz a tu mascota",
+    buttonText: "Descubrir",
+    image: "/images/banners/toys-banner.jpg",
+    backgroundColor: "from-green-400 to-green-600",
+    textColor: "text-white"
+  }
+]
+
+// Características del servicio específicas para mascotas
+const petFeatures = [
+  {
+    icon: PetIcons.Truck,
+    title: "Envío Express",
+    description: "Entrega en 24-48 horas para que tu mascota no se quede sin comida"
+  },
+  {
+    icon: PetIcons.Shield,
+    title: "Productos Certificados",
+    description: "Solo marcas de confianza con certificaciones veterinarias"
+  },
+  {
+    icon: PetIcons.Clock,
+    title: "Suscripción Automática",
+    description: "Recibe la comida de tu mascota automáticamente cada mes"
+  }
+]
+
+export default function PetFriendlyHome({ tienda, productos, categorias = [] }: HomeProps) {
   const [activeCategory, setActiveCategory] = useState('todos')
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null)
   const [showAllProducts, setShowAllProducts] = useState(false)
-  const [productsToShow, setProductsToShow] = useState(8) // Initial number of products to show
+  const [productsToShow, setProductsToShow] = useState(8)
+  const [currentBanner, setCurrentBanner] = useState(0)
   const { addItem, openCart } = useCart()
   
   // Estados para filtros dinámicos
@@ -70,6 +150,14 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   
   // Usar solo productos reales
   const allProducts = productos || []
+
+  // Carrusel automático
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % featuredBanners.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Separar categorías padre de subcategorías
   const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
@@ -116,7 +204,6 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const categoryFilteredProducts = useMemo(() => {
     if (activeCategory === 'todos') {
       if (selectedParentCategory) {
-        // Mostrar productos de todas las subcategorías del padre seleccionado
         const subcategoryIds = subcategoriesByParent[selectedParentCategory]?.map(sub => sub.id) || []
         return allProducts.filter(producto => 
           producto.selectedParentCategoryIds?.some(catId => 
@@ -124,15 +211,12 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
           )
         )
       } else {
-        // Mostrar todos los productos
         return allProducts
       }
     }
     
-    // Buscar la categoría seleccionada por slug
     const categoriaSeleccionada = categorias.find(cat => cat.slug === activeCategory)
     
-    // Filtrar productos que contengan el ID de la categoría en selectedParentCategoryIds
     return allProducts.filter(producto => {
       if (producto.selectedParentCategoryIds && Array.isArray(producto.selectedParentCategoryIds)) {
         if (categoriaSeleccionada) {
@@ -143,11 +227,10 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     })
   }, [activeCategory, allProducts, categorias, selectedParentCategory, subcategoriesByParent])
 
-  // Aplicar filtros dinámicos y ordenamiento a los productos filtrados por categoría
+  // Aplicar filtros dinámicos y ordenamiento
   const filteredProducts = useMemo(() => {
     const filtered = applyDynamicFilters(categoryFilteredProducts, dynamicFilters, priceRangeOptions)
     
-    // Aplicar ordenamiento
     switch (sortBy) {
       case 'name':
         filtered.sort((a, b) => a.name.localeCompare(b.name))
@@ -160,21 +243,18 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         break
       case 'newest':
       default:
-        // Mantener orden original (más nuevos primero)
         break
     }
     
     return filtered
   }, [categoryFilteredProducts, dynamicFilters, priceRangeOptions, sortBy])
 
-  // Actualizar filtros dinámicos cuando cambian los productos filtrados por categoría
+  // Actualizar filtros dinámicos
   useEffect(() => {
     const loadFilters = async () => {
       try {
-        // Get store filter configuration
         const storeFiltersConfig = await getStoreConfiguredFilters(tienda.id)
         
-        // Use configured filters if available, otherwise fallback to automatic extraction
         const newFilters = storeFiltersConfig.length > 0
           ? extractConfiguredFilters(categoryFilteredProducts, storeFiltersConfig)
           : extractDynamicFilters(categoryFilteredProducts)
@@ -185,7 +265,6 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         setPriceRangeOptions(newPriceRangeOptions)
       } catch (error) {
         console.error('Error loading filters:', error)
-        // Fallback to automatic extraction
         const newFilters = extractDynamicFilters(categoryFilteredProducts)
         setDynamicFilters(newFilters)
         
@@ -255,41 +334,12 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     setProductsToShow(8)
   }
 
-  // Remover el scroll automático ya que se maneja en ClientPage
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     window.scrollTo({ top: 0, behavior: 'smooth' })
-  //   }, 100)
-  // }, [tienda.id])
-  
-  // Debug logs removidos para evitar logs infinitos en producción
-
-  const features = [
-    {
-      icon: Icons.ShieldCheck,
-      title: 'Compra Segura',
-      description: 'Transacciones 100% seguras con protección garantizada'
-    },
-    {
-      icon: Icons.Truck,
-      title: 'Envío Rápido',
-      description: 'Entrega express en 24-48 horas a toda la ciudad'
-    },
-    {
-      icon: Icons.Refresh,
-      title: 'Devoluciones',
-      description: '30 días para devoluciones sin preguntas'
-    }
-  ]
-
-  const handleAddToCart = async (producto: PublicProduct, event: React.MouseEvent) => {
-    event.preventDefault() // Prevenir navegación del Link
-    event.stopPropagation()
-    
+    // Función para agregar al carrito
+  const handleAddToCart = async (producto: PublicProduct) => {
     setAddingToCart(producto.id)
     
     try {
-      const cartItem = {
+      addItem({
         id: producto.id,
         productId: producto.id,
         name: producto.name,
@@ -297,418 +347,430 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         currency: tienda.currency,
         image: producto.image,
         slug: producto.slug || `producto-${producto.id}`
-      }
-
-      addItem(cartItem, 1)
+      }, 1)
       
-      // Pequeña pausa para mostrar el feedback visual
       setTimeout(() => {
-        setAddingToCart(null)
-        openCart() // Abrir el carrito después de agregar
-      }, 800)
-      
+        openCart()
+      }, 500)
     } catch (error) {
       console.error('Error adding to cart:', error)
-      setAddingToCart(null)
+    } finally {
+      setTimeout(() => {
+        setAddingToCart(null)
+      }, 1000)
     }
   }
 
   return (
-    <div className="bg-white">
-      {/* Hero Section */}
-      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white pt-24 lg:pt-32">
-        {/* Content Container */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[55vh]">
+    <div className="pet-theme-home">
+      {/* Hero Section con Carrusel */}
+      <section className="relative min-h-[70vh] overflow-hidden pt-16 lg:pt-20">
+        {/* Carrusel de fondo */}
+        <div className="absolute inset-0">
+          {featuredBanners.map((banner, index) => (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 bg-gradient-to-br ${banner.backgroundColor} transition-opacity duration-1000 ${
+                index === currentBanner ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <div className="absolute inset-0 bg-black/20" />
+            </div>
+          ))}
+        </div>
+
+        {/* Contenido del Hero */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center min-h-[70vh]">
+          <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             
-            {/* Left Column - Text Content */}
+            {/* Texto Principal */}
             <div className="space-y-6 text-center lg:text-left">
-              <div className="space-y-6 animate-slide-up">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-extralight text-neutral-900 tracking-tight leading-tight">
-                  {tienda?.storeName || 'Estilo Minimalista'}
+              <div className="space-y-4">
+                <div className="flex items-center justify-center lg:justify-start space-x-2 text-white/90">
+                  <PetIcons.Paw />
+                  <span className="text-sm font-medium tracking-wide uppercase">
+                    {tienda?.storeName || 'Pet Store'}
+                  </span>
+                </div>
+                
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                  {featuredBanners[currentBanner].title}
                 </h1>
-                <p className="text-lg md:text-xl lg:text-2xl text-neutral-600 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
-                  {tienda?.description || 'Descubre nuestra colección única de productos cuidadosamente seleccionados para tu estilo de vida moderno'}
+                
+                <p className="text-xl md:text-2xl text-white/90 font-medium">
+                  {featuredBanners[currentBanner].subtitle}
+                </p>
+                
+                <p className="text-lg text-white/80 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                  {featuredBanners[currentBanner].description}
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center animate-fade-in">
-                <button className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center space-x-2">
-                  <span>Explorar Colección</span>
-                  <Icons.ArrowRight />
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <button className="pet-btn-primary inline-flex items-center space-x-2 px-8 py-4 bg-white text-orange-600 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                  <span>{featuredBanners[currentBanner].buttonText}</span>
+                  <PetIcons.ArrowRight />
                 </button>
-                <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
-                  Ver Ofertas
+                
+                <button className="pet-btn-secondary px-8 py-4 border-2 border-white text-white rounded-2xl font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-200">
+                  Ver Catálogo
                 </button>
               </div>
             </div>
 
-            {/* Right Column - Hero Image */}
-            <div className="relative lg:h-[60vh] h-[50vh] order-first lg:order-last">
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+            {/* Imagen del Hero (opcional) */}
+            <div className="relative hidden lg:block">
+              <div className="relative h-96 w-full rounded-3xl overflow-hidden bg-white/10 backdrop-blur-sm">
                 {tienda?.heroImageUrl ? (
                   <img 
                     src={tienda.heroImageUrl} 
                     alt={`${tienda.storeName} - Imagen principal`}
-                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
-                    <div className="text-center space-y-4">
-                      <div className="w-24 h-24 mx-auto bg-neutral-300 rounded-full flex items-center justify-center">
-                        <svg className="w-12 h-12 text-neutral-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <p className="text-neutral-500 font-light">Imagen de héroe</p>
-                    </div>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <PetIcons.Bowl />
                   </div>
                 )}
               </div>
-              
-              {/* Decorative accent */}
-              <div className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-neutral-900/10 to-transparent rounded-2xl -z-10"></div>
             </div>
           </div>
         </div>
 
-        {/* Decorative elements más sutiles */}
-        <div className="absolute top-20 right-20 w-1 h-1 bg-neutral-400 rounded-full opacity-40 animate-pulse hidden lg:block"></div>
-        <div className="absolute bottom-32 left-16 w-0.5 h-0.5 bg-neutral-400 rounded-full opacity-60 animate-pulse hidden lg:block"></div>
-      </section>
-
-      {/* Featured Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-12">
-        <div className="text-center space-y-4 mb-12">
-          <h2 className="text-3xl md:text-4xl font-light text-neutral-900">Explora por Categoría</h2>
-          <p className="text-neutral-600 font-light">Encuentra exactamente lo que buscas</p>
-        </div>
-
-        {/* Breadcrumb navigation */}
-        {selectedParentCategory && (
-          <div className="flex items-center justify-center gap-2 mb-6">
+        {/* Indicadores del carrusel */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+          {featuredBanners.map((_, index) => (
             <button
-              onClick={handleBackToParentCategories}
-              className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
-            >
-              Categorías
-            </button>
-            <span className="text-neutral-300">›</span>
-            <span className="text-sm text-neutral-900 font-medium">
-              {parentCategories.find(cat => cat.id === selectedParentCategory)?.name}
-            </span>
-          </div>
-        )}
-
-        {/* Category pills */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {categories.map((category) => {
-            const isParentCategory = !selectedParentCategory && parentCategories.find(cat => cat.slug === category)
-            const hasSubcategories = isParentCategory && subcategoriesByParent[parentCategories.find(cat => cat.slug === category)?.id || '']?.length > 0
-            
-            return (
-              <button
-                key={category}
-                onClick={() => {
-                  if (hasSubcategories && category !== 'todos') {
-                    const parentCat = parentCategories.find(cat => cat.slug === category)
-                    if (parentCat) {
-                      handleParentCategoryClick(parentCat.id)
-                    }
-                  } else {
-                    setActiveCategory(category)
-                  }
-                }}
-                className={`px-6 py-2 rounded-full text-sm font-light transition-all duration-200 flex items-center ${
-                  activeCategory === category
-                    ? 'bg-neutral-900 text-white'
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
-                }`}
-              >
-                {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
-                {hasSubcategories && (
-                  <span className="ml-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* Products Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-12">
-        {/* Filtros y contador de productos */}
-        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="text-center sm:text-left">
-            <p className="text-neutral-600 font-light">
-              {productosAMostrar.length === 0 
-                ? `No hay productos en la categoría "${categoryNames[activeCategory] || activeCategory}"`
-                : showAllProducts || filteredProducts.length <= 8
-                  ? `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
-                  : `Mostrando ${productosAMostrar.length} de ${filteredProducts.length} productos ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
-              }
-            </p>
-          </div>
-          
-          {/* Filtros dinámicos y ordenamiento */}
-          <div className="flex items-center gap-4">
-            <DynamicFilters
-              filters={dynamicFilters}
-              priceRangeOptions={priceRangeOptions}
-              onFiltersChange={handleFiltersChange}
-              onPriceRangeChange={handlePriceRangeChange}
-              onClearFilters={handleClearFilters}
+              key={index}
+              onClick={() => setCurrentBanner(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                index === currentBanner 
+                  ? 'bg-white scale-125' 
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
             />
-            
-            {/* Ordenamiento */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
-              >
-                <Icons.Sort />
-                <span className="font-light">Ordenar</span>
-                <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {showSort && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
-                  <div className="p-3">
-                    {[
-                      { value: 'newest', label: 'Más recientes' },
-                      { value: 'name', label: 'Nombre A-Z' },
-                      { value: 'price-low', label: 'Precio: menor a mayor' },
-                      { value: 'price-high', label: 'Precio: mayor a menor' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
-                          setShowSort(false)
-                        }}
-                        className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded text-sm font-light ${
-                          sortBy === option.value ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-600'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {productosAMostrar.length === 0 ? (
-          /* Sin productos en la categoría */
-          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-neutral-900 mb-2">
-              No hay productos en esta categoría
-            </h3>
-            <p className="text-neutral-500 mb-6">
-              Prueba seleccionando una categoría diferente o explora todos los productos.
-            </p>
-            <button 
-              onClick={() => setActiveCategory('todos')}
-              className="bg-neutral-900 text-white px-6 py-3 rounded-md font-medium hover:bg-neutral-800 transition-colors"
-            >
-              Ver todos los productos
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {productosAMostrar.map((producto, index) => (
-                          <Link 
-                key={producto.id} 
-                href={`/${producto.slug}`}
-                className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-              {/* Product Image */}
-              <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100">
-                {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
-                  <VideoPlayer
-                    src={producto.mediaFiles[0].url}
-                    alt={producto.name}
-                    className="w-full h-full object-cover transition-transform duration-300 md:group-hover:scale-105"
-                    showControls={false}
-                    autoPlay={true}
-                    loop={true}
-                    muted={true}
-                    playsInline={true}
-                    preload="metadata"
-                  />
-                ) : (
-                  <Image
-                    src={producto.image}
-                    alt={producto.name}
-                    fill
-                    className="object-cover transition-transform duration-300 md:group-hover:scale-105"
-                  />
-                )}
-                {/* Mostrar "Nuevo" para productos recientes - por ahora todos son nuevos */}
-                <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
-                  Nuevo
-                </span>
-                {/* Botón de favorito */}
-                <div className="absolute top-3 right-3 z-10">
-                  <HeartIcon product={producto} size="md" />
-                </div>
-                <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors duration-300"></div>
-              </div>
-
-              {/* Product Info */}
-              <div className="p-6 pt-0 space-y-3 bg-white">
-                <h3 className="text-lg font-light text-neutral-900 md:group-hover:text-neutral-600 transition-colors duration-200 pt-6">
-                  {producto.name}
-                </h3>
-                
-                {/* Rating */}
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className={`w-3 h-3 ${i < Math.floor(producto.rating || 0) ? 'text-yellow-400' : 'text-neutral-300'}`}>
-                        <Icons.Star />
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-sm text-neutral-500 font-light">
-                    {producto.rating || 0} ({producto.reviews || 0})
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl font-medium text-neutral-900">
-                      {getCurrencySymbol(tienda.currency)} {producto.price}
-                    </span>
-                    {producto.comparePrice && producto.comparePrice > producto.price && (
-                      <span className="text-sm text-neutral-500 line-through font-light">
-                        {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
-                      </span>
-                    )}
-                  </div>
-                  <button 
-                    onClick={(e) => handleAddToCart(producto, e)}
-                    disabled={addingToCart === producto.id}
-                    className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
-                      addingToCart === producto.id
-                        ? 'bg-green-600 text-white opacity-100'
-                        : 'bg-neutral-900 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-neutral-800'
-                    }`}
-                  >
-                    {addingToCart === producto.id ? '✓' : 'Añadir'}
-                  </button>
-                </div>
-              </div>
-            </Link>
           ))}
-          </div>
-        )}
-
-        {productosAMostrar.length > 0 && filteredProducts.length > 8 && (
-          <div className="text-center mt-12">
-            {!showAllProducts ? (
-              <div className="space-y-3">
-                <p className="text-sm text-neutral-500">
-                  Mostrando {productosAMostrar.length} de {filteredProducts.length} productos
-                </p>
-                <div className="flex justify-center gap-3">
-                  <button 
-                    onClick={handleLoadMore}
-                    className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale"
-                  >
-                    Ver más productos
-                  </button>
-                  <button 
-                    onClick={handleShowAllProducts}
-                    className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out hover-lift"
-                  >
-                    Ver todos ({filteredProducts.length})
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button 
-                onClick={() => {
-                  setShowAllProducts(false)
-                  setProductsToShow(8)
-                }}
-                className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale"
-              >
-                Ver menos productos
-              </button>
-            )}
-          </div>
-        )}
+        </div>
       </section>
 
-      {/* Features Section */}
-      <section className="bg-neutral-50 border-y border-neutral-200 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl md:text-4xl font-light text-neutral-900">¿Por qué elegirnos?</h2>
-            <p className="text-neutral-600 font-light">Comprometidos con tu satisfacción</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+      {/* Características del Servicio */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {petFeatures.map((feature, index) => (
               <div 
-                key={index} 
-                className="text-center space-y-4 animate-slide-up"
-                style={{ animationDelay: `${index * 200}ms` }}
+                key={index}
+                className="pet-feature-card bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-200"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-neutral border border-neutral-200">
-                  <div className="text-neutral-700">
-                    <feature.icon />
-                  </div>
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 text-orange-600 rounded-xl mb-4">
+                  <feature.icon />
                 </div>
-                <h3 className="text-xl font-light text-neutral-900">{feature.title}</h3>
-                <p className="text-neutral-600 font-light leading-relaxed">
-                  {feature.description}
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 bg-white pt-20 pb-20">
-        <div className="space-y-4">
-          <h2 className="text-3xl md:text-4xl font-light text-neutral-900">Mantente al día</h2>
-          <p className="text-neutral-600 font-light">
-            Suscríbete a nuestro newsletter y recibe las últimas novedades y ofertas exclusivas
-          </p>
-        </div>
-
-        <div className="max-w-md mx-auto">
-          <div className="flex shadow-neutral rounded-lg overflow-hidden border border-neutral-200">
-            <input
-              type="email"
-              placeholder="tu@email.com"
-              className="flex-1 px-4 py-3 bg-white border-0 text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-0 font-light"
-            />
-            <button className="px-6 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors duration-200 font-medium">
-              Suscribirse
-            </button>
+      {/* Categorías de Productos */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              🐾 Categorías para tu Mascota
+            </h2>
+            <p className="text-gray-600 text-lg">Encuentra todo lo que necesitas organizadamente</p>
           </div>
-          <p className="text-xs text-neutral-500 mt-3 font-light">
-            No spam. Solo contenido de calidad y ofertas especiales.
-          </p>
+
+          {/* Breadcrumb navigation */}
+          {selectedParentCategory && (
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <button
+                onClick={handleBackToParentCategories}
+                className="text-sm text-gray-500 hover:text-orange-600 transition-colors"
+              >
+                Categorías
+              </button>
+              <span className="text-gray-300">›</span>
+              <span className="text-sm text-gray-900 font-medium">
+                {parentCategories.find(cat => cat.id === selectedParentCategory)?.name}
+              </span>
+            </div>
+          )}
+
+          {/* Category pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {categories.map((category) => {
+              const isParentCategory = !selectedParentCategory && parentCategories.find(cat => cat.slug === category)
+              const hasSubcategories = isParentCategory && subcategoriesByParent[parentCategories.find(cat => cat.slug === category)?.id || '']?.length > 0
+              
+              return (
+                <button
+                  key={category}
+                  onClick={() => {
+                    if (hasSubcategories && category !== 'todos') {
+                      const parentCat = parentCategories.find(cat => cat.slug === category)
+                      if (parentCat) {
+                        handleParentCategoryClick(parentCat.id)
+                      }
+                    } else {
+                      setActiveCategory(category)
+                    }
+                  }}
+                  className={`pet-category-pill px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center ${
+                    activeCategory === category
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-700'
+                  }`}
+                >
+                  {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
+                  {hasSubcategories && (
+                    <span className="ml-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Grilla de Productos */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Filtros y contador de productos */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <p className="text-gray-600 font-medium">
+                {productosAMostrar.length === 0 
+                  ? `No hay productos en la categoría "${categoryNames[activeCategory] || activeCategory}"`
+                  : showAllProducts || filteredProducts.length <= 8
+                    ? `Mostrando ${productosAMostrar.length} ${productosAMostrar.length === 1 ? 'producto' : 'productos'} ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+                    : `Mostrando ${productosAMostrar.length} de ${filteredProducts.length} productos ${activeCategory !== 'todos' ? `en "${categoryNames[activeCategory] || activeCategory}"` : ''}`
+                }
+              </p>
+            </div>
+            
+            {/* Filtros y ordenamiento */}
+            <div className="flex items-center gap-3">
+                             {/* Filtros dinámicos */}
+               {dynamicFilters.length > 0 && (
+                 <DynamicFilters
+                   filters={dynamicFilters}
+                   priceRangeOptions={priceRangeOptions}
+                   onFiltersChange={handleFiltersChange}
+                   onPriceRangeChange={handlePriceRangeChange}
+                   onClearFilters={handleClearFilters}
+                 />
+               )}
+
+              {/* Ordenamiento */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowSort(!showSort)}
+                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <PetIcons.Sort />
+                  <span className="text-sm font-medium">Ordenar</span>
+                </button>
+                
+                {showSort && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
+                    <div className="p-2 space-y-1">
+                      {[
+                        { value: 'newest', label: 'Más recientes' },
+                        { value: 'name', label: 'Nombre A-Z' },
+                        { value: 'price-low', label: 'Precio: menor a mayor' },
+                        { value: 'price-high', label: 'Precio: mayor a menor' }
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSortBy(option.value as any)
+                            setShowSort(false)
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                            sortBy === option.value 
+                              ? 'bg-orange-50 text-orange-700 font-medium' 
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Grid de productos */}
+          {productosAMostrar.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {productosAMostrar.map((producto, index) => (
+                <div 
+                  key={producto.id}
+                  className="pet-product-card bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 group overflow-hidden"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <Link href={`/${producto.slug}`} className="block">
+                    {/* Imagen del producto */}
+                    <div className="relative aspect-square overflow-hidden rounded-t-2xl bg-gray-100">
+                      {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
+                        <VideoPlayer
+                          src={producto.mediaFiles[0].url}
+                          alt={producto.name}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          showControls={false}
+                          autoPlay={true}
+                          loop={true}
+                          muted={true}
+                          playsInline={true}
+                          preload="metadata"
+                        />
+                      ) : (
+                        <Image
+                          src={producto.image}
+                          alt={producto.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                      )}
+                      
+                      {/* Badge nuevo */}
+                      <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                        Nuevo
+                      </span>
+                      
+                                             {/* Botón de favorito */}
+                       <div className="absolute top-3 right-3">
+                         <HeartIcon 
+                           product={producto}
+                           className="w-8 h-8 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-sm transition-all duration-200"
+                         />
+                       </div>
+                    </div>
+                  </Link>
+
+                  {/* Información del producto */}
+                  <div className="p-4 space-y-3">
+                    <Link href={`/${producto.slug}`}>
+                      <h3 className="font-bold text-gray-900 text-sm md:text-base line-clamp-2 group-hover:text-orange-600 transition-colors">
+                        {producto.name}
+                      </h3>
+                    </Link>
+
+                    {/* Rating */}
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className={`w-3 h-3 ${i < Math.floor(producto.rating || 4.5) ? 'text-yellow-400' : 'text-gray-300'}`}>
+                          <PetIcons.Star />
+                        </div>
+                      ))}
+                      <span className="text-xs text-gray-500 ml-1">
+                        ({producto.reviews || 24})
+                      </span>
+                    </div>
+
+                    {/* Precio */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <span className="text-lg md:text-xl font-bold text-orange-600">
+                          {getCurrencySymbol(tienda.currency)}{producto.price}
+                        </span>
+                        {producto.comparePrice && producto.comparePrice > producto.price && (
+                          <span className="text-sm text-gray-500 line-through">
+                            {getCurrencySymbol(tienda.currency)}{producto.comparePrice}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Botón agregar al carrito */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleAddToCart(producto)
+                        }}
+                        disabled={addingToCart === producto.id}
+                        className="pet-add-to-cart-btn bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-xl transition-all duration-200 disabled:opacity-50"
+                      >
+                        {addingToCart === producto.id ? (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🐾</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No hay productos disponibles</h3>
+              <p className="text-gray-600">Intenta cambiar los filtros o explora otras categorías</p>
+            </div>
+          )}
+
+          {/* Botones de cargar más */}
+          {!showAllProducts && filteredProducts.length > productosAMostrar.length && (
+            <div className="text-center mt-12 space-y-4">
+              <button
+                onClick={handleLoadMore}
+                className="pet-btn-secondary px-8 py-3 border-2 border-orange-500 text-orange-600 rounded-xl font-bold hover:bg-orange-50 transition-all duration-200"
+              >
+                Cargar más productos
+              </button>
+              
+              {filteredProducts.length > 16 && (
+                <button
+                  onClick={handleShowAllProducts}
+                  className="block mx-auto text-sm text-gray-600 hover:text-orange-600 transition-colors"
+                >
+                  Ver todos los {filteredProducts.length} productos
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-gradient-to-br from-orange-500 to-orange-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+          <div className="space-y-6">
+            <div className="text-4xl">📧</div>
+            <h2 className="text-3xl md:text-4xl font-bold">
+              ¡Mantente al día con las mejores ofertas!
+            </h2>
+            <p className="text-xl text-orange-100">
+              Suscríbete y recibe descuentos exclusivos, nuevos productos y consejos para el cuidado de tu mascota
+            </p>
+          </div>
+
+          <div className="max-w-md mx-auto mt-8">
+            <div className="flex gap-3">
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                className="flex-1 px-4 py-3 rounded-xl border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white text-lg"
+              />
+              <button className="px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-lg">
+                Suscribirse
+              </button>
+            </div>
+            <p className="text-xs text-orange-100 mt-3">
+              Sin spam. Solo contenido de calidad y ofertas especiales. 🐾
+            </p>
+          </div>
         </div>
       </section>
     </div>
