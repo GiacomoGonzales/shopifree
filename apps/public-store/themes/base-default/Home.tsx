@@ -418,10 +418,13 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center animate-fade-in">
-                <button className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center space-x-2">
+                <Link 
+                  href="/colecciones"
+                  className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center space-x-2"
+                >
                   <span>Explorar Colección</span>
                   <Icons.ArrowRight />
-                </button>
+                </Link>
                 <button className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
                   Ver Ofertas
                 </button>
