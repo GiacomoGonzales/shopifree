@@ -10,6 +10,7 @@ import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
 import Breadcrumbs from '../../components/Breadcrumbs'
 import { useBreadcrumbs } from '../../lib/hooks/useBreadcrumbs'
+import ProductVariantSelector from '../../components/ProductVariantSelector'
 
 const Icons = {
   Star: () => (
@@ -48,6 +49,7 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
+  const [selectedMetaVariant, setSelectedMetaVariant] = useState<{size?: string, color?: string, [key: string]: string | undefined}>({})
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem, openCart } = useCart()
   
@@ -85,19 +87,35 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
     setIsAddingToCart(true)
     
     try {
+      // Crear el nombre del producto con variantes de metadatos
+      const metaVariantName = Object.entries(selectedMetaVariant)
+        .filter(([_, value]) => value)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ')
+      
+      let finalProductName = product.name
+      let finalVariantInfo = selectedVariant
+      
+             // Si hay variantes de metadatos, usarlas
+       if (metaVariantName) {
+         finalProductName = `${product.name} (${metaVariantName})`
+         finalVariantInfo = {
+           id: Object.values(selectedMetaVariant).join('-'),
+           name: metaVariantName,
+           price: product.price,
+           stock: 999 // Stock por defecto para variantes de metadatos
+         }
+       }
+
       const cartItem = {
-        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : finalVariantInfo ? `${product.id}-${finalVariantInfo.id}` : product.id,
         productId: product.id,
-        name: product.name,
+        name: finalProductName,
         price: selectedVariant?.price || product.price,
         currency: tienda.currency,
         image: productMedia[0]?.url || product.image,
         slug: product.slug || `producto-${product.id}`,
-        variant: selectedVariant ? {
-          id: selectedVariant.id,
-          name: selectedVariant.name,
-          price: selectedVariant.price
-        } : undefined
+        variant: finalVariantInfo
       }
 
       addItem(cartItem, quantity)
@@ -239,6 +257,13 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
                 />
               </div>
             </div>
+
+            {/* Selector de Variantes (Metadatos) */}
+            <ProductVariantSelector
+              product={product}
+              onVariantChange={setSelectedMetaVariant}
+              theme="default"
+            />
 
             {/* Variants */}
             {product.hasVariants && product.variants.length > 0 && (

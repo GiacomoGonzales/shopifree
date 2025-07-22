@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCart } from '../../lib/cart-context'
 import { useStore } from '../../lib/store-context'
 import { getCurrencySymbol } from '../../lib/store'
+import ElegantBoutiqueCheckoutModal from './CheckoutModal'
 import './styles.css'
 
 const Icons = {
@@ -53,6 +54,7 @@ const Icons = {
 export default function ElegantBoutiqueCart() {
   const { state, closeCart, removeItem, updateQuantity } = useCart()
   const { store } = useStore()
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
 
   // Cerrar carrito con Escape
   useEffect(() => {
@@ -104,6 +106,11 @@ export default function ElegantBoutiqueCart() {
     } else {
       updateQuantity(itemId, newQuantity)
     }
+  }
+
+  const handleCheckout = () => {
+    closeCart()
+    setIsCheckoutOpen(true)
   }
 
   const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768
@@ -281,21 +288,7 @@ export default function ElegantBoutiqueCart() {
                     </p>
                     
                     <button 
-                      onClick={() => {
-                        // En desarrollo localhost usa 'lunara', en producción extraer del hostname
-                        const hostname = window.location.hostname
-                        let subdomain = 'lunara' // Default para desarrollo
-                        
-                        if (hostname.includes('.shopifree.app')) {
-                          subdomain = hostname.split('.')[0]
-                        } else if (hostname.includes('.vercel.app')) {
-                          subdomain = 'lunara'
-                        } else if (hostname === 'localhost') {
-                          subdomain = 'lunara'
-                        }
-                        
-                        window.location.href = `/${subdomain}/checkout`
-                      }}
+                      onClick={handleCheckout}
                       className="w-full btn-boutique-primary"
                     >
                       Finalizar compra
@@ -316,205 +309,205 @@ export default function ElegantBoutiqueCart() {
             )}
           </div>
         </div>
+
+        {/* Modal de Checkout */}
+        <ElegantBoutiqueCheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+        />
       </>
     )
   } else {
     // Versión Mobile - Modal completo
     return (
-      <div className={`fixed inset-0 z-50 flex flex-col overflow-hidden transition-all duration-300 ease-out ${
-        state.isOpen ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-full pointer-events-none'
-      }`} style={{ backgroundColor: 'rgb(var(--theme-neutral-light))' }}>
-        {/* Header del modal */}
-        <div className="flex items-center justify-between p-4 border-b" style={{ 
-          borderColor: 'rgb(var(--theme-primary) / 0.1)',
-          backgroundColor: 'rgb(var(--theme-neutral-light))'
-        }}>
-          <button
-            onClick={closeCart}
-            className="p-2 hover-elegant rounded-full transition-colors"
-            style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-          >
-            <Icons.ArrowLeft />
-          </button>
-          <div className="text-center">
-            <h1 className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
-              Tu Carrito
-            </h1>
-            <p className="text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-              {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
-            </p>
-          </div>
-          <button
-            onClick={closeCart}
-            className="p-2 hover-elegant rounded-full transition-colors"
-            style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-          >
-            <Icons.Close />
-          </button>
-        </div>
-
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {state.items.length === 0 ? (
-            /* Carrito vacío */
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
-                <div style={{ color: 'rgb(var(--theme-accent))' }}>
-                  <Icons.ShoppingBag />
-                </div>
-              </div>
-              <h3 className="text-xl font-medium text-serif mb-3" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
-                Tu carrito está vacío
-              </h3>
-              <p className="text-sans mb-8" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                Descubre nuestra elegante colección
+      <>
+        <div className={`fixed inset-0 z-50 flex flex-col overflow-hidden transition-all duration-300 ease-out ${
+          state.isOpen ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-full pointer-events-none'
+        }`} style={{ backgroundColor: 'rgb(var(--theme-neutral-light))' }}>
+          {/* Header del modal */}
+          <div className="flex items-center justify-between p-4 border-b" style={{ 
+            borderColor: 'rgb(var(--theme-primary) / 0.1)',
+            backgroundColor: 'rgb(var(--theme-neutral-light))'
+          }}>
+            <button
+              onClick={closeCart}
+              className="p-2 hover-elegant rounded-full transition-colors"
+              style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+            >
+              <Icons.ArrowLeft />
+            </button>
+            <div className="text-center">
+              <h1 className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                Tu Carrito
+              </h1>
+              <p className="text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
               </p>
-              <Link href="/" onClick={closeCart}>
-                <button className="btn-boutique-primary">
-                  Explorar Colección
-                </button>
-              </Link>
             </div>
-          ) : (
-            <>
-              {/* Lista de productos */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {state.items.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="flex items-start space-x-4 p-4 rounded-sm card-boutique"
-                  >
-                    {/* Imagen del producto */}
-                    <div className="relative w-20 h-20 rounded-sm overflow-hidden flex-shrink-0 product-image-boutique" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
-                      <img
-                        src={item.image.includes('.mp4') || item.image.includes('.webm') || item.image.includes('.mov') 
-                          ? item.image.replace(/\.(mp4|webm|mov)$/, '.jpg')
-                          : item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          if (target.src.includes('.jpg') && item.image.includes('.mp4')) {
-                            target.src = item.image.replace('.mp4', '.png');
-                          } else if (target.src.includes('.png') && item.image.includes('.mp4')) {
-                            target.src = '/api/placeholder/80/80';
-                          }
-                        }}
-                      />
-                    </div>
+            <button
+              onClick={closeCart}
+              className="p-2 hover-elegant rounded-full transition-colors"
+              style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+            >
+              <Icons.Close />
+            </button>
+          </div>
 
-                    {/* Información del producto */}
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/${item.slug}`} onClick={closeCart}>
-                        <h4 className="text-base font-medium text-serif hover-elegant transition-colors line-clamp-2" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
-                          {item.name}
-                        </h4>
-                      </Link>
-                      
-                      {item.variant && (
-                        <p className="text-sm text-sans mt-1" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                          {item.variant.name}
-                        </p>
-                      )}
+          {/* Contenido principal */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {state.items.length === 0 ? (
+              /* Carrito vacío */
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
+                  <div style={{ color: 'rgb(var(--theme-accent))' }}>
+                    <Icons.ShoppingBag />
+                  </div>
+                </div>
+                <h3 className="text-xl font-medium text-serif mb-3" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                  Tu carrito está vacío
+                </h3>
+                <p className="text-sans mb-8" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                  Descubre nuestra elegante colección
+                </p>
+                <Link href="/" onClick={closeCart}>
+                  <button className="btn-boutique-primary">
+                    Explorar Colección
+                  </button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                {/* Lista de productos */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {state.items.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="flex items-start space-x-4 p-4 rounded-sm card-boutique"
+                    >
+                      {/* Imagen del producto */}
+                      <div className="relative w-20 h-20 rounded-sm overflow-hidden flex-shrink-0 product-image-boutique" style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
+                        <img
+                          src={item.image.includes('.mp4') || item.image.includes('.webm') || item.image.includes('.mov') 
+                            ? item.image.replace(/\.(mp4|webm|mov)$/, '.jpg')
+                            : item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (target.src.includes('.jpg') && item.image.includes('.mp4')) {
+                              target.src = item.image.replace('.mp4', '.png');
+                            } else if (target.src.includes('.png') && item.image.includes('.mp4')) {
+                              target.src = '/api/placeholder/80/80';
+                            }
+                          }}
+                        />
+                      </div>
 
-                      <div className="flex items-center justify-between mt-3">
-                        <p className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>
-                          {getCurrencySymbol(store?.currency || 'USD')} {(item.variant?.price || item.price).toFixed(2)}
-                        </p>
+                      {/* Información del producto */}
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/${item.slug}`} onClick={closeCart}>
+                          <h4 className="text-base font-medium text-serif hover-elegant transition-colors line-clamp-2" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                            {item.name}
+                          </h4>
+                        </Link>
+                        
+                        {item.variant && (
+                          <p className="text-sm text-sans mt-1" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                            {item.variant.name}
+                          </p>
+                        )}
 
-                        {/* Controles de cantidad */}
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                            className="p-2 hover-elegant rounded transition-colors"
-                            style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-                          >
-                            <Icons.Minus />
-                          </button>
-                          <span className="w-8 text-center text-base font-medium text-sans" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                            className="p-2 hover-elegant rounded transition-colors"
-                            style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-                          >
-                            <Icons.Plus />
-                          </button>
+                        <div className="flex items-center justify-between mt-3">
+                          <p className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>
+                            {getCurrencySymbol(store?.currency || 'USD')} {(item.variant?.price || item.price).toFixed(2)}
+                          </p>
+
+                          {/* Controles de cantidad */}
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                              className="p-2 hover-elegant rounded transition-colors"
+                              style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                            >
+                              <Icons.Minus />
+                            </button>
+                            <span className="w-8 text-center text-base font-medium text-sans" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              className="p-2 hover-elegant rounded transition-colors"
+                              style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                            >
+                              <Icons.Plus />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Botón eliminar */}
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="p-2 hover-elegant rounded transition-colors"
-                      style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                      {/* Botón eliminar */}
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="p-2 hover-elegant rounded transition-colors"
+                        style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                      >
+                        <Icons.Trash />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer del carrito */}
+                <div className="border-t p-4 space-y-4" style={{ borderColor: 'rgb(var(--theme-primary) / 0.1)' }}>
+                  {/* Total y botón */}
+                  <div className="card-boutique p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
+                        Total
+                      </span>
+                      <span className="text-2xl font-bold text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>
+                        {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                      {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
+                    </p>
+                    
+                    <button 
+                      onClick={handleCheckout}
+                      className="w-full btn-boutique-primary"
                     >
-                      <Icons.Trash />
+                      Finalizar compra
                     </button>
                   </div>
-                ))}
-              </div>
 
-              {/* Footer del carrito */}
-              <div className="border-t p-4 space-y-4" style={{ borderColor: 'rgb(var(--theme-primary) / 0.1)' }}>
-                {/* Total y botón */}
-                <div className="card-boutique p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
-                      Total
-                    </span>
-                    <span className="text-2xl font-bold text-serif" style={{ color: 'rgb(var(--theme-accent))' }}>
-                      {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                    {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
-                  </p>
-                  
-                  <button 
-                    onClick={() => {
-                      // En desarrollo localhost usa 'lunara', en producción extraer del hostname
-                      const hostname = window.location.hostname
-                      let subdomain = 'lunara' // Default para desarrollo
-                      
-                      if (hostname.includes('.shopifree.app')) {
-                        subdomain = hostname.split('.')[0]
-                      } else if (hostname.includes('.vercel.app')) {
-                        subdomain = 'lunara'
-                      } else if (hostname === 'localhost') {
-                        subdomain = 'lunara'
-                      }
-                      
-                      window.location.href = `/${subdomain}/checkout`
-                    }}
-                    className="w-full btn-boutique-primary"
-                  >
-                    Finalizar compra
-                  </button>
-                </div>
-
-                {/* Información adicional */}
-                <div className="space-y-2 text-center">
-                  <div className="flex items-center justify-center space-x-2 text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                    <div style={{ color: 'rgb(var(--theme-accent))' }}>
-                      <Icons.Truck />
+                  {/* Información adicional */}
+                  <div className="space-y-2 text-center">
+                    <div className="flex items-center justify-center space-x-2 text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                      <div style={{ color: 'rgb(var(--theme-accent))' }}>
+                        <Icons.Truck />
+                      </div>
+                      <span>Envío gratis desde {getCurrencySymbol(store?.currency || 'USD')} 150</span>
                     </div>
-                    <span>Envío gratis desde {getCurrencySymbol(store?.currency || 'USD')} 150</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2 text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                    <div style={{ color: 'rgb(var(--theme-accent))' }}>
-                      <Icons.Tag />
+                    <div className="flex items-center justify-center space-x-2 text-sm text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+                      <div style={{ color: 'rgb(var(--theme-accent))' }}>
+                        <Icons.Tag />
+                      </div>
+                      <span>¿Tienes un cupón de descuento? Lo podrás aplicar en el checkout</span>
                     </div>
-                    <span>¿Tienes un cupón de descuento? Lo podrás aplicar en el checkout</span>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
+
+        {/* Modal de Checkout */}
+        <ElegantBoutiqueCheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+        />
+      </>
     )
   }
 } 

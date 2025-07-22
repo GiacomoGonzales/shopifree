@@ -10,6 +10,7 @@ import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
 import Breadcrumbs from '../../components/Breadcrumbs'
 import { useBreadcrumbs } from '../../lib/hooks/useBreadcrumbs'
+import ProductVariantSelector from '../../components/ProductVariantSelector'
 
 const Icons = {
   Star: () => (
@@ -48,6 +49,7 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
+  const [selectedMetaVariant, setSelectedMetaVariant] = useState<{size?: string, color?: string, [key: string]: string | undefined}>({})
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem, openCart } = useCart()
   
@@ -239,6 +241,13 @@ export default function Product({ tienda, product, categorias = [] }: ThemeProdu
                 />
               </div>
             </div>
+
+            {/* Selector de Variantes (Metadatos) */}
+            <ProductVariantSelector
+              product={product}
+              onVariantChange={setSelectedMetaVariant}
+              theme="modern"
+            />
 
             {/* Variants */}
             {product.hasVariants && product.variants.length > 0 && (

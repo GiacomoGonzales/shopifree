@@ -87,6 +87,13 @@ service cloud.firestore {
         allow write: if isAuthenticated() && 
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
+      
+      // Reglas para filtros de productos
+      match /filters/{filterId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && 
+                      request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
     }
   }
 }

@@ -74,48 +74,54 @@ const transformToPublicProduct = (dbProduct: Record<string, unknown>): PublicPro
     metaFieldValues: dbProduct.metaFieldValues as Record<string, string | string[]> || {}
   }
   
-  console.log('✨ Product transformed:', transformedProduct.name, 'Price:', transformedProduct.price, 'Media files:', transformedMediaFiles.length)
   return transformedProduct
 }
 
 // Get all active products for a store
-export const getStoreProducts = async (storeId: string): Promise<PublicProduct[]> => {
+export async function getStoreProducts(storeId: string): Promise<PublicProduct[]> {
   try {
-    console.log('🔍 Getting products for store:', storeId)
     const db = getFirebaseDb()
     if (!db) {
-      console.error('❌ Firebase db not available - check environment variables')
+      console.warn('Firebase db not available')
       return []
     }
+
+    console.log('🏪 Getting products for store:', storeId)
     
-    console.log('✅ Firebase DB connected successfully')
+    const productsRef = collection(db, 'stores', storeId, 'products')
     
-    const productsCollectionRef = collection(db, 'stores', storeId, 'products')
-    
-    // Obtener solo productos activos
-    console.log('📋 Executing query for ACTIVE products only...')
-    const activeProductsQuery = query(
-      productsCollectionRef,
-      where('status', '==', 'active')
-    )
-    
-    const querySnapshot = await getDocs(activeProductsQuery)
-    console.log('📊 Active products found:', querySnapshot.size)
+    // Intentar con diferentes filtros según los campos disponibles
+    let querySnapshot
+    try {
+      // Primero intentar con el filtro de status = 'active'
+      const activeProductsQuery = query(
+        productsRef,
+        where('status', '==', 'active')
+      )
+      querySnapshot = await getDocs(activeProductsQuery)
+      console.log('✅ Found products with status filter:', querySnapshot.size)
+    } catch (statusError) {
+      console.log('⚠️ Status filter failed, trying without filters')
+      // Si falla, obtener todos los productos
+      querySnapshot = await getDocs(productsRef)
+      console.log('✅ Found products without filters:', querySnapshot.size)
+    }
     
     const products: PublicProduct[] = []
     querySnapshot.forEach((doc) => {
-      console.log('📄 Processing active product:', doc.id, doc.data().name)
       const productData = { id: doc.id, ...doc.data() }
       try {
         const transformedProduct = transformToPublicProduct(productData)
-        products.push(transformedProduct)
-        console.log('✅ Product transformed successfully:', transformedProduct.name)
+        // Solo agregar productos que estén activos
+        if (transformedProduct.status === 'active') {
+          products.push(transformedProduct)
+        }
       } catch (transformError) {
         console.error('❌ Error transforming product:', doc.id, transformError)
       }
     })
     
-    console.log('🎉 Total active products processed:', products.length)
+    console.log('✅ Active products loaded:', products.length)
     return products
   } catch (error) {
     console.error('❌ Error getting store products:', error)

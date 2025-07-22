@@ -766,6 +766,7 @@
     "@dnd-kit/sortable" "^10.0.0"
     "@dnd-kit/utilities" "^3.2.2"
     "@heroicons/react" "^2.2.0"
+    "@react-google-maps/api" "^2.20.7"
     "@shopifree/types" "file:../../packages/types"
     "@shopifree/ui" "file:../../packages/ui"
     "@types/react-beautiful-dnd" "^13.1.8"

@@ -1096,3 +1096,34 @@ html, body {
   background-color: rgb(var(--theme-accent) / 0.2);
   color: rgb(var(--theme-neutral-dark));
 } 
+
+/* === RADIO BUTTONS === */
+input[type="radio"] {
+  @apply relative w-4 h-4 border-2 rounded-full transition-all duration-200;
+  @apply border-neutral-300 bg-white;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input[type="radio"]:checked {
+  @apply border-neutral-600 bg-white;
+}
+
+input[type="radio"]:checked::after {
+  content: "";
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  @apply w-2 h-2 rounded-full bg-neutral-600;
+}
+
+input[type="radio"]:hover {
+  @apply border-neutral-400;
+}
+
+input[type="radio"]:focus {
+  @apply outline-none ring-0 ring-offset-0;
+}
+
+input[type="radio"]:focus-visible {
+  @apply outline-none ring-0 ring-offset-0;
+} 

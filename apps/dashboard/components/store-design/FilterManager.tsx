@@ -321,6 +321,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       setSaving(true)
       setError(null)
       
+      console.log('FilterManager: Saving filters...', filters.length)
       await saveStoreFilters(store.id, filters)
       
       if (onFiltersChange) {
@@ -330,8 +331,14 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       setSuccessMessage('Configuración guardada')
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      console.error('Error saving filters:', err)
-      setError('Error al guardar la configuración')
+      console.error('FilterManager: Error saving filters:', err)
+      const errorMessage = err instanceof Error 
+        ? `Error al guardar: ${err.message}` 
+        : 'Error al guardar la configuración'
+      setError(errorMessage)
+      
+      // Mantener el error por más tiempo para que el usuario lo vea
+      setTimeout(() => setError(null), 10000)
     } finally {
       setSaving(false)
     }

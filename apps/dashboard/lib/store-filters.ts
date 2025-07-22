@@ -142,6 +142,8 @@ function getFilterType(fieldId: string): 'text' | 'select' | 'tags' | 'range' {
  */
 export async function saveStoreFilters(storeId: string, filters: StoreFilterConfig[]): Promise<void> {
   try {
+    console.log('Saving filters for store:', storeId, 'Filters count:', filters.length)
+    
     const db = getFirebaseDb()
     if (!db) throw new Error('Firebase not initialized')
 
@@ -152,24 +154,47 @@ export async function saveStoreFilters(storeId: string, filters: StoreFilterConf
     const filtersRef = collection(db, 'stores', storeId, 'filters')
 
     // Delete all existing filters first
-    const existingFilters = await getDocs(filtersRef)
-    existingFilters.forEach(doc => {
-      batch.delete(doc.ref)
-    })
+    try {
+      const existingFilters = await getDocs(filtersRef)
+      console.log('Deleting existing filters:', existingFilters.size)
+      existingFilters.forEach(doc => {
+        batch.delete(doc.ref)
+      })
+    } catch (deleteError) {
+      console.warn('Error deleting existing filters (might not exist):', deleteError)
+    }
 
     // Add all new filters
-    filters.forEach(filter => {
-      const filterDoc = doc(filtersRef, filter.id)
-      batch.set(filterDoc, {
-        ...filter,
-        updatedAt: new Date()
-      })
+    filters.forEach((filter, index) => {
+      try {
+        const filterDoc = doc(filtersRef, filter.id)
+        const filterData = {
+          id: filter.id,
+          name: filter.name,
+          type: filter.type,
+          visible: filter.visible,
+          order: filter.order,
+          options: filter.options,
+          productCount: filter.productCount,
+          updatedAt: new Date()
+        }
+        batch.set(filterDoc, filterData)
+        console.log(`Adding filter ${index + 1}/${filters.length}:`, filter.id, filter.name)
+      } catch (filterError) {
+        console.error(`Error preparing filter ${filter.id}:`, filterError)
+        throw filterError
+      }
     })
 
     // Commit the batch
+    console.log('Committing batch with', filters.length, 'filters')
     await batch.commit()
+    console.log('✅ Filters saved successfully')
   } catch (error) {
-    console.error('Error saving store filters:', error)
+    console.error('❌ Error saving store filters:', error)
+    if (error instanceof Error) {
+      throw new Error(`Failed to save filters: ${error.message}`)
+    }
     throw error
   }
 }

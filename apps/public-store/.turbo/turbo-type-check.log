@@ -1,0 +1,15 @@
+
+> @shopifree/public-store@1.0.0 type-check
+> tsc --noEmit
+
+components/checkout/CheckoutModal.tsx(446,11): error TS17014: JSX fragment has no corresponding closing tag.
+components/checkout/CheckoutModal.tsx(811,7): error TS1003: Identifier expected.
+components/checkout/CheckoutModal.tsx(813,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+components/checkout/CheckoutModal.tsx(813,3): error TS1005: '</' expected.
+npm error Lifecycle script `type-check` failed with error:
+npm error code 2
+npm error path C:\Users\giaco\Shopifree\apps\public-store
+npm error workspace @shopifree/public-store@1.0.0
+npm error location C:\Users\giaco\Shopifree\apps\public-store
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c tsc --noEmit

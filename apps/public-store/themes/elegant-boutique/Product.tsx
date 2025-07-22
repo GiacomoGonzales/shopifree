@@ -8,6 +8,7 @@ import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
+import ProductVariantSelector from '../../components/ProductVariantSelector'
 import './styles.css'
 
 const Icons = {
@@ -47,6 +48,7 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [addingToCart, setAddingToCart] = useState(false)
+  const [selectedVariant, setSelectedVariant] = useState<{size?: string, color?: string, [key: string]: string | undefined}>({})
   const { addItem, openCart } = useCart()
 
   const images = product.mediaFiles || [{ id: '1', url: product.image, type: 'image' as const }]
@@ -55,14 +57,29 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
     setAddingToCart(true)
     
     try {
+      // Crear el nombre del producto con variantes seleccionadas
+      const variantName = Object.entries(selectedVariant)
+        .filter(([_, value]) => value)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ')
+      
+      const productNameWithVariant = variantName 
+        ? `${product.name} (${variantName})`
+        : product.name
+
       const cartItem = {
-        id: product.id,
+        id: `${product.id}-${Object.values(selectedVariant).join('-')}`,
         productId: product.id,
-        name: product.name,
+        name: productNameWithVariant,
         price: product.price,
         currency: tienda.currency,
         image: product.image,
-        slug: product.slug || `producto-${product.id}`
+        slug: product.slug || `producto-${product.id}`,
+        variant: variantName ? {
+          id: Object.values(selectedVariant).join('-'),
+          name: variantName,
+          price: product.price
+        } : undefined
       }
 
       addItem(cartItem, quantity)
@@ -265,6 +282,13 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
                 }}
               />
             </div>
+
+            {/* Selector de Variantes */}
+            <ProductVariantSelector
+              product={product}
+              onVariantChange={setSelectedVariant}
+              theme="elegant"
+            />
 
             {/* Cantidad y agregar al carrito */}
             <div className="space-y-6">

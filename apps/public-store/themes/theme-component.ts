@@ -22,9 +22,10 @@ export interface ThemeProductProps {
 export type ThemeComponent = ComponentType<ThemeComponentProps>
 export type ThemeLayoutComponent = ComponentType<ThemeLayoutProps>
 export type ThemeProductComponent = ComponentType<ThemeProductProps>
+export type ThemeCartComponent = ComponentType<{}>
 
 // Función para obtener el componente de tema correcto
-export function getThemeComponent(themeName: string, componentType: 'Layout' | 'Home' | 'Product'): any {
+export function getThemeComponent(themeName: string, componentType: 'Layout' | 'Home' | 'Product' | 'Cart'): any {
   try {
     switch (themeName) {
       case 'base-default':
@@ -35,6 +36,8 @@ export function getThemeComponent(themeName: string, componentType: 'Layout' | '
             return require('./base-default/Home').default
           case 'Product':
             return require('./base-default/Product').default
+          case 'Cart':
+            return require('./base-default/Cart').default
           default:
             return require('./base-default/Layout').default
         }
@@ -46,6 +49,8 @@ export function getThemeComponent(themeName: string, componentType: 'Layout' | '
             return require('./elegant-boutique/Home').default
           case 'Product':
             return require('./elegant-boutique/Product').default
+          case 'Cart':
+            return require('./elegant-boutique/Cart').default
           default:
             return require('./elegant-boutique/Layout').default
         }
@@ -57,6 +62,8 @@ export function getThemeComponent(themeName: string, componentType: 'Layout' | '
             return require('./mobile-modern/Home').default
           case 'Product':
             return require('./mobile-modern/Product').default
+          case 'Cart':
+            return require('./mobile-modern/Cart').default
           default:
             return require('./mobile-modern/Layout').default
         }
@@ -68,6 +75,8 @@ export function getThemeComponent(themeName: string, componentType: 'Layout' | '
             return require('./pet-friendly/Home').default
           case 'Product':
             return require('./pet-friendly/Product').default
+          case 'Cart':
+            return require('./pet-friendly/Cart').default
           default:
             return require('./pet-friendly/Layout').default
         }
@@ -80,6 +89,8 @@ export function getThemeComponent(themeName: string, componentType: 'Layout' | '
             return require('./base-default/Home').default
           case 'Product':
             return require('./base-default/Product').default
+          case 'Cart':
+            return require('./base-default/Cart').default
           default:
             return require('./base-default/Layout').default
         }

@@ -6,6 +6,7 @@ import { useStore } from '../../lib/store-context'
 import { getCurrencySymbol } from '../../lib/store'
 import { useShippingCalculator } from '../../lib/hooks/useShippingCalculator'
 import InteractiveMap from '../InteractiveMap'
+import StoreMap from '../StoreMap'
 
 interface CustomerData {
   name: string
@@ -15,7 +16,7 @@ interface CustomerData {
   reference: string
   paymentMethod: string
   notes: string
-  deliveryType: 'home_delivery' | 'store_pickup'
+  shippingMethod: 'delivery' | 'pickup'
 }
 
 interface CheckoutModalProps {
@@ -86,13 +87,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
   const [addressCoordinates, setAddressCoordinates] = useState<{ lat: number; lng: number } | undefined>()
   const [isGettingLocation, setIsGettingLocation] = useState(false)
-  
-  // Determinar tipo de entrega por defecto basado en opciones disponibles
-  const getDefaultDeliveryType = () => {
-    if (store?.advanced?.shipping?.modes?.localDelivery) return 'home_delivery'
-    if (store?.advanced?.shipping?.modes?.storePickup) return 'store_pickup'
-    return 'home_delivery'
-  }
+  const [errors, setErrors] = useState<Record<string, string>>({})
   
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
@@ -102,7 +97,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     reference: '',
     paymentMethod: 'whatsapp',
     notes: '',
-    deliveryType: getDefaultDeliveryType()
+    shippingMethod: 'delivery'
   })
 
   // Hook para calcular envío automáticamente
@@ -145,6 +140,19 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   useEffect(() => {
     if (!isOpen) {
       setCurrentStep('form')
+      
+      // Determinar método de envío por defecto según configuración
+      let defaultShippingMethod: 'delivery' | 'pickup' = 'delivery'
+      
+      // Si solo está habilitado recojo en tienda, usar pickup
+      if (store?.advanced?.shipping?.modes?.storePickup && !store?.advanced?.shipping?.modes?.localDelivery) {
+        defaultShippingMethod = 'pickup'
+      }
+      // Si ambos están habilitados o solo delivery, usar delivery por defecto
+      else {
+        defaultShippingMethod = 'delivery'
+      }
+      
       setCustomerData({
         name: '',
         phone: '',
@@ -153,10 +161,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         reference: '',
         paymentMethod: 'whatsapp',
         notes: '',
-        deliveryType: getDefaultDeliveryType()
+        shippingMethod: defaultShippingMethod
       })
     }
-  }, [isOpen])
+  }, [isOpen, store])
 
   // Cargar Google Maps API cuando se abre el modal
   useEffect(() => {
@@ -238,20 +246,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   }, [isGoogleMapsLoaded, autocompleteRef, isOpen])
 
   const handleInputChange = (field: keyof CustomerData, value: string) => {
-    setCustomerData(prev => {
-      const newData = {
+    setCustomerData(prev => ({
       ...prev,
       [field]: value
-      }
-
-      // Si cambia a recojo en tienda, limpiar campos de dirección y referencia
-      if (field === 'deliveryType' && value === 'store_pickup') {
-        newData.address = ''
-        newData.reference = ''
-      }
-
-      return newData
-    })
+    }))
     
     // Si está cambiando la dirección manualmente, indicar que no es autocompletado
     if (field === 'address') {
@@ -260,8 +258,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   }
 
   // Función para manejar cambios de coordenadas desde el mapa
-  const handleCoordinatesChange = (lat: number, lng: number) => {
-    const coordinates = { lat, lng }
+  const handleCoordinatesChange = (coordinates: { lat: number; lng: number }) => {
     setAddressCoordinates(coordinates)
     // Recalcular envío con las nuevas coordenadas
     if (shippingCalculator.calculateShipping && customerData.address) {
@@ -364,19 +361,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     message += `• Nombre: ${customerData.name}\n`
     message += `• Teléfono: ${customerData.phone}\n`
     message += `• Email: ${customerData.email}\n`
-    
-    // Información de entrega
-    if (customerData.deliveryType === 'store_pickup') {
-      message += `• Tipo de entrega: 🏪 Recojo en tienda\n`
-    } else {
-      message += `• Tipo de entrega: 🚚 Envío a domicilio\n`
     message += `• Dirección: ${customerData.address}\n`
     if (customerData.reference) {
       message += `• Referencia: ${customerData.reference}\n`
-      }
-      if (addressCoordinates) {
-        message += `• Coordenadas: ${addressCoordinates.lat.toFixed(6)}, ${addressCoordinates.lng.toFixed(6)}\n`
-      }
+    }
+    if (addressCoordinates) {
+      message += `• Coordenadas: ${addressCoordinates.lat.toFixed(6)}, ${addressCoordinates.lng.toFixed(6)}\n`
     }
     message += `\n`
     
@@ -390,30 +380,32 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     })
     
     // Información de envío
-    message += `🚚 *ENVÍO:*\n`
-    if (customerData.deliveryType === 'store_pickup') {
-      message += `• Modalidad: Recojo en tienda\n`
+    if (customerData.shippingMethod === 'pickup') {
+      message += `🏪 *RECOJO EN TIENDA:*\n`
+      message += `• Método: Recojo en tienda\n`
+      message += `• Dirección: ${store?.address}\n`
       message += `• Costo: Gratis\n`
+      message += `• Nota: El cliente recogerá el pedido en la tienda\n`
     } else {
-    if (shippingCalculator.isInDeliveryZone && shippingCalculator.shippingCost > 0) {
-      message += `• Zona: ${shippingCalculator.zoneName}\n`
-      message += `• Costo: ${currencySymbol} ${shippingCalculator.shippingCost.toFixed(2)}\n`
-      if (shippingCalculator.estimatedTime) {
-        message += `• Tiempo estimado: ${shippingCalculator.estimatedTime}\n`
-      }
-    } else {
-      message += `• Costo: A coordinar\n`
+      message += `🚚 *ENVÍO A DOMICILIO:*\n`
+      if (shippingCalculator.isInDeliveryZone && shippingCalculator.shippingCost > 0) {
+        message += `• Zona: ${shippingCalculator.zoneName}\n`
+        message += `• Costo: ${currencySymbol} ${shippingCalculator.shippingCost.toFixed(2)}\n`
+        if (shippingCalculator.estimatedTime) {
+          message += `• Tiempo estimado: ${shippingCalculator.estimatedTime}\n`
+        }
+      } else {
+        message += `• Costo: A coordinar\n`
       }
     }
     message += `\n`
     
     // Total
-    const shippingCost = customerData.deliveryType === 'store_pickup' ? 0 : 
-      (shippingCalculator.isInDeliveryZone ? shippingCalculator.shippingCost : 0)
+    const shippingCost = customerData.shippingMethod === 'pickup' ? 0 : (shippingCalculator.isInDeliveryZone ? shippingCalculator.shippingCost : 0)
     const finalTotal = cartState.totalPrice + shippingCost
     message += `💰 *TOTAL: ${currencySymbol} ${finalTotal.toFixed(2)}*\n`
-    if (customerData.deliveryType === 'store_pickup') {
-      message += `   (Subtotal: ${currencySymbol} ${cartState.totalPrice.toFixed(2)} + Envío: Gratis)\n`
+    if (customerData.shippingMethod === 'pickup') {
+      message += `   (Subtotal: ${currencySymbol} ${cartState.totalPrice.toFixed(2)} + Recojo: Gratis)\n`
     } else if (shippingCalculator.isInDeliveryZone && shippingCalculator.shippingCost > 0) {
       message += `   (Subtotal: ${currencySymbol} ${cartState.totalPrice.toFixed(2)} + Envío: ${currencySymbol} ${shippingCalculator.shippingCost.toFixed(2)})\n`
     }
@@ -433,15 +425,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   }
 
   const handleWhatsAppCheckout = () => {
-    // Validar campos requeridos según el tipo de entrega
-    if (!customerData.name || !customerData.phone) {
-      alert('Por favor completa tu nombre y teléfono')
-      return
-    }
-    
-    // Validar dirección solo si es envío a domicilio
-    if (customerData.deliveryType === 'home_delivery' && !customerData.address) {
-      alert('Por favor ingresa tu dirección de entrega')
+    if (!customerData.name || !customerData.phone || !customerData.address) {
+      alert('Por favor completa todos los campos obligatorios')
       return
     }
 
@@ -467,12 +452,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }, 1000)
   }
 
-  const isFormValid = customerData.name && customerData.phone && (
-    // Si es recojo en tienda, no requerimos dirección
-    customerData.deliveryType === 'store_pickup' ||
-    // Si es envío a domicilio, requerimos dirección
-    (customerData.deliveryType === 'home_delivery' && customerData.address)
-  )
+  const isFormValid = customerData.name && customerData.phone && (customerData.shippingMethod === 'pickup' || customerData.address)
 
   if (!isOpen) return null
 
@@ -513,14 +493,18 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               
               {/* Formulario */}
               <div className="p-4 md:p-6 lg:border-r border-gray-200 flex-1 lg:flex-none">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                  <Icons.User />
-                  <span>Datos del Cliente</span>
-                </h3>
+                {/* 🟢 SECCIÓN 1: DATOS DEL CLIENTE */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="text-green-600 text-sm font-bold">1</span>
+                    </div>
+                    <span>Datos del Cliente</span>
+                  </h3>
 
-                <div className="space-y-4">
-                  {/* Nombre */}
-                  <div>
+                  <div className="space-y-4">
+                    {/* Nombre */}
+                    <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nombre completo *
                     </label>
@@ -572,67 +556,61 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       />
                     </div>
                   </div>
-
-                  {/* Datos de Entrega */}
-                  <div className="pt-4 border-t border-gray-200">
-                    <h4 className="text-base font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                      </svg>
-                      <span>Datos de Entrega</span>
-                    </h4>
-                    
-                    <div className="space-y-3">
-                      {/* Opción: Envío a domicilio */}
-                      {store?.advanced?.shipping?.modes?.localDelivery && (
-                        <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                          <input
-                            type="radio"
-                            name="deliveryType"
-                            value="home_delivery"
-                            checked={customerData.deliveryType === 'home_delivery'}
-                            onChange={(e) => handleInputChange('deliveryType', e.target.value)}
-                            className="mt-0.5"
-                          />
-                          <div className="flex items-center space-x-2">
-                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3a4 4 0 118 0v4m-4 4a3 3 0 100 6 3 3 0 000-6z" />
-                            </svg>
-                            <div>
-                              <span className="font-medium text-gray-900">Envío a domicilio</span>
-                              <p className="text-sm text-gray-600">Recibirás tu pedido en la dirección que indiques</p>
-                            </div>
-                          </div>
-                        </label>
-                      )}
-
-                      {/* Opción: Recojo en tienda */}
-                      {store?.advanced?.shipping?.modes?.storePickup && (
-                        <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                          <input
-                            type="radio"
-                            name="deliveryType"
-                            value="store_pickup"
-                            checked={customerData.deliveryType === 'store_pickup'}
-                            onChange={(e) => handleInputChange('deliveryType', e.target.value)}
-                            className="mt-0.5"
-                          />
-                          <div className="flex items-center space-x-2">
-                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h4a1 1 0 011 1v5m-6 0V9a1 1 0 011-1h4a1 1 0 011 1v10" />
-                            </svg>
-                            <div>
-                              <span className="font-medium text-gray-900">Recojo en tienda</span>
-                              <p className="text-sm text-gray-600">Retira tu pedido directamente en nuestro local</p>
-                            </div>
-                          </div>
-                        </label>
-                      )}
                     </div>
                   </div>
 
-                  {/* Dirección - Solo mostrar si es envío a domicilio */}
-                  {customerData.deliveryType === 'home_delivery' && (
+                  {/* 📦 SECCIÓN 2: DATOS DE ENTREGA */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 text-sm font-bold">2</span>
+                      </div>
+                      <span>Datos de Entrega</span>
+                    </h3>
+
+                    {/* Selector de método de envío */}
+                    {(store?.advanced?.shipping?.modes?.localDelivery || store?.advanced?.shipping?.modes?.storePickup) && (
+                      <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="space-y-3">
+                          {store?.advanced?.shipping?.modes?.localDelivery && (
+                            <label className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-white transition-colors cursor-pointer">
+                              <input
+                                type="radio"
+                                name="shippingMethod"
+                                value="delivery"
+                                checked={customerData.shippingMethod === 'delivery'}
+                                onChange={(e) => handleInputChange('shippingMethod', e.target.value)}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                              />
+                              <div className="ml-3">
+                                <span className="text-sm font-medium text-gray-900">🚚 Envío a domicilio</span>
+                                <p className="text-xs text-gray-600">Recibe tu pedido en tu dirección</p>
+                              </div>
+                            </label>
+                          )}
+                          {store?.advanced?.shipping?.modes?.storePickup && (
+                            <label className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-white transition-colors cursor-pointer">
+                              <input
+                                type="radio"
+                                name="shippingMethod"
+                                value="pickup"
+                                checked={customerData.shippingMethod === 'pickup'}
+                                onChange={(e) => handleInputChange('shippingMethod', e.target.value)}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                              />
+                              <div className="ml-3">
+                                <span className="text-sm font-medium text-gray-900">🏪 Recojo en tienda</span>
+                                <p className="text-xs text-gray-600">Recoge tu pedido en nuestro local</p>
+                              </div>
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Dirección - Solo para envío a domicilio */}
+                  {customerData.shippingMethod === 'delivery' && (
+                  <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Dirección *
@@ -642,43 +620,35 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         <div className="flex items-center px-3 py-2 border border-gray-300 border-r-0 rounded-l-lg bg-gray-50">
                           <Icons.MapPin />
                         </div>
-                        <div className="relative flex-1">
                         <input
                           ref={setAutocompleteRef}
                           type="text"
                           value={customerData.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
                           onBlur={shippingCalculator.onAddressBlur}
-                            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+                          className="flex-1 px-3 py-2 pr-10 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                           placeholder={isGoogleMapsLoaded ? "Empieza a escribir tu dirección..." : "Av. Principal 123"}
                           required
                         />
-                          
-                          {/* Botón de geolocalización */}
-                          {isGoogleMapsLoaded && (
-                            <button
-                              type="button"
-                              onClick={handleUseMyLocation}
-                              disabled={isGettingLocation}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                              title="Usar mi ubicación actual"
-                            >
-                              {isGettingLocation ? (
-                                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        {/* Indicador de carga de Google Maps */}
+                        {!isGoogleMapsLoaded && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <svg className="w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                              ) : (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                              )}
-                            </button>
-                          )}
                           </div>
+                        )}
+                        {/* Indicador de Google Maps cargado */}
+                        {isGoogleMapsLoaded && customerData.address && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
-
                       {/* Mensaje de ayuda */}
                       {isGoogleMapsLoaded && (
                         <p className="mt-1 text-xs text-gray-500">
@@ -687,19 +657,43 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       )}
                     </div>
                     
+                    {/* Botón de geolocalización (siempre disponible) */}
+                    {isGoogleMapsLoaded && (
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={handleUseMyLocation}
+                          disabled={isGettingLocation}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isGettingLocation ? (
+                            <>
+                              <svg className="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Obteniendo ubicación...
+                            </>
+                          ) : (
+                            <>
+                              📍 Usar mi ubicación actual
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
                     {/* Mapa Interactivo */}
                     {addressCoordinates && (
                       <InteractiveMap
-                        lat={addressCoordinates.lat}
-                        lng={addressCoordinates.lng}
-                        onLocationChange={handleCoordinatesChange}
+                        coordinates={addressCoordinates}
+                        onCoordinatesChange={handleCoordinatesChange}
+                        isVisible={true}
                       />
                     )}
                   </div>
-                  )}
 
-                  {/* Referencia - Solo mostrar si es envío a domicilio */}
-                  {customerData.deliveryType === 'home_delivery' && (
+                  {/* Referencia */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Referencia
@@ -712,6 +706,37 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       placeholder="Frente al parque, casa blanca"
                     />
                   </div>
+                  </>
+                  )}
+
+                  {/* Información del recojo en tienda */}
+                  {customerData.shippingMethod === 'pickup' && store?.address && (
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                        <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Recojo en tienda
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm text-gray-700">
+                            <strong>Dirección del local:</strong><br />
+                            {store.address}
+                          </p>
+                        </div>
+                        
+                        {/* Mapa de la tienda */}
+                        <StoreMap 
+                          address={store.address}
+                          coordinates={undefined} // Por ahora sin coordenadas, se podría geocodificar en el futuro
+                        />
+                        
+                        <p className="text-sm text-blue-700 bg-blue-100 p-2 rounded">
+                          💡 Podrás recoger tu pedido en esta dirección una vez que esté listo.
+                        </p>
+                      </div>
+                    </div>
                   )}
 
                   {/* Notas adicionales */}
@@ -732,13 +757,16 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       />
                     </div>
                   </div>
+                  </div>
 
-                  {/* Método de pago */}
-                  <div className="pt-4 border-t border-gray-200">
-                    <h4 className="text-base font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                      <Icons.CreditCard />
+                  {/* 💳 SECCIÓN 3: MÉTODO DE PAGO */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-purple-600 text-sm font-bold">3</span>
+                      </div>
                       <span>Método de Pago</span>
-                    </h4>
+                    </h3>
                     
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex items-center space-x-3">
@@ -798,8 +826,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   {/* Información de envío */}
                   <div className="flex justify-between text-gray-600 text-sm">
                     <span className="flex items-center space-x-1">
-                      <span>Envío</span>
-                      {customerData.deliveryType === 'home_delivery' && shippingCalculator.isCalculating && (
+                      <span>{customerData.shippingMethod === 'pickup' ? 'Recojo' : 'Envío'}</span>
+                      {customerData.shippingMethod === 'delivery' && shippingCalculator.isCalculating && (
                         <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -807,8 +835,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       )}
                     </span>
                     <span>
-                      {customerData.deliveryType === 'store_pickup' ? (
-                        `${getCurrencySymbol(store?.currency || 'USD')} 0.00`
+                      {customerData.shippingMethod === 'pickup' ? (
+                        'Gratis'
                       ) : shippingCalculator.isCalculating ? (
                         'Calculando...'
                       ) : shippingCalculator.isInDeliveryZone && shippingCalculator.shippingCost > 0 ? (
@@ -820,7 +848,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   </div>
                   
                   {/* Mensaje de zona de entrega - Solo para envío a domicilio */}
-                  {customerData.deliveryType === 'home_delivery' && customerData.address && !shippingCalculator.isCalculating && (
+                  {customerData.shippingMethod === 'delivery' && customerData.address && !shippingCalculator.isCalculating && (
                     <div className="text-xs">
                       {shippingCalculator.isInDeliveryZone ? (
                         <div className="text-green-600 flex items-center space-x-1">
@@ -849,11 +877,25 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       ) : null}
                     </div>
                   )}
+
+                  {/* Mensaje para recojo en tienda */}
+                  {customerData.shippingMethod === 'pickup' && store?.address && (
+                    <div className="text-xs">
+                      <div className="text-blue-600 flex items-center space-x-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span>
+                          🏪 Recojo en tienda • {store.address}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="flex justify-between text-lg font-semibold text-gray-900 pt-2 border-t border-gray-200">
                     <span>Total</span>
                     <span>
-                      {getCurrencySymbol(store?.currency || 'USD')} {(cartState.totalPrice + (customerData.deliveryType === 'store_pickup' ? 0 : (shippingCalculator.isInDeliveryZone ? shippingCalculator.shippingCost : 0))).toFixed(2)}
+                      {getCurrencySymbol(store?.currency || 'USD')} {(cartState.totalPrice + (customerData.shippingMethod === 'pickup' ? 0 : (shippingCalculator.isInDeliveryZone ? shippingCalculator.shippingCost : 0))).toFixed(2)}
                     </span>
                   </div>
                 </div>

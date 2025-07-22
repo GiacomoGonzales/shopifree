@@ -11,6 +11,7 @@
     "clean": "rm -rf .next out"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.7",
     "@shopifree/types": "file:../../packages/types",
     "@shopifree/ui": "file:../../packages/ui",
     "firebase": "^11.9.1",
