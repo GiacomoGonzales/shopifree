@@ -50,7 +50,7 @@ const PetIcons = {
     </svg>
   ),
   Paw: () => (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
       <path d="M8.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7 8.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm10 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM12 24c-2.7 0-4.9-2.2-4.9-4.9 0-1.6.8-3.1 2.2-4 .2-.1.5-.2.7-.2s.5.1.7.2c1.4.9 2.2 2.4 2.2 4 0 2.7-2.2 4.9-4.9 4.9z"/>
     </svg>
   ),
@@ -69,7 +69,32 @@ const PetIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
-  )
+  ),
+  ArrowRight: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7-7 7" />
+    </svg>
+  ),
+  Facebook: () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 00-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
+    </svg>
+  ),
+  Instagram: () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+    </svg>
+  ),
+  WhatsApp: () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+    </svg>
+  ),
+  TikTok: () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 00-1-.08A6.34 6.34 0 003 15.66a6.34 6.34 0 0010.86 4.44l.13-.19v-8.8a8.16 8.16 0 005.69 2.24l.01-3.46a4.85 4.85 0 01-1.33-.466c.086.057.168.118.247.182z"/>
+    </svg>
+  ),
 }
 
 export default function PetFriendlyLayout({ tienda, categorias = [], children }: ThemeLayoutProps) {
@@ -220,7 +245,8 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                {/* Logo desktop con fondo */}
+                <div className="hidden md:flex w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl items-center justify-center shadow-lg">
                   {tienda?.logoUrl ? (
                     <img 
                       src={tienda.logoUrl} 
@@ -231,11 +257,26 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
                     <PetIcons.Paw />
                   )}
                 </div>
-                <div className="hidden sm:block">
-                  <span className="text-xl font-bold text-gray-900 tracking-tight">
+                {/* Versión móvil del logo sin fondo */}
+                <div className="flex md:hidden w-10 h-10 items-center justify-center">
+                  {tienda?.logoUrl ? (
+                    <img 
+                      src={tienda.logoUrl} 
+                      alt={tienda.storeName}
+                      className="w-10 h-10 object-contain rounded-xl"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 text-orange-500">
+                      <PetIcons.Paw />
+                    </div>
+                  )}
+                </div>
+                {/* Nombre de la tienda */}
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold text-gray-900 tracking-tight">
                     {tienda?.storeName || 'Pet Store'}
                   </span>
-                  <div className="text-xs text-orange-600 font-medium">
+                  <div className="hidden sm:block text-xs text-orange-600 font-medium">
                     Todo para tu mascota 🐾
                   </div>
                 </div>
@@ -309,7 +350,7 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
                         <input
                           ref={searchInputRef}
                           type="text"
-                          placeholder="Buscar productos para tu mascota..."
+                          placeholder="Buscar productos..."
                           value={searchQuery}
                           onChange={(e) => handleSearchChange(e.target.value)}
                           className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -369,7 +410,7 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
               {/* Favoritos */}
               <Link
                 href="/favoritos"
-                className="pet-icon-btn p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-200"
+                className="hidden md:flex pet-icon-btn p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-200"
               >
                 <PetIcons.Heart />
               </Link>
@@ -390,7 +431,7 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
               {/* Cuenta */}
               <Link
                 href="/mi-cuenta"
-                className="pet-icon-btn p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-200"
+                className="hidden md:flex pet-icon-btn p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-200"
               >
                 <PetIcons.User />
               </Link>
@@ -466,15 +507,208 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
         />
       )}
 
+      {/* Modal de Búsqueda Móvil - Pantalla Completa */}
+      {mobileSearchOpen && (
+        <div className="fixed inset-0 z-[9999] md:hidden">
+          {/* Overlay con transición de opacidad */}
+          <div 
+            className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-all duration-300 ease-out ${
+              mobileSearchOpen ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => setMobileSearchOpen(false)}
+          />
+          
+          {/* Modal con transición de deslizamiento */}
+          <div className={`fixed inset-0 bg-white transform transition-all duration-300 ease-out ${
+            mobileSearchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full'
+          }`}>
+            {/* Header del modal */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+              <h2 className="text-lg font-bold text-gray-900">Buscar</h2>
+              <button
+                onClick={() => setMobileSearchOpen(false)}
+                className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-200"
+              >
+                <PetIcons.Close />
+              </button>
+            </div>
+
+            {/* Contenido del modal */}
+            <div className="p-4 h-full overflow-y-auto pb-20">
+              {/* Barra de búsqueda */}
+              <div className="relative mb-6">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Buscar productos para tu mascota..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
+                  className="w-full pl-10 pr-10 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
+                  autoFocus
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <PetIcons.Search />
+                </div>
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('')
+                      setSearchResults([])
+                      setShowSuggestions(false)
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-orange-600 transition-colors"
+                  >
+                    <PetIcons.Close />
+                  </button>
+                )}
+              </div>
+
+              {/* Contenido cuando no hay búsqueda */}
+              {!searchQuery && (
+                <div className="space-y-6">
+                  {/* Historial de búsqueda */}
+                  {searchHistory.length > 0 && (
+                    <div className="animate-fade-in">
+                      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                        <span className="mr-2">🕒</span>
+                        <span>Búsquedas recientes</span>
+                      </h3>
+                      <div className="space-y-2">
+                        {searchHistory.map((item, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSearchQuery(item)}
+                            className="w-full text-left px-4 py-3 hover:bg-orange-50 rounded-xl text-gray-700 transition-colors flex items-center justify-between"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          >
+                            <span>{item}</span>
+                            <span className="text-gray-400">↗</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sugerencias populares */}
+                  {searchSuggestions.length > 0 && (
+                    <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+                      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                        <span className="mr-2">🔥</span>
+                        <span>Búsquedas populares</span>
+                      </h3>
+                      <div className="space-y-2">
+                        {searchSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSearchQuery(suggestion)}
+                            className="w-full text-left px-4 py-3 hover:bg-orange-50 rounded-xl text-gray-700 transition-colors flex items-center justify-between"
+                            style={{ animationDelay: `${(index + 3) * 50}ms` }}
+                          >
+                            <span>{suggestion}</span>
+                            <span className="text-gray-400">↗</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Categorías rápidas */}
+                  <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                      <span className="mr-2">🐾</span>
+                      <span>Categorías</span>
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {categories.slice(0, 6).map((category, index) => (
+                        <button
+                          key={category.id}
+                          onClick={() => {
+                            setMobileSearchOpen(false)
+                            nextRouter.push(category.href)
+                          }}
+                          className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl text-gray-800 text-sm font-medium transition-all duration-200 text-center transform hover:scale-105"
+                          style={{ animationDelay: `${(index + 6) * 50}ms` }}
+                        >
+                          {category.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Resultados de búsqueda */}
+              {showSuggestions && (
+                <div className="animate-fade-in">
+                  {isSearching ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                      <span className="ml-3 text-gray-600">Buscando productos...</span>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">
+                        Resultados ({searchResults.length})
+                      </h3>
+                      <div className="space-y-3">
+                        {searchResults.map((product, index) => (
+                          <button
+                            key={product.id}
+                            onClick={() => handleMobileProductNavigation(product.slug || `producto-${product.id}`)}
+                            className="w-full flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-orange-200 hover:bg-orange-50 transition-all duration-200 text-left transform hover:scale-[1.02]"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          >
+                            <div className="w-16 h-16 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
+                              <img 
+                                src={product.image}
+                                alt={product.name} 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-gray-900 truncate mb-1">{product.name}</h4>
+                              <p className="text-lg font-bold text-orange-600">
+                                {getCurrencySymbol(tienda?.currency || 'USD')}{product.price}
+                              </p>
+                            </div>
+                            <div className="text-orange-500">
+                              <PetIcons.ArrowRight />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <button 
+                        onClick={() => {
+                          setMobileSearchOpen(false)
+                          nextRouter.push(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`)
+                        }}
+                        className="mt-6 w-full py-4 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-bold text-lg transform hover:scale-105"
+                      >
+                        Ver todos los resultados
+                      </button>
+                    </>
+                  ) : searchQuery.length >= 2 && !isSearching ? (
+                    <div className="text-center py-12 animate-fade-in">
+                      <div className="text-6xl mb-4">🐾</div>
+                      <p className="text-gray-500 text-lg">No se encontraron productos para "{searchQuery}"</p>
+                      <p className="text-gray-400 text-sm mt-2">Intenta con otro término de búsqueda</p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Menú móvil */}
       <div className={`pet-mobile-menu fixed right-0 top-0 h-full w-80 max-w-sm bg-white shadow-2xl transform transition-transform duration-300 ease-out z-50 md:hidden ${
         mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gradient-to-r from-orange-500 to-orange-600">
-          <div className="flex items-center space-x-3">
-            <PetIcons.Paw />
-            <span className="text-lg font-bold text-white">Menú</span>
-          </div>
+          <span className="text-lg font-bold text-white">Menú</span>
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
@@ -664,15 +898,15 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
                 </div>
                 
                 {/* Redes sociales */}
-                <div className="flex space-x-3 pt-2">
+                <div className="flex space-x-3 pt-4">
                   {tienda?.socialMedia?.instagram && (
                     <a
                       href={tienda.socialMedia.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 bg-gray-700 hover:bg-orange-500 rounded-lg flex items-center justify-center transition-colors"
+                      className="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
                     >
-                      📷
+                      <PetIcons.Instagram />
                     </a>
                   )}
                   {tienda?.socialMedia?.facebook && (
@@ -680,9 +914,9 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
                       href={tienda.socialMedia.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 bg-gray-700 hover:bg-orange-500 rounded-lg flex items-center justify-center transition-colors"
+                      className="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
                     >
-                      📘
+                      <PetIcons.Facebook />
                     </a>
                   )}
                   {tienda?.socialMedia?.whatsapp && (
@@ -690,9 +924,19 @@ export default function PetFriendlyLayout({ tienda, categorias = [], children }:
                       href={`https://wa.me/${tienda.socialMedia.whatsapp}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 bg-gray-700 hover:bg-orange-500 rounded-lg flex items-center justify-center transition-colors"
+                      className="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
                     >
-                      💬
+                      <PetIcons.WhatsApp />
+                    </a>
+                  )}
+                  {tienda?.socialMedia?.tiktok && (
+                    <a
+                      href={tienda.socialMedia.tiktok}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 bg-gray-700 hover:bg-orange-500 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
+                    >
+                      <PetIcons.TikTok />
                     </a>
                   )}
                 </div>

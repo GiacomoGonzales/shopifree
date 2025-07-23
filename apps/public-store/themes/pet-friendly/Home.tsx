@@ -477,12 +477,12 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
   }
 
   return (
-    <div className="pet-theme-home">
+    <div className="pet-theme-home overflow-x-hidden">
       {/* Carrusel Móvil - Solo visible en móvil */}
-      <section className="lg:hidden relative bg-gray-50 pt-20 sm:pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="lg:hidden relative bg-gray-50 pt-20 sm:pt-24 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
           <div 
-            className="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg"
+            className="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg w-full"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
@@ -506,7 +506,8 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
                     className="absolute inset-0 w-full h-full transition-transform duration-300"
                     style={{
                       transform: `translateX(${translateX}%)`,
-                      transition: isDragging ? 'none' : 'transform 300ms ease-out'
+                      transition: isDragging ? 'none' : 'transform 300ms ease-out',
+                      willChange: 'transform'
                     }}
                   >
                     <Image
@@ -542,7 +543,7 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
       </section>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden lg:pt-20">
+      <section className="relative overflow-hidden lg:pt-20 w-full">
         {/* Carrusel de fondo - Solo visible en desktop */}
         <div className="absolute inset-0 hidden lg:block">
           {featuredBanners.map((banner, index) => (
@@ -897,18 +898,6 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
                       </h3>
                     </Link>
 
-                    {/* Rating */}
-                    <div className="flex items-center space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <div key={i} className={`w-3 h-3 ${i < Math.floor(producto.rating || 4.5) ? 'text-yellow-400' : 'text-gray-300'}`}>
-                          <PetIcons.Star />
-                        </div>
-                      ))}
-                      <span className="text-xs text-gray-500 ml-1">
-                        ({producto.reviews || 24})
-                      </span>
-                    </div>
-
                     {/* Precio */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
@@ -989,13 +978,13 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
           </div>
 
           <div className="max-w-md mx-auto mt-8">
-            <div className="flex gap-3">
+            <div className="flex flex-col lg:flex-row gap-3">
               <input
                 type="email"
                 placeholder="tu@email.com"
-                className="flex-1 px-4 py-3 rounded-xl border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white text-lg"
+                className="w-full px-4 py-3 rounded-xl border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white text-lg"
               />
-              <button className="px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-lg">
+              <button className="w-full lg:w-auto px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-lg">
                 Suscribirse
               </button>
             </div>
