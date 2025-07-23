@@ -35,6 +35,7 @@ export default getRequestConfig(async ({ locale }) => {
     ...baseMessages,
     home: homeMessages,
     orders: ordersMessages,
+    pages: baseMessages.pages || {},
     products: productsMessages,
     categories: categoriesMessages,
     brands: brandsMessages,

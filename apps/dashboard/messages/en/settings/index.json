@@ -9,10 +9,7 @@
   "sections": {
     "info": "Store information",
     "contact": "Contact",
-    "branding": "Branding",
-    "sales": "Sales",
-    "social": "Social media",
-    "location": "Location"
+    "sales": "Sales"
   },
   "storeInfo": {
     "title": "Store Information",
@@ -59,23 +56,7 @@
     "addressPlaceholder": "Enter your store address",
     "addressSaved": "Location saved successfully"
   },
-  "branding": {
-    "title": "Branding",
-    "subtitle": "Customize colors and visual identity of your store",
-    "logo": "Logo",
-    "logoUploadHint": "Drag an image here or click to select",
-    "logoHint": "Recommended: 200x200px, PNG or JPG format",
-    "storePhoto": "Store photo",
-    "storePhotoUploadHint": "Drag an image here or click to select",
-    "storePhotoHint": "Optional: Photo of your physical store",
-    "primaryColor": "Primary color",
-    "secondaryColor": "Secondary color",
-    "fileFormat": "PNG, JPG or JPEG up to 5MB",
-    "optional": "optional",
-    "uploading": "Uploading image...",
-    "changeImage": "Change",
-    "removeImage": "Remove"
-  },
+
   "sales": {
     "title": "Sales Configuration",
     "subtitle": "Configure currency and sales methods for your store",
@@ -114,8 +95,7 @@
     "tabs": {
       "checkout": "Checkout Method",
       "payments": "Payment Gateway",
-      "shipping": "Shipping",
-      "seo": "SEO"
+      "shipping": "Shipping"
     },
     "checkout": {
       "title": "Checkout Method",
@@ -294,13 +274,6 @@
         "confirm": "Confirm",
         "cancel": "Cancel"
       }
-    },
-    "seo": {
-      "title": "SEO Configuration",
-      "description": "Optimize your store for search engines",
-      "seoTitle": "SEO Title",
-      "seoTitlePlaceholder": "My Store - The best online store",
-      "comingSoon": "Coming soon"
     }
   },
   "account": {

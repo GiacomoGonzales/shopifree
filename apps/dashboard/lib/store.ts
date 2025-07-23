@@ -67,9 +67,10 @@ export interface StoreConfig {
       whatsappMessage?: string
     }
     payments?: {
-      provider?: 'culqi' | 'mercadopago' | null
+      provider?: 'culqi' | 'mercadopago' | 'stripe' | 'paypal' | null
       publicKey?: string
       secretKey?: string
+      webhookEndpoint?: string
       connected?: boolean
     }
     shipping?: {
@@ -204,7 +205,94 @@ export interface StoreConfig {
   updatedAt: Date | unknown
 }
 
-export type StoreWithId = StoreConfig & { id: string }
+export interface StoreWithId {
+  id: string
+  storeName: string
+  subdomain: string
+  slogan: string
+  description: string
+  hasPhysicalLocation: boolean
+  address?: string
+  location?: {
+    address: string
+    lat: number
+    lng: number
+  }
+  businessType?: string
+  primaryColor: string
+  secondaryColor: string
+  currency: string
+  phone: string
+  emailStore?: string
+  logo?: string
+  storePhoto?: string
+  logoUrl?: string
+  storefrontImageUrl?: string
+  headerLogoUrl?: string
+  logoPublicId?: string
+  storefrontImagePublicId?: string
+  headerLogoPublicId?: string
+  heroImageUrl?: string
+  heroImagePublicId?: string
+  carouselImages?: Array<{
+    url: string
+    publicId: string
+    order: number
+  }>
+  theme?: string
+  socialMedia?: {
+    facebook?: string
+    instagram?: string
+    whatsapp?: string
+    tiktok?: string
+    x?: string
+    snapchat?: string
+    linkedin?: string
+    telegram?: string
+    youtube?: string
+    pinterest?: string
+  }
+  advanced?: {
+    seo?: {
+      title?: string
+      metaDescription?: string
+      keywords?: string[]
+      ogTitle?: string
+      ogDescription?: string
+      ogImage?: string
+      ogImagePublicId?: string
+      favicon?: string
+      faviconPublicId?: string
+      robots?: 'index,follow' | 'index,nofollow' | 'noindex,follow' | 'noindex,nofollow'
+      canonicalUrl?: string
+      structuredDataEnabled?: boolean
+      googleSearchConsole?: string
+      tiktokPixel?: string
+      customSlug?: string
+    }
+    integrations?: {
+      googleAnalytics?: string
+      metaPixel?: string
+    }
+    language?: 'es' | 'en'
+  }
+  payments?: {
+    provider?: string
+    settings?: {
+      culqi?: {
+        publicKey?: string
+        privateKey?: string
+      }
+      mercadopago?: {
+        accessToken?: string
+        publicKey?: string
+      }
+    }
+  }
+  ownerId: string
+  createdAt: Date | unknown
+  updatedAt: Date | unknown
+}
 
 // Check if user has a store
 export const getUserStore = async (userId: string): Promise<StoreWithId | null> => {

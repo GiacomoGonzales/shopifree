@@ -3,8 +3,9 @@
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import DashboardLayout from '../../../../components/DashboardLayout'
+import BrandingSection from '../../../../components/store-design/BrandingSection'
 
-export default function StoreDesignLogoColorsPage() {
+export default function StoreDesignBrandingPage() {
   const t = useTranslations('storeDesign')
   const params = useParams()
   const locale = params?.locale || 'es'
@@ -26,7 +27,7 @@ export default function StoreDesignLogoColorsPage() {
                 aria-label="Tabs"
               >
                 <a
-                  href={`/${locale}/store-design/logo-colors`}
+                  href={`/${locale}/store-design/branding`}
                   className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-gray-600 text-gray-800"
                 >
                   {t('tabs.logoColors')}
@@ -47,29 +48,9 @@ export default function StoreDesignLogoColorsPage() {
             </div>
           </div>
 
-          {/* Contenido */}
-          <div className="space-y-6">
-            {/* Sección de Logo */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('sections.logo.title')}</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  {t('sections.logo.description')}
-                </p>
-                {/* Aquí irá el componente de subida de logo */}
-              </div>
-            </div>
-
-            {/* Sección de Colores */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('sections.colors.title')}</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  {t('sections.colors.description')}
-                </p>
-                {/* Aquí irán los selectores de color */}
-              </div>
-            </div>
+          {/* Contenido - Componente de Branding */}
+          <div>
+            <BrandingSection />
           </div>
         </div>
       </div>

@@ -27,6 +27,17 @@ export default function ContactSection() {
     },
     phone: '',
     emailStore: '',
+    socialMedia: {
+      facebook: '',
+      instagram: '',
+      tiktok: '',
+      x: '',
+      snapchat: '',
+      linkedin: '',
+      telegram: '',
+      youtube: '',
+      pinterest: ''
+    }
   })
 
   // Cargar datos de la tienda
@@ -47,6 +58,17 @@ export default function ContactSection() {
             },
             phone: userStore.phone || '',
             emailStore: userStore.emailStore || '',
+            socialMedia: {
+              facebook: userStore.socialMedia?.facebook || '',
+              instagram: userStore.socialMedia?.instagram || '',
+              tiktok: userStore.socialMedia?.tiktok || '',
+              x: userStore.socialMedia?.x || '',
+              snapchat: userStore.socialMedia?.snapchat || '',
+              linkedin: userStore.socialMedia?.linkedin || '',
+              telegram: userStore.socialMedia?.telegram || '',
+              youtube: userStore.socialMedia?.youtube || '',
+              pinterest: userStore.socialMedia?.pinterest || ''
+            }
           })
         }
       } catch (error) {
@@ -111,6 +133,15 @@ export default function ContactSection() {
           [locationField]: value
         }
       }))
+    } else if (field.startsWith('socialMedia.')) {
+      const socialField = field.split('.')[1]
+      setFormData(prev => ({
+        ...prev,
+        socialMedia: {
+          ...prev.socialMedia,
+          [socialField]: value
+        }
+      }))
     } else {
       setFormData(prev => ({
         ...prev,
@@ -168,6 +199,7 @@ export default function ContactSection() {
 
   return (
     <div className="space-y-6">
+      {/* Información de Contacto */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
           <div>
@@ -253,6 +285,135 @@ export default function ContactSection() {
             <p className="mt-1 text-xs text-gray-500">
               {t('contact.emailStoreHint')}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Redes Sociales */}
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{t('socialMedia.title')}</h3>
+            <p className="mt-1 text-sm text-gray-600">{t('socialMedia.subtitle')}</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.facebook')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.facebook}
+                onChange={(e) => handleChange('socialMedia.facebook', e.target.value)}
+                placeholder={t('socialMedia.facebookPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.instagram')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.instagram}
+                onChange={(e) => handleChange('socialMedia.instagram', e.target.value)}
+                placeholder={t('socialMedia.instagramPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.tiktok')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.tiktok}
+                onChange={(e) => handleChange('socialMedia.tiktok', e.target.value)}
+                placeholder={t('socialMedia.tiktokPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.x')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.x}
+                onChange={(e) => handleChange('socialMedia.x', e.target.value)}
+                placeholder={t('socialMedia.xPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.snapchat')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.snapchat}
+                onChange={(e) => handleChange('socialMedia.snapchat', e.target.value)}
+                placeholder={t('socialMedia.snapchatPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.linkedin')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.linkedin}
+                onChange={(e) => handleChange('socialMedia.linkedin', e.target.value)}
+                placeholder={t('socialMedia.linkedinPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.telegram')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.telegram}
+                onChange={(e) => handleChange('socialMedia.telegram', e.target.value)}
+                placeholder={t('socialMedia.telegramPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.youtube')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.youtube}
+                onChange={(e) => handleChange('socialMedia.youtube', e.target.value)}
+                placeholder={t('socialMedia.youtubePlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('socialMedia.pinterest')}
+              </label>
+              <input
+                type="url"
+                value={formData.socialMedia.pinterest}
+                onChange={(e) => handleChange('socialMedia.pinterest', e.target.value)}
+                placeholder={t('socialMedia.pinterestPlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+              />
+            </div>
           </div>
         </div>
       </div>

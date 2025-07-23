@@ -54,7 +54,16 @@
     "toggleSidebar": "Alternar menú lateral",
     "changeLanguage": "Cambiar idioma",
     "hello": "Hola",
-    "general": "Cargando..."
+    "general": "Cargando...",
+    "storeInfoTitle": "Información de la Tienda",
+    "contactTitle": "Información de Contacto",
+    "salesTitle": "Configuración de Ventas",
+    "storePickupTitle": "Recojo en Tienda",
+    "localDeliveryTitle": "Envío Local",
+    "nationalShippingTitle": "Envío Nacional",
+    "internationalShippingTitle": "Envío Internacional",
+    "additionalRulesTitle": "Reglas Adicionales",
+    "customerInfoTitle": "Información para el Cliente"
   },
   "pages": {
     "home": {
@@ -78,17 +87,14 @@
       "subtitle": "Ajustes de tu tienda",
       "description": "Configura los ajustes generales de tu tienda, información de contacto y preferencias.",
       "tabs": {
-        "basic": "General",
-        "advanced": "Configuración Avanzada"
+        "basic": "General"
       },
       "basic": {
                 "sections": {
           "info": "Información de la tienda",
           "contact": "Contacto",
-          "branding": "Branding", 
           "sales": "Ventas",
-          "social": "Redes sociales",
-          "location": "Localización"
+          "payments": "Pasarela de Pago"
         },
         "storeInfo": {
           "title": "Información de la Tienda",
@@ -138,28 +144,7 @@
           "emailStorePlaceholder": "tienda@midominio.com",
           "emailStoreHint": "Opcional: Email de contacto público de tu tienda"
         },
-        "branding": {
-          "title": "Imagen de Marca",
-          "subtitle": "Personaliza los colores y la identidad visual de tu tienda",
-          "logo": "Logo",
-          "logoUpload": "Subir logo",
-          "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
-          "logoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-          "logoRequired": "obligatorio",
-          "storePhoto": "Foto del local",
-          "storePhotoUpload": "Subir foto",
-          "storePhotoHint": "Opcional: Foto de tu local físico",
-          "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-          "primaryColor": "Color primario",
-          "secondaryColor": "Color secundario",
-          "fileFormat": "PNG, JPG o JPEG hasta 5MB",
-          "optional": "opcional",
-          "uploading": "Subiendo imagen...",
-          "uploadSuccess": "Imagen subida exitosamente",
-          "uploadError": "Error al subir imagen",
-          "changeImage": "Cambiar",
-          "removeImage": "Eliminar"
-        },
+
         "sales": {
           "title": "Configuración de Ventas",
           "subtitle": "Configura la moneda y métodos de venta de tu tienda",
@@ -194,124 +179,16 @@
           "pinterestPlaceholder": "https://pinterest.com/mi-tienda"
         }
       },
-      "advanced": {
-        "tabs": {
-          "domain": "Dominio Personalizado",
-          "checkout": "Método de Checkout",
-          "payments": "Pasarela de Pago",
-          "shipping": "Envíos",
-          "notifications": "Notificaciones",
-          "seo": "SEO",
-          "integrations": "Integraciones",
-          "language": "Idioma"
-        },
-        "domain": {
-          "title": "Configurar Dominio Personalizado",
-          "description": "Usa tu propio dominio para tu tienda",
-          "customDomain": "Dominio personalizado",
-          "customDomainPlaceholder": "mi-tienda.com",
-          "verifyDomain": "Verificar dominio",
-          "verificationStatus": "Estado de verificación",
-          "verified": "Verificado",
-          "notVerified": "No verificado",
-          "cnameGuide": "Guía para configurar CNAME",
-          "cnameInstructions": "Agrega un registro CNAME en tu proveedor de DNS:",
-          "cnameRecord": "CNAME: www → shopifree.app"
-        },
-        "checkout": {
-          "title": "Método de Checkout",
-          "description": "Configura cómo recibir los pedidos",
-          "whatsappCheckout": "Venta por WhatsApp",
-          "whatsappDescription": "Los clientes envían pedidos por WhatsApp (Plan Free)",
-          "traditionalCheckout": "Checkout tradicional",
-          "traditionalDescription": "Carrito y checkout integrado (Planes Premium/Pro)",
-          "premiumRequired": "Requiere plan de pago",
-          "whatsappMessage": "Mensaje predefinido WhatsApp",
-          "whatsappMessagePlaceholder": "¡Hola! Me interesa este producto de {storeName}:"
-        },
-        "payments": {
-          "title": "Pasarela de Pago",
-          "description": "Configura tu método de pago",
-          "provider": "Proveedor",
-          "selectProvider": "Selecciona un proveedor",
-          "culqi": "Culqi",
-          "mercadopago": "MercadoPago",
-          "publicKey": "Clave pública",
-          "publicKeyPlaceholder": "pk_test_...",
-          "secretKey": "Clave secreta",
-          "secretKeyPlaceholder": "sk_test_...",
-          "testConnection": "Probar conexión",
-          "connectionStatus": "Estado de conexión",
-          "connected": "Conectado",
-          "notConnected": "No conectado"
-        },
-        "shipping": {
-          "title": "Configuración de Envíos",
-          "description": "Configura las opciones de envío",
-          "enableShipping": "Activar módulo de envíos",
-          "shippingType": "Tipo de envío",
-          "freeShipping": "Envío gratis",
-          "fixedCost": "Costo fijo",
-          "minimumAmount": "Envío gratis por monto mínimo",
-          "shippingCost": "Costo de envío",
-          "shippingCostPlaceholder": "15.00",
-          "minimumOrderAmount": "Monto mínimo para envío gratis",
-          "minimumOrderPlaceholder": "50.00",
-          "checkoutText": "Texto visible en checkout",
-          "checkoutTextPlaceholder": "Envío a domicilio disponible",
-          "estimatedTime": "Tiempo estimado de entrega",
-          "estimatedTimePlaceholder": "24-48 horas"
-        },
-        "notifications": {
-          "title": "Notificaciones Automáticas",
-          "description": "Configura el envío automático de notificaciones",
-          "emailNotifications": "Notificaciones por correo electrónico",
-          "whatsappNotifications": "Notificaciones por WhatsApp",
-          "alternativeEmail": "Email alternativo",
-          "alternativeEmailPlaceholder": "ventas@mi-tienda.com",
-          "alternativeEmailHint": "Email adicional para recibir notificaciones"
-        },
-        "seo": {
-          "title": "Configuración SEO",
-          "description": "Optimiza tu tienda para motores de búsqueda",
-          "seoTitle": "Título SEO",
-          "seoTitlePlaceholder": "Mi Tienda - La mejor tienda online",
-          "metaDescription": "Meta descripción",
-          "metaDescriptionPlaceholder": "Encuentra los mejores productos en nuestra tienda online...",
-          "ogImage": "Imagen Open Graph",
-          "ogImageUpload": "Subir imagen OG",
-          "ogImageHint": "Recomendado: 1200x630px para redes sociales",
-          "customSlug": "Slug personalizado",
-          "customSlugPlaceholder": "mi-tienda-especial",
-          "customSlugHint": "Opcional: URL personalizada para tu tienda"
-        },
-        "integrations": {
-          "title": "Integraciones",
-          "description": "Conecta herramientas de análisis y marketing",
-          "googleAnalytics": "Google Analytics",
-          "googleAnalyticsPlaceholder": "GA4-XXXXXXXXXX",
-          "metaPixel": "Meta Pixel (Facebook)",
-          "metaPixelPlaceholder": "1234567890123456"
-        },
-        "language": {
-          "title": "Idioma de la Tienda",
-          "description": "Selecciona el idioma principal de tu tienda",
-          "storeLanguage": "Idioma de la tienda",
-          "spanish": "Español",
-          "english": "Inglés"
-        }
-      },
-      "actions": {
-        "save": "Guardar cambios",
-        "saving": "Guardando...",
-        "saved": "Cambios guardados",
-        "error": "Error al guardar",
-        "cancel": "Cancelar",
-        "uploading": "Subiendo...",
-        "upload": "Subir archivo",
-        "remove": "Remover",
-        "verify": "Verificar",
-        "test": "Probar"
+      "checkout": {
+        "title": "Método de Checkout",
+        "description": "Configura cómo recibir los pedidos",
+        "whatsappCheckout": "Venta por WhatsApp",
+        "whatsappDescription": "Los clientes envían pedidos por WhatsApp (Plan Free)",
+        "traditionalCheckout": "Checkout tradicional",
+        "traditionalDescription": "Carrito y checkout integrado (Planes Premium/Pro)",
+        "premiumRequired": "Requiere plan de pago",
+        "whatsappMessage": "Mensaje predefinido WhatsApp",
+        "whatsappMessagePlaceholder": "¡Hola! Me interesa este producto de {storeName}:"
       }
     },
     "products": {
@@ -529,7 +406,7 @@
       "subtitle": "Personaliza el diseño de tu tienda",
       "description": "Personaliza el diseño, colores, temas y aspecto visual de tu tienda.",
       "tabs": {
-        "logoColors": "Logo y colores",
+        "logoColors": "Marca",
         "banners": "Banners y secciones",
         "themes": "Temas"
       },
@@ -886,5 +763,29 @@
     "dataAvailable": "Disponibles",
     "dataNotAvailable": "No disponibles",
     "firebaseInitialized": "Inicializado"
+  },
+  "payments": {
+    "title": "Pasarela de Pago",
+    "description": "Configura tu método de pago para procesar transacciones en línea",
+    "provider": "Proveedor",
+    "selectProvider": "Selecciona un proveedor",
+    "culqi": "Culqi",
+    "mercadopago": "MercadoPago",
+    "stripe": "Stripe",
+    "paypal": "PayPal",
+    "publicKey": "Clave Pública",
+    "secretKey": "Clave Secreta",
+    "webhookEndpoint": "Webhook Endpoint",
+    "testConnection": "Probar Conexión",
+    "connectionStatus": "Estado de conexión",
+    "connected": "Conectado",
+    "notConnected": "No conectado",
+    "comingSoon": "Próximamente",
+    "configuration": {
+      "title": "Configuración de pasarela de pago",
+      "testKeysInfo": "Asegúrate de usar las claves correctas (test para pruebas, live para producción)",
+      "securityInfo": "Las claves secretas se almacenan de forma segura y encriptada",
+      "webhookInfo": "El webhook endpoint es opcional pero recomendado para actualizaciones automáticas"
+    }
   }
 } 

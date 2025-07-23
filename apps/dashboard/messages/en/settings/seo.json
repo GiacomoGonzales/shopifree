@@ -45,30 +45,27 @@
     },
     "ogDescription": {
       "label": "Social Media Description",
-      "placeholder": "🛍️ Unique products with free shipping. ✨ Guaranteed quality and personalized service.",
+      "placeholder": "Discover our amazing selection of products! Free shipping on all your purchases.",
       "hint": "Description that will appear when sharing on social media",
-      "help": "Use emojis and a more informal tone for social media."
+      "help": "Use a more casual and appealing tone than in meta description."
     },
     "ogImage": {
-      "label": "Open Graph Image",
-      "description": "Image that will appear when sharing your store on social media",
-      "recommendation": "Recommended size: 1200x630 pixels",
-      "formats": "Formats: JPG, PNG, WebP",
-      "upload": "Upload image",
+      "label": "Social Media Image",
+      "description": "This image will be shown when your store is shared on social media",
+      "dropzone": "Drop an image here or click to select",
+      "uploading": "Uploading image...",
       "change": "Change image",
       "remove": "Remove image",
-      "dragDrop": "Drag an image here or click to select",
-      "uploading": "Uploading image...",
-      "uploadError": "Error uploading image"
+      "hint": "Recommended size: 1200x630px • Formats: JPG, PNG"
     },
     "favicon": {
       "label": "Favicon",
       "description": "Icon that appears in the browser tab",
-      "recommendation": "Recommended size: 32x32 pixels",
-      "formats": "Formats: ICO, PNG",
-      "upload": "Upload favicon",
+      "dropzone": "Drop an image here or click to select",
+      "uploading": "Uploading favicon...",
       "change": "Change favicon",
-      "remove": "Remove favicon"
+      "remove": "Remove favicon",
+      "hint": "Recommended size: 32x32px • Formats: ICO, PNG"
     },
     "robots": {
       "label": "Robots Configuration",
@@ -189,8 +186,8 @@
   },
 
   "messages": {
-    "saveSuccess": "SEO configuration has been saved successfully",
-    "saveError": "There was an error saving the configuration",
+    "saveSuccess": "SEO configuration saved successfully",
+    "saveError": "Error saving SEO configuration",
     "imageUploadSuccess": "Image uploaded successfully",
     "imageUploadError": "Error uploading image",
     "invalidFormat": "Invalid file format",

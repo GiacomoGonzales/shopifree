@@ -196,9 +196,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       'marketing': 'marketing',
       'content': 'content',
       'store-design': 'storeDesign',
+      'branding': 'storeDesign',
+      'banners': 'storeDesign',
+      'themes': 'storeDesign',
       'reports': 'reports',
       'settings': 'settings',
-      'account': 'account'
+      'account': 'account',
+      'support': 'support'
     }
 
     // Mapeo específico para subrutas de settings
@@ -206,12 +210,48 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       'general': 'basicSettings',
       'basic': 'basicSettings', // Backward compatibility
       'shipping': 'shippingSettings',
-      'advanced': 'advancedSettings'
+      'advanced': 'advancedSettings',
+      'seo': 'seoSettings'
+    }
+
+    // Si estamos en una subruta de settings/general
+    if (parentSection === 'general' && currentSection) {
+      // Mapeo específico para las secciones de configuración general
+      const generalSectionTitles: Record<string, string> = {
+        'info': 'storeInfoTitle',
+        'contact': 'contactTitle',
+        'sales': 'salesTitle'
+      }
+      return t(generalSectionTitles[currentSection] || `sections.${currentSection}`)
     }
 
     // Si estamos en una subruta de settings
     if (parentSection === 'settings' && settingsSubrouteToTranslationKey[currentSection]) {
       return t(settingsSubrouteToTranslationKey[currentSection])
+    }
+
+    // Si estamos en una subruta de store-design
+    if (parentSection === 'store-design') {
+      return t('storeDesign')
+    }
+
+    // Si estamos en una subruta de content
+    if (parentSection === 'content') {
+      return t('content')
+    }
+
+    // Si estamos en una subruta de shipping
+    if (parentSection === 'shipping' && currentSection) {
+      // Mapeo específico para las secciones de configuración de envíos
+      const shippingSectionTitles: Record<string, string> = {
+        'store-pickup': 'storePickupTitle',
+        'local-delivery': 'localDeliveryTitle',
+        'national-shipping': 'nationalShippingTitle',
+        'international-shipping': 'internationalShippingTitle',
+        'additional-rules': 'additionalRulesTitle',
+        'customer-info': 'customerInfoTitle'
+      }
+      return t(shippingSectionTitles[currentSection] || 'shippingSettings')
     }
 
     // Si la ruta actual tiene una traducción, la usamos
@@ -235,7 +275,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { key: 'customers', href: `/${currentLocale}/customers`, icon: MenuIcons.Customers },
     { key: 'marketing', href: `/${currentLocale}/marketing`, icon: MenuIcons.Marketing },
     { key: 'content', href: `/${currentLocale}/content`, icon: MenuIcons.Content },
-    { key: 'storeDesign', href: `/${currentLocale}/store-design`, icon: MenuIcons.StoreDesign },
+    { key: 'storeDesign', href: `/${currentLocale}/store-design/branding`, icon: MenuIcons.StoreDesign },
     { key: 'reports', href: `/${currentLocale}/reports`, icon: MenuIcons.Reports },
   ]
 
@@ -288,11 +328,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         key: 'seoSettings', 
         href: `/${currentLocale}/settings/seo`, 
         label: t('seoSettings') || (currentLocale === 'es' ? 'SEO' : 'SEO')
-      },
-      { 
-        key: 'advancedSettings', 
-        href: `/${currentLocale}/settings/advanced`, 
-        label: t('advancedSettings') || (currentLocale === 'es' ? 'Configuración Avanzada' : 'Advanced Settings')
       }
     ]
   }

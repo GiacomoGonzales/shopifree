@@ -45,30 +45,27 @@
     },
     "ogDescription": {
       "label": "Descripción para Redes Sociales",
-      "placeholder": "🛍️ Productos únicos con envío gratis. ✨ Calidad garantizada y atención personalizada.",
+      "placeholder": "¡Descubre nuestra increíble selección de productos! Envío gratis en todas tus compras.",
       "hint": "Descripción que aparecerá al compartir en redes sociales",
-      "help": "Usa emojis y un tono más informal para redes sociales."
+      "help": "Usa un tono más informal y atractivo que en la meta descripción."
     },
     "ogImage": {
-      "label": "Imagen Open Graph",
-      "description": "Imagen que aparecerá al compartir tu tienda en redes sociales",
-      "recommendation": "Tamaño recomendado: 1200x630 píxeles",
-      "formats": "Formatos: JPG, PNG, WebP",
-      "upload": "Subir imagen",
-      "change": "Cambiar imagen",
-      "remove": "Remover imagen",
-      "dragDrop": "Arrastra una imagen aquí o haz clic para seleccionar",
+      "label": "Imagen para Redes Sociales",
+      "description": "Esta imagen se mostrará cuando compartas tu tienda en redes sociales",
+      "dropzone": "Arrastra una imagen aquí o haz clic para seleccionar",
       "uploading": "Subiendo imagen...",
-      "uploadError": "Error al subir la imagen"
+      "change": "Cambiar imagen",
+      "remove": "Eliminar imagen",
+      "hint": "Tamaño recomendado: 1200x630px • Formatos: JPG, PNG"
     },
     "favicon": {
       "label": "Favicon",
       "description": "Icono que aparece en la pestaña del navegador",
-      "recommendation": "Tamaño recomendado: 32x32 píxeles",
-      "formats": "Formatos: ICO, PNG",
-      "upload": "Subir favicon",
+      "dropzone": "Arrastra una imagen aquí o haz clic para seleccionar",
+      "uploading": "Subiendo favicon...",
       "change": "Cambiar favicon",
-      "remove": "Remover favicon"
+      "remove": "Eliminar favicon",
+      "hint": "Tamaño recomendado: 32x32px • Formatos: ICO, PNG"
     },
     "robots": {
       "label": "Configuración de Robots",
@@ -104,8 +101,8 @@
       "description": "Así se verá tu tienda en los resultados de búsqueda de Google"
     },
     "social": {
-      "title": "Vista previa en Redes Sociales",
-      "description": "Así se verá cuando compartan tu tienda en Facebook, WhatsApp, Twitter, etc.",
+      "title": "Vista previa en redes sociales",
+      "description": "Así se verá tu tienda cuando la compartan en redes sociales",
       "tabs": {
         "facebook": "Facebook",
         "twitter": "Twitter",
@@ -189,9 +186,9 @@
   },
 
   "messages": {
-    "saveSuccess": "La configuración SEO se ha guardado correctamente",
-    "saveError": "Hubo un error al guardar la configuración",
-    "imageUploadSuccess": "Imagen subida exitosamente",
+    "saveSuccess": "Configuración SEO guardada correctamente",
+    "saveError": "Error al guardar la configuración SEO",
+    "imageUploadSuccess": "Imagen subida correctamente",
     "imageUploadError": "Error al subir la imagen",
     "invalidFormat": "Formato de archivo no válido",
     "fileTooLarge": "El archivo es demasiado grande",

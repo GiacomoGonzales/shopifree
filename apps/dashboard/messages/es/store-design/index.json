@@ -3,36 +3,11 @@
   "subtitle": "Personaliza el diseño de tu tienda",
   "description": "Personaliza el diseño, colores, temas y aspecto visual de tu tienda.",
   "tabs": {
-    "logoColors": "Logo y colores",
+    "logoColors": "Marca",
     "banners": "Banners y secciones",
     "themes": "Temas"
   },
   "sections": {
-    "logo": {
-      "title": "Logo",
-      "description": "Sube el logo de tu tienda. Recomendamos una imagen PNG con fondo transparente.",
-      "upload": "Subir logo",
-      "change": "Cambiar logo",
-      "remove": "Eliminar logo",
-      "preview": "Vista previa del logo",
-      "dragAndDrop": "o arrastra y suelta",
-      "fileTypes": "PNG, JPG hasta 5MB",
-      "uploading": "Subiendo logo..."
-    },
-    "colors": {
-      "title": "Colores",
-      "description": "Personaliza los colores principales de tu tienda.",
-      "primary": {
-        "label": "Color Primario",
-        "description": "Color principal usado para botones y elementos importantes"
-      },
-      "secondary": {
-        "label": "Color Secundario",
-        "description": "Color de acento usado para destacados y elementos secundarios"
-      },
-      "preview": "Vista previa de colores",
-      "reset": "Restablecer por defecto"
-    },
     "hero": {
       "title": "Imagen Hero",
       "description": "Esta imagen se mostrará al inicio de tu tienda como portada. Usa una imagen horizontal de alta calidad para destacar tu marca.",
@@ -43,6 +18,7 @@
       "delete": "Eliminar",
       "uploading": "Subiendo imagen..."
     },
+
     "carousel": {
       "title": "Imágenes del Carrusel",
       "description": "Sube hasta {maxImages} imágenes para el carrusel principal de tu tienda. Recomendamos imágenes horizontales de 1920x600px para mejor visualización.",
@@ -140,11 +116,45 @@
             "generousSpacing": "Espaciado generoso",
             "sophisticatedNav": "Navegación sofisticada",
             "subtleAnimations": "Animaciones sutiles"
-          }
-        }
+                  }
       }
     }
   },
+  "branding": {
+    "title": "Imagen de Marca",
+    "subtitle": "Personaliza los colores y la identidad visual de tu tienda",
+    "logo": "Logo",
+    "logoUpload": "Subir logo",
+    "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
+    "logoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "logoRequired": "obligatorio",
+    "storePhoto": "Foto del local",
+    "storePhotoUpload": "Subir foto",
+    "storePhotoHint": "Opcional: Foto de tu local físico",
+    "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "primaryColor": "Color primario",
+    "secondaryColor": "Color secundario",
+    "fileFormat": "PNG, JPG o JPEG hasta 5MB",
+    "optional": "opcional",
+    "uploading": "Subiendo imagen...",
+    "uploadSuccess": "Imagen subida exitosamente",
+    "uploadError": "Error al subir imagen",
+    "changeImage": "Cambiar",
+    "removeImage": "Eliminar"
+  },
+  "actions": {
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "saved": "Cambios guardados",
+    "error": "Error al guardar",
+    "cancel": "Cancelar",
+    "uploading": "Subiendo...",
+    "upload": "Subir archivo",
+    "remove": "Eliminar",
+    "verify": "Verificar",
+    "test": "Probar"
+  }
+},
   "messages": {
     "saved": "Cambios guardados exitosamente",
     "error": "Ocurrió un error al guardar los cambios",
@@ -160,5 +170,39 @@
     "applying": "Aplicando tema...",
     "success": "Tema {themeName} aplicado exitosamente",
     "error": "Error al aplicar el tema"
+  },
+  "branding": {
+    "title": "Imagen de Marca",
+    "subtitle": "Personaliza los colores y la identidad visual de tu tienda",
+    "logo": "Logo",
+    "logoUpload": "Subir logo",
+    "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
+    "logoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "logoRequired": "obligatorio",
+    "storePhoto": "Foto del local",
+    "storePhotoUpload": "Subir foto",
+    "storePhotoHint": "Opcional: Foto de tu local físico",
+    "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
+    "primaryColor": "Color primario",
+    "secondaryColor": "Color secundario",
+    "fileFormat": "PNG, JPG o JPEG hasta 5MB",
+    "optional": "opcional",
+    "uploading": "Subiendo imagen...",
+    "uploadSuccess": "Imagen subida exitosamente",
+    "uploadError": "Error al subir imagen",
+    "changeImage": "Cambiar",
+    "removeImage": "Eliminar"
+  },
+  "actions": {
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "saved": "Cambios guardados",
+    "error": "Error al guardar",
+    "cancel": "Cancelar",
+    "uploading": "Subiendo...",
+    "upload": "Subir archivo",
+    "remove": "Eliminar",
+    "verify": "Verificar",
+    "test": "Probar"
   }
 } 

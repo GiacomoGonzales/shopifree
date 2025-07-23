@@ -20,8 +20,8 @@ interface FormData {
 
 export default function BrandingSection() {
   const { user } = useAuth()
-  const t = useTranslations('settings')
-  const tActions = useTranslations('settings.actions')
+  const t = useTranslations('storeDesign')
+  const tActions = useTranslations('storeDesign.actions')
   
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)

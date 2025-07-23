@@ -54,7 +54,16 @@
     "toggleSidebar": "Toggle sidebar",
     "changeLanguage": "Change language",
     "hello": "Hello",
-    "general": "Loading..."
+    "general": "Loading...",
+    "storeInfoTitle": "Store Information",
+    "contactTitle": "Contact Information",
+    "salesTitle": "Sales Configuration",
+    "storePickupTitle": "Store Pickup",
+    "localDeliveryTitle": "Local Delivery",
+    "nationalShippingTitle": "National Shipping",
+    "internationalShippingTitle": "International Shipping",
+    "additionalRulesTitle": "Additional Rules",
+    "customerInfoTitle": "Customer Information"
   },
   "pages": {
     "home": {
@@ -78,17 +87,14 @@
       "subtitle": "Store settings",
       "description": "Configure general store settings, contact information and preferences.",
       "tabs": {
-        "basic": "General",
-        "advanced": "Advanced Settings"
+        "basic": "General"
       },
       "basic": {
         "sections": {
           "info": "Store information",
           "contact": "Contact",
-          "branding": "Branding", 
           "sales": "Sales",
-          "social": "Social media",
-          "location": "Location"
+          "payments": "Payment Gateway"
         },
         "storeInfo": {
           "title": "Store Information",
@@ -138,28 +144,7 @@
           "emailStorePlaceholder": "store@mydomain.com",
           "emailStoreHint": "Optional: Public contact email for your store"
         },
-        "branding": {
-          "title": "Branding",
-          "subtitle": "Customize colors and visual identity of your store",
-          "logo": "Logo",
-          "logoUpload": "Upload logo",
-          "logoHint": "Recommended: 200x200px, PNG or JPG format",
-          "logoUploadHint": "Drag an image here or click to select",
-          "logoRequired": "required",
-          "storePhoto": "Store photo",
-          "storePhotoUpload": "Upload photo",
-          "storePhotoHint": "Optional: Photo of your physical store",
-          "storePhotoUploadHint": "Drag an image here or click to select",
-          "primaryColor": "Primary color",
-          "secondaryColor": "Secondary color",
-          "fileFormat": "PNG, JPG or JPEG up to 5MB",
-          "optional": "optional",
-          "uploading": "Uploading image...",
-          "uploadSuccess": "Image uploaded successfully",
-          "uploadError": "Error uploading image",
-          "changeImage": "Change",
-          "removeImage": "Remove"
-        },
+
         "sales": {
           "title": "Sales Configuration",
           "subtitle": "Configure currency and sales methods for your store",
@@ -201,7 +186,6 @@
           "payments": "Payment Gateway",
           "shipping": "Shipping",
           "notifications": "Notifications",
-          "seo": "SEO",
           "integrations": "Integrations",
           "language": "Language"
         },
@@ -350,7 +334,6 @@
         "costPerItem": "Cost per item",
         "profit": "Profit",
         "margin": "Margin",
-        "organization": "Product Organization",
         "variants": {
           "title": "Variants",
           "hasVariants": "This product has variants",
@@ -386,6 +369,11 @@
           "subtitle": "Organize your product by selecting categories and brand",
           "mainCategories": "Main Categories",
           "mainCategoriesSelected": "selected",
+          "subCategories": "Subcategories",
+          "subCategoriesSelected": "selected",
+          "selectedCategories": "Selected categories:",
+          "mainCategoriesLabel": "Main:",
+          "subCategoriesLabel": "Subcategories:",
           "brand": "Brand",
           "brandPlaceholder": "Select brand",
           "category": "Category",
@@ -722,5 +710,29 @@
     "dataAvailable": "Available",
     "dataNotAvailable": "Not available",
     "firebaseInitialized": "Initialized"
+  },
+  "payments": {
+    "title": "Payment Gateway",
+    "description": "Configure your payment method to process online transactions",
+    "provider": "Provider",
+    "selectProvider": "Select a provider",
+    "culqi": "Culqi",
+    "mercadopago": "MercadoPago",
+    "stripe": "Stripe",
+    "paypal": "PayPal",
+    "publicKey": "Public Key",
+    "secretKey": "Secret Key",
+    "webhookEndpoint": "Webhook Endpoint",
+    "testConnection": "Test Connection",
+    "connectionStatus": "Connection status",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "comingSoon": "Coming soon",
+    "configuration": {
+      "title": "Payment gateway configuration",
+      "testKeysInfo": "Make sure to use the correct keys (test for testing, live for production)",
+      "securityInfo": "Secret keys are stored securely and encrypted",
+      "webhookInfo": "Webhook endpoint is optional but recommended for automatic updates"
+    }
   }
 } 

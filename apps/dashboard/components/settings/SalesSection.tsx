@@ -37,6 +37,7 @@ export default function SalesSection() {
   const { user } = useAuth()
   const t = useTranslations('settings')
   const tActions = useTranslations('settings.actions')
+  const tPayments = useTranslations('payments')
   
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
@@ -48,6 +49,13 @@ export default function SalesSection() {
     advanced: {
       checkout: {
         method: 'whatsapp' as 'whatsapp' | 'traditional'
+      },
+      payments: {
+        provider: '' as '' | 'culqi' | 'mercadopago' | 'stripe' | 'paypal',
+        publicKey: '',
+        secretKey: '',
+        webhookEndpoint: '',
+        connected: false
       }
     }
   })
@@ -66,6 +74,13 @@ export default function SalesSection() {
             advanced: {
               checkout: {
                 method: userStore.advanced?.checkout?.method || 'whatsapp'
+              },
+              payments: {
+                provider: userStore.advanced?.payments?.provider || '',
+                publicKey: userStore.advanced?.payments?.publicKey || '',
+                secretKey: userStore.advanced?.payments?.secretKey || '',
+                webhookEndpoint: userStore.advanced?.payments?.webhookEndpoint || '',
+                connected: userStore.advanced?.payments?.connected || false
               }
             }
           })
@@ -92,12 +107,43 @@ export default function SalesSection() {
           }
         }
       }))
+    } else if (field.startsWith('advanced.payments.')) {
+      const paymentField = field.replace('advanced.payments.', '')
+      setFormData(prev => ({
+        ...prev,
+        advanced: {
+          ...prev.advanced,
+          payments: {
+            ...(prev.advanced?.payments || {}),
+            [paymentField]: value
+          }
+        }
+      }))
     } else {
       setFormData(prev => ({
         ...prev,
         [field]: value
       }))
     }
+  }
+
+  const testConnection = async () => {
+    // TODO: Implementar prueba de conexión con la pasarela de pago
+    console.log('Testing payment gateway connection...')
+    
+    // Simular test de conexión
+    setTimeout(() => {
+      setFormData(prev => ({
+        ...prev,
+        advanced: {
+          ...prev.advanced,
+          payments: {
+            ...prev.advanced.payments,
+            connected: true
+          }
+        }
+      }))
+    }, 2000)
   }
 
   const handleSave = async () => {
@@ -149,6 +195,7 @@ export default function SalesSection() {
 
   return (
     <div className="space-y-6">
+      {/* Configuración de Ventas */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
           <div>
@@ -221,6 +268,124 @@ export default function SalesSection() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Configuración de Pasarela de Pago */}
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{tPayments('title')}</h3>
+            <p className="mt-1 text-sm text-gray-600">{tPayments('description')}</p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {tPayments('provider')}
+              </label>
+              <select
+                value={formData.advanced.payments.provider}
+                onChange={(e) => handleChange('advanced.payments.provider', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm bg-white"
+              >
+                <option value="">{tPayments('selectProvider')}</option>
+                <option value="culqi">{tPayments('culqi')}</option>
+                <option value="mercadopago">{tPayments('mercadopago')}</option>
+                <option value="stripe">{tPayments('stripe')}</option>
+                <option value="paypal">{tPayments('paypal')}</option>
+              </select>
+            </div>
+
+            {formData.advanced.payments.provider && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {tPayments('publicKey')}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.advanced.payments.publicKey}
+                      onChange={(e) => handleChange('advanced.payments.publicKey', e.target.value)}
+                      placeholder="pk_test_..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {tPayments('secretKey')}
+                    </label>
+                    <input
+                      type="password"
+                      value={formData.advanced.payments.secretKey}
+                      onChange={(e) => handleChange('advanced.payments.secretKey', e.target.value)}
+                      placeholder="sk_test_..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {tPayments('webhookEndpoint')} (Opcional)
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.advanced.payments.webhookEndpoint}
+                    onChange={(e) => handleChange('advanced.payments.webhookEndpoint', e.target.value)}
+                    placeholder="https://tu-tienda.com/webhook/payments"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    {tPayments('configuration.webhookInfo')}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className={`h-3 w-3 rounded-full mr-3 ${
+                      formData.advanced.payments.connected ? 'bg-green-400' : 'bg-red-400'
+                    }`}></div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {tPayments('connectionStatus')}: {formData.advanced.payments.connected ? tPayments('connected') : tPayments('notConnected')}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={testConnection}
+                    disabled={!formData.advanced.payments.publicKey || !formData.advanced.payments.secretKey}
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {tPayments('testConnection')}
+                  </button>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h4 className="text-sm font-medium text-blue-800">
+                        {tPayments('configuration.title')}
+                      </h4>
+                      <div className="mt-2 text-sm text-blue-700">
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>{tPayments('configuration.testKeysInfo')}</li>
+                          <li>{tPayments('configuration.securityInfo')}</li>
+                          <li>{tPayments('configuration.webhookInfo')}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

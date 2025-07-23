@@ -164,12 +164,7 @@ export default function ShippingLocalDeliveryPage() {
     <DashboardLayout>
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Configuración de Envíos</h1>
-            <p className="mt-2 text-gray-600">
-              Configura las opciones de envío para tu tienda
-            </p>
-          </div>
+
 
           {/* Navegación */}
           <ShippingNav currentSection="local-delivery" />
@@ -244,17 +239,6 @@ export default function ShippingLocalDeliveryPage() {
                   <p className="text-sm text-gray-600 mb-4">
                     Usa el mapa interactivo para definir las zonas de entrega. Puedes crear zonas circulares o dibujar áreas personalizadas.
                   </p>
-                  
-                  {/* Instrucciones */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h5 className="text-sm font-medium text-blue-900 mb-2">Cómo usar el mapa:</h5>
-                    <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• <strong>Polígono:</strong> Haz clic en el ícono de polígono y dibuja el área de entrega punto por punto</li>
-                      <li>• <strong>Círculo:</strong> Haz clic en el ícono de círculo y dibuja un área circular</li>
-                      <li>• <strong>Configurar:</strong> Después de dibujar, configura el nombre, precio y tiempo estimado</li>
-                      <li>• <strong>Gestionar:</strong> Haz clic en una zona existente para ver información o eliminarla</li>
-                    </ul>
-                  </div>
                 </div>
 
                 {/* Componente del mapa */}

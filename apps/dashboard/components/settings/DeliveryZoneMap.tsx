@@ -30,19 +30,33 @@ interface DeliveryZone {
   precio: number
   coordenadas: Array<{ lat: number; lng: number }> | { center: { lat: number; lng: number }; radius: number }
   estimatedTime?: string
+  color?: string
 }
 
 interface ZoneModalData {
   nombre: string
   precio: number
   estimatedTime: string
+  color: string
 }
 
 const libraries: ("drawing" | "places")[] = ["drawing", "places"]
 
+// Colores predefinidos para las zonas
+const ZONE_COLORS = [
+  { name: 'Azul', value: '#2563eb' },
+  { name: 'Verde', value: '#059669' },
+  { name: 'Rojo', value: '#dc2626' },
+  { name: 'Naranja', value: '#ea580c' },
+  { name: 'Morado', value: '#7c3aed' },
+  { name: 'Rosa', value: '#db2777' },
+  { name: 'Amarillo', value: '#ca8a04' },
+  { name: 'Cian', value: '#0891b2' }
+]
+
 const mapContainerStyle = {
   width: '100%',
-  height: '500px'
+  height: '400px'
 }
 
 const defaultCenter = {
@@ -58,7 +72,8 @@ const mapOptions = {
   fullscreenControl: true
 }
 
-const drawingManagerOptions = {
+// Función para crear opciones de drawing manager con color dinámico
+const getDrawingManagerOptions = (color: string) => ({
   drawingMode: null,
   drawingControl: true,
   drawingControlOptions: {
@@ -69,9 +84,9 @@ const drawingManagerOptions = {
     ]
   },
   polygonOptions: {
-    fillColor: '#2563eb',
+    fillColor: color,
     fillOpacity: 0.3,
-    strokeColor: '#2563eb',
+    strokeColor: color,
     strokeOpacity: 0.8,
     strokeWeight: 2,
     clickable: true,
@@ -79,16 +94,16 @@ const drawingManagerOptions = {
     zIndex: 1
   },
   circleOptions: {
-    fillColor: '#2563eb',
+    fillColor: color,
     fillOpacity: 0.3,
-    strokeColor: '#2563eb',
+    strokeColor: color,
     strokeOpacity: 0.8,
     strokeWeight: 2,
     clickable: true,
     editable: true,
     zIndex: 1
   }
-}
+})
 
 interface DeliveryZoneMapProps {
   isVisible?: boolean
@@ -106,7 +121,8 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
   const [modalData, setModalData] = useState<ZoneModalData>({
     nombre: '',
     precio: 0,
-    estimatedTime: ''
+    estimatedTime: '',
+    color: '#2563eb'
   })
   const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null)
   const [infoWindowOpen, setInfoWindowOpen] = useState(false)
@@ -289,6 +305,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
       let zoneData: any = {
         nombre: modalData.nombre.trim(),
         precio: Number(modalData.precio),
+        color: modalData.color,
         createdAt: new Date().toISOString(),
         ...(modalData.estimatedTime.trim() && { estimatedTime: modalData.estimatedTime.trim() })
       }
@@ -361,7 +378,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
 
       // Limpiar modal
       setIsModalOpen(false)
-      setModalData({ nombre: '', precio: 0, estimatedTime: '' })
+      setModalData({ nombre: '', precio: 0, estimatedTime: '', color: '#2563eb' })
       setCurrentShape(null)
       
       console.log('Zone saved successfully')
@@ -408,7 +425,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
     }
     setCurrentShape(null)
     setIsModalOpen(false)
-    setModalData({ nombre: '', precio: 0, estimatedTime: '' })
+    setModalData({ nombre: '', precio: 0, estimatedTime: '', color: '#2563eb' })
   }
 
   const onZoneClick = (zone: DeliveryZone) => {
@@ -565,143 +582,164 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
         </div>
       </div>
 
-      {/* Mapa */}
-      <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-        <LoadScript
-          googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
-          libraries={libraries}
-          onLoad={onLoad}
-        >
-          {isLoaded && (
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={defaultCenter}
-              zoom={12}
-              options={mapOptions}
+      {/* Mapa y zonas configuradas en layout horizontal */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Mapa */}
+        <div className="lg:col-span-2">
+          <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+            <LoadScript
+              googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+              libraries={libraries}
+              onLoad={onLoad}
             >
-              <DrawingManager
-                onPolygonComplete={onShapeComplete}
-                onCircleComplete={onShapeComplete}
-                options={drawingManagerOptions}
-              />
-
-              {/* Renderizar zonas existentes */}
-              {zones.map(zone => {
-                if (zone.tipo === 'poligono') {
-                  const coords = zone.coordenadas as Array<{ lat: number; lng: number }>
-                  return (
-                    <Polygon
-                      key={zone.id}
-                      paths={coords}
-                      options={{
-                        fillColor: '#059669',
-                        fillOpacity: 0.3,
-                        strokeColor: '#059669',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        clickable: true
-                      }}
-                      onClick={() => onZoneClick(zone)}
-                    />
-                  )
-                } else {
-                  const coords = zone.coordenadas as { center: { lat: number; lng: number }; radius: number }
-                  return (
-                    <Circle
-                      key={zone.id}
-                      center={coords.center}
-                      radius={coords.radius}
-                      options={{
-                        fillColor: '#059669',
-                        fillOpacity: 0.3,
-                        strokeColor: '#059669',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        clickable: true
-                      }}
-                      onClick={() => onZoneClick(zone)}
-                    />
-                  )
-                }
-              })}
-
-              {/* InfoWindow para zona seleccionada */}
-              {selectedZone && infoWindowOpen && (
-                <InfoWindow
-                  position={getZoneCenter(selectedZone)}
-                  onCloseClick={() => setInfoWindowOpen(false)}
+              {isLoaded && (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={defaultCenter}
+                  zoom={12}
+                  options={mapOptions}
                 >
-                  <div className="p-2">
-                    <h4 className="font-semibold text-gray-900">{selectedZone.nombre}</h4>
-                    <p className="text-sm text-gray-600">Precio: S/ {selectedZone.precio}</p>
-                    {selectedZone.estimatedTime && (
-                      <p className="text-sm text-gray-600">Tiempo: {selectedZone.estimatedTime}</p>
-                    )}
-                    <button
-                      onClick={() => deleteZone(selectedZone.id)}
-                      className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  <DrawingManager
+                    onPolygonComplete={onShapeComplete}
+                    onCircleComplete={onShapeComplete}
+                    options={getDrawingManagerOptions(modalData.color)}
+                  />
+
+                                     {/* Renderizar zonas existentes */}
+                   {zones.map(zone => {
+                     const zoneColor = zone.color || '#059669' // Color por defecto si no tiene color
+                     if (zone.tipo === 'poligono') {
+                       const coords = zone.coordenadas as Array<{ lat: number; lng: number }>
+                       return (
+                         <Polygon
+                           key={zone.id}
+                           paths={coords}
+                           options={{
+                             fillColor: zoneColor,
+                             fillOpacity: 0.3,
+                             strokeColor: zoneColor,
+                             strokeOpacity: 0.8,
+                             strokeWeight: 2,
+                             clickable: true
+                           }}
+                           onClick={() => onZoneClick(zone)}
+                         />
+                       )
+                     } else {
+                       const coords = zone.coordenadas as { center: { lat: number; lng: number }; radius: number }
+                       return (
+                         <Circle
+                           key={zone.id}
+                           center={coords.center}
+                           radius={coords.radius}
+                           options={{
+                             fillColor: zoneColor,
+                             fillOpacity: 0.3,
+                             strokeColor: zoneColor,
+                             strokeOpacity: 0.8,
+                             strokeWeight: 2,
+                             clickable: true
+                           }}
+                           onClick={() => onZoneClick(zone)}
+                         />
+                       )
+                     }
+                   })}
+
+                  {/* InfoWindow para zona seleccionada */}
+                  {selectedZone && infoWindowOpen && (
+                    <InfoWindow
+                      position={getZoneCenter(selectedZone)}
+                      onCloseClick={() => setInfoWindowOpen(false)}
                     >
-                      Eliminar zona
-                    </button>
-                  </div>
-                </InfoWindow>
+                      <div className="p-2">
+                        <h4 className="font-semibold text-gray-900">{selectedZone.nombre}</h4>
+                        <p className="text-sm text-gray-600">Precio: S/ {selectedZone.precio}</p>
+                        {selectedZone.estimatedTime && (
+                          <p className="text-sm text-gray-600">Tiempo: {selectedZone.estimatedTime}</p>
+                        )}
+                        <button
+                          onClick={() => deleteZone(selectedZone.id)}
+                          className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                        >
+                          Eliminar zona
+                        </button>
+                      </div>
+                    </InfoWindow>
+                  )}
+                </GoogleMap>
               )}
-            </GoogleMap>
-          )}
-        </LoadScript>
-      </div>
+            </LoadScript>
+          </div>
+        </div>
 
-      {/* Lista de zonas */}
-              <div className="bg-white shadow rounded-lg border border-gray-200">
-          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Zonas configuradas</h3>
-            <button
-              onClick={() => {
-                if (storeId && user?.uid) {
-                  forceReloadZones() // Forzar recarga de zonas
-                }
-              }}
-              className="text-sm text-gray-600 hover:text-gray-800 flex items-center space-x-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Actualizar</span>
-            </button>
-          </div>
-        
-        {zones.length > 0 ? (
-          <div className="divide-y divide-gray-200">
-            {zones.map(zone => (
-              <div key={zone.id} className="px-4 py-3 flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-900">{zone.nombre}</h4>
-                  <p className="text-sm text-gray-600">
-                    Tipo: {zone.tipo} • Precio: S/ {zone.precio}
-                    {zone.estimatedTime && ` • Tiempo: ${zone.estimatedTime}`}
-                  </p>
-                </div>
-                <button
-                  onClick={() => deleteZone(zone.id)}
-                  className="text-red-600 hover:text-red-800 text-sm"
-                >
-                  Eliminar
-                </button>
+        {/* Lista de zonas */}
+        <div className="lg:col-span-1">
+          <div className="bg-white shadow rounded-lg border border-gray-200 h-full">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Zonas configuradas</h3>
+              <button
+                onClick={() => {
+                  if (storeId && user?.uid) {
+                    forceReloadZones() // Forzar recarga de zonas
+                  }
+                }}
+                className="text-sm text-gray-600 hover:text-gray-800 flex items-center space-x-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Actualizar</span>
+              </button>
+            </div>
+          
+            {zones.length > 0 ? (
+              <div className="divide-y divide-gray-200 max-h-80 overflow-y-auto">
+                                 {zones.map(zone => (
+                   <div key={zone.id} className="px-4 py-3">
+                     <div className="mb-2">
+                       <div className="flex items-center space-x-2 mb-1">
+                         <div 
+                           className="w-4 h-4 rounded border border-gray-300"
+                           style={{ backgroundColor: zone.color || '#059669' }}
+                         ></div>
+                         <h4 className="font-medium text-gray-900">{zone.nombre}</h4>
+                       </div>
+                       <p className="text-sm text-gray-600">
+                         Tipo: {zone.tipo === 'poligono' ? 'Polígono' : 'Círculo'}
+                       </p>
+                       <p className="text-sm text-gray-600">
+                         Precio: S/ {zone.precio}
+                       </p>
+                       {zone.estimatedTime && (
+                         <p className="text-sm text-gray-600">
+                           Tiempo: {zone.estimatedTime}
+                         </p>
+                       )}
+                     </div>
+                     <button
+                       onClick={() => deleteZone(zone.id)}
+                       className="text-red-600 hover:text-red-800 text-sm font-medium"
+                     >
+                       Eliminar
+                     </button>
+                   </div>
+                 ))}
               </div>
-            ))}
+            ) : (
+              <div className="px-4 py-8 text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No hay zonas configuradas</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Usa las herramientas de dibujo en el mapa para crear tu primera zona de entrega.
+                </p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="px-4 py-8 text-center">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No hay zonas configuradas</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Usa las herramientas de dibujo en el mapa para crear tu primera zona de entrega.
-            </p>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Modal para crear zona */}
@@ -751,6 +789,34 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
                     placeholder="Ej: 30-60 minutos"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                   />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Color de la zona
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {ZONE_COLORS.map((color) => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        onClick={() => setModalData(prev => ({ ...prev, color: color.value }))}
+                        className={`h-10 w-full rounded-md border-2 transition-all duration-200 ${
+                          modalData.color === color.value 
+                            ? 'border-gray-900 shadow-lg scale-105' 
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        style={{ backgroundColor: color.value }}
+                        title={color.name}
+                      >
+                        {modalData.color === color.value && (
+                          <svg className="h-5 w-5 text-white mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               

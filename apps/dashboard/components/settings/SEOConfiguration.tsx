@@ -136,10 +136,9 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         throw new Error(validation.error)
       }
       
-      const result = await replaceImageInCloudinary(
+      const result = await uploadImageToCloudinary(
         file, 
-        { folder: 'seo/og-images', storeId: store?.id },
-        seoData.ogImagePublicId || undefined
+        { folder: 'seo/og-images', storeId: store?.id }
       )
       
       handleInputChange('ogImage', result.secure_url)
@@ -163,10 +162,9 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         throw new Error(validation.error)
       }
       
-      const result = await replaceImageInCloudinary(
+      const result = await uploadImageToCloudinary(
         file, 
-        { folder: 'seo/favicons', storeId: store?.id },
-        seoData.faviconPublicId || undefined
+        { folder: 'seo/favicons', storeId: store?.id }
       )
       
       handleInputChange('favicon', result.secure_url)
@@ -484,36 +482,42 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
             </div>
           </div>
         ) : (
-          <div 
-            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              isDraggingOgImage 
-                ? 'border-black bg-gray-50' 
-                : 'border-gray-300 hover:border-gray-400'
-            }`}
-            {...handleOgImageDragEvents}
-          >
-            <input
-              type="file"
-              accept="image/*"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
+          <div className="relative">
+            <div 
+              className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                isDraggingOgImage ? 'border-black bg-gray-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDraggingOgImage(true)
+              }}
+              onDragLeave={() => setIsDraggingOgImage(false)}
+              onDrop={async (e) => {
+                e.preventDefault()
+                setIsDraggingOgImage(false)
+                const file = e.dataTransfer.files[0]
                 if (file) handleOgImageUpload(file)
               }}
-              disabled={uploadingOgImage}
-            />
-            <div className="space-y-2">
-              <div className="text-gray-400">
-                <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            >
+              <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleOgImageUpload(file)
+                  }}
+                  disabled={uploadingOgImage}
+                />
+                <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-              </div>
-              <div className="text-sm text-gray-600">
-                {uploadingOgImage ? t('fields.ogImage.uploading') : t('fields.ogImage.dragDrop')}
-              </div>
-              <div className="text-xs text-gray-500">
-                {t('fields.ogImage.recommendation')} • {t('fields.ogImage.formats')}
-              </div>
+                <p className="mt-2 text-sm text-gray-600">
+                  {uploadingOgImage ? t('fields.ogImage.uploading') : t('fields.ogImage.dropzone')}
+                </p>
+                <p className="mt-1 text-xs text-gray-500">{t('fields.ogImage.hint')}</p>
+              </label>
             </div>
           </div>
         )}
@@ -603,36 +607,42 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
             </div>
           </div>
         ) : (
-          <div 
-            className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-              isDraggingFavicon 
-                ? 'border-black bg-gray-50' 
-                : 'border-gray-300 hover:border-gray-400'
-            }`}
-            {...handleFaviconDragEvents}
-          >
-            <input
-              type="file"
-              accept="image/*"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
+          <div className="relative">
+            <div 
+              className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                isDraggingFavicon ? 'border-black bg-gray-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDraggingFavicon(true)
+              }}
+              onDragLeave={() => setIsDraggingFavicon(false)}
+              onDrop={async (e) => {
+                e.preventDefault()
+                setIsDraggingFavicon(false)
+                const file = e.dataTransfer.files[0]
                 if (file) handleFaviconUpload(file)
               }}
-              disabled={uploadingFavicon}
-            />
-            <div className="space-y-2">
-              <div className="text-gray-400">
-                <svg className="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            >
+              <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleFaviconUpload(file)
+                  }}
+                  disabled={uploadingFavicon}
+                />
+                <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-              </div>
-              <div className="text-sm text-gray-600">
-                {uploadingFavicon ? t('fields.favicon.uploading') : 'Arrastra un favicon aquí o haz clic'}
-              </div>
-              <div className="text-xs text-gray-500">
-                {t('fields.favicon.recommendation')} • {t('fields.favicon.formats')}
-              </div>
+                <p className="mt-2 text-sm text-gray-600">
+                  {uploadingFavicon ? t('fields.favicon.uploading') : t('fields.favicon.dropzone')}
+                </p>
+                <p className="mt-1 text-xs text-gray-500">{t('fields.favicon.hint')}</p>
+              </label>
             </div>
           </div>
         )}

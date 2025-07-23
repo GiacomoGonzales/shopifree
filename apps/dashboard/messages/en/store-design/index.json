@@ -3,36 +3,11 @@
   "subtitle": "Customize your store design",
   "description": "Customize the design, colors, themes and visual appearance of your store.",
   "tabs": {
-    "logoColors": "Logo & Colors",
+    "logoColors": "Branding",
     "banners": "Banners & Sections",
     "themes": "Themes"
   },
   "sections": {
-    "logo": {
-      "title": "Logo",
-      "description": "Upload your store logo. We recommend using a PNG image with transparent background.",
-      "upload": "Upload logo",
-      "change": "Change logo",
-      "remove": "Remove logo",
-      "preview": "Logo preview",
-      "dragAndDrop": "or drag and drop",
-      "fileTypes": "PNG, JPG up to 5MB",
-      "uploading": "Uploading logo..."
-    },
-    "colors": {
-      "title": "Colors",
-      "description": "Customize the main colors of your store.",
-      "primary": {
-        "label": "Primary Color",
-        "description": "Main color used for buttons and important elements"
-      },
-      "secondary": {
-        "label": "Secondary Color",
-        "description": "Accent color used for highlights and secondary elements"
-      },
-      "preview": "Color preview",
-      "reset": "Reset to default"
-    },
     "hero": {
       "title": "Hero Image",
       "description": "This image will be displayed at the top of your store as a cover. Use a high-quality horizontal image to highlight your brand.",
@@ -43,6 +18,7 @@
       "delete": "Delete",
       "uploading": "Uploading image..."
     },
+
     "carousel": {
       "title": "Carousel Images",
       "description": "Upload up to {maxImages} images for your store's main carousel. We recommend horizontal images of 1920x600px for best display.",
@@ -140,11 +116,45 @@
             "generousSpacing": "Generous spacing",
             "sophisticatedNav": "Sophisticated navigation",
             "subtleAnimations": "Subtle animations"
-          }
-        }
+                  }
       }
     }
   },
+  "branding": {
+    "title": "Branding",
+    "subtitle": "Customize colors and visual identity of your store",
+    "logo": "Logo",
+    "logoUpload": "Upload logo",
+    "logoHint": "Recommended: 200x200px, PNG or JPG format",
+    "logoUploadHint": "Drag an image here or click to select",
+    "logoRequired": "required",
+    "storePhoto": "Store photo",
+    "storePhotoUpload": "Upload photo",
+    "storePhotoHint": "Optional: Photo of your physical store",
+    "storePhotoUploadHint": "Drag an image here or click to select",
+    "primaryColor": "Primary color",
+    "secondaryColor": "Secondary color",
+    "fileFormat": "PNG, JPG or JPEG up to 5MB",
+    "optional": "optional",
+    "uploading": "Uploading image...",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Error uploading image",
+    "changeImage": "Change",
+    "removeImage": "Remove"
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saved": "Changes saved",
+    "error": "Error saving",
+    "cancel": "Cancel",
+    "uploading": "Uploading...",
+    "upload": "Upload file",
+    "remove": "Remove",
+    "verify": "Verify",
+    "test": "Test"
+  }
+},
   "messages": {
     "saved": "Changes saved successfully",
     "error": "An error occurred while saving changes",
@@ -160,5 +170,39 @@
     "applying": "Applying theme...",
     "success": "Theme {themeName} applied successfully",
     "error": "Error applying theme"
+  },
+  "branding": {
+    "title": "Branding",
+    "subtitle": "Customize colors and visual identity of your store",
+    "logo": "Logo",
+    "logoUpload": "Upload logo",
+    "logoHint": "Recommended: 200x200px, PNG or JPG format",
+    "logoUploadHint": "Drag an image here or click to select",
+    "logoRequired": "required",
+    "storePhoto": "Store photo",
+    "storePhotoUpload": "Upload photo",
+    "storePhotoHint": "Optional: Photo of your physical store",
+    "storePhotoUploadHint": "Drag an image here or click to select",
+    "primaryColor": "Primary color",
+    "secondaryColor": "Secondary color",
+    "fileFormat": "PNG, JPG or JPEG up to 5MB",
+    "optional": "optional",
+    "uploading": "Uploading image...",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Error uploading image",
+    "changeImage": "Change",
+    "removeImage": "Remove"
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saved": "Changes saved",
+    "error": "Error saving",
+    "cancel": "Cancel",
+    "uploading": "Uploading...",
+    "upload": "Upload file",
+    "remove": "Remove",
+    "verify": "Verify",
+    "test": "Test"
   }
 } 

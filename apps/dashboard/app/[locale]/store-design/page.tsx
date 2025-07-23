@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 export default function StoreDesignPage() {
   const router = useRouter()
@@ -9,8 +9,7 @@ export default function StoreDesignPage() {
   const locale = params?.locale || 'es'
 
   useEffect(() => {
-    // Redirigir automáticamente a la sección de logo y colores
-    router.replace(`/${locale}/store-design/logo-colors`)
+    router.replace(`/${locale}/store-design/branding`)
   }, [router, locale])
 
   return null

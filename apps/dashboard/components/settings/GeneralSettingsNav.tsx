@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 
 interface GeneralSettingsNavProps {
-  currentSection: 'info' | 'contact' | 'branding' | 'sales' | 'social' | 'location'
+  currentSection: 'info' | 'contact' | 'branding' | 'sales'
 }
 
 export default function GeneralSettingsNav({ currentSection }: GeneralSettingsNavProps) {
@@ -15,10 +15,7 @@ export default function GeneralSettingsNav({ currentSection }: GeneralSettingsNa
   const sections = [
     { id: 'info', key: 'info' },
     { id: 'contact', key: 'contact' },
-    { id: 'branding', key: 'branding' },
     { id: 'sales', key: 'sales' },
-    { id: 'social', key: 'social' },
-    { id: 'location', key: 'location' },
   ]
 
   return (

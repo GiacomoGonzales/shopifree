@@ -9,10 +9,7 @@
   "sections": {
     "info": "Información de la tienda",
     "contact": "Contacto",
-    "branding": "Marca",
-    "sales": "Ventas",
-    "social": "Redes sociales",
-    "location": "Localización"
+    "sales": "Ventas"
   },
   "storeInfo": {
     "title": "Información de la Tienda",
@@ -59,23 +56,7 @@
     "addressPlaceholder": "Ingresa la dirección de tu local",
     "addressSaved": "Ubicación guardada correctamente"
   },
-  "branding": {
-    "title": "Imagen de Marca",
-    "subtitle": "Personaliza los colores y la identidad visual de tu tienda",
-    "logo": "Logo",
-    "logoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-    "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
-    "storePhoto": "Foto del local",
-    "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-    "storePhotoHint": "Opcional: Foto de tu local físico",
-    "primaryColor": "Color primario",
-    "secondaryColor": "Color secundario",
-    "fileFormat": "PNG, JPG o JPEG hasta 5MB",
-    "optional": "opcional",
-    "uploading": "Subiendo imagen...",
-    "changeImage": "Cambiar",
-    "removeImage": "Eliminar"
-  },
+
   "sales": {
     "title": "Configuración de Ventas",
     "subtitle": "Configura la moneda y métodos de venta de tu tienda",
