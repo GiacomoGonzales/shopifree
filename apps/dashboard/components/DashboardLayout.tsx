@@ -194,12 +194,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       'collections': 'collections',
       'customers': 'customers',
       'marketing': 'marketing',
-      'discounts': 'discounts',
       'content': 'content',
       'store-design': 'storeDesign',
       'reports': 'reports',
       'settings': 'settings',
-      'support': 'support',
       'account': 'account'
     }
 
@@ -236,11 +234,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { key: 'orders', href: `/${currentLocale}/orders`, icon: MenuIcons.Orders },
     { key: 'customers', href: `/${currentLocale}/customers`, icon: MenuIcons.Customers },
     { key: 'marketing', href: `/${currentLocale}/marketing`, icon: MenuIcons.Marketing },
-    { key: 'discounts', href: `/${currentLocale}/discounts`, icon: MenuIcons.Discounts },
     { key: 'content', href: `/${currentLocale}/content`, icon: MenuIcons.Content },
     { key: 'storeDesign', href: `/${currentLocale}/store-design`, icon: MenuIcons.StoreDesign },
     { key: 'reports', href: `/${currentLocale}/reports`, icon: MenuIcons.Reports },
-    { key: 'support', href: `/${currentLocale}/support`, icon: MenuIcons.Support },
   ]
 
   // Elemento especial para Products con subopciones
@@ -287,6 +283,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         key: 'shippingSettings', 
         href: `/${currentLocale}/settings/shipping`, 
         label: t('shippingSettings') || (currentLocale === 'es' ? 'Envíos' : 'Shipping')
+      },
+      { 
+        key: 'seoSettings', 
+        href: `/${currentLocale}/settings/seo`, 
+        label: t('seoSettings') || (currentLocale === 'es' ? 'SEO' : 'SEO')
       },
       { 
         key: 'advancedSettings', 

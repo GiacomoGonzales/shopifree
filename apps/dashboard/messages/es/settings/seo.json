@@ -1,0 +1,217 @@
+{
+  "title": "Configuración SEO",
+  "subtitle": "Optimiza tu tienda para motores de búsqueda y redes sociales",
+  "description": "Configura todos los aspectos SEO de tu tienda para aparecer mejor en Google y redes sociales.",
+  
+  "sections": {
+    "basic": {
+      "title": "SEO Básico",
+      "description": "Configuración fundamental para motores de búsqueda"
+    },
+    "social": {
+      "title": "Redes Sociales",
+      "description": "Optimización para compartir en redes sociales"
+    },
+    "advanced": {
+      "title": "SEO Avanzado",
+      "description": "Configuraciones adicionales para mejorar tu posicionamiento"
+    }
+  },
+
+  "fields": {
+    "metaTitle": {
+      "label": "Título SEO",
+      "placeholder": "Mi Tienda - La mejor tienda online",
+      "hint": "El título que aparecerá en los resultados de Google (máximo 60 caracteres)",
+      "help": "Un buen título incluye tu marca y palabras clave importantes."
+    },
+    "metaDescription": {
+      "label": "Meta Descripción",
+      "placeholder": "Encuentra los mejores productos en nuestra tienda online. Envío gratis, precios increíbles y atención personalizada.",
+      "hint": "La descripción que aparecerá en los resultados de Google (máximo 160 caracteres)",
+      "help": "Describe tu tienda de manera atractiva e incluye palabras clave relevantes."
+    },
+    "keywords": {
+      "label": "Palabras Clave",
+      "placeholder": "tienda online, productos, envío gratis, calidad",
+      "hint": "Separadas por comas. Máximo 10 palabras clave",
+      "help": "Incluye las palabras que tus clientes buscarían para encontrar tu tienda."
+    },
+    "ogTitle": {
+      "label": "Título para Redes Sociales",
+      "placeholder": "Mi Tienda - Descubre productos increíbles",
+      "hint": "Título que aparecerá al compartir en Facebook, Twitter, WhatsApp, etc.",
+      "help": "Puede ser diferente al título SEO para ser más atractivo socialmente."
+    },
+    "ogDescription": {
+      "label": "Descripción para Redes Sociales",
+      "placeholder": "🛍️ Productos únicos con envío gratis. ✨ Calidad garantizada y atención personalizada.",
+      "hint": "Descripción que aparecerá al compartir en redes sociales",
+      "help": "Usa emojis y un tono más informal para redes sociales."
+    },
+    "ogImage": {
+      "label": "Imagen Open Graph",
+      "description": "Imagen que aparecerá al compartir tu tienda en redes sociales",
+      "recommendation": "Tamaño recomendado: 1200x630 píxeles",
+      "formats": "Formatos: JPG, PNG, WebP",
+      "upload": "Subir imagen",
+      "change": "Cambiar imagen",
+      "remove": "Remover imagen",
+      "dragDrop": "Arrastra una imagen aquí o haz clic para seleccionar",
+      "uploading": "Subiendo imagen...",
+      "uploadError": "Error al subir la imagen"
+    },
+    "favicon": {
+      "label": "Favicon",
+      "description": "Icono que aparece en la pestaña del navegador",
+      "recommendation": "Tamaño recomendado: 32x32 píxeles",
+      "formats": "Formatos: ICO, PNG",
+      "upload": "Subir favicon",
+      "change": "Cambiar favicon",
+      "remove": "Remover favicon"
+    },
+    "robots": {
+      "label": "Configuración de Robots",
+      "description": "Controla cómo los motores de búsqueda indexan tu tienda",
+      "options": {
+        "indexFollow": "Indexar y seguir enlaces (Recomendado)",
+        "indexNofollow": "Indexar pero no seguir enlaces",
+        "noindexFollow": "No indexar pero seguir enlaces",
+        "noindexNofollow": "No indexar ni seguir enlaces"
+      }
+    },
+    "canonicalUrl": {
+      "label": "URL Canónica",
+      "placeholder": "https://mi-tienda.com",
+      "hint": "URL principal de tu tienda (opcional)",
+      "help": "Solo necesario si tienes un dominio personalizado."
+    },
+    "structuredData": {
+      "label": "Datos Estructurados",
+      "description": "Ayuda a Google a entender mejor tu tienda",
+      "enable": "Habilitar datos estructurados",
+      "types": {
+        "store": "Información de tienda",
+        "products": "Información de productos",
+        "reviews": "Reseñas y calificaciones"
+      }
+    }
+  },
+
+  "preview": {
+    "google": {
+      "title": "Vista previa en Google",
+      "description": "Así se verá tu tienda en los resultados de búsqueda de Google"
+    },
+    "social": {
+      "title": "Vista previa en Redes Sociales",
+      "description": "Así se verá cuando compartan tu tienda en Facebook, WhatsApp, Twitter, etc.",
+      "tabs": {
+        "facebook": "Facebook",
+        "twitter": "Twitter",
+        "whatsapp": "WhatsApp",
+        "linkedin": "LinkedIn"
+      }
+    }
+  },
+
+  "analytics": {
+    "title": "Análisis y Seguimiento",
+    "description": "Conecta herramientas para medir el rendimiento de tu tienda",
+    "googleAnalytics": {
+      "label": "Google Analytics 4",
+      "placeholder": "G-XXXXXXXXXX",
+      "hint": "ID de medición de Google Analytics 4",
+      "help": "Para obtener estadísticas detalladas de visitantes"
+    },
+    "googleSearch": {
+      "label": "Google Search Console",
+      "placeholder": "google-site-verification=xxxxxxxxx",
+      "hint": "Código de verificación de Google Search Console",
+      "help": "Para ver cómo aparece tu tienda en búsquedas de Google"
+    },
+    "metaPixel": {
+      "label": "Meta Pixel (Facebook)",
+      "placeholder": "1234567890123456",
+      "hint": "ID del píxel de Meta/Facebook",
+      "help": "Para hacer publicidad dirigida en Facebook e Instagram"
+    },
+    "tiktokPixel": {
+      "label": "TikTok Pixel",
+      "placeholder": "XXXXXXXXXXXXXXXX",
+      "hint": "ID del píxel de TikTok",
+      "help": "Para hacer publicidad dirigida en TikTok"
+    }
+  },
+
+  "sitemap": {
+    "title": "Sitemap",
+    "description": "Ayuda a los motores de búsqueda a encontrar todas las páginas de tu tienda",
+    "generate": "Generar sitemap automáticamente",
+    "url": "URL del sitemap",
+    "lastGenerated": "Última generación",
+    "regenerate": "Regenerar sitemap"
+  },
+
+  "performance": {
+    "title": "Rendimiento SEO",
+    "description": "Métricas importantes para el SEO de tu tienda",
+    "score": "Puntuación SEO",
+    "metrics": {
+      "titleOptimized": "Título optimizado",
+      "descriptionOptimized": "Descripción optimizada",
+      "imageOptimized": "Imagen Open Graph configurada",
+      "keywordsConfigured": "Palabras clave configuradas",
+      "analyticsConnected": "Analytics conectado",
+      "faviconConfigured": "Favicon configurado"
+    },
+    "recommendations": {
+      "title": "Recomendaciones de Mejora",
+      "addKeywords": "Agrega palabras clave relevantes",
+      "optimizeTitle": "Optimiza el título (30-60 caracteres)",
+      "optimizeDescription": "Optimiza la descripción (120-160 caracteres)",
+      "addOgImage": "Agrega una imagen Open Graph",
+      "connectAnalytics": "Conecta Google Analytics",
+      "addFavicon": "Agrega un favicon"
+    }
+  },
+
+  "actions": {
+    "save": "Guardar configuración",
+    "saving": "Guardando...",
+    "saved": "Configuración guardada exitosamente",
+    "error": "Error al guardar la configuración",
+    "cancel": "Cancelar",
+    "preview": "Vista previa",
+    "test": "Probar configuración",
+    "reset": "Restablecer",
+    "generate": "Generar automáticamente"
+  },
+
+  "messages": {
+    "saveSuccess": "La configuración SEO se ha guardado correctamente",
+    "saveError": "Hubo un error al guardar la configuración",
+    "imageUploadSuccess": "Imagen subida exitosamente",
+    "imageUploadError": "Error al subir la imagen",
+    "invalidFormat": "Formato de archivo no válido",
+    "fileTooLarge": "El archivo es demasiado grande",
+    "urlInvalid": "La URL no es válida",
+    "titleTooLong": "El título es demasiado largo (máximo 60 caracteres)",
+    "descriptionTooLong": "La descripción es demasiado larga (máximo 160 caracteres)",
+    "keywordsTooMany": "Máximo 10 palabras clave permitidas"
+  },
+
+  "tips": {
+    "title": "Consejos para mejorar tu SEO",
+    "items": [
+      "Usa títulos descriptivos y únicos para cada página",
+      "Incluye palabras clave naturalmente en tus descripciones",
+      "Optimiza las imágenes con texto alternativo descriptivo",
+      "Mantén URLs simples y descriptivas",
+      "Actualiza el contenido regularmente",
+      "Mejora la velocidad de carga de tu tienda",
+      "Usa datos estructurados para mejor indexación",
+      "Consigue enlaces de calidad hacia tu tienda"
+    ]
+  }
+} 

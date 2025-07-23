@@ -26,6 +26,7 @@ export default getRequestConfig(async ({ locale }) => {
   const reportsMessages = (await import(`./messages/${locale}/reports/index.json`)).default;
   const supportMessages = (await import(`./messages/${locale}/support/index.json`)).default;
   const settingsMessages = (await import(`./messages/${locale}/settings/index.json`)).default;
+  const seoMessages = (await import(`./messages/${locale}/settings/seo.json`)).default;
   const onboardingUserMessages = (await import(`./messages/${locale}/onboarding/user.json`)).default;
   const onboardingStoreMessages = (await import(`./messages/${locale}/onboarding/store.json`)).default;
 
@@ -45,7 +46,10 @@ export default getRequestConfig(async ({ locale }) => {
     storeDesign: storeDesignMessages,
     reports: reportsMessages,
     support: supportMessages,
-    settings: settingsMessages,
+    settings: {
+      ...settingsMessages,
+      seo: seoMessages
+    },
     onboarding: {
       user: onboardingUserMessages,
       store: onboardingStoreMessages

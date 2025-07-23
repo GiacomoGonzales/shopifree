@@ -1,0 +1,217 @@
+{
+  "title": "SEO Configuration",
+  "subtitle": "Optimize your store for search engines and social media",
+  "description": "Configure all SEO aspects of your store to rank better on Google and social media.",
+  
+  "sections": {
+    "basic": {
+      "title": "Basic SEO",
+      "description": "Fundamental configuration for search engines"
+    },
+    "social": {
+      "title": "Social Media",
+      "description": "Optimization for social media sharing"
+    },
+    "advanced": {
+      "title": "Advanced SEO",
+      "description": "Additional settings to improve your ranking"
+    }
+  },
+
+  "fields": {
+    "metaTitle": {
+      "label": "SEO Title",
+      "placeholder": "My Store - The best online store",
+      "hint": "The title that will appear in Google search results (max 60 characters)",
+      "help": "A good title includes your brand and important keywords."
+    },
+    "metaDescription": {
+      "label": "Meta Description",
+      "placeholder": "Find the best products in our online store. Free shipping, amazing prices and personalized service.",
+      "hint": "The description that will appear in Google search results (max 160 characters)",
+      "help": "Describe your store attractively and include relevant keywords."
+    },
+    "keywords": {
+      "label": "Keywords",
+      "placeholder": "online store, products, free shipping, quality",
+      "hint": "Separated by commas. Maximum 10 keywords",
+      "help": "Include words your customers would search for to find your store."
+    },
+    "ogTitle": {
+      "label": "Social Media Title",
+      "placeholder": "My Store - Discover amazing products",
+      "hint": "Title that will appear when sharing on Facebook, Twitter, WhatsApp, etc.",
+      "help": "Can be different from SEO title to be more socially appealing."
+    },
+    "ogDescription": {
+      "label": "Social Media Description",
+      "placeholder": "🛍️ Unique products with free shipping. ✨ Guaranteed quality and personalized service.",
+      "hint": "Description that will appear when sharing on social media",
+      "help": "Use emojis and a more informal tone for social media."
+    },
+    "ogImage": {
+      "label": "Open Graph Image",
+      "description": "Image that will appear when sharing your store on social media",
+      "recommendation": "Recommended size: 1200x630 pixels",
+      "formats": "Formats: JPG, PNG, WebP",
+      "upload": "Upload image",
+      "change": "Change image",
+      "remove": "Remove image",
+      "dragDrop": "Drag an image here or click to select",
+      "uploading": "Uploading image...",
+      "uploadError": "Error uploading image"
+    },
+    "favicon": {
+      "label": "Favicon",
+      "description": "Icon that appears in the browser tab",
+      "recommendation": "Recommended size: 32x32 pixels",
+      "formats": "Formats: ICO, PNG",
+      "upload": "Upload favicon",
+      "change": "Change favicon",
+      "remove": "Remove favicon"
+    },
+    "robots": {
+      "label": "Robots Configuration",
+      "description": "Control how search engines index your store",
+      "options": {
+        "indexFollow": "Index and follow links (Recommended)",
+        "indexNofollow": "Index but don't follow links",
+        "noindexFollow": "Don't index but follow links",
+        "noindexNofollow": "Don't index or follow links"
+      }
+    },
+    "canonicalUrl": {
+      "label": "Canonical URL",
+      "placeholder": "https://my-store.com",
+      "hint": "Main URL of your store (optional)",
+      "help": "Only needed if you have a custom domain."
+    },
+    "structuredData": {
+      "label": "Structured Data",
+      "description": "Helps Google better understand your store",
+      "enable": "Enable structured data",
+      "types": {
+        "store": "Store information",
+        "products": "Product information",
+        "reviews": "Reviews and ratings"
+      }
+    }
+  },
+
+  "preview": {
+    "google": {
+      "title": "Google Preview",
+      "description": "This is how your store will look in Google search results"
+    },
+    "social": {
+      "title": "Social Media Preview",
+      "description": "This is how it will look when sharing your store on Facebook, WhatsApp, Twitter, etc.",
+      "tabs": {
+        "facebook": "Facebook",
+        "twitter": "Twitter",
+        "whatsapp": "WhatsApp",
+        "linkedin": "LinkedIn"
+      }
+    }
+  },
+
+  "analytics": {
+    "title": "Analytics and Tracking",
+    "description": "Connect tools to measure your store's performance",
+    "googleAnalytics": {
+      "label": "Google Analytics 4",
+      "placeholder": "G-XXXXXXXXXX",
+      "hint": "Google Analytics 4 measurement ID",
+      "help": "To get detailed visitor statistics"
+    },
+    "googleSearch": {
+      "label": "Google Search Console",
+      "placeholder": "google-site-verification=xxxxxxxxx",
+      "hint": "Google Search Console verification code",
+      "help": "To see how your store appears in Google searches"
+    },
+    "metaPixel": {
+      "label": "Meta Pixel (Facebook)",
+      "placeholder": "1234567890123456",
+      "hint": "Meta/Facebook pixel ID",
+      "help": "For targeted advertising on Facebook and Instagram"
+    },
+    "tiktokPixel": {
+      "label": "TikTok Pixel",
+      "placeholder": "XXXXXXXXXXXXXXXX",
+      "hint": "TikTok pixel ID",
+      "help": "For targeted advertising on TikTok"
+    }
+  },
+
+  "sitemap": {
+    "title": "Sitemap",
+    "description": "Helps search engines find all pages of your store",
+    "generate": "Generate sitemap automatically",
+    "url": "Sitemap URL",
+    "lastGenerated": "Last generated",
+    "regenerate": "Regenerate sitemap"
+  },
+
+  "performance": {
+    "title": "SEO Performance",
+    "description": "Important metrics for your store's SEO",
+    "score": "SEO Score",
+    "metrics": {
+      "titleOptimized": "Title optimized",
+      "descriptionOptimized": "Description optimized",
+      "imageOptimized": "Open Graph image configured",
+      "keywordsConfigured": "Keywords configured",
+      "analyticsConnected": "Analytics connected",
+      "faviconConfigured": "Favicon configured"
+    },
+    "recommendations": {
+      "title": "Improvement Recommendations",
+      "addKeywords": "Add relevant keywords",
+      "optimizeTitle": "Optimize title (30-60 characters)",
+      "optimizeDescription": "Optimize description (120-160 characters)",
+      "addOgImage": "Add an Open Graph image",
+      "connectAnalytics": "Connect Google Analytics",
+      "addFavicon": "Add a favicon"
+    }
+  },
+
+  "actions": {
+    "save": "Save configuration",
+    "saving": "Saving...",
+    "saved": "Configuration saved successfully",
+    "error": "Error saving configuration",
+    "cancel": "Cancel",
+    "preview": "Preview",
+    "test": "Test configuration",
+    "reset": "Reset",
+    "generate": "Generate automatically"
+  },
+
+  "messages": {
+    "saveSuccess": "SEO configuration has been saved successfully",
+    "saveError": "There was an error saving the configuration",
+    "imageUploadSuccess": "Image uploaded successfully",
+    "imageUploadError": "Error uploading image",
+    "invalidFormat": "Invalid file format",
+    "fileTooLarge": "File is too large",
+    "urlInvalid": "URL is not valid",
+    "titleTooLong": "Title is too long (max 60 characters)",
+    "descriptionTooLong": "Description is too long (max 160 characters)",
+    "keywordsTooMany": "Maximum 10 keywords allowed"
+  },
+
+  "tips": {
+    "title": "Tips to improve your SEO",
+    "items": [
+      "Use descriptive and unique titles for each page",
+      "Include keywords naturally in your descriptions",
+      "Optimize images with descriptive alternative text",
+      "Keep URLs simple and descriptive",
+      "Update content regularly",
+      "Improve your store's loading speed",
+      "Use structured data for better indexing",
+      "Get quality links to your store"
+    ]
+  }
+} 

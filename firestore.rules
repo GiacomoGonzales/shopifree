@@ -65,6 +65,13 @@ service cloud.firestore {
         allow read: if true;
         allow write: if isAuthenticated() && 
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+        
+        // Reglas para subcategorías
+        match /subcategorias/{subcategoryId} {
+          allow read: if true;
+          allow write: if isAuthenticated() && 
+                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+        }
       }
       
       // Reglas para marcas (solo lectura para clientes)

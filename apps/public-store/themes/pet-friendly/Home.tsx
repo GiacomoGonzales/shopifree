@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Tienda } from '../../lib/types'
@@ -11,7 +11,7 @@ import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
-import DynamicFilters from '../../components/DynamicFilters'
+import PetFriendlyDynamicFilters from './DynamicFilters'
 
 interface HomeProps {
   tienda: Tienda
@@ -78,36 +78,50 @@ const PetIcons = {
   )
 }
 
-// Productos destacados del carrusel (datos de ejemplo para mascotas)
-const featuredBanners = [
+// Carrusel publicitario con banners promocionales para mascotas
+const defaultBanners = [
   {
     id: 1,
-    title: "🦴 Comida Premium para Perros",
+    title: "Comida Premium para Perros",
+    titleEmoji: "🦴",
     subtitle: "Nutrición completa y balanceada",
     description: "Los mejores ingredientes naturales para la salud de tu mascota",
     buttonText: "Ver Productos",
-    image: "/images/banners/dog-food-banner.jpg",
+    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     backgroundColor: "from-orange-400 to-orange-600",
     textColor: "text-white"
   },
   {
     id: 2,
-    title: "🐱 Alimento para Gatos",
+    title: "Alimento para Gatos",
+    titleEmoji: "🐱",
     subtitle: "Sabor irresistible y saludable",
     description: "Fórmulas especiales adaptadas a cada etapa de vida",
     buttonText: "Explorar",
-    image: "/images/banners/cat-food-banner.jpg",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     backgroundColor: "from-purple-400 to-purple-600",
     textColor: "text-white"
   },
   {
     id: 3,
-    title: "🎾 Juguetes y Accesorios",
+    title: "Juguetes y Accesorios",
+    titleEmoji: "🎾",
     subtitle: "Diversión garantizada",
     description: "Todo lo que necesitas para mantener feliz a tu mascota",
     buttonText: "Descubrir",
-    image: "/images/banners/toys-banner.jpg",
+    image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     backgroundColor: "from-green-400 to-green-600",
+    textColor: "text-white"
+  },
+  {
+    id: 4,
+    title: "Cuidado Veterinario",
+    titleEmoji: "🏥",
+    subtitle: "Salud y bienestar",
+    description: "Productos para el cuidado y la higiene de tu compañero fiel",
+    buttonText: "Ver Cuidados",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    backgroundColor: "from-blue-400 to-blue-600",
     textColor: "text-white"
   }
 ]
@@ -138,6 +152,10 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
   const [showAllProducts, setShowAllProducts] = useState(false)
   const [productsToShow, setProductsToShow] = useState(8)
   const [currentBanner, setCurrentBanner] = useState(0)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
   const { addItem, openCart } = useCart()
   
   // Estados para filtros dinámicos
@@ -148,16 +166,72 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'newest'>('newest')
   const [showSort, setShowSort] = useState(false)
   
+  // Ref para el dropdown de ordenamiento
+  const sortRef = useRef<HTMLDivElement>(null)
+  
   // Usar solo productos reales
   const allProducts = productos || []
 
-  // Carrusel automático
+  // Usar las imágenes del carrusel configuradas o las por defecto
+  const featuredBanners = useMemo(() => {
+    if (tienda?.carouselImages && tienda.carouselImages.length > 0) {
+      return tienda.carouselImages
+        .sort((a, b) => a.order - b.order)
+        .map((image, index) => ({
+          id: index + 1,
+          title: defaultBanners[index % defaultBanners.length].title,
+          titleEmoji: defaultBanners[index % defaultBanners.length].titleEmoji,
+          subtitle: defaultBanners[index % defaultBanners.length].subtitle,
+          description: defaultBanners[index % defaultBanners.length].description,
+          buttonText: defaultBanners[index % defaultBanners.length].buttonText,
+          image: image.url,
+          backgroundColor: defaultBanners[index % defaultBanners.length].backgroundColor,
+          textColor: defaultBanners[index % defaultBanners.length].textColor
+        }))
+    }
+    return defaultBanners
+  }, [tienda?.carouselImages])
+
+  // Carrusel automático con transición más suave
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % featuredBanners.length)
-    }, 5000)
+    }, 6000) // Cambiado a 6 segundos para dar más tiempo a ver cada imagen
     return () => clearInterval(interval)
   }, [])
+
+  // Manejar click outside para el dropdown de ordenamiento
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      
+      // No cerrar si el clic fue dentro del sortRef
+      if (sortRef.current && sortRef.current.contains(target)) {
+        return
+      }
+      
+      // No cerrar si el clic fue en algún elemento del filtro
+      if (target.closest('[class*="DynamicFilters"]') || 
+          target.closest('button[class*="border-neutral-200"]') ||
+          target.closest('div[class*="border-neutral-100"]') ||
+          target.closest('div[class*="fixed"][class*="inset-0"]')) {
+        return
+      }
+      
+      // Solo cerrar el dropdown de ordenamiento si el clic fue realmente fuera
+      if (showSort) {
+        setShowSort(false)
+      }
+    }
+
+    if (showSort) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSort])
 
   // Separar categorías padre de subcategorías
   const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
@@ -361,12 +435,116 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
     }
   }
 
+  // Mínima distancia requerida para el swipe
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+    setIsDragging(true)
+    setDragOffset(0)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart || !isDragging) return
+    
+    const currentTouch = e.targetTouches[0].clientX
+    const diff = touchStart - currentTouch
+    
+    // Limitar el arrastre al ancho de la imagen
+    const maxDrag = window.innerWidth
+    const boundedDiff = Math.max(Math.min(diff, maxDrag), -maxDrag)
+    
+    setDragOffset(boundedDiff)
+    setTouchEnd(currentTouch)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd || !isDragging) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe) {
+      setCurrentBanner((prev) => (prev + 1) % featuredBanners.length)
+    } else if (isRightSwipe) {
+      setCurrentBanner((prev) => prev === 0 ? featuredBanners.length - 1 : prev - 1)
+    }
+
+    setIsDragging(false)
+    setDragOffset(0)
+  }
+
   return (
     <div className="pet-theme-home">
-      {/* Hero Section con Carrusel */}
-      <section className="relative min-h-[70vh] overflow-hidden pt-16 lg:pt-20">
-        {/* Carrusel de fondo */}
-        <div className="absolute inset-0">
+      {/* Carrusel Móvil - Solo visible en móvil */}
+      <section className="lg:hidden relative bg-gray-50 pt-20 sm:pt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div 
+            className="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {/* Carrusel de imágenes */}
+            <div className="relative w-full h-full">
+              {featuredBanners.map((banner, index) => {
+                // Calcular la posición relativa de cada imagen
+                const position = index - currentBanner
+                let translateX = position * 100 // Posición base en porcentaje
+                
+                // Ajustar la posición basada en el arrastre
+                if (isDragging) {
+                  const dragPercent = (dragOffset / window.innerWidth) * 100
+                  translateX -= dragPercent
+                }
+
+                return (
+                  <div
+                    key={banner.id}
+                    className="absolute inset-0 w-full h-full transition-transform duration-300"
+                    style={{
+                      transform: `translateX(${translateX}%)`,
+                      transition: isDragging ? 'none' : 'transform 300ms ease-out'
+                    }}
+                  >
+                    <Image
+                      src={banner.image}
+                      alt={banner.title}
+                      fill
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                    {/* Overlay gradiente */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Indicadores del carrusel */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              {featuredBanners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBanner(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    index === currentBanner 
+                      ? 'bg-white scale-125' 
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden lg:pt-20">
+        {/* Carrusel de fondo - Solo visible en desktop */}
+        <div className="absolute inset-0 hidden lg:block">
           {featuredBanners.map((banner, index) => (
             <div
               key={banner.id}
@@ -380,65 +558,116 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
         </div>
 
         {/* Contenido del Hero */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center min-h-[70vh]">
-          <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+          <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 lg:py-20">
             {/* Texto Principal */}
             <div className="space-y-6 text-center lg:text-left">
               <div className="space-y-4">
-                <div className="flex items-center justify-center lg:justify-start space-x-2 text-white/90">
+                <div className="hidden lg:flex items-center justify-center lg:justify-start space-x-2 text-white/90">
                   <PetIcons.Paw />
                   <span className="text-sm font-medium tracking-wide uppercase">
                     {tienda?.storeName || 'Pet Store'}
                   </span>
                 </div>
                 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold leading-tight ${!selectedParentCategory ? 'text-gray-900 lg:text-white' : 'text-white'}`}>
                   {featuredBanners[currentBanner].title}
+                  <span className="hidden lg:inline">{featuredBanners[currentBanner].titleEmoji} </span>
                 </h1>
                 
-                <p className="text-xl md:text-2xl text-white/90 font-medium">
+                <p className={`text-xl md:text-2xl font-medium ${!selectedParentCategory ? 'text-gray-700 lg:text-white/90' : 'text-white/90'}`}>
                   {featuredBanners[currentBanner].subtitle}
                 </p>
                 
-                <p className="text-lg text-white/80 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className={`text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 ${!selectedParentCategory ? 'text-gray-600 lg:text-white/80' : 'text-white/80'}`}>
                   {featuredBanners[currentBanner].description}
                 </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button className="pet-btn-primary inline-flex items-center space-x-2 px-8 py-4 bg-white text-orange-600 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <button className="pet-btn-primary inline-flex items-center space-x-2 px-8 py-4 bg-orange-500 lg:bg-white text-white lg:text-orange-600 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                   <span>{featuredBanners[currentBanner].buttonText}</span>
                   <PetIcons.ArrowRight />
                 </button>
                 
-                <button className="pet-btn-secondary px-8 py-4 border-2 border-white text-white rounded-2xl font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-200">
+                <button className={`pet-btn-secondary px-8 py-4 border-2 rounded-2xl font-bold text-lg transition-all duration-200 ${
+                  !selectedParentCategory 
+                    ? 'border-orange-500 text-orange-600 hover:bg-orange-50 lg:border-white lg:text-white lg:hover:bg-white lg:hover:text-orange-600' 
+                    : 'border-white text-white hover:bg-white hover:text-orange-600'
+                }`}>
                   Ver Catálogo
                 </button>
               </div>
             </div>
 
-            {/* Imagen del Hero (opcional) */}
-            <div className="relative hidden lg:block">
-              <div className="relative h-96 w-full rounded-3xl overflow-hidden bg-white/10 backdrop-blur-sm">
-                {tienda?.heroImageUrl ? (
-                  <img 
-                    src={tienda.heroImageUrl} 
-                    alt={`${tienda.storeName} - Imagen principal`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <PetIcons.Bowl />
-                  </div>
-                )}
+            {/* Carrusel de Imágenes Publicitarias - Solo visible en desktop */}
+            <div className="hidden lg:block relative">
+              <div className="relative h-72 lg:h-96 w-full rounded-3xl overflow-hidden bg-white/10 backdrop-blur-sm shadow-2xl">
+                {/* Carrusel de imágenes */}
+                <div className="relative w-full h-full">
+                  {featuredBanners.map((banner, index) => (
+                    <div
+                      key={banner.id}
+                      className={`pet-carousel-item absolute inset-0 ${
+                        index === currentBanner ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                      }`}
+                    >
+                      <Image
+                        src={banner.image}
+                        alt={banner.title}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+                      {/* Overlay gradiente */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Controles de navegación */}
+                <div className="absolute inset-y-0 left-0 flex items-center">
+                  <button
+                    onClick={() => setCurrentBanner((prev) => prev === 0 ? featuredBanners.length - 1 : prev - 1)}
+                    className="pet-carousel-control ml-4 p-2 rounded-full bg-white/20 text-white"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="absolute inset-y-0 right-0 flex items-center">
+                  <button
+                    onClick={() => setCurrentBanner((prev) => (prev + 1) % featuredBanners.length)}
+                    className="pet-carousel-control mr-4 p-2 rounded-full bg-white/20 text-white"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Indicadores de posición del carrusel de imágenes */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                  {featuredBanners.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentBanner(index)}
+                      className={`pet-carousel-indicator w-2 h-2 rounded-full ${
+                        index === currentBanner 
+                          ? 'bg-white scale-125' 
+                          : 'bg-white/50 hover:bg-white/75'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Indicadores del carrusel */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+        {/* Indicadores del carrusel - Solo visible en desktop */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20 hidden lg:flex">
           {featuredBanners.map((_, index) => (
             <button
               key={index}
@@ -478,7 +707,7 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              🐾 Categorías para tu Mascota
+              <span className="hidden lg:inline">🐾 </span>Categorías para tu Mascota
             </h2>
             <p className="text-gray-600 text-lg">Encuentra todo lo que necesitas organizadamente</p>
           </div>
@@ -559,7 +788,7 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
             <div className="flex items-center gap-3">
                              {/* Filtros dinámicos */}
                {dynamicFilters.length > 0 && (
-                 <DynamicFilters
+                 <PetFriendlyDynamicFilters
                    filters={dynamicFilters}
                    priceRangeOptions={priceRangeOptions}
                    onFiltersChange={handleFiltersChange}
@@ -569,7 +798,7 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
                )}
 
               {/* Ordenamiento */}
-              <div className="relative">
+              <div className="relative" ref={sortRef}>
                 <button
                   onClick={() => setShowSort(!showSort)}
                   className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
@@ -579,7 +808,10 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
                 </button>
                 
                 {showSort && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
+                  <div 
+                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-40"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="p-2 space-y-1">
                       {[
                         { value: 'newest', label: 'Más recientes' },
@@ -747,7 +979,7 @@ export default function PetFriendlyHome({ tienda, productos, categorias = [] }: 
       <section className="py-16 bg-gradient-to-br from-orange-500 to-orange-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
           <div className="space-y-6">
-            <div className="text-4xl">📧</div>
+            <div className="hidden lg:block text-4xl">📧</div>
             <h2 className="text-3xl md:text-4xl font-bold">
               ¡Mantente al día con las mejores ofertas!
             </h2>
