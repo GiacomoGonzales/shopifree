@@ -173,15 +173,66 @@ export default async function RootLayout({
   const structuredData = store ? generateStoreStructuredData(store) : null
   const faviconUrl = store?.advanced?.seo?.favicon || '/brand/icons/favicon.png'
 
+  // Generate SEO meta tags directly for social media
+  const seo = store?.advanced?.seo
+  const ogTitle = seo?.ogTitle || seo?.title || `${store.storeName} - ${store.slogan || 'Tienda Online'}`
+  const ogDescription = seo?.ogDescription || seo?.metaDescription || store.description || `Descubre los mejores productos en ${store.storeName}`
+  const ogImage = seo?.ogImage || store.logoUrl
+  const baseUrl = `https://${store.subdomain}.shopifree.app`
+
   return (
     <html lang={store?.advanced?.language || 'es'}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         
+        {/* Basic SEO Meta Tags */}
+        <title>{seo?.title || `${store.storeName} - ${store.slogan || 'Tienda Online'}`}</title>
+        <meta name="description" content={seo?.metaDescription || store.description || `Descubre los mejores productos en ${store.storeName}`} />
+        {seo?.keywords && seo.keywords.length > 0 && (
+          <meta name="keywords" content={seo.keywords.join(', ')} />
+        )}
+        <meta name="robots" content={seo?.robots || 'index,follow'} />
+        
+        {/* Open Graph Meta Tags for WhatsApp, Facebook, etc. */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:url" content={baseUrl} />
+        <meta property="og:site_name" content={store.storeName} />
+        <meta property="og:locale" content={store.advanced?.language === 'en' ? 'en_US' : 'es_ES'} />
+        {ogImage && (
+          <>
+            <meta property="og:image" content={ogImage} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={ogTitle} />
+          </>
+        )}
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+        
+        {/* WhatsApp specific meta tags */}
+        <meta property="og:image:type" content="image/jpeg" />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={seo?.canonicalUrl || baseUrl} />
+        
         {/* Dynamic favicon */}
         <link rel="icon" href={faviconUrl} type="image/png" />
         <link rel="shortcut icon" href={faviconUrl} type="image/png" />
         <link rel="apple-touch-icon" href={faviconUrl} />
+        
+        {/* Theme color */}
+        <meta name="theme-color" content={store.primaryColor || '#000000'} />
+        
+        {/* Google Search Console verification */}
+        {seo?.googleSearchConsole && (
+          <meta name="google-site-verification" content={seo.googleSearchConsole} />
+        )}
         
         {/* Structured Data */}
         {structuredData && (

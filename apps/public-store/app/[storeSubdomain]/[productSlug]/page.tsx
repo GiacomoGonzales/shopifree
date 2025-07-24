@@ -88,9 +88,48 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // 5. Generar structured data para el producto
   const productStructuredData = generateProductStructuredData(serverStore, product)
 
-  // 6. Renderizar el componente del cliente
+  // 6. Generar metadatos para el producto
+  const seo = serverStore.advanced?.seo
+  const productTitle = `${product.name} - ${serverStore.storeName}`
+  const productDescription = product.description.length > 160 
+    ? product.description.substring(0, 157) + '...'
+    : product.description
+  const productImage = product.image || seo?.ogImage || serverStore.logoUrl
+  const productUrl = `https://${serverStore.subdomain}.shopifree.app/${product.slug}`
+
+  // 7. Renderizar el componente del cliente
   return (
     <>
+      {/* Meta tags específicos para el producto */}
+      <head>
+        <title>{productTitle}</title>
+        <meta name="description" content={productDescription} />
+        
+        {/* Open Graph específico para producto */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={productTitle} />
+        <meta property="og:description" content={productDescription} />
+        <meta property="og:url" content={productUrl} />
+        <meta property="og:site_name" content={serverStore.storeName} />
+        {productImage && (
+          <>
+            <meta property="og:image" content={productImage} />
+            <meta property="og:image:width" content="800" />
+            <meta property="og:image:height" content="600" />
+            <meta property="og:image:alt" content={product.name} />
+          </>
+        )}
+        
+        {/* Twitter Card para producto */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={productTitle} />
+        <meta name="twitter:description" content={productDescription} />
+        {productImage && <meta name="twitter:image" content={productImage} />}
+        
+        {/* Canonical URL para el producto */}
+        <link rel="canonical" href={productUrl} />
+      </head>
+      
       {/* Structured Data para el producto */}
       {productStructuredData && (
         <script
