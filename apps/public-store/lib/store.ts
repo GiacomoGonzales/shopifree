@@ -60,6 +60,27 @@ export interface StoreDataServer {
         enabled?: boolean
       }
     }
+    seo?: {
+      title?: string
+      metaDescription?: string
+      keywords?: string[]
+      ogTitle?: string
+      ogDescription?: string
+      ogImage?: string
+      ogImagePublicId?: string
+      favicon?: string
+      faviconPublicId?: string
+      robots?: 'index,follow' | 'index,nofollow' | 'noindex,follow' | 'noindex,nofollow'
+      canonicalUrl?: string
+      structuredDataEnabled?: boolean
+      googleSearchConsole?: string
+      tiktokPixel?: string
+      customSlug?: string
+    }
+    integrations?: {
+      googleAnalytics?: string
+      metaPixel?: string
+    }
   }
   createdAt?: Timestamp | Date | string
   updatedAt?: Timestamp | Date | string
@@ -123,6 +144,27 @@ export interface StoreDataClient {
       localDelivery?: {
         enabled?: boolean
       }
+    }
+    seo?: {
+      title?: string
+      metaDescription?: string
+      keywords?: string[]
+      ogTitle?: string
+      ogDescription?: string
+      ogImage?: string
+      ogImagePublicId?: string
+      favicon?: string
+      faviconPublicId?: string
+      robots?: 'index,follow' | 'index,nofollow' | 'noindex,follow' | 'noindex,nofollow'
+      canonicalUrl?: string
+      structuredDataEnabled?: boolean
+      googleSearchConsole?: string
+      tiktokPixel?: string
+      customSlug?: string
+    }
+    integrations?: {
+      googleAnalytics?: string
+      metaPixel?: string
     }
   }
   createdAt?: string // ISO string
@@ -277,7 +319,12 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       ownerId: rawData.ownerId || '',
       theme: rawData.theme || 'base-default',
       socialMedia: rawData.socialMedia,
-      advanced: rawData.advanced || { language: 'es' },
+      advanced: {
+        ...rawData.advanced,
+        language: rawData.advanced?.language || 'es',
+        seo: rawData.advanced?.seo,
+        integrations: rawData.advanced?.integrations
+      },
       createdAt: rawData.createdAt,
       updatedAt: rawData.updatedAt,
     }

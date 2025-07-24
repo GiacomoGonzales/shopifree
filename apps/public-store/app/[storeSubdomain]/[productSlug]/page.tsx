@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
 import { getStoreProducts } from '../../../lib/products'
+import { generateProductMetadata, generateProductStructuredData } from '../../../lib/seo-utils'
 import { Tienda } from '../../../lib/types'
 import ProductClientPage from './ProductClientPage'
 
@@ -9,6 +11,37 @@ interface ProductPageProps {
     storeSubdomain: string
     productSlug: string
   }
+}
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
+  
+  if (!serverStore) {
+    return {
+      title: 'Producto no encontrado',
+      description: 'El producto que buscas no existe o no está disponible'
+    }
+  }
+
+  const clientStore = transformStoreForClient(serverStore)
+  if (!clientStore) {
+    return {
+      title: 'Producto no encontrado',
+      description: 'El producto que buscas no existe o no está disponible'
+    }
+  }
+
+  const allProducts = await getStoreProducts(clientStore.id)
+  const product = allProducts.find(p => p.slug === params.productSlug)
+
+  if (!product) {
+    return {
+      title: 'Producto no encontrado',
+      description: 'El producto que buscas no existe o no está disponible'
+    }
+  }
+
+  return generateProductMetadata(serverStore, product)
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -52,6 +85,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
     socialMedia: clientStore.socialMedia || {}, // Inicializar campo requerido
   }
 
-  // 5. Renderizar el componente del cliente
-  return <ProductClientPage tienda={tienda} product={product} locale={locale} />
+  // 5. Generar structured data para el producto
+  const productStructuredData = generateProductStructuredData(serverStore, product)
+
+  // 6. Renderizar el componente del cliente
+  return (
+    <>
+      {/* Structured Data para el producto */}
+      {productStructuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: productStructuredData }}
+        />
+      )}
+      <ProductClientPage tienda={tienda} product={product} locale={locale} />
+    </>
+  )
 } 

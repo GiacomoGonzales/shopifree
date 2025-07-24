@@ -46,6 +46,27 @@ export interface Tienda {
         enabled?: boolean
       }
     }
+    seo?: {
+      title?: string
+      metaDescription?: string
+      keywords?: string[]
+      ogTitle?: string
+      ogDescription?: string
+      ogImage?: string
+      ogImagePublicId?: string
+      favicon?: string
+      faviconPublicId?: string
+      robots?: 'index,follow' | 'index,nofollow' | 'noindex,follow' | 'noindex,nofollow'
+      canonicalUrl?: string
+      structuredDataEnabled?: boolean
+      googleSearchConsole?: string
+      tiktokPixel?: string
+      customSlug?: string
+    }
+    integrations?: {
+      googleAnalytics?: string
+      metaPixel?: string
+    }
   }
   socialMedia?: {
     facebook?: string

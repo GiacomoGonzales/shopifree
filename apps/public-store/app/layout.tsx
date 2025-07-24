@@ -3,15 +3,44 @@ import { headers } from 'next/headers'
 import { StoreProvider } from '../lib/store-context'
 import { AuthFavoritesWrapper } from '../lib/auth-favorites-wrapper'
 import { getStoreBySubdomain, extractSubdomain, transformStoreForClient, StoreDataClient } from '../lib/store'
+import { generateStoreMetadata, generateAnalyticsScripts, generateStoreStructuredData } from '../lib/seo-utils'
 import './globals.css'
 
 // Force dynamic rendering with Node.js runtime (required for Firebase)
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-export const metadata: Metadata = {
-  title: 'Shopifree Store',
-  description: 'Your online store powered by Shopifree',
+// Generate dynamic metadata based on store
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const headersList = headers()
+    const host = headersList.get('host') || headersList.get('x-forwarded-host')
+    const subdomain = extractSubdomain(host)
+    
+    if (!subdomain) {
+      return {
+        title: 'Shopifree - Crea tu tienda online gratis',
+        description: 'Crea tu tienda online completamente gratis con Shopifree. Sin comisiones, sin límites.',
+      }
+    }
+
+    const serverStore = await getStoreBySubdomain(subdomain)
+    
+    if (!serverStore) {
+      return {
+        title: 'Tienda no encontrada - Shopifree',
+        description: 'La tienda que buscas no existe o no está disponible',
+      }
+    }
+
+    return generateStoreMetadata(serverStore)
+  } catch (error) {
+    console.error('Error generating metadata:', error)
+    return {
+      title: 'Shopifree Store',
+      description: 'Your online store powered by Shopifree',
+    }
+  }
 }
 
 /**
@@ -139,22 +168,36 @@ export default async function RootLayout({
     )
   }
 
-  // Dynamic metadata based on store
-  const title = store 
-    ? `${store.storeName} - Powered by Shopifree`
-    : 'Shopifree - Crea tu tienda online gratis'
-  
-  const description = store?.description || 'Crea tu tienda online completamente gratis con Shopifree'
+  // Get analytics scripts and structured data for the store
+  const analyticsScripts = store ? generateAnalyticsScripts(store) : []
+  const structuredData = store ? generateStoreStructuredData(store) : null
+  const faviconUrl = store?.advanced?.seo?.favicon || '/brand/icons/favicon.png'
 
   return (
-    <html lang="es">
+    <html lang={store?.advanced?.language || 'es'}>
       <head>
-        <title>{title}</title>
-        <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
-        <link rel="shortcut icon" href="/brand/icons/favicon.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/brand/icons/favicon.png" />
+        
+        {/* Dynamic favicon */}
+        <link rel="icon" href={faviconUrl} type="image/png" />
+        <link rel="shortcut icon" href={faviconUrl} type="image/png" />
+        <link rel="apple-touch-icon" href={faviconUrl} />
+        
+        {/* Structured Data */}
+        {structuredData && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: structuredData }}
+          />
+        )}
+        
+        {/* Analytics Scripts */}
+        {analyticsScripts.map((script, index) => (
+          <div
+            key={index}
+            dangerouslySetInnerHTML={{ __html: script }}
+          />
+        ))}
       </head>
       <body>
         <StoreProvider initialStore={store}>

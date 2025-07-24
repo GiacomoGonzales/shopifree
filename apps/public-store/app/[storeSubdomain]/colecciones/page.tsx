@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
+import { generateStoreMetadata } from '../../../lib/seo-utils'
 import { Tienda } from '../../../lib/types'
 import CollectionsClientPage from './CollectionsClientPage'
 
@@ -7,6 +9,22 @@ interface CollectionsPageProps {
   params: {
     storeSubdomain: string
   }
+}
+
+export async function generateMetadata({ params }: CollectionsPageProps): Promise<Metadata> {
+  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
+  
+  if (!serverStore) {
+    return {
+      title: 'Colecciones no encontradas',
+      description: 'Las colecciones que buscas no existen o no están disponibles'
+    }
+  }
+
+  return generateStoreMetadata(serverStore, {
+    title: `Colecciones - ${serverStore.storeName}`,
+    metaDescription: `Explora todas las colecciones de ${serverStore.storeName}. ${serverStore.description}`
+  })
 }
 
 export default async function CollectionsPage({ params }: CollectionsPageProps) {

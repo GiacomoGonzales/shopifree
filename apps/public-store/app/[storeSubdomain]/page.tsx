@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { getStoreBySubdomain, transformStoreForClient } from '../../lib/store'
+import { generateStoreMetadata } from '../../lib/seo-utils'
 import { Tienda } from '../../lib/types'
 import ClientPage from './ClientPage'
 
@@ -7,6 +9,19 @@ interface PageProps {
   params: {
     storeSubdomain: string
   }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
+  
+  if (!serverStore) {
+    return {
+      title: 'Tienda no encontrada',
+      description: 'La tienda que buscas no existe o no está disponible'
+    }
+  }
+
+  return generateStoreMetadata(serverStore)
 }
 
 export default async function StorePage({ params }: PageProps) {
