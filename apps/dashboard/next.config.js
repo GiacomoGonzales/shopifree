@@ -14,6 +14,19 @@ const nextConfig = {
     serverComponentsExternalPackages: ['firebase', 'firebase-admin', 'firebase/app', 'firebase/auth', 'firebase/firestore'],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
+  // Configure images for external sources (Cloudinary, etc.)
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Fix for Firebase
     if (!isServer) {

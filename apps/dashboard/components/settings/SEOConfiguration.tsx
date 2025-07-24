@@ -76,6 +76,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
   useEffect(() => {
     if (store?.advanced?.seo) {
       const existingSeo = store.advanced.seo
+      console.log('Loading existing SEO data:', existingSeo)
       setSeoData(prev => ({
         ...prev,
         metaTitle: existingSeo.title || '',
@@ -97,6 +98,11 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
       }))
     }
   }, [store])
+
+  // Debug: Monitorear cambios en ogImage
+  useEffect(() => {
+    console.log('seoData.ogImage changed:', seoData.ogImage)
+  }, [seoData.ogImage])
 
   const handleInputChange = (field: keyof SEOData, value: string | boolean | string[]) => {
     setSeoData(prev => ({
@@ -141,10 +147,48 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         { folder: 'seo/og-images', storeId: store?.id }
       )
       
-      handleInputChange('ogImage', result.secure_url)
-      handleInputChange('ogImagePublicId', result.public_id)
+      // Actualizar el estado local inmediatamente
+      const newSeoData = {
+        ...seoData,
+        ogImage: result.secure_url,
+        ogImagePublicId: result.public_id
+      }
+      setSeoData(newSeoData)
+      
+      // Guardar automáticamente en Firestore
+      await onUpdate({
+        advanced: {
+          ...store?.advanced,
+          seo: {
+            ...store?.advanced?.seo,
+            title: newSeoData.metaTitle,
+            metaDescription: newSeoData.metaDescription,
+            keywords: newSeoData.keywords,
+            ogTitle: newSeoData.ogTitle,
+            ogDescription: newSeoData.ogDescription,
+            ogImage: result.secure_url,
+            ogImagePublicId: result.public_id,
+            favicon: newSeoData.favicon,
+            faviconPublicId: newSeoData.faviconPublicId,
+            robots: newSeoData.robots,
+            canonicalUrl: newSeoData.canonicalUrl,
+            structuredDataEnabled: newSeoData.structuredDataEnabled,
+            googleSearchConsole: newSeoData.googleSearchConsole,
+            tiktokPixel: newSeoData.tiktokPixel
+          },
+          integrations: {
+            ...store?.advanced?.integrations,
+            googleAnalytics: newSeoData.googleAnalytics,
+            metaPixel: newSeoData.metaPixel
+          }
+        }
+      })
+      
+      setSaveMessage(t('messages.imageUploadSuccess'))
+      setTimeout(() => setSaveMessage(null), 3000)
       
     } catch (error) {
+      console.error('Error uploading image:', error)
       setUploadError(error instanceof Error ? error.message : t('messages.imageUploadError'))
     } finally {
       setUploadingOgImage(false)
@@ -435,7 +479,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         <p className="text-xs text-gray-600 mt-1">{t('fields.ogDescription.help')}</p>
       </div>
 
-      {/* Open Graph Image */}
+      {/* Sección de imagen para redes sociales */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           {t('fields.ogImage.label')}
@@ -450,6 +494,8 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
                 alt="Open Graph preview"
                 fill
                 className="object-cover"
+                onLoad={() => console.log('OG Image loaded successfully:', seoData.ogImage)}
+                onError={(e) => console.error('Error loading OG image:', seoData.ogImage, e)}
               />
             </div>
             <div className="mt-3 flex gap-2">
@@ -528,7 +574,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
       </div>
 
       {/* Vista previa de redes sociales */}
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-50 p-4 rounded-lg mt-6">
         <h4 className="text-sm font-medium text-gray-700 mb-3">{t('preview.social.title')}</h4>
         <div className="border rounded-lg bg-white p-4 max-w-lg">
           {seoData.ogImage && (
