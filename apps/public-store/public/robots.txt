@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Allow Facebook's crawler
+User-agent: facebookexternalhit
+Allow: /
+
+# Allow other social media crawlers
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: InstagramBot
+Allow: /
+
+User-agent: GoogleBot
+Allow: /
+
+# Sitemap location
+Sitemap: https://lunara.shopifree.app/sitemap.xml 

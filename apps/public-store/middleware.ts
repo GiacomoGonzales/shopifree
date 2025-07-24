@@ -4,6 +4,31 @@ import { NextRequest, NextResponse } from 'next/server'
 // Ignora rutas como /_next, /api, /favicon.ico, y cualquier ruta que contenga un punto (e.g., /images/banner.webp)
 const PUBLIC_FILE = /\\.(.*)$/
 
+// Social media crawlers that need special handling
+const SOCIAL_MEDIA_CRAWLERS = [
+  'facebookexternalhit',
+  'Facebot',
+  'Twitterbot',
+  'WhatsApp',
+  'LinkedInBot',
+  'TelegramBot',
+  'InstagramBot',
+  'SnapchatBot',
+  'PinterestBot',
+  'TikTokBot',
+  'GoogleBot',
+  'SlackBot',
+  'DiscordBot'
+]
+
+// Function to check if the request is from a social media crawler
+function isSocialMediaCrawler(userAgent: string | null): boolean {
+  if (!userAgent) return false
+  return SOCIAL_MEDIA_CRAWLERS.some(crawler => 
+    userAgent.toLowerCase().includes(crawler.toLowerCase())
+  )
+}
+
 // Función simplificada para extraer subdomain (sin dependencias externas)
 const extractSubdomain = (host: string | null): string | null => {
   if (!host) return null
@@ -43,12 +68,26 @@ export function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl
     const host = request.headers.get('host')
+    const userAgent = request.headers.get('user-agent')
 
-    // Prevenir que el middleware se ejecute en rutas de archivos estáticos
+    // Log crawler requests for debugging
+    if (isSocialMediaCrawler(userAgent)) {
+      console.log('🔍 Social media crawler detected:', {
+        userAgent,
+        host,
+        pathname,
+        timestamp: new Date().toISOString()
+      })
+    }
+
+    // Prevenir que el middleware se ejecute en rutas de archivos estáticos, API y archivos especiales
     if (
       pathname.startsWith('/_next') ||
       pathname.startsWith('/api') ||
       pathname.startsWith('/static') ||
+      pathname.startsWith('/favicon') ||
+      pathname === '/robots.txt' ||
+      pathname === '/sitemap.xml' ||
       PUBLIC_FILE.test(pathname)
     ) {
       return NextResponse.next()
@@ -59,6 +98,17 @@ export function middleware(request: NextRequest) {
     // Si no hay subdominio válido, mostrar la landing page
     if (!subdomain) {
       return NextResponse.rewrite(new URL('/', request.url))
+    }
+
+    // Special handling for social media crawlers
+    if (isSocialMediaCrawler(userAgent)) {
+      // Redirect crawlers to the dedicated og-meta API endpoint
+      const ogMetaUrl = new URL('/api/og-meta', request.url)
+      ogMetaUrl.searchParams.set('subdomain', subdomain)
+      
+      console.log('🤖 Redirecting crawler to og-meta endpoint:', ogMetaUrl.toString())
+      
+      return NextResponse.rewrite(ogMetaUrl)
     }
 
     // Reescribir la URL para incluir el subdominio como parámetro
@@ -86,6 +136,15 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - robots.txt (robots file)
+     * - sitemap.xml (sitemap file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)',
   ],
 } 

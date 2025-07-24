@@ -8,14 +8,32 @@ import './globals.css'
 
 // Force dynamic rendering with Node.js runtime (required for Firebase)
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
+
+// Function to check if request is from a social media crawler
+function isSocialMediaCrawler(userAgent: string | null): boolean {
+  if (!userAgent) return false
+  const crawlers = [
+    'facebookexternalhit', 'Facebot', 'Twitterbot', 'WhatsApp', 
+    'LinkedInBot', 'TelegramBot', 'InstagramBot', 'SnapchatBot',
+    'PinterestBot', 'TikTokBot', 'GoogleBot', 'SlackBot', 'DiscordBot'
+  ]
+  return crawlers.some(crawler => 
+    userAgent.toLowerCase().includes(crawler.toLowerCase())
+  )
+}
 
 // Generate dynamic metadata based on store
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const headersList = headers()
     const host = headersList.get('host') || headersList.get('x-forwarded-host')
+    const userAgent = headersList.get('user-agent')
+    const isCrawler = isSocialMediaCrawler(userAgent)
     const subdomain = extractSubdomain(host)
+    
+    if (isCrawler) {
+      console.log('🤖 Generating metadata for crawler:', { userAgent, subdomain })
+    }
     
     if (!subdomain) {
       return {
@@ -52,21 +70,28 @@ async function getStoreData(): Promise<{
   hasSubdomain: boolean; 
   subdomain?: string;
   error?: string;
+  isCrawler?: boolean;
 }> {
   try {
     console.log('🚀 [SERVER] Getting store data...')
     
     const headersList = headers()
     const host = headersList.get('host') || headersList.get('x-forwarded-host')
+    const userAgent = headersList.get('user-agent')
+    const isCrawler = isSocialMediaCrawler(userAgent)
     
     console.log('🌐 [SERVER] Host detected:', host)
+    
+    if (isCrawler) {
+      console.log('🤖 [SERVER] Social media crawler detected:', userAgent)
+    }
     
     const subdomain = extractSubdomain(host)
     
     // No subdomain = main domain, show landing
     if (!subdomain) {
       console.log('🏠 [SERVER] No subdomain detected, showing landing')
-      return { store: null, hasSubdomain: false }
+      return { store: null, hasSubdomain: false, isCrawler }
     }
     
     console.log('🎯 [SERVER] Subdomain extracted:', subdomain)
@@ -76,7 +101,7 @@ async function getStoreData(): Promise<{
     
     if (!serverStore) {
       console.log('❌ [SERVER] Store not found for subdomain:', subdomain)
-      return { store: null, hasSubdomain: true, subdomain, error: 'Store not found' }
+      return { store: null, hasSubdomain: true, subdomain, error: 'Store not found', isCrawler }
     }
     
     // Transform server data to client-safe format
@@ -84,11 +109,11 @@ async function getStoreData(): Promise<{
     
     if (!clientStore) {
       console.error('❌ [SERVER] Failed to transform store data for client')
-      return { store: null, hasSubdomain: true, subdomain, error: 'Data transformation failed' }
+      return { store: null, hasSubdomain: true, subdomain, error: 'Data transformation failed', isCrawler }
     }
     
     console.log('✅ [SERVER] Store data prepared for client:', clientStore.storeName)
-    return { store: clientStore, hasSubdomain: true, subdomain }
+    return { store: clientStore, hasSubdomain: true, subdomain, isCrawler }
     
   } catch (error) {
     console.error('❌ [SERVER] Critical error in getStoreData:', error)
@@ -115,11 +140,30 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { store, hasSubdomain, subdomain, error } = await getStoreData()
+  const { store, hasSubdomain, subdomain, error, isCrawler } = await getStoreData()
 
   // If has subdomain but no store found, show error page
   if (hasSubdomain && !store) {
     const errorMessage = error || 'La tienda no está disponible'
+    
+    // For crawlers, return minimal HTML with meta tags
+    if (isCrawler) {
+      return (
+        <html lang="es">
+          <head>
+            <title>Tienda no encontrada - Shopifree</title>
+            <meta name="description" content="La tienda que buscas no existe o no está disponible" />
+            <meta property="og:title" content="Tienda no encontrada" />
+            <meta property="og:description" content="La tienda que buscas no existe o no está disponible" />
+            <meta property="og:type" content="website" />
+            <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
+          </head>
+          <body>
+            <div>Tienda no encontrada</div>
+          </body>
+        </html>
+      )
+    }
     
     return (
       <html lang="es">
@@ -179,6 +223,67 @@ export default async function RootLayout({
   const ogDescription = seo?.ogDescription || seo?.metaDescription || store.description || `Descubre los mejores productos en ${store.storeName}`
   const ogImage = seo?.ogImage || store.logoUrl
   const baseUrl = `https://${store.subdomain}.shopifree.app`
+
+  // For social media crawlers, return simplified HTML with complete meta tags
+  if (isCrawler && store) {
+    return (
+      <html lang={store?.advanced?.language || 'es'}>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          
+          {/* Basic SEO Meta Tags */}
+          <title>{seo?.title || `${store.storeName} - ${store.slogan || 'Tienda Online'}`}</title>
+          <meta name="description" content={seo?.metaDescription || store.description || `Descubre los mejores productos en ${store.storeName}`} />
+          {seo?.keywords && seo.keywords.length > 0 && (
+            <meta name="keywords" content={seo.keywords.join(', ')} />
+          )}
+          <meta name="robots" content={seo?.robots || 'index,follow'} />
+          
+          {/* Open Graph Meta Tags for WhatsApp, Facebook, etc. */}
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={ogTitle} />
+          <meta property="og:description" content={ogDescription} />
+          <meta property="og:url" content={baseUrl} />
+          <meta property="og:site_name" content={store.storeName} />
+          <meta property="og:locale" content={store.advanced?.language === 'en' ? 'en_US' : 'es_ES'} />
+          {ogImage && (
+            <>
+              <meta property="og:image" content={ogImage} />
+              <meta property="og:image:width" content="1200" />
+              <meta property="og:image:height" content="630" />
+              <meta property="og:image:alt" content={ogTitle} />
+            </>
+          )}
+          
+          {/* Twitter Card Meta Tags */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={ogTitle} />
+          <meta name="twitter:description" content={ogDescription} />
+          {ogImage && <meta name="twitter:image" content={ogImage} />}
+          
+          {/* WhatsApp specific meta tags */}
+          <meta property="og:image:type" content="image/jpeg" />
+          
+          {/* Canonical URL */}
+          <link rel="canonical" href={seo?.canonicalUrl || baseUrl} />
+          
+          {/* Dynamic favicon */}
+          <link rel="icon" href={faviconUrl} type="image/png" />
+          <link rel="shortcut icon" href={faviconUrl} type="image/png" />
+          <link rel="apple-touch-icon" href={faviconUrl} />
+          
+          {/* Theme color */}
+          <meta name="theme-color" content={store.primaryColor || '#000000'} />
+        </head>
+        <body>
+          <div>
+            <h1>{store.storeName}</h1>
+            <p>{store.description}</p>
+          </div>
+        </body>
+      </html>
+    )
+  }
 
   return (
     <html lang={store?.advanced?.language || 'es'}>
