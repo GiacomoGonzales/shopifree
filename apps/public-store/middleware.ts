@@ -23,7 +23,7 @@ const SOCIAL_MEDIA_CRAWLERS = [
 ]
 
 // Function to check if the request is from a social media crawler
-function isSocialMediaCrawler(userAgent: string | null): boolean {
+export function isSocialMediaCrawler(userAgent: string | null): boolean {
   if (!userAgent) return false
   return SOCIAL_MEDIA_CRAWLERS.some(crawler => 
     userAgent.toLowerCase().includes(crawler.toLowerCase())
@@ -101,15 +101,21 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(new URL('/', request.url))
     }
 
-    // Special handling for social media crawlers
+    // Special handling for social media crawlers - only for home page
     if (isSocialMediaCrawler(userAgent)) {
-      // Redirect crawlers to the dedicated og-meta API endpoint
-      const ogMetaUrl = new URL('/api/og-meta', request.url)
-      ogMetaUrl.searchParams.set('subdomain', subdomain)
-      
-      console.log('🤖 Redirecting crawler to og-meta endpoint:', ogMetaUrl.toString())
-      
-      return NextResponse.rewrite(ogMetaUrl)
+      // Solo redirigir crawlers a og-meta si están en la página principal
+      // Las páginas específicas (productos, categorías, etc.) manejarán sus propios meta tags
+      if (pathname === '/' || pathname === '') {
+        const ogMetaUrl = new URL('/api/og-meta', request.url)
+        ogMetaUrl.searchParams.set('subdomain', subdomain)
+        
+        console.log('🤖 Redirecting crawler to og-meta endpoint for home page:', ogMetaUrl.toString())
+        
+        return NextResponse.rewrite(ogMetaUrl)
+      } else {
+        console.log('🤖 Crawler detected for specific page, letting page handle its own meta tags:', pathname)
+        // Continuar con el flujo normal para que la página específica maneje sus meta tags
+      }
     }
 
     // Reescribir la URL para incluir el subdominio como parámetro
@@ -126,6 +132,7 @@ export function middleware(request: NextRequest) {
     // Agregar headers customizados para acceder al subdominio en las páginas
     response.headers.set('x-subdomain', subdomain)
     response.headers.set('x-host', host || '')
+    response.headers.set('x-pathname', pathname)
     
     return response
   } catch (error) {

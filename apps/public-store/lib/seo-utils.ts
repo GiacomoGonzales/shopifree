@@ -2,6 +2,35 @@ import type { Metadata } from 'next'
 import { StoreDataServer, StoreDataClient } from './store'
 import { PublicProduct } from './products'
 
+/**
+ * Optimiza una imagen para WhatsApp usando Cloudinary
+ * WhatsApp prefiere imágenes cuadradas de 400x400px
+ */
+export function optimizeImageForWhatsApp(imageUrl: string | null | undefined): string | null {
+  if (!imageUrl) return null
+  
+  // Si la imagen ya está optimizada para WhatsApp, devolverla tal como está
+  if (imageUrl.includes('c_fill,h_400,w_400')) {
+    return imageUrl
+  }
+  
+  // Si es una imagen de Cloudinary, aplicar transformaciones
+  if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+    // Extraer la parte después de /upload/
+    const uploadIndex = imageUrl.indexOf('/upload/')
+    if (uploadIndex !== -1) {
+      const beforeUpload = imageUrl.substring(0, uploadIndex + 8) // incluye '/upload/'
+      const afterUpload = imageUrl.substring(uploadIndex + 8)
+      
+      // Agregar transformaciones para WhatsApp: cuadrado, 400x400, optimizado
+      return `${beforeUpload}c_fill,f_auto,q_auto,w_400,h_400/${afterUpload}`
+    }
+  }
+  
+  // Si no es de Cloudinary, devolver la imagen original
+  return imageUrl
+}
+
 // Interfaces para SEO
 export interface SEOConfig {
   title?: string

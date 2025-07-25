@@ -225,7 +225,13 @@ export default async function RootLayout({
   const baseUrl = `https://${store.subdomain}.shopifree.app`
 
   // For social media crawlers, return simplified HTML with complete meta tags
-  if (isCrawler && store) {
+  // ONLY for home page - specific pages (products, categories) handle their own crawlers
+  const pathname = headersList.get('x-pathname') || '/'
+  const isHomePage = pathname === '/' || pathname === ''
+  
+  console.log('🤖 [LAYOUT] Crawler detected, pathname:', pathname, 'isHomePage:', isHomePage)
+  
+  if (isCrawler && store && isHomePage) {
     return (
       <html lang={store?.advanced?.language || 'es'}>
         <head>
