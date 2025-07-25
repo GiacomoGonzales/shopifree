@@ -116,74 +116,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const whatsappOptimizedImage = optimizeImageForWhatsApp(product.image)
   const fallbackImage = whatsappOptimizedImage || productImage
 
-  // 7. Si es un crawler, devolver HTML optimizado para compartir
-  if (isCrawler) {
-    return (
-      <html lang={serverStore.advanced?.language || 'es'}>
-        <head>
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          
-          {/* Meta tags básicos específicos del producto */}
-          <title>{productTitle}</title>
-          <meta name="description" content={productDescription} />
-          <meta name="robots" content="index,follow" />
-          
-          {/* Open Graph específico para producto - WhatsApp prioritario */}
-          <meta property="og:type" content="product" />
-          <meta property="og:title" content={productTitle} />
-          <meta property="og:description" content={productDescription} />
-          <meta property="og:url" content={productUrl} />
-          <meta property="og:site_name" content={serverStore.storeName} />
-          <meta property="og:locale" content={serverStore.advanced?.language === 'en' ? 'en_US' : 'es_ES'} />
-          
-                     {/* ÚNICA imagen para WhatsApp - evitar duplicados */}
-           <meta property="og:image" content={whatsappOptimizedImage || productImage || fallbackImage} />
-           <meta property="og:image:width" content={whatsappOptimizedImage ? "400" : "1200"} />
-           <meta property="og:image:height" content={whatsappOptimizedImage ? "400" : "630"} />
-           <meta property="og:image:alt" content={product.name} />
-           <meta property="og:image:type" content="image/jpeg" />
-           <meta property="og:image:secure_url" content={whatsappOptimizedImage || productImage || fallbackImage} />
-          
-          {/* Twitter Card para producto */}
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={productTitle} />
-          <meta name="twitter:description" content={productDescription} />
-          <meta name="twitter:image" content={fallbackImage} />
-          
-          {/* Datos del producto para crawlers */}
-          <meta property="product:price:amount" content={product.price.toString()} />
-          <meta property="product:price:currency" content={serverStore.currency} />
-          <meta property="product:availability" content="in stock" />
-          
-          {/* Canonical URL */}
-          <link rel="canonical" href={productUrl} />
-          
-          {/* Favicon */}
-          <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
-        </head>
-        <body>
-          <div>
-            <h1>{product.name}</h1>
-            <p>{product.description}</p>
-            <p>Precio: {product.price} {serverStore.currency}</p>
-            <p>Tienda: {serverStore.storeName}</p>
-            {whatsappOptimizedImage && (
-              <img src={whatsappOptimizedImage} alt={product.name} style={{ maxWidth: '400px' }} />
-            )}
-          </div>
-          
-          {/* Structured Data para el producto */}
-          {productStructuredData && (
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: productStructuredData }}
-            />
-          )}
-        </body>
-      </html>
-    )
-  }
+  // 7. Los crawlers usarán generateMetadata para obtener los meta tags optimizados
+  // No necesitamos renderizar HTML especial aquí
 
   // 8. Renderizar el componente del cliente para usuarios normales
   return (
