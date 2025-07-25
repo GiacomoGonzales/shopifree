@@ -10,6 +10,7 @@ export interface SEOConfig {
   ogTitle?: string
   ogDescription?: string
   ogImage?: string
+  whatsappImage?: string
   robots?: string
   canonicalUrl?: string
   structuredDataEnabled?: boolean
@@ -84,7 +85,8 @@ export function generateStoreMetadata(
           url: safeOgImage,
           width: 1200,
           height: 630,
-          alt: ogTitle
+          alt: ogTitle,
+          type: 'image/jpeg'
         }
       ],
       locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
@@ -108,7 +110,11 @@ export function generateStoreMetadata(
 
     // Metadatos adicionales
     other: {
-      'theme-color': store.primaryColor || '#000000'
+      'theme-color': store.primaryColor || '#000000',
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      'og:image:type': 'image/jpeg',
+      'og:image:secure_url': safeOgImage,
     }
   }
 
@@ -133,29 +139,39 @@ export function generateProductMetadata(
   const ogImage = product.image || seo?.ogImage || store.logoUrl
   const safeOgImage = ogImage || '/brand/icons/favicon.png'
   
-  // Usar imagen específica de WhatsApp si está disponible, sino usar la imagen general
-  const whatsappImage = seo?.whatsappImage || safeOgImage
-  
-  // Crear array de imágenes con la de WhatsApp primero (para que WhatsApp la detecte)
+  // Crear array de imágenes para máxima compatibilidad con WhatsApp
   const images = []
   
-  // Imagen optimizada para WhatsApp (400x400)
-  if (whatsappImage) {
+  // 1. Imagen específica de WhatsApp si está disponible (400x400, prioritaria)
+  if (seo?.whatsappImage) {
     images.push({
-      url: whatsappImage,
+      url: seo.whatsappImage,
       width: 400,
       height: 400,
-      alt: product.name
+      alt: product.name,
+      type: 'image/jpeg'
     })
   }
   
-  // Imagen estándar para otras redes sociales (800x600)
-  if (safeOgImage !== whatsappImage) {
+  // 2. Imagen del producto o imagen general (1200x630, estándar)
+  if (safeOgImage) {
     images.push({
       url: safeOgImage,
-      width: 800,
-      height: 600,
-      alt: product.name
+      width: 1200,
+      height: 630,
+      alt: product.name,
+      type: 'image/jpeg'
+    })
+  }
+  
+  // 3. Si tenemos imagen específica de WhatsApp, también agregar versión cuadrada de la imagen principal
+  if (seo?.whatsappImage && safeOgImage !== seo.whatsappImage) {
+    images.push({
+      url: safeOgImage,
+      width: 1200,
+      height: 1200,
+      alt: product.name,
+      type: 'image/jpeg'
     })
   }
 
@@ -183,6 +199,15 @@ export function generateProductMetadata(
       title,
       description,
       images: [safeOgImage] // Twitter usa la imagen estándar
+    },
+
+    // Agregar metadatos adicionales para WhatsApp
+    other: {
+      // Asegurar que se incluyan las dimensiones específicas
+      'og:image:width': seo?.whatsappImage ? '400' : '1200',
+      'og:image:height': seo?.whatsappImage ? '400' : '630',
+      'og:image:type': 'image/jpeg',
+      'og:image:secure_url': seo?.whatsappImage || safeOgImage,
     }
   }
 }
@@ -345,6 +370,7 @@ export function validateSEOData(seo: any): SEOConfig {
     ogTitle: typeof seo?.ogTitle === 'string' ? seo.ogTitle : undefined,
     ogDescription: typeof seo?.ogDescription === 'string' ? seo.ogDescription : undefined,
     ogImage: typeof seo?.ogImage === 'string' ? seo.ogImage : undefined,
+    whatsappImage: typeof seo?.whatsappImage === 'string' ? seo.whatsappImage : undefined,
     robots: ['index,follow', 'index,nofollow', 'noindex,follow', 'noindex,nofollow'].includes(seo?.robots) 
       ? seo.robots : 'index,follow',
     canonicalUrl: typeof seo?.canonicalUrl === 'string' ? seo.canonicalUrl : undefined,

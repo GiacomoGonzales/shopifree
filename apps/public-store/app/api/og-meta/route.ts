@@ -47,12 +47,23 @@ export async function GET(request: NextRequest) {
   <meta property="og:url" content="${baseUrl}">
   <meta property="og:site_name" content="${store.storeName}">
   <meta property="og:locale" content="${store.advanced?.language === 'en' ? 'en_US' : 'es_ES'}">
+  
+  <!-- Multiple images for different platforms - WhatsApp specific image first -->
+  ${seo?.whatsappImage ? `
+  <meta property="og:image" content="${seo.whatsappImage}">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="${ogTitle}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:secure_url" content="${seo.whatsappImage}">
+  ` : ''}
   ${ogImage ? `
   <meta property="og:image" content="${ogImage}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="${ogTitle}">
   <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:secure_url" content="${ogImage}">
   ` : ''}
   
   <!-- Twitter Card Meta Tags -->

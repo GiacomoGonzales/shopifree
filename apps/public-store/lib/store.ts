@@ -68,6 +68,8 @@ export interface StoreDataServer {
       ogDescription?: string
       ogImage?: string
       ogImagePublicId?: string
+      whatsappImage?: string
+      whatsappImagePublicId?: string
       favicon?: string
       faviconPublicId?: string
       robots?: 'index,follow' | 'index,nofollow' | 'noindex,follow' | 'noindex,nofollow'
@@ -153,6 +155,8 @@ export interface StoreDataClient {
       ogDescription?: string
       ogImage?: string
       ogImagePublicId?: string
+      whatsappImage?: string
+      whatsappImagePublicId?: string
       favicon?: string
       faviconPublicId?: string
       robots?: 'index,follow' | 'index,nofollow' | 'noindex,follow' | 'noindex,nofollow'

@@ -10,6 +10,7 @@ const SOCIAL_MEDIA_CRAWLERS = [
   'Facebot',
   'Twitterbot',
   'WhatsApp',
+  'WhatsApp/2', // WhatsApp crawler specific user agent pattern
   'LinkedInBot',
   'TelegramBot',
   'InstagramBot',

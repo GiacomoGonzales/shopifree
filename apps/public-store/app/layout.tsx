@@ -13,9 +13,9 @@ export const dynamic = 'force-dynamic'
 function isSocialMediaCrawler(userAgent: string | null): boolean {
   if (!userAgent) return false
   const crawlers = [
-    'facebookexternalhit', 'Facebot', 'Twitterbot', 'WhatsApp', 
-    'LinkedInBot', 'TelegramBot', 'InstagramBot', 'SnapchatBot',
-    'PinterestBot', 'TikTokBot', 'GoogleBot', 'SlackBot', 'DiscordBot'
+    'facebookexternalhit', 'Facebot', 'Twitterbot', 'WhatsApp', 'WhatsApp/2',
+    'LinkedInBot', 'InstagramBot', 'SnapchatBot', 'TelegramBot',
+    'GoogleBot', 'bingbot', 'SlackBot', 'DiscordBot'
   ]
   return crawlers.some(crawler => 
     userAgent.toLowerCase().includes(crawler.toLowerCase())
@@ -246,12 +246,26 @@ export default async function RootLayout({
           <meta property="og:url" content={baseUrl} />
           <meta property="og:site_name" content={store.storeName} />
           <meta property="og:locale" content={store.advanced?.language === 'en' ? 'en_US' : 'es_ES'} />
+          
+          {/* Multiple images for different platforms - WhatsApp specific image first */}
+          {seo?.whatsappImage && (
+            <>
+              <meta property="og:image" content={seo.whatsappImage} />
+              <meta property="og:image:width" content="400" />
+              <meta property="og:image:height" content="400" />
+              <meta property="og:image:alt" content={ogTitle} />
+              <meta property="og:image:type" content="image/jpeg" />
+              <meta property="og:image:secure_url" content={seo.whatsappImage} />
+            </>
+          )}
           {ogImage && (
             <>
               <meta property="og:image" content={ogImage} />
               <meta property="og:image:width" content="1200" />
               <meta property="og:image:height" content="630" />
               <meta property="og:image:alt" content={ogTitle} />
+              <meta property="og:image:type" content="image/jpeg" />
+              <meta property="og:image:secure_url" content={ogImage} />
             </>
           )}
           
@@ -260,9 +274,6 @@ export default async function RootLayout({
           <meta name="twitter:title" content={ogTitle} />
           <meta name="twitter:description" content={ogDescription} />
           {ogImage && <meta name="twitter:image" content={ogImage} />}
-          
-          {/* WhatsApp specific meta tags */}
-          <meta property="og:image:type" content="image/jpeg" />
           
           {/* Canonical URL */}
           <link rel="canonical" href={seo?.canonicalUrl || baseUrl} />
