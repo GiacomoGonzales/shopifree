@@ -19,6 +19,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   try {
     console.log('🤖 [METADATA] Generating metadata for:', params.storeSubdomain, params.productSlug)
     
+    // Información adicional para debugging
+    console.log('🤖 [METADATA] Environment:', {
+      nodeEnv: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    })
+    
     const serverStore = await getStoreBySubdomain(params.storeSubdomain)
     
     if (!serverStore) {
@@ -30,12 +36,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
           title: 'Producto no encontrado',
           description: 'El producto que buscas no existe o no está disponible',
           type: 'website',
-                   images: [{
-           url: '/brand/icons/favicon.png',
-           width: 400,
-           height: 400,
-           alt: 'Producto no encontrado'
-         }]
+          images: [{
+            url: '/brand/icons/favicon.png',
+            width: 400,
+            height: 400,
+            alt: 'Producto no encontrado'
+          }]
         },
         twitter: {
           card: 'summary_large_image',
@@ -44,6 +50,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         }
       }
     }
+    
+    console.log('🤖 [METADATA] Store found:', serverStore.storeName)
 
     const clientStore = transformStoreForClient(serverStore)
     if (!clientStore) {
@@ -55,12 +63,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
           title: 'Tienda no disponible',
           description: 'Esta tienda no está disponible temporalmente',
           type: 'website',
-                     images: [{
-             url: '/brand/icons/favicon.png',
-             width: 400,
-             height: 400,
-             alt: 'Tienda no disponible'
-           }]
+          images: [{
+            url: '/brand/icons/favicon.png',
+            width: 400,
+            height: 400,
+            alt: 'Tienda no disponible'
+          }]
         },
         twitter: {
           card: 'summary_large_image',
@@ -69,8 +77,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         }
       }
     }
+    
+    console.log('🤖 [METADATA] Client store transformed successfully')
 
     const allProducts = await getStoreProducts(clientStore.id)
+    console.log('🤖 [METADATA] Products loaded:', allProducts.length)
+    
     const product = allProducts.find(p => p.slug === params.productSlug)
 
     if (!product) {
@@ -98,12 +110,18 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       }
     }
 
+    console.log('🤖 [METADATA] Product found:', product.name)
+    console.log('🤖 [METADATA] Calling generateProductMetadata...')
+    
     // Si llegamos aquí, tenemos todos los datos necesarios
-    console.log('🤖 [METADATA] All data available, generating product metadata')
-    return generateProductMetadata(serverStore, product)
+    const metadata = generateProductMetadata(serverStore, product)
+    console.log('🤖 [METADATA] Successfully generated metadata')
+    
+    return metadata
 
   } catch (error) {
     console.error('🚨 [METADATA] Critical error in generateMetadata:', error)
+    console.error('🚨 [METADATA] Error stack:', error instanceof Error ? error.stack : 'No stack available')
     
     // Fallback ultra-seguro para bots cuando todo falla
     const safeFallback: Metadata = {
@@ -114,11 +132,11 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       openGraph: {
         title: 'Producto - Shopifree',
         description: 'Este producto no está disponible por el momento. Vuelve a intentarlo más tarde.',
-        type: 'product',
+        type: 'website',
         siteName: 'Shopifree',
         locale: 'es_ES',
         images: [{
-                     url: '/brand/icons/favicon.png',
+          url: '/brand/icons/favicon.png',
           width: 400,
           height: 400,
           alt: 'Producto no disponible',
@@ -130,7 +148,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         card: 'summary_large_image',
         title: 'Producto - Shopifree',
         description: 'Este producto no está disponible por el momento.',
-                 images: ['/brand/icons/favicon.png']
+        images: ['/brand/icons/favicon.png']
       },
       
       other: {
@@ -139,10 +157,11 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         'og:image:width': '400',
         'og:image:height': '400',
         'og:image:type': 'image/jpeg',
-                 'og:image:secure_url': '/brand/icons/favicon.png',
+        'og:image:secure_url': '/brand/icons/favicon.png',
       }
     }
     
+    console.log('🤖 [METADATA] Returning safe fallback metadata')
     return safeFallback
   }
 }

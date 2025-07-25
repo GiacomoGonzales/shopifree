@@ -101,43 +101,64 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(new URL('/', request.url))
     }
 
-    // Special handling for social media crawlers - only for home page
-    // CAMBIO: Solo redirigir crawlers para la página principal, y solo si no hay errores
-    if (isSocialMediaCrawler(userAgent) && (pathname === '/' || pathname === '')) {
-      try {
-        const ogMetaUrl = new URL('/api/og-meta', request.url)
-        ogMetaUrl.searchParams.set('subdomain', subdomain)
+    // NUEVO: Manejo especial para bots de redes sociales en productos
+    if (isSocialMediaCrawler(userAgent)) {
+      // Para página principal - usar endpoint existente
+      if (pathname === '/' || pathname === '') {
+        try {
+          const ogMetaUrl = new URL('/api/og-meta', request.url)
+          ogMetaUrl.searchParams.set('subdomain', subdomain)
+          
+          console.log('🤖 Redirecting crawler to og-meta endpoint for home page:', ogMetaUrl.toString())
+          
+          return NextResponse.rewrite(ogMetaUrl)
+        } catch (error) {
+          console.error('Error redirecting to og-meta, continuing with normal flow:', error)
+        }
+      }
+      
+      // Para productos - usar endpoint específico de productos
+      const productMatch = pathname.match(/^\/([^\/]+)$/) // Coincide con /producto-slug
+      if (productMatch && productMatch[1]) {
+        const productSlug = productMatch[1]
         
-        console.log('🤖 Redirecting crawler to og-meta endpoint for home page:', ogMetaUrl.toString())
-        
-        return NextResponse.rewrite(ogMetaUrl)
-      } catch (error) {
-        console.error('Error redirecting to og-meta, continuing with normal flow:', error)
-        // Si hay error en og-meta, continuar con el flujo normal
+        // Verificar que no sea una ruta reservada
+        const reservedRoutes = ['categoria', 'colecciones', 'mi-cuenta', 'favoritos', 'checkout', 'debug']
+        if (!reservedRoutes.includes(productSlug)) {
+          try {
+            const ogProductUrl = new URL('/api/og-meta', request.url)
+            ogProductUrl.searchParams.set('subdomain', subdomain)
+            ogProductUrl.searchParams.set('productSlug', productSlug)
+            
+            console.log('🤖 Redirecting crawler to product OG endpoint:', ogProductUrl.toString())
+            
+            return NextResponse.rewrite(ogProductUrl)
+          } catch (error) {
+            console.error('Error redirecting product to og-meta, continuing with normal flow:', error)
+          }
+        }
       }
     }
 
-    // Para todas las demás rutas (incluyendo productos), usar el flujo normal
-    // Esto permite que las páginas manejen sus propios metadatos sin interferencia
+    // Para todas las demás rutas (incluyendo usuarios normales), usar el flujo normal
     const url = new URL(request.url)
     const path = url.pathname === '/' ? '' : url.pathname
     const newUrl = new URL(`/${subdomain}${path}`, request.url)
     
-    // Mantener los query params
-    newUrl.search = url.search
-    
-    // Reescribir la request con el nuevo path que incluye el subdominio
-    const response = NextResponse.rewrite(newUrl)
-    
-    // Agregar headers customizados para acceder al subdominio en las páginas
-    response.headers.set('x-subdomain', subdomain)
-    response.headers.set('x-host', host || '')
-    response.headers.set('x-pathname', pathname)
-    
-    return response
+    // Log de la transformación de URL para debug
+    console.log('🔄 URL transform:', {
+      original: url.pathname,
+      subdomain,
+      newPath: `/${subdomain}${path}`,
+      isCrawler: isSocialMediaCrawler(userAgent)
+    })
+
+    return NextResponse.rewrite(newUrl)
+
   } catch (error) {
-    console.error('Middleware error:', error)
-    // En caso de error, permitir que la request continue
+    console.error('❌ Error in middleware:', error)
+    
+    // En caso de error, continuar con el flujo normal
     return NextResponse.next()
   }
 }

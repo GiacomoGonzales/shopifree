@@ -1,27 +1,162 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStoreBySubdomain } from '../../../lib/store'
+import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
+import { getStoreProducts } from '../../../lib/products'
+import { generateProductMetadata, cleanHtmlForSocialMedia, optimizeImageForWhatsApp } from '../../../lib/seo-utils'
 
-// Función para sanitizar texto y evitar problemas con caracteres especiales
-function sanitizeText(text: string | undefined | null): string {
-  if (!text) return ''
-  
-  return text
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/&/g, '&amp;')
-    .trim()
-}
+// Lista de crawlers de redes sociales
+const SOCIAL_MEDIA_CRAWLERS = [
+  'facebookexternalhit',
+  'Facebot',
+  'Twitterbot',
+  'WhatsApp',
+  'WhatsApp/2',
+  'LinkedInBot',
+  'TelegramBot',
+  'InstagramBot',
+  'SnapchatBot',
+  'PinterestBot',
+  'TikTokBot',
+  'GoogleBot',
+  'SlackBot',
+  'DiscordBot'
+]
 
 // Función para validar URL
-function isValidUrl(url: string | undefined | null): boolean {
-  if (!url) return false
+function isValidUrl(string: string): boolean {
   try {
-    new URL(url)
+    new URL(string)
     return true
-  } catch {
+  } catch (_) {
     return false
+  }
+}
+
+function isSocialMediaCrawler(userAgent: string | null): boolean {
+  if (!userAgent) return false
+  return SOCIAL_MEDIA_CRAWLERS.some(crawler => 
+    userAgent.toLowerCase().includes(crawler.toLowerCase())
+  )
+}
+
+async function generateProductOG(subdomain: string, productSlug: string) {
+  try {
+    console.log('🔧 [OG-API] Generating product OG for:', subdomain, productSlug)
+    
+    // 1. Obtener datos de la tienda
+    const serverStore = await getStoreBySubdomain(subdomain)
+    if (!serverStore) {
+      throw new Error('Store not found')
+    }
+
+    const clientStore = transformStoreForClient(serverStore)
+    if (!clientStore) {
+      throw new Error('Store transformation failed')
+    }
+
+    // 2. Buscar el producto
+    const allProducts = await getStoreProducts(clientStore.id)
+    const product = allProducts.find(p => p.slug === productSlug)
+    
+    if (!product) {
+      throw new Error('Product not found')
+    }
+
+    // 3. Generar HTML con metadatos Open Graph
+    const productTitle = `${product.name} - ${serverStore.storeName}`
+    const cleanDescription = cleanHtmlForSocialMedia(product.description || '')
+    const productDescription = cleanDescription.length > 160 
+      ? cleanDescription.substring(0, 157) + '...'
+      : cleanDescription || 'Producto disponible en nuestra tienda online'
+    
+    const whatsappOptimizedImage = optimizeImageForWhatsApp(product.image)
+    const productImage = whatsappOptimizedImage || product.image || serverStore.logoUrl || '/brand/icons/favicon.png'
+    const productUrl = `https://${serverStore.subdomain}.shopifree.app/${product.slug}`
+    
+    const htmlResponse = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Basic SEO -->
+  <title>${productTitle}</title>
+  <meta name="description" content="${productDescription}">
+  <meta name="robots" content="index,follow">
+  
+  <!-- Open Graph básico -->
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="${productTitle}">
+  <meta property="og:description" content="${productDescription}">
+  <meta property="og:url" content="${productUrl}">
+  <meta property="og:site_name" content="${serverStore.storeName}">
+  <meta property="og:locale" content="es_ES">
+  
+  <!-- Open Graph imágenes -->
+  <meta property="og:image" content="${productImage}">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="${product.name}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:secure_url" content="${productImage}">
+  
+  <!-- Meta tags específicos para productos -->
+  <meta name="product:price:amount" content="${product.price}">
+  <meta name="product:price:currency" content="${serverStore.currency || 'USD'}">
+  <meta name="product:availability" content="in stock">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${productTitle}">
+  <meta name="twitter:description" content="${productDescription}">
+  <meta name="twitter:image" content="${productImage}">
+  
+  <!-- Canonical -->
+  <link rel="canonical" href="${productUrl}">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="${serverStore.advanced?.seo?.favicon || '/brand/icons/favicon.png'}">
+</head>
+<body>
+  <h1>${product.name}</h1>
+  <p>${productDescription}</p>
+  <p>Precio: ${serverStore.currency || 'USD'} ${product.price}</p>
+  <p><a href="${productUrl}">Ver producto</a></p>
+  
+  <!-- Para crawlers que necesitan contenido visible -->
+  <div style="display: none;">
+    <img src="${productImage}" alt="${product.name}">
+  </div>
+</body>
+</html>`
+
+    return htmlResponse
+
+  } catch (error) {
+    console.error('🚨 [OG-API] Error generating product OG:', error)
+    
+    // Fallback HTML para cuando todo falla
+    const fallbackHtml = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Producto - Shopifree</title>
+  <meta name="description" content="Producto no disponible temporalmente">
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="Producto - Shopifree">
+  <meta property="og:description" content="Producto no disponible temporalmente">
+  <meta property="og:image" content="/brand/icons/favicon.png">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <h1>Producto no disponible</h1>
+  <p>Este producto no está disponible temporalmente.</p>
+</body>
+</html>`
+    
+    return fallbackHtml
   }
 }
 
@@ -29,151 +164,49 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const subdomain = searchParams.get('subdomain')
+    const productSlug = searchParams.get('productSlug')
+    const userAgent = request.headers.get('user-agent')
     
-    if (!subdomain) {
-      return new NextResponse('Missing subdomain parameter', { status: 400 })
+    console.log('🔧 [OG-API] Request received:', {
+      subdomain,
+      productSlug,
+      userAgent,
+      isCrawler: isSocialMediaCrawler(userAgent)
+    })
+    
+    // Solo procesar si es un bot de redes sociales
+    if (!isSocialMediaCrawler(userAgent)) {
+      return NextResponse.redirect(new URL(`/${subdomain}/${productSlug}`, request.url))
     }
-
-    // Get store data
-    const store = await getStoreBySubdomain(subdomain)
     
-    if (!store) {
-      return new NextResponse('Store not found', { status: 404 })
+    if (!subdomain || !productSlug) {
+      return new NextResponse('Missing parameters', { status: 400 })
     }
-
-    // Sanitizar y validar datos
-    const seo = store.advanced?.seo
-    const storeName = sanitizeText(store.storeName) || 'Tienda Online'
-    const storeDescription = sanitizeText(store.description) || `Descubre los mejores productos en ${storeName}`
-    const storeSlogan = sanitizeText(store.slogan) || 'Tienda Online'
     
-    const ogTitle = sanitizeText(seo?.ogTitle || seo?.title || `${storeName} - ${storeSlogan}`)
-    const ogDescription = sanitizeText(seo?.ogDescription || seo?.metaDescription || storeDescription)
+    const htmlContent = await generateProductOG(subdomain, productSlug)
     
-    // Validar URLs de imágenes
-    const ogImage = isValidUrl(seo?.ogImage) ? seo?.ogImage : (isValidUrl(store.logoUrl) ? store.logoUrl : '')
-    const faviconUrl = isValidUrl(seo?.favicon) ? seo?.favicon : '/brand/icons/favicon.png'
-    
-    const baseUrl = `https://${subdomain}.shopifree.app`
-    const language = store.advanced?.language || 'es'
-    const locale = language === 'en' ? 'en_US' : 'es_ES'
-    const robots = seo?.robots || 'index,follow'
-    const primaryColor = store.primaryColor || '#000000'
-
-    // Generar keywords
-    const keywords = seo?.keywords && Array.isArray(seo.keywords) && seo.keywords.length > 0 
-      ? seo.keywords.map(k => sanitizeText(k)).filter(k => k).join(', ')
-      : ''
-
-    // Return simplified HTML with all meta tags
-    const html = `<!DOCTYPE html>
-<html lang="${language}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <!-- Basic SEO Meta Tags -->
-  <title>${ogTitle}</title>
-  <meta name="description" content="${ogDescription}">
-  ${keywords ? `<meta name="keywords" content="${keywords}">` : ''}
-  <meta name="robots" content="${robots}">
-  
-  <!-- Open Graph Meta Tags -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="${ogTitle}">
-  <meta property="og:description" content="${ogDescription}">
-  <meta property="og:url" content="${baseUrl}">
-  <meta property="og:site_name" content="${storeName}">
-  <meta property="og:locale" content="${locale}">
-  
-  <!-- Multiple images for different platforms - WhatsApp specific image first -->
-  ${seo?.whatsappImage && isValidUrl(seo.whatsappImage) ? `
-  <meta property="og:image" content="${seo.whatsappImage}">
-  <meta property="og:image:width" content="400">
-  <meta property="og:image:height" content="400">
-  <meta property="og:image:alt" content="${ogTitle}">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:secure_url" content="${seo.whatsappImage}">
-  ` : ''}
-  ${ogImage ? `
-  <meta property="og:image" content="${ogImage}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="${ogTitle}">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:secure_url" content="${ogImage}">
-  ` : ''}
-  
-  <!-- Twitter Card Meta Tags -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${ogTitle}">
-  <meta name="twitter:description" content="${ogDescription}">
-  ${ogImage ? `<meta name="twitter:image" content="${ogImage}">` : ''}
-  
-  <!-- Canonical URL -->
-  <link rel="canonical" href="${seo?.canonicalUrl && isValidUrl(seo.canonicalUrl) ? seo.canonicalUrl : baseUrl}">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="${faviconUrl}" type="image/png">
-  <link rel="shortcut icon" href="${faviconUrl}" type="image/png">
-  <link rel="apple-touch-icon" href="${faviconUrl}">
-  
-  <!-- Theme color -->
-  <meta name="theme-color" content="${primaryColor}">
-  
-  <!-- Redirect to main site after meta tags are parsed -->
-  <script>
-    setTimeout(function() {
-      window.location.href = '${baseUrl}';
-    }, 1000);
-  </script>
-</head>
-<body>
-  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-    <h1>${storeName}</h1>
-    <p>${storeDescription}</p>
-    <p>Redirigiendo a la tienda...</p>
-  </div>
-</body>
-</html>`
-
-    return new NextResponse(html, {
-      status: 200,
+    return new NextResponse(htmlContent, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
-      },
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
+      }
     })
     
   } catch (error) {
-    console.error('Error in og-meta API route:', error)
+    console.error('🚨 [OG-API] Error in GET handler:', error)
     
-    // Devolver una respuesta HTML básica en caso de error
-    const fallbackHtml = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tienda Online - Shopifree</title>
-  <meta name="description" content="Descubre productos increíbles en nuestra tienda online">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Tienda Online - Shopifree">
-  <meta property="og:description" content="Descubre productos increíbles en nuestra tienda online">
-</head>
-<body>
-  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-    <h1>Tienda Online</h1>
-    <p>Cargando tienda...</p>
-  </div>
-</body>
-</html>`
+    // Respuesta de error mínima pero válida para bots
+    const errorHtml = `<!DOCTYPE html>
+<html><head>
+<title>Error - Shopifree</title>
+<meta property="og:title" content="Error - Shopifree">
+<meta property="og:description" content="Error al cargar el producto">
+<meta property="og:type" content="website">
+</head><body><h1>Error</h1></body></html>`
     
-    return new NextResponse(fallbackHtml, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache',
-      },
+    return new NextResponse(errorHtml, {
+      status: 500,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   }
 } 
