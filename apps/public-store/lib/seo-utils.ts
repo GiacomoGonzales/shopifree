@@ -156,7 +156,7 @@ export function generateProductMetadata(
         }
       ],
       locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
-      type: 'product'
+      type: 'website'
     },
 
     twitter: {
