@@ -142,10 +142,12 @@ export function generateProductMetadata(
   // Crear array de imágenes para máxima compatibilidad con WhatsApp
   const images = []
   
-  // 1. Imagen específica de WhatsApp si está disponible (400x400, prioritaria)
-  if (seo?.whatsappImage) {
+  // Para productos, priorizar la imagen del producto por encima de la imagen general de WhatsApp
+  
+  // 1. Si tenemos imagen del producto, agregarla optimizada para WhatsApp (400x400)
+  if (product.image) {
     images.push({
-      url: seo.whatsappImage,
+      url: product.image,
       width: 400,
       height: 400,
       alt: product.name,
@@ -153,7 +155,7 @@ export function generateProductMetadata(
     })
   }
   
-  // 2. Imagen del producto o imagen general (1200x630, estándar)
+  // 2. Imagen del producto en tamaño estándar para otras redes sociales (1200x630)
   if (safeOgImage) {
     images.push({
       url: safeOgImage,
@@ -164,12 +166,12 @@ export function generateProductMetadata(
     })
   }
   
-  // 3. Si tenemos imagen específica de WhatsApp, también agregar versión cuadrada de la imagen principal
-  if (seo?.whatsappImage && safeOgImage !== seo.whatsappImage) {
+  // 3. Como fallback, si NO hay imagen del producto, usar la imagen de WhatsApp de la tienda
+  if (!product.image && seo?.whatsappImage) {
     images.push({
-      url: safeOgImage,
-      width: 1200,
-      height: 1200,
+      url: seo.whatsappImage,
+      width: 400,
+      height: 400,
       alt: product.name,
       type: 'image/jpeg'
     })
@@ -203,11 +205,11 @@ export function generateProductMetadata(
 
     // Agregar metadatos adicionales para WhatsApp
     other: {
-      // Asegurar que se incluyan las dimensiones específicas
-      'og:image:width': seo?.whatsappImage ? '400' : '1200',
-      'og:image:height': seo?.whatsappImage ? '400' : '630',
+      // Para productos, priorizar imagen del producto (400x400), sino usar la imagen general
+      'og:image:width': product.image ? '400' : '1200',
+      'og:image:height': product.image ? '400' : '630',
       'og:image:type': 'image/jpeg',
-      'og:image:secure_url': seo?.whatsappImage || safeOgImage,
+      'og:image:secure_url': product.image || safeOgImage,
     }
   }
 }
