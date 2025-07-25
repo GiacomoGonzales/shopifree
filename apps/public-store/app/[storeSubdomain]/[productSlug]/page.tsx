@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
 import { getStoreProducts } from '../../../lib/products'
-import { generateProductMetadata, generateProductStructuredData, optimizeImageForWhatsApp } from '../../../lib/seo-utils'
+import { generateProductMetadata, generateProductStructuredData, optimizeImageForWhatsApp, cleanHtmlForSocialMedia } from '../../../lib/seo-utils'
 import { Tienda } from '../../../lib/types'
 import { isSocialMediaCrawler } from '../../../middleware'
 import ProductClientPage from './ProductClientPage'
@@ -102,9 +102,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // 6. Generar metadatos para el producto
   const seo = serverStore.advanced?.seo
   const productTitle = `${product.name} - ${serverStore.storeName}`
-  const productDescription = product.description.length > 160 
-    ? product.description.substring(0, 157) + '...'
-    : product.description
+  
+  // Limpiar HTML de la descripción para redes sociales
+  const cleanDescription = cleanHtmlForSocialMedia(product.description)
+  
+  const productDescription = cleanDescription.length > 160 
+    ? cleanDescription.substring(0, 157) + '...'
+    : cleanDescription
   const productImage = product.image || seo?.ogImage || serverStore.logoUrl
   const productUrl = `https://${serverStore.subdomain}.shopifree.app/${product.slug}`
 
@@ -133,29 +137,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <meta property="og:site_name" content={serverStore.storeName} />
           <meta property="og:locale" content={serverStore.advanced?.language === 'en' ? 'en_US' : 'es_ES'} />
           
-          {/* Imagen optimizada para WhatsApp (400x400) */}
-          {whatsappOptimizedImage && (
-            <>
-              <meta property="og:image" content={whatsappOptimizedImage} />
-              <meta property="og:image:width" content="400" />
-              <meta property="og:image:height" content="400" />
-              <meta property="og:image:alt" content={product.name} />
-              <meta property="og:image:type" content="image/jpeg" />
-              <meta property="og:image:secure_url" content={whatsappOptimizedImage} />
-            </>
-          )}
-          
-          {/* Imagen estándar como fallback para otras redes sociales */}
-          {productImage && productImage !== whatsappOptimizedImage && (
-            <>
-              <meta property="og:image" content={productImage} />
-              <meta property="og:image:width" content="1200" />
-              <meta property="og:image:height" content="630" />
-              <meta property="og:image:alt" content={product.name} />
-              <meta property="og:image:type" content="image/jpeg" />
-              <meta property="og:image:secure_url" content={productImage} />
-            </>
-          )}
+                     {/* ÚNICA imagen para WhatsApp - evitar duplicados */}
+           <meta property="og:image" content={whatsappOptimizedImage || productImage || fallbackImage} />
+           <meta property="og:image:width" content={whatsappOptimizedImage ? "400" : "1200"} />
+           <meta property="og:image:height" content={whatsappOptimizedImage ? "400" : "630"} />
+           <meta property="og:image:alt" content={product.name} />
+           <meta property="og:image:type" content="image/jpeg" />
+           <meta property="og:image:secure_url" content={whatsappOptimizedImage || productImage || fallbackImage} />
           
           {/* Twitter Card para producto */}
           <meta name="twitter:card" content="summary_large_image" />

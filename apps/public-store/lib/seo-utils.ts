@@ -3,6 +3,31 @@ import { StoreDataServer, StoreDataClient } from './store'
 import { PublicProduct } from './products'
 
 /**
+ * Limpia texto HTML para usar en meta tags de redes sociales
+ * Remueve todas las etiquetas HTML y decodifica entidades
+ */
+export function cleanHtmlForSocialMedia(htmlText: string): string {
+  if (!htmlText) return ''
+  
+  return htmlText
+    // Primero decodificar entidades HTML comunes
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&apos;/g, "'")
+    // Remover todas las etiquetas HTML
+    .replace(/<[^>]*>/g, '')
+    // Limpiar espacios extra y saltos de línea
+    .replace(/\s+/g, ' ')
+    .replace(/[\r\n]+/g, ' ')
+    .trim()
+}
+
+/**
  * Optimiza una imagen para WhatsApp usando Cloudinary
  * WhatsApp prefiere imágenes cuadradas de 400x400px
  */
@@ -161,50 +186,55 @@ export function generateProductMetadata(
   const baseUrl = `https://${store.subdomain}.shopifree.app`
   
   const title = `${product.name} - ${store.storeName}`
-  const description = product.description.length > 160 
-    ? product.description.substring(0, 157) + '...'
-    : product.description
+  
+  // Limpiar HTML de la descripción para redes sociales
+  const cleanDescription = cleanHtmlForSocialMedia(product.description)
+  
+  const description = cleanDescription.length > 160 
+    ? cleanDescription.substring(0, 157) + '...'
+    : cleanDescription
   
   const ogImage = product.image || seo?.ogImage || store.logoUrl
   const safeOgImage = ogImage || '/brand/icons/favicon.png'
   
-  // Crear array de imágenes para máxima compatibilidad con WhatsApp
-  const images = []
-  
-  // Para productos, priorizar la imagen del producto por encima de la imagen general de WhatsApp
-  
-  // 1. Si tenemos imagen del producto, agregarla optimizada para WhatsApp (400x400)
-  if (product.image) {
-    images.push({
-      url: product.image,
-      width: 400,
-      height: 400,
-      alt: product.name,
-      type: 'image/jpeg'
-    })
-  }
-  
-  // 2. Imagen del producto en tamaño estándar para otras redes sociales (1200x630)
-  if (safeOgImage) {
-    images.push({
-      url: safeOgImage,
-      width: 1200,
-      height: 630,
-      alt: product.name,
-      type: 'image/jpeg'
-    })
-  }
-  
-  // 3. Como fallback, si NO hay imagen del producto, usar la imagen de WhatsApp de la tienda
-  if (!product.image && seo?.whatsappImage) {
-    images.push({
-      url: seo.whatsappImage,
-      width: 400,
-      height: 400,
-      alt: product.name,
-      type: 'image/jpeg'
-    })
-  }
+     // Crear imagen optimizada para WhatsApp
+   const whatsappOptimizedImage = optimizeImageForWhatsApp(product.image)
+   
+   // Crear array de imágenes para máxima compatibilidad
+   const images = []
+   
+   // 1. PRIORITARIO: Imagen optimizada para WhatsApp (400x400)
+   if (whatsappOptimizedImage) {
+     images.push({
+       url: whatsappOptimizedImage,
+       width: 400,
+       height: 400,
+       alt: product.name,
+       type: 'image/jpeg'
+     })
+   }
+   
+   // 2. Solo si es diferente, agregar imagen original para otras redes sociales
+   if (product.image && product.image !== whatsappOptimizedImage) {
+     images.push({
+       url: product.image,
+       width: 1200,
+       height: 630,
+       alt: product.name,
+       type: 'image/jpeg'
+     })
+   }
+   
+   // 3. Fallback si no hay imagen del producto
+   if (!product.image && seo?.whatsappImage) {
+     images.push({
+       url: seo.whatsappImage,
+       width: 400,
+       height: 400,
+       alt: product.name,
+       type: 'image/jpeg'
+     })
+   }
 
   return {
     title,
@@ -215,15 +245,15 @@ export function generateProductMetadata(
       canonical: `${baseUrl}/${product.slug}`
     },
 
-    openGraph: {
-      title,
-      description,
-      url: `${baseUrl}/${product.slug}`,
-      siteName: store.storeName,
-      images,
-      locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
-      type: 'website'
-    },
+              openGraph: {
+       title,
+       description,
+       url: `${baseUrl}/${product.slug}`,
+       siteName: store.storeName,
+       images,
+       locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
+       type: 'website'
+     },
 
     twitter: {
       card: 'summary_large_image',
@@ -232,14 +262,20 @@ export function generateProductMetadata(
       images: [safeOgImage] // Twitter usa la imagen estándar
     },
 
-    // Agregar metadatos adicionales para WhatsApp
-    other: {
-      // Para productos, priorizar imagen del producto (400x400), sino usar la imagen general
-      'og:image:width': product.image ? '400' : '1200',
-      'og:image:height': product.image ? '400' : '630',
-      'og:image:type': 'image/jpeg',
-      'og:image:secure_url': product.image || safeOgImage,
-    }
+         // Agregar metadatos adicionales para WhatsApp y productos
+     other: {
+       // Meta tags específicos para productos
+       'og:type': 'product',
+       'product:price:amount': product.price.toString(),
+       'product:price:currency': store.currency,
+       'product:availability': 'in stock',
+       
+               // Para WhatsApp - priorizar imagen del producto optimizada
+        'og:image:width': whatsappOptimizedImage ? '400' : '1200',
+        'og:image:height': whatsappOptimizedImage ? '400' : '630',
+        'og:image:type': 'image/jpeg',
+        'og:image:secure_url': whatsappOptimizedImage || product.image || safeOgImage,
+     }
   }
 }
 
