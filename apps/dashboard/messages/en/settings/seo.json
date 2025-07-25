@@ -58,6 +58,15 @@
       "remove": "Remove image",
       "hint": "Recommended size: 1200x630px • Formats: JPG, PNG"
     },
+    "whatsappImage": {
+      "label": "WhatsApp Image",
+      "description": "Image optimized specifically for WhatsApp (400x400px, max. 400KB)",
+      "dropzone": "Drop an image here or click to select",
+      "uploading": "Uploading image...",
+      "change": "Change image",
+      "remove": "Remove image",
+      "hint": "Recommended size: 400x400px • Formats: JPG, PNG • Max. 400KB"
+    },
     "favicon": {
       "label": "Favicon",
       "description": "Icon that appears in the browser tab",
@@ -189,6 +198,7 @@
     "saveSuccess": "SEO configuration saved successfully",
     "saveError": "Error saving SEO configuration",
     "imageUploadSuccess": "Image uploaded successfully",
+    "whatsappImageUploadSuccess": "WhatsApp image uploaded successfully",
     "imageUploadError": "Error uploading image",
     "invalidFormat": "Invalid file format",
     "fileTooLarge": "File is too large",

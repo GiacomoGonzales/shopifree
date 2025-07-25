@@ -132,6 +132,32 @@ export function generateProductMetadata(
   
   const ogImage = product.image || seo?.ogImage || store.logoUrl
   const safeOgImage = ogImage || '/brand/icons/favicon.png'
+  
+  // Usar imagen específica de WhatsApp si está disponible, sino usar la imagen general
+  const whatsappImage = seo?.whatsappImage || safeOgImage
+  
+  // Crear array de imágenes con la de WhatsApp primero (para que WhatsApp la detecte)
+  const images = []
+  
+  // Imagen optimizada para WhatsApp (400x400)
+  if (whatsappImage) {
+    images.push({
+      url: whatsappImage,
+      width: 400,
+      height: 400,
+      alt: product.name
+    })
+  }
+  
+  // Imagen estándar para otras redes sociales (800x600)
+  if (safeOgImage !== whatsappImage) {
+    images.push({
+      url: safeOgImage,
+      width: 800,
+      height: 600,
+      alt: product.name
+    })
+  }
 
   return {
     title,
@@ -147,14 +173,7 @@ export function generateProductMetadata(
       description,
       url: `${baseUrl}/${product.slug}`,
       siteName: store.storeName,
-      images: [
-        {
-          url: safeOgImage,
-          width: 800,
-          height: 600,
-          alt: product.name
-        }
-      ],
+      images,
       locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
       type: 'website'
     },
@@ -163,7 +182,7 @@ export function generateProductMetadata(
       card: 'summary_large_image',
       title,
       description,
-      images: [safeOgImage]
+      images: [safeOgImage] // Twitter usa la imagen estándar
     }
   }
 }

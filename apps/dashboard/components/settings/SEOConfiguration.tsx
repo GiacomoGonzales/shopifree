@@ -18,6 +18,10 @@ interface SEOData {
   ogImage: string
   ogImagePublicId: string
   
+  // WhatsApp específico
+  whatsappImage: string
+  whatsappImagePublicId: string
+  
   // Favicon
   favicon: string
   faviconPublicId: string
@@ -53,6 +57,8 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
     ogDescription: '',
     ogImage: '',
     ogImagePublicId: '',
+    whatsappImage: '',
+    whatsappImagePublicId: '',
     favicon: '',
     faviconPublicId: '',
     robots: 'index,follow',
@@ -66,10 +72,12 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
   
   const [keywordInput, setKeywordInput] = useState('')
   const [uploadingOgImage, setUploadingOgImage] = useState(false)
+  const [uploadingWhatsappImage, setUploadingWhatsappImage] = useState(false)
   const [uploadingFavicon, setUploadingFavicon] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [isDraggingOgImage, setIsDraggingOgImage] = useState(false)
+  const [isDraggingWhatsappImage, setIsDraggingWhatsappImage] = useState(false)
   const [isDraggingFavicon, setIsDraggingFavicon] = useState(false)
 
   // Cargar datos existentes
@@ -86,6 +94,8 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         ogDescription: existingSeo.ogDescription || '',
         ogImage: existingSeo.ogImage || '',
         ogImagePublicId: existingSeo.ogImagePublicId || '',
+        whatsappImage: existingSeo.whatsappImage || '',
+        whatsappImagePublicId: existingSeo.whatsappImagePublicId || '',
         favicon: existingSeo.favicon || '',
         faviconPublicId: existingSeo.faviconPublicId || '',
         robots: existingSeo.robots || 'index,follow',
@@ -195,6 +205,72 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
     }
   }
 
+  // Funciones para subir imagen de WhatsApp
+  const handleWhatsappImageUpload = async (file: File) => {
+    setUploadingWhatsappImage(true)
+    setUploadError(null)
+    
+    try {
+      const validation = validateImageFile(file)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+      
+      const result = await uploadImageToCloudinary(
+        file, 
+        { folder: 'seo/whatsapp-images', storeId: store?.id }
+      )
+      
+      // Actualizar el estado local inmediatamente
+      const newSeoData = {
+        ...seoData,
+        whatsappImage: result.secure_url,
+        whatsappImagePublicId: result.public_id
+      }
+      setSeoData(newSeoData)
+      
+      // Guardar automáticamente en Firestore
+      await onUpdate({
+        advanced: {
+          ...store?.advanced,
+          seo: {
+            ...store?.advanced?.seo,
+            title: newSeoData.metaTitle,
+            metaDescription: newSeoData.metaDescription,
+            keywords: newSeoData.keywords,
+            ogTitle: newSeoData.ogTitle,
+            ogDescription: newSeoData.ogDescription,
+            ogImage: newSeoData.ogImage,
+            ogImagePublicId: newSeoData.ogImagePublicId,
+            whatsappImage: result.secure_url,
+            whatsappImagePublicId: result.public_id,
+            favicon: newSeoData.favicon,
+            faviconPublicId: newSeoData.faviconPublicId,
+            robots: newSeoData.robots,
+            canonicalUrl: newSeoData.canonicalUrl,
+            structuredDataEnabled: newSeoData.structuredDataEnabled,
+            googleSearchConsole: newSeoData.googleSearchConsole,
+            tiktokPixel: newSeoData.tiktokPixel
+          },
+          integrations: {
+            ...store?.advanced?.integrations,
+            googleAnalytics: newSeoData.googleAnalytics,
+            metaPixel: newSeoData.metaPixel
+          }
+        }
+      })
+      
+      setSaveMessage(t('messages.whatsappImageUploadSuccess'))
+      setTimeout(() => setSaveMessage(null), 3000)
+      
+    } catch (error) {
+      console.error('Error uploading WhatsApp image:', error)
+      setUploadError(error instanceof Error ? error.message : t('messages.imageUploadError'))
+    } finally {
+      setUploadingWhatsappImage(false)
+    }
+  }
+
   // Funciones para subir favicon
   const handleFaviconUpload = async (file: File) => {
     setUploadingFavicon(true)
@@ -249,6 +325,34 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
     }
   }
 
+  // Handlers para drag & drop WhatsApp Image
+  const handleWhatsappImageDragEvents = {
+    onDragEnter: (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDraggingWhatsappImage(true)
+    },
+    onDragLeave: (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDraggingWhatsappImage(false)
+    },
+    onDragOver: (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+    },
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDraggingWhatsappImage(false)
+      
+      const files = e.dataTransfer.files
+      if (files.length > 0) {
+        handleWhatsappImageUpload(files[0])
+      }
+    }
+  }
+
   // Handlers para drag & drop Favicon
   const handleFaviconDragEvents = {
     onDragEnter: (e: React.DragEvent) => {
@@ -291,6 +395,8 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
             ogDescription: seoData.ogDescription,
             ogImage: seoData.ogImage,
             ogImagePublicId: seoData.ogImagePublicId,
+            whatsappImage: seoData.whatsappImage,
+            whatsappImagePublicId: seoData.whatsappImagePublicId,
             favicon: seoData.favicon,
             faviconPublicId: seoData.faviconPublicId,
             robots: seoData.robots,
@@ -570,6 +676,96 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         
         {uploadError && (
           <p className="text-sm text-red-600 mt-2">{uploadError}</p>
+        )}
+      </div>
+
+      {/* Sección de imagen para WhatsApp */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t('fields.whatsappImage.label')}
+        </label>
+        <p className="text-sm text-gray-600 mb-3">{t('fields.whatsappImage.description')}</p>
+        
+        {seoData.whatsappImage ? (
+          <div className="relative">
+            <div className="relative w-40 h-40 bg-gray-100 rounded-lg overflow-hidden">
+              <Image
+                src={seoData.whatsappImage}
+                alt="WhatsApp preview"
+                fill
+                className="object-cover"
+                onLoad={() => console.log('WhatsApp Image loaded successfully:', seoData.whatsappImage)}
+                onError={(e) => console.error('Error loading WhatsApp image:', seoData.whatsappImage, e)}
+              />
+            </div>
+            <div className="mt-3 flex gap-2">
+              <label className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleWhatsappImageUpload(file)
+                  }}
+                  disabled={uploadingWhatsappImage}
+                />
+                {uploadingWhatsappImage ? t('fields.whatsappImage.uploading') : t('fields.whatsappImage.change')}
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (seoData.whatsappImagePublicId) {
+                    deleteImageFromCloudinary(seoData.whatsappImagePublicId)
+                  }
+                  handleInputChange('whatsappImage', '')
+                  handleInputChange('whatsappImagePublicId', '')
+                }}
+                className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+              >
+                {t('fields.whatsappImage.remove')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="relative">
+            <div 
+              className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                isDraggingWhatsappImage ? 'border-black bg-gray-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDraggingWhatsappImage(true)
+              }}
+              onDragLeave={() => setIsDraggingWhatsappImage(false)}
+              onDrop={async (e) => {
+                e.preventDefault()
+                setIsDraggingWhatsappImage(false)
+                const file = e.dataTransfer.files[0]
+                if (file) handleWhatsappImageUpload(file)
+              }}
+            >
+              <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleWhatsappImageUpload(file)
+                  }}
+                  disabled={uploadingWhatsappImage}
+                />
+                <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="mt-2 text-sm text-gray-600">
+                  {uploadingWhatsappImage ? t('fields.whatsappImage.uploading') : t('fields.whatsappImage.dropzone')}
+                </p>
+                <p className="mt-1 text-xs text-gray-500">{t('fields.whatsappImage.hint')}</p>
+              </label>
+            </div>
+          </div>
         )}
       </div>
 
