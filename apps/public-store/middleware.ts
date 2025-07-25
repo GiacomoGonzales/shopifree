@@ -102,23 +102,23 @@ export function middleware(request: NextRequest) {
     }
 
     // Special handling for social media crawlers - only for home page
-    if (isSocialMediaCrawler(userAgent)) {
-      // Solo redirigir crawlers a og-meta si están en la página principal
-      // Las páginas específicas (productos, categorías, etc.) manejarán sus propios meta tags
-      if (pathname === '/' || pathname === '') {
+    // CAMBIO: Solo redirigir crawlers para la página principal, y solo si no hay errores
+    if (isSocialMediaCrawler(userAgent) && (pathname === '/' || pathname === '')) {
+      try {
         const ogMetaUrl = new URL('/api/og-meta', request.url)
         ogMetaUrl.searchParams.set('subdomain', subdomain)
         
         console.log('🤖 Redirecting crawler to og-meta endpoint for home page:', ogMetaUrl.toString())
         
         return NextResponse.rewrite(ogMetaUrl)
-      } else {
-        console.log('🤖 Crawler detected for specific page, letting page handle its own meta tags:', pathname)
-        // Continuar con el flujo normal para que la página específica maneje sus meta tags
+      } catch (error) {
+        console.error('Error redirecting to og-meta, continuing with normal flow:', error)
+        // Si hay error en og-meta, continuar con el flujo normal
       }
     }
 
-    // Reescribir la URL para incluir el subdominio como parámetro
+    // Para todas las demás rutas (incluyendo productos), usar el flujo normal
+    // Esto permite que las páginas manejen sus propios metadatos sin interferencia
     const url = new URL(request.url)
     const path = url.pathname === '/' ? '' : url.pathname
     const newUrl = new URL(`/${subdomain}${path}`, request.url)

@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 import { StoreProvider } from '../lib/store-context'
 import { AuthFavoritesWrapper } from '../lib/auth-favorites-wrapper'
 import { getStoreBySubdomain, extractSubdomain, transformStoreForClient, StoreDataClient } from '../lib/store'
 import { generateStoreMetadata, generateAnalyticsScripts, generateStoreStructuredData } from '../lib/seo-utils'
 import './globals.css'
+
+const inter = Inter({ subsets: ['latin'] })
 
 // Force dynamic rendering with Node.js runtime (required for Firebase)
 export const dynamic = 'force-dynamic'
@@ -65,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Obtiene datos de la tienda en el servidor y los transforma para el cliente
  * Maneja toda la cadena: headers → subdomain → Firebase → transformación
  */
-async function getStoreData(): Promise<{ 
+async function getServerData(): Promise<{ 
   store: StoreDataClient | null; 
   hasSubdomain: boolean; 
   subdomain?: string;
@@ -140,30 +143,63 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { store, hasSubdomain, subdomain, error, isCrawler } = await getStoreData()
+  // Obtener headers una sola vez al inicio
+  const headersList = headers()
+  const pathname = headersList.get('x-pathname') || '/'
+  const userAgent = headersList.get('user-agent')
+  const isCrawler = isSocialMediaCrawler(userAgent)
+  
+  const { store, hasSubdomain, error } = await getServerData()
 
-  // If has subdomain but no store found, show error page
-  if (hasSubdomain && !store) {
-    const errorMessage = error || 'La tienda no está disponible'
-    
-    // For crawlers, return minimal HTML with meta tags
-    if (isCrawler) {
-      return (
-        <html lang="es">
-          <head>
-            <title>Tienda no encontrada - Shopifree</title>
-            <meta name="description" content="La tienda que buscas no existe o no está disponible" />
-            <meta property="og:title" content="Tienda no encontrada" />
-            <meta property="og:description" content="La tienda que buscas no existe o no está disponible" />
-            <meta property="og:type" content="website" />
-            <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
-          </head>
-          <body>
-            <div>Tienda no encontrada</div>
-          </body>
-        </html>
-      )
-    }
+  console.log('🚀 [LAYOUT] Store data:', { 
+    hasStore: !!store, 
+    hasSubdomain, 
+    error, 
+    isCrawler,
+    pathname
+  })
+
+  // No subdomain = main domain, show landing
+  if (!hasSubdomain) {
+    return (
+      <html lang="es">
+        <head>
+          <title>Shopifree - Crea tu tienda online gratis</title>
+          <meta name="description" content="Crea tu tienda online gratis con Shopifree. Vende tus productos online de forma fácil y rápida." />
+          <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
+          <link rel="shortcut icon" href="/brand/icons/favicon.png" type="image/png" />
+          <link rel="apple-touch-icon" href="/brand/icons/favicon.png" />
+        </head>
+        <body>
+          <div>Tienda no encontrada</div>
+        </body>
+      </html>
+    )
+  }
+
+  // Error loading store data
+  if (error) {
+    return (
+      <html lang="es">
+        <head>
+          <title>Error - Shopifree</title>
+          <meta name="description" content="Ha ocurrido un error al cargar la tienda" />
+          <link rel="icon" href="/brand/icons/favicon.png" type="image/png" />
+          <link rel="shortcut icon" href="/brand/icons/favicon.png" type="image/png" />
+          <link rel="apple-touch-icon" href="/brand/icons/favicon.png" />
+        </head>
+        <body>
+          <div>Error: {error}</div>
+        </body>
+      </html>
+    )
+  }
+
+  // Store not found for subdomain
+  if (!store) {
+    // Extract subdomain from headers for error message
+    const host = headersList.get('host') || headersList.get('x-forwarded-host')
+    const subdomain = extractSubdomain(host)
     
     return (
       <html lang="es">
@@ -196,14 +232,14 @@ export default async function RootLayout({
               </p>
               
               <p className="text-sm text-gray-500 mb-6">
-                {errorMessage}
+                Verifica que la URL sea correcta o contacta al propietario de la tienda.
               </p>
               
-              <a
-                href="https://shopifree.app"
-                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              <a 
+                href="https://shopifree.app" 
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Volver a Shopifree
+                Ir a Shopifree
               </a>
             </div>
           </main>
@@ -226,7 +262,6 @@ export default async function RootLayout({
 
   // For social media crawlers, return simplified HTML with complete meta tags
   // ONLY for home page - specific pages (products, categories) handle their own crawlers
-  const pathname = headersList.get('x-pathname') || '/'
   const isHomePage = pathname === '/' || pathname === ''
   
   console.log('🤖 [LAYOUT] Crawler detected, pathname:', pathname, 'isHomePage:', isHomePage)
@@ -279,29 +314,53 @@ export default async function RootLayout({
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={ogTitle} />
           <meta name="twitter:description" content={ogDescription} />
-          {ogImage && <meta name="twitter:image" content={ogImage} />}
+          {ogImage && (
+            <meta name="twitter:image" content={ogImage} />
+          )}
           
           {/* Canonical URL */}
           <link rel="canonical" href={seo?.canonicalUrl || baseUrl} />
           
-          {/* Dynamic favicon */}
+          {/* Favicon */}
           <link rel="icon" href={faviconUrl} type="image/png" />
           <link rel="shortcut icon" href={faviconUrl} type="image/png" />
           <link rel="apple-touch-icon" href={faviconUrl} />
           
           {/* Theme color */}
           <meta name="theme-color" content={store.primaryColor || '#000000'} />
+          
+          {/* Structured Data */}
+          {structuredData && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: structuredData }}
+            />
+          )}
+          
+          {/* Analytics Scripts */}
+          {analyticsScripts.map((script, index) => (
+            <script
+              key={index}
+              dangerouslySetInnerHTML={{ __html: script }}
+            />
+          ))}
         </head>
         <body>
-          <div>
+          <div style={{
+            textAlign: 'center',
+            padding: '50px',
+            fontFamily: 'Arial, sans-serif'
+          }}>
             <h1>{store.storeName}</h1>
             <p>{store.description}</p>
+            <p>Cargando tienda...</p>
           </div>
         </body>
       </html>
     )
   }
 
+  // Regular rendering for normal users and non-home page crawlers
   return (
     <html lang={store?.advanced?.language || 'es'}>
       <head>
@@ -322,12 +381,26 @@ export default async function RootLayout({
         <meta property="og:url" content={baseUrl} />
         <meta property="og:site_name" content={store.storeName} />
         <meta property="og:locale" content={store.advanced?.language === 'en' ? 'en_US' : 'es_ES'} />
+        
+        {/* Multiple images for different platforms - WhatsApp specific image first */}
+        {seo?.whatsappImage && (
+          <>
+            <meta property="og:image" content={seo.whatsappImage} />
+            <meta property="og:image:width" content="400" />
+            <meta property="og:image:height" content="400" />
+            <meta property="og:image:alt" content={ogTitle} />
+            <meta property="og:image:type" content="image/jpeg" />
+            <meta property="og:image:secure_url" content={seo.whatsappImage} />
+          </>
+        )}
         {ogImage && (
           <>
             <meta property="og:image" content={ogImage} />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
             <meta property="og:image:alt" content={ogTitle} />
+            <meta property="og:image:type" content="image/jpeg" />
+            <meta property="og:image:secure_url" content={ogImage} />
           </>
         )}
         
@@ -335,26 +408,20 @@ export default async function RootLayout({
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={ogTitle} />
         <meta name="twitter:description" content={ogDescription} />
-        {ogImage && <meta name="twitter:image" content={ogImage} />}
-        
-        {/* WhatsApp specific meta tags */}
-        <meta property="og:image:type" content="image/jpeg" />
+        {ogImage && (
+          <meta name="twitter:image" content={ogImage} />
+        )}
         
         {/* Canonical URL */}
         <link rel="canonical" href={seo?.canonicalUrl || baseUrl} />
         
-        {/* Dynamic favicon */}
+        {/* Favicon */}
         <link rel="icon" href={faviconUrl} type="image/png" />
         <link rel="shortcut icon" href={faviconUrl} type="image/png" />
         <link rel="apple-touch-icon" href={faviconUrl} />
         
         {/* Theme color */}
         <meta name="theme-color" content={store.primaryColor || '#000000'} />
-        
-        {/* Google Search Console verification */}
-        {seo?.googleSearchConsole && (
-          <meta name="google-site-verification" content={seo.googleSearchConsole} />
-        )}
         
         {/* Structured Data */}
         {structuredData && (
@@ -366,13 +433,13 @@ export default async function RootLayout({
         
         {/* Analytics Scripts */}
         {analyticsScripts.map((script, index) => (
-          <div
+          <script
             key={index}
             dangerouslySetInnerHTML={{ __html: script }}
           />
         ))}
       </head>
-      <body>
+      <body className={inter.className}>
         <StoreProvider initialStore={store}>
           <AuthFavoritesWrapper storeId={store?.id || ''}>
             {children}
