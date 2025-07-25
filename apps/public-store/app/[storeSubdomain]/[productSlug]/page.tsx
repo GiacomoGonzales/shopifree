@@ -16,34 +16,135 @@ interface ProductPageProps {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const serverStore = await getStoreBySubdomain(params.storeSubdomain)
-  
-  if (!serverStore) {
-    return {
-      title: 'Producto no encontrado',
-      description: 'El producto que buscas no existe o no está disponible'
+  try {
+    console.log('🤖 [METADATA] Generating metadata for:', params.storeSubdomain, params.productSlug)
+    
+    const serverStore = await getStoreBySubdomain(params.storeSubdomain)
+    
+    if (!serverStore) {
+      console.log('🤖 [METADATA] Store not found, returning fallback metadata')
+      return {
+        title: 'Producto no encontrado',
+        description: 'El producto que buscas no existe o no está disponible',
+        openGraph: {
+          title: 'Producto no encontrado',
+          description: 'El producto que buscas no existe o no está disponible',
+          type: 'website',
+                   images: [{
+           url: '/brand/icons/favicon.png',
+           width: 400,
+           height: 400,
+           alt: 'Producto no encontrado'
+         }]
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: 'Producto no encontrado',
+          description: 'El producto que buscas no existe o no está disponible'
+        }
+      }
     }
-  }
 
-  const clientStore = transformStoreForClient(serverStore)
-  if (!clientStore) {
-    return {
-      title: 'Producto no encontrado',
-      description: 'El producto que buscas no existe o no está disponible'
+    const clientStore = transformStoreForClient(serverStore)
+    if (!clientStore) {
+      console.log('🤖 [METADATA] Store transformation failed, returning fallback metadata')
+      return {
+        title: 'Tienda no disponible',
+        description: 'Esta tienda no está disponible temporalmente',
+        openGraph: {
+          title: 'Tienda no disponible',
+          description: 'Esta tienda no está disponible temporalmente',
+          type: 'website',
+                     images: [{
+             url: '/brand/icons/favicon.png',
+             width: 400,
+             height: 400,
+             alt: 'Tienda no disponible'
+           }]
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: 'Tienda no disponible',
+          description: 'Esta tienda no está disponible temporalmente'
+        }
+      }
     }
-  }
 
-  const allProducts = await getStoreProducts(clientStore.id)
-  const product = allProducts.find(p => p.slug === params.productSlug)
+    const allProducts = await getStoreProducts(clientStore.id)
+    const product = allProducts.find(p => p.slug === params.productSlug)
 
-  if (!product) {
-    return {
-      title: 'Producto no encontrado',
-      description: 'El producto que buscas no existe o no está disponible'
+    if (!product) {
+      console.log('🤖 [METADATA] Product not found, returning store-specific fallback metadata')
+      return {
+        title: `Producto no encontrado - ${serverStore.storeName}`,
+        description: 'El producto que buscas no existe o no está disponible en esta tienda',
+        openGraph: {
+          title: `Producto no encontrado - ${serverStore.storeName}`,
+          description: 'El producto que buscas no existe o no está disponible en esta tienda',
+          type: 'website',
+          siteName: serverStore.storeName,
+          images: [{
+            url: serverStore.logoUrl || '/brand/icons/favicon.png',
+            width: 400,
+            height: 400,
+            alt: `Producto no encontrado - ${serverStore.storeName}`
+          }]
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: `Producto no encontrado - ${serverStore.storeName}`,
+          description: 'El producto que buscas no existe o no está disponible en esta tienda'
+        }
+      }
     }
-  }
 
-  return generateProductMetadata(serverStore, product)
+    // Si llegamos aquí, tenemos todos los datos necesarios
+    console.log('🤖 [METADATA] All data available, generating product metadata')
+    return generateProductMetadata(serverStore, product)
+
+  } catch (error) {
+    console.error('🚨 [METADATA] Critical error in generateMetadata:', error)
+    
+    // Fallback ultra-seguro para bots cuando todo falla
+    const safeFallback: Metadata = {
+      title: 'Producto - Shopifree',
+      description: 'Este producto no está disponible por el momento. Vuelve a intentarlo más tarde.',
+      keywords: 'producto, tienda online, shopifree',
+      
+      openGraph: {
+        title: 'Producto - Shopifree',
+        description: 'Este producto no está disponible por el momento. Vuelve a intentarlo más tarde.',
+        type: 'product',
+        siteName: 'Shopifree',
+        locale: 'es_ES',
+        images: [{
+                     url: '/brand/icons/favicon.png',
+          width: 400,
+          height: 400,
+          alt: 'Producto no disponible',
+          type: 'image/jpeg'
+        }]
+      },
+      
+      twitter: {
+        card: 'summary_large_image',
+        title: 'Producto - Shopifree',
+        description: 'Este producto no está disponible por el momento.',
+                 images: ['/brand/icons/favicon.png']
+      },
+      
+      other: {
+        'og:type': 'product',
+        'product:availability': 'out of stock',
+        'og:image:width': '400',
+        'og:image:height': '400',
+        'og:image:type': 'image/jpeg',
+                 'og:image:secure_url': '/brand/icons/favicon.png',
+      }
+    }
+    
+    return safeFallback
+  }
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

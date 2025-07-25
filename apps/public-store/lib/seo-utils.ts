@@ -7,24 +7,29 @@ import { PublicProduct } from './products'
  * Remueve todas las etiquetas HTML y decodifica entidades
  */
 export function cleanHtmlForSocialMedia(htmlText: string): string {
-  if (!htmlText) return ''
-  
-  return htmlText
-    // Primero decodificar entidades HTML comunes
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
-    .replace(/&#x2F;/g, '/')
-    .replace(/&apos;/g, "'")
-    // Remover todas las etiquetas HTML
-    .replace(/<[^>]*>/g, '')
-    // Limpiar espacios extra y saltos de línea
-    .replace(/\s+/g, ' ')
-    .replace(/[\r\n]+/g, ' ')
-    .trim()
+  try {
+    if (!htmlText || typeof htmlText !== 'string') return ''
+    
+    return htmlText
+      // Primero decodificar entidades HTML comunes
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&quot;/g, '"')
+      .replace(/&#x27;/g, "'")
+      .replace(/&#x2F;/g, '/')
+      .replace(/&apos;/g, "'")
+      // Remover todas las etiquetas HTML
+      .replace(/<[^>]*>/g, '')
+      // Limpiar espacios extra y saltos de línea
+      .replace(/\s+/g, ' ')
+      .replace(/[\r\n]+/g, ' ')
+      .trim()
+  } catch (error) {
+    console.warn('Error cleaning HTML for social media:', error)
+    return String(htmlText || '').slice(0, 200) // Fallback seguro
+  }
 }
 
 /**
@@ -32,28 +37,33 @@ export function cleanHtmlForSocialMedia(htmlText: string): string {
  * WhatsApp prefiere imágenes cuadradas de 400x400px
  */
 export function optimizeImageForWhatsApp(imageUrl: string | null | undefined): string | null {
-  if (!imageUrl) return null
-  
-  // Si la imagen ya está optimizada para WhatsApp, devolverla tal como está
-  if (imageUrl.includes('c_fill,h_400,w_400')) {
-    return imageUrl
-  }
-  
-  // Si es una imagen de Cloudinary, aplicar transformaciones
-  if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
-    // Extraer la parte después de /upload/
-    const uploadIndex = imageUrl.indexOf('/upload/')
-    if (uploadIndex !== -1) {
-      const beforeUpload = imageUrl.substring(0, uploadIndex + 8) // incluye '/upload/'
-      const afterUpload = imageUrl.substring(uploadIndex + 8)
-      
-      // Agregar transformaciones para WhatsApp: cuadrado, 400x400, optimizado
-      return `${beforeUpload}c_fill,f_auto,q_auto,w_400,h_400/${afterUpload}`
+  try {
+    if (!imageUrl || typeof imageUrl !== 'string') return null
+    
+    // Si la imagen ya está optimizada para WhatsApp, devolverla tal como está
+    if (imageUrl.includes('c_fill,h_400,w_400')) {
+      return imageUrl
     }
-  }
-  
-  // Si no es de Cloudinary, devolver la imagen original
-  return imageUrl
+    
+    // Si es una imagen de Cloudinary, aplicar transformaciones
+    if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+      // Extraer la parte después de /upload/
+      const uploadIndex = imageUrl.indexOf('/upload/')
+      if (uploadIndex !== -1) {
+        const beforeUpload = imageUrl.substring(0, uploadIndex + 8) // incluye '/upload/'
+        const afterUpload = imageUrl.substring(uploadIndex + 8)
+        
+        // Agregar transformaciones para WhatsApp: cuadrado, 400x400, optimizado
+        return `${beforeUpload}c_fill,f_auto,q_auto,w_400,h_400/${afterUpload}`
+      }
+    }
+    
+    // Si no es de Cloudinary, devolver la imagen original
+    return imageUrl
+     } catch (error) {
+     console.warn('Error optimizing image for WhatsApp:', error)
+     return imageUrl || null // Devolver original si falla la optimización
+   }
 }
 
 // Interfaces para SEO
@@ -176,106 +186,194 @@ export function generateStoreMetadata(
 }
 
 /**
- * Genera metadatos para página de producto
+ * Genera metadatos para página de producto (con manejo robusto de errores)
  */
 export function generateProductMetadata(
   store: StoreDataServer | StoreDataClient,
   product: PublicProduct
 ): Metadata {
-  const seo = store.advanced?.seo
-  const baseUrl = `https://${store.subdomain}.shopifree.app`
-  
-  const title = `${product.name} - ${store.storeName}`
-  
-  // Limpiar HTML de la descripción para redes sociales
-  const cleanDescription = cleanHtmlForSocialMedia(product.description)
-  
-  const description = cleanDescription.length > 160 
-    ? cleanDescription.substring(0, 157) + '...'
-    : cleanDescription
-  
-  const ogImage = product.image || seo?.ogImage || store.logoUrl
-  const safeOgImage = ogImage || '/brand/icons/favicon.png'
-  
-     // Crear imagen optimizada para WhatsApp
-   const whatsappOptimizedImage = optimizeImageForWhatsApp(product.image)
-   
-   // Crear array de imágenes para máxima compatibilidad
-   const images = []
-   
-   // 1. PRIORITARIO: Imagen optimizada para WhatsApp (400x400)
-   if (whatsappOptimizedImage) {
-     images.push({
-       url: whatsappOptimizedImage,
-       width: 400,
-       height: 400,
-       alt: product.name,
-       type: 'image/jpeg'
-     })
-   }
-   
-   // 2. Solo si es diferente, agregar imagen original para otras redes sociales
-   if (product.image && product.image !== whatsappOptimizedImage) {
-     images.push({
-       url: product.image,
-       width: 1200,
-       height: 630,
-       alt: product.name,
-       type: 'image/jpeg'
-     })
-   }
-   
-   // 3. Fallback si no hay imagen del producto
-   if (!product.image && seo?.whatsappImage) {
-     images.push({
-       url: seo.whatsappImage,
-       width: 400,
-       height: 400,
-       alt: product.name,
-       type: 'image/jpeg'
-     })
-   }
-
-  return {
-    title,
-    description,
-    keywords: [product.name, store.storeName, ...(seo?.keywords || [])].join(', '),
+  try {
+    console.log('🔧 [SEO] Generating product metadata for:', product.name || 'Unknown product')
     
-    alternates: {
-      canonical: `${baseUrl}/${product.slug}`
-    },
+    // Validación de datos básicos
+    if (!store || !product) {
+      throw new Error('Store or product data is missing')
+    }
 
-              openGraph: {
-       title,
-       description,
-       url: `${baseUrl}/${product.slug}`,
-       siteName: store.storeName,
-       images,
-       locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
-       type: 'website'
-     },
+    const seo = store.advanced?.seo
+    const baseUrl = `https://${store.subdomain || 'unknown'}.shopifree.app`
+    
+    // Valores seguros con fallbacks
+    const productName = product.name || 'Producto'
+    const storeName = store.storeName || 'Tienda'
+    const title = `${productName} - ${storeName}`
+    
+    // Limpiar HTML de la descripción para redes sociales (con fallback)
+    let cleanDescription: string
+    try {
+      cleanDescription = cleanHtmlForSocialMedia(product.description || '')
+    } catch (descError) {
+      console.warn('Error cleaning product description:', descError)
+      cleanDescription = 'Producto disponible en nuestra tienda online'
+    }
+    
+    const description = cleanDescription.length > 160 
+      ? cleanDescription.substring(0, 157) + '...'
+      : cleanDescription || 'Producto disponible en nuestra tienda online'
+    
+    const ogImage = product.image || seo?.ogImage || store.logoUrl
+         const safeOgImage = ogImage || '/brand/icons/favicon.png'
+    
+    // Crear imagen optimizada para WhatsApp (con manejo de errores)
+    let whatsappOptimizedImage: string | null = null
+    try {
+      whatsappOptimizedImage = optimizeImageForWhatsApp(product.image)
+    } catch (imageError) {
+      console.warn('Error optimizing image for WhatsApp:', imageError)
+      whatsappOptimizedImage = product.image || null
+    }
+    
+    // Crear array de imágenes para máxima compatibilidad
+    const images = []
+    
+    // 1. PRIORITARIO: Imagen optimizada para WhatsApp (400x400)
+    if (whatsappOptimizedImage) {
+      images.push({
+        url: whatsappOptimizedImage,
+        width: 400,
+        height: 400,
+        alt: productName,
+        type: 'image/jpeg'
+      })
+    }
+    
+    // 2. Solo si es diferente, agregar imagen original para otras redes sociales
+    if (product.image && product.image !== whatsappOptimizedImage) {
+      images.push({
+        url: product.image,
+        width: 1200,
+        height: 630,
+        alt: productName,
+        type: 'image/jpeg'
+      })
+    }
+    
+    // 3. Fallback si no hay imagen del producto
+    if (!product.image && seo?.whatsappImage) {
+      images.push({
+        url: seo.whatsappImage,
+        width: 400,
+        height: 400,
+        alt: productName,
+        type: 'image/jpeg'
+      })
+    }
 
-    twitter: {
-      card: 'summary_large_image',
+    // 4. Fallback final para garantizar al menos una imagen
+    if (images.length === 0) {
+      images.push({
+        url: safeOgImage,
+        width: 400,
+        height: 400,
+        alt: productName,
+        type: 'image/jpeg'
+      })
+    }
+
+    // Precio seguro
+    const productPrice = (typeof product.price === 'number' && product.price >= 0) 
+      ? product.price 
+      : 0
+
+    const metadata: Metadata = {
       title,
       description,
-      images: [safeOgImage] // Twitter usa la imagen estándar
-    },
+      keywords: [productName, storeName, ...(seo?.keywords || [])].join(', '),
+      
+      alternates: {
+        canonical: `${baseUrl}/${product.slug || product.id || 'producto'}`
+      },
 
-         // Agregar metadatos adicionales para WhatsApp y productos
-     other: {
-       // Meta tags específicos para productos
-       'og:type': 'product',
-       'product:price:amount': product.price.toString(),
-       'product:price:currency': store.currency,
-       'product:availability': 'in stock',
-       
-               // Para WhatsApp - priorizar imagen del producto optimizada
+      openGraph: {
+        title,
+        description,
+        url: `${baseUrl}/${product.slug || product.id || 'producto'}`,
+        siteName: storeName,
+        images,
+        locale: store.advanced?.language === 'en' ? 'en_US' : 'es_ES',
+        type: 'website'
+      },
+
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: [safeOgImage] // Twitter usa la imagen estándar
+      },
+
+      // Agregar metadatos adicionales para WhatsApp y productos
+      other: {
+        // Meta tags específicos para productos
+        'og:type': 'product',
+        'product:price:amount': productPrice.toString(),
+        'product:price:currency': store.currency || 'USD',
+        'product:availability': 'in stock',
+        
+        // Para WhatsApp - priorizar imagen del producto optimizada
         'og:image:width': whatsappOptimizedImage ? '400' : '1200',
         'og:image:height': whatsappOptimizedImage ? '400' : '630',
         'og:image:type': 'image/jpeg',
         'og:image:secure_url': whatsappOptimizedImage || product.image || safeOgImage,
-     }
+      }
+    }
+
+    console.log('✅ [SEO] Product metadata generated successfully')
+    return metadata
+
+  } catch (error) {
+    console.error('🚨 [SEO] Error in generateProductMetadata:', error)
+    
+         // Fallback ultra-seguro cuando falla la generación completa
+     const fallbackImage = '/brand/icons/favicon.png'
+    const safeName = (product?.name || 'Producto').substring(0, 50)
+    const safeStoreName = (store?.storeName || 'Tienda').substring(0, 50)
+    
+    return {
+      title: `${safeName} - ${safeStoreName}`,
+      description: 'Este producto no puede mostrarse temporalmente. Intenta nuevamente más tarde.',
+      keywords: 'producto, tienda online',
+      
+             openGraph: {
+         title: `${safeName} - ${safeStoreName}`,
+         description: 'Este producto no puede mostrarse temporalmente.',
+         type: 'website',
+         siteName: safeStoreName,
+         locale: 'es_ES',
+         images: [{
+           url: fallbackImage,
+           width: 400,
+           height: 400,
+           alt: safeName,
+           type: 'image/jpeg'
+         }]
+       },
+      
+      twitter: {
+        card: 'summary_large_image',
+        title: `${safeName} - ${safeStoreName}`,
+        description: 'Este producto no puede mostrarse temporalmente.',
+        images: [fallbackImage]
+      },
+      
+      other: {
+        'og:type': 'product',
+        'product:availability': 'out of stock',
+        'og:image:width': '400',
+        'og:image:height': '400',
+        'og:image:type': 'image/jpeg',
+        'og:image:secure_url': fallbackImage,
+      }
+    }
   }
 }
 
