@@ -10,6 +10,8 @@ import {
   sendPasswordResetEmail,
   setPersistence,
   browserLocalPersistence,
+  GoogleAuthProvider,
+  signInWithPopup,
   AuthError
 } from 'firebase/auth'
 import { 
@@ -73,6 +75,7 @@ interface StoreAuthContextType {
   loading: boolean
   error: string | null
   login: (email: string, password: string) => Promise<void>
+  loginWithGoogle: () => Promise<void>
   register: (email: string, password: string, userData?: Partial<StoreCustomerData>) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
@@ -245,6 +248,55 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
       const authError = error as AuthError
       console.error('Error en login:', authError)
       setError(getErrorMessage(authError))
+      throw authError
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loginWithGoogle = async () => {
+    try {
+      setError(null)
+      setLoading(true)
+
+      const auth = getFirebaseAuth()
+      if (!auth) throw new Error('Firebase no está configurado')
+
+      // Configurar persistencia
+      await setPersistence(auth, browserLocalPersistence)
+
+      // Crear proveedor de Google
+      const provider = new GoogleAuthProvider()
+      provider.addScope('email')
+      provider.addScope('profile')
+
+      // Login con Google
+      const { user: firebaseUser } = await signInWithPopup(auth, provider)
+      
+      // Crear/actualizar usuario global
+      await createGlobalUser(firebaseUser)
+
+      // Crear/obtener perfil para esta tienda con datos de Google
+      const googleUserData: Partial<StoreCustomerData> = {
+        displayName: firebaseUser.displayName || undefined,
+      }
+      
+      const customerData = await createStoreCustomerProfile(firebaseUser.uid, googleUserData)
+      
+      setUser(firebaseUser)
+      setStoreCustomerData(customerData as StoreCustomerData)
+    } catch (error) {
+      const authError = error as AuthError
+      console.error('Error en login con Google:', authError)
+      
+      // Manejar errores específicos de Google Auth
+      if (authError.code === 'auth/popup-closed-by-user') {
+        setError('Ventana de autenticación cerrada. Intenta nuevamente.')
+      } else if (authError.code === 'auth/popup-blocked') {
+        setError('Ventana emergente bloqueada. Verifica la configuración de tu navegador.')
+      } else {
+        setError(getErrorMessage(authError))
+      }
       throw authError
     } finally {
       setLoading(false)
@@ -553,6 +605,7 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
     loading,
     error,
     login,
+    loginWithGoogle,
     register,
     logout,
     resetPassword,

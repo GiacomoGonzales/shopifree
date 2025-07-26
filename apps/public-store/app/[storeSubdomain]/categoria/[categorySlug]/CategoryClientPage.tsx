@@ -312,11 +312,26 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
           <Breadcrumbs items={breadcrumbs} />
         </div>
 
-        {/* Header */}
+        {/* Header con estilos elegant boutique */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-light text-neutral-900 mb-2">{currentCategory.name}</h1>
-            <p className="text-neutral-600 font-light">
+            <h1 
+              className="text-3xl font-light mb-2"
+              style={{
+                color: `rgb(var(--theme-neutral-dark))`,
+                fontFamily: `var(--theme-font-heading)`,
+                fontWeight: '300'
+              }}
+            >
+              {currentCategory.name}
+            </h1>
+            <p 
+              className="font-light"
+              style={{
+                color: `rgb(var(--theme-neutral-medium))`,
+                fontFamily: `var(--theme-font-body)`
+              }}
+            >
               {filteredAndSortedProducts.length} producto{filteredAndSortedProducts.length !== 1 ? 's' : ''} encontrado{filteredAndSortedProducts.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -332,11 +347,30 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
                 onClearFilters={handleClearFilters}
               />
 
-            {/* Ordenamiento */}
+            {/* Ordenamiento con estilos boutique */}
             <div className="relative">
               <button
                 onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-light border rounded-sm transition-all duration-200"
+                style={{
+                  borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                  backgroundColor: showSort ? `rgb(var(--theme-secondary))` : 'transparent',
+                  color: `rgb(var(--theme-neutral-medium))`,
+                  fontFamily: `var(--theme-font-body)`,
+                  transition: `var(--theme-transition)`
+                }}
+                onMouseEnter={(e) => {
+                  if (!showSort) {
+                    e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                    e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.3)`
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!showSort) {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                    e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                  }
+                }}
               >
                 <Icons.Sort />
                 <span className="font-light">Ordenar</span>
@@ -346,7 +380,14 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
               </button>
               
               {showSort && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 animate-fade-in">
+                <div 
+                  className="absolute top-full right-0 mt-2 w-48 border rounded-sm z-50 animate-fade-in"
+                  style={{
+                    backgroundColor: `rgb(var(--theme-neutral-light))`,
+                    borderColor: `rgb(var(--theme-primary) / 0.1)`,
+                    boxShadow: `var(--theme-shadow-sm)`
+                  }}
+                >
                   <div className="p-3">
                     {[
                       { value: 'newest', label: 'Más recientes' },
@@ -360,9 +401,25 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
                           setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
                           setShowSort(false)
                         }}
-                        className={`w-full text-left px-3 py-2 hover:bg-neutral-50 transition-colors duration-200 rounded text-sm font-light ${
-                          sortBy === option.value ? 'bg-neutral-50 text-neutral-900' : 'text-neutral-600'
-                        }`}
+                        className="w-full text-left px-3 py-2 transition-colors duration-200 rounded-sm text-sm font-light"
+                        style={{
+                          backgroundColor: sortBy === option.value ? `rgb(var(--theme-secondary))` : 'transparent',
+                          color: sortBy === option.value ? `rgb(var(--theme-neutral-dark))` : `rgb(var(--theme-neutral-medium))`,
+                          fontFamily: `var(--theme-font-body)`,
+                          transition: `var(--theme-transition)`
+                        }}
+                        onMouseEnter={(e) => {
+                          if (sortBy !== option.value) {
+                            e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                            e.currentTarget.style.color = `rgb(var(--theme-neutral-dark))`
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (sortBy !== option.value) {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.color = `rgb(var(--theme-neutral-medium))`
+                          }
+                        }}
                       >
                         {option.label}
                       </button>
@@ -402,13 +459,32 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
               ))}
             </div>
 
-            {/* Paginación */}
+            {/* Paginación con estilos boutique */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 border border-neutral-300 rounded-md hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                    backgroundColor: 'transparent',
+                    color: `rgb(var(--theme-neutral-medium))`,
+                    fontFamily: `var(--theme-font-body)`,
+                    transition: `var(--theme-transition)`
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentPage !== 1) {
+                      e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                      e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.3)`
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentPage !== 1) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                    }
+                  }}
                 >
                   Anterior
                 </button>
@@ -417,11 +493,32 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 border rounded-md transition-colors ${
-                      currentPage === page
-                        ? 'bg-neutral-900 text-white border-neutral-900'
-                        : 'border-neutral-300 hover:bg-neutral-50'
-                    }`}
+                    className="px-4 py-2 border rounded-sm transition-colors"
+                    style={{
+                      backgroundColor: currentPage === page 
+                        ? `rgb(var(--theme-primary))` 
+                        : 'transparent',
+                      color: currentPage === page 
+                        ? `rgb(var(--theme-neutral-light))` 
+                        : `rgb(var(--theme-neutral-medium))`,
+                      borderColor: currentPage === page 
+                        ? `rgb(var(--theme-primary))` 
+                        : `rgb(var(--theme-primary) / 0.2)`,
+                      fontFamily: `var(--theme-font-body)`,
+                      transition: `var(--theme-transition)`
+                    }}
+                    onMouseEnter={(e) => {
+                      if (currentPage !== page) {
+                        e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                        e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.3)`
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentPage !== page) {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                      }
+                    }}
                   >
                     {page}
                   </button>
@@ -430,7 +527,26 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 border border-neutral-300 rounded-md hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                    backgroundColor: 'transparent',
+                    color: `rgb(var(--theme-neutral-medium))`,
+                    fontFamily: `var(--theme-font-body)`,
+                    transition: `var(--theme-transition)`
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentPage !== totalPages) {
+                      e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                      e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.3)`
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentPage !== totalPages) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                    }
+                  }}
                 >
                   Siguiente
                 </button>
@@ -500,8 +616,27 @@ const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, ind
     <Link 
       href={`/${producto.slug}`}
       onClick={handleProductClick}
-      className="bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 hover-lift animate-fade-in group cursor-pointer block relative"
-      style={{ animationDelay: `${index * 100}ms` }}
+      className="card-boutique group cursor-pointer block relative transition-all duration-300 animate-fade-in"
+      style={{ 
+        animationDelay: `${index * 100}ms`,
+        backgroundColor: `rgb(var(--theme-neutral-light))`,
+        border: `1px solid rgb(var(--theme-primary) / 0.1)`,
+        borderRadius: `var(--theme-border-radius)`,
+        boxShadow: `var(--theme-shadow-sm)`,
+        color: `rgb(var(--theme-neutral-dark))`,
+        transition: `var(--theme-transition)`,
+        padding: `var(--theme-card-padding)`
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = `var(--theme-shadow-md)`
+        e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = `var(--theme-shadow-sm)`
+        e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.1)`
+      }}
     >
       {/* Botón de favorito */}
       <div className="absolute top-3 right-3 z-10">
@@ -509,7 +644,14 @@ const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, ind
       </div>
 
       {/* Imagen del producto */}
-      <div className="relative aspect-square overflow-hidden rounded-t-lg bg-neutral-100">
+      <div 
+        className="relative aspect-square overflow-hidden flex-shrink-0"
+        style={{
+          backgroundColor: `rgb(var(--theme-secondary))`,
+          borderRadius: `var(--theme-border-radius)`,
+          marginBottom: '1rem'
+        }}
+      >
         {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
           <VideoPlayer
             src={producto.mediaFiles[0].url}
@@ -532,25 +674,46 @@ const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, ind
           />
         )}
         
-        {/* Badge de nuevo */}
-        <span className="absolute top-3 left-3 bg-neutral-900 text-white text-xs font-medium px-2 py-1 rounded-full">
+        {/* Badge de nuevo con estilo boutique */}
+        <span 
+          className="product-badge-boutique absolute top-3 left-3 text-xs font-medium px-3 py-1"
+          style={{
+            backgroundColor: `rgb(var(--theme-accent))`,
+            color: `rgb(var(--theme-neutral-light))`,
+            borderRadius: `var(--theme-border-radius)`,
+            fontFamily: `var(--theme-font-body)`,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            boxShadow: `var(--theme-shadow-sm)`
+          }}
+        >
           Nuevo
         </span>
       </div>
 
       {/* Información del producto */}
-      <div className="p-6 pt-0 space-y-3 bg-white">
-        <h3 className="text-lg font-light text-neutral-900 group-hover:text-neutral-600 transition-colors duration-200 pt-6">
+      <div className="space-y-3">
+        <h3 
+          className="text-lg font-light group-hover:opacity-80 transition-all duration-200"
+          style={{
+            color: `rgb(var(--theme-neutral-dark))`,
+            fontFamily: `var(--theme-font-heading)`,
+            fontWeight: '300'
+          }}
+        >
           {producto.name}
         </h3>
         
-        {/* Rating */}
+        {/* Rating con estilos boutique */}
         <div className="flex items-center space-x-2">
           <div className="flex items-center">
             {[...Array(5)].map((_, i) => (
               <svg
                 key={i}
-                className={`w-4 h-4 ${i < Math.floor(producto.rating || 0) ? 'text-yellow-400' : 'text-neutral-300'}`}
+                className="w-4 h-4"
+                style={{
+                  color: i < Math.floor(producto.rating || 0) ? `rgb(var(--theme-accent))` : `rgb(var(--theme-neutral-medium) / 0.3)`
+                }}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -558,19 +721,38 @@ const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, ind
               </svg>
             ))}
           </div>
-          <span className="text-sm text-neutral-500">
+          <span 
+            className="text-sm"
+            style={{
+              color: `rgb(var(--theme-neutral-medium))`,
+              fontFamily: `var(--theme-font-body)`
+            }}
+          >
             ({producto.reviews || 0})
           </span>
         </div>
 
-        {/* Precio y botón de agregar */}
+        {/* Precio y botón de agregar con estilos boutique */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-xl font-medium text-neutral-900">
+            <span 
+              className="text-xl font-medium"
+              style={{
+                color: `rgb(var(--theme-neutral-dark))`,
+                fontFamily: `var(--theme-font-body)`,
+                fontWeight: '500'
+              }}
+            >
               {getCurrencySymbol(tienda.currency)} {producto.price}
             </span>
             {producto.comparePrice && producto.comparePrice > producto.price && (
-              <span className="text-sm text-neutral-500 line-through font-light">
+              <span 
+                className="text-sm line-through font-light"
+                style={{
+                  color: `rgb(var(--theme-neutral-medium))`,
+                  fontFamily: `var(--theme-font-body)`
+                }}
+              >
                 {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
               </span>
             )}
@@ -578,11 +760,35 @@ const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, ind
           <button 
             onClick={handleAddToCart}
             disabled={addingToCart}
-            className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
-              addingToCart
-                ? 'bg-green-600 text-white opacity-100'
-                : 'bg-neutral-900 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-neutral-800'
+            className={`btn-boutique-primary text-sm px-4 py-2 transition-all duration-200 ${
+              addingToCart ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'
             }`}
+            style={{
+              backgroundColor: addingToCart 
+                ? `rgb(var(--theme-success))` 
+                : `rgb(var(--theme-primary))`,
+              color: `rgb(var(--theme-neutral-light))`,
+              borderRadius: `var(--theme-border-radius)`,
+              fontFamily: `var(--theme-font-body)`,
+              letterSpacing: '0.025em',
+              boxShadow: `var(--theme-shadow-sm)`,
+              border: 'none',
+              cursor: addingToCart ? 'not-allowed' : 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              if (!addingToCart) {
+                e.currentTarget.style.backgroundColor = `rgb(var(--theme-neutral-dark))`
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = `var(--theme-shadow-md)`
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!addingToCart) {
+                e.currentTarget.style.backgroundColor = `rgb(var(--theme-primary))`
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = `var(--theme-shadow-sm)`
+              }
+            }}
           >
             {addingToCart ? '✓' : 'Añadir'}
           </button>

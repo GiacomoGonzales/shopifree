@@ -9,6 +9,7 @@ import ElegantAuthModal from './AuthModal'
 import ElegantFooter from './Footer'
 import AddressAutocomplete from '../../components/AddressAutocomplete'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface MiCuentaElegantProps {
   tienda: Tienda
@@ -167,27 +168,32 @@ function MiCuentaElegantContent({ tienda }: MiCuentaElegantProps) {
         }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-6">
-              <div className="flex items-center">
+                             <div className="flex items-center">
                 <Link href="/" className="flex items-center space-x-3">
-                  <div 
-                    className="w-8 h-8 rounded-sm flex items-center justify-center"
-                    style={{ backgroundColor: 'rgb(var(--theme-primary))' }}
-                  >
-                    <span className="text-white font-bold text-sm text-serif">
-                      {tienda.storeName?.charAt(0) || 'S'}
-                    </span>
-                  </div>
+                  {tienda?.logoUrl ? (
+                    <div className="w-8 h-8 relative logo-boutique">
+                      <Image
+                        src={tienda.logoUrl}
+                        alt={`${tienda.storeName} logo`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-8 h-8 rounded-sm flex items-center justify-center"
+                      style={{ backgroundColor: 'rgb(var(--theme-primary))' }}
+                    >
+                      <span className="text-white font-bold text-sm text-serif">
+                        {tienda.storeName?.charAt(0) || 'S'}
+                      </span>
+                    </div>
+                  )}
                   <span className="text-xl font-light text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
                     {tienda.storeName}
                   </span>
                 </Link>
               </div>
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="btn-boutique-primary"
-              >
-                Iniciar Sesión
-              </button>
             </div>
           </div>
         </div>
@@ -556,14 +562,25 @@ function MiCuentaElegantContent({ tienda }: MiCuentaElegantProps) {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-3">
-                <div 
-                  className="w-8 h-8 rounded-sm flex items-center justify-center"
-                  style={{ backgroundColor: 'rgb(var(--theme-primary))' }}
-                >
-                  <span className="text-white font-bold text-sm text-serif">
-                    {tienda.storeName?.charAt(0) || 'S'}
-                  </span>
-                </div>
+                {tienda?.logoUrl ? (
+                  <div className="w-8 h-8 relative logo-boutique">
+                    <Image
+                      src={tienda.logoUrl}
+                      alt={`${tienda.storeName} logo`}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div 
+                    className="w-8 h-8 rounded-sm flex items-center justify-center"
+                    style={{ backgroundColor: 'rgb(var(--theme-primary))' }}
+                  >
+                    <span className="text-white font-bold text-sm text-serif">
+                      {tienda.storeName?.charAt(0) || 'S'}
+                    </span>
+                  </div>
+                )}
                 <span className="text-xl font-light text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>
                   {tienda.storeName}
                 </span>

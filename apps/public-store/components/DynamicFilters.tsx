@@ -130,14 +130,40 @@ export default function DynamicFilters({
     <div className="relative">
       <button
         onClick={() => setShowFilters(!showFilters)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-light border rounded-sm transition-all duration-200"
+        style={{
+          borderColor: `rgb(var(--theme-primary) / 0.2)`,
+          backgroundColor: showFilters ? `rgb(var(--theme-secondary))` : 'transparent',
+          color: `rgb(var(--theme-neutral-medium))`,
+          fontFamily: `var(--theme-font-body)`,
+          transition: `var(--theme-transition)`
+        }}
+        onMouseEnter={(e) => {
+          if (!showFilters) {
+            e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+            e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.3)`
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!showFilters) {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+          }
+        }}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
         </svg>
         <span className="font-light">Filtros</span>
         {hasActiveFilters && (
-          <span className="bg-neutral-900 text-white text-xs font-light rounded-full px-2 py-0.5 min-w-[18px] h-4 flex items-center justify-center">
+          <span 
+            className="text-xs font-light rounded-full px-2 py-0.5 min-w-[18px] h-4 flex items-center justify-center"
+            style={{
+              backgroundColor: `rgb(var(--theme-accent))`,
+              color: `rgb(var(--theme-neutral-light))`,
+              fontFamily: `var(--theme-font-body)`
+            }}
+          >
             {getActiveFiltersCount()}
           </span>
         )}
@@ -156,14 +182,40 @@ export default function DynamicFilters({
       
       {/* Desktop dropdown */}
       {showFilters && (
-        <div className="hidden md:block absolute top-full right-0 mt-2 w-80 bg-white border border-neutral-100 rounded-lg shadow-sm z-50 max-h-96 flex flex-col animate-fade-in">
+        <div 
+          className="hidden md:block absolute top-full right-0 mt-2 w-80 border rounded-sm z-50 max-h-96 flex flex-col animate-fade-in"
+          style={{
+            backgroundColor: `rgb(var(--theme-neutral-light))`,
+            borderColor: `rgb(var(--theme-primary) / 0.1)`,
+            boxShadow: `var(--theme-shadow-sm)`
+          }}
+        >
           <div className="p-6 flex-1 overflow-y-auto" style={{ maxHeight: '300px' }}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-light text-neutral-900">Filtros</h3>
+              <h3 
+                className="text-lg font-light"
+                style={{
+                  color: `rgb(var(--theme-neutral-dark))`,
+                  fontFamily: `var(--theme-font-heading)`
+                }}
+              >
+                Filtros
+              </h3>
               {hasActiveFilters && (
                 <button
                   onClick={handleClearFilters}
-                  className="text-xs font-light text-neutral-500 hover:text-neutral-900 transition-colors duration-200"
+                  className="text-xs font-light transition-colors duration-200"
+                  style={{
+                    color: `rgb(var(--theme-neutral-medium))`,
+                    fontFamily: `var(--theme-font-body)`,
+                    transition: `var(--theme-transition)`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = `rgb(var(--theme-accent))`
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = `rgb(var(--theme-neutral-medium))`
+                  }}
                 >
                   Limpiar todo
                 </button>
@@ -247,17 +299,48 @@ export default function DynamicFilters({
 
           {/* Botones fijos en la parte inferior - Desktop */}
           {(hasTempChanges || hasActiveFilters) && (
-            <div className="flex-shrink-0 border-t border-neutral-100 p-4 bg-white rounded-b-lg space-y-3">
+            <div 
+              className="flex-shrink-0 border-t p-4 rounded-b-sm space-y-3"
+              style={{
+                borderColor: `rgb(var(--theme-primary) / 0.1)`,
+                backgroundColor: `rgb(var(--theme-neutral-light))`
+              }}
+            >
               <button
                 onClick={handleApplyFilters}
-                className="w-full bg-neutral-900 text-white py-2 rounded-md font-medium text-sm hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center gap-2"
+                className="btn-boutique-primary w-full py-2 rounded-sm font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2"
+                style={{
+                  backgroundColor: `rgb(var(--theme-primary))`,
+                  color: `rgb(var(--theme-neutral-light))`,
+                  fontFamily: `var(--theme-font-body)`,
+                  letterSpacing: '0.025em',
+                  boxShadow: `var(--theme-shadow-sm)`,
+                  border: 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `rgb(var(--theme-neutral-dark))`
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = `var(--theme-shadow-md)`
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = `rgb(var(--theme-primary))`
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = `var(--theme-shadow-sm)`
+                }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
                 Aplicar Filtros
                 {getTempActiveFiltersCount() > 0 && (
-                  <span className="bg-white text-neutral-900 text-xs font-medium rounded-full px-2 py-0.5 min-w-[18px] h-4 flex items-center justify-center">
+                  <span 
+                    className="text-xs font-medium rounded-full px-2 py-0.5 min-w-[18px] h-4 flex items-center justify-center"
+                    style={{
+                      backgroundColor: `rgb(var(--theme-neutral-light))`,
+                      color: `rgb(var(--theme-neutral-dark))`,
+                      fontFamily: `var(--theme-font-body)`
+                    }}
+                  >
                     {getTempActiveFiltersCount()}
                   </span>
                 )}
@@ -266,7 +349,24 @@ export default function DynamicFilters({
               {hasActiveFilters && (
                 <button
                   onClick={handleClearFilters}
-                  className="w-full bg-neutral-100 text-neutral-700 py-2 rounded-md font-medium text-sm hover:bg-neutral-200 transition-colors duration-200 flex items-center justify-center gap-2"
+                  className="btn-boutique-secondary w-full py-2 rounded-sm font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2"
+                  style={{
+                    backgroundColor: `rgb(var(--theme-secondary))`,
+                    color: `rgb(var(--theme-neutral-dark))`,
+                    border: `1px solid rgb(var(--theme-primary) / 0.2)`,
+                    fontFamily: `var(--theme-font-body)`,
+                    letterSpacing: '0.025em'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `rgb(var(--theme-primary) / 0.1)`
+                    e.currentTarget.style.borderColor = `rgb(var(--theme-primary))`
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                    e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
