@@ -7,11 +7,13 @@ import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
 import { PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRangeOption } from '../../lib/products'
 import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../lib/store-filters'
+import { PublicCollection, getStoreCollections } from '../../lib/collections'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
+import { subscribeToNewsletter } from '../../lib/newsletter'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
-import DynamicFilters from './DynamicFilters'
+import ProductSortFilter from './ProductSortFilter'
 import './styles.css'
 
 interface HomeProps {
@@ -98,20 +100,46 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'newest'>('newest')
   const [showSort, setShowSort] = useState(false)
   
+  // Estado para colecciones
+  const [collections, setCollections] = useState<PublicCollection[]>([])
+  const [productCollections, setProductCollections] = useState<Record<string, PublicCollection[]>>({})
+  
+  // Estado para detectar si estamos en móvil
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1024
+    }
+    return false
+  })
+
+  // Estados para newsletter
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false)
+  const [newsletterMessage, setNewsletterMessage] = useState('')
+  
   // Estado para el selector de vista (solo móvil)
   const [viewMode, setViewMode] = useState<ProductViewMode>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('productViewMode') as ProductViewMode) || 'expanded'
+      // En móvil usar localStorage, en escritorio siempre 'compact'
+      const mobile = window.innerWidth < 1024
+      if (mobile) {
+        return (localStorage.getItem('productViewMode') as ProductViewMode) || 'expanded'
+      } else {
+        return 'compact' // Siempre compact en escritorio
+      }
     }
     return 'expanded'
   })
   
-  // Función para cambiar el modo de vista
+  // Función para cambiar el modo de vista (solo móvil)
   const handleViewModeChange = (mode: ProductViewMode) => {
-    setViewMode(mode)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('productViewMode', mode)
+    if (isMobile) {
+      setViewMode(mode)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('productViewMode', mode)
+      }
     }
+    // En escritorio no hacer nada, mantener 'compact'
   }
   
   // Función para cambiar vista de forma cíclica
@@ -166,7 +194,7 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
   
   const allProducts = productos || []
 
-  // Separar categorías padre de subcategorías
+  // Separar categorías padre de subcategorías (conservando orden)
   const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
   const subcategoriesByParent = categorias.reduce((acc, cat) => {
     if (cat.parentCategoryId) {
@@ -177,6 +205,15 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
     }
     return acc
   }, {} as Record<string, typeof categorias>)
+  
+  // Ordenar subcategorías por order dentro de cada categoría padre
+  Object.keys(subcategoriesByParent).forEach(parentId => {
+    subcategoriesByParent[parentId].sort((a, b) => {
+      const orderA = a.order ?? 999999
+      const orderB = b.order ?? 999999
+      return orderA - orderB
+    })
+  })
 
   // Determinar qué categorías mostrar
   const categoriesToShow = selectedParentCategory 
@@ -300,6 +337,56 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
     setProductsToShow(8)
   }, [activeCategory, selectedParentCategory])
 
+  // Cargar colecciones
+  useEffect(() => {
+    const loadCollections = async () => {
+      try {
+        const storeCollections = await getStoreCollections(tienda.id)
+        setCollections(storeCollections)
+        
+        // Crear un mapa de productos a sus colecciones
+        const productCollectionsMap: Record<string, PublicCollection[]> = {}
+        
+        allProducts.forEach(product => {
+          const productColls = storeCollections.filter(collection => 
+            collection.productIds.includes(product.id)
+          )
+          if (productColls.length > 0) {
+            productCollectionsMap[product.id] = productColls
+          }
+        })
+        
+        setProductCollections(productCollectionsMap)
+      } catch (error) {
+        console.error('Error loading collections:', error)
+      }
+    }
+    
+    if (tienda.id && allProducts.length > 0) {
+      loadCollections()
+    }
+  }, [tienda.id, allProducts])
+
+  // Asegurar que en escritorio siempre se use 'compact' y actualizar isMobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        const mobile = window.innerWidth < 1024
+        setIsMobile(mobile)
+        
+        if (!mobile && viewMode !== 'compact') {
+          setViewMode('compact')
+        }
+      }
+    }
+
+    // Verificar al montar y al cambiar tamaño de ventana
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    
+    return () => window.removeEventListener('resize', handleResize)
+  }, [viewMode])
+
   // Funciones para cargar más productos
   const handleLoadMore = () => {
     const newProductsToShow = productsToShow + 8
@@ -341,6 +428,73 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
     setPriceRangeOptions(clearedPriceRanges)
     setShowAllProducts(false)
     setProductsToShow(8)
+  }
+
+  // Función para manejar suscripción a newsletter
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!newsletterEmail.trim()) {
+      setNewsletterMessage('Por favor, introduce tu email')
+      return
+    }
+
+    if (!tienda?.id) {
+      setNewsletterMessage('Error: Tienda no disponible')
+      return
+    }
+
+    setNewsletterSubmitting(true)
+    setNewsletterMessage('')
+
+    try {
+      const result = await subscribeToNewsletter(tienda.id, newsletterEmail, 'home')
+      setNewsletterMessage(result.message)
+      
+      if (result.success) {
+        setNewsletterEmail('')
+        // Limpiar mensaje después de 5 segundos
+        setTimeout(() => setNewsletterMessage(''), 5000)
+      }
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error)
+      setNewsletterMessage('Hubo un error inesperado. Por favor, inténtalo de nuevo.')
+    } finally {
+      setNewsletterSubmitting(false)
+    }
+  }
+
+  // Función para obtener la etiqueta dinámica de un producto
+  const getProductBadge = (producto: PublicProduct) => {
+    const productColls = productCollections[producto.id] || []
+    
+    if (productColls.length > 0) {
+      // Priorizar ciertas colecciones por orden de importancia
+      const priorityOrder = ['ofertas', 'descuentos', 'novedades', 'nuevo', 'destacado', 'popular']
+      
+      // Buscar si tiene alguna colección prioritaria
+      for (const priority of priorityOrder) {
+        const priorityCollection = productColls.find(coll => 
+          coll.title.toLowerCase().includes(priority) || 
+          coll.slug.toLowerCase().includes(priority)
+        )
+        if (priorityCollection) {
+          return {
+            text: priorityCollection.title.toUpperCase(),
+            type: priority
+          }
+        }
+      }
+      
+      // Si no tiene colecciones prioritarias, usar la primera disponible
+      return {
+        text: productColls[0].title.toUpperCase(),
+        type: 'default'
+      }
+    }
+    
+    // Si no pertenece a ninguna colección, no mostrar etiqueta
+    return null
   }
 
   const features = [
@@ -399,7 +553,7 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
         background: `linear-gradient(135deg, rgb(var(--theme-secondary)) 0%, rgb(var(--theme-neutral-light)) 100%)`
       }}>
         {/* Contenido */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full" style={{ paddingTop: 'var(--theme-section-padding)' }}>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-6 md:pt-16 lg:pt-20">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[65vh]">
             
             {/* Columna izquierda - Contenido de texto */}
@@ -592,148 +746,18 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
           
           {/* Filtros dinámicos y ordenamiento */}
           <div className="flex items-center gap-6">
-            {/* Desktop: Filtros y ordenamiento normales */}
-            <div className="hidden md:flex items-center gap-6">
-              <DynamicFilters
-                filters={dynamicFilters}
-                priceRangeOptions={priceRangeOptions}
-                onFiltersChange={handleFiltersChange}
-                onPriceRangeChange={handlePriceRangeChange}
-                onClearFilters={handleClearFilters}
-              />
-              
-              {/* Ordenamiento - Desktop */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowSort(!showSort)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900"
-                >
-                  <Icons.Sort />
-                  <span>Ordenar</span>
-                  <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-                
-                {showSort && (
-                  <div 
-                    className="absolute top-full right-0 mt-2 w-56 rounded-sm z-50 animate-fadeInUp"
-                    style={{ 
-                      backgroundColor: 'rgb(var(--theme-neutral-light))',
-                      border: '1px solid rgb(var(--theme-primary) / 0.1)',
-                      boxShadow: 'var(--theme-shadow-md)'
-                    }}
-                  >
-                    <div className="p-3">
-                      {[
-                        { value: 'newest', label: 'Más recientes' },
-                        { value: 'name', label: 'Nombre A-Z' },
-                        { value: 'price-low', label: 'Precio: menor a mayor' },
-                        { value: 'price-high', label: 'Precio: mayor a menor' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => {
-                            setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
-                            setShowSort(false)
-                          }}
-                          className={`w-full text-left px-3 py-2 hover-elegant transition-colors duration-200 rounded-sm text-sm font-light text-sans ${
-                            sortBy === option.value 
-                              ? 'font-medium' 
-                              : ''
-                          }`}
-                          style={{ 
-                            backgroundColor: sortBy === option.value ? 'rgb(var(--theme-secondary))' : 'transparent',
-                            color: sortBy === option.value ? 'rgb(var(--theme-neutral-dark))' : 'rgb(var(--theme-neutral-medium))'
-                          }}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Mobile: Tres botones alineados */}
-            <div className="md:hidden flex items-center justify-between w-full gap-3">
-              {/* Filtros - Izquierda */}
-              <div className="flex-1">
-                <DynamicFilters
-                  filters={dynamicFilters}
-                  priceRangeOptions={priceRangeOptions}
-                  onFiltersChange={handleFiltersChange}
-                  onPriceRangeChange={handlePriceRangeChange}
-                  onClearFilters={handleClearFilters}
-                />
-              </div>
-              
-              {/* Ordenamiento - Centro */}
-              <div className="relative flex-1">
-                <button
-                  onClick={() => setShowSort(!showSort)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900 w-full"
-                >
-                  <Icons.Sort />
-                  <span>Ordenar</span>
-                  <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-                
-                {showSort && (
-                  <div 
-                    className="absolute top-full left-0 mt-2 w-full rounded-sm z-50 animate-fadeInUp"
-                    style={{ 
-                      backgroundColor: 'rgb(var(--theme-neutral-light))',
-                      border: '1px solid rgb(var(--theme-primary) / 0.1)',
-                      boxShadow: 'var(--theme-shadow-md)'
-                    }}
-                  >
-                    <div className="p-3">
-                      {[
-                        { value: 'newest', label: 'Más recientes' },
-                        { value: 'name', label: 'Nombre A-Z' },
-                        { value: 'price-low', label: 'Precio: menor a mayor' },
-                        { value: 'price-high', label: 'Precio: mayor a menor' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => {
-                            setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
-                            setShowSort(false)
-                          }}
-                          className={`w-full text-left px-3 py-2 hover-elegant transition-colors duration-200 rounded-sm text-sm font-light text-sans ${
-                            sortBy === option.value 
-                              ? 'font-medium' 
-                              : ''
-                          }`}
-                          style={{ 
-                            backgroundColor: sortBy === option.value ? 'rgb(var(--theme-secondary))' : 'transparent',
-                            color: sortBy === option.value ? 'rgb(var(--theme-neutral-dark))' : 'rgb(var(--theme-neutral-medium))'
-                          }}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Selector de vista - Derecha */}
-              <div className="flex-1">
-                <button
-                  onClick={handleViewModeToggle}
-                  className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-light border border-neutral-200 rounded-md hover:bg-neutral-50 transition-all duration-200 text-neutral-700 hover:text-neutral-900 w-full"
-                  title={getCurrentViewTitle()}
-                >
-                  {getCurrentViewIcon()}
-                  <span className="hidden sm:inline">Vista</span>
-                </button>
-              </div>
-            </div>
+            <ProductSortFilter
+              filters={dynamicFilters}
+              priceRangeOptions={priceRangeOptions}
+              onFiltersChange={handleFiltersChange}
+              onPriceRangeChange={handlePriceRangeChange}
+              onClearFilters={handleClearFilters}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              showViewSelector={isMobile}
+              viewMode={viewMode}
+              onViewModeChange={handleViewModeChange}
+            />
           </div>
         </div>
 
@@ -798,12 +822,15 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
                       />
                     </div>
                   )}
-                  {/* Badge premium - Oculto en vista lista */}
-                  {viewMode !== 'list' && (
-                    <span className="product-badge-boutique">
-                      Premium
-                    </span>
-                  )}
+                  {/* Badge dinámico - Oculto en vista lista */}
+                  {viewMode !== 'list' && (() => {
+                    const badge = getProductBadge(producto)
+                    return badge ? (
+                      <span className={`product-badge-boutique badge-${badge.type}`}>
+                        {badge.text}
+                      </span>
+                    ) : null
+                  })()}
                   {/* Botón de favorito - Oculto en vista compacta y lista */}
                   {viewMode !== 'compact' && viewMode !== 'list' && (
                     <div className="absolute top-3 right-3 z-10">
@@ -1027,19 +1054,42 @@ export default function ElegantBoutiqueHome({ tienda, productos, categorias = []
         </div>
 
         <div className="max-w-md mx-auto mt-8">
-          <div className="space-y-4">
+          <form onSubmit={handleNewsletterSubmit} className="space-y-4">
             <input
               type="email"
+              value={newsletterEmail}
+              onChange={(e) => setNewsletterEmail(e.target.value)}
               placeholder="tu@email.com"
               className="input-boutique"
+              disabled={newsletterSubmitting}
+              required
             />
-            <button className="w-full btn-boutique-primary">
-              Suscribirse a la Newsletter
+            <button 
+              type="submit"
+              disabled={newsletterSubmitting || !newsletterEmail.trim()}
+              className="w-full btn-boutique-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {newsletterSubmitting ? 'Suscribiendo...' : 'Suscribirse a la Newsletter'}
             </button>
-          </div>
-          <p className="text-xs mt-4 font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-            Contenido exclusivo, sin spam. Solo elegancia y calidad.
-          </p>
+          </form>
+          
+          {newsletterMessage && (
+            <p 
+              className={`text-sm mt-3 text-center ${
+                newsletterMessage.includes('Gracias') || newsletterMessage.includes('Ya estás') 
+                  ? 'text-green-600' 
+                  : 'text-red-600'
+              }`}
+            >
+              {newsletterMessage}
+            </p>
+          )}
+          
+          {!newsletterMessage && (
+            <p className="text-xs mt-4 font-light text-sans text-center" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+              Contenido exclusivo, sin spam. Solo elegancia y calidad.
+            </p>
+          )}
         </div>
       </section>
     </div>

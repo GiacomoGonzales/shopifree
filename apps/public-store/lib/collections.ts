@@ -15,6 +15,17 @@ export interface PublicCollection {
 }
 
 // Obtener todas las colecciones visibles de una tienda
+// Obtener las colecciones a las que pertenece un producto específico
+export const getProductCollections = async (storeId: string, productId: string): Promise<PublicCollection[]> => {
+  try {
+    const allCollections = await getStoreCollections(storeId)
+    return allCollections.filter(collection => collection.productIds.includes(productId))
+  } catch (error) {
+    console.error('Error getting product collections:', error)
+    return []
+  }
+}
+
 export const getStoreCollections = async (storeId: string): Promise<PublicCollection[]> => {
   try {
     const db = getFirebaseDb()

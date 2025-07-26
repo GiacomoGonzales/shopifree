@@ -8,6 +8,11 @@ export interface Tienda {
   theme: string
   hasPhysicalLocation: boolean
   address?: string
+  location?: {
+    address: string
+    lat: number
+    lng: number
+  }
   logoUrl?: string
   heroImageUrl?: string
   storefrontImageUrl?: string

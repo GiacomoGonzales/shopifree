@@ -263,6 +263,38 @@ html, body {
   box-shadow: var(--theme-shadow-sm);
 }
 
+/* Estilos específicos para diferentes tipos de etiquetas */
+.badge-ofertas,
+.badge-descuentos {
+  background-color: #dc2626; /* Rojo para ofertas y descuentos */
+  color: white;
+}
+
+.badge-novedades,
+.badge-nuevo {
+  background-color: #059669; /* Verde para novedades */
+  color: white;
+}
+
+.badge-destacado,
+.badge-popular {
+  background-color: #7c3aed; /* Púrpura para destacados */
+  color: white;
+}
+
+.badge-invierno,
+.badge-verano,
+.badge-temporada {
+  background-color: #0284c7; /* Azul para temporadas */
+  color: white;
+}
+
+.badge-premium,
+.badge-default {
+  background-color: rgb(var(--theme-accent)); /* Dorado por defecto */
+  color: rgb(var(--theme-neutral-light));
+}
+
 .product-image-boutique {
   position: relative;
   overflow: hidden;
@@ -506,6 +538,20 @@ html, body {
 /* === PRODUCTO ESPECÍFICO === */
 .elegant-boutique-product-container {
   padding: var(--theme-section-padding) 1rem;
+}
+
+/* Espaciado específico para página de producto - solo desktop */
+@media (min-width: 1024px) {
+  .elegant-product-spacing {
+    margin-top: 4rem; /* 64px adicionales solo en desktop para compensar la navegación */
+  }
+}
+
+/* Espaciado específico para página de categorías - solo desktop */
+@media (min-width: 1024px) {
+  .elegant-category-spacing {
+    margin-top: 4rem; /* 64px adicionales solo en desktop para compensar la navegación */
+  }
 }
 
 /* Estilos para la descripción del producto con HTML */
@@ -1186,4 +1232,35 @@ input[type="radio"]:focus {
 
 input[type="radio"]:focus-visible {
   @apply outline-none ring-0 ring-offset-0;
+}
+
+/* Espaciado específico para página de favoritos - solo desktop */
+@media (min-width: 1024px) {
+  .elegant-favoritos-spacing {
+    margin-top: 4rem; /* 64px adicionales solo en desktop para compensar la navegación */
+  }
+}
+
+/* === NEWSLETTER ESPECÍFICO === */
+.newsletter-form-elegant {
+  position: relative;
+}
+
+.newsletter-form-elegant input:focus {
+  outline: none;
+  border-color: rgb(var(--theme-primary));
+  box-shadow: 0 0 0 3px rgb(var(--theme-primary) / 0.1);
+}
+
+.newsletter-form-elegant button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--theme-shadow-md);
+}
+
+.newsletter-form-elegant .text-green-600 {
+  color: #16a34a;
+}
+
+.newsletter-form-elegant .text-red-600 {
+  color: #dc2626;
 } 

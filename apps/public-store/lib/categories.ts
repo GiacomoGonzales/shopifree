@@ -1,4 +1,4 @@
-import { collection, getDocs, query } from 'firebase/firestore'
+import { collection, getDocs, query, orderBy } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
 
 export interface Category {
@@ -20,7 +20,8 @@ export async function getStoreCategories(storeId: string): Promise<Category[]> {
     }
 
     const categoriesRef = collection(db, 'stores', storeId, 'categories')
-    const categoriesSnapshot = await getDocs(categoriesRef)
+    const categoriesQuery = query(categoriesRef, orderBy('order', 'asc'))
+    const categoriesSnapshot = await getDocs(categoriesQuery)
     
     const categories: Category[] = []
     categoriesSnapshot.forEach((doc) => {
@@ -31,7 +32,14 @@ export async function getStoreCategories(storeId: string): Promise<Category[]> {
       })
     })
     
-    console.log('✅ Categories loaded:', categories.length)
+    // Ordenar por campo order (manejar casos donde order sea undefined)
+    categories.sort((a, b) => {
+      const orderA = a.order ?? 999999 // Si no tiene order, ponerlo al final
+      const orderB = b.order ?? 999999
+      return orderA - orderB
+    })
+    
+    console.log('✅ Categories loaded and sorted:', categories.length)
     return categories
   } catch (error) {
     console.error('❌ Error getting store categories:', error)

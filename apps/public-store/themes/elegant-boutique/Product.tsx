@@ -97,9 +97,9 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
 
   return (
     <div style={{ backgroundColor: 'rgb(var(--theme-neutral-light))' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 elegant-boutique-product-container">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-6 lg:pt-12 elegant-boutique-product-container elegant-product-spacing">
         {/* Breadcrumb */}
-        <nav className="mb-8">
+        <nav className="mb-8 lg:mb-12">
           <div className="flex items-center space-x-3 text-sm text-sans">
             <Link 
               href="/" 
@@ -122,17 +122,6 @@ export default function ElegantBoutiqueProduct({ tienda, product, categorias = [
             </span>
           </div>
         </nav>
-
-        {/* Botón de regreso */}
-        <div className="mb-8">
-          <Link 
-            href="/"
-            className="inline-flex items-center space-x-2 btn-boutique-secondary"
-          >
-            <Icons.ArrowLeft />
-            <span>Volver a la colección</span>
-          </Link>
-        </div>
 
         {/* Contenido principal del producto */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">

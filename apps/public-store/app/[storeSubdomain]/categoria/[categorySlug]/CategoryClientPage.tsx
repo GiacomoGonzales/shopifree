@@ -15,14 +15,18 @@ import { ThemeLayoutComponent, ThemeLayoutProps } from '../../../../themes/theme
 import { getStoreCategories, Category } from '../../../../lib/categories'
 import { getStoreProducts, PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRangeOption } from '../../../../lib/products'
 import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../../../lib/store-filters'
+import { PublicCollection, getStoreCollections } from '../../../../lib/collections'
 import { Tienda } from '../../../../lib/types'
 import { StoreDataClient } from '../../../../lib/store'
-import DynamicFilters from '../../../../components/DynamicFilters'
+import ProductSortFilter from '../../../../themes/elegant-boutique/ProductSortFilter'
 
 // Layout por defecto en caso de error
 const DefaultLayout: ThemeLayoutComponent = ({ children }) => (
   <main className="min-h-screen bg-gray-50">{children}</main>
 )
+
+// Tipos para el selector de vista
+type ProductViewMode = 'expanded' | 'compact' | 'list'
 
 // Función para convertir Store a Tienda
 const convertStoreToTienda = (store: StoreDataClient): Tienda => ({
@@ -97,6 +101,57 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter[]>([])
   const [priceRangeOptions, setPriceRangeOptions] = useState<PriceRangeOption[]>([])
   
+  // Estado para colecciones
+  const [collections, setCollections] = useState<PublicCollection[]>([])
+  const [productCollections, setProductCollections] = useState<Record<string, PublicCollection[]>>({})
+  
+  // Estado para detectar si estamos en móvil
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1024
+    }
+    return false
+  })
+  
+  // Estados para el selector de vista (solo móvil)
+  const [viewMode, setViewMode] = useState<ProductViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      // En móvil usar localStorage, en escritorio siempre 'compact'
+      const mobile = window.innerWidth < 1024
+      if (mobile) {
+        return (localStorage.getItem('productViewMode') as ProductViewMode) || 'expanded'
+      } else {
+        return 'compact' // Siempre compact en escritorio
+      }
+    }
+    return 'expanded'
+  })
+  
+  // Función para cambiar el modo de vista (solo móvil)
+  const handleViewModeChange = (mode: ProductViewMode) => {
+    if (isMobile) {
+      setViewMode(mode)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('productViewMode', mode)
+      }
+    }
+    // En escritorio no hacer nada, mantener 'compact'
+  }
+  
+  // Función para obtener las clases de la grilla según el modo de vista
+  const getGridClasses = (mode: ProductViewMode) => {
+    switch (mode) {
+      case 'expanded':
+        return 'grid-boutique-products' // Clase existente (1 columna en móvil)
+      case 'compact':
+        return 'grid-boutique-products-compact' // Nueva clase (2 columnas en móvil)
+      case 'list':
+        return 'grid-boutique-products-list' // Nueva clase (lista)
+      default:
+        return 'grid-boutique-products'
+    }
+  }
+  
   // Paginación
   const [currentPage, setCurrentPage] = useState(1)
   const [productsPerPage] = useState(12)
@@ -130,6 +185,56 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Cargar colecciones
+  useEffect(() => {
+    const loadCollections = async () => {
+      if (!store?.id || products.length === 0) return
+      
+      try {
+        const storeCollections = await getStoreCollections(store.id)
+        setCollections(storeCollections)
+        
+        // Crear un mapa de productos a sus colecciones
+        const productCollectionsMap: Record<string, PublicCollection[]> = {}
+        
+        products.forEach(product => {
+          const productColls = storeCollections.filter(collection => 
+            collection.productIds.includes(product.id)
+          )
+          if (productColls.length > 0) {
+            productCollectionsMap[product.id] = productColls
+          }
+        })
+        
+        setProductCollections(productCollectionsMap)
+      } catch (error) {
+        console.error('Error loading collections:', error)
+      }
+    }
+    
+    loadCollections()
+  }, [store?.id, products])
+
+  // Asegurar que en escritorio siempre se use 'compact' y actualizar isMobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        const mobile = window.innerWidth < 1024
+        setIsMobile(mobile)
+        
+        if (!mobile && viewMode !== 'compact') {
+          setViewMode('compact')
+        }
+      }
+    }
+
+    // Verificar al montar y al cambiar tamaño de ventana
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    
+    return () => window.removeEventListener('resize', handleResize)
+  }, [viewMode])
 
   // Encontrar la categoría actual
   const currentCategory = useMemo(() => {
@@ -306,14 +411,14 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     }
 
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-12 pb-12 elegant-category-spacing">
         {/* Breadcrumbs */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Breadcrumbs items={breadcrumbs} />
         </div>
 
         {/* Header con estilos elegant boutique */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
             <h1 
               className="text-3xl font-light mb-2"
@@ -338,96 +443,18 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
           
           {/* Controles de filtro y ordenamiento */}
           <div className="flex items-center gap-4 mt-4 md:mt-0">
-            {/* Filtros dinámicos */}
-                         <DynamicFilters
-                filters={dynamicFilters}
-                priceRangeOptions={priceRangeOptions}
-                onFiltersChange={handleFiltersChange}
-                onPriceRangeChange={handlePriceRangeChange}
-                onClearFilters={handleClearFilters}
-              />
-
-            {/* Ordenamiento con estilos boutique */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-light border rounded-sm transition-all duration-200"
-                style={{
-                  borderColor: `rgb(var(--theme-primary) / 0.2)`,
-                  backgroundColor: showSort ? `rgb(var(--theme-secondary))` : 'transparent',
-                  color: `rgb(var(--theme-neutral-medium))`,
-                  fontFamily: `var(--theme-font-body)`,
-                  transition: `var(--theme-transition)`
-                }}
-                onMouseEnter={(e) => {
-                  if (!showSort) {
-                    e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
-                    e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.3)`
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!showSort) {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                    e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
-                  }
-                }}
-              >
-                <Icons.Sort />
-                <span className="font-light">Ordenar</span>
-                <svg className={`w-3 h-3 transition-transform duration-200 ${showSort ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {showSort && (
-                <div 
-                  className="absolute top-full right-0 mt-2 w-48 border rounded-sm z-50 animate-fade-in"
-                  style={{
-                    backgroundColor: `rgb(var(--theme-neutral-light))`,
-                    borderColor: `rgb(var(--theme-primary) / 0.1)`,
-                    boxShadow: `var(--theme-shadow-sm)`
-                  }}
-                >
-                  <div className="p-3">
-                    {[
-                      { value: 'newest', label: 'Más recientes' },
-                      { value: 'name', label: 'Nombre A-Z' },
-                      { value: 'price-low', label: 'Precio: menor a mayor' },
-                      { value: 'price-high', label: 'Precio: mayor a menor' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setSortBy(option.value as 'name' | 'price-low' | 'price-high' | 'newest')
-                          setShowSort(false)
-                        }}
-                        className="w-full text-left px-3 py-2 transition-colors duration-200 rounded-sm text-sm font-light"
-                        style={{
-                          backgroundColor: sortBy === option.value ? `rgb(var(--theme-secondary))` : 'transparent',
-                          color: sortBy === option.value ? `rgb(var(--theme-neutral-dark))` : `rgb(var(--theme-neutral-medium))`,
-                          fontFamily: `var(--theme-font-body)`,
-                          transition: `var(--theme-transition)`
-                        }}
-                        onMouseEnter={(e) => {
-                          if (sortBy !== option.value) {
-                            e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
-                            e.currentTarget.style.color = `rgb(var(--theme-neutral-dark))`
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (sortBy !== option.value) {
-                            e.currentTarget.style.backgroundColor = 'transparent'
-                            e.currentTarget.style.color = `rgb(var(--theme-neutral-medium))`
-                          }
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <ProductSortFilter
+              filters={dynamicFilters}
+              priceRangeOptions={priceRangeOptions}
+              onFiltersChange={handleFiltersChange}
+              onPriceRangeChange={handlePriceRangeChange}
+              onClearFilters={handleClearFilters}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              showViewSelector={isMobile}
+              viewMode={viewMode}
+              onViewModeChange={handleViewModeChange}
+            />
           </div>
         </div>
 
@@ -453,9 +480,9 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
         ) : (
           <>
             {/* Grilla de productos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+            <div className={`grid ${getGridClasses(viewMode)} gap-6 mb-12`}>
               {paginatedProducts.map((producto, index) => (
-                <ProductCard key={producto.id} producto={producto} index={index} tienda={convertStoreToTienda(store)} />
+                <ProductCard key={producto.id} producto={producto} index={index} tienda={convertStoreToTienda(store)} viewMode={viewMode} productCollections={productCollections} />
               ))}
             </div>
 
@@ -569,8 +596,47 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   )
 }
 
-// Componente de tarjeta de producto
-const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, index: number, tienda: Tienda }) => {
+// Función para obtener la etiqueta dinámica de un producto
+const getProductBadge = (producto: PublicProduct, productCollections: Record<string, PublicCollection[]>) => {
+  const productColls = productCollections[producto.id] || []
+  
+  if (productColls.length > 0) {
+    // Priorizar ciertas colecciones por orden de importancia
+    const priorityOrder = ['ofertas', 'descuentos', 'novedades', 'nuevo', 'destacado', 'popular']
+    
+    // Buscar si tiene alguna colección prioritaria
+    for (const priority of priorityOrder) {
+      const priorityCollection = productColls.find(coll => 
+        coll.title.toLowerCase().includes(priority) || 
+        coll.slug.toLowerCase().includes(priority)
+      )
+      if (priorityCollection) {
+        return {
+          text: priorityCollection.title.toUpperCase(),
+          type: priority
+        }
+      }
+    }
+    
+    // Si no tiene colecciones prioritarias, usar la primera disponible
+    return {
+      text: productColls[0].title.toUpperCase(),
+      type: 'default'
+    }
+  }
+  
+  // Si no pertenece a ninguna colección, no mostrar etiqueta
+  return null
+}
+
+// Componente de tarjeta de producto (idéntico al de Home.tsx)
+const ProductCard = ({ producto, index, tienda, viewMode, productCollections }: { 
+  producto: PublicProduct, 
+  index: number, 
+  tienda: Tienda, 
+  viewMode: ProductViewMode,
+  productCollections: Record<string, PublicCollection[]>
+}) => {
   const [addingToCart, setAddingToCart] = useState(false)
   const { addItem, openCart } = useCart()
 
@@ -616,182 +682,154 @@ const ProductCard = ({ producto, index, tienda }: { producto: PublicProduct, ind
     <Link 
       href={`/${producto.slug}`}
       onClick={handleProductClick}
-      className="card-boutique group cursor-pointer block relative transition-all duration-300 animate-fade-in"
-      style={{ 
-        animationDelay: `${index * 100}ms`,
-        backgroundColor: `rgb(var(--theme-neutral-light))`,
-        border: `1px solid rgb(var(--theme-primary) / 0.1)`,
-        borderRadius: `var(--theme-border-radius)`,
-        boxShadow: `var(--theme-shadow-sm)`,
-        color: `rgb(var(--theme-neutral-dark))`,
-        transition: `var(--theme-transition)`,
-        padding: `var(--theme-card-padding)`
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = `var(--theme-shadow-md)`
-        e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = `var(--theme-shadow-sm)`
-        e.currentTarget.style.borderColor = `rgb(var(--theme-primary) / 0.1)`
-      }}
+      className={`card-boutique group cursor-pointer block animate-fadeInUp ${
+        viewMode === 'compact' ? 'product-card-compact' : 
+        viewMode === 'list' ? 'product-card-list' : ''
+      }`}
+      style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Botón de favorito */}
-      <div className="absolute top-3 right-3 z-10">
-        <HeartIcon product={producto} size="md" />
-      </div>
-
-      {/* Imagen del producto */}
-      <div 
-        className="relative aspect-square overflow-hidden flex-shrink-0"
-        style={{
-          backgroundColor: `rgb(var(--theme-secondary))`,
-          borderRadius: `var(--theme-border-radius)`,
-          marginBottom: '1rem'
-        }}
-      >
+      {/* Product Image */}
+      <div className={`relative overflow-hidden rounded-sm product-image ${
+        viewMode === 'list' ? 'w-20 h-20' : 'aspect-square mb-6'
+      }`} style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
         {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
           <VideoPlayer
             src={producto.mediaFiles[0].url}
             alt={producto.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             showControls={false}
             autoPlay={true}
             loop={true}
             muted={true}
+            playsInline={true}
+            preload="metadata"
+            poster={producto.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
           />
         ) : (
-          <img
-            src={producto.image}
-            alt={producto.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/api/placeholder/300/400';
-            }}
-          />
+          <div className="product-image-boutique w-full h-full">
+            <img
+              src={producto.image}
+              alt={producto.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/api/placeholder/300/400';
+              }}
+            />
+          </div>
         )}
-        
-        {/* Badge de nuevo con estilo boutique */}
-        <span 
-          className="product-badge-boutique absolute top-3 left-3 text-xs font-medium px-3 py-1"
-          style={{
-            backgroundColor: `rgb(var(--theme-accent))`,
-            color: `rgb(var(--theme-neutral-light))`,
-            borderRadius: `var(--theme-border-radius)`,
-            fontFamily: `var(--theme-font-body)`,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            boxShadow: `var(--theme-shadow-sm)`
-          }}
-        >
-          Nuevo
-        </span>
+        {/* Badge dinámico - Oculto en vista lista */}
+        {viewMode !== 'list' && (() => {
+          const badge = getProductBadge(producto, productCollections)
+          return badge ? (
+            <span className={`product-badge-boutique badge-${badge.type}`}>
+              {badge.text}
+            </span>
+          ) : null
+        })()}
+        {/* Botón de favorito - Oculto en vista compacta y lista */}
+        {viewMode !== 'compact' && viewMode !== 'list' && (
+          <div className="absolute top-3 right-3 z-10">
+            <HeartIcon product={producto} size="md" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
       </div>
 
-      {/* Información del producto */}
-      <div className="space-y-3">
+      {/* Product Info */}
+      <div className={`product-info ${
+        viewMode === 'list' ? 'flex-1' : 'space-y-4'
+      }`}>
         <h3 
-          className="text-lg font-light group-hover:opacity-80 transition-all duration-200"
-          style={{
-            color: `rgb(var(--theme-neutral-dark))`,
-            fontFamily: `var(--theme-font-heading)`,
-            fontWeight: '300'
-          }}
+          className={`font-medium group-hover:color-accent transition-colors duration-300 text-serif product-title ${
+            viewMode === 'compact' ? 'text-sm' : viewMode === 'list' ? 'text-base' : 'text-lg'
+          }`}
+          style={{ color: 'rgb(var(--theme-neutral-dark))' }}
         >
           {producto.name}
         </h3>
         
-        {/* Rating con estilos boutique */}
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <svg
-                key={i}
-                className="w-4 h-4"
-                style={{
-                  color: i < Math.floor(producto.rating || 0) ? `rgb(var(--theme-accent))` : `rgb(var(--theme-neutral-medium) / 0.3)`
-                }}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
-          </div>
-          <span 
-            className="text-sm"
-            style={{
-              color: `rgb(var(--theme-neutral-medium))`,
-              fontFamily: `var(--theme-font-body)`
-            }}
-          >
-            ({producto.reviews || 0})
-          </span>
-        </div>
-
-        {/* Precio y botón de agregar con estilos boutique */}
-        <div className="flex items-center justify-between">
+        {/* Rating - Oculto en vista compacta */}
+        {viewMode !== 'compact' && (
           <div className="flex items-center space-x-2">
-            <span 
-              className="text-xl font-medium"
-              style={{
-                color: `rgb(var(--theme-neutral-dark))`,
-                fontFamily: `var(--theme-font-body)`,
-                fontWeight: '500'
-              }}
-            >
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="w-3 h-3"
+                  style={{ 
+                    color: i < Math.floor(producto.rating || 0) 
+                      ? 'rgb(var(--theme-accent))' 
+                      : 'rgb(var(--theme-neutral-medium) / 0.3)' 
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+            <span className="text-sm font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+              {producto.rating || 0} ({producto.reviews || 0})
+            </span>
+          </div>
+        )}
+
+        {/* Price */}
+        <div className={`${viewMode === 'list' ? 'product-price-section' : viewMode === 'compact' ? 'space-y-2' : 'flex items-center justify-between'}`}>
+          <div className={`${viewMode === 'compact' ? 'flex items-center justify-between' : 'flex items-center space-x-2'}`}>
+            <span className={`font-medium text-serif product-price ${
+              viewMode === 'compact' ? 'text-sm' : 'text-xl'
+            }`} style={{ color: 'rgb(var(--theme-accent))' }}>
               {getCurrencySymbol(tienda.currency)} {producto.price}
             </span>
-            {producto.comparePrice && producto.comparePrice > producto.price && (
-              <span 
-                className="text-sm line-through font-light"
+            {viewMode === 'compact' && (
+              <button 
+                onClick={handleAddToCart}
+                disabled={addingToCart}
+                className="w-6 h-6 rounded-full transition-all duration-300 text-xs flex items-center justify-center opacity-100"
                 style={{
-                  color: `rgb(var(--theme-neutral-medium))`,
-                  fontFamily: `var(--theme-font-body)`
+                  backgroundColor: addingToCart 
+                    ? 'rgb(var(--theme-success))' 
+                    : 'rgb(var(--theme-primary))',
+                  color: 'rgb(var(--theme-neutral-light))'
                 }}
               >
-                {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
-              </span>
+                {addingToCart ? '✓' : '+'}
+              </button>
             )}
           </div>
-          <button 
-            onClick={handleAddToCart}
-            disabled={addingToCart}
-            className={`btn-boutique-primary text-sm px-4 py-2 transition-all duration-200 ${
-              addingToCart ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'
-            }`}
-            style={{
-              backgroundColor: addingToCart 
-                ? `rgb(var(--theme-success))` 
-                : `rgb(var(--theme-primary))`,
-              color: `rgb(var(--theme-neutral-light))`,
-              borderRadius: `var(--theme-border-radius)`,
-              fontFamily: `var(--theme-font-body)`,
-              letterSpacing: '0.025em',
-              boxShadow: `var(--theme-shadow-sm)`,
-              border: 'none',
-              cursor: addingToCart ? 'not-allowed' : 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              if (!addingToCart) {
-                e.currentTarget.style.backgroundColor = `rgb(var(--theme-neutral-dark))`
-                e.currentTarget.style.transform = 'translateY(-1px)'
-                e.currentTarget.style.boxShadow = `var(--theme-shadow-md)`
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!addingToCart) {
-                e.currentTarget.style.backgroundColor = `rgb(var(--theme-primary))`
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = `var(--theme-shadow-sm)`
-              }
-            }}
-          >
-            {addingToCart ? '✓' : 'Añadir'}
-          </button>
+          {producto.comparePrice && producto.comparePrice > producto.price && viewMode === 'compact' && (
+            <span className="text-xs line-through font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+              {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
+            </span>
+          )}
+          {producto.comparePrice && producto.comparePrice > producto.price && viewMode !== 'compact' && (
+            <span className="text-sm line-through font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+              {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
+            </span>
+          )}
+          {viewMode !== 'compact' && (
+            <button 
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              className={`rounded-sm transition-all duration-300 text-sans product-button ${
+                viewMode === 'list' ? 'text-sm px-4 py-2' : 'text-sm px-4 py-2'
+              } ${
+                addingToCart
+                  ? 'bg-success text-white opacity-100'
+                  : viewMode === 'list' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}
+              style={{
+                backgroundColor: addingToCart 
+                  ? 'rgb(var(--theme-success))' 
+                  : 'rgb(var(--theme-primary))',
+                color: 'rgb(var(--theme-neutral-light))'
+              }}
+            >
+              {addingToCart ? '✓' : 'Añadir'}
+            </button>
+          )}
         </div>
       </div>
     </Link>

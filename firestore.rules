@@ -101,6 +101,21 @@ service cloud.firestore {
         allow write: if isAuthenticated() && 
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
+      
+      // Reglas para newsletter (suscripciones públicas)
+      match /newsletter/{subscriptionId} {
+        // Cualquier persona puede suscribirse (crear) con validación básica
+        allow create: if request.resource.data.keys().hasAll(['email', 'storeId', 'status']) &&
+                         request.resource.data.email is string &&
+                         request.resource.data.storeId is string &&
+                         request.resource.data.status == 'active';
+        // Solo el dueño de la tienda puede leer las suscripciones
+        allow read: if isAuthenticated() && 
+                     request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+        // Solo el dueño puede actualizar/eliminar suscripciones
+        allow update, delete: if isAuthenticated() && 
+                                request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
     }
   }
 }

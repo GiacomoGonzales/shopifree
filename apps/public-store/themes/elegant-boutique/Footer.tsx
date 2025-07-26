@@ -11,7 +11,7 @@ interface ElegantFooterProps {
 }
 
 export default function ElegantFooter({ tienda, categorias }: ElegantFooterProps) {
-  // Separar categorías padre de subcategorías
+  // Separar categorías padre de subcategorías (conservando orden desde Firestore)
   const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
 
   return (
@@ -151,30 +151,100 @@ export default function ElegantFooter({ tienda, categorias }: ElegantFooterProps
             </nav>
           </div>
 
-          {/* Newsletter */}
+          {/* Ubicación */}
           <div className="space-y-6">
             <h3 
               className="text-lg font-medium text-serif"
               style={{ color: 'rgb(var(--theme-neutral-dark))' }}
             >
-              Newsletter
+              📌 Ubícanos
             </h3>
-            <p 
-              className="text-sm text-sans"
-              style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-            >
-              Suscríbete para recibir ofertas exclusivas y novedades
-            </p>
-            <div className="space-y-3">
-              <input
-                type="email"
-                placeholder="tu@email.com"
-                className="input-boutique text-sm"
-              />
-              <button className="btn-boutique-primary w-full">
-                Suscribirse
-              </button>
-            </div>
+            
+            {tienda?.hasPhysicalLocation && tienda?.address ? (
+              <>
+                <p 
+                  className="text-sm text-sans"
+                  style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                >
+                  Encuéntranos fácilmente
+                </p>
+                
+                {/* Mapa */}
+                <div className="w-full">
+                  <div 
+                    className="w-full h-[150px] rounded-lg overflow-hidden flex items-center justify-center relative"
+                    style={{ 
+                      backgroundColor: 'rgb(var(--theme-primary) / 0.05)',
+                      border: '1px solid rgb(var(--theme-primary) / 0.1)'
+                    }}
+                  >
+                    {/* Mapa placeholder visual */}
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🗺️</div>
+                      <p 
+                        className="text-sm text-sans font-medium"
+                        style={{ color: 'rgb(var(--theme-neutral-dark))' }}
+                      >
+                        Ver en Google Maps
+                      </p>
+                    </div>
+                    
+                    {/* Link que abre Google Maps */}
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tienda.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 hover:bg-black hover:bg-opacity-5 transition-colors"
+                      title="Ver ubicación en Google Maps"
+                    />
+                  </div>
+                </div>
+                
+                {/* Dirección */}
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <span 
+                      className="text-sm mt-0.5"
+                      style={{ color: 'rgb(var(--theme-primary))' }}
+                    >
+                      📍
+                    </span>
+                    <p 
+                      className="text-sm text-sans leading-relaxed"
+                      style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                    >
+                      {tienda.address}
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <p 
+                  className="text-sm text-sans"
+                  style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                >
+                  Tienda en línea
+                </p>
+                <div 
+                  className="w-full h-[150px] rounded-lg flex items-center justify-center"
+                  style={{ 
+                    backgroundColor: 'rgb(var(--theme-primary) / 0.05)',
+                    border: '1px solid rgb(var(--theme-primary) / 0.1)'
+                  }}
+                >
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🌐</div>
+                    <p 
+                      className="text-sm text-sans"
+                      style={{ color: 'rgb(var(--theme-neutral-medium))' }}
+                    >
+                      Disponible en línea
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
