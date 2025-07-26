@@ -308,11 +308,6 @@ export default function ElegantBoutiqueCart() {
           </div>
         </div>
 
-        {/* Modal de Checkout */}
-        <ElegantBoutiqueCheckoutModal
-          isOpen={isCheckoutOpen}
-          onClose={() => setIsCheckoutOpen(false)}
-        />
       </>
     )
   } else {
