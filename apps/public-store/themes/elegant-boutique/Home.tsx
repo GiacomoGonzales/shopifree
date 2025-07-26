@@ -11,7 +11,7 @@ import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
-import DynamicFilters from '../../components/DynamicFilters'
+import DynamicFilters from './DynamicFilters'
 import './styles.css'
 
 interface HomeProps {

@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useCart } from '../../lib/cart-context'
 import { useStore } from '../../lib/store-context'
 import { getCurrencySymbol } from '../../lib/store'
-import ElegantBoutiqueCheckoutModal from './CheckoutModal'
 import './styles.css'
 
 const Icons = {
@@ -52,9 +51,8 @@ const Icons = {
 }
 
 export default function ElegantBoutiqueCart() {
-  const { state, closeCart, removeItem, updateQuantity } = useCart()
+  const { state, closeCart, removeItem, updateQuantity, openCheckout } = useCart()
   const { store } = useStore()
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
 
   // Cerrar carrito con Escape
   useEffect(() => {
@@ -110,7 +108,7 @@ export default function ElegantBoutiqueCart() {
 
   const handleCheckout = () => {
     closeCart()
-    setIsCheckoutOpen(true)
+    openCheckout()
   }
 
   const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768
@@ -502,11 +500,6 @@ export default function ElegantBoutiqueCart() {
           </div>
         </div>
 
-        {/* Modal de Checkout */}
-        <ElegantBoutiqueCheckoutModal
-          isOpen={isCheckoutOpen}
-          onClose={() => setIsCheckoutOpen(false)}
-        />
       </>
     )
   }

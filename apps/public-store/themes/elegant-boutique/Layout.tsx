@@ -10,6 +10,7 @@ import { useStore } from '../../lib/store-context'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import ElegantBoutiqueCart from './Cart'
+import CheckoutModal from '../../components/checkout/CheckoutModal'
 import './styles.css'
 
 // Iconos elegantes para el header
@@ -79,7 +80,7 @@ const Icons = {
 export default function ElegantBoutiqueLayout({ tienda, categorias = [], children }: ThemeLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const { state: cartState, toggleCart } = useCart()
+  const { state: cartState, toggleCart, closeCheckout } = useCart()
   const pathname = usePathname()
   const nextRouter = useRouter()
 
@@ -990,6 +991,12 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
           </div>
         </div>
       </footer>
+
+      {/* Modal de Checkout */}
+      <CheckoutModal 
+        isOpen={cartState.isCheckoutOpen} 
+        onClose={closeCheckout} 
+      />
     </div>
   )
 } 

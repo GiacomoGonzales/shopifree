@@ -11,7 +11,7 @@ import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
-import DynamicFilters from '../../components/DynamicFilters'
+import DynamicFilters from './DynamicFilters'
 
 interface HomeProps {
   tienda: Tienda
@@ -552,6 +552,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 onFiltersChange={handleFiltersChange}
                 onPriceRangeChange={handlePriceRangeChange}
                 onClearFilters={handleClearFilters}
+                primaryColor={tienda.primaryColor}
               />
               
               {/* Ordenamiento - Desktop */}
@@ -607,6 +608,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                   onFiltersChange={handleFiltersChange}
                   onPriceRangeChange={handlePriceRangeChange}
                   onClearFilters={handleClearFilters}
+                  primaryColor={tienda.primaryColor}
                 />
               </div>
               
