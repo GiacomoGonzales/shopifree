@@ -14,6 +14,9 @@ export default function ElegantFooter({ tienda, categorias }: ElegantFooterProps
   // Separar categorías padre de subcategorías (conservando orden desde Firestore)
   const parentCategories = categorias.filter(cat => !cat.parentCategoryId)
 
+  // API Key de Google Maps desde variables de entorno
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+
   return (
     <footer className="border-t mt-auto" style={{ 
       backgroundColor: 'rgb(var(--theme-secondary))', 
@@ -169,34 +172,50 @@ export default function ElegantFooter({ tienda, categorias }: ElegantFooterProps
                   Encuéntranos fácilmente
                 </p>
                 
-                {/* Mapa */}
+                {/* Mapa interactivo de Google Maps */}
                 <div className="w-full">
                   <div 
-                    className="w-full h-[150px] rounded-lg overflow-hidden flex items-center justify-center relative"
+                    className="w-full h-[150px] rounded-lg overflow-hidden"
                     style={{ 
                       backgroundColor: 'rgb(var(--theme-primary) / 0.05)',
                       border: '1px solid rgb(var(--theme-primary) / 0.1)'
                     }}
                   >
-                    {/* Mapa placeholder visual */}
-                    <div className="text-center">
-                      <div className="text-4xl mb-2">🗺️</div>
-                      <p 
-                        className="text-sm text-sans font-medium"
-                        style={{ color: 'rgb(var(--theme-neutral-dark))' }}
-                      >
-                        Ver en Google Maps
-                      </p>
-                    </div>
-                    
-                    {/* Link que abre Google Maps */}
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tienda.address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute inset-0 hover:bg-black hover:bg-opacity-5 transition-colors"
-                      title="Ver ubicación en Google Maps"
-                    />
+                    {googleMapsApiKey ? (
+                      <iframe
+                        src={`https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(tienda.address)}&zoom=16`}
+                        width="100%"
+                        height="150"
+                        style={{ border: 0, borderRadius: '8px' }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Ubicación de la tienda"
+                      />
+                    ) : (
+                      <>
+                        {/* Fallback si no hay API key */}
+                        <div className="w-full h-full flex items-center justify-center relative">
+                          <div className="text-center">
+                            <div className="text-4xl mb-2">🗺️</div>
+                            <p 
+                              className="text-sm text-sans font-medium"
+                              style={{ color: 'rgb(var(--theme-neutral-dark))' }}
+                            >
+                              Ver en Google Maps
+                            </p>
+                          </div>
+                          
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tienda.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 hover:bg-black hover:bg-opacity-5 transition-colors"
+                            title="Ver ubicación en Google Maps"
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 
@@ -215,6 +234,19 @@ export default function ElegantFooter({ tienda, categorias }: ElegantFooterProps
                     >
                       {tienda.address}
                     </p>
+                  </div>
+                  
+                  {/* Enlace para abrir en Google Maps */}
+                  <div className="mt-2">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tienda.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-sans hover-elegant transition-colors"
+                      style={{ color: 'rgb(var(--theme-accent))' }}
+                    >
+                      Abrir en Google Maps →
+                    </a>
                   </div>
                 </div>
               </>

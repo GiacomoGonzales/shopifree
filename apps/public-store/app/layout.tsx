@@ -171,7 +171,7 @@ export default async function RootLayout({
           <link rel="apple-touch-icon" href="/brand/icons/favicon.png" />
         </head>
         <body>
-          <div>Tienda no encontrada</div>
+          {children}
         </body>
       </html>
     )

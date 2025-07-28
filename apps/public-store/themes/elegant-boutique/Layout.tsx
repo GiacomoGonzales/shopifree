@@ -12,6 +12,7 @@ import { getCurrencySymbol } from '../../lib/store'
 import ElegantBoutiqueCart from './Cart'
 import CheckoutModal from '../../components/checkout/CheckoutModal'
 import NewsletterForm from './NewsletterForm'
+import StoreLocationMap from './StoreLocationMap'
 import './styles.css'
 
 // Iconos elegantes para el header
@@ -971,33 +972,19 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
               <div>
                 <h3 className="font-medium mb-6 text-serif" style={{ color: 'rgb(var(--theme-neutral-dark))' }}>Ubícanos</h3>
                 
-                {tienda?.hasPhysicalLocation ? (
+                {(tienda?.hasPhysicalLocation || tienda?.location || tienda?.address) ? (
                   <>
                     <p className="mb-6 text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
                       Encuéntranos fácilmente
                     </p>
                     
-                    {/* Mapa con Google Maps Embed */}
-                    <div className="w-full mb-4">
-                      <div 
-                        className="w-full h-[150px] rounded-lg overflow-hidden"
-                        style={{ 
-                          backgroundColor: 'rgb(var(--theme-primary) / 0.05)',
-                          border: '1px solid rgb(var(--theme-primary) / 0.1)'
-                        }}
-                      >
-                        <iframe
-                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyA5ZIaH3M_qB441IarTC8FvSbG2VvIwfZ4&q=-12.1209207,-77.0290177&zoom=16`}
-                          width="100%"
-                          height="150"
-                          style={{ border: 0, borderRadius: '8px' }}
-                          allowFullScreen
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          title="Ubicación de la tienda"
-                        />
-                      </div>
-                    </div>
+                    {/* Mapa interactivo con Google Maps */}
+                    <StoreLocationMap
+                      address={tienda?.location?.address || tienda?.address || 'Ubicación de la tienda'}
+                      lat={tienda?.location?.lat}
+                      lng={tienda?.location?.lng}
+                      storeName={tienda?.storeName}
+                    />
                     
                     {/* Dirección */}
                     <div className="flex items-start space-x-2">
@@ -1011,71 +998,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
                         className="text-sm text-sans leading-relaxed"
                         style={{ color: 'rgb(var(--theme-neutral-medium))' }}
                       >
-                        Av. José Larco 345, Miraflores 15074, Perú
-                      </p>
-                    </div>
-                    
-                    {/* Enlace para abrir en Google Maps */}
-                    <div className="mt-3">
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=-12.1209207,-77.0290177`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-sans hover-elegant transition-colors"
-                        style={{ color: 'rgb(var(--theme-accent))' }}
-                      >
-                        Abrir en Google Maps →
-                      </a>
-                    </div>
-                  </>
-                ) : tienda?.address ? (
-                  <>
-                    <p className="mb-6 text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
-                      Nuestra ubicación
-                    </p>
-                    
-                    {/* Mapa placeholder para dirección sin coordenadas */}
-                    <div className="w-full mb-4">
-                      <div 
-                        className="w-full h-[150px] rounded-lg overflow-hidden flex items-center justify-center relative cursor-pointer"
-                        style={{ 
-                          backgroundColor: 'rgb(var(--theme-primary) / 0.05)',
-                          border: '1px solid rgb(var(--theme-primary) / 0.1)'
-                        }}
-                      >
-                        <div className="text-center">
-                          <div className="text-4xl mb-2">🗺️</div>
-                          <p 
-                            className="text-sm text-sans font-medium"
-                            style={{ color: 'rgb(var(--theme-neutral-dark))' }}
-                          >
-                            Ver en Google Maps
-                          </p>
-                        </div>
-                        
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tienda.address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute inset-0 hover:bg-black hover:bg-opacity-5 transition-colors"
-                          title="Ver ubicación en Google Maps"
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* Dirección */}
-                    <div className="flex items-start space-x-2">
-                      <span 
-                        className="text-sm mt-0.5"
-                        style={{ color: 'rgb(var(--theme-primary))' }}
-                      >
-                        📍
-                      </span>
-                      <p 
-                        className="text-sm text-sans leading-relaxed"
-                        style={{ color: 'rgb(var(--theme-neutral-medium))' }}
-                      >
-                        {tienda.address}
+                        {tienda?.location?.address || tienda?.address || 'Ubicación de la tienda'}
                       </p>
                     </div>
                   </>
@@ -1085,7 +1008,7 @@ export default function ElegantBoutiqueLayout({ tienda, categorias = [], childre
                       Tienda en línea
                     </p>
                     <div 
-                      className="w-full h-[150px] rounded-lg flex items-center justify-center"
+                      className="w-full h-[200px] rounded-lg flex items-center justify-center"
                       style={{ 
                         backgroundColor: 'rgb(var(--theme-primary) / 0.05)',
                         border: '1px solid rgb(var(--theme-primary) / 0.1)'

@@ -40,7 +40,7 @@ const extractSubdomain = (host: string | null): string | null => {
     
     // For local development, handle localhost
     if (cleanHost === 'localhost' || cleanHost.includes('127.0.0.1')) {
-      return 'lunara' // Para desarrollo local
+      return 'lunara' // Para desarrollo local usar tienda lunara
     }
     
     // Handle production domains

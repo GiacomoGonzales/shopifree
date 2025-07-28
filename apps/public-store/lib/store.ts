@@ -22,6 +22,11 @@ export interface StoreDataServer {
   currency: string
   phone: string
   address?: string
+  location?: {
+    address: string
+    lat: number
+    lng: number
+  }
   hasPhysicalLocation: boolean
   ownerId: string
   theme?: string
@@ -109,6 +114,11 @@ export interface StoreDataClient {
   currency: string
   phone: string
   address?: string
+  location?: {
+    address: string
+    lat: number
+    lng: number
+  }
   hasPhysicalLocation: boolean
   ownerId: string
   theme?: string
@@ -229,6 +239,7 @@ export function transformStoreForClient(serverStore: StoreDataServer | null): St
       currency: serverStore.currency,
       phone: serverStore.phone,
       address: serverStore.address,
+      location: serverStore.location,
       hasPhysicalLocation: serverStore.hasPhysicalLocation,
       ownerId: serverStore.ownerId,
       theme: serverStore.theme,
@@ -319,6 +330,7 @@ export const getStoreBySubdomain = async (subdomain: string): Promise<StoreDataS
       currency: rawData.currency || 'USD',
       phone: rawData.phone || '',
       address: rawData.address,
+      location: rawData.location,
       hasPhysicalLocation: rawData.hasPhysicalLocation || false,
       ownerId: rawData.ownerId || '',
       theme: rawData.theme || 'base-default',

@@ -478,9 +478,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
   return (
     <>
-      {/* Overlay con estilo boutique */}
+      {/* Overlay con estilo adaptable por tema */}
       <div 
-        className="fixed inset-0 backdrop-blur-sm z-50 transition-all duration-300 ease-out"
+        className="checkout-modal-overlay fixed inset-0 backdrop-blur-sm z-50 transition-all duration-300 ease-out"
         style={{ 
           backgroundColor: `rgba(var(--theme-neutral-dark), 0.75)`,
           backdropFilter: 'blur(4px)'
@@ -488,10 +488,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         onClick={onClose}
       />
       
-      {/* Modal con estilos elegant boutique */}
+      {/* Modal con estilos adaptables por tema */}
       <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4">
         <div 
-          className="md:rounded-sm shadow-2xl md:max-w-4xl w-full md:max-h-[90vh] h-full md:h-auto flex flex-col overflow-hidden"
+          className="checkout-modal-container md:rounded-sm shadow-2xl md:max-w-4xl w-full md:max-h-[90vh] h-full md:h-auto flex flex-col overflow-hidden"
           style={{
             backgroundColor: `rgb(var(--theme-neutral-light))`,
             boxShadow: `var(--theme-shadow-lg)`,
@@ -499,9 +499,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           }}
         >
           
-          {/* Header con estilo boutique */}
+          {/* Header con estilo adaptable por tema */}
           <div 
-            className="flex items-center justify-between p-6"
+            className="checkout-modal-header flex items-center justify-between p-6"
             style={{
               borderBottom: `1px solid rgb(var(--theme-primary) / 0.1)`,
               backgroundColor: `rgb(var(--theme-secondary))`
@@ -511,15 +511,15 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               <div 
                 className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, rgb(var(--theme-secondary)) 0%, rgb(var(--theme-accent) / 0.1) 100%)`,
-                  color: `rgb(var(--theme-accent))`
+                  background: `linear-gradient(135deg, rgb(var(--theme-secondary)) 0%, rgb(var(--theme-primary) / 0.1) 100%)`,
+                  color: `rgb(var(--theme-primary))`
                 }}
               >
                 <Icons.ShoppingBag />
               </div>
               <div>
                 <h2 
-                  className="text-lg font-semibold"
+                  className="checkout-modal-title text-lg font-semibold"
                   style={{
                     color: `rgb(var(--theme-neutral-dark))`,
                     fontFamily: `var(--theme-font-heading)`
@@ -528,7 +528,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   Finalizar Compra
                 </h2>
                 <p 
-                  className="text-sm"
+                  className="checkout-modal-subtitle text-sm"
                   style={{
                     color: `rgb(var(--theme-neutral-medium))`,
                     fontFamily: `var(--theme-font-body)`
@@ -547,7 +547,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = `rgb(var(--theme-primary) / 0.1)`
-                e.currentTarget.style.color = `rgb(var(--theme-accent))`
+                e.currentTarget.style.color = `rgb(var(--theme-primary))`
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent'
@@ -598,7 +598,21 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       type="text"
                       value={customerData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="input-boutique"
+                      className="checkout-input input-boutique w-full px-3 py-2 border rounded-sm focus:outline-none transition-all duration-300"
+                      style={{
+                        borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                        backgroundColor: `rgb(var(--theme-neutral-light))`,
+                        color: `rgb(var(--theme-neutral-dark))`,
+                        fontFamily: `var(--theme-font-body)`
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = `rgb(var(--theme-primary))`
+                        e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-primary) / 0.08)`
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                        e.target.style.boxShadow = 'none'
+                      }}
                       placeholder="Tu nombre completo"
                       required
                     />
@@ -639,8 +653,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           fontFamily: `var(--theme-font-body)`
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = `rgb(var(--theme-accent))`
-                          e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-accent) / 0.1)`
+                          e.target.style.borderColor = `rgb(var(--theme-primary))`
+                          e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-primary) / 0.08)`
                         }}
                         onBlur={(e) => {
                           e.target.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
@@ -687,8 +701,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           fontFamily: `var(--theme-font-body)`
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = `rgb(var(--theme-accent))`
-                          e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-accent) / 0.1)`
+                          e.target.style.borderColor = `rgb(var(--theme-primary))`
+                          e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-primary) / 0.08)`
                         }}
                         onBlur={(e) => {
                           e.target.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
@@ -725,7 +739,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           style={{
                             borderColor: `rgb(var(--theme-primary) / 0.2)`,
                             backgroundColor: customerData.deliveryType === 'home_delivery' 
-                              ? `rgb(var(--theme-accent) / 0.1)` 
+                              ? `rgb(var(--theme-primary) / 0.05)` 
                               : `rgb(var(--theme-neutral-light))`,
                             transition: `var(--theme-transition)`
                           }}
@@ -748,7 +762,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                             onChange={(e) => handleInputChange('deliveryType', e.target.value)}
                             className="mt-0.5"
                             style={{
-                              accentColor: `rgb(var(--theme-accent))`
+                              accentColor: `rgb(var(--theme-primary))`
                             }}
                           />
                           <div className="flex items-center space-x-2">
@@ -792,7 +806,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           style={{
                             borderColor: `rgb(var(--theme-primary) / 0.2)`,
                             backgroundColor: customerData.deliveryType === 'store_pickup' 
-                              ? `rgb(var(--theme-accent) / 0.1)` 
+                              ? `rgb(var(--theme-primary) / 0.05)` 
                               : `rgb(var(--theme-neutral-light))`,
                             transition: `var(--theme-transition)`
                           }}
@@ -815,7 +829,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                             onChange={(e) => handleInputChange('deliveryType', e.target.value)}
                             className="mt-0.5"
                             style={{
-                              accentColor: `rgb(var(--theme-accent))`
+                              accentColor: `rgb(var(--theme-primary))`
                             }}
                           />
                           <div className="flex items-center space-x-2">
@@ -886,7 +900,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           value={customerData.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
                           onBlur={shippingCalculator.onAddressBlur}
-                          className="w-full px-3 py-2 pr-10 border rounded-r-sm focus:outline-none transition-all duration-300"
+                          className="checkout-input w-full px-3 py-2 pr-10 border rounded-r-sm focus:outline-none transition-all duration-300"
                           style={{
                             borderColor: `rgb(var(--theme-primary) / 0.2)`,
                             backgroundColor: `rgb(var(--theme-neutral-light))`,
@@ -894,8 +908,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                             fontFamily: `var(--theme-font-body)`
                           }}
                           onFocus={(e) => {
-                            e.target.style.borderColor = `rgb(var(--theme-accent))`
-                            e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-accent) / 0.1)`
+                            e.target.style.borderColor = `rgb(var(--theme-primary))`
+                            e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-primary) / 0.08)`
                           }}
                           onBlur={(e) => {
                             e.target.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
@@ -920,7 +934,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                               onMouseEnter={(e) => {
                                 if (!isGettingLocation) {
                                   e.currentTarget.style.backgroundColor = `rgb(var(--theme-primary) / 0.1)`
-                                  e.currentTarget.style.color = `rgb(var(--theme-accent))`
+                                  e.currentTarget.style.color = `rgb(var(--theme-primary))`
                                 }
                               }}
                               onMouseLeave={(e) => {
@@ -989,7 +1003,21 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       type="text"
                       value={customerData.reference}
                       onChange={(e) => handleInputChange('reference', e.target.value)}
-                      className="input-boutique"
+                      className="checkout-input input-boutique w-full px-3 py-2 border rounded-sm focus:outline-none transition-all duration-300"
+                      style={{
+                        borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                        backgroundColor: `rgb(var(--theme-neutral-light))`,
+                        color: `rgb(var(--theme-neutral-dark))`,
+                        fontFamily: `var(--theme-font-body)`
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = `rgb(var(--theme-primary))`
+                        e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-primary) / 0.08)`
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
+                        e.target.style.boxShadow = 'none'
+                      }}
                       placeholder="Frente al parque, casa blanca"
                     />
                   </div>
@@ -1030,8 +1058,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           fontFamily: `var(--theme-font-body)`
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = `rgb(var(--theme-accent))`
-                          e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-accent) / 0.1)`
+                          e.target.style.borderColor = `rgb(var(--theme-primary))`
+                          e.target.style.boxShadow = `0 0 0 3px rgb(var(--theme-primary) / 0.08)`
                         }}
                         onBlur={(e) => {
                           e.target.style.borderColor = `rgb(var(--theme-primary) / 0.2)`
@@ -1281,7 +1309,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       ) : shippingCalculator.error ? (
                         <div 
                           className="flex items-center space-x-1"
-                          style={{ color: `rgb(var(--theme-accent))` }}
+                          style={{ color: `rgb(var(--theme-error))` }}
                         >
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -1322,7 +1350,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <button
                     onClick={handleWhatsAppCheckout}
                     disabled={isLoading || !isFormValid}
-                    className="btn-boutique-primary w-full py-3 rounded-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2"
+                    className="checkout-btn-primary btn-boutique-primary w-full py-3 rounded-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2"
                     style={{
                       backgroundColor: isLoading || !isFormValid 
                         ? `rgb(var(--theme-neutral-medium))` 

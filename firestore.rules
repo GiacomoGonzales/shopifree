@@ -30,9 +30,13 @@ service cloud.firestore {
       // Información básica de la tienda es pública
       allow read: if true;
       
-      // Solo el dueño puede modificar la tienda
-      allow write: if isAuthenticated() && 
-                     request.auth.uid == resource.data.ownerId;
+      // Permitir crear tienda nueva si el usuario autenticado es el dueño
+      allow create: if isAuthenticated() && 
+                      request.auth.uid == request.resource.data.ownerId;
+      
+      // Solo el dueño puede actualizar/eliminar la tienda existente
+      allow update, delete: if isAuthenticated() && 
+                              request.auth.uid == resource.data.ownerId;
       
       // Reglas para clientes de la tienda
       match /customers/{customerId} {

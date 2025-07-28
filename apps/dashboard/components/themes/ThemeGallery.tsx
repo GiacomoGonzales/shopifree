@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { useStore } from '../../lib/hooks/useStore'
 import { updateStoreField } from '../../lib/store'
@@ -6,14 +6,21 @@ import { availableThemes, DEFAULT_THEME_ID, isValidTheme } from '../../lib/theme
 import ThemeCard from './ThemeCard'
 
 export default function ThemeGallery() {
-  const t = useTranslations('storeDesign.sections.themes.gallery')
+  const t = useTranslations('storeDesign')
   const { store } = useStore()
-  const [selectedThemeId, setSelectedThemeId] = useState<string>(store?.theme || DEFAULT_THEME_ID)
+  const [selectedThemeId, setSelectedThemeId] = useState<string>(DEFAULT_THEME_ID)
   const [loadingThemeId, setLoadingThemeId] = useState<string | null>(null)
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info'
     message: string
   } | null>(null)
+
+  // Update selectedThemeId when store data loads
+  useEffect(() => {
+    if (store?.theme) {
+      setSelectedThemeId(store.theme)
+    }
+  }, [store?.theme])
 
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
     setNotification({ type, message })
@@ -56,7 +63,7 @@ export default function ThemeGallery() {
 
       // Obtener información del tema seleccionado
       const selectedTheme = availableThemes.find(theme => theme.id === themeId)
-      const themeName = selectedTheme ? t(`themesList.${selectedTheme.translationKey}.name`) : 'el tema seleccionado'
+      const themeName = selectedTheme ? t(`sections.themes.themesList.${selectedTheme.translationKey}.name`) : 'el tema seleccionado'
 
       // Mostrar mensaje de éxito
       showNotification('success', t('notifications.success', { themeName }))
@@ -77,8 +84,8 @@ export default function ThemeGallery() {
     <div className="space-y-6">
       {/* Encabezado */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900">{t('title')}</h3>
-        <p className="mt-1 text-sm text-gray-500">{t('description')}</p>
+        <h3 className="text-lg font-medium text-gray-900">{t('sections.themes.gallery.title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('sections.themes.gallery.description')}</p>
       </div>
 
       {/* Notificación */}
