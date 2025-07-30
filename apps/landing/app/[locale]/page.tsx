@@ -31,12 +31,15 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <LanguageSelector />
-              <a href={`https://dashboard.shopifree.app/${locale}/login`}>
+              {/* Mobile order: Login button first, then language selector */}
+              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="order-1 sm:order-2">
                 <Button variant="secondary" size="sm" className="bg-white hover:bg-gray-100 text-gray-900 border-gray-300">
                   {t('login')}
                 </Button>
               </a>
+              <div className="order-2 sm:order-1">
+                <LanguageSelector />
+              </div>
             </div>
           </div>
         </div>
@@ -66,7 +69,7 @@ export default function HomePage() {
                 {t('subtitle')}
               </p>
               <a href={`https://dashboard.shopifree.app/${locale}/register`}>
-                <Button size="lg" className="px-8 py-4 text-lg bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-lg hover:shadow-xl transition-all duration-200">
+                <Button size="lg" className="px-8 py-4 text-lg !bg-emerald-600 hover:!bg-emerald-700 text-white border-emerald-600 shadow-lg hover:shadow-xl transition-all duration-200">
                   {t('startFree')}
                 </Button>
               </a>
