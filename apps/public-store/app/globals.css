@@ -67,6 +67,35 @@
     --store-badge-sale: var(--store-error);
     --store-badge-featured: var(--store-accent);
     --store-badge-out-of-stock: var(--store-neutral-400);
+
+    /* Variables para compatibilidad con sistema de temas (prefijo --theme-) */
+    /* Estas variables permiten que componentes como CheckoutModal funcionen */
+    /* tanto en temas con estilos específicos como en el tema base-default */
+    --theme-primary: var(--store-neutral-900);
+    --theme-secondary: var(--store-neutral-100);
+    --theme-accent: var(--store-accent);
+    
+    --theme-neutral-dark: var(--store-neutral-800);
+    --theme-neutral-medium: var(--store-neutral-500);
+    --theme-neutral-light: 255 255 255;  /* Blanco puro para fondo del modal */
+    --theme-neutral-50: var(--store-neutral-50);
+    
+    --theme-success: var(--store-success);
+    --theme-warning: var(--store-warning);
+    --theme-error: var(--store-error);
+    
+    --theme-font-heading: 'Inter', system-ui, sans-serif;
+    --theme-font-body: 'Inter', system-ui, sans-serif;
+    
+    --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --theme-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --theme-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    --theme-border-radius: 0.5rem;
+    --theme-border-radius-lg: 0.75rem;
+    
+    --theme-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --theme-transition-fast: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   * {
