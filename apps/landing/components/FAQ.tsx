@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
 
 interface FAQItem {
   id: string
@@ -74,7 +73,7 @@ export default function FAQ() {
           {/* Right Column - FAQ Accordion */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
             <div className="divide-y divide-gray-100">
-              {faqData.map((item, index) => {
+              {faqData.map((item) => {
                 const isOpen = openItems.has(item.id)
                 
                 return (
