@@ -12,7 +12,7 @@ export default function PrivacyPage() {
             <Link href="/" className="flex items-center">
               <h1 className="text-2xl font-bold text-gray-900">Shopifree</h1>
             </Link>
-            <Link href="/" className="text-indigo-600 hover:text-indigo-500">
+            <Link href="/" className="text-gray-600 hover:text-gray-900">
               ← Volver al inicio
             </Link>
           </div>

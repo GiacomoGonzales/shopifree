@@ -24,14 +24,14 @@
     --landing-neutral-800: 31 41 55; /* #1F2937 */
     --landing-neutral-900: 17 24 39; /* #111827 */
     
-    /* Colores semánticos para la landing */
-    --landing-background: 255 255 255;
+    /* Colores semánticos para la landing - Tema neutral como dashboard */
+    --landing-background: var(--landing-neutral-50);
     --landing-foreground: var(--landing-neutral-900);
     --landing-muted: var(--landing-neutral-100);
     --landing-muted-foreground: var(--landing-neutral-500);
     --landing-border: var(--landing-neutral-200);
     --landing-input: var(--landing-neutral-200);
-    --landing-ring: var(--landing-primary);
+    --landing-ring: var(--landing-neutral-400);
     
     /* Radio para esquinas redondeadas */
     --landing-radius: 0.5rem;
@@ -118,9 +118,9 @@
     @apply rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6;
   }
 
-  /* Hero section styles */
+  /* Hero section styles - Tema neutral */
   .hero-landing {
-    background: linear-gradient(135deg, rgb(var(--landing-primary) / 0.05) 0%, rgb(var(--landing-secondary) / 0.05) 100%);
+    background: rgb(var(--landing-background));
     @apply min-h-screen flex items-center;
   }
 
@@ -131,8 +131,8 @@
   }
 
   .feature-landing-icon {
-    background-color: rgb(var(--landing-primary) / 0.1);
-    color: rgb(var(--landing-primary));
+    background-color: rgb(var(--landing-neutral-100));
+    color: rgb(var(--landing-neutral-700));
     @apply w-12 h-12 rounded-lg flex items-center justify-center mb-4;
   }
 
@@ -149,8 +149,8 @@
   .form-landing input:focus,
   .form-landing textarea:focus,
   .form-landing select:focus {
-    border-color: rgb(var(--landing-primary));
-    box-shadow: 0 0 0 3px rgb(var(--landing-primary) / 0.1);
+    border-color: rgb(var(--landing-neutral-400));
+    box-shadow: 0 0 0 3px rgb(var(--landing-neutral-400) / 0.1);
   }
 
   /* Navigation styles */
@@ -163,11 +163,11 @@
 
   .nav-landing-item {
     color: rgb(var(--landing-muted-foreground));
-    @apply hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors duration-200;
+    @apply hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200;
   }
 
   .nav-landing-item.active {
-    color: rgb(var(--landing-primary));
+    color: rgb(var(--landing-foreground));
   }
 
   /* Footer styles */
@@ -183,13 +183,13 @@
 }
 
 @layer utilities {
-  /* Gradientes para landing */
+  /* Gradientes para landing - Tema neutral */
   .gradient-landing-primary {
-    background: linear-gradient(135deg, rgb(var(--landing-primary)), rgb(var(--landing-secondary)));
+    background: linear-gradient(135deg, rgb(var(--landing-neutral-600)), rgb(var(--landing-neutral-800)));
   }
 
   .gradient-landing-text {
-    background: linear-gradient(135deg, rgb(var(--landing-primary)), rgb(var(--landing-secondary)));
+    background: linear-gradient(135deg, rgb(var(--landing-neutral-700)), rgb(var(--landing-neutral-900)));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

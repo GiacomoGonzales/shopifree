@@ -292,7 +292,7 @@ export default function ShippingStorePickupPage() {
                     
                     <div className="space-y-2">
                       {shippingData.storePickup.schedules.map((schedule, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div key={index} className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                           <select
                             value={schedule.day}
                             onChange={(e) => {
@@ -300,7 +300,7 @@ export default function ShippingStorePickupPage() {
                               newSchedules[index].day = e.target.value
                               updateShippingData('storePickup.schedules', newSchedules)
                             }}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                            className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                           >
                             <option value="monday">Lunes</option>
                             <option value="tuesday">Martes</option>
@@ -311,37 +311,39 @@ export default function ShippingStorePickupPage() {
                             <option value="sunday">Domingo</option>
                           </select>
                           
-                          <input
-                            type="time"
-                            value={schedule.openTime}
-                            onChange={(e) => {
-                              const newSchedules = [...shippingData.storePickup.schedules]
-                              newSchedules[index].openTime = e.target.value
-                              updateShippingData('storePickup.schedules', newSchedules)
-                            }}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                          />
-                          
-                          <span className="text-gray-500">-</span>
-                          
-                          <input
-                            type="time"
-                            value={schedule.closeTime}
-                            onChange={(e) => {
-                              const newSchedules = [...shippingData.storePickup.schedules]
-                              newSchedules[index].closeTime = e.target.value
-                              updateShippingData('storePickup.schedules', newSchedules)
-                            }}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                          />
-                          
-                          <button
-                            type="button"
-                            onClick={() => removeSchedule(index)}
-                            className="text-red-600 hover:text-red-800 p-1"
-                          >
-                            ×
-                          </button>
+                          <div className="flex items-center space-x-2 w-full sm:w-auto">
+                            <input
+                              type="time"
+                              value={schedule.openTime}
+                              onChange={(e) => {
+                                const newSchedules = [...shippingData.storePickup.schedules]
+                                newSchedules[index].openTime = e.target.value
+                                updateShippingData('storePickup.schedules', newSchedules)
+                              }}
+                              className="flex-1 sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                            />
+                            
+                            <span className="text-gray-500">-</span>
+                            
+                            <input
+                              type="time"
+                              value={schedule.closeTime}
+                              onChange={(e) => {
+                                const newSchedules = [...shippingData.storePickup.schedules]
+                                newSchedules[index].closeTime = e.target.value
+                                updateShippingData('storePickup.schedules', newSchedules)
+                              }}
+                              className="flex-1 sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                            />
+                            
+                            <button
+                              type="button"
+                              onClick={() => removeSchedule(index)}
+                              className="text-red-600 hover:text-red-800 p-1 flex-shrink-0"
+                            >
+                              ×
+                            </button>
+                          </div>
                         </div>
                       ))}
                       
