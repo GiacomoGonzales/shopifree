@@ -535,29 +535,6 @@ export const CATEGORY_OPTIONS: CategoryNode[] = [
       isLeaf: true,
       children: []
     },
-    { 
-      id: 'pets-animals', 
-      name: 'Mascotas y animales',
-      children: [
-        { 
-          id: 'pets-dogs', 
-          name: 'Perros',
-          children: [
-            { id: 'pets-dogs-food', name: 'Alimentos', isLeaf: true },
-            { id: 'pets-dogs-accessories', name: 'Accesorios', isLeaf: true },
-            { id: 'pets-dogs-toys', name: 'Juguetes', isLeaf: true }
-          ]
-        },
-        { 
-          id: 'pets-cats', 
-          name: 'Gatos',
-          children: [
-            { id: 'pets-cats-food', name: 'Alimentos', isLeaf: true },
-            { id: 'pets-cats-accessories', name: 'Accesorios', isLeaf: true }
-          ]
-        }
-      ]
-    },
 ]
 
 // Metacampos por categoría
@@ -1457,13 +1434,6 @@ export const META_FIELDS_BY_CATEGORY: Record<string, MetaField[]> = {
     { id: 'grip_type', name: 'Tipo de agarre', type: 'select', options: ['Banda silicona', 'Gel heel', 'Adhesivo', 'Sin agarre', 'Doble silicona'] },
     { id: 'features', name: 'Características', type: 'tags', options: ['Antideslizante', 'Transpirable', 'Sin costuras', 'Forma anatómica', 'Invisible', 'Cómodo'] },
     { id: 'shoe_type', name: 'Tipo de zapato', type: 'tags', options: ['Sneakers', 'Flats', 'Loafers', 'Heels', 'Boat shoes', 'Canvas shoes'] }
-  ],
-  // Alimentos para perros
-  'pets-dogs-food': [
-    { id: 'size', name: 'Tamaño de Perro', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Extra Grande'] },
-    { id: 'age', name: 'Edad', type: 'select', options: ['Cachorro', 'Adulto', 'Senior'] },
-    { id: 'flavor', name: 'Sabor', type: 'tags', options: ['Pollo', 'Carne', 'Pescado', 'Cordero', 'Vegetariano'] },
-    { id: 'brand', name: 'Marca', type: 'select', options: ['Royal Canin', 'Hills', 'Purina', 'Eukanuba', 'Pedigree'] }
   ],
   // Papas fritas
   'food-snacks-chips': [

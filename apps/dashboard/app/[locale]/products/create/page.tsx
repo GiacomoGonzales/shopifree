@@ -13,7 +13,19 @@ import { uploadMediaToCloudinary, getFileType } from '../../../../lib/cloudinary
 import { Card } from '../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../packages/ui/src/components/Input'
-import { CATEGORY_OPTIONS, META_FIELDS_BY_CATEGORY } from './productCategorization'
+import { CATEGORY_OPTIONS as FASHION_CATEGORIES, META_FIELDS_BY_CATEGORY as FASHION_META } from './productCategorization'
+import { PETS_CATEGORY_OPTIONS, PETS_META_FIELDS_BY_CATEGORY } from './petsCategorization'
+
+// Combinar las categorías
+const CATEGORY_OPTIONS = [
+  ...FASHION_CATEGORIES,
+  ...PETS_CATEGORY_OPTIONS
+]
+
+const META_FIELDS_BY_CATEGORY = {
+  ...FASHION_META,
+  ...PETS_META_FIELDS_BY_CATEGORY
+}
 
 // Interfaces
 interface ProductVariant {

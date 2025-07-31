@@ -19,7 +19,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <Link href={`/${locale}`} className="focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md transition-all duration-200 hover:scale-105">
+              <Link href={`/${locale}`} className="transition-all duration-200 hover:scale-105">
                 <Image 
                   src="/logo-primary.svg" 
                   alt="Shopifree Logo" 
@@ -31,13 +31,13 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Mobile order: Login button first, then language selector */}
-              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="order-1 sm:order-2">
+              {/* Mobile: Login first, Desktop: Login first too */}
+              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="order-1">
                 <Button variant="secondary" size="sm" className="bg-white hover:bg-gray-100 text-gray-900 border-gray-300">
                   {t('login')}
                 </Button>
               </a>
-              <div className="order-2 sm:order-1">
+              <div className="order-2">
                 <LanguageSelector />
               </div>
             </div>
