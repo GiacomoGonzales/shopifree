@@ -79,8 +79,10 @@ const Icons = {
 
 // Componente de autenticación
 function AuthSection({ tienda }: { tienda: Tienda }) {
+  const { login, register, loginWithGoogle, resetPassword, error, loading, clearError } = useStoreAuth()
   const [isSignUp, setIsSignUp] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isReset, setIsReset] = useState(false)
+  const [resetEmailSent, setResetEmailSent] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -89,30 +91,57 @@ function AuthSection({ tienda }: { tienda: Tienda }) {
   })
 
   const handleGoogleAuth = async () => {
-    setIsLoading(true)
     try {
-      // Aquí implementarías la lógica de autenticación con Google
-      console.log('Autenticación con Google')
-      // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      clearError()
+      await loginWithGoogle()
     } catch (error) {
       console.error('Error con Google Auth:', error)
     }
-    setIsLoading(false)
   }
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    try {
-      // Aquí implementarías la lógica de autenticación con email
-      console.log('Autenticación con email:', formData)
-      // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-    } catch (error) {
-      console.error('Error con email Auth:', error)
+    
+    if (isSignUp && formData.password !== formData.confirmPassword) {
+      return
     }
-    setIsLoading(false)
+
+    try {
+      clearError()
+      if (isSignUp) {
+        await register(formData.email, formData.password, {
+          displayName: formData.displayName
+        })
+      } else {
+        await login(formData.email, formData.password)
+      }
+    } catch (error) {
+      console.error('Error con autenticación:', error)
+    }
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      clearError()
+      await resetPassword(formData.email)
+      setResetEmailSent(true)
+    } catch (error) {
+      console.error('Error al enviar email de recuperación:', error)
+    }
+  }
+
+  const switchMode = (mode: 'login' | 'signup' | 'reset') => {
+    setIsSignUp(mode === 'signup')
+    setIsReset(mode === 'reset')
+    setResetEmailSent(false)
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      displayName: ''
+    })
+    clearError()
   }
 
   return (
@@ -120,40 +149,130 @@ function AuthSection({ tienda }: { tienda: Tienda }) {
       <div className="max-w-md mx-auto px-4 py-12">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-light text-neutral-900 mb-2">
-            {isSignUp ? 'Crear cuenta' : 'Iniciar sesión'}
+            {isReset ? 'Recuperar contraseña' : isSignUp ? 'Crear cuenta' : 'Iniciar sesión'}
           </h1>
           <p className="text-neutral-600 font-light">
-            {isSignUp 
-              ? 'Únete a nosotros y disfruta de beneficios exclusivos'
-              : 'Accede a tu cuenta para continuar'
+            {isReset 
+              ? 'Te enviaremos un enlace para restablecer tu contraseña'
+              : isSignUp 
+                ? 'Únete a nosotros y disfruta de beneficios exclusivos'
+                : 'Accede a tu cuenta para continuar'
             }
           </p>
         </div>
 
-        <div className="space-y-6">
-          {/* Botón de Google */}
-          <button
-            onClick={handleGoogleAuth}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors duration-200 font-light disabled:opacity-50"
-          >
-            <Icons.google />
-            <span>{isSignUp ? 'Registrarse' : 'Continuar'} con Google</span>
-          </button>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-neutral-500 font-light">o</span>
-            </div>
+        {/* Mensaje de error */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{error}</p>
+            {error.includes('ya está registrado') && (
+              <div className="mt-2 space-x-2">
+                <button
+                  onClick={() => setIsSignUp(false)}
+                  className="text-sm text-red-600 hover:text-red-800 underline"
+                >
+                  Iniciar Sesión
+                </button>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Formulario de email */}
-          <form onSubmit={handleEmailAuth} className="space-y-4">
-            {isSignUp && (
+        <div className="space-y-6">
+          {/* Solo mostrar Google Auth si no es reset */}
+          {!isReset && (
+            <>
+              {/* Botón de Google */}
+              <button
+                onClick={handleGoogleAuth}
+                disabled={loading}
+                className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors duration-200 font-light disabled:opacity-50"
+              >
+                <Icons.google />
+                <span>{isSignUp ? 'Registrarse' : 'Continuar'} con Google</span>
+              </button>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-neutral-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-neutral-500 font-light">o</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Formulario de email o reset */}
+          {isReset ? (
+            resetEmailSent ? (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-neutral-900">Email enviado</h3>
+                <p className="text-sm text-neutral-600">
+                  Te hemos enviado un enlace para restablecer tu contraseña a{' '}
+                  <span className="font-medium">{formData.email}</span>
+                </p>
+                <button
+                  onClick={() => switchMode('login')}
+                  className="text-neutral-900 hover:text-neutral-700 font-medium transition-colors"
+                >
+                  Volver al inicio de sesión
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
+                      <Icons.email />
+                    </div>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent font-light"
+                      placeholder="tu@email.com"
+                      required
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors duration-200 font-medium disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span>Enviando...</span>
+                    </div>
+                  ) : (
+                    'Enviar enlace'
+                  )}
+                </button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => switchMode('login')}
+                    className="text-neutral-600 hover:text-neutral-900 transition-colors font-light text-sm"
+                  >
+                    Volver al inicio de sesión
+                  </button>
+                </div>
+              </form>
+            )
+          ) : (
+            <form onSubmit={handleEmailAuth} className="space-y-4">
+              {isSignUp && (
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-1">
                   Nombre completo
@@ -228,12 +347,16 @@ function AuthSection({ tienda }: { tienda: Tienda }) {
               </div>
             )}
 
+            {isSignUp && formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+              <p className="text-sm text-red-600">Las contraseñas no coinciden</p>
+            )}
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading || (isSignUp && formData.password !== formData.confirmPassword)}
               className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors duration-200 font-medium disabled:opacity-50"
             >
-              {isLoading ? (
+              {loading ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                   <span>Procesando...</span>
@@ -242,14 +365,15 @@ function AuthSection({ tienda }: { tienda: Tienda }) {
                 isSignUp ? 'Crear cuenta' : 'Iniciar sesión'
               )}
             </button>
-          </form>
+            </form>
+          )}
 
           {/* Toggle entre login y signup */}
           <div className="text-center">
             <p className="text-neutral-600 font-light">
               {isSignUp ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'}{' '}
               <button
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={() => switchMode(isSignUp ? 'login' : 'signup')}
                 className="text-neutral-900 hover:underline font-medium"
               >
                 {isSignUp ? 'Iniciar sesión' : 'Crear cuenta'}
@@ -259,7 +383,11 @@ function AuthSection({ tienda }: { tienda: Tienda }) {
 
           {!isSignUp && (
             <div className="text-center">
-              <button className="text-neutral-600 hover:text-neutral-900 font-light text-sm">
+              <button 
+                type="button"
+                onClick={() => switchMode('reset')}
+                className="text-neutral-600 hover:text-neutral-900 font-light text-sm"
+              >
                 ¿Olvidaste tu contraseña?
               </button>
             </div>

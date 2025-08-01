@@ -1,6 +1,7 @@
 'use client'
 
 import { StoreAuthProvider } from '../../../lib/store-auth-context'
+import { CartProvider } from '../../../lib/cart-context'
 import { Tienda } from '../../../lib/types'
 import { Category } from '../../../lib/categories'
 import dynamic from 'next/dynamic'
@@ -60,11 +61,13 @@ export default function MiCuentaClientPage({ tienda, categories }: MiCuentaClien
 
   return (
     <StoreAuthProvider storeId={tienda.id}>
-      {/* @ts-expect-error: Dynamic theme component typing issue */}
-      <ThemeLayout tienda={tienda} categorias={categories}>
+      <CartProvider>
         {/* @ts-expect-error: Dynamic theme component typing issue */}
-        <ThemeMiCuenta tienda={tienda} />
-      </ThemeLayout>
+        <ThemeLayout tienda={tienda} categorias={categories}>
+          {/* @ts-expect-error: Dynamic theme component typing issue */}
+          <ThemeMiCuenta tienda={tienda} />
+        </ThemeLayout>
+      </CartProvider>
     </StoreAuthProvider>
   )
 }

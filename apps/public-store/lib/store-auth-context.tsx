@@ -539,6 +539,18 @@ export function StoreAuthProvider({ children, storeId }: StoreAuthProviderProps)
     if (authError.code === 'auth/wrong-password') {
       return 'La contraseña es incorrecta.'
     }
+    if (authError.code === 'auth/invalid-credential') {
+      return 'Email o contraseña incorrectos. Por favor, verifica tus datos.'
+    }
+    if (authError.code === 'auth/account-exists-with-different-credential') {
+      return 'Ya existe una cuenta con este email pero con un método de inicio de sesión diferente.'
+    }
+    if (authError.code === 'auth/popup-closed-by-user') {
+      return 'El proceso de autenticación fue cancelado.'
+    }
+    if (authError.code === 'auth/network-request-failed') {
+      return 'Error de conexión. Verifica tu internet e intenta nuevamente.'
+    }
     if (authError.code === 'auth/too-many-requests') {
       return 'Demasiados intentos fallidos. Intenta más tarde.'
     }
