@@ -650,7 +650,7 @@ export default function EditProductPage() {
                       type="checkbox"
                       checked={chargeTaxes}
                       onChange={(e) => setChargeTaxes(e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">Cobrar impuestos sobre este producto</span>
                   </label>
@@ -698,7 +698,7 @@ export default function EditProductPage() {
                       type="checkbox"
                       checked={hasVariants}
                       onChange={(e) => setHasVariants(e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">Este producto tiene variantes</span>
                   </label>
@@ -836,7 +836,7 @@ export default function EditProductPage() {
                 <select 
                   value={status}
                   onChange={(e) => setStatus(e.target.value as 'draft' | 'active' | 'archived')}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                 >
                   <option value="draft">Borrador</option>
                   <option value="active">Activo</option>
@@ -865,7 +865,7 @@ export default function EditProductPage() {
                                 type="checkbox"
                                 checked={selectedParentCategoryIds.includes(category.id)}
                                 onChange={() => handleParentCategoryToggle(category.id)}
-                                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                               />
                               <span className="text-sm text-gray-700">{category.name}</span>
                             </label>
@@ -899,7 +899,7 @@ export default function EditProductPage() {
                                   type="checkbox"
                                   checked={selectedSubcategoryIds.includes(subcategory.id)}
                                   onChange={() => handleSubcategoryToggle(subcategory.id)}
-                                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                  className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                                 />
                                 <span className="text-sm text-gray-700">{subcategory.name}</span>
                               </label>
@@ -915,7 +915,7 @@ export default function EditProductPage() {
                     <select
                       value={selectedBrandId}
                       onChange={(e) => setSelectedBrandId(e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                       disabled={loadingBrands}
                     >
                       <option value="">Seleccionar marca</option>

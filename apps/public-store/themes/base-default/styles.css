@@ -1,0 +1,294 @@
+/* ================================
+   BASE DEFAULT THEME STYLES
+   ================================ */
+
+/* Variables CSS para el tema base-default */
+:root {
+  /* === COLORES PRINCIPALES === */
+  --theme-primary: 23 23 23;           /* Negro suave #171717 */
+  --theme-secondary: 248 250 252;      /* Gris muy claro #F8FAFC */
+  --theme-accent: 59 130 246;          /* Azul moderno #3B82F6 */
+  
+  /* === COLORES NEUTROS === */
+  --theme-neutral-dark: 23 23 23;       /* Negro suave #171717 */
+  --theme-neutral-medium: 107 114 128;  /* Gris medio #6B7280 */
+  --theme-neutral-light: 255 255 255;   /* Blanco puro #FFFFFF */
+  --theme-neutral-50: 249 250 251;      /* Gris muy claro #F9FAFB */
+  --theme-neutral-100: 243 244 246;     /* Gris claro #F3F4F6 */
+  --theme-neutral-200: 229 231 235;     /* Gris claro bordes #E5E7EB */
+  --theme-neutral-300: 209 213 219;     /* Gris medio claro #D1D5DB */
+  
+  /* === COLORES DE ESTADO === */
+  --theme-success: 34 197 94;          /* Verde #22C55E */
+  --theme-warning: 251 191 36;         /* Amarillo #FBBF24 */
+  --theme-error: 239 68 68;            /* Rojo #EF4444 */
+  
+  /* === TIPOGRAFÍA === */
+  --theme-font-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --theme-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* === ESPACIADO === */
+  --theme-section-padding: 2rem;        /* 32px */
+  --theme-card-padding: 1.5rem;         /* 24px */
+  --theme-element-gap: 1.5rem;          /* 24px */
+  --theme-grid-gap: 1.5rem;             /* 24px */
+  
+  /* === BORDES Y SOMBRAS === */
+  --theme-border-radius: 0.5rem;        /* 8px - redondeado moderno */
+  --theme-border-radius-lg: 0.75rem;    /* 12px */
+  --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --theme-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --theme-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* === TRANSICIONES === */
+  --theme-transition: all 0.2s ease-in-out;
+  --theme-transition-fast: all 0.15s ease-in-out;
+}
+
+/* ================================
+   ESTILOS GLOBALES DEL TEMA
+   ================================ */
+
+/* === BOTONES === */
+.btn-base-primary {
+  @apply px-6 py-3 rounded-md font-medium transition-all duration-200;
+  background-color: rgb(var(--theme-primary));
+  color: rgb(var(--theme-neutral-light));
+  font-family: var(--theme-font-body);
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.btn-base-primary:hover {
+  background-color: rgb(var(--theme-neutral-dark) / 0.8);
+  transform: translateY(-1px);
+  box-shadow: var(--theme-shadow-md);
+}
+
+.btn-base-secondary {
+  @apply px-6 py-3 rounded-md font-medium transition-all duration-200;
+  background-color: rgb(var(--theme-secondary));
+  color: rgb(var(--theme-neutral-dark));
+  border: 1px solid rgb(var(--theme-neutral-200));
+  font-family: var(--theme-font-body);
+}
+
+.btn-base-secondary:hover {
+  background-color: rgb(var(--theme-neutral-100));
+  border-color: rgb(var(--theme-neutral-300));
+  transform: translateY(-1px);
+}
+
+.btn-base-outline {
+  @apply px-6 py-3 rounded-md font-medium transition-all duration-200;
+  background-color: transparent;
+  color: rgb(var(--theme-primary));
+  border: 1px solid rgb(var(--theme-neutral-300));
+  font-family: var(--theme-font-body);
+}
+
+.btn-base-outline:hover {
+  background-color: rgb(var(--theme-neutral-50));
+  border-color: rgb(var(--theme-primary));
+  transform: translateY(-1px);
+}
+
+/* === CARDS === */
+.card-base {
+  @apply rounded-lg transition-all duration-200;
+  background-color: rgb(var(--theme-neutral-light));
+  border: 1px solid rgb(var(--theme-neutral-200));
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.card-base:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--theme-shadow-md);
+  border-color: rgb(var(--theme-neutral-300));
+}
+
+/* === GRID LAYOUTS === */
+.grid-base {
+  display: grid;
+  gap: var(--theme-grid-gap);
+}
+
+.grid-base-products {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Vista compacta - más columnas */
+.grid-base-products-compact {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* Vista lista - 1 columna */
+.grid-base-products-list {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 768px) {
+  .grid-base-products {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  
+  .grid-base-products-compact {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .grid-base-products-list {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* === ESTILOS PARA VISTAS DE PRODUCTOS === */
+
+/* Vista compacta */
+.product-card-base-compact {
+  padding: 1rem;
+}
+
+.product-card-base-compact .product-image {
+  margin-bottom: 0.75rem;
+}
+
+.product-card-base-compact .product-title {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.product-card-base-compact .product-price {
+  font-size: 0.875rem;
+}
+
+/* Vista lista */
+.product-card-base-list {
+  @apply flex flex-row items-center gap-4 p-4;
+}
+
+.product-card-base-list .product-image {
+  @apply w-20 h-20 rounded-lg flex-shrink-0;
+}
+
+.product-card-base-list .product-info {
+  @apply flex-1 space-y-2;
+}
+
+.product-card-base-list .product-title {
+  @apply text-base;
+}
+
+/* === ANIMACIONES === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* === EFECTOS HOVER === */
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* === BADGE STYLES === */
+.badge-base {
+  @apply px-2 py-1 text-xs font-medium rounded-full;
+  background-color: rgb(var(--theme-primary));
+  color: rgb(var(--theme-neutral-light));
+}
+
+.badge-base-success {
+  background-color: rgb(var(--theme-success));
+  color: white;
+}
+
+.badge-base-warning {
+  background-color: rgb(var(--theme-warning));
+  color: white;
+}
+
+.badge-base-error {
+  background-color: rgb(var(--theme-error));
+  color: white;
+}
+
+/* === UTILIDADES === */
+.text-theme-primary {
+  color: rgb(var(--theme-primary));
+}
+
+.text-theme-secondary {
+  color: rgb(var(--theme-neutral-medium));
+}
+
+.bg-theme-primary {
+  background-color: rgb(var(--theme-primary));
+}
+
+.bg-theme-secondary {
+  background-color: rgb(var(--theme-secondary));
+}
+
+.border-theme-primary {
+  border-color: rgb(var(--theme-neutral-200));
+}
+
+/* === MENÚ DE COMPARTIR === */
+.share-menu {
+  animation: shareMenuFadeIn 0.2s ease-out forwards;
+  transform-origin: top right;
+}
+
+@keyframes shareMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.share-menu-item {
+  transition: all 0.15s ease-in-out;
+}
+
+.share-menu-item:hover {
+  background-color: rgb(var(--theme-neutral-50));
+}
+
+/* Colores específicos para redes sociales */
+.share-whatsapp:hover {
+  background-color: #25d366;
+  color: white;
+}
+
+.share-facebook:hover {
+  background-color: #1877f2;
+  color: white;
+}
+
+.share-twitter:hover {
+  background-color: #1da1f2;
+  color: white;
+}

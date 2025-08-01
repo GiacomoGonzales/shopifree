@@ -693,7 +693,7 @@ export default function CreateProductPage() {
                       type="checkbox"
                       checked={chargeTaxes}
                       onChange={(e) => setChargeTaxes(e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">{t('chargeTaxes')}</span>
                   </label>
@@ -875,7 +875,7 @@ export default function CreateProductPage() {
                               <select 
                                 value={(metaFieldValues[field.id] as string) || ''}
                                 onChange={(e) => handleMetaFieldChange(field.id, e.target.value)}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                               >
                                 <option value="">Seleccionar</option>
                                 {field.options?.map(option => (
@@ -888,7 +888,7 @@ export default function CreateProductPage() {
                                 type="text"
                                 value={(metaFieldValues[field.id] as string) || ''}
                                 onChange={(e) => handleMetaFieldChange(field.id, e.target.value)}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                                 placeholder={`Ingrese ${field.name.toLowerCase()}`}
                               />
                             )}
@@ -929,7 +929,7 @@ export default function CreateProductPage() {
                       type="checkbox"
                       checked={hasVariants}
                       onChange={(e) => setHasVariants(e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">{t('variants.hasVariants')}</span>
                   </label>
@@ -1030,7 +1030,7 @@ export default function CreateProductPage() {
                         type="checkbox"
                         checked={requiresShipping}
                         onChange={(e) => setRequiresShipping(e.target.checked)}
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                       />
                       <span className="ml-2 text-sm text-gray-700">{t('shipping.requiresShipping')}</span>
                     </label>
@@ -1120,7 +1120,7 @@ export default function CreateProductPage() {
                 <select 
                   value={productStatus}
                   onChange={(e) => setProductStatus(e.target.value as 'draft' | 'active' | 'archived')}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                 >
                   <option value="draft">{t('status.draft')}</option>
                   <option value="active">{t('status.active')}</option>
@@ -1155,7 +1155,7 @@ export default function CreateProductPage() {
                                   setSelectedParentCategoryIds(selectedParentCategoryIds.filter(id => id !== category.id))
                                 }
                               }}
-                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                              className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                             />
                             <span className="ml-2 text-sm text-gray-900">{category.name}</span>
                           </label>
@@ -1186,7 +1186,7 @@ export default function CreateProductPage() {
                                     setSelectedSubcategoryIds(selectedSubcategoryIds.filter(id => id !== subcategory.id))
                                   }
                                 }}
-                                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                               />
                               <span className="ml-2 text-sm text-gray-900">{subcategory.name}</span>
                             </label>
@@ -1240,7 +1240,7 @@ export default function CreateProductPage() {
                     <select
                       value={selectedBrandId}
                       onChange={(e) => setSelectedBrandId(e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                     >
                       <option value="">{t('organization.brandPlaceholder')}</option>
                       {brands.map((brand) => (

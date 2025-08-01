@@ -1,5 +1,6 @@
 'use client'
 
+import './styles.css'
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'

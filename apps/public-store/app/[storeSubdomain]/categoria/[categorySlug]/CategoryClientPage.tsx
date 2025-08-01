@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
-import { useStore } from '../../../../lib/store-context'
+
 import { getCurrencySymbol } from '../../../../lib/store'
 import HeartIcon from '../../../../components/HeartIcon'
 import VideoPlayer from '../../../../components/VideoPlayer'
@@ -17,7 +17,7 @@ import { getStoreProducts, PublicProduct, generatePriceRangeOptions, applyDynami
 import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../../../lib/store-filters'
 import { PublicCollection, getStoreCollections } from '../../../../lib/collections'
 import { Tienda } from '../../../../lib/types'
-import { StoreDataClient } from '../../../../lib/store'
+
 import ProductSortFilter from '../../../../themes/elegant-boutique/ProductSortFilter'
 
 // Layout por defecto en caso de error
@@ -28,31 +28,7 @@ const DefaultLayout: ThemeLayoutComponent = ({ children }) => (
 // Tipos para el selector de vista
 type ProductViewMode = 'expanded' | 'compact' | 'list'
 
-// Función para convertir Store a Tienda
-const convertStoreToTienda = (store: StoreDataClient): Tienda => ({
-  id: store.id,
-  storeName: store.storeName,
-  subdomain: store.subdomain,
-  slug: store.slug,
-  slogan: store.slogan,
-  description: store.description,
-  theme: store.theme || 'base-default',
-  hasPhysicalLocation: store.hasPhysicalLocation,
-  address: store.address,
-  logoUrl: store.logoUrl,
-  heroImageUrl: store.heroImageUrl,
-  headerLogoUrl: store.headerLogoUrl,
-  carouselImages: store.carouselImages,
-  primaryColor: store.primaryColor,
-  secondaryColor: store.secondaryColor,
-  currency: store.currency,
-  phone: store.phone,
-  ownerId: store.ownerId,
-  advanced: store.advanced,
-  socialMedia: store.socialMedia,
-  createdAt: store.createdAt,
-  updatedAt: store.updatedAt
-})
+
 
 // Iconos para filtros
 const Icons = {
@@ -83,10 +59,11 @@ const Icons = {
 
 interface CategoryClientPageProps {
   categorySlug: string
+  tienda: Tienda
+  locale: 'es' | 'en'
 }
 
-const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
-  const { store } = useStore()
+const CategoryClientPage = ({ categorySlug, tienda, locale }: CategoryClientPageProps) => {
   const [mounted, setMounted] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [products, setProducts] = useState<PublicProduct[]>([])
@@ -142,13 +119,13 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   const getGridClasses = (mode: ProductViewMode) => {
     switch (mode) {
       case 'expanded':
-        return 'grid-boutique-products' // Clase existente (1 columna en móvil)
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
       case 'compact':
-        return 'grid-boutique-products-compact' // Nueva clase (2 columnas en móvil)
+        return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
       case 'list':
-        return 'grid-boutique-products-list' // Nueva clase (lista)
+        return 'grid-cols-1 gap-4'
       default:
-        return 'grid-boutique-products'
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
     }
   }
   
@@ -159,14 +136,14 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   // Cargar datos necesarios
   useEffect(() => {
     const loadData = async () => {
-      if (!store?.id) return
+      if (!tienda?.id) return
       
       try {
         setLoading(true)
         const [messagesModule, categoriesData, productsData] = await Promise.all([
-          import('../../../../messages/common/es.json').catch(() => ({ default: {} })),
-          getStoreCategories(store.id).catch(() => []),
-          getStoreProducts(store.id).catch(() => [])
+          import(`../../../../messages/common/${locale}.json`).catch(() => ({ default: {} })),
+          getStoreCategories(tienda.id).catch(() => []),
+          getStoreProducts(tienda.id).catch(() => [])
         ])
         
         setMessages(messagesModule.default)
@@ -180,7 +157,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     }
     
     loadData()
-  }, [store?.id])
+  }, [tienda?.id, locale])
 
   useEffect(() => {
     setMounted(true)
@@ -189,10 +166,10 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   // Cargar colecciones
   useEffect(() => {
     const loadCollections = async () => {
-      if (!store?.id || products.length === 0) return
+      if (!tienda?.id || products.length === 0) return
       
       try {
-        const storeCollections = await getStoreCollections(store.id)
+        const storeCollections = await getStoreCollections(tienda.id)
         setCollections(storeCollections)
         
         // Crear un mapa de productos a sus colecciones
@@ -214,7 +191,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     }
     
     loadCollections()
-  }, [store?.id, products])
+  }, [tienda?.id, products])
 
   // Asegurar que en escritorio siempre se use 'compact' y actualizar isMobile
   useEffect(() => {
@@ -304,11 +281,11 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   // Actualizar filtros dinámicos cuando cambian los productos de la categoría
   useEffect(() => {
     const loadFilters = async () => {
-      if (!store?.id) return
+      if (!tienda?.id) return
       
       try {
         // Get store filter configuration
-        const storeFiltersConfig = await getStoreConfiguredFilters(store.id)
+        const storeFiltersConfig = await getStoreConfiguredFilters(tienda.id)
         
         // Use configured filters if available, otherwise fallback to automatic extraction
         const newFilters = storeFiltersConfig.length > 0
@@ -331,7 +308,7 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
     }
     
     loadFilters()
-  }, [categoryProducts, store?.id])
+      }, [categoryProducts, tienda?.id])
 
   // Paginación
   const paginatedProducts = useMemo(() => {
@@ -370,11 +347,11 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
 
   // Importar layout del tema
   const ThemeLayout = useMemo(() => {
-    if (!store?.theme) return DefaultLayout
+    if (!tienda?.theme) return DefaultLayout
     
     return dynamic<ThemeLayoutProps>(
-      () => import(`../../../../themes/${store.theme}/Layout`).then(mod => mod.default).catch(() => {
-        console.error(`Theme Layout ${store.theme} not found, using default layout`)
+      () => import(`../../../../themes/${tienda.theme}/Layout`).then(mod => mod.default).catch(() => {
+        console.error(`Theme Layout ${tienda.theme} not found, using default layout`)
         return DefaultLayout
       }),
       { 
@@ -382,9 +359,9 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
         loading: () => null
       }
     )
-  }, [store?.theme])
+  }, [tienda?.theme])
 
-  if (!mounted || loading || !messages || !store) {
+  if (!mounted || loading || !messages || !tienda) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900"></div>
@@ -480,9 +457,9 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
         ) : (
           <>
             {/* Grilla de productos */}
-            <div className={`grid ${getGridClasses(viewMode)} gap-6 mb-12`}>
+            <div className={`grid ${getGridClasses(viewMode)} mb-12`}>
               {paginatedProducts.map((producto, index) => (
-                <ProductCard key={producto.id} producto={producto} index={index} tienda={convertStoreToTienda(store)} viewMode={viewMode} productCollections={productCollections} />
+                <ProductCard key={producto.id} producto={producto} index={index} tienda={tienda} viewMode={viewMode} productCollections={productCollections} />
               ))}
             </div>
 
@@ -586,9 +563,9 @@ const CategoryClientPage = ({ categorySlug }: CategoryClientPageProps) => {
   }
 
   return (
-    <NextIntlClientProvider locale="es" messages={messages as Record<string, string>}>
+    <NextIntlClientProvider locale={locale} messages={messages as Record<string, string>}>
       <CartProvider>
-        <ThemeLayout tienda={convertStoreToTienda(store)} categorias={categories || []}>
+        <ThemeLayout tienda={tienda} categorias={categories || []}>
           <CategoryContent />
         </ThemeLayout>
       </CartProvider>
@@ -682,16 +659,17 @@ const ProductCard = ({ producto, index, tienda, viewMode, productCollections }: 
     <Link 
       href={`/${producto.slug}`}
       onClick={handleProductClick}
-      className={`card-boutique group cursor-pointer block animate-fadeInUp ${
-        viewMode === 'compact' ? 'product-card-compact' : 
-        viewMode === 'list' ? 'product-card-list' : ''
+      className={`bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block ${
+        viewMode === 'list' ? 'flex flex-row items-center gap-4 p-4' : 'flex flex-col'
       }`}
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Product Image */}
-      <div className={`relative overflow-hidden rounded-sm product-image ${
-        viewMode === 'list' ? 'w-20 h-20' : 'aspect-square mb-6'
-      }`} style={{ backgroundColor: 'rgb(var(--theme-secondary))' }}>
+      <div className={`relative overflow-hidden bg-neutral-100 ${
+        viewMode === 'list' 
+          ? 'w-20 h-20 rounded-lg flex-shrink-0' 
+          : 'aspect-square rounded-t-lg'
+      }`}>
         {producto.mediaFiles && producto.mediaFiles.length > 0 && producto.mediaFiles[0].type === 'video' ? (
           <VideoPlayer
             src={producto.mediaFiles[0].url}
@@ -706,106 +684,96 @@ const ProductCard = ({ producto, index, tienda, viewMode, productCollections }: 
             poster={producto.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg')}
           />
         ) : (
-          <div className="product-image-boutique w-full h-full">
-            <img
-              src={producto.image}
-              alt={producto.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/api/placeholder/300/400';
-              }}
-            />
-          </div>
+          <img
+            src={producto.image}
+            alt={producto.name}
+            className="w-full h-full object-cover transition-transform duration-300 md:group-hover:scale-105"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/api/placeholder/300/400';
+            }}
+          />
         )}
-        {/* Badge dinámico - Oculto en vista lista */}
-        {viewMode !== 'list' && (() => {
-          const badge = getProductBadge(producto, productCollections)
-          return badge ? (
-            <span className={`product-badge-boutique badge-${badge.type}`}>
-              {badge.text}
-            </span>
-          ) : null
-        })()}
-        {/* Botón de favorito - Oculto en vista compacta y lista */}
-        {viewMode !== 'compact' && viewMode !== 'list' && (
+        {/* Mostrar "Nuevo" para productos recientes - Oculto en vista lista */}
+        {viewMode !== 'list' && (
+          <span className={`absolute bg-neutral-900 text-white font-medium rounded-full ${
+            viewMode === 'compact' 
+              ? 'top-2 left-2 px-1.5 py-0.5 text-xs' 
+              : 'top-3 left-3 px-2 py-1 text-xs'
+          }`} style={{ fontSize: viewMode === 'compact' ? '0.625rem' : '0.75rem' }}>
+            Nuevo
+          </span>
+        )}
+        {/* Botón de favorito - Oculto en vista lista */}
+        {viewMode !== 'list' && (
           <div className="absolute top-3 right-3 z-10">
             <HeartIcon product={producto} size="md" />
           </div>
         )}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
+        <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors duration-300"></div>
       </div>
 
       {/* Product Info */}
-      <div className={`product-info ${
-        viewMode === 'list' ? 'flex-1' : 'space-y-4'
+      <div className={`bg-white ${
+        viewMode === 'list' 
+          ? 'flex-1 space-y-2' 
+          : 'p-6 pt-0 space-y-3'
       }`}>
-        <h3 
-          className={`font-medium group-hover:color-accent transition-colors duration-300 text-serif product-title ${
-            viewMode === 'compact' ? 'text-sm' : viewMode === 'list' ? 'text-base' : 'text-lg'
-          }`}
-          style={{ color: 'rgb(var(--theme-neutral-dark))' }}
-        >
+        <h3 className={`font-light text-neutral-900 md:group-hover:text-neutral-600 transition-colors duration-200 ${
+          viewMode === 'list' ? 'text-base' : 'text-lg pt-6'
+        } ${
+          viewMode === 'compact' ? 'text-sm' : ''
+        }`}>
           {producto.name}
         </h3>
         
         {/* Rating - Oculto en vista compacta */}
         {viewMode !== 'compact' && (
           <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className="w-3 h-3"
-                  style={{ 
-                    color: i < Math.floor(producto.rating || 0) 
-                      ? 'rgb(var(--theme-accent))' 
-                      : 'rgb(var(--theme-neutral-medium) / 0.3)' 
-                  }}
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </div>
-              ))}
-            </div>
-            <span className="text-sm font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={`w-3 h-3 ${i < Math.floor(producto.rating || 0) ? 'text-yellow-400' : 'text-neutral-300'}`}>
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+            ))}
+          </div>
+            <span className="text-sm text-neutral-500 font-light">
               {producto.rating || 0} ({producto.reviews || 0})
             </span>
           </div>
         )}
 
         {/* Price */}
-        <div className={`${viewMode === 'list' ? 'product-price-section' : viewMode === 'compact' ? 'space-y-2' : 'flex items-center justify-between'}`}>
+        <div className={`${viewMode === 'compact' ? 'space-y-2' : 'flex items-center justify-between'}`}>
           <div className={`${viewMode === 'compact' ? 'flex items-center justify-between' : 'flex items-center space-x-2'}`}>
-            <span className={`font-medium text-serif product-price ${
+            <span className={`font-medium text-neutral-900 ${
               viewMode === 'compact' ? 'text-sm' : 'text-xl'
-            }`} style={{ color: 'rgb(var(--theme-accent))' }}>
+            }`}>
               {getCurrencySymbol(tienda.currency)} {producto.price}
             </span>
             {viewMode === 'compact' && (
               <button 
                 onClick={handleAddToCart}
                 disabled={addingToCart}
-                className="w-6 h-6 rounded-full transition-all duration-300 text-xs flex items-center justify-center opacity-100"
-                style={{
-                  backgroundColor: addingToCart 
-                    ? 'rgb(var(--theme-success))' 
-                    : 'rgb(var(--theme-primary))',
-                  color: 'rgb(var(--theme-neutral-light))'
-                }}
+                className={`w-6 h-6 rounded-full transition-all duration-200 text-xs flex items-center justify-center ${
+                  addingToCart
+                    ? 'bg-green-600 text-white opacity-100'
+                    : 'bg-neutral-900 text-white opacity-100 hover:bg-neutral-800'
+                }`}
               >
                 {addingToCart ? '✓' : '+'}
               </button>
             )}
           </div>
           {producto.comparePrice && producto.comparePrice > producto.price && viewMode === 'compact' && (
-            <span className="text-xs line-through font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+            <span className="text-xs text-neutral-500 line-through font-light">
               {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
             </span>
           )}
           {producto.comparePrice && producto.comparePrice > producto.price && viewMode !== 'compact' && (
-            <span className="text-sm line-through font-light text-sans" style={{ color: 'rgb(var(--theme-neutral-medium))' }}>
+            <span className="text-sm text-neutral-500 line-through font-light">
               {getCurrencySymbol(tienda.currency)} {producto.comparePrice}
             </span>
           )}
@@ -813,19 +781,11 @@ const ProductCard = ({ producto, index, tienda, viewMode, productCollections }: 
             <button 
               onClick={handleAddToCart}
               disabled={addingToCart}
-              className={`rounded-sm transition-all duration-300 text-sans product-button ${
-                viewMode === 'list' ? 'text-sm px-4 py-2' : 'text-sm px-4 py-2'
-              } ${
+              className={`text-sm px-4 py-2 rounded-md transition-all duration-200 ${
                 addingToCart
-                  ? 'bg-success text-white opacity-100'
-                  : viewMode === 'list' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  ? 'bg-green-600 text-white opacity-100'
+                  : 'bg-neutral-900 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-neutral-800'
               }`}
-              style={{
-                backgroundColor: addingToCart 
-                  ? 'rgb(var(--theme-success))' 
-                  : 'rgb(var(--theme-primary))',
-                color: 'rgb(var(--theme-neutral-light))'
-              }}
             >
               {addingToCart ? '✓' : 'Añadir'}
             </button>

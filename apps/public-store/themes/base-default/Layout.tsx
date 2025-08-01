@@ -1,5 +1,6 @@
 'use client'
 
+import './styles.css'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -93,6 +94,11 @@ const Icons = {
   X: () => (
     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
       <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
+    </svg>
+  ),
+  Close: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
     </svg>
   ),
   YouTube: () => (
@@ -224,6 +230,29 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [mobileSearchOpen])
 
+  // Efecto para prevenir scroll del body cuando el modal móvil está abierto
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      // Prevenir scroll del body
+      document.body.style.overflow = 'hidden'
+      // Prevenir scroll en iOS Safari
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+    } else {
+      // Restaurar scroll del body
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+
+    // Cleanup al desmontar
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+  }, [mobileSearchOpen])
+
   // Función para manejar la búsqueda con debounce
   const handleSearch = async (query: string) => {
     setSearchQuery(query)
@@ -322,11 +351,33 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center space-x-3 hover-scale">
-                <div className="w-8 h-8 bg-neutral-900 rounded-sm flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">
-                    {tienda?.storeName?.charAt(0) || 'S'}
-                  </span>
-                </div>
+                {(tienda?.logoUrl || tienda?.headerLogoUrl) ? (
+                  <div className="w-8 h-8 rounded-sm overflow-hidden flex items-center justify-center">
+                    <img
+                      src={tienda.logoUrl || tienda.headerLogoUrl}
+                      alt={`${tienda.storeName} logo`}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        // Fallback al logo de letra si la imagen falla
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-8 h-8 bg-neutral-900 rounded-sm flex items-center justify-center" style={{ display: 'none' }}>
+                      <span className="text-white font-bold text-sm">
+                        {tienda?.storeName?.charAt(0) || 'S'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 bg-neutral-900 rounded-sm flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">
+                      {tienda?.storeName?.charAt(0) || 'S'}
+                    </span>
+                  </div>
+                )}
                 <span className="text-xl font-light text-neutral-900 tracking-tight">
                   {tienda?.storeName || 'Mi Tienda'}
                 </span>
@@ -448,7 +499,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                       onClick={clearSearch}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
                     >
-                      <Icons.X />
+                      <Icons.Close />
                     </button>
                   )}
                 </div>
@@ -569,10 +620,10 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
       {/* Búsqueda Mobile Modal */}
       {mobileSearchOpen && (
         <div className="fixed inset-0 z-[9999] md:hidden">
-          <div className="fixed inset-0 bg-white">
+          <div className="fixed inset-0 bg-white flex flex-col">
             {/* Header del modal */}
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200">
-              <h2 className="text-lg font-light text-neutral-900">Buscar</h2>
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200 flex-shrink-0">
+              <h2 className="text-base font-light text-neutral-900">Buscar</h2>
               <button
                 onClick={() => setMobileSearchOpen(false)}
                 className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
@@ -582,7 +633,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
             </div>
 
             {/* Contenido del modal */}
-            <div className="p-4">
+            <div className="flex-1 overflow-y-auto p-4">
 
               {/* Barra de búsqueda */}
               <div className="relative mb-6">
@@ -593,7 +644,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && executeSearch(searchQuery)}
-                  className="w-full pl-10 pr-10 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent font-light"
+                  className="w-full pl-10 pr-10 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent font-light"
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400">
                   <Icons.Search />
@@ -603,7 +654,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                     onClick={clearSearch}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
                   >
-                    <Icons.X />
+                    <Icons.Close />
                   </button>
                 )}
               </div>
@@ -614,7 +665,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                   {/* Historial de búsqueda */}
                   {searchHistory.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-medium text-neutral-700 mb-3 flex items-center">
+                      <h3 className="text-xs font-medium text-neutral-700 mb-3 flex items-center">
                         <Icons.Clock />
                         <span className="ml-2">Búsquedas recientes</span>
                       </h3>
@@ -623,7 +674,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                           <button
                             key={index}
                             onClick={() => executeSearch(item)}
-                            className="w-full text-left px-3 py-2 hover:bg-neutral-50 rounded-lg text-neutral-700 transition-colors"
+                            className="w-full text-left px-3 py-2 hover:bg-neutral-50 rounded-lg text-neutral-700 text-sm transition-colors"
                           >
                             {item}
                           </button>
@@ -635,7 +686,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                   {/* Sugerencias populares */}
                   {searchSuggestions.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-medium text-neutral-700 mb-3 flex items-center">
+                      <h3 className="text-xs font-medium text-neutral-700 mb-3 flex items-center">
                         <Icons.TrendingUp />
                         <span className="ml-2">Sugerencias</span>
                       </h3>
@@ -644,7 +695,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                           <button
                             key={index}
                             onClick={() => executeSearch(suggestion)}
-                            className="w-full text-left px-3 py-2 hover:bg-neutral-50 rounded-lg text-neutral-700 transition-colors"
+                            className="w-full text-left px-3 py-2 hover:bg-neutral-50 rounded-lg text-neutral-700 text-sm transition-colors"
                           >
                             {suggestion}
                           </button>
@@ -655,7 +706,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
 
                   {/* Categorías rápidas */}
                   <div>
-                    <h3 className="text-sm font-medium text-neutral-700 mb-3 flex items-center">
+                    <h3 className="text-xs font-medium text-neutral-700 mb-3 flex items-center">
                       <Icons.Tag />
                       <span className="ml-2">Categorías</span>
                     </h3>
@@ -663,7 +714,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                       {categories.slice(0, 6).map((category) => (
                         <button
                           key={category.name}
-                          className="p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg text-neutral-700 text-sm transition-colors"
+                          className="p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg text-neutral-700 text-xs transition-colors"
                         >
                           {category.name}
                         </button>
@@ -685,7 +736,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                     </div>
                   ) : searchResults.length > 0 ? (
                     <>
-                      <h3 className="text-sm font-medium text-neutral-700 mb-3">Resultados ({searchResults.length})</h3>
+                      <h3 className="text-xs font-medium text-neutral-700 mb-3">Resultados ({searchResults.length})</h3>
                       <div className="space-y-3">
                         {searchResults.map((product) => (
                           <Link 
@@ -713,22 +764,22 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                               />
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-medium text-neutral-900">{product.name}</h4>
-                              <p className="text-lg font-medium text-neutral-900">{getCurrencySymbol(tienda?.currency || 'USD')}{product.price}</p>
+                              <h4 className="text-sm font-medium text-neutral-900">{product.name}</h4>
+                              <p className="text-sm font-medium text-neutral-900">{getCurrencySymbol(tienda?.currency || 'USD')}{product.price}</p>
                             </div>
                           </Link>
                         ))}
                       </div>
                       <button 
                         onClick={() => executeSearch(searchQuery)}
-                        className="mt-4 w-full py-3 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+                        className="mt-4 w-full py-3 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors"
                       >
                         Ver todos los resultados
                       </button>
                     </>
                   ) : searchQuery.length >= 2 && !isSearching ? (
                     <div className="text-center py-8">
-                      <p className="text-neutral-500">No se encontraron productos para "{searchQuery}"</p>
+                      <p className="text-sm text-neutral-500">No se encontraron productos para "{searchQuery}"</p>
                     </div>
                   ) : null}
                 </div>
@@ -803,11 +854,33 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
             {/* Información de la tienda */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-neutral-900 rounded-sm flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">
-                    {tienda?.storeName?.charAt(0) || 'S'}
-                  </span>
-                </div>
+                {(tienda?.logoUrl || tienda?.headerLogoUrl) ? (
+                  <div className="w-6 h-6 rounded-sm overflow-hidden flex items-center justify-center">
+                    <img
+                      src={tienda.logoUrl || tienda.headerLogoUrl}
+                      alt={`${tienda.storeName} logo`}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        // Fallback al logo de letra si la imagen falla
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-6 h-6 bg-neutral-900 rounded-sm flex items-center justify-center" style={{ display: 'none' }}>
+                      <span className="text-white font-bold text-xs">
+                        {tienda?.storeName?.charAt(0) || 'S'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 bg-neutral-900 rounded-sm flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">
+                      {tienda?.storeName?.charAt(0) || 'S'}
+                    </span>
+                  </div>
+                )}
                 <span className="text-lg font-light text-neutral-900">
                   {tienda?.storeName || 'Mi Tienda'}
                 </span>
@@ -1037,7 +1110,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
           
           <div className="mt-8 pt-8 border-t border-neutral-200 flex flex-col sm:flex-row justify-between items-center">
             <p className="text-neutral-600 font-light text-sm">
-              © 2024 {tienda?.storeName || 'Mi Tienda'}. Todos los derechos reservados.
+              © 2025 {tienda?.storeName || 'Mi Tienda'}. Todos los derechos reservados.
             </p>
             <div className="flex space-x-6 mt-4 sm:mt-0">
               <a href="#" className="text-neutral-600 hover:text-neutral-900 transition-colors duration-200 text-sm font-light">
