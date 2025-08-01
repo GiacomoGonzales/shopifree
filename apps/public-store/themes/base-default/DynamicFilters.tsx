@@ -269,7 +269,7 @@ export default function BaseDefaultDynamicFilters({
         <div className="fixed inset-0 z-[9999] md:hidden flex flex-col bg-white">
           {/* Header con título y botón de cerrar */}
           <div className="flex items-center justify-between p-4 border-b border-neutral-200 flex-shrink-0 bg-white">
-            <h3 className="text-xl font-medium text-neutral-900">
+            <h3 className="text-lg font-medium text-neutral-900">
               Filtros
             </h3>
             <button
@@ -287,7 +287,7 @@ export default function BaseDefaultDynamicFilters({
             {/* Filtro de precio */}
             {tempPriceRangeOptions.length > 0 && (
               <div className="mb-8">
-                <h4 className="text-lg font-medium mb-4 text-neutral-900">
+                <h4 className="text-base font-medium mb-4 text-neutral-900">
                   Precio
                   {tempPriceRangeOptions.filter(range => range.selected).length > 0 && (
                     <span className="ml-2 bg-neutral-100 text-neutral-700 text-sm font-medium rounded-full px-3 py-1">
@@ -315,7 +315,7 @@ export default function BaseDefaultDynamicFilters({
                             style={checkboxStyle}
                             disabled={isUpdating}
                           />
-                      <span className="text-base font-light text-neutral-700">
+                      <span className="text-sm font-light text-neutral-700">
                         {range.label}
                       </span>
                     </label>
@@ -327,7 +327,7 @@ export default function BaseDefaultDynamicFilters({
             {/* Filtros dinámicos */}
             {tempFilters.map(filter => (
               <div key={filter.id} className="mb-8 last:mb-0">
-                <h4 className="text-lg font-medium mb-4 text-neutral-900">
+                <h4 className="text-base font-medium mb-4 text-neutral-900">
                   {filter.name}
                   {filter.selectedOptions.length > 0 && (
                     <span className="ml-2 bg-neutral-100 text-neutral-700 text-sm font-medium rounded-full px-3 py-1">
@@ -357,7 +357,7 @@ export default function BaseDefaultDynamicFilters({
                               style={checkboxStyle}
                               disabled={isUpdating}
                             />
-                        <span className="text-base font-light text-neutral-700">
+                        <span className="text-sm font-light text-neutral-700">
                           {option}
                         </span>
                       </label>
@@ -378,8 +378,8 @@ export default function BaseDefaultDynamicFilters({
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
                 </svg>
-                <p className="text-lg font-light mb-2">No hay filtros disponibles</p>
-                <p className="text-base font-light">Los filtros aparecerán cuando los productos tengan características definidas</p>
+                <p className="text-base font-light mb-2">No hay filtros disponibles</p>
+                <p className="text-sm font-light">Los filtros aparecerán cuando los productos tengan características definidas</p>
               </div>
             )}
           </div>
@@ -389,7 +389,7 @@ export default function BaseDefaultDynamicFilters({
             {/* Botón de aplicar filtros */}
             <button
               onClick={handleApplyFilters}
-              className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium text-lg hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center gap-2"
+              className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium text-base hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />

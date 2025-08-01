@@ -1,11 +1,12 @@
 'use client'
 
 import './styles.css'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Tienda } from '../../lib/types'
 import { Category } from '../../lib/categories'
+import { getProductCollections, PublicCollection } from '../../lib/collections'
 import { PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRangeOption } from '../../lib/products'
 import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../lib/store-filters'
 import { useCart } from '../../lib/cart-context'
@@ -56,21 +57,6 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
     </svg>
   ),
-  ShieldCheck: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-  ),
-  Truck: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-  ),
-  Refresh: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-  ),
 }
 
 export default function Home({ tienda, productos, categorias = [] }: HomeProps) {
@@ -103,6 +89,11 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   // Estado para las marcas
   const [brands, setBrands] = useState<PublicBrand[]>([])
   const [brandsLoading, setBrandsLoading] = useState(true)
+  const [isUserScrolling, setIsUserScrolling] = useState(false)
+  const carouselRef = useRef<HTMLDivElement>(null)
+  
+  // Estado para las colecciones de productos
+  const [productCollections, setProductCollections] = useState<Record<string, PublicCollection[]>>({})
   
   // Función para cambiar el modo de vista
   const handleViewModeChange = (mode: ProductViewMode) => {
@@ -334,6 +325,89 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     loadBrands()
   }, [tienda.id])
 
+  // Control táctil del carrusel de marcas
+  useEffect(() => {
+    const carousel = carouselRef.current
+    if (!carousel) return
+
+    let touchStartX = 0
+    let scrollTimeout: NodeJS.Timeout
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX
+      setIsUserScrolling(true)
+      clearTimeout(scrollTimeout)
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchStartX) return
+      
+      const touchCurrentX = e.touches[0].clientX
+      const diffX = touchStartX - touchCurrentX
+      
+      // Scroll manual
+      carousel.scrollLeft += diffX * 0.5 // Factor de sensibilidad
+      touchStartX = touchCurrentX
+    }
+
+    const handleTouchEnd = () => {
+      touchStartX = 0
+      // Reanudar animación automática después de 3 segundos
+      scrollTimeout = setTimeout(() => {
+        setIsUserScrolling(false)
+      }, 3000)
+    }
+
+    // Solo en móvil
+    const isMobile = window.innerWidth < 768
+    if (isMobile) {
+      carousel.addEventListener('touchstart', handleTouchStart, { passive: true })
+      carousel.addEventListener('touchmove', handleTouchMove, { passive: true })
+      carousel.addEventListener('touchend', handleTouchEnd, { passive: true })
+    }
+
+    return () => {
+      if (isMobile && carousel) {
+        carousel.removeEventListener('touchstart', handleTouchStart)
+        carousel.removeEventListener('touchmove', handleTouchMove)
+        carousel.removeEventListener('touchend', handleTouchEnd)
+      }
+      clearTimeout(scrollTimeout)
+    }
+  }, [brands.length])
+
+  // Cargar colecciones de productos
+  useEffect(() => {
+    const loadProductCollections = async () => {
+      const collectionsMap: Record<string, PublicCollection[]> = {}
+      
+      for (const producto of productosAMostrar) {
+        try {
+          const collections = await getProductCollections(tienda.id, producto.id)
+          collectionsMap[producto.id] = collections
+        } catch (error) {
+          console.error(`Error loading collections for product ${producto.id}:`, error)
+          collectionsMap[producto.id] = []
+        }
+      }
+      
+      setProductCollections(collectionsMap)
+    }
+
+    if (productosAMostrar.length > 0) {
+      loadProductCollections()
+    }
+  }, [productosAMostrar, tienda.id])
+
+  // Función para obtener el nombre de la colección de un producto
+  const getProductCollectionName = (productId: string): string | null => {
+    const collections = productCollections[productId]
+    if (collections && collections.length > 0) {
+      return collections[0].title // Mostrar la primera colección
+    }
+    return null
+  }
+
   // Función para cargar más productos
   const handleLoadMore = () => {
     const newProductsToShow = productsToShow + 8
@@ -387,24 +461,6 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   
   // Debug logs removidos para evitar logs infinitos en producción
 
-  const features = [
-    {
-      icon: Icons.ShieldCheck,
-      title: 'Compra Segura',
-      description: 'Transacciones 100% seguras con protección garantizada'
-    },
-    {
-      icon: Icons.Truck,
-      title: 'Envío Rápido',
-      description: 'Entrega express en 24-48 horas a toda la ciudad'
-    },
-    {
-      icon: Icons.Refresh,
-      title: 'Devoluciones',
-      description: '30 días para devoluciones sin preguntas'
-    }
-  ]
-
   const handleAddToCart = async (producto: PublicProduct, event: React.MouseEvent) => {
     event.preventDefault() // Prevenir navegación del Link
     event.stopPropagation()
@@ -439,7 +495,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-[75vh] overflow-hidden bg-gradient-to-b from-neutral-50 to-white pt-24 lg:pt-32">
+      <section className="relative min-h-[75vh] bg-gradient-to-b from-neutral-50 to-white pt-24 lg:pt-32 pb-8">
         {/* Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[55vh]">
@@ -493,7 +549,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
               </div>
               
               {/* Decorative accent */}
-              <div className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-neutral-900/10 to-transparent rounded-2xl -z-10"></div>
+              <div className="absolute -bottom-2 -right-2 w-full h-full bg-gradient-to-br from-neutral-900/10 to-transparent rounded-2xl -z-10"></div>
             </div>
           </div>
         </div>
@@ -773,14 +829,14 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                     className="object-cover transition-transform duration-300 md:group-hover:scale-105"
                   />
                 )}
-                {/* Mostrar "Nuevo" para productos recientes - Oculto en vista lista */}
-                {viewMode !== 'list' && (
+                {/* Mostrar nombre de la colección - Oculto en vista lista */}
+                {viewMode !== 'list' && getProductCollectionName(producto.id) && (
                   <span className={`absolute bg-neutral-900 text-white font-medium rounded-full ${
                     viewMode === 'compact' 
                       ? 'top-2 left-2 px-1.5 py-0.5 text-xs' 
                       : 'top-3 left-3 px-2 py-1 text-xs'
                   }`} style={{ fontSize: viewMode === 'compact' ? '0.625rem' : '0.75rem' }}>
-                    Nuevo
+                    {getProductCollectionName(producto.id)}
                   </span>
                 )}
                 {/* Botón de favorito - Oculto en vista lista */}
@@ -911,75 +967,9 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         )}
       </section>
 
-      {/* Features Section */}
-      <section className="bg-neutral-50 border-y border-neutral-200 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl md:text-4xl font-light text-neutral-900">¿Por qué elegirnos?</h2>
-            <p className="text-neutral-600 font-light">Comprometidos con tu satisfacción</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className="text-center space-y-4 animate-slide-up"
-                style={{ animationDelay: `${index * 200}ms` }}
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-neutral border border-neutral-200">
-                  <div className="text-neutral-700">
-                    <feature.icon />
-                  </div>
-                </div>
-                <h3 className="text-xl font-light text-neutral-900">{feature.title}</h3>
-                <p className="text-neutral-600 font-light leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Brands Carousel Section */}
-      {!brandsLoading && brands.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-light text-neutral-900 mb-4">Nuestras Marcas</h2>
-            <p className="text-neutral-600 font-light max-w-2xl mx-auto">
-              Trabajamos con las mejores marcas para ofrecerte productos de calidad excepcional
-            </p>
-          </div>
-          
-          <div className="relative overflow-hidden">
-            <div 
-              className="flex animate-slow-scroll gap-8 md:gap-12"
-              style={{
-                width: `${(brands.length + brands.length) * 200}px`,
-                animation: 'slowScroll 60s linear infinite'
-              }}
-            >
-              {/* Duplicamos las marcas para crear el efecto de carrusel infinito */}
-              {[...brands, ...brands].map((brand, index) => (
-                <div
-                  key={`${brand.id}-${index}`}
-                  className="flex-shrink-0 w-40 md:w-48 h-24 md:h-28 bg-white border border-neutral-200 rounded-lg p-4 flex items-center justify-center hover:shadow-lg transition-all duration-300 hover:scale-105"
-                >
-                  <img
-                    src={brand.image}
-                    alt={brand.name}
-                    className="max-w-full max-h-full object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
-                    style={{ maxWidth: '120px', maxHeight: '60px' }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Newsletter Section */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 bg-white pt-20 pb-20">
+      <section className="bg-neutral-50 border-y border-neutral-200 mt-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 pt-20 pb-20">
         <div className="space-y-4">
           <h2 className="text-3xl md:text-4xl font-light text-neutral-900">Mantente al día</h2>
           <p className="text-neutral-600 font-light">
@@ -1003,7 +993,39 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
             No spam. Solo contenido de calidad y ofertas especiales.
           </p>
         </div>
+        </div>
       </section>
+
+      {/* Brands Carousel Section */}
+      {!brandsLoading && brands.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-light text-neutral-900">Nuestras Marcas</h2>
+          </div>
+          
+          <div className="relative overflow-x-auto md:overflow-x-hidden py-8 brands-carousel">
+            <div 
+              ref={carouselRef}
+              className={`flex gap-8 md:gap-12 ${!isUserScrolling ? 'animate-slow-scroll' : ''}`}
+              style={{
+                width: `${(brands.length + brands.length) * 180}px`,
+                animation: !isUserScrolling ? 'slowScroll 60s linear infinite' : 'none'
+              }}
+            >
+              {/* Duplicamos las marcas para crear el efecto de carrusel infinito */}
+              {[...brands, ...brands].map((brand, index) => (
+                <img
+                  key={`${brand.id}-${index}`}
+                  src={brand.image}
+                  alt={brand.name}
+                  className="flex-shrink-0 w-24 md:w-32 h-24 md:h-32 object-contain rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white filter grayscale hover:grayscale-0"
+                  style={{ maxWidth: '128px', maxHeight: '128px' }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 } 

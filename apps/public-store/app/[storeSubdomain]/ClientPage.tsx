@@ -10,6 +10,7 @@ import { CartProvider } from '../../lib/cart-context'
 import { StoreAuthProvider } from '../../lib/store-auth-context'
 import { LOADING_CONFIG } from '../../lib/loading-config'
 import { useStoreData } from '../../lib/hooks/useStoreData'
+import LogoSpinner from '../../themes/base-default/components/LogoSpinner'
 
 interface ClientPageProps {
   tienda: Tienda
@@ -23,14 +24,30 @@ const DefaultLayout: ThemeLayoutComponent = ({ children }) => (
 DefaultLayout.displayName = 'DefaultLayout'
 
 // Componente de fallback para Home
-const DefaultHome = () => (
-  <div className="min-h-screen bg-white flex items-center justify-center">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-3"></div>
-              <p className="text-neutral-600 font-light">{LOADING_CONFIG.LOADING_MESSAGES.store}</p>
+const DefaultHome = ({ tienda }: { tienda: Tienda }) => {
+  // Usar LogoSpinner solo para el tema base-default
+  if (tienda.theme === 'base-default') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <LogoSpinner 
+          tienda={tienda} 
+          size="lg" 
+          message={LOADING_CONFIG.LOADING_MESSAGES.store}
+        />
+      </div>
+    )
+  }
+  
+  // Fallback genérico para otros temas
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-3"></div>
+        <p className="text-neutral-600 font-light">{LOADING_CONFIG.LOADING_MESSAGES.store}</p>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default function ClientPage({ tienda, locale }: ClientPageProps) {
   // Usar el hook personalizado para cargar datos de manera eficiente
@@ -78,7 +95,7 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
 
   // Mostrar loading hasta que todos los datos estén listos
   if (isLoading || !messages) {
-    return <DefaultHome />
+    return <DefaultHome tienda={tienda} />
   }
 
   // Mostrar error si algo falló

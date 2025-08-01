@@ -3,6 +3,8 @@
 import React, { useCallback, useState } from 'react'
 import { GoogleMap, Marker } from '@react-google-maps/api'
 import { useGoogleMapsLoader } from '../../lib/hooks/useGoogleMapsLoader'
+import { Tienda } from '../../lib/types'
+import LogoSpinner from './components/LogoSpinner'
 
 const mapContainerStyle = {
   width: '100%',
@@ -35,9 +37,10 @@ interface StoreLocationMapProps {
   lat?: number
   lng?: number
   storeName?: string
+  tienda: Tienda
 }
 
-export default function StoreLocationMap({ address, lat, lng, storeName }: StoreLocationMapProps) {
+export default function StoreLocationMap({ address, lat, lng, storeName, tienda }: StoreLocationMapProps) {
   const { isLoaded, loadError } = useGoogleMapsLoader()
   const [map, setMap] = useState<google.maps.Map | null>(null)
 
@@ -95,12 +98,7 @@ export default function StoreLocationMap({ address, lat, lng, storeName }: Store
     return (
       <div className="w-full mb-4">
         <div className="w-full h-[200px] rounded-lg overflow-hidden flex items-center justify-center bg-neutral-50 border border-neutral-200">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-2"></div>
-            <p className="text-sm text-neutral-600">
-              Cargando mapa...
-            </p>
-          </div>
+          <LogoSpinner tienda={tienda} size="sm" message="Cargando mapa..." />
         </div>
       </div>
     )

@@ -8,6 +8,7 @@ import { Category, getStoreCategories } from '../../lib/categories'
 import AddressAutocomplete from '../../components/AddressAutocomplete'
 import Link from 'next/link'
 import './styles.css'
+import LogoSpinner from './components/LogoSpinner'
 
 interface MiCuentaProps {
   tienda: Tienda
@@ -353,7 +354,7 @@ function MiCuentaContent({ tienda }: MiCuentaProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-white pt-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900"></div>
+        <LogoSpinner tienda={tienda} size="lg" message="Cargando cuenta..." />
       </div>
     )
   }
@@ -484,9 +485,8 @@ function MiCuentaContent({ tienda }: MiCuentaProps) {
             <h2 className="text-2xl font-light text-neutral-900">Mis Compras</h2>
             
             {loadingOrders ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-4"></div>
-                <p className="text-neutral-600">Cargando pedidos...</p>
+              <div className="py-8">
+                <LogoSpinner tienda={tienda} size="md" message="Cargando pedidos..." />
               </div>
             ) : orders.length === 0 ? (
               <div className="bg-white border border-neutral-200 rounded-lg p-8 text-center">

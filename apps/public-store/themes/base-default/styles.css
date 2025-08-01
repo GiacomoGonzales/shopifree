@@ -357,6 +357,20 @@
   animation-play-state: paused;
 }
 
+/* Estilos para scroll táctil suave en móvil */
+@media (max-width: 768px) {
+  .brands-carousel {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  .brands-carousel::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
+
 .animate-slide-out-down {
   animation: slideOutDown 0.2s ease-in forwards;
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useCart } from '../../lib/cart-context'
 import { useStore } from '../../lib/store-context'
+import { useStoreAuth } from '../../lib/store-auth-context'
 import { getCurrencySymbol } from '../../lib/store'
 import { useShippingCalculator } from '../../lib/hooks/useShippingCalculator'
 import InteractiveMap from '../InteractiveMap'
@@ -80,12 +81,14 @@ const Icons = {
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { state: cartState, clearCart } = useCart()
   const { store } = useStore()
+  const { user, storeCustomerData, isAuthenticated } = useStoreAuth()
   const [currentStep, setCurrentStep] = useState<'form' | 'summary'>('form')
   const [isLoading, setIsLoading] = useState(false)
   const [autocompleteRef, setAutocompleteRef] = useState<HTMLInputElement | null>(null)
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
   const [addressCoordinates, setAddressCoordinates] = useState<{ lat: number; lng: number } | undefined>()
   const [isGettingLocation, setIsGettingLocation] = useState(false)
+
   
   // Determinar tipo de entrega por defecto basado en opciones disponibles
   const getDefaultDeliveryType = () => {
@@ -128,6 +131,29 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       document.body.style.paddingRight = '0px'
     }
   }, [isOpen])
+
+  // Auto-llenar datos del cliente autenticado (excepto dirección para mantener funcionalidad de cálculo de envío)
+  useEffect(() => {
+    if (isOpen && isAuthenticated && (user || storeCustomerData)) {
+      const hasDataToFill = (
+        storeCustomerData?.displayName || 
+        user?.displayName || 
+        storeCustomerData?.phone || 
+        user?.email
+      )
+      
+      if (hasDataToFill) {
+        setCustomerData(prevData => ({
+          ...prevData,
+          name: storeCustomerData?.displayName || user?.displayName || prevData.name,
+          phone: storeCustomerData?.phone || prevData.phone,
+          email: user?.email || prevData.email
+          // NO auto-llenamos address para que el usuario use el autocompletador de Google
+          // y así obtener las coordenadas necesarias para el cálculo de envío
+        }))
+      }
+    }
+  }, [isOpen, isAuthenticated, user, storeCustomerData])
 
   // Cerrar modal con Escape
   useEffect(() => {

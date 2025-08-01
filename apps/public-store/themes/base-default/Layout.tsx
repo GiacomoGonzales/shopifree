@@ -12,6 +12,7 @@ import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
 import Cart from '../../components/cart/Cart'
 import StoreLocationMap from './StoreLocationMap'
+import LogoSpinner from './components/LogoSpinner'
 
 // Iconos modernos para el header
 const Icons = {
@@ -556,9 +557,12 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               {showSuggestions && (
                 <div className="mt-6">
                   {isSearching ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-neutral-900"></div>
-                      <span className="ml-2 text-sm text-neutral-600">Buscando...</span>
+                    <div className="py-4">
+                      <LogoSpinner 
+                        tienda={tienda} 
+                        size="sm" 
+                        message="Buscando..."
+                      />
                     </div>
                   ) : searchResults.length > 0 ? (
                     <>
@@ -730,9 +734,12 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
               {showSuggestions && (
                 <div>
                   {isSearching ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900"></div>
-                      <span className="ml-3 text-neutral-600">Buscando...</span>
+                    <div className="py-8">
+                      <LogoSpinner 
+                        tienda={tienda} 
+                        size="md" 
+                        message="Buscando..."
+                      />
                     </div>
                   ) : searchResults.length > 0 ? (
                     <>
@@ -1068,6 +1075,7 @@ export default function BaseDefaultLayout({ tienda, categorias = [], children }:
                     lat={tienda?.location?.lat}
                     lng={tienda?.location?.lng}
                     storeName={tienda?.storeName}
+                    tienda={tienda}
                   />
                   
                   {/* Dirección */}
