@@ -10,6 +10,7 @@ import { getProductCollections, PublicCollection } from '../../lib/collections'
 import { PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRangeOption } from '../../lib/products'
 import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../lib/store-filters'
 import { useCart } from '../../lib/cart-context'
+import { useNewsletter } from '../../lib/hooks/useNewsletter'
 import { getCurrencySymbol } from '../../lib/store'
 import { getStoreBrands, PublicBrand } from '../../lib/brands'
 import VideoPlayer from '../../components/VideoPlayer'
@@ -66,6 +67,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   const [showAllProducts, setShowAllProducts] = useState(false)
   const [productsToShow, setProductsToShow] = useState(8) // Initial number of products to show
   const { addItem, openCart } = useCart()
+  const { email, setEmail, isSubmitting, result, subscribe, reset } = useNewsletter(tienda.id)
   
   // Estados para filtros dinámicos
   const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter[]>([])
@@ -490,6 +492,11 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
       console.error('Error adding to cart:', error)
       setAddingToCart(null)
     }
+  }
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await subscribe('home')
   }
 
   return (
@@ -978,17 +985,48 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
         </div>
 
         <div className="max-w-md mx-auto">
-          <div className="flex shadow-neutral rounded-lg overflow-hidden border border-neutral-200">
-            <input
-              type="email"
-              placeholder="tu@email.com"
-              className="flex-1 px-4 py-3 bg-white border-0 text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-0 font-light"
-            />
-            <button className="px-2 sm:px-6 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors duration-200 font-medium text-xs sm:text-base whitespace-nowrap flex items-center justify-center min-w-[75px] sm:min-w-[120px]">
-              <span className="hidden sm:inline">Suscribirse</span>
-              <span className="sm:hidden">Suscribir</span>
-            </button>
-          </div>
+          <form onSubmit={handleNewsletterSubmit}>
+            <div className="flex shadow-neutral rounded-lg overflow-hidden border border-neutral-200">
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 bg-white border-0 text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-0 font-light disabled:opacity-50"
+                required
+              />
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="px-2 sm:px-6 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors duration-200 font-medium text-xs sm:text-base whitespace-nowrap flex items-center justify-center min-w-[75px] sm:min-w-[120px] disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <span className="hidden sm:inline">Enviando...</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Suscribirse</span>
+                    <span className="sm:hidden">Suscribir</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+          
+          {/* Mostrar resultado */}
+          {result && (
+            <div className={`mt-3 p-3 rounded-lg text-sm ${
+              result.success 
+                ? 'bg-green-50 text-green-800 border border-green-200' 
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
+              {result.message}
+            </div>
+          )}
+          
           <p className="text-xs text-neutral-500 mt-3 font-light">
             No spam. Solo contenido de calidad y ofertas especiales.
           </p>
@@ -998,15 +1036,15 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
 
       {/* Brands Carousel Section */}
       {!brandsLoading && brands.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
-          <div className="text-center mb-12">
+        <section className="py-16 bg-white">
+          <div className="text-center mb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl md:text-4xl font-light text-neutral-900">Nuestras Marcas</h2>
           </div>
           
-          <div className="relative overflow-x-auto md:overflow-x-hidden py-8 brands-carousel">
+          <div className="relative overflow-x-auto md:overflow-x-hidden py-8 brands-carousel md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8">
             <div 
               ref={carouselRef}
-              className={`flex gap-8 md:gap-12 ${!isUserScrolling ? 'animate-slow-scroll' : ''}`}
+              className={`flex gap-8 md:gap-12 px-4 md:px-0 ${!isUserScrolling ? 'animate-slow-scroll' : ''}`}
               style={{
                 width: `${(brands.length + brands.length) * 180}px`,
                 animation: !isUserScrolling ? 'slowScroll 60s linear infinite' : 'none'

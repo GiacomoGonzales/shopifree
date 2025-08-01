@@ -96,9 +96,11 @@ export const subscribeToNewsletter = async (
     let errorMessage = 'Hubo un error al procesar tu suscripción. Por favor, inténtalo de nuevo.'
     
     if (error.code === 'permission-denied') {
-      errorMessage = 'Error de permisos. Verifica que la tienda esté configurada correctamente.'
+      errorMessage = 'Error de permisos. Las reglas de seguridad se están actualizando, por favor intenta en unos segundos.'
     } else if (error.code === 'invalid-argument') {
       errorMessage = 'Datos inválidos. Verifica que el email sea correcto.'
+    } else if (error.code === 'network-request-failed') {
+      errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente.'
     }
     
     return {

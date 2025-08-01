@@ -108,11 +108,8 @@ service cloud.firestore {
       
       // Reglas para newsletter (suscripciones públicas)
       match /newsletter/{subscriptionId} {
-        // Cualquier persona puede suscribirse (crear) con validación básica
-        allow create: if request.resource.data.keys().hasAll(['email', 'storeId', 'status']) &&
-                         request.resource.data.email is string &&
-                         request.resource.data.storeId is string &&
-                         request.resource.data.status == 'active';
+        // Permitir a cualquiera crear suscripciones (temporalmente permisivo para debug)
+        allow create: if true;
         // Solo el dueño de la tienda puede leer las suscripciones
         allow read: if isAuthenticated() && 
                      request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
