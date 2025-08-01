@@ -10,6 +10,7 @@ import { PublicProduct, generatePriceRangeOptions, applyDynamicFilters, PriceRan
 import { getStoreConfiguredFilters, extractConfiguredFilters, extractDynamicFilters, DynamicFilter } from '../../lib/store-filters'
 import { useCart } from '../../lib/cart-context'
 import { getCurrencySymbol } from '../../lib/store'
+import { getStoreBrands, PublicBrand } from '../../lib/brands'
 import VideoPlayer from '../../components/VideoPlayer'
 import HeartIcon from '../../components/HeartIcon'
 import DynamicFilters from './DynamicFilters'
@@ -98,6 +99,10 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
   
   // Estado para manejar la transición de vista
   const [isTransitioning, setIsTransitioning] = useState(false)
+  
+  // Estado para las marcas
+  const [brands, setBrands] = useState<PublicBrand[]>([])
+  const [brandsLoading, setBrandsLoading] = useState(true)
   
   // Función para cambiar el modo de vista
   const handleViewModeChange = (mode: ProductViewMode) => {
@@ -311,6 +316,23 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     setShowAllProducts(false)
     setProductsToShow(8)
   }, [activeCategory, selectedParentCategory])
+
+  // Cargar marcas
+  useEffect(() => {
+    const loadBrands = async () => {
+      setBrandsLoading(true)
+      try {
+        const storeBrands = await getStoreBrands(tienda.id)
+        setBrands(storeBrands)
+      } catch (error) {
+        console.error('Error loading brands:', error)
+      } finally {
+        setBrandsLoading(false)
+      }
+    }
+
+    loadBrands()
+  }, [tienda.id])
 
   // Función para cargar más productos
   const handleLoadMore = () => {
@@ -918,6 +940,43 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
           </div>
         </div>
       </section>
+
+      {/* Brands Carousel Section */}
+      {!brandsLoading && brands.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-light text-neutral-900 mb-4">Nuestras Marcas</h2>
+            <p className="text-neutral-600 font-light max-w-2xl mx-auto">
+              Trabajamos con las mejores marcas para ofrecerte productos de calidad excepcional
+            </p>
+          </div>
+          
+          <div className="relative overflow-hidden">
+            <div 
+              className="flex animate-slow-scroll gap-8 md:gap-12"
+              style={{
+                width: `${(brands.length + brands.length) * 200}px`,
+                animation: 'slowScroll 60s linear infinite'
+              }}
+            >
+              {/* Duplicamos las marcas para crear el efecto de carrusel infinito */}
+              {[...brands, ...brands].map((brand, index) => (
+                <div
+                  key={`${brand.id}-${index}`}
+                  className="flex-shrink-0 w-40 md:w-48 h-24 md:h-28 bg-white border border-neutral-200 rounded-lg p-4 flex items-center justify-center hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
+                  <img
+                    src={brand.image}
+                    alt={brand.name}
+                    className="max-w-full max-h-full object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                    style={{ maxWidth: '120px', maxHeight: '60px' }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Newsletter Section */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 bg-white pt-20 pb-20">

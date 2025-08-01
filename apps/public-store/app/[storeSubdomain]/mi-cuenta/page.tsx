@@ -2,24 +2,10 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getStoreBySubdomain, transformStoreForClient } from '../../../lib/store'
 import { Tienda } from '../../../lib/types'
-import MiCuentaClient from './MiCuentaClient'
-import dynamic from 'next/dynamic'
+import { getStoreCategories } from '../../../lib/categories'
+import MiCuentaClientPage from './MiCuentaClientPage'
 
-// Importar dinámicamente el componente específico del tema Elegant Boutique
-const MiCuentaElegant = dynamic(
-  () => import('../../../themes/elegant-boutique/MiCuenta').then(mod => mod.default).catch(() => {
-    console.error('Elegant Boutique MiCuenta component not found, using default')
-    return MiCuentaClient
-  }),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900"></div>
-      </div>
-    )
-  }
-)
+
 
 interface MiCuentaPageProps {
   params: { storeSubdomain: string }
@@ -56,11 +42,8 @@ export default async function MiCuentaPage({ params }: MiCuentaPageProps) {
     socialMedia: clientStore.socialMedia || {}, // Inicializar campo requerido
   }
 
-  // Usar el componente específico del tema si es Elegant Boutique
-  if (tienda.theme === 'elegant-boutique') {
-    return <MiCuentaElegant tienda={tienda} />
-  }
+  // Obtener categorías para el Layout
+  const categories = await getStoreCategories(tienda.id)
 
-  // Para otros temas, usar el componente por defecto
-  return <MiCuentaClient tienda={tienda} />
+  return <MiCuentaClientPage tienda={tienda} categories={categories} />
 } 

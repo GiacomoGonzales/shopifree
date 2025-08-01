@@ -339,6 +339,24 @@
   }
 }
 
+/* Brands Carousel Animation */
+@keyframes slowScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-slow-scroll {
+  animation: slowScroll 60s linear infinite;
+}
+
+.animate-slow-scroll:hover {
+  animation-play-state: paused;
+}
+
 .animate-slide-out-down {
   animation: slideOutDown 0.2s ease-in forwards;
 }
