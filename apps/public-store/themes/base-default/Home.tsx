@@ -96,11 +96,26 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
     return 'expanded'
   })
   
+  // Estado para manejar la transición de vista
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  
   // Función para cambiar el modo de vista
   const handleViewModeChange = (mode: ProductViewMode) => {
-    setViewMode(mode)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('productViewMode', mode)
+    if (mode !== viewMode) {
+      setIsTransitioning(true)
+      
+      // Pequeño delay para permitir que se vea la animación de salida
+      setTimeout(() => {
+        setViewMode(mode)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('productViewMode', mode)
+        }
+        
+        // Reset transition state after animation completes
+        setTimeout(() => {
+          setIsTransitioning(false)
+        }, 300)
+      }, 150)
     }
   }
   
@@ -692,15 +707,22 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
             </button>
           </div>
         ) : (
-          <div className={`grid ${getGridClasses(viewMode)}`}>
+          <div className={`grid ${getGridClasses(viewMode)} transition-all duration-300 ease-in-out ${
+            isTransitioning ? 'opacity-50 scale-98' : 'opacity-100 scale-100'
+          }`}>
             {productosAMostrar.map((producto, index) => (
               <Link 
-                key={producto.id} 
+                key={`${producto.id}-${viewMode}`}
                 href={`/${producto.slug}`}
-                className={`bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-shadow duration-200 md:hover-lift animate-fade-in group cursor-pointer block ${
+                className={`bg-white text-neutral-900 rounded-lg border border-neutral-200 shadow-sm md:hover:shadow-md transition-all duration-300 ease-in-out md:hover-lift group cursor-pointer block ${
                   viewMode === 'list' ? 'flex flex-row items-center gap-4 p-4' : 'flex flex-col'
+                } ${
+                  isTransitioning ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0 animate-fade-in'
                 }`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                style={{ 
+                  animationDelay: isTransitioning ? '0ms' : `${index * 50}ms`,
+                  transitionDelay: isTransitioning ? '0ms' : `${index * 30}ms`
+                }}
               >
               {/* Product Image */}
               <div className={`relative overflow-hidden bg-neutral-100 ${
@@ -913,8 +935,9 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
               placeholder="tu@email.com"
               className="flex-1 px-4 py-3 bg-white border-0 text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-0 font-light"
             />
-            <button className="px-6 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors duration-200 font-medium">
-              Suscribirse
+            <button className="px-2 sm:px-6 py-3 bg-neutral-900 text-white hover:bg-neutral-800 transition-colors duration-200 font-medium text-xs sm:text-base whitespace-nowrap flex items-center justify-center min-w-[75px] sm:min-w-[120px]">
+              <span className="hidden sm:inline">Suscribirse</span>
+              <span className="sm:hidden">Suscribir</span>
             </button>
           </div>
           <p className="text-xs text-neutral-500 mt-3 font-light">

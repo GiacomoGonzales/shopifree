@@ -24,6 +24,7 @@ export default function BaseDefaultDynamicFilters({
   const [showFilters, setShowFilters] = useState(false)
   const [tempFilters, setTempFilters] = useState<DynamicFilter[]>(filters)
   const [tempPriceRangeOptions, setTempPriceRangeOptions] = useState<PriceRangeOption[]>(priceRangeOptions)
+  const [isUpdating, setIsUpdating] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
 
   // Sincronizar estados cuando cambian los props
@@ -53,6 +54,9 @@ export default function BaseDefaultDynamicFilters({
   }, [showFilters])
 
   const toggleFilterOption = (filterId: string, option: string) => {
+    if (isUpdating) return
+    
+    setIsUpdating(true)
     setTempFilters(prev => prev.map(filter => {
       if (filter.id === filterId) {
         const isSelected = filter.selectedOptions.includes(option)
@@ -65,14 +69,23 @@ export default function BaseDefaultDynamicFilters({
       }
       return filter
     }))
+    
+    // Reset updating flag after a brief delay
+    setTimeout(() => setIsUpdating(false), 100)
   }
 
   const togglePriceRange = (rangeId: string) => {
+    if (isUpdating) return
+    
+    setIsUpdating(true)
     setTempPriceRangeOptions(prev => prev.map(range => 
       range.id === rangeId 
         ? { ...range, selected: !range.selected }
         : range
     ))
+    
+    // Reset updating flag after a brief delay
+    setTimeout(() => setIsUpdating(false), 100)
   }
 
   const getActiveFiltersCount = () => {
@@ -210,8 +223,11 @@ export default function BaseDefaultDynamicFilters({
                               type="checkbox"
                               checked={filter.selectedOptions.includes(option)}
                               onChange={() => toggleFilterOption(filter.id, option)}
-                              className="w-3 h-3 border-0 focus:outline-none focus:ring-0 focus:shadow-none focus:border-0 focus:ring-offset-0 active:outline-none active:ring-0 active:shadow-none"
+                              className={`w-3 h-3 border-0 focus:outline-none focus:ring-0 focus:shadow-none focus:border-0 focus:ring-offset-0 active:outline-none active:ring-0 active:shadow-none ${
+                                isUpdating ? 'pointer-events-none' : ''
+                              }`}
                               style={checkboxStyle}
+                              disabled={isUpdating}
                             />
                         <span className="text-sm font-light text-neutral-700">
                           {option}
@@ -293,8 +309,11 @@ export default function BaseDefaultDynamicFilters({
                             type="checkbox"
                             checked={range.selected}
                             onChange={() => togglePriceRange(range.id)}
-                            className="w-4 h-4 border-0 focus:outline-none focus:ring-0 focus:shadow-none focus:border-0 focus:ring-offset-0 active:outline-none active:ring-0 active:shadow-none"
+                            className={`w-4 h-4 border-0 focus:outline-none focus:ring-0 focus:shadow-none focus:border-0 focus:ring-offset-0 active:outline-none active:ring-0 active:shadow-none ${
+                              isUpdating ? 'pointer-events-none' : ''
+                            }`}
                             style={checkboxStyle}
+                            disabled={isUpdating}
                           />
                       <span className="text-base font-light text-neutral-700">
                         {range.label}
@@ -332,8 +351,11 @@ export default function BaseDefaultDynamicFilters({
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleFilterOption(filter.id, option)}
-                              className="w-4 h-4 border-0 focus:outline-none focus:ring-0 focus:shadow-none focus:border-0 focus:ring-offset-0 active:outline-none active:ring-0 active:shadow-none"
+                              className={`w-4 h-4 border-0 focus:outline-none focus:ring-0 focus:shadow-none focus:border-0 focus:ring-offset-0 active:outline-none active:ring-0 active:shadow-none ${
+                                isUpdating ? 'pointer-events-none' : ''
+                              }`}
                               style={checkboxStyle}
+                              disabled={isUpdating}
                             />
                         <span className="text-base font-light text-neutral-700">
                           {option}

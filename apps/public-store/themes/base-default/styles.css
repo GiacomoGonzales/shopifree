@@ -292,3 +292,53 @@
   background-color: #1da1f2;
   color: white;
 }
+
+/* === ANIMACIONES DE VISTA DE PRODUCTOS === */
+.scale-98 {
+  transform: scale(0.98);
+}
+
+.scale-100 {
+  transform: scale(1);
+}
+
+/* Transiciones suaves para el cambio de vista */
+.product-grid-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animación de entrada escalonada para productos */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.4s ease-out forwards;
+}
+
+/* Animación de salida para productos */
+@keyframes slideOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.animate-slide-out-down {
+  animation: slideOutDown 0.2s ease-in forwards;
+}
