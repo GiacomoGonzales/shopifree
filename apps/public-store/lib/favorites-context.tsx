@@ -12,6 +12,7 @@ import {
   where 
 } from 'firebase/firestore'
 import { getFirebaseDb } from './firebase'
+import { useStoreAuth } from './store-auth-context'
 
 interface FavoritesContextType {
   favorites: PublicProduct[]
@@ -35,12 +36,15 @@ export const useFavorites = () => {
 interface FavoritesProviderProps {
   children: ReactNode
   storeId: string
-  userId?: string | null // Usuario autenticado opcional
+  userId?: string | null // No usado, solo para compatibilidad
 }
 
-export const FavoritesProvider = ({ children, storeId, userId }: FavoritesProviderProps) => {
+export const FavoritesProvider = ({ children, storeId }: FavoritesProviderProps) => {
+  const { user } = useStoreAuth()
   const [favorites, setFavorites] = useState<PublicProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  
+  const userId = user?.uid || null
 
   // Clave para localStorage específica de la tienda
   const localStorageKey = `favorites_${storeId}`
