@@ -372,7 +372,7 @@ const CategoryClientPage = ({ categorySlug, tienda, locale }: CategoryClientPage
   const CategoryContent = () => {
     if (!currentCategory) {
       return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 pb-12">
           <div className="text-center">
             <h1 className="text-3xl font-light text-neutral-900 mb-4">Categoría no encontrada</h1>
             <p className="text-neutral-600 mb-8">La categoría que buscas no existe o ha sido eliminada.</p>
@@ -388,7 +388,7 @@ const CategoryClientPage = ({ categorySlug, tienda, locale }: CategoryClientPage
     }
 
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-12 pb-12 elegant-category-spacing">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-12 pb-12 elegant-category-spacing">
         {/* Breadcrumbs */}
         <div className="mb-6">
           <Breadcrumbs items={breadcrumbs} />
