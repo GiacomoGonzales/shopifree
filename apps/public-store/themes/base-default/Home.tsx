@@ -721,7 +721,7 @@ export default function Home({ tienda, productos, categorias = [] }: HomeProps) 
                 }`}
                 style={{ 
                   animationDelay: isTransitioning ? '0ms' : `${index * 50}ms`,
-                  transitionDelay: isTransitioning ? '0ms' : `${index * 30}ms`
+                  transitionDelay: '0ms'
                 }}
               >
               {/* Product Image */}
