@@ -1,12 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCart } from '../../lib/cart-context'
 import { useStore } from '../../lib/store-context'
 import { useStoreAuth } from '../../lib/store-auth-context'
 import { getCurrencySymbol } from '../../lib/store'
 import { useShippingCalculator } from '../../lib/hooks/useShippingCalculator'
+import { useFreeShipping } from '../../lib/hooks/useFreeShipping'
 import InteractiveMap from '../InteractiveMap'
+import { createOrder, convertCartItemsToOrderItems, OrderData } from '../../lib/orders'
+import OrderConfirmation from './OrderConfirmation'
 
 interface CustomerData {
   name: string
@@ -17,11 +21,34 @@ interface CustomerData {
   paymentMethod: string
   notes: string
   deliveryType: 'home_delivery' | 'store_pickup'
+  // Traditional checkout payment fields
+  traditionalPaymentMethod?: 'online' | 'cash_on_delivery'
+  paymentSubMethod?: 'efectivo' | 'tarjeta' | 'yape'
 }
 
 interface CheckoutModalProps {
   isOpen: boolean
   onClose: () => void
+}
+
+// Helper function to get payment method information
+const getPaymentMethodInfo = (method: string) => {
+  const methodsMap: Record<string, { name: string; image: string }> = {
+    efectivo: {
+      name: 'Efectivo',
+      image: '/api/payment-icons/cash'
+    },
+    tarjeta: {
+      name: 'Tarjeta',
+      image: '/api/payment-icons/card'
+    },
+    yape: {
+      name: 'Yape',
+      image: '/api/payment-icons/yape'
+    }
+  }
+  
+  return methodsMap[method] || { name: method, image: '/api/payment-icons/cash' }
 }
 
 const Icons = {
@@ -79,6 +106,7 @@ const Icons = {
 }
 
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
+  const router = useRouter()
   const { state: cartState, clearCart } = useCart()
   const { store } = useStore()
   const { user, storeCustomerData, isAuthenticated } = useStoreAuth()
@@ -88,7 +116,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
   const [addressCoordinates, setAddressCoordinates] = useState<{ lat: number; lng: number } | undefined>()
   const [isGettingLocation, setIsGettingLocation] = useState(false)
+  const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
+  const [orderId, setOrderId] = useState<string | null>(null)
 
+  // Check if store uses traditional checkout
+  const isTraditionalCheckout = store?.advanced?.checkout?.method === 'traditional'
   
   // Determinar tipo de entrega por defecto basado en opciones disponibles
   const getDefaultDeliveryType = () => {
@@ -105,7 +137,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     reference: '',
     paymentMethod: 'whatsapp',
     notes: '',
-    deliveryType: getDefaultDeliveryType()
+    deliveryType: getDefaultDeliveryType(),
+    traditionalPaymentMethod: undefined,
+    paymentSubMethod: undefined
   })
 
   // Hook para calcular envío automáticamente
@@ -114,6 +148,24 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     address: customerData.address,
     coordinates: addressCoordinates
   })
+
+  // Hook para envío gratuito
+  const freeShipping = useFreeShipping(cartState.totalPrice)
+
+  // Función para calcular el costo de envío considerando envío gratuito
+  const calculateShippingCost = () => {
+    if (customerData.deliveryType === 'store_pickup') {
+      return 0
+    }
+
+    // Si el envío gratuito está habilitado y se cumple el mínimo, envío es gratis
+    if (freeShipping.isEnabled && freeShipping.isEligible) {
+      return 0
+    }
+
+    // Sino, usar el costo calculado por las zonas de entrega
+    return shippingCalculator.isInDeliveryZone ? shippingCalculator.shippingCost : 0
+  }
 
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
@@ -179,7 +231,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         reference: '',
         paymentMethod: 'whatsapp',
         notes: '',
-        deliveryType: getDefaultDeliveryType()
+        deliveryType: getDefaultDeliveryType(),
+        traditionalPaymentMethod: undefined,
+        paymentSubMethod: undefined
       })
     }
   }, [isOpen])
@@ -434,12 +488,13 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     message += `\n`
     
     // Total
-    const shippingCost = customerData.deliveryType === 'store_pickup' ? 0 : 
-      (shippingCalculator.isInDeliveryZone ? shippingCalculator.shippingCost : 0)
+    const shippingCost = calculateShippingCost()
     const finalTotal = cartState.totalPrice + shippingCost
     message += `💰 *TOTAL: ${currencySymbol} ${finalTotal.toFixed(2)}*\n`
     if (customerData.deliveryType === 'store_pickup') {
       message += `   (Subtotal: ${currencySymbol} ${cartState.totalPrice.toFixed(2)} + Envío: Gratis)\n`
+    } else if (freeShipping.isEnabled && freeShipping.isEligible) {
+      message += `   (Subtotal: ${currencySymbol} ${cartState.totalPrice.toFixed(2)} + Envío: Gratis - ¡Envío gratuito aplicado!)\n`
     } else if (shippingCalculator.isInDeliveryZone && shippingCalculator.shippingCost > 0) {
       message += `   (Subtotal: ${currencySymbol} ${cartState.totalPrice.toFixed(2)} + Envío: ${currencySymbol} ${shippingCalculator.shippingCost.toFixed(2)})\n`
     }
@@ -456,6 +511,86 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     message += `¡Gracias por tu compra! Te contactaremos pronto para coordinar la entrega 🚀`
     
     return encodeURIComponent(message)
+  }
+
+  const handleTraditionalCheckout = async () => {
+    if (!store?.id) {
+      alert('Error: Tienda no disponible')
+      return
+    }
+
+    // Validar campos requeridos
+    if (!customerData.name || !customerData.phone) {
+      alert('Por favor completa tu nombre y teléfono')
+      return
+    }
+    
+    // Validar dirección solo si es envío a domicilio
+    if (customerData.deliveryType === 'home_delivery' && !customerData.address) {
+      alert('Por favor ingresa tu dirección de entrega')
+      return
+    }
+
+    // Validar método de pago para checkout tradicional
+    if (!customerData.traditionalPaymentMethod) {
+      alert('Por favor selecciona un método de pago')
+      return
+    }
+
+    // Validar sub-método si es pago contra entrega
+    if (customerData.traditionalPaymentMethod === 'cash_on_delivery' && !customerData.paymentSubMethod) {
+      alert('Por favor selecciona el tipo de pago contra entrega')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Calculate total with shipping
+      const shippingCost = calculateShippingCost()
+      const total = cartState.totalPrice + shippingCost
+
+      // Prepare order data
+      const orderData: OrderData = {
+        storeId: store.id,
+        userId: user?.uid || null,
+        items: convertCartItemsToOrderItems(cartState.items),
+        total,
+        paymentMethod: customerData.traditionalPaymentMethod,
+        paymentSubMethod: customerData.paymentSubMethod,
+        paymentStatus: 'pending',
+        status: 'pending',
+        customer: {
+          name: customerData.name,
+          phone: customerData.phone,
+          ...(customerData.email && { email: customerData.email }),
+          ...(customerData.deliveryType === 'home_delivery' && customerData.address && { 
+            address: customerData.address 
+          })
+        },
+        shippingCost,
+        deliveryType: customerData.deliveryType,
+        ...(addressCoordinates && { addressCoordinates }),
+        ...(customerData.reference && { reference: customerData.reference }),
+        ...(customerData.notes && { notes: customerData.notes })
+      }
+
+      // Create order in Firestore
+      const createdOrderId = await createOrder(orderData)
+      
+      // Clear cart
+      clearCart()
+      
+      // Redirect to order confirmation page
+      onClose() // Close the checkout modal
+      router.push(`/order-confirmation/${createdOrderId}`)
+      
+    } catch (error) {
+      console.error('Error creating order:', error)
+      alert('Error al crear el pedido. Por favor intenta de nuevo.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleWhatsAppCheckout = () => {
@@ -493,11 +628,25 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }, 1000)
   }
 
+  const handleCheckout = () => {
+    if (isTraditionalCheckout) {
+      handleTraditionalCheckout()
+    } else {
+      handleWhatsAppCheckout()
+    }
+  }
+
   const isFormValid = customerData.name && customerData.phone && (
     // Si es recojo en tienda, no requerimos dirección
     customerData.deliveryType === 'store_pickup' ||
     // Si es envío a domicilio, requerimos dirección
     (customerData.deliveryType === 'home_delivery' && customerData.address)
+  ) && (
+    // Para checkout tradicional, requerir método de pago
+    !isTraditionalCheckout || (
+      customerData.traditionalPaymentMethod &&
+      (customerData.traditionalPaymentMethod === 'online' || customerData.paymentSubMethod)
+    )
   )
 
   if (!isOpen) return null
@@ -925,7 +1074,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           type="text"
                           value={customerData.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
-                          onBlur={shippingCalculator.onAddressBlur}
                           className="checkout-input w-full px-3 py-2 pr-10 border rounded-r-sm focus:outline-none transition-all duration-300"
                           style={{
                             borderColor: `rgb(var(--theme-primary) / 0.2)`,
@@ -1112,45 +1260,221 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       <span>Método de Pago</span>
                     </h4>
                     
-                    <div 
-                      className="rounded-sm p-4 border"
-                      style={{
-                        backgroundColor: `rgb(var(--theme-secondary))`,
-                        borderColor: `rgb(var(--theme-primary) / 0.2)`
-                      }}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div 
-                          className="w-8 h-8 rounded-full flex items-center justify-center"
+                    {isTraditionalCheckout ? (
+                      <div className="space-y-3">
+                        {/* Pago en línea - Solo mostrar si está habilitado */}
+                        {store?.advanced?.payments?.acceptOnlinePayment && (
+                          <label 
+                            className="flex items-center space-x-3 p-3 border rounded-sm cursor-pointer transition-colors"
                           style={{
-                            backgroundColor: `rgb(var(--theme-success) / 0.1)`,
-                            color: `rgb(var(--theme-success))`
+                            borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                            backgroundColor: customerData.traditionalPaymentMethod === 'online' 
+                              ? `rgb(var(--theme-primary) / 0.05)` 
+                              : `rgb(var(--theme-neutral-light))`,
+                            transition: `var(--theme-transition)`
+                          }}
+                          onMouseEnter={(e) => {
+                            if (customerData.traditionalPaymentMethod !== 'online') {
+                              e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (customerData.traditionalPaymentMethod !== 'online') {
+                              e.currentTarget.style.backgroundColor = `rgb(var(--theme-neutral-light))`
+                            }
                           }}
                         >
-                          <Icons.WhatsApp />
-                        </div>
-                        <div>
-                          <p 
-                            className="font-medium"
+                          <input
+                            type="radio"
+                            name="traditionalPaymentMethod"
+                            value="online"
+                            checked={customerData.traditionalPaymentMethod === 'online'}
+                            onChange={(e) => handleInputChange('traditionalPaymentMethod', e.target.value)}
+                            className="mt-0.5"
                             style={{
-                              color: `rgb(var(--theme-neutral-dark))`,
-                              fontFamily: `var(--theme-font-body)`
+                              accentColor: `rgb(var(--theme-primary))`
+                            }}
+                          />
+                          <div className="flex items-center space-x-2">
+                            <Icons.CreditCard />
+                            <div>
+                              <span 
+                                className="font-medium"
+                                style={{
+                                  color: `rgb(var(--theme-neutral-dark))`,
+                                  fontFamily: `var(--theme-font-body)`
+                                }}
+                              >
+                                Pago en línea (MercadoPago)
+                              </span>
+                              <p 
+                                className="text-sm"
+                                style={{ 
+                                  color: `rgb(var(--theme-neutral-medium))`,
+                                  fontFamily: `var(--theme-font-body)`
+                                }}
+                              >
+                                Paga de forma segura con tarjeta o transferencia
+                              </p>
+                            </div>
+                          </div>
+                        </label>
+                        )}
+
+                        {/* Pago contra entrega - Solo mostrar si está habilitado */}
+                        {store?.advanced?.payments?.acceptCashOnDelivery && (
+                        <label 
+                          className="flex items-start space-x-3 p-3 border rounded-sm cursor-pointer transition-colors"
+                          style={{
+                            borderColor: `rgb(var(--theme-primary) / 0.2)`,
+                            backgroundColor: customerData.traditionalPaymentMethod === 'cash_on_delivery' 
+                              ? `rgb(var(--theme-primary) / 0.05)` 
+                              : `rgb(var(--theme-neutral-light))`,
+                            transition: `var(--theme-transition)`
+                          }}
+                          onMouseEnter={(e) => {
+                            if (customerData.traditionalPaymentMethod !== 'cash_on_delivery') {
+                              e.currentTarget.style.backgroundColor = `rgb(var(--theme-secondary))`
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (customerData.traditionalPaymentMethod !== 'cash_on_delivery') {
+                              e.currentTarget.style.backgroundColor = `rgb(var(--theme-neutral-light))`
+                            }
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="traditionalPaymentMethod"
+                            value="cash_on_delivery"
+                            checked={customerData.traditionalPaymentMethod === 'cash_on_delivery'}
+                            onChange={(e) => handleInputChange('traditionalPaymentMethod', e.target.value)}
+                            className="mt-0.5"
+                            style={{
+                              accentColor: `rgb(var(--theme-primary))`
+                            }}
+                          />
+                          <div className="w-full">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <svg 
+                                className="w-5 h-5"
+                                style={{ color: `rgb(var(--theme-neutral-medium))` }}
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                              <span 
+                                className="font-medium"
+                                style={{
+                                  color: `rgb(var(--theme-neutral-dark))`,
+                                  fontFamily: `var(--theme-font-body)`
+                                }}
+                              >
+                                Pago contra entrega
+                              </span>
+                            </div>
+
+                            
+                            {/* Subopciones de pago contra entrega */}
+                            {customerData.traditionalPaymentMethod === 'cash_on_delivery' && (
+                              <div className="mt-4">
+                                <div className="flex justify-center gap-6">
+                                  {(store?.advanced?.payments?.cashOnDeliveryMethods || ['efectivo', 'tarjeta', 'yape']).map((method) => {
+                                    const methodInfo = getPaymentMethodInfo(method)
+                                    const isSelected = customerData.paymentSubMethod === method
+                                    return (
+                                      <button
+                                        key={method}
+                                        type="button"
+                                        onClick={() => handleInputChange('paymentSubMethod', method)}
+                                        className="flex flex-col items-center p-2 transition-all duration-300 hover:scale-105"
+                                      >
+                                        <img
+                                          src={methodInfo.image}
+                                          alt={methodInfo.name}
+                                          className={`w-12 h-12 object-contain transition-all duration-300 ${
+                                            isSelected 
+                                              ? 'filter-none scale-105' 
+                                              : 'filter grayscale hover:grayscale-0'
+                                          }`}
+                                          style={{
+                                            filter: isSelected ? 'none' : 'grayscale(100%)',
+                                          }}
+                                          onError={(e) => {
+                                            // Fallback si no existe la imagen
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            target.parentElement?.insertAdjacentHTML('beforeend', 
+                                              `<div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-sm text-gray-500">${methodInfo.name.charAt(0)}</div>`
+                                            );
+                                          }}
+                                        />
+                                        <span 
+                                          className={`text-xs font-medium text-center capitalize mt-1 transition-all duration-300 ${
+                                            isSelected ? 'font-semibold' : 'text-gray-600'
+                                          }`}
+                                          style={{
+                                            color: isSelected 
+                                              ? `rgb(var(--theme-primary))` 
+                                              : `rgb(var(--theme-neutral-dark))`,
+                                            fontFamily: `var(--theme-font-body)`
+                                          }}
+                                        >
+                                          {methodInfo.name}
+                                        </span>
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                        )}
+                      </div>
+                    ) : (
+                      <div 
+                        className="rounded-sm p-4 border"
+                        style={{
+                          backgroundColor: `rgb(var(--theme-secondary))`,
+                          borderColor: `rgb(var(--theme-primary) / 0.2)`
+                        }}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div 
+                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                            style={{
+                              backgroundColor: `rgb(var(--theme-success) / 0.1)`,
+                              color: `rgb(var(--theme-success))`
                             }}
                           >
-                            Pago por WhatsApp
-                          </p>
-                          <p 
-                            className="text-sm"
-                            style={{
-                              color: `rgb(var(--theme-neutral-medium))`,
-                              fontFamily: `var(--theme-font-body)`
-                            }}
-                          >
-                            Coordinaremos el método de pago contigo vía WhatsApp
-                          </p>
+                            <Icons.WhatsApp />
+                          </div>
+                          <div>
+                            <p 
+                              className="font-medium"
+                              style={{
+                                color: `rgb(var(--theme-neutral-dark))`,
+                                fontFamily: `var(--theme-font-body)`
+                              }}
+                            >
+                              Pago por WhatsApp
+                            </p>
+                            <p 
+                              className="text-sm"
+                              style={{
+                                color: `rgb(var(--theme-neutral-medium))`,
+                                fontFamily: `var(--theme-font-body)`
+                              }}
+                            >
+                              Coordinaremos el método de pago contigo vía WhatsApp
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1308,6 +1632,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         `${getCurrencySymbol(store?.currency || 'USD')} 0.00`
                       ) : shippingCalculator.isCalculating ? (
                         'Calculando...'
+                      ) : freeShipping.isEnabled && freeShipping.isEligible ? (
+                        <span className="text-green-600 font-medium">
+                          {getCurrencySymbol(store?.currency || 'USD')} 0.00 - ¡Gratis!
+                        </span>
                       ) : shippingCalculator.isInDeliveryZone && shippingCalculator.shippingCost > 0 ? (
                         `${getCurrencySymbol(store?.currency || 'USD')} ${shippingCalculator.shippingCost.toFixed(2)}`
                       ) : (
@@ -1318,7 +1646,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   
                   {/* Mensaje de zona de entrega - Solo para envío a domicilio */}
                   {customerData.deliveryType === 'home_delivery' && customerData.address && !shippingCalculator.isCalculating && (
-                    <div className="text-xs">
+                    <div className="text-xs space-y-1">
                       {shippingCalculator.isInDeliveryZone ? (
                         <div 
                           className="flex items-center space-x-1"
@@ -1353,6 +1681,28 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           <span>Selecciona del autocompletado o termina de escribir tu dirección</span>
                         </div>
                       ) : null}
+                      
+                      {/* Mensaje de envío gratuito */}
+                      {freeShipping.isEnabled && customerData.deliveryType === 'home_delivery' && (
+                        <div 
+                          className="flex items-center space-x-1"
+                          style={{ color: freeShipping.isEligible ? `rgb(var(--theme-success))` : `rgb(var(--theme-primary))` }}
+                        >
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            {freeShipping.isEligible ? (
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            ) : (
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5l-3 5a1 1 0 001.734 1l2.132-3.553L12 10.5a1 1 0 001-1 1 1 0 00-1-1 1 1 0 00-1 1 1 1 0 001 1z" clipRule="evenodd" />
+                            )}
+                          </svg>
+                          <span>
+                            {freeShipping.isEligible 
+                              ? '¡Envío gratuito aplicado!' 
+                              : `Te faltan ${freeShipping.currencySymbol} ${freeShipping.amountNeeded.toFixed(2)} para envío gratis`
+                            }
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1371,16 +1721,18 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   </div>
                 </div>
 
-                {/* Botón de WhatsApp con estilo boutique */}
+                {/* Botón de checkout con estilo boutique */}
                 <div className="mt-4 pb-4 md:pb-0">
                   <button
-                    onClick={handleWhatsAppCheckout}
+                    onClick={handleCheckout}
                     disabled={isLoading || !isFormValid}
                     className="checkout-btn-primary btn-boutique-primary w-full py-3 rounded-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2"
                     style={{
                       backgroundColor: isLoading || !isFormValid 
                         ? `rgb(var(--theme-neutral-medium))` 
-                        : `rgb(var(--theme-success))`,
+                        : isTraditionalCheckout 
+                          ? `rgb(var(--theme-neutral-dark))` 
+                          : `rgb(var(--theme-success))`,
                       color: `rgb(var(--theme-neutral-light))`,
                       fontFamily: `var(--theme-font-body)`,
                       letterSpacing: '0.025em',
@@ -1390,14 +1742,16 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     }}
                     onMouseEnter={(e) => {
                       if (!isLoading && isFormValid) {
-                        e.currentTarget.style.backgroundColor = `rgb(var(--theme-success) / 0.9)`
+                        const baseColor = isTraditionalCheckout ? `var(--theme-neutral-dark)` : `var(--theme-success)`
+                        e.currentTarget.style.backgroundColor = `rgb(${baseColor} / 0.9)`
                         e.currentTarget.style.transform = 'translateY(-1px)'
                         e.currentTarget.style.boxShadow = `var(--theme-shadow-md)`
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isLoading && isFormValid) {
-                        e.currentTarget.style.backgroundColor = `rgb(var(--theme-success))`
+                        const baseColor = isTraditionalCheckout ? `var(--theme-neutral-dark)` : `var(--theme-success)`
+                        e.currentTarget.style.backgroundColor = `rgb(${baseColor})`
                         e.currentTarget.style.transform = 'translateY(0)'
                         e.currentTarget.style.boxShadow = `var(--theme-shadow-sm)`
                       }
@@ -1407,8 +1761,14 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     ) : (
                       <>
-                        <Icons.WhatsApp />
-                        <span>Enviar Pedido por WhatsApp</span>
+                        {isTraditionalCheckout ? (
+                          <Icons.CreditCard />
+                        ) : (
+                          <Icons.WhatsApp />
+                        )}
+                        <span>
+                          {isTraditionalCheckout ? 'Finalizar Compra' : 'Enviar Pedido por WhatsApp'}
+                        </span>
                       </>
                     )}
                   </button>
@@ -1420,7 +1780,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       fontFamily: `var(--theme-font-body)`
                     }}
                   >
-                    Al hacer clic, se abrirá WhatsApp con tu pedido listo para enviar
+                    {isTraditionalCheckout 
+                      ? 'Tu pedido será guardado y podrás hacer seguimiento'
+                      : 'Al hacer clic, se abrirá WhatsApp con tu pedido listo para enviar'
+                    }
                   </p>
                 </div>
               </div>
@@ -1428,6 +1791,18 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           </div>
         </div>
       </div>
+      
+      {/* Order Confirmation Modal */}
+      {showOrderConfirmation && orderId && (
+        <OrderConfirmation 
+          orderId={orderId} 
+          onClose={() => {
+            setShowOrderConfirmation(false)
+            setOrderId(null)
+            onClose()
+          }} 
+        />
+      )}
     </>
   )
 } 

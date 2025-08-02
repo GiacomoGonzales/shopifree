@@ -37,6 +37,9 @@ export interface Tienda {
       provider?: string
       publicKey?: string
       connected?: boolean
+      acceptCashOnDelivery?: boolean
+      cashOnDeliveryMethods?: string[]
+      acceptOnlinePayment?: boolean
     }
     shipping?: {
       enabled?: boolean

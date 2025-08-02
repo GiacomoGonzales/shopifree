@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useCart } from '../../lib/cart-context'
 import { useStore } from '../../lib/store-context'
 import { getCurrencySymbol } from '../../lib/store'
+import { useFreeShipping } from '../../lib/hooks/useFreeShipping'
 
 const Icons = {
   Close: () => (
@@ -28,7 +29,7 @@ const Icons = {
     </svg>
   ),
   ShoppingBag: () => (
-    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
     </svg>
   ),
@@ -47,6 +48,7 @@ const Icons = {
 export default function CartPanel() {
   const { state, closeCart, removeItem, updateQuantity, openCheckout } = useCart()
   const { store } = useStore()
+  const freeShipping = useFreeShipping(state.totalPrice)
 
   // Cerrar carrito con Escape
   useEffect(() => {
@@ -117,20 +119,20 @@ export default function CartPanel() {
       
       {/* Panel deslizante */}
       <div 
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-all duration-300 ease-out ${
+        className={`fixed top-4 right-4 bottom-4 w-96 bg-white shadow-2xl rounded-lg z-50 transform transition-all duration-300 ease-out ${
           state.isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
         }`}
       >
         
         {/* Header del panel */}
-        <div className="flex items-center justify-between p-6 border-b border-neutral-200">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-200">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center">
               <Icons.ShoppingBag />
             </div>
             <div>
-              <h2 className="text-lg font-medium text-neutral-900">Tu Carrito</h2>
-              <p className="text-sm text-neutral-500">
+              <h2 className="text-base font-medium text-neutral-900">Tu Carrito</h2>
+              <p className="text-xs text-neutral-500">
                 {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
               </p>
             </div>
@@ -144,19 +146,19 @@ export default function CartPanel() {
         </div>
 
         {/* Contenido del carrito */}
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {state.items.length === 0 ? (
             /* Carrito vacío */
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-              <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+            <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
+              <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-3">
                 <Icons.ShoppingBag />
               </div>
-              <h3 className="text-lg font-medium text-neutral-900 mb-2">Tu carrito está vacío</h3>
-              <p className="text-neutral-500 mb-6">
+              <h3 className="text-base font-medium text-neutral-900 mb-2">Tu carrito está vacío</h3>
+              <p className="text-sm text-neutral-500 mb-4">
                 Agrega algunos productos para comenzar tu compra
               </p>
               <Link href="/" onClick={closeCart}>
-                <button className="bg-neutral-900 text-white px-6 py-3 rounded-md font-medium hover:bg-neutral-800 transition-colors">
+                <button className="bg-neutral-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-neutral-800 transition-colors">
                   Explorar productos
                 </button>
               </Link>
@@ -164,14 +166,14 @@ export default function CartPanel() {
           ) : (
             <>
               {/* Lista de productos */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {state.items.map((item) => (
                   <div 
                     key={item.id} 
-                    className="flex items-start space-x-4 p-4 bg-neutral-50 rounded-lg"
+                    className="flex items-start space-x-3 p-3 bg-neutral-50 rounded-lg"
                   >
                     {/* Imagen del producto */}
-                    <div className="relative w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="relative w-12 h-12 bg-neutral-200 rounded-lg overflow-hidden flex-shrink-0">
                       <img
                         src={item.image.includes('.mp4') || item.image.includes('.webm') || item.image.includes('.mov') 
                           ? item.image.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
@@ -184,7 +186,7 @@ export default function CartPanel() {
                           if (target.src.includes('.jpg') && item.image.includes('.mp4')) {
                             target.src = item.image.replace('.mp4', '.png'); // Try PNG thumbnail
                           } else if (target.src.includes('.png') && item.image.includes('.mp4')) {
-                            target.src = '/api/placeholder/64/64'; // Final fallback
+                            target.src = '/api/placeholder/48/48'; // Final fallback
                           }
                         }}
                       />
@@ -194,7 +196,7 @@ export default function CartPanel() {
                     {/* Información del producto */}
                     <div className="flex-1 min-w-0">
                       <Link href={`/${item.slug}`} onClick={closeCart}>
-                        <h4 className="text-sm font-medium text-neutral-900 hover:text-neutral-600 transition-colors line-clamp-2">
+                        <h4 className="text-xs font-medium text-neutral-900 hover:text-neutral-600 transition-colors line-clamp-2">
                           {item.name}
                         </h4>
                       </Link>
@@ -206,19 +208,19 @@ export default function CartPanel() {
                       )}
 
                       <div className="flex items-center justify-between mt-2">
-                        <p className="text-sm font-medium text-neutral-900">
+                        <p className="text-xs font-medium text-neutral-900">
                           {getCurrencySymbol(store?.currency || 'USD')} {(item.variant?.price || item.price).toFixed(2)}
                         </p>
 
                         {/* Controles de cantidad */}
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-1">
                           <button
                             onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                             className="p-1 hover:bg-neutral-200 rounded transition-colors"
                           >
                             <Icons.Minus />
                           </button>
-                          <span className="w-8 text-center text-sm font-medium">
+                          <span className="w-6 text-center text-xs font-medium">
                             {item.quantity}
                           </span>
                           <button
@@ -243,18 +245,32 @@ export default function CartPanel() {
               </div>
 
               {/* Footer del carrito */}
-              <div className="border-t border-neutral-200 p-6 space-y-4">
+              <div className="border-t border-neutral-200 p-4 pb-6 space-y-3">
                 {/* Total y botón juntos */}
-                <div className="bg-neutral-50 p-4 rounded-lg space-y-4">
+                <div className="bg-neutral-50 p-3 rounded-lg space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-neutral-900">Total</span>
-                    <span className="text-2xl font-bold text-neutral-900">
-                      {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
-                    </span>
+                    <div>
+                      <span className="text-sm font-medium text-neutral-900">Total</span>
+                      <p className="text-xs text-neutral-500">
+                        {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-lg font-bold text-neutral-900">
+                        {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
+                      </span>
+                      {freeShipping.isEnabled && (
+                        <p className={`text-xs ${freeShipping.isEligible ? 'text-green-600' : 'text-neutral-500'}`}>
+                          {freeShipping.isEligible ? '¡Envío gratis!' : 'Envío gratis'}
+                          {!freeShipping.isEligible && (
+                            <span className="block text-xs text-neutral-500">
+                              desde {freeShipping.currencySymbol} {freeShipping.threshold.toFixed(2)}
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-neutral-500">
-                    {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
-                  </p>
                   
                   {/* Botón de checkout dentro de la caja del total */}
                   <button 
@@ -262,7 +278,7 @@ export default function CartPanel() {
                       closeCart()
                       openCheckout()
                     }}
-                    className="w-full bg-neutral-900 text-white py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
+                    className="w-full bg-neutral-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors"
                   >
                     Finalizar compra
                   </button>
@@ -270,13 +286,17 @@ export default function CartPanel() {
 
                 {/* Información adicional */}
                 <div className="space-y-2 text-center">
-                  <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
-                    <Icons.Truck />
-                    <span>Envío gratis a partir de {getCurrencySymbol(store?.currency || 'USD')} 150</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
+                  {/* Información de envío gratis actualizada */}
+                  {freeShipping.isEnabled && !freeShipping.isEligible && (
+                    <div className="flex items-center justify-center space-x-1 text-xs text-neutral-600">
+                      <Icons.Truck />
+                      <span>Te faltan {freeShipping.currencySymbol} {(freeShipping.threshold - state.totalPrice).toFixed(2)} para envío gratis</span>
+                    </div>
+                  )}
+                  {/* Información sobre cupones */}
+                  <div className="flex items-center justify-center space-x-1 text-xs text-neutral-600">
                     <Icons.Tag />
-                    <span>¿Tienes un cupón de descuento?</span>
+                    <span>¿Tienes un cupón de descuento? Lo podrás aplicar en el checkout</span>
                   </div>
                 </div>
               </div>

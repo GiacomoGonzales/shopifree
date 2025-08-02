@@ -51,6 +51,9 @@ export interface StoreDataServer {
       provider?: string
       publicKey?: string
       connected?: boolean
+      acceptCashOnDelivery?: boolean
+      cashOnDeliveryMethods?: string[]
+      acceptOnlinePayment?: boolean
     }
     shipping?: {
       enabled?: boolean
@@ -63,6 +66,11 @@ export interface StoreDataServer {
       }
       localDelivery?: {
         enabled?: boolean
+      }
+      // Reglas adicionales de envío
+      additionalRules?: {
+        enableFreeShipping?: boolean
+        freeShippingThreshold?: number
       }
     }
     seo?: {
@@ -143,6 +151,9 @@ export interface StoreDataClient {
       provider?: string
       publicKey?: string
       connected?: boolean
+      acceptCashOnDelivery?: boolean
+      cashOnDeliveryMethods?: string[]
+      acceptOnlinePayment?: boolean
     }
     shipping?: {
       enabled?: boolean
@@ -155,6 +166,11 @@ export interface StoreDataClient {
       }
       localDelivery?: {
         enabled?: boolean
+      }
+      // Reglas adicionales de envío
+      additionalRules?: {
+        enableFreeShipping?: boolean
+        freeShippingThreshold?: number
       }
     }
     seo?: {

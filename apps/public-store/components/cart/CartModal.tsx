@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useCart } from '../../lib/cart-context'
 import { useStore } from '../../lib/store-context'
 import { getCurrencySymbol } from '../../lib/store'
+import { useFreeShipping, getFreeShippingMessage } from '../../lib/hooks/useFreeShipping'
 
 const Icons = {
   Close: () => (
@@ -42,6 +43,7 @@ const Icons = {
 export default function CartModal() {
   const { state, closeCart, removeItem, updateQuantity, openCheckout } = useCart()
   const { store } = useStore()
+  const freeShipping = useFreeShipping(state.totalPrice)
 
   // Solo prevenir scroll del body en desktop, permitir scroll interno del modal en mobile
   useEffect(() => {
@@ -80,8 +82,8 @@ export default function CartModal() {
           <Icons.ArrowLeft />
         </button>
         <div className="text-center">
-          <h1 className="text-lg font-medium text-neutral-900">Tu Carrito</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-base font-medium text-neutral-900">Tu Carrito</h1>
+          <p className="text-xs text-neutral-500">
             {state.totalItems} {state.totalItems === 1 ? 'producto' : 'productos'}
           </p>
         </div>
@@ -142,18 +144,18 @@ export default function CartModal() {
                     {/* Información del producto */}
                     <div className="flex-1 min-w-0">
                       <Link href={`/${item.slug}`} onClick={closeCart}>
-                        <h3 className="text-base font-medium text-neutral-900 hover:text-neutral-600 transition-colors line-clamp-2 mb-1">
+                        <h3 className="text-sm font-medium text-neutral-900 hover:text-neutral-600 transition-colors line-clamp-2 mb-1">
                           {item.name}
                         </h3>
                       </Link>
                       
                       {item.variant && (
-                        <p className="text-sm text-neutral-500 mb-2">
+                        <p className="text-xs text-neutral-500 mb-2">
                           {item.variant.name}
                         </p>
                       )}
 
-                      <p className="text-lg font-medium text-neutral-900 mb-3">
+                      <p className="text-base font-medium text-neutral-900 mb-3">
                         {getCurrencySymbol(store?.currency || 'USD')} {(item.variant?.price || item.price).toFixed(2)}
                       </p>
 
@@ -166,7 +168,7 @@ export default function CartModal() {
                           >
                             <Icons.Minus />
                           </button>
-                          <span className="w-12 text-center text-base font-medium">
+                          <span className="w-12 text-center text-sm font-medium">
                             {item.quantity}
                           </span>
                           <button
@@ -196,15 +198,24 @@ export default function CartModal() {
               {/* Información del total */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-neutral-500">Total ({state.totalItems} productos)</p>
-                  <p className="text-2xl font-bold text-neutral-900">
+                  <p className="text-xs text-neutral-500">Total ({state.totalItems} productos)</p>
+                  <p className="text-xl font-bold text-neutral-900">
                     {getCurrencySymbol(store?.currency || 'USD')} {state.totalPrice.toFixed(2)}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-neutral-500">Envío gratis</p>
-                  <p className="text-xs text-neutral-500">desde {getCurrencySymbol(store?.currency || 'USD')} 150</p>
-                </div>
+                {freeShipping.isEnabled && (
+                  <div className="text-right">
+                    <p className={`text-xs ${freeShipping.isEligible ? 'text-green-600' : 'text-neutral-500'}`}>
+                      {freeShipping.isEligible ? '¡Envío gratis!' : 'Envío gratis'}
+                    </p>
+                    <p className="text-xs text-neutral-500">
+                      {freeShipping.isEligible 
+                        ? 'Aplicado a tu pedido' 
+                        : `desde ${freeShipping.currencySymbol} ${freeShipping.threshold.toFixed(2)}`
+                      }
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Botón de checkout */}
@@ -213,7 +224,7 @@ export default function CartModal() {
                   closeCart()
                   openCheckout()
                 }}
-                className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors text-lg"
+                className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 transition-colors text-base"
               >
                 Finalizar compra
               </button>

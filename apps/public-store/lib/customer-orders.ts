@@ -39,40 +39,141 @@ export const getCustomerOrders = async (storeId: string, customerId: string): Pr
     }
 
     const ordersRef = collection(db, 'stores', storeId, 'orders')
-    const q = query(
-      ordersRef,
-      where('customerId', '==', customerId),
-      orderBy('createdAt', 'desc')
-    )
+    
+    // Intentar con índices primero (nueva estructura con orderBy)
+    try {
+      let q = query(
+        ordersRef,
+        where('userId', '==', customerId),
+        orderBy('createdAt', 'desc')
+      )
 
-    const querySnapshot = await getDocs(q)
-    const orders: CustomerOrder[] = []
+      let querySnapshot = await getDocs(q)
+      
+      // Si no encuentra resultados, intentar con customerId (estructura antigua)
+      if (querySnapshot.empty) {
+        q = query(
+          ordersRef,
+          where('customerId', '==', customerId),
+          orderBy('createdAt', 'desc')
+        )
+        querySnapshot = await getDocs(q)
+      }
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data()
-      orders.push({
-        id: doc.id,
-        storeId: data.storeId,
-        customerId: data.customerId,
-        clientName: data.clientName,
-        clientPhone: data.clientPhone,
-        clientAddress: data.clientAddress,
-        clientNotes: data.clientNotes,
-        items: data.items || [],
-        subtotal: data.subtotal || 0,
-        shippingCost: data.shippingCost || 0,
-        total: data.total || 0,
-        paymentMethod: data.paymentMethod || 'cash',
-        status: data.status || 'pending',
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date()
+      const orders: CustomerOrder[] = []
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        
+        // Adaptar los datos a la estructura esperada
+        orders.push({
+          id: doc.id,
+          storeId: data.storeId,
+          customerId: data.userId || data.customerId || customerId,
+          clientName: data.customer?.name || data.clientName || '',
+          clientPhone: data.customer?.phone || data.clientPhone || '',
+          clientAddress: data.customer?.address || data.clientAddress || '',
+          clientNotes: data.notes || data.clientNotes || '',
+          items: data.items || [],
+          subtotal: (data.total || 0) - (data.shippingCost || 0),
+          shippingCost: data.shippingCost || 0,
+          total: data.total || 0,
+          paymentMethod: mapPaymentMethod(data.paymentMethod),
+          status: mapOrderStatus(data.status),
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || data.createdAt?.toDate() || new Date()
+        })
       })
-    })
 
-    return orders
+      // Ordenar manualmente por fecha si no se pudo usar orderBy
+      return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+
+    } catch (indexError: any) {
+      console.log('Index not ready, using fallback query without orderBy:', indexError.message)
+      
+      // Fallback: consulta sin orderBy mientras se construyen los índices
+      let q = query(
+        ordersRef,
+        where('userId', '==', customerId)
+      )
+
+      let querySnapshot = await getDocs(q)
+      
+      // Si no encuentra resultados, intentar con customerId (estructura antigua)
+      if (querySnapshot.empty) {
+        q = query(
+          ordersRef,
+          where('customerId', '==', customerId)
+        )
+        querySnapshot = await getDocs(q)
+      }
+
+      const orders: CustomerOrder[] = []
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        
+        // Adaptar los datos a la estructura esperada
+        orders.push({
+          id: doc.id,
+          storeId: data.storeId,
+          customerId: data.userId || data.customerId || customerId,
+          clientName: data.customer?.name || data.clientName || '',
+          clientPhone: data.customer?.phone || data.clientPhone || '',
+          clientAddress: data.customer?.address || data.clientAddress || '',
+          clientNotes: data.notes || data.clientNotes || '',
+          items: data.items || [],
+          subtotal: (data.total || 0) - (data.shippingCost || 0),
+          shippingCost: data.shippingCost || 0,
+          total: data.total || 0,
+          paymentMethod: mapPaymentMethod(data.paymentMethod),
+          status: mapOrderStatus(data.status),
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || data.createdAt?.toDate() || new Date()
+        })
+      })
+
+      // Ordenar manualmente por fecha descendente
+      return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    }
+
   } catch (error) {
     console.error('Error getting customer orders:', error)
     return []
+  }
+}
+
+// Helper function to map payment methods
+const mapPaymentMethod = (method: string): 'cash' | 'transfer' | 'card' | 'other' => {
+  switch (method) {
+    case 'online':
+      return 'card'
+    case 'cash_on_delivery':
+      return 'cash'
+    default:
+      return 'other'
+  }
+}
+
+// Helper function to map order status
+const mapOrderStatus = (status: string): 'pending' | 'confirmed' | 'preparing' | 'ready' | 'shipped' | 'delivered' | 'cancelled' => {
+  switch (status) {
+    case 'pending':
+      return 'pending'
+    case 'confirmed':
+      return 'confirmed'
+    case 'preparing':
+      return 'preparing'
+    case 'ready':
+      return 'ready'
+    case 'shipped':
+      return 'shipped'
+    case 'delivered':
+      return 'delivered'
+    case 'cancelled':
+      return 'cancelled'
+    default:
+      return 'pending'
   }
 }
 

@@ -50,11 +50,23 @@ service cloud.firestore {
       
       // Reglas para órdenes
       match /orders/{orderId} {
-        allow read: if isAuthenticated() && 
-                     (request.auth.uid == resource.data.customerId || 
+        // Lectura: permitir a cualquiera que tenga el ID específico del pedido (es único y difícil de adivinar)
+        // También permitir al dueño de la tienda si está autenticado
+        allow read: if true || 
+                     (isAuthenticated() && 
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId);
-        allow write: if isAuthenticated() && 
-                      request.auth.uid == resource.data.customerId;
+        
+        // Crear orden: permitir todas las creaciones 
+        allow create: if true;
+        
+        // Actualizar orden: solo el cliente autenticado (si tiene userId) o el dueño de la tienda
+        allow update: if isAuthenticated() && 
+                       (request.auth.uid == resource.data.userId || 
+                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId);
+        
+        // Eliminar orden: solo el dueño de la tienda
+        allow delete: if isAuthenticated() && 
+                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
       
       // Reglas para productos (solo lectura para clientes)

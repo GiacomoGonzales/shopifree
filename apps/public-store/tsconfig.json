@@ -3,16 +3,25 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./app/*"],
-      "@ui/*": ["../../packages/ui/src/*"],
-      "@types/*": ["../../packages/types/src/*"],
-      "@utils/*": ["./lib/*"]
+      "@/*": [
+        "./app/*"
+      ],
+      "@ui/*": [
+        "../../packages/ui/src/*"
+      ],
+      "@types/*": [
+        "../../packages/types/src/*"
+      ],
+      "@utils/*": [
+        "./lib/*"
+      ]
     },
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -23,4 +32,4 @@
   "exclude": [
     "node_modules"
   ]
-} 
+}

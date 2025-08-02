@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../lib/store'
+import PaymentMethodSelector from './PaymentMethodSelector'
 
 const monedas = [
   { code: 'USD', symbol: '$', name: 'Dólar Americano' },
@@ -55,7 +56,10 @@ export default function SalesSection() {
         publicKey: '',
         secretKey: '',
         webhookEndpoint: '',
-        connected: false
+        connected: false,
+        acceptCashOnDelivery: false,
+        cashOnDeliveryMethods: [] as string[],
+        acceptOnlinePayment: false
       }
     }
   })
@@ -80,7 +84,10 @@ export default function SalesSection() {
                 publicKey: userStore.advanced?.payments?.publicKey || '',
                 secretKey: userStore.advanced?.payments?.secretKey || '',
                 webhookEndpoint: userStore.advanced?.payments?.webhookEndpoint || '',
-                connected: userStore.advanced?.payments?.connected || false
+                connected: userStore.advanced?.payments?.connected || false,
+                acceptCashOnDelivery: userStore.advanced?.payments?.acceptCashOnDelivery || false,
+                cashOnDeliveryMethods: userStore.advanced?.payments?.cashOnDeliveryMethods || [],
+                acceptOnlinePayment: userStore.advanced?.payments?.acceptOnlinePayment || false
               }
             }
           })
@@ -125,6 +132,25 @@ export default function SalesSection() {
         [field]: value
       }))
     }
+  }
+
+  const handlePaymentMethodsChange = (settings: {
+    acceptCashOnDelivery: boolean
+    cashOnDeliveryMethods: string[]
+    acceptOnlinePayment: boolean
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      advanced: {
+        ...prev.advanced,
+        payments: {
+          ...(prev.advanced?.payments || {}),
+          acceptCashOnDelivery: settings.acceptCashOnDelivery,
+          cashOnDeliveryMethods: settings.cashOnDeliveryMethods,
+          acceptOnlinePayment: settings.acceptOnlinePayment
+        }
+      }
+    }))
   }
 
   const testConnection = async () => {
@@ -271,6 +297,29 @@ export default function SalesSection() {
           </div>
         </div>
       </div>
+
+      {/* Métodos de pago - Solo visible cuando se selecciona checkout tradicional */}
+      {formData.advanced?.checkout?.method === 'traditional' && (
+        <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+          <div className="px-6 py-6 space-y-6">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Métodos de pago aceptados</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Configure los métodos de pago que acepta su tienda para el checkout tradicional
+              </p>
+            </div>
+
+            <PaymentMethodSelector
+              settings={{
+                acceptCashOnDelivery: formData.advanced.payments.acceptCashOnDelivery,
+                cashOnDeliveryMethods: formData.advanced.payments.cashOnDeliveryMethods,
+                acceptOnlinePayment: formData.advanced.payments.acceptOnlinePayment
+              }}
+              onSettingsChange={handlePaymentMethodsChange}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Configuración de Pasarela de Pago */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
