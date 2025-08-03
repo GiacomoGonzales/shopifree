@@ -17,5 +17,12 @@
       "src": "apps/public-store/package.json",
       "use": "@vercel/next"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/www.:subdomain.shopifree.app/(.*)",
+      "destination": "https://:subdomain.shopifree.app/$1",
+      "permanent": true
+    }
   ]
 } 
