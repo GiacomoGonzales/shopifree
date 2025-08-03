@@ -7,6 +7,7 @@ import { Button } from '@shopifree/ui'
 import PhoneDemo from '../../components/PhoneDemo'
 import LanguageSelector from '../../components/LanguageSelector'
 import FAQ from '../../components/FAQ'
+import HeroFeatures from '../../components/HeroFeatures'
 
 export default function HomePage() {
   const t = useTranslations('home')
@@ -82,6 +83,9 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Hero Features Section */}
+      <HeroFeatures />
 
       {/* Features Section */}
       <section className="bg-white py-20">

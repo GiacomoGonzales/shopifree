@@ -27,6 +27,26 @@
       "rights": "Todos los derechos reservados."
     }
   },
+  "heroFeatures": {
+    "title": "Crea tu sitio web en minutos",
+    "subtitle": "Descubre las funcionalidades que harán de tu tienda online un éxito",
+    "carousel": {
+      "title": "Hermosos catálogos de productos",
+      "description": "Organiza tus productos de manera atractiva"
+    },
+    "domain": {
+      "title": "Dominio propio",
+      "description": "Configura tu dominio personalizado fácilmente"
+    },
+    "mobile": {
+      "title": "Diseña tu sitio web",
+      "description": "Optimizado para móviles y fácil de usar"
+    },
+    "seo": {
+      "title": "Optimización para Motores de Búsqueda (SEO)",
+      "description": "Aparece en Google y atrae más clientes"
+    }
+  },
   "auth": {
     "login": {
       "title": "Iniciar sesión",

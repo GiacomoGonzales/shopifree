@@ -285,4 +285,22 @@
   .bg-landing-muted {
     background-color: rgb(var(--landing-muted));
   }
+
+  /* Carousel Animation */
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-carousel-slide {
+    animation: carousel-slide 12s linear infinite;
+  }
+
+  .carousel-container:hover .animate-carousel-slide {
+    animation-play-state: paused;
+  }
 } 

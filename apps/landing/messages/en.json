@@ -27,6 +27,26 @@
       "rights": "All rights reserved."
     }
   },
+  "heroFeatures": {
+    "title": "Create your website in minutes",
+    "subtitle": "Discover the features that will make your online store a success",
+    "carousel": {
+      "title": "Beautiful product catalogs",
+      "description": "Organize your products in an attractive way"
+    },
+    "domain": {
+      "title": "Own domain",
+      "description": "Easily configure your custom domain"
+    },
+    "mobile": {
+      "title": "Design your website",
+      "description": "Mobile optimized and easy to use"
+    },
+    "seo": {
+      "title": "Search Engine Optimization (SEO)",
+      "description": "Appear on Google and attract more customers"
+    }
+  },
   "auth": {
     "login": {
       "title": "Sign in",
