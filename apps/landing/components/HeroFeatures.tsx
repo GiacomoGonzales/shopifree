@@ -30,124 +30,108 @@ export default function HeroFeatures() {
             </div>
             
             {/* Contenedor del carrusel */}
-            <div className="absolute bottom-4 left-0 right-0 h-40 overflow-hidden">
-              <div className="carousel-container flex animate-carousel-slide">
+            <div className="absolute bottom-6 left-6 right-6 h-48 overflow-hidden">
+              <div className="carousel-container flex animate-carousel-slide items-center h-full">
                 {/* Primera serie de imágenes */}
-                <div className="carousel-set flex space-x-4 min-w-full">
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product1.PNG"
-                      alt="Producto 1"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='12'%3ET-Shirt%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                <div className="carousel-set flex space-x-8 min-w-full items-center px-4">
+                  <Image
+                    src="/images/demo/product1.PNG"
+                    alt="Producto 1"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3ET-Shirt%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
                   
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product2.PNG"
-                      alt="Producto 2"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='12'%3EShirts%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                  <Image
+                    src="/images/demo/product2.PNG"
+                    alt="Producto 2"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EShirts%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
 
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product3.PNG"
-                      alt="Producto 3"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='11'%3EPizza%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                  <Image
+                    src="/images/demo/product3.PNG"
+                    alt="Producto 3"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EPizza%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
 
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product4.PNG"
-                      alt="Producto 4"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='12'%3EWatch%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                  <Image
+                    src="/images/demo/product4.PNG"
+                    alt="Producto 4"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EWatch%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
                 </div>
 
                 {/* Segunda serie de imágenes (duplicado para loop infinito) */}
-                <div className="carousel-set flex space-x-4 min-w-full">
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product1.PNG"
-                      alt="Producto 1"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='12'%3ET-Shirt%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                <div className="carousel-set flex space-x-8 min-w-full items-center px-4">
+                  <Image
+                    src="/images/demo/product1.PNG"
+                    alt="Producto 1"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3ET-Shirt%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
                   
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product2.PNG"
-                      alt="Producto 2"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='12'%3EShirts%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                  <Image
+                    src="/images/demo/product2.PNG"
+                    alt="Producto 2"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EShirts%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
 
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product3.PNG"
-                      alt="Producto 3"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='11'%3EPizza%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                  <Image
+                    src="/images/demo/product3.PNG"
+                    alt="Producto 3"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EPizza%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
 
-                  <div className="bg-white rounded-xl p-2 shadow-lg">
-                    <Image
-                      src="/images/demo/product4.PNG"
-                      alt="Producto 4"
-                      width={120}
-                      height={120}
-                      className="w-28 h-28 object-contain rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23e5e7eb'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='12'%3EWatch%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
+                  <Image
+                    src="/images/demo/product4.PNG"
+                    alt="Producto 4"
+                    width={160}
+                    height={160}
+                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EWatch%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
                 </div>
               </div>
             </div>
