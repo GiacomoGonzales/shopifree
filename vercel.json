@@ -20,9 +20,25 @@
   ],
   "redirects": [
     {
-      "source": "/www.:subdomain.shopifree.app/(.*)",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.(?<subdomain>.*).shopifree.app"
+        }
+      ],
       "destination": "https://:subdomain.shopifree.app/$1",
       "permanent": true
+    }
+  ],
+  "wildcard": [
+    {
+      "domain": "*.shopifree.app",
+      "value": "CNAME"
+    },
+    {
+      "domain": "www.*.shopifree.app", 
+      "value": "CNAME"
     }
   ]
 } 
