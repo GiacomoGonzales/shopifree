@@ -12,6 +12,7 @@ import { LOADING_CONFIG } from '../../lib/loading-config'
 import { useStoreData } from '../../lib/hooks/useStoreData'
 import LogoSpinner from '../../themes/base-default/components/LogoSpinner'
 
+
 interface ClientPageProps {
   tienda: Tienda
   locale: string
@@ -62,36 +63,67 @@ export default function ClientPage({ tienda, locale }: ClientPageProps) {
     window.scrollTo(0, 0)
   }, [])
 
-    // Importar componentes del tema de forma consolidada
-  const ThemeComponents = useMemo(() => {
-    const ThemeLayout = dynamic<ThemeLayoutProps>(
-      () => import(`../../themes/${tienda.theme}/Layout`).then(mod => mod.default).catch(() => {
-        console.error(`Theme Layout ${tienda.theme} not found, using default layout`)
-        return DefaultLayout
-      }),
-      { 
-        ssr: false,
-        loading: () => null
-      }
-    )
+// Importar componentes del tema de forma consolidada (con diagnóstico)
+const ThemeComponents = useMemo(() => {
+  // helper: valida que el módulo tenga un componente válido
+  function ensureDefault(name: string, mod: any, fallback?: any) {
+    const keys = mod ? Object.keys(mod) : [];
+    const C = (mod && mod.default) || mod;
+    console.log(`[DIAG] ${name} module keys:`, keys, ' typeof default:', typeof C);
 
-    const ThemeHome = dynamic<ThemeComponentProps>(
-      () => import(`../../themes/${tienda.theme}/Home`).then(mod => mod.default).catch(() => {
-        console.error(`Theme Home ${tienda.theme} not found, falling back to base-default`)
-        const FallbackHome = () => <div className="min-h-screen flex items-center justify-center">
-          <p className="text-neutral-600">Contenido no disponible</p>
-        </div>
-        FallbackHome.displayName = 'FallbackHome'
-        return FallbackHome
-      }),
-      { 
-        ssr: false,
-        loading: () => null
-      }
-    )
+    if (typeof C !== 'function') {
+      console.error(`[DIAG_INVALID_${name}] No es un componente. Usando fallback.`);
+      if (fallback && typeof fallback === 'function') return fallback;
+      // fallback mínimo si no se pasa otro
+      return function FallbackStub() {
+        return (
+          <div className="min-h-screen flex items-center justify-center">
+            <p className="text-neutral-600">Contenido no disponible ({name})</p>
+          </div>
+        );
+      };
+    }
+    return C;
+  }
 
-    return { ThemeLayout, ThemeHome }
-  }, [tienda.theme])
+  // Layout
+  const ThemeLayout = dynamic<ThemeLayoutProps>(
+    async () => {
+      try {
+        const mod = await import(`../../themes/${tienda.theme}/Layout`);
+        return ensureDefault('ThemeLayout', mod, DefaultLayout);
+      } catch (e) {
+        console.error(`[DIAG] Import Layout failed for theme "${tienda.theme}"`, e);
+        return DefaultLayout;
+      }
+    },
+    { ssr: false, loading: () => null }
+  );
+
+  // Home
+  const ThemeHome = dynamic<ThemeComponentProps>(
+    async () => {
+      try {
+        const mod = await import(`../../themes/${tienda.theme}/Home`);
+        return ensureDefault('ThemeHome', mod);
+      } catch (e) {
+        console.error(`[DIAG] Import Home failed for theme "${tienda.theme}"`, e);
+        return function FallbackHome() {
+          return (
+            <div className="min-h-screen flex items-center justify-center">
+              <p className="text-neutral-600">Contenido no disponible (Home)</p>
+            </div>
+          );
+        };
+      }
+    },
+    { ssr: false, loading: () => null }
+  );
+
+  return { ThemeLayout, ThemeHome };
+}, [tienda.theme]);
+
+
 
   // Mostrar loading hasta que todos los datos estén listos
   if (isLoading || !messages) {

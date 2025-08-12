@@ -124,7 +124,7 @@ export async function getStoreProducts(storeId: string): Promise<PublicProduct[]
     console.log('✅ Active products loaded:', products.length)
     return products
   } catch (error) {
-    console.error('❌ Error getting store products:', error)
+    console.error('[PUBLIC_STORE][products] error', { message: (error as any)?.message, stack: (error as any)?.stack })
     return []
   }
 }
@@ -156,7 +156,7 @@ export const searchProducts = async (storeId: string, searchQuery: string, limit
     // Return limited results
     return filteredProducts.slice(0, limit)
   } catch (error) {
-    console.error('❌ Error searching products:', error)
+    console.error('[PUBLIC_STORE][products] error', { message: (error as any)?.message, stack: (error as any)?.stack })
     return []
   }
 }
@@ -182,7 +182,7 @@ export const getSearchSuggestions = async (storeId: string): Promise<string[]> =
     // Convert to array and return first 5
     return Array.from(suggestions).slice(0, 5)
   } catch (error) {
-    console.error('❌ Error getting search suggestions:', error)
+    console.error('[PUBLIC_STORE][products] error', { message: (error as any)?.message, stack: (error as any)?.stack })
     return []
   }
 }
@@ -206,7 +206,7 @@ export const getStoreProduct = async (storeId: string, productId: string): Promi
     
     return null
   } catch (error) {
-    console.error('Error getting store product:', error)
+    console.error('[PUBLIC_STORE][products] error', { message: (error as any)?.message, stack: (error as any)?.stack })
     return null
   }
 }
@@ -222,7 +222,7 @@ export const getFeaturedProducts = async (storeId: string, limit: number = 6): P
     const allProducts = await getStoreProducts(storeId)
     return allProducts.slice(0, limit)
   } catch (error) {
-    console.error('Error getting featured products:', error)
+    console.error('[PUBLIC_STORE][products] error', { message: (error as any)?.message, stack: (error as any)?.stack })
     return []
   }
 }
