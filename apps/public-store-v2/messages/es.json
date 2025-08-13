@@ -1,0 +1,35 @@
+{
+  "common": {
+    "loading": "Cargando…",
+    "all": "Todos",
+    "offers": "Ver Ofertas",
+    "catalog": "Explorar Catálogo",
+    "nav": {
+      "categories": "Categorías"
+    },
+    "brands": {
+      "title": "Nuestras marcas",
+      "subtitle": "Marcas con las que trabajamos"
+    },
+    "footer": {
+      "navigation": "Navegación",
+      "followUs": "Síguenos",
+      "locateUs": "Ubícanos",
+      "rights": "Todos los derechos reservados"
+    },
+    "sort": {
+      "title": "Ordenar",
+      "relevance": "Relevancia",
+      "priceAsc": "Precio: menor a mayor",
+      "priceDesc": "Precio: mayor a menor",
+      "nameAsc": "Nombre: A → Z",
+      "nameDesc": "Nombre: Z → A"
+    },
+    "actions": {
+      "filters": "Filtros",
+      "order": "Ordenar"
+    }
+  }
+}
+
+

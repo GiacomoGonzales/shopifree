@@ -31,6 +31,7 @@ export type StoreBasicInfo = {
     emailStore?: string;
     phone?: string;
     address?: string;
+    language?: 'es' | 'en';
     socialMedia?: {
         instagram?: string;
         facebook?: string;
@@ -80,6 +81,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             emailStore: data.emailStore || data.email || undefined,
             phone: data.phone || data.phoneNumber || undefined,
             address: data.address || data.direction || data.direccion || undefined,
+            language: (data?.advanced?.language === 'en' ? 'en' : (data?.advanced?.language === 'es' ? 'es' : undefined)),
             socialMedia: socialFromGroup,
         };
 	} catch (e) {

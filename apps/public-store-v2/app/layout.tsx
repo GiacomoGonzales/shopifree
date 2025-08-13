@@ -4,12 +4,12 @@ export const metadata = {
 	description: "Tienda pública minimal",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<html lang="es">
-			<body>{children}</body>
-		</html>
-	);
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <html lang="es" suppressHydrationWarning>
+            <body>{children}</body>
+        </html>
+    );
 }
 
 

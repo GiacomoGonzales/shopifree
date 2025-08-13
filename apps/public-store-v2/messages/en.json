@@ -1,0 +1,35 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "all": "All",
+    "offers": "See Offers",
+    "catalog": "Explore Catalog",
+    "nav": {
+      "categories": "Categories"
+    },
+    "brands": {
+      "title": "Our brands",
+      "subtitle": "Brands we work with"
+    },
+    "footer": {
+      "navigation": "Navigation",
+      "followUs": "Follow us",
+      "locateUs": "Find us",
+      "rights": "All rights reserved"
+    },
+    "sort": {
+      "title": "Sort",
+      "relevance": "Relevance",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low",
+      "nameAsc": "Name: A → Z",
+      "nameDesc": "Name: Z → A"
+    },
+    "actions": {
+      "filters": "Filters",
+      "order": "Sort"
+    }
+  }
+}
+
+

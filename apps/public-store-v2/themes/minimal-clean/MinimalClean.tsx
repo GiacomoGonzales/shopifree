@@ -1,18 +1,23 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import "./minimal-clean.css";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { toCloudinarySquare } from "../../lib/images";
+import Header from "./Header";
+import Footer from "./Footer";
 
 type Props = {
-	storeSubdomain: string;
+    storeSubdomain: string;
 };
 
 export default function MinimalClean({ storeSubdomain }: Props) {
+
+    const t = useTranslations('common');
 
 	const [storeId, setStoreId] = useState<string | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -55,7 +60,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 
 	useEffect(() => {
 		let alive = true;
-		(async () => {
+        (async () => {
 			try {
 				const id = await getStoreIdBySubdomain(storeSubdomain);
 				if (!alive) return;
@@ -81,6 +86,26 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 			alive = false;
 		};
 	}, [storeSubdomain]);
+
+    // Enforce preferred store language via cookie and URL locale segment (client-side best-effort)
+    useEffect(() => {
+        try {
+            if (!storeInfo?.language) return;
+            const preferred = storeInfo.language; // 'es' | 'en'
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(Boolean);
+            const currentLocale = parts[0] || '';
+            // Cookie por subdominio para que el middleware pueda leer preferencia (opcional)
+            document.cookie = `sf:locale:${storeSubdomain}=${preferred}; path=/; max-age=31536000`;
+            if (currentLocale !== preferred) {
+                const rest = parts.slice(2).join('/'); // excluir locale y subdominio actuales
+                const newUrl = `/${preferred}/${storeSubdomain}${rest ? `/${rest}` : ''}`;
+                if (newUrl !== window.location.pathname) {
+                    window.location.replace(newUrl);
+                }
+            }
+        } catch {}
+    }, [storeInfo?.language, storeSubdomain]);
 
     const hasProducts = Array.isArray(products) && products.length > 0;
     const topLevelCategories = useMemo(() => (Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : []), [categories]);
@@ -117,67 +142,27 @@ export default function MinimalClean({ storeSubdomain }: Props) {
         return list;
     }, [products, hasProducts, activeCategory, sortOption]);
 
-	if (loading) {
+    if (loading) {
 		return (
 			<div data-theme="minimal-clean">
 				<div className="mc-loading">
-					<div className="mc-spinner" aria-label="Cargando" />
+                    <div className="mc-spinner" aria-label={t('loading')} />
 				</div>
 			</div>
 		);
 	}
 
-	return (
-		<div data-theme="minimal-clean">
-			<header className="mc-header">
-				<div className="mc-header-inner">
-					<div className="mc-logo">
-						{storeInfo?.logoUrl && (
-							<img src={toCloudinarySquare(storeInfo.logoUrl, 200)} alt={storeInfo?.storeName || storeSubdomain} />
-						)}
-						<span>{storeInfo?.storeName || storeSubdomain}</span>
-					</div>
-					{Array.isArray(categories) && categories.length > 0 && (
-						<nav className="mc-nav" aria-label="Categorías">
-							<ul>
-								{categories.filter(c => !c.parentCategoryId).map((c) => (
-									<li key={c.id}><a href={`/#cat-${c.slug}`}>{c.name}</a></li>
-								))}
-							</ul>
-						</nav>
-					)}
-					<div className="mc-actions">
-						<button className="mc-icon-link" aria-label="Buscar">
-							<svg className="mc-icon" viewBox="0 0 24 24" aria-hidden="true">
-								<circle cx="11" cy="11" r="7" />
-								<path d="M21 21l-4.5-4.5" />
-								<path d="M8.5 10.5a3.25 3.25 0 0 1 3-3" />
-							</svg>
-						</button>
-						<button className="mc-icon-link" aria-label="Carrito">
-							<svg className="mc-icon" viewBox="0 0 24 24" aria-hidden="true">
-								<circle cx="9" cy="20" r="1.25" />
-								<circle cx="17" cy="20" r="1.25" />
-								<path d="M3 4h2l2.2 12h12.2L21 8H6" strokeLinecap="round" strokeLinejoin="round" />
-							</svg>
-						</button>
-						<button className="mc-icon-link" aria-label="Mi cuenta">
-							<svg className="mc-icon" viewBox="0 0 24 24" aria-hidden="true">
-								<path d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10Z" />
-								<path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" strokeLinecap="round" strokeLinejoin="round" />
-							</svg>
-						</button>
-					</div>
-				</div>
-			</header>
+    return (
+        <div data-theme="minimal-clean">
+            <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
 
             <section className="mc-hero">
                 <div className="mc-hero-copy">
                     <h1>{storeInfo?.storeName || storeSubdomain}</h1>
                     {storeInfo?.description ? <p>{storeInfo.description}</p> : null}
                     <div className="mc-cta">
-                        <a className="mc-btn" href="#ofertas">Ver Ofertas</a>
-						<a className="mc-btn mc-btn--outline" href="#catalogo">Explorar Catálogo</a>
+                        <a className="mc-btn" href="#ofertas">{t('offers')}</a>
+                        <a className="mc-btn mc-btn--outline" href="#catalogo">{t('catalog')}</a>
                     </div>
                 </div>
                 <div className="mc-hero-media">
@@ -191,10 +176,10 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 
 			<section id="products" className="mc-products">
                 <div className="mc-toolbar">
-					<div className="mc-toolbar-title">Explora por categorías</div>
-					<div className="mc-toolbar-subtitle">Elige una categoría para explorar</div>
+                    <div className="mc-toolbar-title">{t('nav.categories')}</div>
+                    <div className="mc-toolbar-subtitle">&nbsp;</div>
                     <div className="mc-toolbar-inner">
-						<button className={`mc-chip ${!activeCategory ? "is-active" : ""}`} onClick={() => setActiveCategory(null)}>Todos</button>
+                        <button className={`mc-chip ${!activeCategory ? "is-active" : ""}`} onClick={() => setActiveCategory(null)}>{t('all')}</button>
 						{topLevelCategories.map((c) => (
 							<button key={c.id} className={`mc-chip ${activeCategory === c.slug ? "is-active" : ""}`} onClick={() => setActiveCategory(c.slug)}>
 								{c.name}
@@ -202,14 +187,14 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 						))}
 					</div>
                     <div className="mc-mobile-actions" aria-label="Acciones de productos (solo móvil)">
-                        <button className="mc-btn mc-btn--outline mc-btn--sm" type="button">Filtros</button>
+                        <button className="mc-btn mc-btn--outline mc-btn--sm" type="button">{t('actions.filters')}</button>
                         <button
                             className="mc-btn mc-btn--outline mc-btn--sm"
                             type="button"
                             aria-expanded={showSort}
                             onClick={() => setShowSort((v) => !v)}
                         >
-                            Ordenar
+                            {t('actions.order')}
                         </button>
                         <button
                             className="mc-btn mc-btn--outline mc-btn--sm mc-btn--icon"
@@ -243,20 +228,20 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                     {showSort && (
                         <>
                             <button className="mc-sheet-backdrop" aria-hidden onClick={() => setShowSort(false)} />
-                            <div className="mc-sheet" role="dialog" aria-modal="true" aria-label="Ordenar productos">
+                            <div className="mc-sheet" role="dialog" aria-modal="true" aria-label={t('sort.title')}>
                                 <div className="mc-sheet-panel">
                                     <div className="mc-sheet-header">
-                                        <span>Ordenar</span>
+                                        <span>{t('sort.title')}</span>
                                         <button className="mc-icon-link" aria-label="Cerrar" onClick={() => setShowSort(false)}>
                                             <svg className="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
                                         </button>
                                     </div>
                                     <div className="mc-sheet-body">
-                                        <button className={`mc-sort-item ${sortOption === "relevance" ? "is-active" : ""}`} onClick={() => { setSortOption("relevance"); setShowSort(false); }}>Relevancia</button>
-                                        <button className={`mc-sort-item ${sortOption === "price-asc" ? "is-active" : ""}`} onClick={() => { setSortOption("price-asc"); setShowSort(false); }}>Precio: menor a mayor</button>
-                                        <button className={`mc-sort-item ${sortOption === "price-desc" ? "is-active" : ""}`} onClick={() => { setSortOption("price-desc"); setShowSort(false); }}>Precio: mayor a menor</button>
-                                        <button className={`mc-sort-item ${sortOption === "name-asc" ? "is-active" : ""}`} onClick={() => { setSortOption("name-asc"); setShowSort(false); }}>Nombre: A → Z</button>
-                                        <button className={`mc-sort-item ${sortOption === "name-desc" ? "is-active" : ""}`} onClick={() => { setSortOption("name-desc"); setShowSort(false); }}>Nombre: Z → A</button>
+                                        <button className={`mc-sort-item ${sortOption === "relevance" ? "is-active" : ""}`} onClick={() => { setSortOption("relevance"); setShowSort(false); }}>{t('sort.relevance')}</button>
+                                        <button className={`mc-sort-item ${sortOption === "price-asc" ? "is-active" : ""}`} onClick={() => { setSortOption("price-asc"); setShowSort(false); }}>{t('sort.priceAsc')}</button>
+                                        <button className={`mc-sort-item ${sortOption === "price-desc" ? "is-active" : ""}`} onClick={() => { setSortOption("price-desc"); setShowSort(false); }}>{t('sort.priceDesc')}</button>
+                                        <button className={`mc-sort-item ${sortOption === "name-asc" ? "is-active" : ""}`} onClick={() => { setSortOption("name-asc"); setShowSort(false); }}>{t('sort.nameAsc')}</button>
+                                        <button className={`mc-sort-item ${sortOption === "name-desc" ? "is-active" : ""}`} onClick={() => { setSortOption("name-desc"); setShowSort(false); }}>{t('sort.nameDesc')}</button>
                                     </div>
                                 </div>
                             </div>
@@ -266,7 +251,18 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 
                 <div className={`mc-grid ${mobileView === "grid2" ? "mobile-grid2" : mobileView === "list" ? "mobile-list" : "mobile-expanded"} ${isAnimatingView ? "is-animating" : ""}`}>
                 {hasProducts && visibleProducts.map((p) => (
-                    <article key={p.id} className={`mc-card${mobileView === "list" ? " is-list" : ""}`}>
+                    <article key={p.id} className={`mc-card${mobileView === "list" ? " is-list" : ""}`} onClick={(e) => {
+                        try {
+                            const base = window.location.pathname.split('/').filter(Boolean);
+                            const locale = base[0];
+                            const sub = base[1];
+                            const slug = (p as any).slug || p.id;
+                            // Permitir click en elementos interactivos internos sin navegar
+                            const target = e.target as HTMLElement;
+                            if (target.closest('button,a')) return;
+                            window.location.href = `/${locale}/${sub}/producto/${encodeURIComponent(slug)}`;
+                        } catch {}
+                    }} role="link" tabIndex={0}>
 						<div className="mc-media">
 						{"video" in p && (p as any).video ? (
 								<video src={(p as any).video} muted autoPlay playsInline loop preload="metadata" />
@@ -291,11 +287,11 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 				</div>
 			</section>
 
-			{Array.isArray(brands) && brands.length > 0 && (
+            {Array.isArray(brands) && brands.length > 0 && (
 				<section className="mc-brands" aria-label="Marcas">
 					<div className="mc-brands-inner">
-						<div className="mc-brands-title">Nuestras marcas</div>
-						<div className="mc-brands-subtitle">Marcas con las que trabajamos</div>
+                        <div className="mc-brands-title">{t('brands.title')}</div>
+                        <div className="mc-brands-subtitle">{t('brands.subtitle')}</div>
 						<div className="mc-brands-track">
 							{Array.from({ length: 4 }).flatMap(() => brands).map((b, i) => (
 								<a key={`brand-${b.id}-${i}`} className="mc-brand" href={`/#brand-${b.id}`} onClick={(e) => { (e.currentTarget as HTMLAnchorElement).classList.add("is-active"); }}>
@@ -311,102 +307,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 				</section>
 			)}
 
-            <footer className="mc-footer">
-                <div className="mc-footer-inner">
-                    <div className="mc-footer-grid">
-                        <div>
-                            <h4 className="mc-footer-title">{storeInfo?.storeName || storeSubdomain}</h4>
-                            {storeInfo?.description ? (
-                                <p className="mc-footer-text">{storeInfo.description}</p>
-                            ) : null}
-                            <div className="mc-footer-text" style={{ marginTop: 8 }}>
-                                {storeInfo?.phone ? <div>Tel: {storeInfo.phone}</div> : null}
-                                {storeInfo?.emailStore ? <div>Email: {storeInfo.emailStore}</div> : null}
-                                {storeInfo?.address ? <div>Dirección: {storeInfo.address}</div> : null}
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="mc-footer-title">Navegación</h4>
-                            {Array.isArray(categories) && categories.filter(c => !c.parentCategoryId).length > 0 ? (
-                                <ul className="mc-footer-list">
-                                    {categories.filter(c => !c.parentCategoryId).map((c) => (
-                                        <li key={`fcat-${c.id}`}><a className="mc-footer-link" href={`/#cat-${c.slug}`}>{c.name}</a></li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="mc-footer-text">Sin categorías</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <h4 className="mc-footer-title">Síguenos</h4>
-                            <div className="mc-socials">
-                                {storeInfo?.socialMedia?.instagram ? (
-                                    <a className="mc-social-link" href={storeInfo.socialMedia.instagram} target="_blank" rel="noopener noreferrer">
-                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>
-                                        Instagram
-                                    </a>
-                                ) : null}
-                                {storeInfo?.socialMedia?.facebook ? (
-                                    <a className="mc-social-link" href={storeInfo.socialMedia.facebook} target="_blank" rel="noopener noreferrer">
-                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M13 10h2V7h-2c-1.657 0-3 1.343-3 3v2H8v3h2v6h3v-6h2.2l.8-3H13v-2c0-.552.448-1 1-1Z"/></svg>
-                                        Facebook
-                                    </a>
-                                ) : null}
-                                {storeInfo?.socialMedia?.tiktok ? (
-                                    <a className="mc-social-link" href={storeInfo.socialMedia.tiktok} target="_blank" rel="noopener noreferrer">
-                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v4a5 5 0 0 0 5 5h2v3a9 9 0 1 1-9-9h2Z"/></svg>
-                                        TikTok
-                                    </a>
-                                ) : null}
-                                {storeInfo?.socialMedia?.whatsapp ? (
-                                    <a className="mc-social-link" href={storeInfo.socialMedia.whatsapp} target="_blank" rel="noopener noreferrer">
-                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 16.31 5.31L22 22l-3.15-2.69A9 9 0 0 0 3 12Z"/><path d="M8.5 10.5c0 3 4 6 6 6 .5 0 1.5-1 1.5-1.5 0-.2-.2-.5-.5-.7l-.9-.6c-.2-.1-.5-.1-.7 0l-.6.3c-.8-.3-1.7-1.2-2-2l.3-.6c.1-.2.1-.5 0-.7l-.6-.9c-.2-.3-.5-.5-.7-.5-.5 0-1.5 1-1.5 1.5Z"/></svg>
-                                        WhatsApp
-                                    </a>
-                                ) : null}
-                                {storeInfo?.socialMedia?.youtube ? (
-                                    <a className="mc-social-link" href={storeInfo.socialMedia.youtube} target="_blank" rel="noopener noreferrer">
-                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M10 9.5v5l5-2.5-5-2.5Z"/></svg>
-                                        YouTube
-                                    </a>
-                                ) : null}
-                                {storeInfo?.socialMedia?.twitter || storeInfo?.socialMedia?.x ? (
-                                    <a className="mc-social-link" href={(storeInfo?.socialMedia?.twitter || storeInfo?.socialMedia?.x) as string} target="_blank" rel="noopener noreferrer">
-                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M21 3L3 21"/></svg>
-                                        X/Twitter
-                                    </a>
-                                ) : null}
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="mc-footer-title">Ubícanos</h4>
-                            {storeInfo?.address ? (
-                                <div className="mc-footer-text" style={{ marginBottom: 8 }}>{storeInfo.address}</div>
-                            ) : null}
-                            <div className="mc-map">
-                                {storeInfo?.address ? (
-                                    <iframe
-                                        title="Mapa"
-                                        src={`https://www.google.com/maps?q=${encodeURIComponent(storeInfo.address)}&output=embed`}
-                                        width="100%"
-                                        height="100%"
-                                        style={{ border: 0 }}
-                                        loading="lazy"
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                    />
-                                ) : (
-                                    <div style={{ height: '100%' }} />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mc-footer-bottom">© {new Date().getFullYear()} {storeInfo?.storeName || 'Shopifree'}</div>
-                </div>
-            </footer>
+            <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
 		</div>
 	);
 }

@@ -16,6 +16,7 @@ export type PublicProduct = {
 	mediaFiles?: PublicMediaFile[];
 	currency?: string;
 	status?: "draft" | "active" | "archived";
+    slug?: string;
 };
 
 function transformToPublicProduct(raw: any): PublicProduct {
@@ -34,6 +35,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
 		mediaFiles,
 		currency: raw.currency ?? "USD",
 		status: raw.status ?? "active",
+        slug: typeof raw.slug === 'string' ? raw.slug : undefined,
 	};
 }
 
@@ -59,6 +61,48 @@ export async function getStoreProducts(storeId: string): Promise<PublicProduct[]
 		console.warn("[public-store-v2] getStoreProducts fallo", e);
 		return [];
 	}
+}
+
+export async function getProductBySlug(storeId: string, slug: string): Promise<PublicProduct | null> {
+    try {
+        const db = getFirebaseDb();
+        if (!db) return null;
+        const ref = collection(db, "stores", storeId, "products");
+        const snap = await getDocs(query(ref, where("slug", "==", slug)));
+        if (snap.empty) return null;
+        const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+        const p = transformToPublicProduct(data);
+        return p.status === 'active' ? p : null;
+    } catch (e) {
+        console.warn("[public-store-v2] getProductBySlug fallo", e);
+        return null;
+    }
+}
+
+export async function getProduct(storeId: string, slugOrId: string): Promise<PublicProduct | null> {
+    try {
+        const db = getFirebaseDb();
+        if (!db) return null;
+        // 1) intentar por slug
+        const ref = collection(db, "stores", storeId, "products");
+        const snap = await getDocs(query(ref, where("slug", "==", slugOrId)));
+        if (!snap.empty) {
+            const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+            const p = transformToPublicProduct(data);
+            return p.status === 'active' ? p : null;
+        }
+        // 2) fallback por ID de documento
+        const { doc, getDoc } = await import('firebase/firestore');
+        const pRef = doc(db, "stores", storeId, "products", slugOrId);
+        const pSnap = await getDoc(pRef);
+        if (!pSnap.exists()) return null;
+        const data = { id: pSnap.id, ...pSnap.data() } as any;
+        const p = transformToPublicProduct(data);
+        return p.status === 'active' ? p : null;
+    } catch (e) {
+        console.warn("[public-store-v2] getProduct fallo", e);
+        return null;
+    }
 }
 
 
