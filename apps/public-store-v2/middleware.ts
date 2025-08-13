@@ -1,12 +1,20 @@
 import { NextResponse, NextRequest } from "next/server";
 
-const IGNORED_PATHS = ["/_next", "/api", "/robots.txt", "/sitemap.xml", "/healthz"];
+const IGNORED_PATHS = [
+	"/_next",
+	"/api",
+	"/robots.txt",
+	"/sitemap.xml",
+	"/healthz",
+	"/favicon.ico"
+];
 
 export function middleware(req: NextRequest) {
 	const { nextUrl } = req;
 	const { pathname, hostname, search } = nextUrl;
 
-	if (IGNORED_PATHS.some((p) => pathname.startsWith(p))) {
+    // Ignorar rutas especiales y archivos estáticos (con extensión)
+    if (IGNORED_PATHS.some((p) => pathname.startsWith(p)) || pathname.includes(".")) {
 		return NextResponse.next();
 	}
 
