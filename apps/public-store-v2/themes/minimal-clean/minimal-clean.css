@@ -31,6 +31,9 @@
 /* Normalizar enlaces para evitar azul por defecto en móvil */
 [data-theme="minimal-clean"] a { color: inherit; text-decoration: none; }
 [data-theme="minimal-clean"] a:visited { color: inherit; }
+/* Excepciones: los botones deben respetar su color propio */
+[data-theme="minimal-clean"] .mc-btn { color: var(--mc-primary-contrast); }
+[data-theme="minimal-clean"] .mc-btn.mc-btn--outline { color: var(--mc-primary); }
 
 /* Loading state */
 .mc-loading {
@@ -333,13 +336,14 @@
 
 .mc-title {
 	margin: 0 0 6px;
-	font-weight: 600;
+	font-weight: 500;
 	letter-spacing: -0.01em;
 }
 
 .mc-price {
 	margin: 0;
 	color: var(--mc-text-muted);
+	font-weight: 400;
 }
 
 .mc-footer {

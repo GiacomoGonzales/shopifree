@@ -27,6 +27,7 @@ export type StoreBasicInfo = {
     description?: string;
     heroImageUrl?: string;
     logoUrl?: string;
+    currency?: string;
     emailStore?: string;
     phone?: string;
     address?: string;
@@ -75,6 +76,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             description: data.description || data.slogan || "",
             heroImageUrl: data.heroImageUrl || data.headerImageUrl || data.logoUrl || undefined,
             logoUrl: data.logoUrl || data.headerLogoUrl || undefined,
+            currency: data.currency || data.currencyCode || undefined,
             emailStore: data.emailStore || data.email || undefined,
             phone: data.phone || data.phoneNumber || undefined,
             address: data.address || data.direction || data.direccion || undefined,

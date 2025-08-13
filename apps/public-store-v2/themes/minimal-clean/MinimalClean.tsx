@@ -278,7 +278,13 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 						</div>
 						<div className="mc-body">
 							<h3 className="mc-title">{"name" in p ? p.name : (p as any).title}</h3>
-							<p className="mc-price">${"price" in p ? p.price : (p as any).price}</p>
+                            <p className="mc-price">
+                                {storeInfo?.currency ? (
+                                    new Intl.NumberFormat(undefined, { style: "currency", currency: storeInfo.currency, currencyDisplay: "symbol", minimumFractionDigits: 0 }).format(("price" in p ? (p.price as number) : (p as any).price) as number)
+                                ) : (
+                                    `$${"price" in p ? p.price : (p as any).price}`
+                                )}
+                            </p>
 						</div>
 					</article>
 				))}
