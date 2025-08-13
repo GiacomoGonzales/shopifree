@@ -5,6 +5,7 @@ import "./minimal-clean.css";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
+import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { toCloudinarySquare } from "../../lib/images";
 
 type Props = {
@@ -18,6 +19,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
     const [products, setProducts] = useState<PublicProduct[] | null>(null);
     const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
+    const [brands, setBrands] = useState<PublicBrand[] | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [mobileView, setMobileView] = useState<"expanded" | "grid2" | "list">("expanded");
     const [isAnimatingView, setIsAnimatingView] = useState<boolean>(false);
@@ -59,15 +61,17 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 				if (!alive) return;
 				setStoreId(id);
                 if (id) {
-                    const [items, info, cats] = await Promise.all([
+                    const [items, info, cats, brandList] = await Promise.all([
                         getStoreProducts(id),
                         getStoreBasicInfo(id),
-                        getStoreCategories(id)
+                        getStoreCategories(id),
+                        getStoreBrands(id)
                     ]);
 					if (!alive) return;
                     setProducts(items);
                     setStoreInfo(info);
                     setCategories(cats);
+                    setBrands(brandList);
 				}
 			} finally {
 				if (alive) setLoading(false);
@@ -167,7 +171,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 				</div>
 			</header>
 
-			<section className="mc-hero">
+            <section className="mc-hero">
                 <div className="mc-hero-copy">
                     <h1>{storeInfo?.storeName || storeSubdomain}</h1>
                     {storeInfo?.description ? <p>{storeInfo.description}</p> : null}
@@ -188,6 +192,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 			<section id="products" className="mc-products">
                 <div className="mc-toolbar">
 					<div className="mc-toolbar-title">Explora por categorías</div>
+					<div className="mc-toolbar-subtitle">Elige una categoría para explorar</div>
                     <div className="mc-toolbar-inner">
 						<button className={`mc-chip ${!activeCategory ? "is-active" : ""}`} onClick={() => setActiveCategory(null)}>Todos</button>
 						{topLevelCategories.map((c) => (
@@ -280,9 +285,122 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 				</div>
 			</section>
 
-			<footer className="mc-footer">
-				<div className="mc-footer-inner">© {new Date().getFullYear()} Shopifree</div>
-			</footer>
+			{Array.isArray(brands) && brands.length > 0 && (
+				<section className="mc-brands" aria-label="Marcas">
+					<div className="mc-brands-inner">
+						<div className="mc-brands-title">Nuestras marcas</div>
+						<div className="mc-brands-subtitle">Marcas con las que trabajamos</div>
+						<div className="mc-brands-track">
+							{Array.from({ length: 4 }).flatMap(() => brands).map((b, i) => (
+								<a key={`brand-${b.id}-${i}`} className="mc-brand" href={`/#brand-${b.id}`} onClick={(e) => { (e.currentTarget as HTMLAnchorElement).classList.add("is-active"); }}>
+									{b.image ? (
+										<img src={b.image} alt={b.name} loading="lazy" />
+									) : (
+										<span>{b.name}</span>
+									)}
+								</a>
+							))}
+						</div>
+					</div>
+				</section>
+			)}
+
+            <footer className="mc-footer">
+                <div className="mc-footer-inner">
+                    <div className="mc-footer-grid">
+                        <div>
+                            <h4 className="mc-footer-title">{storeInfo?.storeName || storeSubdomain}</h4>
+                            {storeInfo?.description ? (
+                                <p className="mc-footer-text">{storeInfo.description}</p>
+                            ) : null}
+                            <div className="mc-footer-text" style={{ marginTop: 8 }}>
+                                {storeInfo?.phone ? <div>Tel: {storeInfo.phone}</div> : null}
+                                {storeInfo?.emailStore ? <div>Email: {storeInfo.emailStore}</div> : null}
+                                {storeInfo?.address ? <div>Dirección: {storeInfo.address}</div> : null}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="mc-footer-title">Navegación</h4>
+                            {Array.isArray(categories) && categories.filter(c => !c.parentCategoryId).length > 0 ? (
+                                <ul className="mc-footer-list">
+                                    {categories.filter(c => !c.parentCategoryId).map((c) => (
+                                        <li key={`fcat-${c.id}`}><a className="mc-footer-link" href={`/#cat-${c.slug}`}>{c.name}</a></li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="mc-footer-text">Sin categorías</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <h4 className="mc-footer-title">Síguenos</h4>
+                            <div className="mc-socials">
+                                {storeInfo?.socialMedia?.instagram ? (
+                                    <a className="mc-social-link" href={storeInfo.socialMedia.instagram} target="_blank" rel="noopener noreferrer">
+                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>
+                                        Instagram
+                                    </a>
+                                ) : null}
+                                {storeInfo?.socialMedia?.facebook ? (
+                                    <a className="mc-social-link" href={storeInfo.socialMedia.facebook} target="_blank" rel="noopener noreferrer">
+                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M13 10h2V7h-2c-1.657 0-3 1.343-3 3v2H8v3h2v6h3v-6h2.2l.8-3H13v-2c0-.552.448-1 1-1Z"/></svg>
+                                        Facebook
+                                    </a>
+                                ) : null}
+                                {storeInfo?.socialMedia?.tiktok ? (
+                                    <a className="mc-social-link" href={storeInfo.socialMedia.tiktok} target="_blank" rel="noopener noreferrer">
+                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v4a5 5 0 0 0 5 5h2v3a9 9 0 1 1-9-9h2Z"/></svg>
+                                        TikTok
+                                    </a>
+                                ) : null}
+                                {storeInfo?.socialMedia?.whatsapp ? (
+                                    <a className="mc-social-link" href={storeInfo.socialMedia.whatsapp} target="_blank" rel="noopener noreferrer">
+                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 16.31 5.31L22 22l-3.15-2.69A9 9 0 0 0 3 12Z"/><path d="M8.5 10.5c0 3 4 6 6 6 .5 0 1.5-1 1.5-1.5 0-.2-.2-.5-.5-.7l-.9-.6c-.2-.1-.5-.1-.7 0l-.6.3c-.8-.3-1.7-1.2-2-2l.3-.6c.1-.2.1-.5 0-.7l-.6-.9c-.2-.3-.5-.5-.7-.5-.5 0-1.5 1-1.5 1.5Z"/></svg>
+                                        WhatsApp
+                                    </a>
+                                ) : null}
+                                {storeInfo?.socialMedia?.youtube ? (
+                                    <a className="mc-social-link" href={storeInfo.socialMedia.youtube} target="_blank" rel="noopener noreferrer">
+                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M10 9.5v5l5-2.5-5-2.5Z"/></svg>
+                                        YouTube
+                                    </a>
+                                ) : null}
+                                {storeInfo?.socialMedia?.twitter || storeInfo?.socialMedia?.x ? (
+                                    <a className="mc-social-link" href={(storeInfo?.socialMedia?.twitter || storeInfo?.socialMedia?.x) as string} target="_blank" rel="noopener noreferrer">
+                                        <svg className="mc-social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M21 3L3 21"/></svg>
+                                        X/Twitter
+                                    </a>
+                                ) : null}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="mc-footer-title">Ubícanos</h4>
+                            {storeInfo?.address ? (
+                                <div className="mc-footer-text" style={{ marginBottom: 8 }}>{storeInfo.address}</div>
+                            ) : null}
+                            <div className="mc-map">
+                                {storeInfo?.address ? (
+                                    <iframe
+                                        title="Mapa"
+                                        src={`https://www.google.com/maps?q=${encodeURIComponent(storeInfo.address)}&output=embed`}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0 }}
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    />
+                                ) : (
+                                    <div style={{ height: '100%' }} />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mc-footer-bottom">© {new Date().getFullYear()} {storeInfo?.storeName || 'Shopifree'}</div>
+                </div>
+            </footer>
 		</div>
 	);
 }
