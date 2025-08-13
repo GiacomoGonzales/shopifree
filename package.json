@@ -19,6 +19,7 @@
     "dev:landing": "npm run dev --workspace=@shopifree/landing",
     "dev:dashboard": "npm run dev --workspace=@shopifree/dashboard",
     "dev:public-store": "npm run dev --workspace=@shopifree/public-store",
+    "dev:public-store-v2": "npm run dev --workspace=@shopifree/public-store-v2",
     "dev:admin": "npm run dev --workspace=@shopifree/admin"
   },
   "devDependencies": {
