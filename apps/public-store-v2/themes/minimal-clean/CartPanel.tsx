@@ -24,8 +24,8 @@ export default function CartPanel() {
 
   return (
     <>
-      <div className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-300 ${state.isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={closeCart} />
-      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-all duration-300 ${state.isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
+      <div className={`fixed inset-0 cart-overlay z-40 transition-all duration-300 ${state.isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={closeCart} />
+      <div className={`fixed top-0 right-0 h-full w-96 cart-panel z-50 transform transition-all duration-300 ${state.isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center"><Icons.ShoppingBag /></div>

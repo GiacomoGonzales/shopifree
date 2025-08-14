@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { StoreBasicInfo } from "../../lib/store";
 import { Category } from "../../lib/categories";
 import { toCloudinarySquare } from "../../lib/images";
-import Cart from "./Cart";
 import { useCart } from "../../lib/cart-context";
 
 type Props = {
@@ -15,6 +14,7 @@ type Props = {
 
 export default function Header({ storeInfo, categories, storeSubdomain }: Props) {
 	const [isScrolled, setIsScrolled] = useState(false);
+	const { state, openCart } = useCart();
 	const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -115,7 +115,16 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
 							<svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
 						</a>
 						{/* Botón carrito */}
-						<Cart />
+						<button
+							aria-label="Carrito"
+							onClick={() => openCart()}
+							className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale"
+						>
+							<svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="20" r="1.25" /><circle cx="17" cy="20" r="1.25" /><path d="M3 4h2l2.2 12h12.2L21 8H6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+							{state.totalItems > 0 && (
+								<span className="absolute -top-1 -right-1 w-5 h-5 bg-neutral-900 text-white text-xs rounded-full flex items-center justify-center font-medium">{state.totalItems}</span>
+							)}
+						</button>
 						<button className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200" aria-label="Abrir menú" onClick={() => setMobileMenuOpen(true)}>
 							<svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h16" strokeWidth="1.5" strokeLinecap="round"/></svg>
 						</button>
