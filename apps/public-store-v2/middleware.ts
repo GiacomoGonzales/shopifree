@@ -36,13 +36,13 @@ function normalizeHost(headerHost: string | null): string {
 
 async function findSubdomainForCustomHost(host: string): Promise<string | null> {
 	try {
-		const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-		const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+		const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT;
+		const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY;
 		if (!projectId || !apiKey) return null;
 
 		const endpoint = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`;
 
-		async function run(fieldPath: string): Promise<{ subdomain?: string; slug?: string } | null> {
+		async function run(fieldPath: string, value: string): Promise<{ subdomain?: string; slug?: string } | null> {
 			const body = {
 				structuredQuery: {
 					from: [{ collectionId: "stores" }],
@@ -50,7 +50,7 @@ async function findSubdomainForCustomHost(host: string): Promise<string | null> 
 						fieldFilter: {
 							field: { fieldPath },
 							op: "EQUAL",
-							value: { stringValue: host }
+							value: { stringValue: value }
 						}
 					},
 					limit: 1
@@ -74,10 +74,32 @@ async function findSubdomainForCustomHost(host: string): Promise<string | null> 
 			return null;
 		}
 
+		// Intentar con valores de host en distintas variantes (por si fue guardado con protocolo o www)
+		const bare = host.toLowerCase();
+		const withWww = bare.startsWith('www.') ? bare : `www.${bare}`;
+		const withoutWww = bare.replace(/^www\./, '');
+		const hostCandidates = Array.from(new Set([
+			bare,
+			withoutWww,
+			withWww,
+			`https://${bare}`,
+			`http://${bare}`,
+			`https://${withWww}`,
+			`http://${withWww}`
+		]));
+
 		// Intentar con los dos posibles esquemas
-		const first = await run('advanced.customDomain.domain');
+		let first: { subdomain?: string; slug?: string } | null = null;
+		for (const candidate of hostCandidates) {
+			first = await run('advanced.customDomain.domain', candidate);
+			if (first?.subdomain || first?.slug) break;
+		}
 		if (first?.subdomain || first?.slug) return first.subdomain || first.slug || null;
-		const legacy = await run('settings.domain.customDomain');
+		let legacy: { subdomain?: string; slug?: string } | null = null;
+		for (const candidate of hostCandidates) {
+			legacy = await run('settings.domain.customDomain', candidate);
+			if (legacy?.subdomain || legacy?.slug) break;
+		}
 		if (legacy?.subdomain || legacy?.slug) return legacy.subdomain || legacy.slug || null;
 		return null;
 	} catch {
