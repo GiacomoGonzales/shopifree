@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { StoreBasicInfo } from "../../lib/store";
 import { Category } from "../../lib/categories";
 import { toCloudinarySquare } from "../../lib/images";
+import Cart from "./Cart";
+import { useCart } from "../../lib/cart-context";
 
 type Props = {
 	storeInfo: StoreBasicInfo | null;
@@ -112,6 +114,8 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
 						<a className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200 hover-scale" href={getSubdomainUrl("/favoritos")} aria-label="Favoritos">
 							<svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
 						</a>
+						{/* Botón carrito */}
+						<Cart />
 						<button className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 transition-colors duration-200" aria-label="Abrir menú" onClick={() => setMobileMenuOpen(true)}>
 							<svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h16" strokeWidth="1.5" strokeLinecap="round"/></svg>
 						</button>
