@@ -249,9 +249,9 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                     )}
 				</div>
 
-                <div className={`mc-grid ${mobileView === "grid2" ? "mobile-grid2" : mobileView === "list" ? "mobile-list" : "mobile-expanded"} ${isAnimatingView ? "is-animating" : ""}`}>
+				<div className={`mc-grid ${mobileView === "grid2" ? "mobile-grid2" : mobileView === "list" ? "mobile-list" : "mobile-expanded"} ${isAnimatingView ? "is-animating" : ""} grid-base grid-base-products`}>
                 {hasProducts && visibleProducts.map((p) => (
-                    <article key={p.id} className={`mc-card${mobileView === "list" ? " is-list" : ""}`} onClick={(e) => {
+					<article key={p.id} className={`mc-card card-base product-card-transition ${mobileView === "list" ? "product-card-base-list is-list" : "product-card-base-compact"}`} onClick={(e) => {
                         try {
                             const base = window.location.pathname.split('/').filter(Boolean);
                             const locale = base[0];
@@ -263,7 +263,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                             window.location.href = `/${locale}/${sub}/producto/${encodeURIComponent(slug)}`;
                         } catch {}
                     }} role="link" tabIndex={0}>
-						<div className="mc-media">
+						<div className="mc-media product-image">
 						{"video" in p && (p as any).video ? (
 								<video src={(p as any).video} muted autoPlay playsInline loop preload="metadata" />
 						) : ("image" in p && (p as any).image ? (
@@ -273,14 +273,25 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 						))}
 						</div>
 						<div className="mc-body">
-							<h3 className="mc-title">{"name" in p ? p.name : (p as any).title}</h3>
-                            <p className="mc-price">
-                                {storeInfo?.currency ? (
-                                    new Intl.NumberFormat(undefined, { style: "currency", currency: storeInfo.currency, currencyDisplay: "symbol", minimumFractionDigits: 0 }).format(("price" in p ? (p.price as number) : (p as any).price) as number)
-                                ) : (
-                                    `$${"price" in p ? p.price : (p as any).price}`
-                                )}
-                            </p>
+							<h3 className="mc-title product-title">{"name" in p ? p.name : (p as any).title}</h3>
+							<p className="mc-price">
+								<span className="price-current">
+									{storeInfo?.currency ? (
+										new Intl.NumberFormat(undefined, { style: "currency", currency: storeInfo.currency, currencyDisplay: "symbol", minimumFractionDigits: 0 }).format(("price" in p ? (p.price as number) : (p as any).price) as number)
+									) : (
+										`$${"price" in p ? p.price : (p as any).price}`
+									)}
+								</span>
+								{(p as any).comparePrice ? (
+									<span className="price-original" style={{ marginLeft: 8 }}>
+										{storeInfo?.currency ? (
+											new Intl.NumberFormat(undefined, { style: "currency", currency: storeInfo.currency, currencyDisplay: "symbol", minimumFractionDigits: 0 }).format((p as any).comparePrice as number)
+										) : (
+											`$${(p as any).comparePrice}`
+										)}
+									</span>
+								) : null}
+							</p>
 						</div>
 					</article>
 				))}
