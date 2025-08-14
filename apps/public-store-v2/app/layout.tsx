@@ -1,4 +1,6 @@
-import "./globals.css";
+import "../styles/globals.css";
+// import "../styles/tokens.css"; // no existía en el commit base
+// import "../styles/fonts.css";  // no existían fuentes locales en el commit base
 export const metadata = {
 	title: "Shopifree Public Store",
 	description: "Tienda pública minimal",

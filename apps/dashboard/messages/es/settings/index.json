@@ -9,7 +9,8 @@
   "sections": {
     "info": "Información de la tienda",
     "contact": "Contacto",
-    "sales": "Ventas"
+    "sales": "Ventas",
+    "advanced": "Configuración Avanzada"
   },
   "storeInfo": {
     "title": "Información de la Tienda",
@@ -92,6 +93,11 @@
     "pinterestPlaceholder": "https://pinterest.com/mi-tienda"
   },
   "advanced": {
+    "actions": {
+      "saved": "Configuración guardada",
+      "error": "Error al guardar",
+      "saving": "Guardando..."
+    },
     "tabs": {
       "checkout": "Método de Checkout",
       "payments": "Pasarela de Pago",
@@ -109,6 +115,23 @@
         "spanish": "Español",
         "english": "Inglés"
       }
+    },
+    "customDomain": {
+      "title": "Conectar dominio personalizado",
+      "description": "Usa tu propio dominio para tu tienda. Ejemplo: mi-tienda.com",
+      "domainLabel": "Dominio",
+      "placeholder": "mi-tienda.com",
+      "status": "Estado",
+      "ssl": "SSL",
+      "sslActive": "activo",
+      "sslPending": "pendiente",
+      "verified": "Verificado",
+      "yes": "sí",
+      "no": "no",
+      "lastChecked": "Última verificación",
+      "save": "Guardar dominio",
+      "saving": "Guardando…",
+      "verifyNow": "Verificar ahora"
     },
     "payments": {
       "title": "Pasarela de Pago",

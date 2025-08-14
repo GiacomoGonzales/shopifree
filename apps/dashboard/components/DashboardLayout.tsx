@@ -220,7 +220,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       const generalSectionTitles: Record<string, string> = {
         'info': 'storeInfoTitle',
         'contact': 'contactTitle',
-        'sales': 'salesTitle'
+        'sales': 'salesTitle',
+        // Mapa especial para la sub-sección avanzada dentro de general
+        'advanced': 'advancedSettings'
       }
       return t(generalSectionTitles[currentSection] || `sections.${currentSection}`)
     }

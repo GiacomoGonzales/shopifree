@@ -9,7 +9,8 @@
   "sections": {
     "info": "Store information",
     "contact": "Contact",
-    "sales": "Sales"
+    "sales": "Sales",
+    "advanced": "Advanced settings"
   },
   "storeInfo": {
     "title": "Store Information",
@@ -92,6 +93,11 @@
     "pinterestPlaceholder": "https://pinterest.com/my-store"
   },
   "advanced": {
+    "actions": {
+      "saved": "Settings saved",
+      "error": "Error saving",
+      "saving": "Saving..."
+    },
     "tabs": {
       "checkout": "Checkout Method",
       "payments": "Payment Gateway",
@@ -108,6 +114,23 @@
         "spanish": "Spanish",
         "english": "English"
       }
+    },
+    "customDomain": {
+      "title": "Connect custom domain",
+      "description": "Use your own domain for your store. Example: my-store.com",
+      "domainLabel": "Domain",
+      "placeholder": "my-store.com",
+      "status": "Status",
+      "ssl": "SSL",
+      "sslActive": "active",
+      "sslPending": "pending",
+      "verified": "Verified",
+      "yes": "yes",
+      "no": "no",
+      "lastChecked": "Last checked",
+      "save": "Save domain",
+      "saving": "Saving…",
+      "verifyNow": "Verify now"
     },
     "payments": {
       "title": "Payment Gateway",
