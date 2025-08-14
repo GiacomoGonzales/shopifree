@@ -156,23 +156,66 @@ export default function MinimalClean({ storeSubdomain }: Props) {
         <div data-theme="minimal-clean">
             <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
 
-            <section className="mc-hero">
-                <div className="mc-hero-copy">
-                    <h1>{storeInfo?.storeName || storeSubdomain}</h1>
-                    {storeInfo?.description ? <p>{storeInfo.description}</p> : null}
-                    <div className="mc-cta">
-                        <a className="mc-btn" href="#ofertas">{t('offers')}</a>
-                        <a className="mc-btn mc-btn--outline" href="#catalogo">{t('catalog')}</a>
-                    </div>
-                </div>
-                <div className="mc-hero-media">
-                    {storeInfo?.heroImageUrl ? (
-                        <img src={toCloudinarySquare(storeInfo.heroImageUrl, 1200)} alt={storeInfo.storeName} />
-                    ) : (
-                        <div />
-                    )}
-                </div>
-            </section>
+			{/* Hero base-default */}
+			<section className="relative min-h-[75vh] bg-gradient-to-b from-neutral-50 to-white pt-24 lg:pt-32 pb-8">
+				<div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+					<div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[55vh]">
+
+						{/* Columna izquierda: texto */}
+						<div className="space-y-6 text-center lg:text-left">
+							<div className="space-y-6 animate-slide-up">
+								<h1 className="text-4xl md:text-6xl lg:text-7xl font-extralight text-neutral-900 tracking-tight leading-tight">
+									{storeInfo?.storeName || storeSubdomain}
+								</h1>
+								{storeInfo?.description ? (
+									<p className="text-lg md:text-xl lg:text-2xl text-neutral-600 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
+										{storeInfo.description}
+									</p>
+								) : null}
+							</div>
+
+							<div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center animate-fade-in">
+								<a href="#catalogo" className="bg-neutral-900 text-white hover:bg-neutral-800 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out border-0 hover-lift inline-flex items-center space-x-2">
+									<span>{t('catalog')}</span>
+								</a>
+								<a href="#ofertas" className="border border-neutral-300 text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 px-6 py-3 rounded-md font-medium transition-all duration-200 ease-in-out bg-transparent hover-scale">
+									{t('offers')}
+								</a>
+							</div>
+						</div>
+
+						{/* Columna derecha: imagen */}
+						<div className="relative lg:h-[60vh] h-[50vh] order-first lg:order-last">
+							<div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+								{storeInfo?.heroImageUrl ? (
+									<img
+										src={toCloudinarySquare(storeInfo.heroImageUrl, 1200)}
+										alt={storeInfo.storeName || 'Hero'}
+										className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+									/>
+								) : (
+									<div className="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
+										<div className="text-center space-y-4">
+											<div className="w-24 h-24 mx-auto bg-neutral-300 rounded-full flex items-center justify-center">
+												<svg className="w-12 h-12 text-neutral-500" fill="currentColor" viewBox="0 0 20 20">
+													<path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+												</svg>
+											</div>
+											<p className="text-neutral-500 font-light">Imagen de héroe</p>
+										</div>
+									</div>
+								)}
+							</div>
+							<div className="absolute -bottom-2 -right-2 w-full h-full bg-gradient-to-br from-neutral-900/10 to-transparent rounded-2xl -z-10" />
+						</div>
+
+					</div>
+				</div>
+
+				{/* Decorativos sutiles */}
+				<div className="absolute top-20 right-20 w-1 h-1 bg-neutral-400 rounded-full opacity-40 animate-pulse hidden lg:block" />
+				<div className="absolute bottom-32 left-16 w-0.5 h-0.5 bg-neutral-400 rounded-full opacity-60 animate-pulse hidden lg:block" />
+			</section>
 
 			<section id="products" className="mc-products">
                 <div className="mc-toolbar">
