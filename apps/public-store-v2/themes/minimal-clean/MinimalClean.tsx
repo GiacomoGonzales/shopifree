@@ -26,6 +26,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
     const [categories, setCategories] = useState<Category[] | null>(null);
     const [brands, setBrands] = useState<PublicBrand[] | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
     const [mobileView, setMobileView] = useState<"expanded" | "grid2" | "list">("expanded");
     const [isAnimatingView, setIsAnimatingView] = useState<boolean>(false);
     type SortOption = "relevance" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
@@ -109,10 +110,25 @@ export default function MinimalClean({ storeSubdomain }: Props) {
 
     const hasProducts = Array.isArray(products) && products.length > 0;
     const topLevelCategories = useMemo(() => (Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : []), [categories]);
+    const subcategoriesByParent = useMemo(() => {
+        const map: Record<string, Category[]> = {};
+        (Array.isArray(categories) ? categories : []).forEach(c => {
+            if (c.parentCategoryId) {
+                map[c.parentCategoryId] = map[c.parentCategoryId] || [];
+                map[c.parentCategoryId].push(c);
+            }
+        });
+        return map;
+    }, [categories]);
+    const visibleToolbarCategories: Category[] = useMemo(() => {
+        if (!Array.isArray(categories)) return [];
+        if (!selectedParentCategory) return topLevelCategories;
+        return subcategoriesByParent[selectedParentCategory] || [];
+    }, [categories, selectedParentCategory, subcategoriesByParent, topLevelCategories]);
     const visibleProducts = useMemo(() => {
         if (!hasProducts) return [] as PublicProduct[];
         let base: PublicProduct[] = products as PublicProduct[];
-        if (activeCategory) {
+        if (activeCategory && activeCategory !== 'todos') {
             try {
                 base = base.filter((p: any) => {
                     const slugs: string[] = (p?.categorySlugs as string[]) || (p?.categories?.map((c: any) => c?.slug).filter(Boolean)) || (p?.categorySlug ? [p.categorySlug] : []);
@@ -222,12 +238,44 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                     <div className="mc-toolbar-title">{t('nav.categories')}</div>
                     <div className="mc-toolbar-subtitle">&nbsp;</div>
                     <div className="mc-toolbar-inner">
-                        <button className={`mc-chip ${!activeCategory ? "is-active" : ""}`} onClick={() => setActiveCategory(null)}>{t('all')}</button>
-						{topLevelCategories.map((c) => (
-							<button key={c.id} className={`mc-chip ${activeCategory === c.slug ? "is-active" : ""}`} onClick={() => setActiveCategory(c.slug)}>
-								{c.name}
-							</button>
-						))}
+                        {/* Chip "Volver" cuando estamos viendo subcategorías */}
+                        {selectedParentCategory && (
+                            <button
+                                className="mc-chip"
+                                onClick={() => { setSelectedParentCategory(null); setActiveCategory(null); }}
+                                aria-label="Volver a categorías principales"
+                            >
+                                ← {t('all')}
+                            </button>
+                        )}
+                        {/* Chip "Todos" */}
+                        <button
+                            className={`mc-chip ${!activeCategory ? "is-active" : ""}`}
+                            onClick={() => setActiveCategory(null)}
+                        >
+                            {t('all')}
+                        </button>
+                        {/* Chips de categorías visibles (padre o subcategorías) */}
+                        {visibleToolbarCategories.map((c) => {
+                            const hasChildren = (subcategoriesByParent[c.id] || []).length > 0;
+                            return (
+                                <button
+                                    key={c.id}
+                                    className={`mc-chip ${activeCategory === c.slug ? "is-active" : ""}`}
+                                    onClick={() => {
+                                        if (!selectedParentCategory && hasChildren) {
+                                            setSelectedParentCategory(c.id);
+                                            setActiveCategory('todos');
+                                        } else {
+                                            setActiveCategory(c.slug);
+                                        }
+                                    }}
+                                    aria-expanded={hasChildren && !selectedParentCategory ? true : undefined}
+                                >
+                                    {c.name}
+                                </button>
+                            );
+                        })}
 					</div>
                     <div className="mc-mobile-actions" aria-label="Acciones de productos (solo móvil)">
                         <button className="mc-btn mc-btn--outline mc-btn--sm" type="button">{t('actions.filters')}</button>
