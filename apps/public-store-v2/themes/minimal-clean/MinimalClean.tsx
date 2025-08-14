@@ -32,6 +32,9 @@ export default function MinimalClean({ storeSubdomain }: Props) {
     type SortOption = "relevance" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
     const [sortOption, setSortOption] = useState<SortOption>("relevance");
     const [showSort, setShowSort] = useState<boolean>(false);
+    const [showFilters, setShowFilters] = useState<boolean>(false);
+    const [onlyOnSale, setOnlyOnSale] = useState<boolean>(false);
+    const [withVideo, setWithVideo] = useState<boolean>(false);
 
     // Persistencia simple en localStorage (solo cliente)
     useEffect(() => {
@@ -137,6 +140,13 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                 });
             } catch {}
         }
+        // Filtros simples estilo base-default
+        if (onlyOnSale) {
+            base = base.filter((p: any) => typeof p.comparePrice === 'number' && (p.comparePrice as number) > (p.price as number));
+        }
+        if (withVideo) {
+            base = base.filter((p: any) => Boolean((p as any).video));
+        }
         // ordenamiento
         const list = [...base];
         switch (sortOption) {
@@ -156,7 +166,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                 break; // relevance: mantiene orden original
         }
         return list;
-    }, [products, hasProducts, activeCategory, sortOption]);
+    }, [products, hasProducts, activeCategory, sortOption, onlyOnSale, withVideo]);
 
     if (loading) {
 		return (
@@ -278,7 +288,7 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                         })}
 					</div>
                     <div className="mc-mobile-actions" aria-label="Acciones de productos (solo móvil)">
-                        <button className="mc-btn mc-btn--outline mc-btn--sm" type="button">{t('actions.filters')}</button>
+                        <button className="mc-btn mc-btn--outline mc-btn--sm" type="button" onClick={() => setShowFilters(true)}>{t('actions.filters')}</button>
                         <button
                             className="mc-btn mc-btn--outline mc-btn--sm"
                             type="button"
@@ -316,6 +326,32 @@ export default function MinimalClean({ storeSubdomain }: Props) {
                             )}
                         </button>
                     </div>
+                    {showFilters && (
+                        <>
+                            <button className="mc-sheet-backdrop" aria-hidden onClick={() => setShowFilters(false)} />
+                            <div className="mc-sheet" role="dialog" aria-modal="true" aria-label="Filtros">
+                                <div className="mc-sheet-panel">
+                                    <div className="mc-sheet-header">
+                                        <span>{t('actions.filters')}</span>
+                                        <button className="mc-icon-link" aria-label="Cerrar" onClick={() => setShowFilters(false)}>
+                                            <svg className="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                                        </button>
+                                    </div>
+                                    <div className="mc-sheet-body">
+                                        <label className="mc-sort-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <input type="checkbox" checked={onlyOnSale} onChange={(e) => setOnlyOnSale(e.target.checked)} />
+                                            <span>En oferta</span>
+                                        </label>
+                                        <label className="mc-sort-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <input type="checkbox" checked={withVideo} onChange={(e) => setWithVideo(e.target.checked)} />
+                                            <span>Con video</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
                     {showSort && (
                         <>
                             <button className="mc-sheet-backdrop" aria-hidden onClick={() => setShowSort(false)} />
