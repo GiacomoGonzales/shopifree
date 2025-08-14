@@ -102,6 +102,7 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
 											</div>
 										</div>
 									)}
+								</div>
 							);
 						})}
 					</nav>
