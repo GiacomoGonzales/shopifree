@@ -47,6 +47,8 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                     setStoreInfo(info);
                     setCategories(cats);
                     setBrands(brandList);
+                    
+
                 }
             } finally {
                 if (alive) setLoading(false);
@@ -212,21 +214,52 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                             filteredProducts.map((product) => (
                                 <div key={product.id} className="nbd-product-card">
                                     <div className="nbd-product-image">
-                                        {product.images && product.images[0] ? (
-                                            <img
-                                                src={toCloudinarySquare(product.images[0], 400)}
-                                                alt={product.name}
-                                                className="nbd-product-img"
-                                            />
-                                        ) : (
+                                        {(() => {
+                                            const imageUrl = product.image || product.mediaFiles?.[0]?.url;
+                                            // Usar 800px para pantallas retina (se mostrará como 400px pero nítido)
+                                            const processedUrl = imageUrl ? toCloudinarySquare(imageUrl, 800) : null;
+                                            
+                                            // Generar diferentes tamaños para srcset
+                                            const src400 = toCloudinarySquare(imageUrl, 400);
+                                            const src800 = processedUrl; // Ya es 800px
+                                            const src1200 = toCloudinarySquare(imageUrl, 1200);
+                                            
+                                            return processedUrl ? (
+                                                <img
+                                                    src={processedUrl}
+                                                    srcSet={`${src400} 400w, ${src800} 800w, ${src1200} 1200w`}
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    alt={product.name}
+                                                    className="nbd-product-img"
+                                                    loading="lazy"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                        const placeholder = e.currentTarget.parentElement?.querySelector('.nbd-product-placeholder-hidden');
+                                                        if (placeholder) {
+                                                            (placeholder as HTMLElement).style.display = 'flex';
+                                                        }
+                                                    }}
+                                                />
+                                            ) : null;
+                                        })()}
+                                        
+                                        <div className="nbd-product-placeholder nbd-product-placeholder-hidden" style={{ display: 'none' }}>
+                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                            <span className="nbd-placeholder-text">Sin imagen</span>
+                                        </div>
+                                        
+                                        {!product.image && !product.mediaFiles?.[0]?.url && (
                                             <div className="nbd-product-placeholder">
                                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                                                     <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                 </svg>
+                                                <span className="nbd-placeholder-text">Sin imagen</span>
                                             </div>
                                         )}
                                         
-                                        {product.discountPrice && (
+                                        {product.comparePrice && product.comparePrice > product.price && (
                                             <div className="nbd-product-badge">
                                                 Oferta
                                             </div>
@@ -241,10 +274,10 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                         
                                         <div className="nbd-product-footer">
                                             <div className="nbd-product-price">
-                                                {product.discountPrice ? (
+                                                {product.comparePrice && product.comparePrice > product.price ? (
                                                     <>
-                                                        <span className="nbd-price-current">${product.discountPrice}</span>
-                                                        <span className="nbd-price-original">${product.price}</span>
+                                                        <span className="nbd-price-current">${product.price}</span>
+                                                        <span className="nbd-price-original">${product.comparePrice}</span>
                                                     </>
                                                 ) : (
                                                     <span className="nbd-price-current">${product.price}</span>

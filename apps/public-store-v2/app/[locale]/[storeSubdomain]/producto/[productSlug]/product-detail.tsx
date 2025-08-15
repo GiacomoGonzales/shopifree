@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getStoreIdBySubdomain } from '../../../../../lib/store';
 import { getProduct, getProductBySlug, PublicProduct } from '../../../../../lib/products';
 import { toCloudinarySquare } from '../../../../../lib/images';
-import Layout from '../../../../../themes/minimal-clean/Layout';
+import Layout from '../../../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../../../lib/store';
 import { getStoreCategories, Category } from '../../../../../lib/categories';
 
@@ -103,33 +103,33 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       ) : null}
       {/* Breadcrumb visible */}
-      <nav className="mc-breadcrumbs" aria-label="Breadcrumb">
+      <nav className="nbd-breadcrumbs" aria-label="Breadcrumb">
         <a href={`/${l}/${storeSubdomain}`}>Inicio</a>
-        <span className="mc-breadcrumbs-sep">/</span>
+        <span className="nbd-breadcrumbs-sep">/</span>
         <a href={`/${l}/${storeSubdomain}/catalogo`}>Catálogo</a>
-        <span className="mc-breadcrumbs-sep">/</span>
+        <span className="nbd-breadcrumbs-sep">/</span>
         <span aria-current="page">{product.name}</span>
       </nav>
 
-      <div className="mc-product">
-        <div className="mc-product-media">
+      <div className="nbd-product">
+        <div className="nbd-product-media">
           {cover}
         </div>
         <div>
-          <h1 className="mc-product-title">{product.name}</h1>
+          <h1 className="nbd-product-title">{product.name}</h1>
           {typeof product.price === 'number' ? (
-            <p className="mc-product-price">
+            <p className="nbd-product-price">
               {new Intl.NumberFormat(undefined, { style: 'currency', currency: product.currency || 'USD', minimumFractionDigits: 0 }).format(product.price)}
             </p>
           ) : null}
 
           {product.description ? (
-            <div className="mc-product-description" dangerouslySetInnerHTML={{ __html: product.description }} />
+            <div className="nbd-product-description" dangerouslySetInnerHTML={{ __html: product.description }} />
           ) : null}
 
-          <div className="mc-product-actions">
-            <button className="mc-btn">Comprar</button>
-            <button className="mc-btn mc-btn--outline" onClick={() => history.back()}>Volver</button>
+          <div className="nbd-product-actions">
+            <button className="nbd-btn">Comprar</button>
+            <button className="nbd-btn nbd-btn--outline" onClick={() => history.back()}>Volver</button>
           </div>
         </div>
       </div>

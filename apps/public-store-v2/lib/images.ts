@@ -20,7 +20,8 @@ export function toCloudinarySquare(url: string | undefined | null, size: number 
 		// Detectar si el suffix comienza con "v" (version) o ya tiene transforms (letras y coma)
 		const hasVersionFirst = /^v\d+/.test(suffix);
 		const versionAndRest = hasVersionFirst ? suffix : suffix.replace(/^([^/]+)\//, "");
-		const transforms = `c_fill,g_auto,f_auto,q_auto:good,w_${size},h_${size},dpr_auto`;
+		// Transformaciones optimizadas para tarjetas de productos cuadradas
+		const transforms = `c_fill,g_auto,f_auto,q_auto:best,w_${size},h_${size},dpr_auto,fl_progressive:steep`;
 		return `${prefix}${transforms}/${versionAndRest}`;
 	} catch (_) {
 		return url;
