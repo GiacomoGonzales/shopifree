@@ -17,6 +17,7 @@ export type PublicProduct = {
 	currency?: string;
 	status?: "draft" | "active" | "archived";
     slug?: string;
+    categoryId?: string;
 };
 
 function transformToPublicProduct(raw: any): PublicProduct {
@@ -36,6 +37,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
 		currency: raw.currency ?? "USD",
 		status: raw.status ?? "active",
         slug: typeof raw.slug === 'string' ? raw.slug : undefined,
+        categoryId: typeof raw.categoryId === 'string' ? raw.categoryId : undefined,
 	};
 }
 
