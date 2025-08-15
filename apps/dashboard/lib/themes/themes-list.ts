@@ -3,68 +3,28 @@ import { Theme } from './theme-types'
 
 export const availableThemes: Theme[] = [
   {
-    id: 'base-default',
-    translationKey: 'baseDefault',
-    preview: '/themes/base-default/preview.jpg',
-    category: 'classic',
-    recommended: true,
-    colors: {
-      primary: brandColors.neutral[800],
-      secondary: brandColors.neutral[600]
-    }
-  },
-  {
-    id: 'mobile-modern',
-    translationKey: 'mobilemodern',
-    preview: '/themes/mobile-modern/preview.svg',
+    id: 'new-base-default',
+    translationKey: 'newBaseDefault',
+    preview: '/themes/new-base-default/preview.svg',
     category: 'modern',
     recommended: true,
     colors: {
-      primary: brandColors.blue[500],
-      secondary: brandColors.success
-    }
-  },
-  {
-    id: 'minimal-sushi',
-    translationKey: 'minimalSushi',
-    preview: '/themes/minimal-sushi/preview.svg',
-    category: 'minimal',
-    colors: {
-      primary: brandColors.neutral[900],
-      secondary: brandColors.neutral[500]
-    }
-  },
-  {
-    id: 'pet-friendly',
-    translationKey: 'petFriendly',
-    preview: '/themes/pet-friendly/preview.svg',
-    category: 'bold',
-    colors: {
-      primary: brandColors.indigo[700],
-      secondary: brandColors.indigo[500]
-    }
-  },
-  {
-    id: 'minimal-clean',
-    translationKey: 'minimalClean',
-    preview: '/themes/minimal-clean/preview.svg',
-    category: 'minimal',
-    colors: {
-      primary: brandColors.neutral[900],
-      secondary: brandColors.neutral[400]
-    }
-  },
-  {
-    id: 'elegant-boutique',
-    translationKey: 'elegantBoutique',
-    preview: '/themes/elegant-boutique/preview.jpg',
-    category: 'classic',
-    recommended: true,
-    colors: {
-      primary: '#8B7D6B', // Warm taupe
-      secondary: '#B8860B'  // Elegant gold
+      primary: '#171717', // Modern dark
+      secondary: '#737373'  // Modern gray
     }
   }
+  // TODO: Agregar más temas aquí conforme se vayan creando
+  // {
+  //   id: 'otro-tema',
+  //   translationKey: 'otroTema',
+  //   preview: '/themes/otro-tema/preview.svg',
+  //   category: 'categoria',
+  //   recommended: false,
+  //   colors: {
+  //     primary: '#000000',
+  //     secondary: '#ffffff'
+  //   }
+  // }
 ]
 
 // Función helper para obtener un tema por ID
@@ -78,4 +38,4 @@ export const isValidTheme = (themeId: string): boolean => {
 }
 
 // Tema por defecto
-export const DEFAULT_THEME_ID = 'base-default' 
+export const DEFAULT_THEME_ID = 'new-base-default' 

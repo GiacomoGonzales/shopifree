@@ -26,6 +26,12 @@ interface CustomerCardProps {
   t: (key: string) => string
 }
 
+// Helper function to safely get customer initials
+function getCustomerInitials(customer: CustomerWithId): string {
+  const name = customer.displayName || customer.email || 'U'
+  return name.charAt(0).toUpperCase()
+}
+
 function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurrency, t }: CustomerCardProps) {
   const [showMenu, setShowMenu] = useState(false)
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 })
@@ -76,7 +82,7 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
         <div className="flex-shrink-0">
           <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
             <span className="text-lg font-medium text-gray-700">
-              {customer.displayName.charAt(0).toUpperCase()}
+              {getCustomerInitials(customer)}
             </span>
           </div>
         </div>
@@ -86,7 +92,7 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-medium text-gray-900 truncate">
-                {customer.displayName}
+                {customer.displayName || customer.email || 'Cliente sin nombre'}
               </h3>
               <p className="text-sm text-gray-500 truncate">
                 {customer.email}
@@ -724,13 +730,13 @@ export default function CustomersPage() {
                                   <div className="flex-shrink-0 h-10 w-10">
                                     <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                                       <span className="text-sm font-medium text-gray-700">
-                                        {customer.displayName.charAt(0).toUpperCase()}
+                                        {getCustomerInitials(customer)}
                                       </span>
                                     </div>
                                   </div>
                                   <div className="ml-4">
                                     <div className="text-sm font-medium text-gray-900">
-                                      {customer.displayName}
+                                      {customer.displayName || customer.email || 'Cliente sin nombre'}
                                     </div>
                                   </div>
                                 </div>

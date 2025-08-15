@@ -32,6 +32,7 @@ export type StoreBasicInfo = {
     phone?: string;
     address?: string;
     language?: 'es' | 'en';
+    theme?: string;
     socialMedia?: {
         instagram?: string;
         facebook?: string;
@@ -42,6 +43,22 @@ export type StoreBasicInfo = {
         x?: string;
     };
 };
+
+export async function getStoreTheme(storeId: string): Promise<string> {
+	try {
+		const db = getFirebaseDb();
+		        if (!db) return 'new-base-default';
+		const { doc, getDoc } = await import("firebase/firestore");
+		const ref = doc(db, "stores", storeId);
+		const snap = await getDoc(ref);
+		        if (!snap.exists()) return 'new-base-default';
+        const data: any = snap.data();
+        return data.theme || 'new-base-default';
+    } catch (e) {
+        console.warn("[public-store-v2] getStoreTheme fallo", e);
+        return 'new-base-default';
+	}
+}
 
 export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo | null> {
 	try {
@@ -82,6 +99,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             phone: data.phone || data.phoneNumber || undefined,
             address: data.address || data.direction || data.direccion || undefined,
             language: (data?.advanced?.language === 'en' ? 'en' : (data?.advanced?.language === 'es' ? 'es' : undefined)),
+            theme: data.theme || 'new-base-default',
             socialMedia: socialFromGroup,
         };
 	} catch (e) {
