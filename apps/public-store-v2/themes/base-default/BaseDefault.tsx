@@ -95,10 +95,10 @@ export default function BaseDefault({ storeSubdomain }: Props) {
 
         // Filtros adicionales
         if (onlyOnSale) {
-            base = base.filter(p => p.discountPrice && p.discountPrice < (p.price || 0));
+            base = base.filter(p => p.comparePrice && p.comparePrice > (p.price || 0));
         }
         if (withVideo) {
-            base = base.filter(p => p.videoUrl);
+            base = base.filter(p => p.video);
         }
 
         // Ordenamiento
@@ -240,9 +240,9 @@ export default function BaseDefault({ storeSubdomain }: Props) {
                             filteredProducts.map((product) => (
                                 <div key={product.id} className="card-base bd-product-card">
                                     <div className="bd-product-image">
-                                        {product.images && product.images[0] ? (
+                                        {product.image ? (
                                             <img
-                                                src={toCloudinarySquare(product.images[0], 400)}
+                                                src={toCloudinarySquare(product.image, 400)}
                                                 alt={product.name}
                                                 className="bd-product-img"
                                             />
@@ -262,10 +262,10 @@ export default function BaseDefault({ storeSubdomain }: Props) {
                                         )}
                                         
                                         <div className="bd-product-price">
-                                            {product.discountPrice ? (
+                                            {product.comparePrice && product.comparePrice > product.price ? (
                                                 <>
-                                                    <span className="bd-price-original">${product.price}</span>
-                                                    <span className="bd-price-discount">${product.discountPrice}</span>
+                                                    <span className="bd-price-original">${product.comparePrice}</span>
+                                                    <span className="bd-price-discount">${product.price}</span>
                                                 </>
                                             ) : (
                                                 <span className="bd-price-current">${product.price}</span>
