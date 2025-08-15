@@ -44,19 +44,13 @@ export default function ThemeRenderer({ storeSubdomain }: Props) {
         };
     }, [storeSubdomain]);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 mx-auto mb-4"></div>
-                    <p className="text-neutral-600">Cargando tienda...</p>
-                </div>
-            </div>
-        );
-    }
+    // No mostrar loading aquí, dejar que el tema maneje toda la carga
 
-    // Renderizar el tema correspondiente
-    switch (theme) {
+    // Renderizar el tema correspondiente - usar new-base-default como default
+    // mientras se carga el tema real si es diferente
+    const themeToRender = theme || 'new-base-default';
+    
+    switch (themeToRender) {
         case 'new-base-default':
             return <NewBaseDefault storeSubdomain={storeSubdomain} />;
         // TODO: Agregar más casos aquí conforme se creen nuevos temas
@@ -64,7 +58,7 @@ export default function ThemeRenderer({ storeSubdomain }: Props) {
         //     return <OtroTema storeSubdomain={storeSubdomain} />;
         default:
             // Por ahora, solo tenemos new-base-default disponible
-            console.log(`Using new-base-default theme (requested: "${theme}")`);
+            console.log(`Using new-base-default theme (requested: "${themeToRender}")`);
             return <NewBaseDefault storeSubdomain={storeSubdomain} />;
     }
 }

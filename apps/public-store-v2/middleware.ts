@@ -138,33 +138,41 @@ export async function middleware(req: NextRequest) {
 		const currentLocale = hasLocale ? (first as typeof supportedLocales[number]) : null;
 		const hasSubdomainInPath = subdomain && segments[hasLocale ? 1 : 0] === subdomain;
 
-		// Construir ruta canónica deseada
-		let targetSegments = [...segments];
-
-		// Insertar subdominio si existe en host y no está en la ruta
-		if (subdomain && subdomain !== 'localhost' && !hasSubdomainInPath) {
-			const rest = hasLocale ? segments.slice(1) : segments;
-			const restSansDup = rest.filter((seg) => seg !== subdomain);
-			targetSegments = [currentLocale || '', subdomain, ...restSansDup].filter(Boolean) as string[];
-		}
-
-		// Asegurar locale
-		const ensureHasLocale = hasLocale || !subdomain ? hasLocale : false;
-		if (!ensureHasLocale) {
-			const preferred = getPreferredLocale(req, subdomain || '');
-			if (targetSegments.length === 0) {
-				targetSegments = [preferred];
-			} else if (supportedLocales.includes(targetSegments[0] as any)) {
-				// ya tiene locale
-			} else {
-				targetSegments = [preferred, ...targetSegments];
+		// Si hay subdominio en la URL pero tenemos subdominio en el host, hacer redirect sin el subdominio
+		if (subdomain && subdomain !== 'localhost' && hasSubdomainInPath) {
+			const rest = hasLocale ? segments.slice(2) : segments.slice(1); // Remover subdominio de la ruta
+			const preferred = hasLocale ? currentLocale : getPreferredLocale(req, subdomain);
+			const cleanSegments = [preferred, ...rest].filter(Boolean);
+			const cleanPathname = cleanSegments.length > 0 ? '/' + cleanSegments.join('/') : `/${preferred || 'es'}`;
+			
+			if (cleanPathname !== originalPathname) {
+				const to = new URL(cleanPathname + search, req.url);
+				return NextResponse.redirect(to, 301);
 			}
 		}
 
-		const targetPathname = '/' + targetSegments.join('/');
-		if (targetPathname !== originalPathname) {
-			const to = new URL(targetPathname + search, req.url);
-			return NextResponse.redirect(to);
+		// Asegurar que tengamos locale si no lo tiene
+		if (!hasLocale) {
+			const preferred = getPreferredLocale(req, subdomain || '');
+			const targetPathname = `/${preferred}${originalPathname === '/' ? '' : originalPathname}`;
+			if (targetPathname !== originalPathname) {
+				const to = new URL(targetPathname + search, req.url);
+				return NextResponse.redirect(to);
+			}
+		}
+
+		// Para rewrite interno, necesitamos agregar el subdominio para que Next.js encuentre la ruta correcta
+		if (subdomain && subdomain !== 'localhost') {
+			const currentSegments = originalPathname.split('/').filter(Boolean);
+			const locale = currentSegments[0] && supportedLocales.includes(currentSegments[0] as any) ? currentSegments[0] : 'es';
+			const pathAfterLocale = currentSegments.slice(supportedLocales.includes(currentSegments[0] as any) ? 1 : 0);
+			
+			// Solo hacer rewrite interno si no contiene ya el subdominio
+			if (!pathAfterLocale.includes(subdomain)) {
+				const internalSegments = [locale, subdomain, ...pathAfterLocale];
+				const internalPathname = '/' + internalSegments.join('/');
+				return NextResponse.rewrite(new URL(internalPathname + search, req.url));
+			}
 		}
 
 		// Si no hubo cambios, delegar a next-intl

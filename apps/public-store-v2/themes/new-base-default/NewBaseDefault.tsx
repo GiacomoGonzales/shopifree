@@ -26,6 +26,7 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
     const [brands, setBrands] = useState<PublicBrand[] | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
+    const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('expanded');
 
     // Cargar datos de la tienda
     useEffect(() => {
@@ -47,6 +48,9 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                     setStoreInfo(info);
                     setCategories(cats);
                     setBrands(brandList);
+                    
+                    console.log("Categorías cargadas:", cats);
+                    console.log("Categorías padre:", cats?.filter(c => !c.parentCategoryId));
                     
 
                 }
@@ -209,7 +213,64 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                         </p>
                     </div>
 
-                    <div className="nbd-products-grid">
+                    {/* Controles de productos */}
+                    <div className="nbd-product-controls">
+                        
+                        {/* Filtros */}
+                        <button className="nbd-control-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                            <span>Filtros</span>
+                        </button>
+
+                        {/* Ordenar */}
+                        <button className="nbd-control-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 7h3m0 0l3-3m-3 3l3 3M3 17h9m0 0l3-3m-3 3l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span>Ordenar</span>
+                        </button>
+
+                        {/* Vista */}
+                        <button 
+                            className="nbd-control-btn nbd-view-btn"
+                            onClick={() => {
+                                setMobileViewMode(prev => {
+                                    if (prev === 'expanded') return 'grid';
+                                    if (prev === 'grid') return 'list';
+                                    return 'expanded';
+                                });
+                            }}
+                            title={`Vista actual: ${
+                                mobileViewMode === 'expanded' ? 'Expandida' : 
+                                mobileViewMode === 'grid' ? '2 por fila' : 
+                                'Lista'
+                            }`}
+                        >
+                            {mobileViewMode === 'expanded' && (
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="1.5" rx="2"/>
+                                </svg>
+                            )}
+                            {mobileViewMode === 'grid' && (
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.5" rx="1"/>
+                                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.5" rx="1"/>
+                                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="1.5" rx="1"/>
+                                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="1.5" rx="1"/>
+                                </svg>
+                            )}
+                            {mobileViewMode === 'list' && (
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                                </svg>
+                            )}
+                            <span>Vista</span>
+                        </button>
+                    </div>
+
+                    <div className={`nbd-products-grid nbd-mobile-${mobileViewMode}`}>
                         {filteredProducts.length > 0 ? (
                             filteredProducts.map((product) => (
                                 <div key={product.id} className="nbd-product-card">
@@ -268,9 +329,6 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                     
                                     <div className="nbd-product-content">
                                         <h3 className="nbd-product-name">{product.name}</h3>
-                                        {product.description && (
-                                            <p className="nbd-product-description">{product.description}</p>
-                                        )}
                                         
                                         <div className="nbd-product-footer">
                                             <div className="nbd-product-price">
@@ -285,8 +343,8 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                             </div>
                                             
                                             <button className="nbd-add-to-cart">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V16A2 2 0 0115 18H9A2 2 0 017 16V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                 </svg>
                                             </button>
                                         </div>

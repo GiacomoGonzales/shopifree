@@ -67,13 +67,10 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
 
                     {/* Navegación principal - Desktop */}
                     <nav className="nbd-nav">
-                        <a href="#categorias" className="nbd-nav-link">
-                            Categorías
-                        </a>
                         <a href="#productos" className="nbd-nav-link">
                             Productos
                         </a>
-                        {topCategories.slice(0, 3).map(category => (
+                        {topCategories.slice(0, 4).map(category => (
                             <a
                                 key={category.id}
                                 href={getSubdomainUrl(`/categoria/${category.slug}`)}
@@ -89,8 +86,9 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
                         
                         {/* Búsqueda */}
                         <button className="nbd-action-btn" aria-label="Buscar productos">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19S2 15.194 2 10.5S5.806 2 10.5 2S19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
+                                <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                             </svg>
                         </button>
 
@@ -100,8 +98,10 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
                             className="nbd-cart-btn"
                             aria-label={`Carrito (${state.items.length} productos)`}
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V16A2 2 0 0115 18H9A2 2 0 017 16V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <path d="M6 2L3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6l-3-4H6z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="1.5"/>
+                                <path d="M16 10c0 2.21-1.79 4-4 4s-4-1.79-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                             {state.items.length > 0 && (
                                 <span className="nbd-cart-badge">{state.items.length}</span>
@@ -143,16 +143,6 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
                         </div>
                         
                         <nav className="nbd-mobile-nav">
-                            <a
-                                href="#categorias"
-                                className="nbd-mobile-nav-link"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                    <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M3 7L3 12M3 7H21M21 7V5C21 3.89543 20.1046 3 19 3H17M21 7V12M3 12V19C3 20.1046 3.89543 21 5 21H7M3 12H21M21 12V19C21 20.1046 20.1046 21 19 21H17M7 3V21M17 3V21" stroke="currentColor" strokeWidth="2"/>
-                                </svg>
-                                Categorías
-                            </a>
                             <a
                                 href="#productos"
                                 className="nbd-mobile-nav-link"
