@@ -11,6 +11,8 @@ export interface Category {
 	order?: number;
 	storeId?: string;
 	parentCategoryId?: string | null;
+	imageUrl?: string;
+	imagePublicId?: string;
 }
 
 export async function getStoreCategories(storeId: string): Promise<Category[]> {

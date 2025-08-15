@@ -26,7 +26,7 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
     const [brands, setBrands] = useState<PublicBrand[] | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
-    const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('expanded');
+    const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
 
     // Cargar datos de la tienda
     useEffect(() => {
@@ -155,45 +155,203 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                 </div>
             </section>
 
-            {/* Sección de categorías */}
-            <section id="categorias" className="nbd-categories">
+            {/* Sección de categorías con mosaico inteligente */}
+            {(() => {
+                // Preparar categorías para mostrar (priorizando padre sobre subcategorías)
+                const allCategories = Array.isArray(categories) ? categories : [];
+                const parentCategories = allCategories.filter(c => !c.parentCategoryId);
+                const subcategories = allCategories.filter(c => c.parentCategoryId);
+                
+                // Combinar y limitar a 10 máximo
+                const categoriesToShow = [
+                    ...parentCategories,
+                    ...subcategories.filter(sub => 
+                        !parentCategories.some(parent => parent.id === sub.parentCategoryId) || 
+                        parentCategories.length < 5
+                    )
+                ].slice(0, 10);
+
+                // Solo mostrar si hay 3 o más categorías
+                if (categoriesToShow.length < 3) return null;
+
+                // Determinar layout basado en cantidad
+                const getLayoutClass = (count: number) => {
+                    if (count === 3) return 'nbd-mosaic-3';
+                    if (count === 4) return 'nbd-mosaic-4';
+                    if (count === 5) return 'nbd-mosaic-5';
+                    if (count === 6) return 'nbd-mosaic-6';
+                    return 'nbd-mosaic-many';
+                };
+
+                return (
+                    <section id="categorias" className="nbd-categories-mosaic">
                 <div className="nbd-container">
                     <div className="nbd-section-header">
-                        <h2 className="nbd-section-title">Explora por categoría</h2>
-                        <p className="nbd-section-subtitle">Encuentra exactamente lo que buscas</p>
+                                <h2 className="nbd-section-title">Explora nuestras categorías</h2>
+                                <p className="nbd-section-subtitle">
+                                    Descubre nuestra variedad de productos organizados especialmente para ti
+                                </p>
+                            </div>
+                            
+                            <div className={`nbd-mosaic-grid ${getLayoutClass(categoriesToShow.length)}`}>
+                                {categoriesToShow.map((category, index) => {
+                                    const productCount = products?.filter(p => p.categoryId === category.id).length || 0;
+                                    const isParent = !category.parentCategoryId;
+                                    const isFeatured = index < 2; // Primeras 2 categorías son destacadas
+                                    
+                                    return (
+                                        <button
+                                            key={category.id}
+                                            className={`nbd-mosaic-card ${activeCategory === category.slug ? 'nbd-mosaic-card--active' : ''} ${
+                                                isFeatured ? 'nbd-mosaic-card--featured' : ''
+                                            } ${isParent ? 'nbd-mosaic-card--parent' : 'nbd-mosaic-card--sub'}`}
+                                            onClick={() => setActiveCategory(category.slug)}
+                                        >
+                                            {/* Imagen de fondo */}
+                                            <div className="nbd-mosaic-background">
+                                                {category.imageUrl ? (
+                                                    <img
+                                                        src={toCloudinarySquare(category.imageUrl, 800)}
+                                                        alt={category.name}
+                                                        className="nbd-mosaic-image"
+                                                        loading="lazy"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            const parent = target.parentElement as HTMLElement;
+                                                            target.style.display = 'none';
+                                                            if (parent) {
+                                                                parent.classList.add('nbd-mosaic-fallback-active');
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                
+                                                {/* Fallback pattern */}
+                                                <div className={`nbd-mosaic-fallback ${!category.imageUrl ? 'nbd-mosaic-fallback-active' : ''}`}>
+                                                    <div className="nbd-mosaic-pattern">
+                                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                                                            <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Overlay para legibilidad */}
+                                            <div className="nbd-mosaic-overlay"></div>
+                                            
+                                            {/* Contenido */}
+                                            <div className="nbd-mosaic-content">
+                                                <div className="nbd-mosaic-text">
+                                                    <h3 className="nbd-mosaic-title">{category.name}</h3>
+                                                    {category.description && (
+                                                        <p className="nbd-mosaic-description">
+                                                            {category.description}
+                                                        </p>
+                                                    )}
+                                                    <p className="nbd-mosaic-count">
+                                                        {productCount} {productCount === 1 ? 'producto' : 'productos'}
+                                                    </p>
+                                                </div>
+                                                
+                                                <div className="nbd-mosaic-arrow">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                     </div>
                     
-                    <div className="nbd-categories-grid">
-                        <button
-                            className={`nbd-category-card ${!activeCategory ? 'nbd-category-card--active' : ''}`}
+                            {/* Botón "Ver todos" */}
+                            <div className="nbd-mosaic-footer">
+                                                        <button
+                                    className={`nbd-view-all-btn ${!activeCategory ? 'nbd-view-all-btn--active' : ''}`}
                             onClick={() => setActiveCategory(null)}
                         >
-                            <div className="nbd-category-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                     <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M3 7L3 12M3 7H21M21 7V5C21 3.89543 20.1046 3 19 3H17M21 7V12M3 12V19C3 20.1046 3.89543 21 5 21H7M3 12H21M21 12V19C21 20.1046 20.1046 21 19 21H17M7 3V21M17 3V21" stroke="currentColor" strokeWidth="2"/>
+                                    </svg>
+                                    <span>Ver todos los productos</span>
+                                </button>
+                            </div>
+                            
+                            {/* Indicador de scroll para móvil */}
+                            <div className="nbd-categories-scroll-hint">
+                                Desliza para ver más categorías
+                            </div>
+                        </div>
+                    </section>
+                );
+            })()}
+
+            {/* Sección de Newsletter */}
+            <section className="nbd-newsletter">
+                <div className="nbd-container">
+                    <div className="nbd-newsletter-content">
+                        <div className="nbd-newsletter-text">
+                            <div className="nbd-newsletter-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </div>
-                            <h3 className="nbd-category-name">Todos</h3>
-                            <p className="nbd-category-count">{products?.length || 0} productos</p>
-                        </button>
+                            <h2 className="nbd-newsletter-title">
+                                Mantente al día con nuestras ofertas
+                            </h2>
+                            <p className="nbd-newsletter-description">
+                                Suscríbete a nuestro newsletter y recibe las últimas novedades, ofertas exclusivas y descuentos especiales directamente en tu correo.
+                            </p>
+                        </div>
                         
-                        {topCategories.map((category) => (
-                            <button
-                                key={category.id}
-                                className={`nbd-category-card ${activeCategory === category.slug ? 'nbd-category-card--active' : ''}`}
-                                onClick={() => setActiveCategory(category.slug)}
-                            >
-                                <div className="nbd-category-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <div className="nbd-newsletter-form-wrapper">
+                            <form className="nbd-newsletter-form" onSubmit={(e) => {
+                                e.preventDefault();
+                                const form = e.target as HTMLFormElement;
+                                const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+                                
+                                if (email) {
+                                    // Simulación de suscripción exitosa
+                                    const button = form.querySelector('.nbd-newsletter-submit') as HTMLButtonElement;
+                                    const originalText = button.innerHTML;
+                                    button.innerHTML = `
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        <span>¡Suscrito!</span>
+                                    `;
+                                    button.disabled = true;
+                                    button.style.background = 'var(--nbd-success)';
+                                    
+                                    setTimeout(() => {
+                                        button.innerHTML = originalText;
+                                        button.disabled = false;
+                                        button.style.background = '';
+                                        form.reset();
+                                    }, 3000);
+                                }
+                            }}>
+                                <div className="nbd-newsletter-input-group">
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="tu@email.com"
+                                        className="nbd-newsletter-input"
+                                        required
+                                    />
+                                    <button type="submit" className="nbd-newsletter-submit">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
+                                        <span>Suscribirse</span>
+                                    </button>
                                 </div>
-                                <h3 className="nbd-category-name">{category.name}</h3>
-                                <p className="nbd-category-count">
-                                    {products?.filter(p => p.categoryId === category.id).length || 0} productos
+                                <p className="nbd-newsletter-privacy">
+                                    Al suscribirte, aceptas recibir emails promocionales. Puedes darte de baja en cualquier momento.
                                 </p>
-                            </button>
-                        ))}
+                            </form>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -243,8 +401,8 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                 });
                             }}
                             title={`Vista actual: ${
-                                mobileViewMode === 'expanded' ? 'Expandida' : 
                                 mobileViewMode === 'grid' ? '2 por fila' : 
+                                mobileViewMode === 'expanded' ? 'Expandida' : 
                                 'Lista'
                             }`}
                         >
@@ -277,22 +435,24 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                     <div className="nbd-product-image">
                                         {(() => {
                                             const imageUrl = product.image || product.mediaFiles?.[0]?.url;
-                                            // Usar 800px para pantallas retina (se mostrará como 400px pero nítido)
-                                            const processedUrl = imageUrl ? toCloudinarySquare(imageUrl, 800) : null;
                                             
-                                            // Generar diferentes tamaños para srcset
-                                            const src400 = toCloudinarySquare(imageUrl, 400);
-                                            const src800 = processedUrl; // Ya es 800px
-                                            const src1200 = toCloudinarySquare(imageUrl, 1200);
+                                            if (!imageUrl) return null;
                                             
-                                            return processedUrl ? (
+                                            // Generar diferentes tamaños optimizados para móvil y retina
+                                            const src600 = toCloudinarySquare(imageUrl, 600);   // Para móvil normal
+                                            const src800 = toCloudinarySquare(imageUrl, 800);   // Para móvil retina
+                                            const src1200 = toCloudinarySquare(imageUrl, 1200); // Para tablet retina
+                                            const src1600 = toCloudinarySquare(imageUrl, 1600); // Para desktop retina
+                                            
+                                            return (
                                                 <img
-                                                    src={processedUrl}
-                                                    srcSet={`${src400} 400w, ${src800} 800w, ${src1200} 1200w`}
-                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    src={src800}
+                                                    srcSet={`${src600} 600w, ${src800} 800w, ${src1200} 1200w, ${src1600} 1600w`}
+                                                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                                                     alt={product.name}
                                                     className="nbd-product-img"
                                                     loading="lazy"
+                                                    decoding="async"
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = 'none';
                                                         const placeholder = e.currentTarget.parentElement?.querySelector('.nbd-product-placeholder-hidden');
@@ -301,7 +461,7 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                                         }
                                                     }}
                                                 />
-                                            ) : null;
+                                            );
                                         })()}
                                         
                                         <div className="nbd-product-placeholder nbd-product-placeholder-hidden" style={{ display: 'none' }}>
