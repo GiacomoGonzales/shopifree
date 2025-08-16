@@ -212,21 +212,40 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
         if (Object.keys(selectedFilters).length > 0) {
             console.log("=== APPLYING FILTERS ===");
             console.log("Selected filters:", selectedFilters);
+            console.log("First product tags example:", base[0]?.tags);
             
             base = base.filter(product => {
-                return Object.entries(selectedFilters).every(([filterKey, selectedValues]) => {
+                const productMatches = Object.entries(selectedFilters).every(([filterKey, selectedValues]) => {
                     if (!selectedValues || selectedValues.length === 0) return true;
                     
-                    // Los filtros están en el campo 'tags' del producto
+                    // Los filtros están en el campo 'tags' del producto (que ahora mapea a metaFieldValues)
                     const productTags = product.tags || {};
                     const productFilterValue = productTags[filterKey];
                     
+                    console.log(`Product ${product.name}:`);
+                    console.log(`  Filter ${filterKey}: productValue="${productFilterValue}", selectedValues:`, selectedValues);
+                    
                     // Si el producto no tiene este filtro, no lo incluimos
-                    if (!productFilterValue) return false;
+                    if (!productFilterValue) {
+                        console.log(`  ❌ Product has no value for filter ${filterKey}`);
+                        return false;
+                    }
                     
                     // Verificar si alguno de los valores seleccionados coincide
-                    return selectedValues.includes(productFilterValue);
+                    // Manejar tanto strings como arrays
+                    let matches = false;
+                    if (Array.isArray(productFilterValue)) {
+                        matches = productFilterValue.some(val => selectedValues.includes(val));
+                    } else {
+                        matches = selectedValues.includes(productFilterValue);
+                    }
+                    
+                    console.log(`  ${matches ? '✅' : '❌'} Filter match: ${matches}`);
+                    return matches;
                 });
+                
+                console.log(`Product ${product.name} overall match: ${productMatches}`);
+                return productMatches;
             });
             
             console.log(`Productos después de filtros: ${base.length}`);
@@ -955,13 +974,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                             <h4 className="nbd-filter-title">{filter.name}</h4>
                                             <div className="nbd-filter-options">
                                                 {Object.entries(filter.options || {}).map(([optionKey, optionLabel]) => {
-                                                    const isSelected = selectedFilters[filter.id]?.includes(optionKey) || false;
+                                                    const isSelected = selectedFilters[filter.id]?.includes(optionLabel) || false;
                                                     return (
                                                         <label key={optionKey} className={`nbd-filter-option ${isSelected ? 'nbd-filter-option--selected' : ''}`}>
                                                             <input
                                                                 type="checkbox"
                                                                 checked={isSelected}
-                                                                onChange={(e) => handleFilterChange(filter.id, optionKey, e.target.checked)}
+                                                                onChange={(e) => handleFilterChange(filter.id, optionLabel, e.target.checked)}
                                                                 className="nbd-filter-checkbox"
                                                             />
                                                             <span className="nbd-filter-checkmark"></span>

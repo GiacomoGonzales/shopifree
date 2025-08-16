@@ -45,7 +45,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
                   Array.isArray(raw.selectedParentCategoryIds) && raw.selectedParentCategoryIds.length > 0 ? raw.selectedParentCategoryIds[0] : undefined,
         selectedParentCategoryIds: Array.isArray(raw.selectedParentCategoryIds) ? raw.selectedParentCategoryIds : undefined,
         brand: typeof raw.brand === 'string' ? raw.brand : undefined,
-        tags: raw.tags && typeof raw.tags === 'object' ? raw.tags : undefined,
+        tags: raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : undefined,
         createdAt: raw.createdAt?.toDate?.()?.toISOString() || raw.createdAt || undefined,
 	};
 }
