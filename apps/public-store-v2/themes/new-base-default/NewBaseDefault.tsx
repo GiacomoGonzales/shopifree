@@ -8,15 +8,22 @@ import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { toCloudinarySquare } from "../../lib/images";
+import { formatPrice } from "../../lib/currency";
 import Header from "./Header";
 import Footer from "./Footer";
 
 type Props = {
     storeSubdomain: string;
+    categorySlug?: string;
 };
 
-export default function NewBaseDefault({ storeSubdomain }: Props) {
+export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) {
     const t = useTranslations('common');
+    
+    // Detectar si estamos en una página de categoría
+    const isOnCategoryPage = !!categorySlug || (typeof window !== 'undefined' && window.location.pathname.includes('/categoria/'));
+    const categorySlugFromUrl = categorySlug || (isOnCategoryPage ? 
+        window.location.pathname.split('/categoria/')[1]?.split('/')[0] : null);
 
     const [storeId, setStoreId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -24,9 +31,10 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
     const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
     const [brands, setBrands] = useState<PublicBrand[] | null>(null);
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const [activeCategory, setActiveCategory] = useState<string | null>(categorySlugFromUrl);
     const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
+    const [productsToShow, setProductsToShow] = useState<number>(8); // Mostrar 8 productos inicialmente
 
     // Cargar datos de la tienda
     useEffect(() => {
@@ -51,6 +59,8 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                     
                     console.log("Categorías cargadas:", cats);
                     console.log("Categorías padre:", cats?.filter(c => !c.parentCategoryId));
+                    console.log("Productos cargados:", items);
+                    console.log("Productos con categoryId:", items.filter(p => p.categoryId));
                     
 
                 }
@@ -62,6 +72,18 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
             alive = false;
         };
     }, [storeSubdomain]);
+
+    // Asegurar que activeCategory se setee correctamente al recibir categorySlug prop
+    useEffect(() => {
+        if (categorySlug) {
+            setActiveCategory(categorySlug);
+        }
+    }, [categorySlug]);
+
+    // Resetear paginación cuando cambie la categoría activa
+    useEffect(() => {
+        setProductsToShow(8);
+    }, [activeCategory]);
 
     // Categorías organizadas
     const topCategories = useMemo(() => 
@@ -79,13 +101,61 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
         // Filtrar por categoría
         if (activeCategory && activeCategory !== 'todos') {
             const cat = categories?.find(c => c.slug === activeCategory);
+            console.log("=== CATEGORY FILTERING DEBUG ===");
+            console.log("activeCategory:", activeCategory);
+            console.log("categorySlug prop:", categorySlug);
+            console.log("isOnCategoryPage:", isOnCategoryPage);
+            console.log("Categoría encontrada:", cat);
+            console.log("Todas las categorías:", categories?.map(c => ({id: c.id, name: c.name, slug: c.slug})));
+            console.log("Todos los productos:", base.map(p => ({name: p.name, categoryId: p.categoryId, selectedParentCategoryIds: p.selectedParentCategoryIds})));
+            
             if (cat) {
-                base = base.filter(p => p.categoryId === cat.id);
+                const beforeFilter = base.length;
+                // Buscar productos que pertenezcan a esta categoría O a sus subcategorías
+                const subcategoryIds = categories?.filter(c => c.parentCategoryId === cat.id).map(c => c.id) || [];
+                const allCategoryIds = [cat.id, ...subcategoryIds];
+                
+                // También incluir búsqueda por slug para mayor compatibilidad
+                const allCategorySlugs = [cat.slug, ...categories?.filter(c => c.parentCategoryId === cat.id).map(c => c.slug) || []];
+                
+                base = base.filter(p => {
+                    // Buscar por ID de categoría (campo legacy)
+                    const matchesById = allCategoryIds.includes(p.categoryId || '');
+                    // Buscar por slug de categoría (por si el categoryId es en realidad un slug)
+                    const matchesBySlug = allCategorySlugs.includes(p.categoryId || '');
+                    // Buscar en selectedParentCategoryIds (campo correcto)
+                    const matchesByParentCategories = p.selectedParentCategoryIds?.some(catId => 
+                        allCategoryIds.includes(catId) || allCategorySlugs.includes(catId)
+                    ) || false;
+                    
+                    return matchesById || matchesBySlug || matchesByParentCategories;
+                });
+                
+                console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
+                console.log("IDs de categorías a buscar:", allCategoryIds);
+                console.log("Slugs de categorías a buscar:", allCategorySlugs);
+                console.log("Productos filtrados:", base.map(p => ({name: p.name, categoryId: p.categoryId, selectedParentCategoryIds: p.selectedParentCategoryIds})));
+            } else {
+                console.log("❌ No se encontró la categoría con slug:", activeCategory);
             }
+            console.log("=== END CATEGORY FILTERING DEBUG ===");
         }
 
         return base;
     }, [products, categories, activeCategory]);
+
+    // Productos a mostrar con paginación
+    const displayedProducts = useMemo(() => {
+        return filteredProducts.slice(0, productsToShow);
+    }, [filteredProducts, productsToShow]);
+
+    // Función para cargar más productos
+    const loadMoreProducts = () => {
+        setProductsToShow(prev => prev + 8);
+    };
+
+    // Verificar si hay más productos para mostrar
+    const hasMoreProducts = filteredProducts.length > productsToShow;
 
     if (loading) {
         return (
@@ -100,11 +170,41 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
         );
     }
 
+    // Encontrar la categoría actual si estamos en una página de categoría
+    const currentCategory = isOnCategoryPage ? 
+        categories?.find(c => c.slug === categorySlugFromUrl) : null;
+
     return (
         <div data-theme="new-base-default" className="nbd-theme">
             <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
             
-            {/* Hero Section Moderno */}
+            {/* Si estamos en una página de categoría, mostrar header limpio */}
+            {isOnCategoryPage && currentCategory && (
+                <div className="nbd-category-page-header">
+                    <div className="nbd-container">
+                        <h1 className="nbd-category-title">{currentCategory.name}</h1>
+                        {currentCategory.description && (
+                            <p className="nbd-category-description">{currentCategory.description}</p>
+                        )}
+                        
+                        {/* Breadcrumbs debajo del título */}
+                        <nav className="nbd-category-breadcrumbs">
+                            <a href={`/${typeof window !== 'undefined' ? window.location.pathname.split('/')[1] || 'es' : 'es'}/${storeSubdomain}`} className="nbd-breadcrumb-link">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Inicio
+                            </a>
+                            <span className="nbd-breadcrumbs-sep">/</span>
+                            <span className="nbd-breadcrumb-current">{currentCategory.name}</span>
+                        </nav>
+                    </div>
+                </div>
+            )}
+            
+            {/* Hero Section Moderno - Solo en home */}
+            {!isOnCategoryPage && (
             <section className="nbd-hero">
                 <div className="nbd-hero-container">
                     <div className="nbd-hero-content">
@@ -154,9 +254,10 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                     </div>
                 </div>
             </section>
+            )}
 
-            {/* Sección de categorías con mosaico inteligente */}
-            {(() => {
+            {/* Sección de categorías con mosaico inteligente - Solo en home */}
+            {!isOnCategoryPage && (() => {
                 // Preparar categorías para mostrar (priorizando padre sobre subcategorías)
                 const allCategories = Array.isArray(categories) ? categories : [];
                 const parentCategories = allCategories.filter(c => !c.parentCategoryId);
@@ -187,25 +288,25 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                     <section id="categorias" className="nbd-categories-mosaic">
                 <div className="nbd-container">
                     <div className="nbd-section-header">
-                                <h2 className="nbd-section-title">Explora nuestras categorías</h2>
-                                <p className="nbd-section-subtitle">
-                                    Descubre nuestra variedad de productos organizados especialmente para ti
-                                </p>
+                                <h2 className="nbd-section-title">Categorías</h2>
                             </div>
                             
                             <div className={`nbd-mosaic-grid ${getLayoutClass(categoriesToShow.length)}`}>
                                 {categoriesToShow.map((category, index) => {
-                                    const productCount = products?.filter(p => p.categoryId === category.id).length || 0;
+                                    // Contar productos en esta categoría y sus subcategorías
+                                    const subcategoryIds = categories?.filter(c => c.parentCategoryId === category.id).map(c => c.id) || [];
+                                    const allCategoryIds = [category.id, ...subcategoryIds];
+                                    const productCount = products?.filter(p => allCategoryIds.includes(p.categoryId || '')).length || 0;
                                     const isParent = !category.parentCategoryId;
                                     const isFeatured = index < 2; // Primeras 2 categorías son destacadas
                                     
                                     return (
-                                        <button
+                                        <a
                                             key={category.id}
+                                            href={`/${typeof window !== 'undefined' ? window.location.pathname.split('/')[1] || 'es' : 'es'}/${storeSubdomain}/categoria/${category.slug}`}
                                             className={`nbd-mosaic-card ${activeCategory === category.slug ? 'nbd-mosaic-card--active' : ''} ${
                                                 isFeatured ? 'nbd-mosaic-card--featured' : ''
                                             } ${isParent ? 'nbd-mosaic-card--parent' : 'nbd-mosaic-card--sub'}`}
-                                            onClick={() => setActiveCategory(category.slug)}
                                         >
                                             {/* Imagen de fondo */}
                                             <div className="nbd-mosaic-background">
@@ -259,117 +360,29 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                                     </svg>
                                                 </div>
                                             </div>
-                                        </button>
+                                        </a>
                                     );
                                 })}
                     </div>
-                    
-                            {/* Botón "Ver todos" */}
-                            <div className="nbd-mosaic-footer">
-                                                        <button
-                                    className={`nbd-view-all-btn ${!activeCategory ? 'nbd-view-all-btn--active' : ''}`}
-                            onClick={() => setActiveCategory(null)}
-                        >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                    <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M3 7L3 12M3 7H21M21 7V5C21 3.89543 20.1046 3 19 3H17M21 7V12M3 12V19C3 20.1046 3.89543 21 5 21H7M3 12H21M21 12V19C21 20.1046 20.1046 21 19 21H17M7 3V21M17 3V21" stroke="currentColor" strokeWidth="2"/>
-                                    </svg>
-                                    <span>Ver todos los productos</span>
-                                </button>
-                            </div>
-                            
-                            {/* Indicador de scroll para móvil */}
-                            <div className="nbd-categories-scroll-hint">
-                                Desliza para ver más categorías
-                            </div>
                         </div>
                     </section>
                 );
             })()}
 
-            {/* Sección de Newsletter */}
-            <section className="nbd-newsletter">
-                <div className="nbd-container">
-                    <div className="nbd-newsletter-content">
-                        <div className="nbd-newsletter-text">
-                            <div className="nbd-newsletter-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                    <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </div>
-                            <h2 className="nbd-newsletter-title">
-                                Mantente al día con nuestras ofertas
-                            </h2>
-                            <p className="nbd-newsletter-description">
-                                Suscríbete a nuestro newsletter y recibe las últimas novedades, ofertas exclusivas y descuentos especiales directamente en tu correo.
-                            </p>
-                        </div>
-                        
-                        <div className="nbd-newsletter-form-wrapper">
-                            <form className="nbd-newsletter-form" onSubmit={(e) => {
-                                e.preventDefault();
-                                const form = e.target as HTMLFormElement;
-                                const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-                                
-                                if (email) {
-                                    // Simulación de suscripción exitosa
-                                    const button = form.querySelector('.nbd-newsletter-submit') as HTMLButtonElement;
-                                    const originalText = button.innerHTML;
-                                    button.innerHTML = `
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        <span>¡Suscrito!</span>
-                                    `;
-                                    button.disabled = true;
-                                    button.style.background = 'var(--nbd-success)';
-                                    
-                                    setTimeout(() => {
-                                        button.innerHTML = originalText;
-                                        button.disabled = false;
-                                        button.style.background = '';
-                                        form.reset();
-                                    }, 3000);
-                                }
-                            }}>
-                                <div className="nbd-newsletter-input-group">
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        placeholder="tu@email.com"
-                                        className="nbd-newsletter-input"
-                                        required
-                                    />
-                                    <button type="submit" className="nbd-newsletter-submit">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                        <span>Suscribirse</span>
-                                    </button>
-                                </div>
-                                <p className="nbd-newsletter-privacy">
-                                    Al suscribirte, aceptas recibir emails promocionales. Puedes darte de baja en cualquier momento.
-                                </p>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {/* Sección de productos */}
             <section id="productos" className="nbd-products">
                 <div className="nbd-container">
-                    <div className="nbd-section-header">
-                        <h2 className="nbd-section-title">
-                            {activeCategory ? 
-                                `${categories?.find(c => c.slug === activeCategory)?.name || 'Productos'}` : 
-                                'Nuestros productos'
-                            }
-                        </h2>
-                        <p className="nbd-section-subtitle">
-                            {filteredProducts.length} productos disponibles
-                        </p>
-                    </div>
+                    {/* Solo mostrar header de productos en home, no en páginas de categoría */}
+                    {!isOnCategoryPage && (
+                        <div className="nbd-section-header">
+                            <h2 className="nbd-section-title">
+                                {activeCategory ? 
+                                    `${categories?.find(c => c.slug === activeCategory)?.name || 'Productos'}` : 
+                                    'Nuestros productos'
+                                }
+                            </h2>
+                        </div>
+                    )}
 
                     {/* Controles de productos */}
                     <div className="nbd-product-controls">
@@ -429,9 +442,18 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                     </div>
 
                     <div className={`nbd-products-grid nbd-mobile-${mobileViewMode}`}>
-                        {filteredProducts.length > 0 ? (
-                            filteredProducts.map((product) => (
-                                <div key={product.id} className="nbd-product-card">
+                        {displayedProducts.length > 0 ? (
+                            displayedProducts.map((product) => (
+                                <div 
+                                    key={product.id} 
+                                    className="nbd-product-card"
+                                    onClick={() => {
+                                        const locale = typeof window !== 'undefined' ? 
+                                            window.location.pathname.split('/')[1] || 'es' : 'es';
+                                        window.location.href = `/${locale}/${storeSubdomain}/producto/${product.slug || product.id}`;
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <div className="nbd-product-image">
                                         {(() => {
                                             const imageUrl = product.image || product.mediaFiles?.[0]?.url;
@@ -494,11 +516,11 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                                             <div className="nbd-product-price">
                                                 {product.comparePrice && product.comparePrice > product.price ? (
                                                     <>
-                                                        <span className="nbd-price-current">${product.price}</span>
-                                                        <span className="nbd-price-original">${product.comparePrice}</span>
+                                                        <span className="nbd-price-current">{formatPrice(product.price, storeInfo?.currency)}</span>
+                                                        <span className="nbd-price-original">{formatPrice(product.comparePrice, storeInfo?.currency)}</span>
                                                     </>
                                                 ) : (
-                                                    <span className="nbd-price-current">${product.price}</span>
+                                                    <span className="nbd-price-current">{formatPrice(product.price, storeInfo?.currency)}</span>
                                                 )}
                                             </div>
                                             
@@ -524,8 +546,161 @@ export default function NewBaseDefault({ storeSubdomain }: Props) {
                             </div>
                         )}
                     </div>
+
+                    {/* Botón "Cargar más" */}
+                    {hasMoreProducts && (
+                        <div style={{ 
+                            textAlign: 'center', 
+                            marginTop: 'var(--nbd-space-4xl)', 
+                            marginBottom: 'var(--nbd-space-2xl)' 
+                        }}>
+                            <button 
+                                onClick={loadMoreProducts}
+                                className="nbd-btn nbd-btn--outline"
+                                style={{
+                                    minWidth: '200px',
+                                    transition: 'all var(--nbd-transition-base)'
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                                <span>Cargar más productos ({Math.min(8, filteredProducts.length - productsToShow)})</span>
+                            </button>
+                            <p style={{
+                                fontSize: 'var(--nbd-font-size-sm)',
+                                color: 'var(--nbd-neutral-600)',
+                                marginTop: 'var(--nbd-space-md)',
+                                marginBottom: '0'
+                            }}>
+                                Mostrando {displayedProducts.length} de {filteredProducts.length} productos
+                            </p>
+                        </div>
+                    )}
                 </div>
             </section>
+
+            {/* Sección de Newsletter */}
+            {!isOnCategoryPage && (
+            <section className="nbd-newsletter">
+                <div className="nbd-container">
+                    <div className="nbd-newsletter-content">
+                        <div className="nbd-newsletter-text">
+                            <div className="nbd-newsletter-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 className="nbd-newsletter-title">
+                                Mantente al día con nuestras ofertas
+                            </h2>
+                            <p className="nbd-newsletter-description">
+                                Suscríbete a nuestro newsletter y recibe las últimas novedades, ofertas exclusivas y descuentos especiales directamente en tu correo.
+                            </p>
+                        </div>
+                        
+                        <div className="nbd-newsletter-form-wrapper">
+                            <form className="nbd-newsletter-form" onSubmit={(e) => {
+                                e.preventDefault();
+                                const form = e.target as HTMLFormElement;
+                                const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+                                
+                                if (email) {
+                                    // Simulación de suscripción exitosa
+                                    const button = form.querySelector('.nbd-newsletter-submit') as HTMLButtonElement;
+                                    const originalText = button.innerHTML;
+                                    button.innerHTML = `
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        <span>¡Suscrito!</span>
+                                    `;
+                                    button.disabled = true;
+                                    button.style.background = 'var(--nbd-success)';
+                                    
+                                    setTimeout(() => {
+                                        button.innerHTML = originalText;
+                                        button.disabled = false;
+                                        button.style.background = '';
+                                        form.reset();
+                                    }, 3000);
+                                }
+                            }}>
+                                <div className="nbd-newsletter-input-group">
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="tu@email.com"
+                                        className="nbd-newsletter-input"
+                                        autoComplete="email"
+                                        required
+                                    />
+                                    <button type="submit" className="nbd-newsletter-submit">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                        <span>Suscribirse</span>
+                                    </button>
+                                </div>
+                                <p className="nbd-newsletter-privacy">
+                                    Al suscribirte, aceptas recibir emails promocionales. Puedes darte de baja en cualquier momento.
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            )}
+
+            {/* Sección de Marcas Carousel - Solo en home */}
+            {!isOnCategoryPage && brands && brands.length > 0 && (
+                <section className="nbd-brands-carousel">
+                    <div className="nbd-container">
+                        <div className="nbd-section-header">
+                            <h2 className="nbd-section-title">Nuestras marcas</h2>
+                            <p className="nbd-section-subtitle">
+                                Trabajamos con las mejores marcas para ofrecerte calidad garantizada
+                            </p>
+                        </div>
+                        
+                        <div className="nbd-brands-container">
+                            <div className="nbd-brands-track" 
+                                 style={{ 
+                                     '--brands-count': brands.length,
+                                     '--animation-duration': `${brands.length * 4}s`
+                                 } as React.CSSProperties}>
+                                {/* Duplicar las marcas para efecto infinito */}
+                                {[...brands, ...brands].map((brand, index) => (
+                                    <div key={`${brand.id}-${index}`} className="nbd-brand-item">
+                                        {brand.image ? (
+                                            <img
+                                                src={toCloudinarySquare(brand.image, 400)}
+                                                alt={brand.name}
+                                                className="nbd-brand-image"
+                                                loading="lazy"
+                                                onError={(e) => {
+                                                    // Si falla la imagen, mostrar solo el nombre
+                                                    const target = e.currentTarget;
+                                                    const parent = target.parentElement;
+                                                    if (parent) {
+                                                        target.style.display = 'none';
+                                                        parent.innerHTML = `<div class="nbd-brand-fallback">${brand.name}</div>`;
+                                                    }
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="nbd-brand-fallback">
+                                                {brand.name}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
         </div>

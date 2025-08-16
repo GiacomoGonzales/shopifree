@@ -18,6 +18,7 @@ export type PublicProduct = {
 	status?: "draft" | "active" | "archived";
     slug?: string;
     categoryId?: string;
+    selectedParentCategoryIds?: string[];
 };
 
 function transformToPublicProduct(raw: any): PublicProduct {
@@ -37,7 +38,9 @@ function transformToPublicProduct(raw: any): PublicProduct {
 		currency: raw.currency ?? "USD",
 		status: raw.status ?? "active",
         slug: typeof raw.slug === 'string' ? raw.slug : undefined,
-        categoryId: typeof raw.categoryId === 'string' ? raw.categoryId : undefined,
+        categoryId: typeof raw.categoryId === 'string' ? raw.categoryId : 
+                  Array.isArray(raw.selectedParentCategoryIds) && raw.selectedParentCategoryIds.length > 0 ? raw.selectedParentCategoryIds[0] : undefined,
+        selectedParentCategoryIds: Array.isArray(raw.selectedParentCategoryIds) ? raw.selectedParentCategoryIds : undefined,
 	};
 }
 

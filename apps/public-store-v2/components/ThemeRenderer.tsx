@@ -10,9 +10,10 @@ const NewBaseDefault = dynamic(() => import("../themes/new-base-default/NewBaseD
 
 type Props = {
     storeSubdomain: string;
+    categorySlug?: string;
 };
 
-export default function ThemeRenderer({ storeSubdomain }: Props) {
+export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
     const [theme, setTheme] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -52,13 +53,13 @@ export default function ThemeRenderer({ storeSubdomain }: Props) {
     
     switch (themeToRender) {
         case 'new-base-default':
-            return <NewBaseDefault storeSubdomain={storeSubdomain} />;
+            return <NewBaseDefault storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
         // TODO: Agregar más casos aquí conforme se creen nuevos temas
         // case 'otro-tema':
-        //     return <OtroTema storeSubdomain={storeSubdomain} />;
+        //     return <OtroTema storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
         default:
             // Por ahora, solo tenemos new-base-default disponible
             console.log(`Using new-base-default theme (requested: "${themeToRender}")`);
-            return <NewBaseDefault storeSubdomain={storeSubdomain} />;
+            return <NewBaseDefault storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
     }
 }
