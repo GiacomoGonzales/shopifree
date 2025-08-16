@@ -1,0 +1,236 @@
+{
+  "metadata": {
+    "fields": {
+      "color": "Color",
+      "size_clothing": "Talla",
+      "size_shoes": "Talla de Calzado",
+      "gender": "Género",
+      "material": "Material",
+      "clothing_style": "Estilo",
+      "season": "Temporada",
+      "occasion": "Ocasión",
+      "pet_type": "Tipo de Mascota",
+      "pet_size": "Tamaño de Mascota",
+      "pet_age": "Edad de Mascota",
+      "tech_brand": "Marca",
+      "connectivity": "Conectividad",
+      "storage_capacity": "Capacidad de Almacenamiento",
+      "operating_system": "Sistema Operativo",
+      "screen_size": "Tamaño de Pantalla",
+      "processor": "Procesador",
+      "ram_memory": "Memoria RAM",
+      "device_type": "Tipo de Dispositivo"
+    },
+    "values": {
+      "color_options": {
+        "Negro": "Negro",
+        "Blanco": "Blanco",
+        "Gris": "Gris",
+        "Azul": "Azul",
+        "Verde": "Verde",
+        "Rosa": "Rosa",
+        "Rojo": "Rojo",
+        "Marrón": "Marrón",
+        "Beige": "Beige",
+        "Amarillo": "Amarillo",
+        "Naranja": "Naranja",
+        "Morado": "Morado",
+        "Multicolor": "Multicolor"
+      },
+      "size_clothing_options": {
+        "XS": "XS",
+        "S": "S",
+        "M": "M",
+        "L": "L",
+        "XL": "XL",
+        "XXL": "XXL",
+        "XXXL": "XXXL",
+        "Talla única": "Talla única"
+      },
+      "gender_options": {
+        "Mujer": "Mujer",
+        "Hombre": "Hombre",
+        "Unisex": "Unisex",
+        "Niño": "Niño",
+        "Niña": "Niña"
+      },
+      "material_options": {
+        "Algodón": "Algodón",
+        "Poliéster": "Poliéster",
+        "Lino": "Lino",
+        "Seda": "Seda",
+        "Lana": "Lana",
+        "Cuero": "Cuero",
+        "Sintético": "Sintético",
+        "Mezclilla": "Mezclilla",
+        "Spandex": "Spandex",
+        "Nylon": "Nylon"
+      },
+      "clothing_style_options": {
+        "Casual": "Casual",
+        "Formal": "Formal",
+        "Deportivo": "Deportivo",
+        "Elegante": "Elegante",
+        "Vintage": "Vintage",
+        "Moderno": "Moderno",
+        "Bohemio": "Bohemio",
+        "Clásico": "Clásico",
+        "Urbano": "Urbano"
+      },
+      "season_options": {
+        "Primavera": "Primavera",
+        "Verano": "Verano",
+        "Otoño": "Otoño",
+        "Invierno": "Invierno",
+        "Todo el año": "Todo el año"
+      },
+      "pet_type_options": {
+        "Perro": "Perro",
+        "Gato": "Gato",
+        "Ave": "Ave",
+        "Pez": "Pez",
+        "Roedor": "Roedor",
+        "Reptil": "Reptil"
+      },
+      "pet_size_options": {
+        "Muy pequeño": "Muy pequeño",
+        "Pequeño": "Pequeño",
+        "Mediano": "Mediano",
+        "Grande": "Grande",
+        "Muy grande": "Muy grande"
+      },
+      "pet_age_options": {
+        "Cachorro/Bebé": "Cachorro/Bebé",
+        "Joven": "Joven",
+        "Adulto": "Adulto",
+        "Senior": "Senior",
+        "Todas las edades": "Todas las edades"
+      },
+      "occasion_options": {
+        "Diario": "Diario",
+        "Trabajo": "Trabajo",
+        "Fiesta": "Fiesta",
+        "Boda": "Boda",
+        "Playa": "Playa",
+        "Viaje": "Viaje",
+        "Deporte": "Deporte",
+        "Casa": "Casa",
+        "Noche": "Noche"
+      },
+      "tech_brand_options": {
+        "Apple": "Apple",
+        "Samsung": "Samsung",
+        "Xiaomi": "Xiaomi",
+        "Huawei": "Huawei",
+        "Sony": "Sony",
+        "LG": "LG",
+        "HP": "HP",
+        "Dell": "Dell",
+        "Lenovo": "Lenovo",
+        "Asus": "Asus",
+        "Otra": "Otra"
+      },
+      "connectivity_options": {
+        "WiFi": "WiFi",
+        "Bluetooth": "Bluetooth",
+        "USB": "USB",
+        "USB-C": "USB-C",
+        "Lightning": "Lightning",
+        "4G": "4G",
+        "5G": "5G",
+        "NFC": "NFC",
+        "Inalámbrico": "Inalámbrico"
+      },
+      "storage_capacity_options": {
+        "32GB": "32GB",
+        "64GB": "64GB",
+        "128GB": "128GB",
+        "256GB": "256GB",
+        "512GB": "512GB",
+        "1TB": "1TB",
+        "2TB": "2TB",
+        "4TB": "4TB",
+        "8TB": "8TB",
+        "16TB": "16TB"
+      },
+      "operating_system_options": {
+        "Windows": "Windows",
+        "macOS": "macOS",
+        "Linux": "Linux",
+        "Android": "Android",
+        "iOS": "iOS",
+        "Chrome OS": "Chrome OS",
+        "watchOS": "watchOS",
+        "iPadOS": "iPadOS",
+        "Otro": "Otro"
+      },
+      "screen_size_options": {
+        "5_menos": "5 pulgadas o menos",
+        "5_1_6": "5.1-6 pulgadas",
+        "6_1_7": "6.1-7 pulgadas",
+        "7_1_10": "7.1-10 pulgadas",
+        "10_1_13": "10.1-13 pulgadas",
+        "13_1_15": "13.1-15 pulgadas",
+        "15_1_17": "15.1-17 pulgadas",
+        "17_mas": "17+ pulgadas",
+        "sin_pantalla": "Sin pantalla"
+      },
+      "processor_options": {
+        "intel_i3": "Intel Core i3",
+        "intel_i5": "Intel Core i5",
+        "intel_i7": "Intel Core i7",
+        "intel_i9": "Intel Core i9",
+        "amd_r3": "AMD Ryzen 3",
+        "amd_r5": "AMD Ryzen 5",
+        "amd_r7": "AMD Ryzen 7",
+        "amd_r9": "AMD Ryzen 9",
+        "apple_m1": "Apple M1",
+        "apple_m2": "Apple M2",
+        "apple_m3": "Apple M3",
+        "snapdragon": "Snapdragon",
+        "mediatek": "MediaTek",
+        "otro": "Otro"
+      },
+      "ram_memory_options": {
+        "2GB": "2GB",
+        "4GB": "4GB",
+        "6GB": "6GB",
+        "8GB": "8GB",
+        "12GB": "12GB",
+        "16GB": "16GB",
+        "32GB": "32GB",
+        "64GB": "64GB",
+        "128GB": "128GB"
+      },
+      "device_type_options": {
+        "Smartphone": "Smartphone",
+        "Tablet": "Tablet",
+        "Laptop": "Laptop",
+        "Desktop": "PC de Escritorio",
+        "Smartwatch": "Smartwatch",
+        "Auriculares": "Auriculares",
+        "Altavoces": "Altavoces",
+        "Consola": "Consola",
+        "Accesorio": "Accesorio",
+        "Smart TV": "Smart TV",
+        "Cámara": "Cámara",
+        "Drone": "Drone",
+        "Router": "Router",
+        "Hub inteligente": "Hub inteligente"
+      },
+      "size_shoes_options": {
+        "35": "35",
+        "36": "36",
+        "37": "37",
+        "38": "38",
+        "39": "39",
+        "40": "40",
+        "41": "41",
+        "42": "42",
+        "43": "43",
+        "44": "44",
+        "45": "45"
+      }
+    }
+  }
+}

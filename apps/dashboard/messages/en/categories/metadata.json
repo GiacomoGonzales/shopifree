@@ -1,0 +1,236 @@
+{
+  "metadata": {
+    "fields": {
+      "color": "Color",
+      "size_clothing": "Size",
+      "size_shoes": "Shoe Size",
+      "gender": "Gender",
+      "material": "Material",
+      "clothing_style": "Style",
+      "season": "Season",
+      "occasion": "Occasion",
+      "pet_type": "Pet Type",
+      "pet_size": "Pet Size",
+      "pet_age": "Pet Age",
+      "tech_brand": "Brand",
+      "connectivity": "Connectivity",
+      "storage_capacity": "Storage Capacity",
+      "operating_system": "Operating System",
+      "screen_size": "Screen Size",
+      "processor": "Processor",
+      "ram_memory": "RAM Memory",
+      "device_type": "Device Type"
+    },
+    "values": {
+      "color_options": {
+        "Negro": "Black",
+        "Blanco": "White",
+        "Gris": "Grey",
+        "Azul": "Blue",
+        "Verde": "Green",
+        "Rosa": "Pink",
+        "Rojo": "Red",
+        "Marrón": "Brown",
+        "Beige": "Beige",
+        "Amarillo": "Yellow",
+        "Naranja": "Orange",
+        "Morado": "Purple",
+        "Multicolor": "Multicolor"
+      },
+      "size_clothing_options": {
+        "XS": "XS",
+        "S": "S",
+        "M": "M",
+        "L": "L",
+        "XL": "XL",
+        "XXL": "XXL",
+        "XXXL": "XXXL",
+        "Talla única": "One Size"
+      },
+      "gender_options": {
+        "Mujer": "Women",
+        "Hombre": "Men",
+        "Unisex": "Unisex",
+        "Niño": "Boy",
+        "Niña": "Girl"
+      },
+      "material_options": {
+        "Algodón": "Cotton",
+        "Poliéster": "Polyester",
+        "Lino": "Linen",
+        "Seda": "Silk",
+        "Lana": "Wool",
+        "Cuero": "Leather",
+        "Sintético": "Synthetic",
+        "Mezclilla": "Denim",
+        "Spandex": "Spandex",
+        "Nylon": "Nylon"
+      },
+      "clothing_style_options": {
+        "Casual": "Casual",
+        "Formal": "Formal",
+        "Deportivo": "Sporty",
+        "Elegante": "Elegant",
+        "Vintage": "Vintage",
+        "Moderno": "Modern",
+        "Bohemio": "Bohemian",
+        "Clásico": "Classic",
+        "Urbano": "Urban"
+      },
+      "season_options": {
+        "Primavera": "Spring",
+        "Verano": "Summer",
+        "Otoño": "Autumn",
+        "Invierno": "Winter",
+        "Todo el año": "All Year"
+      },
+      "pet_type_options": {
+        "Perro": "Dog",
+        "Gato": "Cat",
+        "Ave": "Bird",
+        "Pez": "Fish",
+        "Roedor": "Rodent",
+        "Reptil": "Reptile"
+      },
+      "pet_size_options": {
+        "Muy pequeño": "Very Small",
+        "Pequeño": "Small",
+        "Mediano": "Medium",
+        "Grande": "Large",
+        "Muy grande": "Very Large"
+      },
+      "pet_age_options": {
+        "Cachorro/Bebé": "Puppy/Baby",
+        "Joven": "Young",
+        "Adulto": "Adult",
+        "Senior": "Senior",
+        "Todas las edades": "All Ages"
+      },
+      "occasion_options": {
+        "Diario": "Daily",
+        "Trabajo": "Work",
+        "Fiesta": "Party",
+        "Boda": "Wedding",
+        "Playa": "Beach",
+        "Viaje": "Travel",
+        "Deporte": "Sport",
+        "Casa": "Home",
+        "Noche": "Night"
+      },
+      "tech_brand_options": {
+        "Apple": "Apple",
+        "Samsung": "Samsung",
+        "Xiaomi": "Xiaomi",
+        "Huawei": "Huawei",
+        "Sony": "Sony",
+        "LG": "LG",
+        "HP": "HP",
+        "Dell": "Dell",
+        "Lenovo": "Lenovo",
+        "Asus": "Asus",
+        "Otra": "Other"
+      },
+      "connectivity_options": {
+        "WiFi": "WiFi",
+        "Bluetooth": "Bluetooth",
+        "USB": "USB",
+        "USB-C": "USB-C",
+        "Lightning": "Lightning",
+        "4G": "4G",
+        "5G": "5G",
+        "NFC": "NFC",
+        "Inalámbrico": "Wireless"
+      },
+      "storage_capacity_options": {
+        "32GB": "32GB",
+        "64GB": "64GB",
+        "128GB": "128GB",
+        "256GB": "256GB",
+        "512GB": "512GB",
+        "1TB": "1TB",
+        "2TB": "2TB",
+        "4TB": "4TB",
+        "8TB": "8TB",
+        "16TB": "16TB"
+      },
+      "operating_system_options": {
+        "Windows": "Windows",
+        "macOS": "macOS",
+        "Linux": "Linux",
+        "Android": "Android",
+        "iOS": "iOS",
+        "Chrome OS": "Chrome OS",
+        "watchOS": "watchOS",
+        "iPadOS": "iPadOS",
+        "Otro": "Other"
+      },
+      "screen_size_options": {
+        "5_menos": "5 inches or less",
+        "5_1_6": "5.1-6 inches",
+        "6_1_7": "6.1-7 inches",
+        "7_1_10": "7.1-10 inches",
+        "10_1_13": "10.1-13 inches",
+        "13_1_15": "13.1-15 inches",
+        "15_1_17": "15.1-17 inches",
+        "17_mas": "17+ inches",
+        "sin_pantalla": "No screen"
+      },
+      "processor_options": {
+        "intel_i3": "Intel Core i3",
+        "intel_i5": "Intel Core i5",
+        "intel_i7": "Intel Core i7",
+        "intel_i9": "Intel Core i9",
+        "amd_r3": "AMD Ryzen 3",
+        "amd_r5": "AMD Ryzen 5",
+        "amd_r7": "AMD Ryzen 7",
+        "amd_r9": "AMD Ryzen 9",
+        "apple_m1": "Apple M1",
+        "apple_m2": "Apple M2",
+        "apple_m3": "Apple M3",
+        "snapdragon": "Snapdragon",
+        "mediatek": "MediaTek",
+        "otro": "Other"
+      },
+      "ram_memory_options": {
+        "2GB": "2GB",
+        "4GB": "4GB",
+        "6GB": "6GB",
+        "8GB": "8GB",
+        "12GB": "12GB",
+        "16GB": "16GB",
+        "32GB": "32GB",
+        "64GB": "64GB",
+        "128GB": "128GB"
+      },
+      "device_type_options": {
+        "Smartphone": "Smartphone",
+        "Tablet": "Tablet",
+        "Laptop": "Laptop",
+        "Desktop": "Desktop PC",
+        "Smartwatch": "Smartwatch",
+        "Auriculares": "Headphones",
+        "Altavoces": "Speakers",
+        "Consola": "Gaming Console",
+        "Accesorio": "Accessory",
+        "Smart TV": "Smart TV",
+        "Cámara": "Camera",
+        "Drone": "Drone",
+        "Router": "Router",
+        "Hub inteligente": "Smart Hub"
+      },
+      "size_shoes_options": {
+        "35": "35",
+        "36": "36",
+        "37": "37",
+        "38": "38",
+        "39": "39",
+        "40": "40",
+        "41": "41",
+        "42": "42",
+        "43": "43",
+        "44": "44",
+        "45": "45"
+      }
+    }
+  }
+}

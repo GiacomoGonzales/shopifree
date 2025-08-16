@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getStoreMetadata } from "../../../server-only/store-metadata";
 import SEOScripts from "../../../components/SEOScripts";
+import { generateAllImageVariants } from "../../../lib/image-optimization";
 
 export async function generateMetadata({ params }: { params: { storeSubdomain: string } }): Promise<Metadata> {
     const subdomain = params?.storeSubdomain ?? "store";
@@ -15,6 +16,9 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const keywords = data?.keywords;
     const robots = data?.robots || "index,follow";
     
+    // Generar imágenes optimizadas para diferentes plataformas
+    const imageVariants = generateAllImageVariants(ogImage, data?.whatsappImage);
+    
     // Construir objeto de metadata completo
     const metadata: Metadata = {
         title,
@@ -22,21 +26,39 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
         robots,
         
-        // Open Graph para redes sociales
+        // Open Graph para redes sociales - Múltiples imágenes para diferentes plataformas
         openGraph: {
             title: ogTitle,
             description: ogDescription,
-            images: [ogImage],
+            images: [
+                {
+                    url: imageVariants.social,
+                    width: 1200,
+                    height: 630,
+                    alt: ogTitle
+                },
+                {
+                    url: imageVariants.whatsapp,
+                    width: 400,
+                    height: 400,
+                    alt: ogTitle
+                }
+            ],
             type: 'website',
             siteName: title
         },
         
-        // Twitter/X optimizado
+        // Twitter/X optimizado - usar imagen social estándar
         twitter: {
             card: "summary_large_image",
             title: ogTitle,
             description: ogDescription,
-            images: [ogImage]
+            images: [{
+                url: imageVariants.social,
+                width: 1200,
+                height: 630,
+                alt: ogTitle
+            }]
         }
     };
     
@@ -67,9 +89,11 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     console.log(`🔍 [SEO] Metadata generada para ${subdomain}:`, {
         title,
         hasCustomOG: !!data?.ogImage,
+        hasWhatsAppImage: !!data?.whatsappImage,
         hasKeywords: !!keywords,
         hasCanonical: !!data?.canonicalUrl,
-        hasFavicon: !!data?.favicon
+        hasFavicon: !!data?.favicon,
+        ...imageVariants.info
     });
     
     return metadata;

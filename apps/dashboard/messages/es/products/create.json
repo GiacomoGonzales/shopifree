@@ -56,9 +56,9 @@
     "subtitle": "Organiza tu producto para una mejor gestión",
     "mainCategories": "Categorías principales",
     "mainCategoriesSelected": "seleccionadas",
-    "subCategories": "Subcategorías",
+    "subCategories": "Subcategorías", 
     "subCategoriesSelected": "seleccionadas",
-    "selectedCategories": "Categorías seleccionadas",
+    "selectedCategories": "Categorías seleccionadas:",
     "mainCategoriesLabel": "Principales:",
     "subCategoriesLabel": "Subcategorías:",
     "brand": "Marca",
@@ -70,5 +70,21 @@
     "save": "Guardar producto",
     "saving": "Guardando...",
     "discard": "Descartar"
+  },
+  "customOptions": {
+    "addColor": "+ Agregar color",
+    "addSize": "+ Agregar talla",
+    "newColor": "Nuevo color",
+    "newSize": "Nueva talla",
+    "removeCustomOption": "Eliminar opción personalizada"
+  },
+  "categorization": {
+    "title": "Categorizar producto",
+    "metaFields": "metacampos",
+    "select": "Seleccionar",
+    "selectOption": "Seleccionar",
+    "categoryLabel": "Categoría",
+    "chooseCategoryPlaceholder": "Elige una categoría de producto",
+    "categorySelected": "✓ Categoría seleccionada"
   }
 } 

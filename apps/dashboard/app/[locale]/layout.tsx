@@ -41,6 +41,39 @@ export default function LocaleLayout({
             }
           }
         })
+
+        // Cargar específicamente products/create.json
+        const productsCreatePromise = (async () => {
+          try {
+            const productsCreateModule = await import(`../../messages/${locale}/products/create.json`)
+            return { section: 'products-create', data: productsCreateModule.default }
+          } catch {
+            console.log('⚠️ No se pudo cargar products/create.json, usando fallback')
+            return { section: 'products-create', data: {} }
+          }
+        })()
+
+        // Cargar específicamente categories/categories.json
+        const categoriesPromise = (async () => {
+          try {
+            const categoriesModule = await import(`../../messages/${locale}/categories/categories.json`)
+            return { section: 'categories-list', data: categoriesModule.default }
+          } catch {
+            console.log('⚠️ No se pudo cargar categories/categories.json, usando fallback')
+            return { section: 'categories-list', data: {} }
+          }
+        })()
+
+        // Cargar específicamente categories/metadata.json
+        const metadataPromise = (async () => {
+          try {
+            const metadataModule = await import(`../../messages/${locale}/categories/metadata.json`)
+            return { section: 'categories-metadata', data: metadataModule.default }
+          } catch {
+            console.log('⚠️ No se pudo cargar categories/metadata.json, usando fallback')
+            return { section: 'categories-metadata', data: {} }
+          }
+        })()
         
         // Cargar específicamente settings.seo desde su archivo separado
         const seoPromise = (async () => {
@@ -55,6 +88,9 @@ export default function LocaleLayout({
         
         const sectionResults = await Promise.all(sectionPromises)
         const seoResult = await seoPromise
+        const productsCreateResult = await productsCreatePromise
+        const categoriesResult = await categoriesPromise
+        const metadataResult = await metadataPromise
         
         // Construir el objeto de secciones
         sectionResults.forEach(({ section, data }) => {
@@ -66,6 +102,26 @@ export default function LocaleLayout({
           sectionMessages.settings = {}
         }
         sectionMessages.settings.seo = seoResult.data
+
+        // Agregar las traducciones de products/create específicamente
+        if (!sectionMessages.products) {
+          sectionMessages.products = {}
+        }
+        // Merge con las traducciones existentes de products
+        sectionMessages.products = {
+          ...sectionMessages.products,
+          create: productsCreateResult.data
+        }
+
+        // Agregar las traducciones de categorías directamente
+        sectionMessages.categorization = {
+          categories: categoriesResult.data.categories || {},
+          metadata: metadataResult.data.metadata || {}
+        }
+
+        // También agregar en el nivel raíz para compatibilidad con useTranslations
+        sectionMessages.categories = categoriesResult.data.categories || {}
+        sectionMessages.metadata = metadataResult.data.metadata || {}
         
         // Estructura final de mensajes que next-intl espera
         const finalMessages = {
@@ -76,13 +132,39 @@ export default function LocaleLayout({
           // También mantener la estructura anidada por compatibilidad
           pages: {
             ...mainMessages.pages,
-            ...sectionMessages
+            ...sectionMessages,
+            // Asegurar que pages.products.create esté disponible
+            products: {
+              ...mainMessages.pages?.products,
+              ...sectionMessages.products,
+              create: productsCreateResult.data
+            }
           }
         }
         
         console.log('✅ Traducciones cargadas exitosamente. Secciones disponibles:', Object.keys(sectionMessages))
         console.log('🔧 Settings.seo cargado:', !!finalMessages.settings?.seo)
+        console.log('🔧 Products.create cargado:', !!finalMessages.pages?.products?.create)
+        console.log('🔧 Categorization cargado:', !!finalMessages.categorization)
+        console.log('🔧 Categorization.categories cargado:', !!finalMessages.categorization?.categories)
+        console.log('🔧 Categorization.metadata cargado:', !!finalMessages.categorization?.metadata)
         console.log('📋 Traducciones totales cargadas:', Object.keys(finalMessages).length)
+        
+        // Debug específico para categorías
+        console.log('🔍 Categories data:', categoriesResult.data)
+        console.log('🔍 Metadata data:', metadataResult.data)
+        
+        if (finalMessages.categorization?.categories) {
+          console.log('✅ Categories loaded:', Object.keys(finalMessages.categorization.categories).slice(0, 5))
+        } else {
+          console.log('❌ Categories NOT loaded')
+        }
+        
+        if (finalMessages.categorization?.metadata) {
+          console.log('✅ Metadata loaded:', Object.keys(finalMessages.categorization.metadata).slice(0, 3))
+        } else {
+          console.log('❌ Metadata NOT loaded')
+        }
         
         // Debug específico para SEO
         if (finalMessages.settings?.seo) {

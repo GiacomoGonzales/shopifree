@@ -318,7 +318,6 @@
       "inDevelopment": "In development...",
       "create": {
         "title": "Add product",
-        "backToProducts": "← Back to products",
         "productInfo": "Product Information",
         "productName": "Product name",
         "productNamePlaceholder": "Short sleeve t-shirt",

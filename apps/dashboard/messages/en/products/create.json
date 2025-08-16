@@ -70,5 +70,21 @@
     "save": "Save product",
     "saving": "Saving...",
     "discard": "Discard"
+  },
+  "customOptions": {
+    "addColor": "+ Add color",
+    "addSize": "+ Add size",
+    "newColor": "New color",
+    "newSize": "New size",
+    "removeCustomOption": "Remove custom option"
+  },
+  "categorization": {
+    "title": "Categorize product",
+    "metaFields": "metadata fields",
+    "select": "Select",
+    "selectOption": "Select",
+    "categoryLabel": "Category",
+    "chooseCategoryPlaceholder": "Choose a product category",
+    "categorySelected": "✓ Category selected"
   }
 } 

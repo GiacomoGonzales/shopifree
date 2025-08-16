@@ -211,60 +211,49 @@
       "inDevelopment": "En desarrollo...",
       "create": {
         "title": "Agregar producto",
-        "backToProducts": "← Volver a productos",
         "productInfo": "Información del producto",
         "productName": "Nombre del producto",
-        "productNamePlaceholder": "Camiseta de manga corta",
+        "productNamePlaceholder": "Ej: Camiseta de algodón",
         "description": "Descripción",
-        "descriptionPlaceholder": "Describe tu producto con formato de texto enriquecido...",
+        "descriptionPlaceholder": "Describe tu producto...",
         "multimedia": "Multimedia",
-        "uploadHint": "Haz clic para subir o arrastra y suelta",
-        "uploadFormats": "PNG, JPG hasta 10MB • MP4, WebM hasta 50MB",
+        "uploadHint": "Arrastra imágenes o haz clic para seleccionar",
+        "uploadFormats": "Acepta imágenes, videos o modelos 3D",
         "pricing": "Precios",
         "price": "Precio",
         "comparePrice": "Precio de comparación",
         "chargeTaxes": "Cobrar impuestos sobre este producto",
-        "costPerItem": "Coste por artículo",
-        "profit": "Beneficio",
+        "costPerItem": "Costo por unidad",
+        "profit": "Ganancia",
         "margin": "Margen",
-        "organization": {
-          "title": "Organización del producto",
-          "subtitle": "Organiza tu producto seleccionando categorías y marca",
-          "mainCategories": "Categorías principales",
-          "mainCategoriesSelected": "seleccionadas",
-          "subCategories": "Subcategorías",
-          "subCategoriesSelected": "seleccionadas",
-          "selectedCategories": "Categorías seleccionadas:",
-          "mainCategoriesLabel": "Categorías principales:",
-          "subCategoriesLabel": "Subcategorías:",
-          "brand": "Marca",
-          "brandPlaceholder": "Seleccionar marca",
-          "collections": "Colecciones",
-          "tags": "Etiquetas"
-        },
         "variants": {
           "title": "Variantes",
           "hasVariants": "Este producto tiene variantes",
-          "addOption": "+ Agregar otra opción"
+          "addOption": "Agregar opción",
+          "variant": "Variante",
+          "price": "Precio",
+          "available": "Disponible",
+          "actions": "Acciones",
+          "remove": "Eliminar"
         },
         "shipping": {
           "title": "Envío",
           "requiresShipping": "Este producto requiere envío",
-          "weight": "Peso (kg)",
-          "weightPlaceholder": "0.5",
-          "countryOrigin": "País/Región de origen",
-          "countryOriginPlaceholder": "Seleccionar",
-          "harmonizedCode": "Código del sistema armonizado (SA)",
-          "harmonizedCodePlaceholder": "Buscar por palabra clave o código del producto"
+          "weight": "Peso",
+          "weightPlaceholder": "0.0",
+          "countryOrigin": "País de origen",
+          "countryOriginPlaceholder": "Selecciona un país",
+          "harmonizedCode": "Código armonizado",
+          "harmonizedCodePlaceholder": "Buscar o ingresar código"
         },
         "seo": {
           "title": "SEO",
           "pageTitle": "Título de la página",
-          "pageTitlePlaceholder": "Título que aparecerá en Google",
+          "pageTitlePlaceholder": "Título que se mostrará en los resultados de búsqueda",
           "metaDescription": "Meta descripción",
-          "metaDescriptionPlaceholder": "Descripción que aparecerá en los resultados de búsqueda...",
-          "urlHandle": "Identificador de URL",
-          "urlHandlePlaceholder": "producto-123"
+          "metaDescriptionPlaceholder": "Descripción que se mostrará en los resultados de búsqueda",
+          "urlHandle": "URL amigable",
+          "urlHandlePlaceholder": "nombre-del-producto"
         },
         "status": {
           "title": "Estado",
@@ -272,10 +261,25 @@
           "active": "Activo",
           "archived": "Archivado"
         },
+        "organization": {
+          "title": "Organización",
+          "subtitle": "Organiza tu producto para mejor gestión",
+          "mainCategories": "Categorías principales",
+          "mainCategoriesSelected": "seleccionadas",
+          "subCategories": "Subcategorías",
+          "subCategoriesSelected": "seleccionadas",
+          "selectedCategories": "Categorías seleccionadas",
+          "mainCategoriesLabel": "Principal:",
+          "subCategoriesLabel": "Subcategorías:",
+          "brand": "Marca",
+          "brandPlaceholder": "Selecciona una marca",
+          "collections": "Colecciones",
+          "tags": "Etiquetas"
+        },
         "buttons": {
-          "discard": "Descartar",
+          "save": "Guardar producto",
           "saving": "Guardando...",
-          "save": "Guardar producto"
+          "discard": "Descartar"
         }
       },
       "tabs": {

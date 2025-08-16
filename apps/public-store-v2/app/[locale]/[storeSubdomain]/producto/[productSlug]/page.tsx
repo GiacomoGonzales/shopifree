@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import ProductDetail from './product-detail';
 import { getStoreIdBySubdomain } from '../../../../../lib/store';
 import { getProduct } from '../../../../../lib/products';
+import { generateAllImageVariants } from '../../../../../lib/image-optimization';
 
 export default function ProductoPage({ params }: { params: { productSlug: string; locale: string; storeSubdomain: string } }) {
     const { productSlug, storeSubdomain, locale } = params as any;
@@ -27,22 +28,61 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     const title = product.name || 'Producto';
     const description = product.description || undefined;
     const image = product.image || undefined;
+    
+    if (!image) {
+      return {
+        title,
+        description,
+        openGraph: {
+          title,
+          description: description || undefined
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description: description || undefined
+        }
+      };
+    }
+    
+    // Generar imágenes optimizadas para diferentes plataformas
+    const imageVariants = generateAllImageVariants(image);
+    
     return {
       title,
       description,
       openGraph: {
         title,
         description: description || undefined,
-        images: image ? [image] : undefined
+        images: [
+          {
+            url: imageVariants.social,
+            width: 1200,
+            height: 630,
+            alt: title
+          },
+          {
+            url: imageVariants.whatsapp,
+            width: 400,
+            height: 400,
+            alt: title
+          }
+        ]
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description: description || undefined,
-        images: image ? [image] : undefined
+        images: [{
+          url: imageVariants.social,
+          width: 1200,
+          height: 630,
+          alt: title
+        }]
       }
     };
-  } catch {
+  } catch (error) {
+    console.error('Error generating product metadata:', error);
     return { title: 'Producto' };
   }
 }

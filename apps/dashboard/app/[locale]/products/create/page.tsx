@@ -13,19 +13,14 @@ import { uploadMediaToCloudinary, getFileType } from '../../../../lib/cloudinary
 import { Card } from '../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../packages/ui/src/components/Input'
-import { CATEGORY_OPTIONS as FASHION_CATEGORIES, META_FIELDS_BY_CATEGORY as FASHION_META } from './productCategorization'
-import { PETS_CATEGORY_OPTIONS, PETS_META_FIELDS_BY_CATEGORY } from './petsCategorization'
+import { 
+  SIMPLIFIED_CATEGORIES, 
+  getMetadataForCategory, 
+  findCategoryById 
+} from './simplifiedCategorization'
 
-// Combinar las categorías
-const CATEGORY_OPTIONS = [
-  ...FASHION_CATEGORIES,
-  ...PETS_CATEGORY_OPTIONS
-]
-
-const META_FIELDS_BY_CATEGORY = {
-  ...FASHION_META,
-  ...PETS_META_FIELDS_BY_CATEGORY
-}
+// Usar las categorías simplificadas
+const CATEGORY_OPTIONS = SIMPLIFIED_CATEGORIES
 
 // Interfaces
 interface ProductVariant {
@@ -56,11 +51,32 @@ export default function CreateProductPage() {
   const router = useRouter()
   const { store, loading: storeLoading, currency, currencySymbol, currencyName, formatPrice } = useStore()
   const t = useTranslations('pages.products.create')
+  const tCategories = useTranslations('categories')
+  const tMetadata = useTranslations('metadata')
+  
+  // Debug: verificar si los hooks están funcionando
+  console.log('🔧 Translation hooks loaded:')
+  console.log('  - t (create):', typeof t)
+  console.log('  - tCategories:', typeof tCategories)  
+  console.log('  - tMetadata:', typeof tMetadata)
+  console.log('  - Test tMetadata fields.color:', tMetadata('fields.color'))
+  console.log('  - Test tMetadata fields.tech_brand:', tMetadata('fields.tech_brand'))
   
   // Estados del formulario
   const [productName, setProductName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedBrandId, setSelectedBrandId] = useState('')
+  
+  // Estados para opciones personalizadas
+  const [customColors, setCustomColors] = useState<string[]>([])
+  const [customSizes, setCustomSizes] = useState<string[]>([])
+  const [customShoeSizes, setCustomShoeSizes] = useState<string[]>([])
+  const [showColorInput, setShowColorInput] = useState(false)
+  const [showSizeInput, setShowSizeInput] = useState(false)
+  const [showShoeSizeInput, setShowShoeSizeInput] = useState(false)
+  const [newColorInput, setNewColorInput] = useState('')
+  const [newSizeInput, setNewSizeInput] = useState('')
+  const [newShoeSizeInput, setNewShoeSizeInput] = useState('')
   const [brands, setBrands] = useState<BrandWithId[]>([])
   const [loadingBrands, setLoadingBrands] = useState(false)
   
@@ -273,24 +289,118 @@ export default function CreateProductPage() {
     setVariants(prev => prev.filter(v => v.id !== id))
   }
 
-  const getMetaFieldsForCategory = () => {
-    return META_FIELDS_BY_CATEGORY[selectedCategory] || []
+  // Funciones para manejar opciones personalizadas
+  const addCustomColor = () => {
+    if (newColorInput.trim() && !customColors.includes(newColorInput.trim())) {
+      setCustomColors(prev => [...prev, newColorInput.trim()])
+      setNewColorInput('')
+      setShowColorInput(false)
+    }
   }
 
-  const findNodeById = (nodes: CategoryNode[], id: string): CategoryNode | null => {
-    for (const node of nodes) {
-      if (node.id === id) return node
-      if (node.children) {
-        const found = findNodeById(node.children, id)
-        if (found) return found
-      }
+  const addCustomSize = () => {
+    if (newSizeInput.trim() && !customSizes.includes(newSizeInput.trim())) {
+      setCustomSizes(prev => [...prev, newSizeInput.trim()])
+      setNewSizeInput('')
+      setShowSizeInput(false)
     }
-    return null
   }
+
+  const addCustomShoeSize = () => {
+    if (newShoeSizeInput.trim() && !customShoeSizes.includes(newShoeSizeInput.trim())) {
+      setCustomShoeSizes(prev => [...prev, newShoeSizeInput.trim()])
+      setNewShoeSizeInput('')
+      setShowShoeSizeInput(false)
+    }
+  }
+
+  const removeCustomColor = (color: string) => {
+    setCustomColors(prev => prev.filter(c => c !== color))
+  }
+
+  const removeCustomSize = (size: string) => {
+    setCustomSizes(prev => prev.filter(s => s !== size))
+  }
+
+  const removeCustomShoeSize = (size: string) => {
+    setCustomShoeSizes(prev => prev.filter(s => s !== size))
+  }
+
+  const getMetaFieldsForCategory = () => {
+    const metadata = getMetadataForCategory(selectedCategory)
+    console.log('🔍 Raw metadata for category:', selectedCategory, metadata)
+    
+    // Traducir los metadatos y agregar opciones personalizadas
+    const translatedMetadata = metadata.map(field => {
+      // Traducir nombre del campo
+      const fieldTranslationKey = `fields.${field.id}`
+      const translatedName = tMetadata(fieldTranslationKey)
+      console.log(`🔍 Translating field "${field.id}":`)
+      console.log(`  - Original name: "${field.name}"`)
+      console.log(`  - Translation key: "${fieldTranslationKey}"`)
+      console.log(`  - Translated result: "${translatedName}"`)
+      console.log(`  - Final name: "${translatedName || field.name}"`)
+      
+      let options = field.options?.map(option => {
+        // Traducir opciones usando la estructura del JSON
+        const translationKey = `values.${field.id}_options.${option}`
+        
+        try {
+          const translatedOption = tMetadata(translationKey)
+          console.log(`🔍 Translating "${option}" with key "${translationKey}": -> "${translatedOption}"`)
+          
+          // Si la traducción devuelve la misma clave, significa que no encontró la traducción
+          if (translatedOption === translationKey || !translatedOption) {
+            console.log(`❌ Translation not found for: ${translationKey}, using original: ${option}`)
+            return option // Usar el valor original
+          }
+          
+          return translatedOption
+        } catch (error) {
+          console.log(`❌ Error translating ${translationKey}:`, error)
+          return option // Usar el valor original como fallback
+        }
+      }) || []
+
+      // Agregar opciones personalizadas según el tipo de campo
+      if (field.id === 'color') {
+        options = [...options, ...customColors]
+      } else if (field.id === 'size_clothing') {
+        options = [...options, ...customSizes]
+      } else if (field.id === 'size_shoes') {
+        options = [...options, ...customShoeSizes]
+      }
+      
+      return {
+        ...field,
+        name: translatedName || field.name,
+        options
+      }
+    })
+    
+    console.log('🔍 Translated metadata with custom options:', translatedMetadata)
+    return translatedMetadata
+  }
+
+  // Usar la función del sistema simplificado
+  const findNodeById = findCategoryById
 
   const getCurrentCategories = (): CategoryNode[] => {
     if (categoryPath.length === 0) {
-      return CATEGORY_OPTIONS
+      return CATEGORY_OPTIONS.map(cat => {
+        // Traducir categoria usando la ruta directa
+        const translatedName = tCategories(cat.id) || cat.name
+        console.log(`🔍 Translating category ${cat.id}: ${cat.name} -> ${translatedName}`)
+        
+        return {
+          ...cat,
+          name: translatedName,
+          children: cat.children?.map(child => ({
+            ...child,
+            name: tCategories(child.id) || child.name
+          }))
+        }
+      })
     }
     
     let current = CATEGORY_OPTIONS
@@ -302,24 +412,28 @@ export default function CreateProductPage() {
         return []
       }
     }
-    return current
+    
+    return current.map(cat => ({
+      ...cat,
+      name: tCategories(cat.id) || cat.name
+    }))
   }
 
   const getBreadcrumb = (): string[] => {
     const breadcrumb: string[] = []
     let current = CATEGORY_OPTIONS
     
-          for (const pathId of categoryPath) {
-        const node = current.find((n: CategoryNode) => n.id === pathId)
-        if (node) {
-          breadcrumb.push(node.name)
-          if (node.children) {
-            current = node.children
-          }
+    for (const pathId of categoryPath) {
+      const node = current.find((n: CategoryNode) => n.id === pathId)
+      if (node) {
+        breadcrumb.push(tCategories(node.id) || node.name)
+        if (node.children) {
+          current = node.children
         }
       }
-      return breadcrumb
     }
+    return breadcrumb
+  }
 
     const navigateToCategory = (categoryId: string) => {
       const node = findNodeById(CATEGORY_OPTIONS, categoryId)
@@ -735,22 +849,22 @@ export default function CreateProductPage() {
               {/* 4. Organización del producto */}
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Categorizar producto</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('categorization.title')}</h2>
                   {selectedCategory && getMetaFieldsForCategory().length > 0 && (
                     <span className="text-sm text-gray-500">
-                      {getMetaFieldsForCategory().length} metacampos
+                      {getMetaFieldsForCategory().length} {t('categorization.metaFields')}
                     </span>
                   )}
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('categorization.categoryLabel')}</label>
                     
                     {/* Buscador con dropdown navegable */}
                     <div className="relative">
                       <input
                         type="text"
-                        value={selectedCategory ? findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name || 'Elige una categoría de producto' : 'Elige una categoría de producto'}
+                        value={selectedCategory ? (tCategories(selectedCategory) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name || t('categorization.chooseCategoryPlaceholder')) : t('categorization.chooseCategoryPlaceholder')}
                         readOnly
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                         className="block w-full px-3 py-2 border-2 border-blue-500 rounded-md bg-white cursor-pointer focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -777,7 +891,7 @@ export default function CreateProductPage() {
                           <span className="mr-2">{getBreadcrumb().join(' > ')}</span>
                           {selectedCategory && (
                             <span className="text-blue-600 font-medium">
-                              {findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name}
+                              {tCategories(selectedCategory) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name}
                             </span>
                           )}
                         </div>
@@ -807,7 +921,7 @@ export default function CreateProductPage() {
                                       }}
                                       className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
                                     >
-                                      Seleccionar
+                                      {t('categorization.select')}
                                     </button>
                                   )}
                                   {category.children && category.children.length > 0 && (
@@ -818,7 +932,7 @@ export default function CreateProductPage() {
                             </div>
                             {category.isLeaf && selectedCategory === category.id && (
                               <div className="px-4 py-1 bg-green-50 text-green-700 text-sm border-l-2 border-green-200">
-                                ✓ Categoría seleccionada
+                                {t('categorization.categorySelected')}
                               </div>
                             )}
                           </div>
@@ -854,21 +968,112 @@ export default function CreateProductPage() {
                               <div className="flex flex-wrap gap-2">
                                 {field.options?.map(option => {
                                   const isSelected = (metaFieldValues[field.id] as string[] || []).includes(option)
+                                  const isCustomOption = (field.id === 'color' && customColors.includes(option)) || 
+                                                         (field.id === 'size_clothing' && customSizes.includes(option)) ||
+                                                         (field.id === 'size_shoes' && customShoeSizes.includes(option))
+                                  
                                   return (
-                                    <button
-                                      key={option}
-                                      type="button"
-                                      onClick={() => toggleMetaFieldTag(field.id, option)}
-                                      className={`px-3 py-1 text-sm border rounded-full transition-colors ${
-                                        isSelected
-                                          ? 'bg-blue-100 border-blue-300 text-blue-700'
-                                          : 'bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-700'
-                                      }`}
-                                    >
-                                      {option}
-                                    </button>
+                                    <div key={option} className="relative">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleMetaFieldTag(field.id, option)}
+                                        className={`px-3 py-1 text-sm border rounded-full transition-colors ${
+                                          isSelected
+                                            ? 'bg-blue-100 border-blue-300 text-blue-700'
+                                            : 'bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-700'
+                                        }`}
+                                      >
+                                        {option}
+                                      </button>
+                                      {isCustomOption && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (field.id === 'color') removeCustomColor(option)
+                                            else if (field.id === 'size_clothing') removeCustomSize(option)
+                                            else if (field.id === 'size_shoes') removeCustomShoeSize(option)
+                                          }}
+                                          className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hover:bg-red-600"
+                                          title={t('customOptions.removeCustomOption')}
+                                        >
+                                          ×
+                                        </button>
+                                      )}
+                                    </div>
                                   )
                                 })}
+                                
+                                {/* Botón + para agregar opciones personalizadas */}
+                                {(field.id === 'color' || field.id === 'size_clothing' || field.id === 'size_shoes') && (
+                                  <>
+                                    {/* Mostrar input si está activo */}
+                                    {((field.id === 'color' && showColorInput) || (field.id === 'size_clothing' && showSizeInput) || (field.id === 'size_shoes' && showShoeSizeInput)) ? (
+                                      <div className="flex items-center gap-2">
+                                        <input
+                                          type="text"
+                                          value={field.id === 'color' ? newColorInput : field.id === 'size_clothing' ? newSizeInput : newShoeSizeInput}
+                                          onChange={(e) => {
+                                            if (field.id === 'color') setNewColorInput(e.target.value)
+                                            else if (field.id === 'size_clothing') setNewSizeInput(e.target.value)
+                                            else if (field.id === 'size_shoes') setNewShoeSizeInput(e.target.value)
+                                          }}
+                                          onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                              if (field.id === 'color') addCustomColor()
+                                              else if (field.id === 'size_clothing') addCustomSize()
+                                              else if (field.id === 'size_shoes') addCustomShoeSize()
+                                            }
+                                          }}
+                                          placeholder={field.id === 'color' ? t('customOptions.newColor') : field.id === 'size_clothing' ? t('customOptions.newSize') : t('customOptions.newSize')}
+                                          className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                          autoFocus
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (field.id === 'color') addCustomColor()
+                                            else if (field.id === 'size_clothing') addCustomSize()
+                                            else if (field.id === 'size_shoes') addCustomShoeSize()
+                                          }}
+                                          className="px-2 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                                        >
+                                          ✓
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (field.id === 'color') {
+                                              setShowColorInput(false)
+                                              setNewColorInput('')
+                                            } else if (field.id === 'size_clothing') {
+                                              setShowSizeInput(false)
+                                              setNewSizeInput('')
+                                            } else if (field.id === 'size_shoes') {
+                                              setShowShoeSizeInput(false)
+                                              setNewShoeSizeInput('')
+                                            }
+                                          }}
+                                          className="px-2 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                                        >
+                                          ✕
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (field.id === 'color') setShowColorInput(true)
+                                          else if (field.id === 'size_clothing') setShowSizeInput(true)
+                                          else if (field.id === 'size_shoes') setShowShoeSizeInput(true)
+                                        }}
+                                        className="px-3 py-1 text-sm border-2 border-dashed border-gray-300 text-gray-500 rounded-full hover:border-blue-300 hover:text-blue-500 transition-colors"
+                                        title={field.id === 'color' ? t('customOptions.addColor') : t('customOptions.addSize')}
+                                      >
+                                        {field.id === 'color' ? t('customOptions.addColor') : t('customOptions.addSize')}
+                                      </button>
+                                    )}
+                                  </>
+                                )}
                               </div>
                             )}
                             {field.type === 'select' && (
@@ -877,7 +1082,7 @@ export default function CreateProductPage() {
                                 onChange={(e) => handleMetaFieldChange(field.id, e.target.value)}
                                 className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                               >
-                                <option value="">Seleccionar</option>
+                                <option value="">{t('categorization.selectOption')}</option>
                                 {field.options?.map(option => (
                                   <option key={option} value={option}>{option}</option>
                                 ))}
