@@ -9,6 +9,7 @@ import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo } from "../../
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
+import { getStoreFilters, Filter } from "../../lib/filters";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
 import Header from "./Header";
@@ -60,6 +61,11 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
     const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
     const [productsToShow, setProductsToShow] = useState<number>(8); // Mostrar 8 productos inicialmente
+    const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+    const [currentSort, setCurrentSort] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc'>('newest');
+    const [filters, setFilters] = useState<Filter[]>([]);
+    const [filtersModalOpen, setFiltersModalOpen] = useState(false);
+    const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
 
     // Cargar datos de la tienda
     useEffect(() => {
@@ -70,17 +76,19 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                 if (!alive) return;
                 setStoreId(id);
                 if (id) {
-                    const [items, info, cats, brandList] = await Promise.all([
+                    const [items, info, cats, brandList, filterList] = await Promise.all([
                         getStoreProducts(id),
                         getStoreBasicInfo(id),
                         getStoreCategories(id),
-                        getStoreBrands(id)
+                        getStoreBrands(id),
+                        getStoreFilters(id)
                     ]);
                     if (!alive) return;
                     setProducts(items);
                     setStoreInfo(info);
                     setCategories(cats);
                     setBrands(brandList);
+                    setFilters(filterList);
                     
                     console.log("Categorías cargadas:", cats);
                     console.log("Categorías padre:", cats?.filter(c => !c.parentCategoryId));
@@ -109,6 +117,40 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
     useEffect(() => {
         setProductsToShow(8);
     }, [activeCategory]);
+
+    // Cerrar dropdown cuando se hace clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (sortDropdownOpen && !target.closest('.nbd-sort-dropdown')) {
+                setSortDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [sortDropdownOpen]);
+
+    // Cerrar modal de filtros con Escape
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && filtersModalOpen) {
+                setFiltersModalOpen(false);
+            }
+        };
+
+        if (filtersModalOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'unset';
+        };
+    }, [filtersModalOpen]);
 
     // Categorías organizadas
     const topCategories = useMemo(() => 
@@ -166,21 +208,140 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
             console.log("=== END CATEGORY FILTERING DEBUG ===");
         }
 
+        // Aplicar filtros seleccionados
+        if (Object.keys(selectedFilters).length > 0) {
+            console.log("=== APPLYING FILTERS ===");
+            console.log("Selected filters:", selectedFilters);
+            
+            base = base.filter(product => {
+                return Object.entries(selectedFilters).every(([filterKey, selectedValues]) => {
+                    if (!selectedValues || selectedValues.length === 0) return true;
+                    
+                    // Los filtros están en el campo 'tags' del producto
+                    const productTags = product.tags || {};
+                    const productFilterValue = productTags[filterKey];
+                    
+                    // Si el producto no tiene este filtro, no lo incluimos
+                    if (!productFilterValue) return false;
+                    
+                    // Verificar si alguno de los valores seleccionados coincide
+                    return selectedValues.includes(productFilterValue);
+                });
+            });
+            
+            console.log(`Productos después de filtros: ${base.length}`);
+        }
+
         return base;
-    }, [products, categories, activeCategory]);
+    }, [products, categories, activeCategory, selectedFilters]);
+
+    // Productos ordenados
+    const sortedProducts = useMemo(() => {
+        if (!filteredProducts || filteredProducts.length === 0) return [];
+        
+        const sorted = [...filteredProducts];
+        
+        switch (currentSort) {
+            case 'newest':
+                return sorted.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || 0).getTime();
+                    const dateB = new Date(b.createdAt || 0).getTime();
+                    return dateB - dateA; // Más reciente primero
+                });
+            case 'oldest':
+                return sorted.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || 0).getTime();
+                    const dateB = new Date(b.createdAt || 0).getTime();
+                    return dateA - dateB; // Más antiguo primero
+                });
+            case 'price-low':
+                return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+            case 'price-high':
+                return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+            case 'name-asc':
+                return sorted.sort((a, b) => a.name.localeCompare(b.name));
+            case 'name-desc':
+                return sorted.sort((a, b) => b.name.localeCompare(a.name));
+            default:
+                return sorted;
+        }
+    }, [filteredProducts, currentSort]);
 
     // Productos a mostrar con paginación
     const displayedProducts = useMemo(() => {
-        return filteredProducts.slice(0, productsToShow);
-    }, [filteredProducts, productsToShow]);
+        return sortedProducts.slice(0, productsToShow);
+    }, [sortedProducts, productsToShow]);
 
     // Función para cargar más productos
     const loadMoreProducts = () => {
         setProductsToShow(prev => prev + 8);
     };
 
+    // Funciones para el dropdown de ordenamiento
+    const handleSortChange = (sortType: typeof currentSort) => {
+        setCurrentSort(sortType);
+        setSortDropdownOpen(false);
+        setProductsToShow(8); // Resetear paginación al cambiar orden
+    };
+
+    const toggleSortDropdown = () => {
+        setSortDropdownOpen(!sortDropdownOpen);
+    };
+
+    // Opciones de ordenamiento
+    const sortOptions = [
+        { value: 'newest', label: 'Más recientes' },
+        { value: 'oldest', label: 'Más antiguos' },
+        { value: 'price-low', label: 'Precio: menor a mayor' },
+        { value: 'price-high', label: 'Precio: mayor a menor' },
+        { value: 'name-asc', label: 'Nombre: A-Z' },
+        { value: 'name-desc', label: 'Nombre: Z-A' }
+    ] as const;
+
+    // Funciones para manejar filtros
+    const toggleFiltersModal = () => {
+        setFiltersModalOpen(!filtersModalOpen);
+    };
+
+    const handleFilterChange = (filterKey: string, optionKey: string, checked: boolean) => {
+        setSelectedFilters(prev => {
+            const current = prev[filterKey] || [];
+            
+            if (checked) {
+                // Agregar la opción si está marcada
+                return {
+                    ...prev,
+                    [filterKey]: [...current, optionKey]
+                };
+            } else {
+                // Remover la opción si está desmarcada
+                const updated = current.filter(key => key !== optionKey);
+                if (updated.length === 0) {
+                    const { [filterKey]: removed, ...rest } = prev;
+                    return rest;
+                }
+                return {
+                    ...prev,
+                    [filterKey]: updated
+                };
+            }
+        });
+        
+        // Resetear paginación al cambiar filtros
+        setProductsToShow(8);
+    };
+
+    const clearAllFilters = () => {
+        setSelectedFilters({});
+        setProductsToShow(8);
+    };
+
+    const getActiveFiltersCount = () => {
+        return Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
+    };
+
     // Verificar si hay más productos para mostrar
-    const hasMoreProducts = filteredProducts.length > productsToShow;
+    const hasMoreProducts = sortedProducts.length > productsToShow;
 
     if (loading) {
         return <LoadingSpinner />;
@@ -404,20 +565,58 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                     <div className="nbd-product-controls">
                         
                         {/* Filtros */}
-                        <button className="nbd-control-btn">
+                        <button 
+                            className={`nbd-control-btn ${getActiveFiltersCount() > 0 ? 'nbd-control-btn--active' : ''}`}
+                            onClick={toggleFiltersModal}
+                        >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                 <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                             </svg>
                             <span>Filtros</span>
+                            {getActiveFiltersCount() > 0 && (
+                                <span className="nbd-filter-badge">{getActiveFiltersCount()}</span>
+                            )}
                         </button>
 
                         {/* Ordenar */}
-                        <button className="nbd-control-btn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M3 7h3m0 0l3-3m-3 3l3 3M3 17h9m0 0l3-3m-3 3l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            <span>Ordenar</span>
-                        </button>
+                        <div className="nbd-sort-dropdown">
+                            <button 
+                                className={`nbd-control-btn ${sortDropdownOpen ? 'nbd-control-btn--active' : ''}`}
+                                onClick={toggleSortDropdown}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 7h3m0 0l3-3m-3 3l3 3M3 17h9m0 0l3-3m-3 3l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span>Ordenar</span>
+                                <svg 
+                                    width="12" height="12" 
+                                    viewBox="0 0 24 24" 
+                                    fill="none"
+                                    className={`nbd-dropdown-arrow ${sortDropdownOpen ? 'nbd-dropdown-arrow--open' : ''}`}
+                                >
+                                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                            
+                            {sortDropdownOpen && (
+                                <div className="nbd-dropdown-menu">
+                                    {sortOptions.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            className={`nbd-dropdown-option ${currentSort === option.value ? 'nbd-dropdown-option--active' : ''}`}
+                                            onClick={() => handleSortChange(option.value)}
+                                        >
+                                            {option.label}
+                                            {currentSort === option.value && (
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Vista */}
                         <button 
@@ -717,6 +916,87 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
             )}
 
             <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
+
+            {/* Modal de Filtros */}
+            {filtersModalOpen && (
+                <div className="nbd-modal-overlay" onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                        setFiltersModalOpen(false);
+                    }
+                }}>
+                    <div className="nbd-modal-content nbd-filters-modal">
+                        {/* Header del modal */}
+                        <div className="nbd-modal-header">
+                            <h3 className="nbd-modal-title">Filtros</h3>
+                            <button 
+                                className="nbd-modal-close"
+                                onClick={() => setFiltersModalOpen(false)}
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Contenido del modal */}
+                        <div className="nbd-modal-body">
+                            {filters.length === 0 ? (
+                                <div className="nbd-no-filters">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                                    </svg>
+                                    <h4>No hay filtros disponibles</h4>
+                                    <p>Los filtros se configuran desde el panel de administración.</p>
+                                </div>
+                            ) : (
+                                <div className="nbd-filters-list">
+                                    {filters.map((filter) => (
+                                        <div key={filter.id} className="nbd-filter-group">
+                                            <h4 className="nbd-filter-title">{filter.name}</h4>
+                                            <div className="nbd-filter-options">
+                                                {Object.entries(filter.options || {}).map(([optionKey, optionLabel]) => {
+                                                    const isSelected = selectedFilters[filter.id]?.includes(optionKey) || false;
+                                                    return (
+                                                        <label key={optionKey} className={`nbd-filter-option ${isSelected ? 'nbd-filter-option--selected' : ''}`}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={(e) => handleFilterChange(filter.id, optionKey, e.target.checked)}
+                                                                className="nbd-filter-checkbox"
+                                                            />
+                                                            <span className="nbd-filter-checkmark"></span>
+                                                            <span className="nbd-filter-label">{optionLabel}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer del modal */}
+                        {filters.length > 0 && (
+                            <div className="nbd-modal-footer">
+                                <button 
+                                    className="nbd-btn nbd-btn--ghost"
+                                    onClick={clearAllFilters}
+                                    disabled={getActiveFiltersCount() === 0}
+                                >
+                                    Limpiar filtros
+                                </button>
+                                <button 
+                                    className="nbd-btn nbd-btn--primary"
+                                    onClick={() => setFiltersModalOpen(false)}
+                                >
+                                    Aplicar ({getActiveFiltersCount()})
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

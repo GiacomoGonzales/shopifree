@@ -245,7 +245,7 @@
         width: 100%;
     }
     
-    .nbd-btn {
+    .nbd-hero-actions .nbd-btn {
         width: 100%;
         max-width: 280px;
         margin: 0 auto;
@@ -294,6 +294,21 @@
     display: flex;
     gap: var(--nbd-space-lg);
     align-items: center;
+}
+
+@media (min-width: 641px) {
+    .nbd-hero-actions {
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    
+    .nbd-hero-actions .nbd-btn {
+        width: auto;
+        min-width: 180px;
+        max-width: none;
+        flex: none;
+    }
 }
 
 @media (max-width: 640px) {
@@ -443,6 +458,20 @@
     background: var(--nbd-primary);
     color: var(--nbd-neutral-0);
     border-color: var(--nbd-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--nbd-shadow-lg);
+}
+
+/* Botón secundario */
+.nbd-btn--secondary {
+    background: transparent;
+    color: var(--nbd-primary);
+    border: 1px solid var(--nbd-primary);
+}
+
+.nbd-btn--secondary:hover {
+    background: var(--nbd-primary);
+    color: var(--nbd-neutral-0);
     transform: translateY(-2px);
     box-shadow: var(--nbd-shadow-lg);
 }
@@ -1257,6 +1286,81 @@
     flex-shrink: 0;
 }
 
+.nbd-control-btn--active {
+    color: var(--nbd-primary);
+    background: var(--nbd-neutral-100);
+}
+
+/* Dropdown de ordenamiento */
+.nbd-sort-dropdown {
+    position: relative;
+}
+
+.nbd-dropdown-arrow {
+    transition: transform var(--nbd-transition-base);
+    margin-left: var(--nbd-space-xs);
+}
+
+.nbd-dropdown-arrow--open {
+    transform: rotate(180deg);
+}
+
+.nbd-dropdown-menu {
+    position: absolute;
+    top: calc(100% + var(--nbd-space-xs));
+    right: 0;
+    background: var(--nbd-neutral-0);
+    border: 1px solid var(--nbd-neutral-200);
+    border-radius: var(--nbd-radius-lg);
+    box-shadow: var(--nbd-shadow-lg);
+    z-index: 1000;
+    min-width: 200px;
+    padding: var(--nbd-space-sm);
+    animation: nbd-dropdown-fade-in 0.15s ease-out;
+}
+
+.nbd-dropdown-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: var(--nbd-font-size-sm);
+    color: var(--nbd-neutral-700);
+    border-radius: var(--nbd-radius-md);
+    cursor: pointer;
+    transition: all var(--nbd-transition-base);
+}
+
+.nbd-dropdown-option:hover {
+    background: var(--nbd-neutral-50);
+    color: var(--nbd-primary);
+}
+
+.nbd-dropdown-option--active {
+    background: var(--nbd-primary);
+    color: var(--nbd-neutral-0);
+}
+
+.nbd-dropdown-option--active:hover {
+    background: var(--nbd-secondary);
+    color: var(--nbd-neutral-0);
+}
+
+@keyframes nbd-dropdown-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Ocultar botón de vista en escritorio */
 .nbd-view-btn {
     display: none;
@@ -1296,6 +1400,273 @@
     /* Mostrar botón de vista solo en móvil */
     .nbd-view-btn {
         display: flex;
+    }
+    
+    /* Ajustes del dropdown en móvil */
+    .nbd-dropdown-menu {
+        right: auto;
+        left: 0;
+        min-width: 180px;
+    }
+    
+    .nbd-dropdown-arrow {
+        display: none; /* Ocultar flecha en móvil para ahorrar espacio */
+    }
+}
+
+/* Badge de contador de filtros */
+.nbd-filter-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--nbd-error);
+    color: var(--nbd-neutral-0);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 1;
+}
+
+/* Modal de filtros */
+.nbd-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: var(--nbd-space-lg);
+    animation: nbd-modal-fade-in 0.2s ease-out;
+}
+
+.nbd-modal-content {
+    background: var(--nbd-neutral-0);
+    border-radius: var(--nbd-radius-2xl);
+    box-shadow: var(--nbd-shadow-2xl);
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: nbd-modal-slide-up 0.2s ease-out;
+}
+
+.nbd-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--nbd-space-xl);
+    border-bottom: 1px solid var(--nbd-neutral-200);
+}
+
+.nbd-modal-title {
+    font-size: var(--nbd-font-size-lg);
+    font-weight: 600;
+    color: var(--nbd-primary);
+    margin: 0;
+}
+
+.nbd-modal-close {
+    background: none;
+    border: none;
+    color: var(--nbd-neutral-500);
+    cursor: pointer;
+    padding: var(--nbd-space-sm);
+    border-radius: var(--nbd-radius-lg);
+    transition: all var(--nbd-transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nbd-modal-close:hover {
+    background: var(--nbd-neutral-100);
+    color: var(--nbd-primary);
+}
+
+.nbd-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--nbd-space-xl);
+}
+
+.nbd-modal-footer {
+    display: flex;
+    gap: var(--nbd-space-md);
+    padding: var(--nbd-space-xl);
+    border-top: 1px solid var(--nbd-neutral-200);
+}
+
+.nbd-modal-footer .nbd-btn {
+    flex: 1;
+    font-size: var(--nbd-font-size-sm);
+    padding: var(--nbd-space-sm) var(--nbd-space-lg);
+    min-height: 44px;
+}
+
+/* Estado vacío de filtros */
+.nbd-no-filters {
+    text-align: center;
+    padding: var(--nbd-space-3xl) var(--nbd-space-xl);
+    color: var(--nbd-neutral-500);
+}
+
+.nbd-no-filters svg {
+    margin-bottom: var(--nbd-space-lg);
+    opacity: 0.5;
+}
+
+.nbd-no-filters h4 {
+    font-size: var(--nbd-font-size-base);
+    font-weight: 600;
+    color: var(--nbd-neutral-700);
+    margin-bottom: var(--nbd-space-sm);
+}
+
+.nbd-no-filters p {
+    color: var(--nbd-neutral-500);
+    font-size: var(--nbd-font-size-xs);
+}
+
+/* Lista de filtros */
+.nbd-filters-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nbd-space-2xl);
+}
+
+.nbd-filter-group {
+    border-bottom: 1px solid var(--nbd-neutral-200);
+    padding-bottom: var(--nbd-space-lg);
+}
+
+.nbd-filter-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.nbd-filter-title {
+    font-size: var(--nbd-font-size-base);
+    font-weight: 600;
+    color: var(--nbd-primary);
+    margin-bottom: var(--nbd-space-lg);
+}
+
+.nbd-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nbd-space-md);
+}
+
+.nbd-filter-option {
+    display: flex;
+    align-items: center;
+    gap: var(--nbd-space-sm);
+    cursor: pointer;
+    padding: var(--nbd-space-sm);
+    border-radius: var(--nbd-radius-lg);
+    border: 1px solid transparent;
+    transition: all var(--nbd-transition-base);
+}
+
+.nbd-filter-option:hover {
+    background: var(--nbd-neutral-50);
+}
+
+.nbd-filter-option--selected {
+    background: var(--nbd-neutral-100);
+    color: var(--nbd-primary);
+    border: 1px solid var(--nbd-primary);
+}
+
+.nbd-filter-checkbox {
+    display: none;
+}
+
+.nbd-filter-checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--nbd-neutral-300);
+    border-radius: var(--nbd-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--nbd-transition-base);
+    position: relative;
+}
+
+.nbd-filter-option--selected .nbd-filter-checkmark {
+    border-color: var(--nbd-primary);
+    background: var(--nbd-primary);
+}
+
+.nbd-filter-option--selected .nbd-filter-checkmark::after {
+    content: '';
+    width: 6px;
+    height: 10px;
+    border: 2px solid var(--nbd-neutral-0);
+    border-left: none;
+    border-top: none;
+    transform: rotate(45deg);
+    margin-top: -2px;
+}
+
+.nbd-filter-label {
+    font-size: var(--nbd-font-size-sm);
+    font-weight: 500;
+}
+
+/* Animaciones del modal */
+@keyframes nbd-modal-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes nbd-modal-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive del modal */
+@media (max-width: 640px) {
+    .nbd-modal-overlay {
+        padding: var(--nbd-space-lg) 0 0 0; /* Solo padding superior */
+        align-items: flex-end; /* Alinear al fondo */
+    }
+    
+    .nbd-modal-content {
+        max-height: 90vh;
+        border-radius: var(--nbd-radius-2xl) var(--nbd-radius-2xl) 0 0; /* Solo bordes superiores redondeados */
+        max-width: none; /* Quitar límite de ancho para ocupar todo el ancho */
+    }
+    
+    .nbd-modal-header,
+    .nbd-modal-body,
+    .nbd-modal-footer {
+        padding: var(--nbd-space-lg);
+    }
+    
+    .nbd-modal-footer {
+        flex-direction: column;
     }
 
     .nbd-products-grid {
@@ -2005,13 +2376,23 @@
 .nbd-footer {
     background: var(--nbd-neutral-900);
     color: var(--nbd-neutral-300);
-    margin-top: var(--nbd-space-5xl);
+    margin-top: var(--nbd-space-xl);
+}
+
+@media (max-width: 768px) {
+    .nbd-footer {
+        margin-top: var(--nbd-space-lg);
+    }
+    
+    .nbd-footer-container {
+        padding: var(--nbd-space-2xl) var(--nbd-space-lg) 0;
+    }
 }
 
 .nbd-footer-container {
     max-width: 1280px;
     margin: 0 auto;
-    padding: var(--nbd-space-5xl) var(--nbd-space-xl) 0;
+    padding: var(--nbd-space-3xl) var(--nbd-space-xl) 0;
 }
 
 .nbd-footer-main {
@@ -2186,7 +2567,7 @@
    CARRUSEL DE MARCAS
    =================================================== */
 .nbd-brands-carousel {
-    padding: var(--nbd-space-lg) 0;
+    padding: var(--nbd-space-3xl) var(--nbd-space-xl);
     background: linear-gradient(135deg, var(--nbd-neutral-50) 0%, var(--nbd-neutral-0) 100%);
     border-top: 1px solid var(--nbd-neutral-200);
     overflow: hidden;
@@ -2282,7 +2663,7 @@
 /* Responsive para móvil */
 @media (max-width: 768px) {
     .nbd-brands-carousel {
-        padding: var(--nbd-space-md) 0;
+        padding: var(--nbd-space-2xl) var(--nbd-space-lg);
     }
     
     .nbd-brands-container {
@@ -2351,6 +2732,11 @@
     
     .nbd-section-header {
         text-align: left; /* Alinear títulos a la izquierda en móvil */
+    }
+    
+    /* Excepción: mantener centrado en carrusel de marcas */
+    .nbd-brands-carousel .nbd-section-header {
+        text-align: center;
     }
     
     .nbd-categories,
@@ -2510,24 +2896,7 @@
         width: 100%;
     }
     
-    [data-theme="new-base-default"] .nbd-btn--secondary {
-        padding: var(--nbd-space-sm) var(--nbd-space-md);
-        font-size: var(--nbd-font-size-xs);
-        min-height: 44px;
-        height: 44px;
-        width: 100%;
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        border: 1px solid var(--nbd-neutral-300);
-    }
-    
-    [data-theme="new-base-default"] .nbd-btn--secondary svg {
-        width: 18px;
-        height: 18px;
-    }
+
 }
 
 /* Media del producto */
@@ -2667,20 +3036,7 @@
     align-items: stretch;
 }
 
-[data-theme="new-base-default"] .nbd-btn--secondary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--nbd-space-xs);
-    padding: var(--nbd-space-md);
-    font-size: var(--nbd-font-size-sm);
-    font-weight: 500;
-    border-radius: var(--nbd-radius-lg);
-    transition: all var(--nbd-transition-base);
-    white-space: nowrap;
-    width: 100%;
-    box-sizing: border-box;
-}
+
 
 /* ===================================================
    PÁGINA DE PRODUCTO DETALLADA - NUEVA
@@ -3044,16 +3400,15 @@
     
     .nbd-btn {
         justify-content: center;
-        width: 100% !important; /* Forzar ancho completo en móvil */
+        width: 100%;
     }
     
-    /* Asegurar que los botones secundarios también tengan ancho completo */
     .nbd-secondary-actions {
         width: 100%;
     }
     
     .nbd-btn--half-width {
-        width: 100% !important;
+        width: 100%;
         flex: 1;
     }
     
