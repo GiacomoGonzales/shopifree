@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getStoreIdBySubdomain } from '../../../../../lib/store';
-import { getProduct, getProductBySlug, PublicProduct } from '../../../../../lib/products';
+import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../../../lib/products';
 import { toCloudinarySquare } from '../../../../../lib/images';
 import { formatPrice } from '../../../../../lib/currency';
 import Layout from '../../../../../themes/new-base-default/Layout';
@@ -21,6 +21,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   const [loading, setLoading] = useState(true);
   const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
+  const [products, setProducts] = useState<PublicProduct[]>([]);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   
   // Estados para carrusel de galería
@@ -38,13 +39,15 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
           if (!alive) return;
           setProduct(p);
           // cargar info base para header/footer
-          const [info, cats] = await Promise.all([
+          const [info, cats, prods] = await Promise.all([
             getStoreBasicInfo(id),
-            getStoreCategories(id)
+            getStoreCategories(id),
+            getStoreProducts(id)
           ]);
           if (!alive) return;
           setStoreInfo(info);
           setCategories(cats);
+          setProducts(prods);
         }
       } finally {
         if (alive) setLoading(false);
@@ -242,7 +245,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   };
 
   return (
-    <Layout storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain}>
+    <Layout storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products}>
       {/* JSON-LD SEO */}
       {breadcrumbJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />

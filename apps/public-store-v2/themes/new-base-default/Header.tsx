@@ -5,17 +5,21 @@ import { StoreBasicInfo } from "../../lib/store";
 import { Category } from "../../lib/categories";
 import { toCloudinarySquare } from "../../lib/images";
 import { useCart } from "../../lib/cart-context";
+import { PublicProduct } from "../../lib/products";
+import SearchComponent from "./SearchComponent";
 
 type Props = {
     storeInfo: StoreBasicInfo | null;
     categories: Category[] | null;
     storeSubdomain: string;
+    products: PublicProduct[];
 };
 
-export default function Header({ storeInfo, categories, storeSubdomain }: Props) {
+export default function Header({ storeInfo, categories, storeSubdomain, products }: Props) {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, openCart } = useCart();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => setIsScrolled(window.scrollY > 20);
@@ -101,7 +105,11 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
                     <div className="nbd-header-actions">
                         
                         {/* Búsqueda */}
-                        <button className="nbd-action-btn" aria-label="Buscar productos">
+                        <button 
+                            className="nbd-action-btn" 
+                            onClick={() => setSearchOpen(true)}
+                            aria-label="Buscar productos"
+                        >
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
                                 <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -188,6 +196,15 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
                     </div>
                 </div>
             )}
+
+            {/* Componente de Búsqueda */}
+            <SearchComponent
+                products={products}
+                isOpen={searchOpen}
+                onClose={() => setSearchOpen(false)}
+                isCustomDomain={isCustomDomain()}
+                storeSubdomain={storeSubdomain}
+            />
         </>
     );
 }

@@ -353,7 +353,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
 
     return (
         <div data-theme="new-base-default" className="nbd-theme">
-            <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
+            <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products || []} />
             
             {/* Si estamos en una página de categoría, mostrar header limpio */}
             {isOnCategoryPage && currentCategory && (
