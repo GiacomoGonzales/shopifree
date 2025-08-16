@@ -12,8 +12,10 @@ import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { getStoreFilters, Filter } from "../../lib/filters";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
+import { useCart } from "../../lib/cart-context";
 import Header from "./Header";
 import Footer from "./Footer";
+import CartModal from "./CartModal";
 
 type Props = {
     storeSubdomain: string;
@@ -22,6 +24,7 @@ type Props = {
 
 export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) {
     const t = useTranslations('common');
+    const { addItem } = useCart();
     
     // Función para detectar si estamos en un dominio personalizado
     const isCustomDomain = () => {
@@ -364,6 +367,21 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
 
     const getActiveFiltersCount = () => {
         return Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
+    };
+
+    // Función para agregar producto al carrito
+    const handleAddToCart = (product: PublicProduct) => {
+        addItem({
+            productId: product.id,
+            name: product.name,
+            price: product.price,
+            currency: storeInfo?.currency || 'COP',
+            image: product.image || '',
+            slug: product.slug || product.id
+        }, 1);
+        
+        // Feedback visual opcional (puede implementarse después)
+        console.log(`Agregado al carrito: ${product.name}`);
     };
 
     // Verificar si hay más productos para mostrar
@@ -763,7 +781,11 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                                 )}
                                             </div>
                                             
-                                            <button className="nbd-add-to-cart">
+                                            <button 
+                                                className="nbd-add-to-cart"
+                                                onClick={() => handleAddToCart(product)}
+                                                aria-label={`Agregar ${product.name} al carrito`}
+                                            >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                 </svg>
@@ -1023,6 +1045,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                     </div>
                 </div>
             )}
+
+            {/* Modal del carrito */}
+            <CartModal />
         </div>
     );
 }
