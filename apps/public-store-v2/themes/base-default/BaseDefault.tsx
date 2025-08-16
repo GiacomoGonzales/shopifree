@@ -123,10 +123,9 @@ export default function BaseDefault({ storeSubdomain }: Props) {
 
     if (loading) {
         return (
-            <div data-theme="base-default" className="bd-theme">
-                <div className="bd-loading">
-                    <div className="bd-spinner" aria-label={t('loading')} />
-                </div>
+            <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
+                <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
+                <p className="text-gray-600 text-sm">Cargando...</p>
             </div>
         );
     }

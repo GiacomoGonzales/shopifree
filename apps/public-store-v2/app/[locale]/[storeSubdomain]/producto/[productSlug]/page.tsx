@@ -7,7 +7,12 @@ import { getProduct } from '../../../../../lib/products';
 export default function ProductoPage({ params }: { params: { productSlug: string; locale: string; storeSubdomain: string } }) {
     const { productSlug, storeSubdomain, locale } = params as any;
     return (
-        <Suspense fallback={<div className="container">Cargando…</div>}>
+        <Suspense fallback={
+            <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
+                <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
+                <p className="text-gray-600 text-sm">Cargando...</p>
+            </div>
+        }>
             <ProductDetail productSlug={productSlug} storeSubdomain={storeSubdomain} locale={locale} />
         </Suspense>
     );

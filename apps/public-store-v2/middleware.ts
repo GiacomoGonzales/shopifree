@@ -202,10 +202,19 @@ export async function middleware(req: NextRequest) {
 	const segments = originalPathname.split('/').filter(Boolean);
 	const first = segments[0] || '';
 	const hasLocale = supportedLocales.includes(first as any);
+	
+	// Si la URL ya contiene el subdominio después del locale, NO hacer rewrite para evitar loops
+	const localeIndex = hasLocale ? 1 : 0;
+	if (segments[localeIndex] === resolvedSubdomain) {
+		// La URL ya tiene el formato correcto, delegar a next-intl
+		return intl(req);
+	}
+	
 	const preferred = hasLocale ? (first as typeof supportedLocales[number]) : getPreferredLocale(req, resolvedSubdomain);
 	const rest = hasLocale ? segments.slice(1) : segments;
 	const targetSegments = [preferred, resolvedSubdomain, ...rest];
 	const internalPathname = '/' + targetSegments.join('/');
+	
 	return NextResponse.rewrite(new URL(internalPathname + search, req.url));
 }
 

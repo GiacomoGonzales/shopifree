@@ -37,7 +37,23 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
         [categories]
     );
 
-    const getSubdomainUrl = (path: string) => `/${locale}/${storeSubdomain}${path}`;
+    // Función para detectar si estamos en un dominio personalizado
+    const isCustomDomain = () => {
+        if (typeof window === 'undefined') return false;
+        const host = window.location.hostname;
+        return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+    };
+    
+    const getSubdomainUrl = (path: string) => {
+        const isCustom = isCustomDomain();
+        if (isCustom) {
+            // En dominio personalizado: NO incluir subdominio
+            return `/${locale}${path}`;
+        } else {
+            // En dominio de plataforma: incluir subdominio
+            return `/${locale}/${storeSubdomain}${path}`;
+        }
+    };
 
     return (
         <>

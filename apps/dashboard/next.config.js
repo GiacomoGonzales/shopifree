@@ -1,5 +1,3 @@
-const withNextIntl = require('next-intl/plugin')('./i18n.ts');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -14,6 +12,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ['firebase', 'firebase-admin', 'firebase/app', 'firebase/auth', 'firebase/firestore'],
   },
   transpilePackages: ['@shopifree/ui', '@shopifree/types'],
+  // Dashboard is completely CSR - no SSR needed for pages
   // Configure images for external sources (Cloudinary, etc.)
   images: {
     remotePatterns: [
@@ -52,4 +51,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withNextIntl(nextConfig); 
+module.exports = nextConfig; 

@@ -24,10 +24,13 @@
   },
   "paymentMethods": {
     "cash": "Cash",
+    "cash_on_delivery": "Cash on Delivery",
     "card": "Card",
     "transfer": "Transfer",
     "paypal": "PayPal",
     "stripe": "Stripe",
+    "mercadopago": "MercadoPago",
+    "culqi": "Culqi",
     "other": "Other"
   },
   "details": {

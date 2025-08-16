@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import "./new-base-default.css";
+import "./loading-spinner.css";
+import LoadingSpinner from "./LoadingSpinner";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
@@ -19,6 +21,29 @@ type Props = {
 
 export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) {
     const t = useTranslations('common');
+    
+    // Función para detectar si estamos en un dominio personalizado
+    const isCustomDomain = () => {
+        if (typeof window === 'undefined') return false;
+        const host = window.location.hostname;
+        return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+    };
+    
+    // Función para construir URLs correctamente según el tipo de dominio
+    const buildUrl = (path: string) => {
+        if (typeof window === 'undefined') return path;
+        
+        const locale = window.location.pathname.split('/')[1] || 'es';
+        const isCustom = isCustomDomain();
+        
+        if (isCustom) {
+            // En dominio personalizado: NO incluir subdominio
+            return `/${locale}${path}`;
+        } else {
+            // En dominio de plataforma: incluir subdominio
+            return `/${locale}/${storeSubdomain}${path}`;
+        }
+    };
     
     // Detectar si estamos en una página de categoría
     const isOnCategoryPage = !!categorySlug || (typeof window !== 'undefined' && window.location.pathname.includes('/categoria/'));
@@ -158,16 +183,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
     const hasMoreProducts = filteredProducts.length > productsToShow;
 
     if (loading) {
-        return (
-            <div data-theme="new-base-default" className="nbd-theme">
-                <div className="nbd-loading">
-                    <div className="nbd-loading-content">
-                        <div className="nbd-spinner"></div>
-                        <p className="nbd-loading-text">{t('loading')}</p>
-                    </div>
-                </div>
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     // Encontrar la categoría actual si estamos en una página de categoría
@@ -189,7 +205,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                         
                         {/* Breadcrumbs debajo del título */}
                         <nav className="nbd-category-breadcrumbs">
-                            <a href={`/${typeof window !== 'undefined' ? window.location.pathname.split('/')[1] || 'es' : 'es'}/${storeSubdomain}`} className="nbd-breadcrumb-link">
+                            <a href={buildUrl('')} className="nbd-breadcrumb-link">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                                     <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -303,7 +319,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     return (
                                         <a
                                             key={category.id}
-                                            href={`/${typeof window !== 'undefined' ? window.location.pathname.split('/')[1] || 'es' : 'es'}/${storeSubdomain}/categoria/${category.slug}`}
+                                            href={buildUrl(`/categoria/${category.slug}`)}
                                             className={`nbd-mosaic-card ${activeCategory === category.slug ? 'nbd-mosaic-card--active' : ''} ${
                                                 isFeatured ? 'nbd-mosaic-card--featured' : ''
                                             } ${isParent ? 'nbd-mosaic-card--parent' : 'nbd-mosaic-card--sub'}`}
@@ -448,9 +464,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     key={product.id} 
                                     className="nbd-product-card"
                                     onClick={() => {
-                                        const locale = typeof window !== 'undefined' ? 
-                                            window.location.pathname.split('/')[1] || 'es' : 'es';
-                                        window.location.href = `/${locale}/${storeSubdomain}/producto/${product.slug || product.id}`;
+                                        window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
                                     }}
                                     style={{ cursor: 'pointer' }}
                                 >

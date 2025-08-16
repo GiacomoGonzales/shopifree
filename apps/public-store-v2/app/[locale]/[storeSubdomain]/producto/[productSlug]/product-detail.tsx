@@ -85,7 +85,12 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   } : null;
 
   if (loading) {
-    return <div className="container">Cargando…</div>;
+    return (
+      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
+        <p className="text-gray-600 text-sm">Cargando...</p>
+      </div>
+    );
   }
 
   if (!product) {
@@ -472,71 +477,119 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
                 </div>
           ) : null}
 
-              {/* Características del producto */}
-              <div className="nbd-product-features">
-                <h3>Características</h3>
-                <div className="nbd-features-grid">
-                  <div className="nbd-feature">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <path d="M7 18C7 15.2386 9.23858 13 12 13C14.7614 13 17 15.2386 17 18V21H7V18Z" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M12 13C14.2091 13 16 11.2091 16 9C16 6.79086 14.2091 5 12 5C9.79086 5 8 6.79086 8 9C8 11.2091 9.79086 13 12 13Z" stroke="currentColor" strokeWidth="2"/>
+
+
+              {/* Selector de cantidad */}
+              <div className="nbd-quantity-selector">
+                <label htmlFor="quantity" className="nbd-quantity-label">Cantidad:</label>
+                <div className="nbd-quantity-controls">
+                  <button 
+                    type="button" 
+                    id="quantity-minus"
+                    className="nbd-quantity-btn nbd-quantity-btn--minus"
+                    onClick={() => {
+                      const input = document.getElementById('quantity') as HTMLInputElement;
+                      const minusBtn = document.getElementById('quantity-minus') as HTMLButtonElement;
+                      if (input && parseInt(input.value) > 1) {
+                        const newValue = parseInt(input.value) - 1;
+                        input.value = newValue.toString();
+                        if (newValue === 1) {
+                          minusBtn.disabled = true;
+                        }
+                      }
+                    }}
+                    disabled
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12H19"/>
                     </svg>
-                    <div>
-                      <strong>Calidad Premium</strong>
-                      <span>Materiales de alta calidad</span>
-                    </div>
-                  </div>
-                  <div className="nbd-feature">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <path d="M20 7L12 3L4 7L12 11L20 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M4 7V17L12 21L20 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </button>
+                  <input 
+                    id="quantity"
+                    type="number" 
+                    min="1" 
+                    max="99"
+                    defaultValue="1" 
+                    className="nbd-quantity-input"
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      const minusBtn = document.getElementById('quantity-minus') as HTMLButtonElement;
+                      if (value <= 1) {
+                        e.target.value = "1";
+                        minusBtn.disabled = true;
+                      } else {
+                        minusBtn.disabled = false;
+                      }
+                      if (value > 99) {
+                        e.target.value = "99";
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className="nbd-quantity-btn nbd-quantity-btn--plus"
+                    onClick={() => {
+                      const input = document.getElementById('quantity') as HTMLInputElement;
+                      const minusBtn = document.getElementById('quantity-minus') as HTMLButtonElement;
+                      if (input && parseInt(input.value) < 99) {
+                        const newValue = parseInt(input.value) + 1;
+                        input.value = newValue.toString();
+                        if (newValue > 1) {
+                          minusBtn.disabled = false;
+                        }
+                      }
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 5V19M5 12H19"/>
                     </svg>
-                    <div>
-                      <strong>Envío Gratis</strong>
-                      <span>En compras mayores a $50</span>
-                    </div>
-                  </div>
-                  <div className="nbd-feature">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <div>
-                      <strong>Garantía</strong>
-                      <span>30 días de garantía</span>
-                    </div>
-                  </div>
+                  </button>
                 </div>
               </div>
 
-                              {/* Acciones */}
-          <div className="nbd-product-actions">
-                  {/* Botón principal - 100% ancho */}
-                  <button className="nbd-btn nbd-btn--primary nbd-btn--full-width">
+              {/* Acciones */}
+              <div className="nbd-product-actions">
+                {/* Botón principal - Agregar al carrito */}
+                <button className="nbd-btn nbd-btn--primary nbd-btn--cart">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
+                  </svg>
+                  Agregar al carrito
+                </button>
+                
+                {/* Botones secundarios */}
+                <div className="nbd-secondary-actions">
+                  <button className="nbd-btn nbd-btn--outline nbd-btn--secondary">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
+                      <path d="M20.84 4.61A5.5 5.5 0 0 0 16 2A5.5 5.5 0 0 0 12 4A5.5 5.5 0 0 0 8 2A5.5 5.5 0 0 0 3.16 4.61C1.42 6.81 1.42 10.19 3.16 12.39L12 22L20.84 12.39C22.58 10.19 22.58 6.81 20.84 4.61Z"/>
                     </svg>
-                    Agregar al carrito
+                    Favoritos
                   </button>
-                  
-                  {/* Botones secundarios - 50% cada uno */}
-                  <div className="nbd-secondary-actions">
-                    <button className="nbd-btn nbd-btn--outline nbd-btn--half-width">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61A5.5 5.5 0 0 0 16 2A5.5 5.5 0 0 0 12 4A5.5 5.5 0 0 0 8 2A5.5 5.5 0 0 0 3.16 4.61C1.42 6.81 1.42 10.19 3.16 12.39L12 22L20.84 12.39C22.58 10.19 22.58 6.81 20.84 4.61Z"/>
-                      </svg>
-                      Favoritos
-                    </button>
-                    <button 
-                      className="nbd-btn nbd-btn--ghost nbd-btn--half-width" 
-                      onClick={() => history.back()}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19L5 12L12 5"/>
-                      </svg>
-                      Volver
-                    </button>
-                  </div>
-               </div>
+                  <button 
+                    className="nbd-btn nbd-btn--outline nbd-btn--secondary"
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: product.name,
+                          text: `Mira este producto: ${product.name}`,
+                          url: window.location.href
+                        });
+                      } else {
+                        // Fallback para navegadores que no soportan Web Share API
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('Enlace copiado al portapapeles');
+                      }
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V12"/>
+                      <path d="M16 6L12 2L8 6"/>
+                      <path d="M12 2V15"/>
+                    </svg>
+                    Compartir
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

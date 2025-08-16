@@ -84,7 +84,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
   useEffect(() => {
     if (store?.advanced?.seo) {
       const existingSeo = store.advanced.seo
-      console.log('Loading existing SEO data:', existingSeo)
+      console.log('📄 Loading existing SEO data:', existingSeo)
       setSeoData(prev => ({
         ...prev,
         metaTitle: existingSeo.title || '',
@@ -106,8 +106,77 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         metaPixel: store.advanced?.integrations?.metaPixel || '',
         tiktokPixel: existingSeo.tiktokPixel || ''
       }))
+    } else {
+      console.log('📄 No existing SEO data found, using defaults')
     }
   }, [store])
+
+  // Detectar y actualizar URL canónica automáticamente cuando se conecta un dominio personalizado
+  useEffect(() => {
+    const checkAndUpdateCanonicalUrl = async () => {
+      if (!store?.id) return
+      
+      try {
+        // Consultar configuración de dominio personalizado
+        const db = (await import('../../lib/firebase')).getFirebaseDb()
+        if (!db) return
+        
+        const { doc, getDoc } = await import('firebase/firestore')
+        const domainRef = doc(db, 'stores', store.id, 'settings', 'domain')
+        const domainSnap = await getDoc(domainRef)
+        
+        if (domainSnap.exists()) {
+          const domainData = domainSnap.data()
+          const customDomain = domainData?.customDomain
+          const isVerified = domainData?.verified || domainData?.vercelData?.verified
+          
+          // Obtener la URL canónica actual desde los datos de SEO guardados
+          const currentCanonicalUrl = store.advanced?.seo?.canonicalUrl || ''
+          const expectedCanonicalUrl = customDomain && isVerified ? `https://${customDomain}` : ''
+          
+          console.log('🔍 Verificando URL canónica:', {
+            customDomain,
+            isVerified,
+            currentCanonicalUrl,
+            expectedCanonicalUrl,
+            shouldUpdate: expectedCanonicalUrl && currentCanonicalUrl !== expectedCanonicalUrl
+          })
+          
+          // Si hay un dominio personalizado verificado y la URL canónica no coincide
+          if (expectedCanonicalUrl && currentCanonicalUrl !== expectedCanonicalUrl) {
+            console.log('🔄 Auto-actualizando URL canónica:', expectedCanonicalUrl)
+            
+            // Actualizar el estado local
+            setSeoData(prev => ({
+              ...prev,
+              canonicalUrl: expectedCanonicalUrl
+            }))
+            
+            // Guardar automáticamente en Firestore
+            await onUpdate({
+              advanced: {
+                ...store?.advanced,
+                seo: {
+                  ...store?.advanced?.seo,
+                  canonicalUrl: expectedCanonicalUrl
+                }
+              }
+            })
+            
+            setSaveMessage('✅ URL canónica actualizada automáticamente con el dominio personalizado')
+            setTimeout(() => setSaveMessage(null), 4000)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error verificando dominio personalizado:', error)
+      }
+    }
+    
+    // Ejecutar cuando tengamos los datos del store cargados
+    if (store?.id) {
+      checkAndUpdateCanonicalUrl()
+    }
+  }, [store?.id, store?.advanced?.seo?.canonicalUrl])
 
   // Debug: Monitorear cambios en ogImage
   useEffect(() => {
@@ -922,6 +991,11 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         />
         <p className="text-xs text-gray-500 mt-1">{t('fields.canonicalUrl.hint')}</p>
         <p className="text-xs text-gray-600 mt-1">{t('fields.canonicalUrl.help')}</p>
+        {!seoData.canonicalUrl && (
+          <p className="text-xs text-blue-600 mt-1">
+            💡 Se configurará automáticamente cuando tengas un dominio personalizado verificado
+          </p>
+        )}
       </div>
 
       {/* Datos Estructurados */}

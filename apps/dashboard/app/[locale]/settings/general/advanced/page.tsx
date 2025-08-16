@@ -10,6 +10,44 @@ import { getUserStore, updateStore, StoreWithId } from '../../../../../lib/store
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { getFirebaseDb } from '../../../../../lib/firebase'
 
+// Función auxiliar para actualizar URL canónica cuando se verifica un dominio
+const updateCanonicalUrl = async (storeId: string, customDomain: string) => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) return
+    
+    const storeRef = doc(db, 'stores', storeId)
+    const storeSnap = await getDoc(storeRef)
+    
+    if (storeSnap.exists()) {
+      const storeData = storeSnap.data()
+      const currentCanonicalUrl = storeData?.advanced?.seo?.canonicalUrl || ''
+      const expectedCanonicalUrl = `https://${customDomain}`
+      
+      // Actualizar si la URL canónica no coincide con el dominio personalizado
+      if (currentCanonicalUrl !== expectedCanonicalUrl) {
+        await updateDoc(storeRef, {
+          advanced: {
+            ...(storeData.advanced || {}),
+            seo: {
+              ...(storeData.advanced?.seo || {}),
+              canonicalUrl: expectedCanonicalUrl
+            }
+          },
+          updatedAt: serverTimestamp()
+        })
+        
+        console.log('✅ URL canónica actualizada automáticamente:', expectedCanonicalUrl)
+        return true // Indica que se actualizó
+      }
+    }
+    return false // Indica que no se necesitó actualizar
+  } catch (error) {
+    console.error('❌ Error actualizando URL canónica:', error)
+    throw error
+  }
+}
+
 export default function GeneralSettingsAdvancedPage() {
   const t = useTranslations('settings')
   const tAdv = useTranslations('settings.advanced')
@@ -62,7 +100,17 @@ export default function GeneralSettingsAdvancedPage() {
     if (!store?.id) return
     setSaving(true)
     try {
-      await updateStore(store.id, { advanced: { ...(store.advanced || {}), language } })
+      // ✅ FIXED: Preservar todos los datos existentes en 'advanced' al actualizar el idioma
+      await updateStore(store.id, { 
+        advanced: { 
+          ...(store.advanced || {}), 
+          language,
+          // Preservar explícitamente los datos existentes
+          seo: store.advanced?.seo || {},
+          shipping: store.advanced?.shipping || {},
+          integrations: store.advanced?.integrations || {}
+        } 
+      })
       setMessage(tAdv('actions.saved'))
       setTimeout(() => setMessage(null), 2500)
     } catch (e) {
@@ -122,6 +170,8 @@ export default function GeneralSettingsAdvancedPage() {
     setDomainSaving(true)
     try {
       const domain = customDomain.trim()
+      console.log(`🔍 Iniciando verificación de dominio: ${domain}`)
+      
       // 1) Consultar endpoint interno para verificar HTTPS y cabeceras Vercel
       const res = await fetch('/api/domain/verify', {
         method: 'POST',
@@ -129,7 +179,7 @@ export default function GeneralSettingsAdvancedPage() {
         body: JSON.stringify({ domain })
       })
       const data = res.ok ? await res.json() : { ssl: false, verified: false }
-      console.log('Respuesta de verificación:', data) // Debug temporal
+      console.log('✅ Respuesta de verificación:', data)
 
       // 2) Guardar resultado en Firestore
       const db = getFirebaseDb()
@@ -148,7 +198,25 @@ export default function GeneralSettingsAdvancedPage() {
         }
       })
       const snap = await getDoc(ref)
-      setDomainDoc(snap.exists() ? (snap.data() as any) : null)
+      const updatedDomainDoc = snap.exists() ? (snap.data() as any) : null
+      setDomainDoc(updatedDomainDoc)
+      
+      // ✅ Si el dominio se verificó exitosamente, actualizar URL canónica automáticamente
+      if (Boolean(data?.verified) && updatedDomainDoc?.customDomain) {
+        try {
+          const wasUpdated = await updateCanonicalUrl(store.id, updatedDomainDoc.customDomain)
+          if (wasUpdated) {
+            setMessage('✅ Dominio verificado y URL canónica actualizada automáticamente')
+          } else {
+            setMessage('✅ Dominio verificado exitosamente')
+          }
+          setTimeout(() => setMessage(null), 4000)
+        } catch (error) {
+          console.error('Error actualizando URL canónica:', error)
+          setMessage('✅ Dominio verificado (error al actualizar URL canónica)')
+          setTimeout(() => setMessage(null), 4000)
+        }
+      }
     } finally {
       setDomainSaving(false)
     }

@@ -24,10 +24,13 @@
   },
   "paymentMethods": {
     "cash": "Efectivo",
+    "cash_on_delivery": "Pago contra entrega",
     "card": "Tarjeta",
     "transfer": "Transferencia",
     "paypal": "PayPal",
     "stripe": "Stripe",
+    "mercadopago": "MercadoPago",
+    "culqi": "Culqi",
     "other": "Otro"
   },
   "details": {
