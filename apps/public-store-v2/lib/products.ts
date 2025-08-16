@@ -19,6 +19,7 @@ export type PublicProduct = {
     slug?: string;
     categoryId?: string;
     selectedParentCategoryIds?: string[];
+    brand?: string;
 };
 
 function transformToPublicProduct(raw: any): PublicProduct {
@@ -41,6 +42,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
         categoryId: typeof raw.categoryId === 'string' ? raw.categoryId : 
                   Array.isArray(raw.selectedParentCategoryIds) && raw.selectedParentCategoryIds.length > 0 ? raw.selectedParentCategoryIds[0] : undefined,
         selectedParentCategoryIds: Array.isArray(raw.selectedParentCategoryIds) ? raw.selectedParentCategoryIds : undefined,
+        brand: typeof raw.brand === 'string' ? raw.brand : undefined,
 	};
 }
 
