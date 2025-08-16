@@ -96,7 +96,7 @@ export default async function StoreLocaleLayout({
         address: seoData.address,
         phone: seoData.phone,
         email: seoData.emailStore
-    } : null;
+    } : undefined;
     
     return (
         <>
