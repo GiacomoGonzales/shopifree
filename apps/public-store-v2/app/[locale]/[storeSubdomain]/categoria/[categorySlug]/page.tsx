@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
         return {
             title: category ? `${category.name} - ${storeName}` : `${params.categorySlug} - ${storeName}`,
             description: category?.description || `Descubre todos los productos de ${category?.name || params.categorySlug} en ${storeName}`,
-            keywords: category ? [category.name, storeName, 'tienda online', 'productos'] : undefined
+            keywords: category ? [category.name, storeName, 'tienda online', 'productos'].filter(Boolean).join(', ') : undefined
         };
     } catch (error) {
         console.error('Error generating metadata:', error);
