@@ -156,7 +156,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   const handleSwipeGesture = (e: React.TouchEvent) => {
     if (typeof window === 'undefined' || window.innerWidth > 768) return;
     
-    const container = e.currentTarget;
+    const container = e.currentTarget as HTMLElement;
     let startX = 0;
     let isDragging = false;
 
