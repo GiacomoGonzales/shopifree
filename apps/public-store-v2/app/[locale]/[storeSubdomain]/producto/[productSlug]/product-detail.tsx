@@ -440,13 +440,13 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
 
           {typeof product.price === 'number' ? (
                 <div className="nbd-product-pricing">
-                  {product.originalPrice && product.originalPrice > product.price ? (
+                  {product.comparePrice && product.comparePrice > product.price ? (
                     <div className="nbd-price-comparison">
                       <span className="nbd-price-original">
-                        {formatPrice(product.originalPrice, storeInfo?.currency)}
+                        {formatPrice(product.comparePrice, storeInfo?.currency)}
                       </span>
                       <span className="nbd-price-discount">
-                        -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                        -{Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
                       </span>
                     </div>
                   ) : null}
