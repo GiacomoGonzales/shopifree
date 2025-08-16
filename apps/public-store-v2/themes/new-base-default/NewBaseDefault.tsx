@@ -322,27 +322,34 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
         setFiltersModalOpen(!filtersModalOpen);
     };
 
-    const handleFilterChange = (filterKey: string, optionKey: string, checked: boolean) => {
+    const handleFilterChange = (filterKey: string, optionValue: string, checked: boolean) => {
+        console.log(`Filter change: ${filterKey} = "${optionValue}" (${checked})`);
         setSelectedFilters(prev => {
             const current = prev[filterKey] || [];
             
             if (checked) {
                 // Agregar la opción si está marcada
-                return {
+                const newFilters = {
                     ...prev,
-                    [filterKey]: [...current, optionKey]
+                    [filterKey]: [...current, optionValue]
                 };
+                console.log('New selected filters:', newFilters);
+                return newFilters;
             } else {
                 // Remover la opción si está desmarcada
-                const updated = current.filter(key => key !== optionKey);
+                const updated = current.filter(val => val !== optionValue);
                 if (updated.length === 0) {
                     const { [filterKey]: removed, ...rest } = prev;
+                    console.log('New selected filters (removed key):', rest);
                     return rest;
+                } else {
+                    const newFilters = {
+                        ...prev,
+                        [filterKey]: updated
+                    };
+                    console.log('New selected filters (updated):', newFilters);
+                    return newFilters;
                 }
-                return {
-                    ...prev,
-                    [filterKey]: updated
-                };
             }
         });
         
