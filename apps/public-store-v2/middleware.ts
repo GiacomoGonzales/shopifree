@@ -42,67 +42,81 @@ async function findSubdomainForCustomHost(host: string): Promise<string | null> 
 
 		const endpoint = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`;
 
-		async function run(fieldPath: string, value: string): Promise<{ subdomain?: string; slug?: string } | null> {
+		// Buscar en todas las tiendas y luego verificar sus configuraciones de dominio
+		async function searchDomainSettings(domainValue: string): Promise<string | null> {
+			// Primero obtener todas las tiendas
 			const body = {
 				structuredQuery: {
-					from: [{ collectionId: "stores" }],
-					where: {
-						fieldFilter: {
-							field: { fieldPath },
-							op: "EQUAL",
-							value: { stringValue: value }
-						}
-					},
-					limit: 1
+					from: [{ collectionId: "stores" }]
 				}
 			};
+
 			const res = await fetch(endpoint, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(body)
 			});
+
 			if (!res.ok) return null;
 			const data = await res.json();
 			if (!Array.isArray(data)) return null;
+
+			// Para cada tienda, verificar si tiene el dominio personalizado configurado
 			for (const row of data) {
-				const fields = row?.document?.fields;
-				if (!fields) continue;
-				const sub = fields?.subdomain?.stringValue || undefined;
-				const slug = fields?.slug?.stringValue || undefined;
-				if (sub || slug) return { subdomain: sub, slug };
+				const docPath = row?.document?.name;
+				if (!docPath) continue;
+				
+				// Extraer el storeId
+				const pathParts = docPath.split('/');
+				const storeIndex = pathParts.indexOf('stores');
+				if (storeIndex === -1 || storeIndex + 1 >= pathParts.length) continue;
+				
+				const storeId = pathParts[storeIndex + 1];
+				const subdomain = row?.document?.fields?.subdomain?.stringValue;
+				
+				if (!subdomain) continue;
+
+				// Verificar si esta tienda tiene el dominio personalizado configurado
+				try {
+					const domainDocRes = await fetch(
+						`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`
+					);
+					
+					if (domainDocRes.ok) {
+						const domainDoc = await domainDocRes.json();
+						const customDomain = domainDoc?.fields?.customDomain?.stringValue;
+						
+						if (customDomain && customDomain.toLowerCase() === domainValue.toLowerCase()) {
+							return subdomain;
+						}
+					}
+				} catch (e) {
+					// Si el documento no existe, continuar con la siguiente tienda
+					continue;
+				}
 			}
 			return null;
 		}
 
-		// Intentar con valores de host en distintas variantes (por si fue guardado con protocolo o www)
+		// Preparar variantes del dominio
 		const bare = host.toLowerCase();
 		const withWww = bare.startsWith('www.') ? bare : `www.${bare}`;
 		const withoutWww = bare.replace(/^www\./, '');
 		const hostCandidates = Array.from(new Set([
 			bare,
 			withoutWww,
-			withWww,
-			`https://${bare}`,
-			`http://${bare}`,
-			`https://${withWww}`,
-			`http://${withWww}`
+			withWww
 		]));
 
-		// Intentar con los dos posibles esquemas
-		let first: { subdomain?: string; slug?: string } | null = null;
+		// Buscar el dominio en la subcolección settings/domain
 		for (const candidate of hostCandidates) {
-			first = await run('advanced.customDomain.domain', candidate);
-			if (first?.subdomain || first?.slug) break;
+			const result = await searchDomainSettings(candidate);
+			if (result) return result;
 		}
-		if (first?.subdomain || first?.slug) return first.subdomain || first.slug || null;
-		let legacy: { subdomain?: string; slug?: string } | null = null;
-		for (const candidate of hostCandidates) {
-			legacy = await run('settings.domain.customDomain', candidate);
-			if (legacy?.subdomain || legacy?.slug) break;
-		}
-		if (legacy?.subdomain || legacy?.slug) return legacy.subdomain || legacy.slug || null;
+
 		return null;
-	} catch {
+	} catch (error) {
+		console.error('Error in findSubdomainForCustomHost:', error);
 		return null;
 	}
 }

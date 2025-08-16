@@ -112,6 +112,8 @@
       "language": {
         "title": "Idioma de la tienda",
         "description": "Selecciona el idioma por defecto para elementos comunes de la tienda",
+        "label": "Idioma",
+        "hint": "Este será el idioma predeterminado para elementos comunes de tu tienda como botones, etiquetas y mensajes del sistema",
         "spanish": "Español",
         "english": "Inglés"
       }
@@ -121,6 +123,8 @@
       "description": "Usa tu propio dominio para tu tienda. Ejemplo: mi-tienda.com",
       "domainLabel": "Dominio",
       "placeholder": "mi-tienda.com",
+      "hint": "Ingresa tu dominio personalizado sin 'https://' ni 'www'",
+      "statusTitle": "Estado del dominio",
       "status": "Estado",
       "ssl": "SSL",
       "sslActive": "activo",
@@ -131,6 +135,7 @@
       "lastChecked": "Última verificación",
       "save": "Guardar dominio",
       "saving": "Guardando…",
+      "verifying": "Verificando…",
       "verifyNow": "Verificar ahora"
     },
     "payments": {

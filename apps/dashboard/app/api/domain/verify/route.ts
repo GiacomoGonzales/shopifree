@@ -6,23 +6,47 @@ type VerifyResponse = {
   platformHeader?: string | null;
   ok: boolean;
   source?: 'http-probe' | 'vercel-api';
+  error?: string;
 };
 
 async function checkHttpsHealth(domain: string): Promise<VerifyResponse> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), 10000); // Aumentar timeout
   try {
+    // Primero intentar HTTPS
     const url = `https://${domain}/healthz`;
     const res = await fetch(url, { method: 'GET', cache: 'no-store', signal: controller.signal });
     clearTimeout(timeout);
+    
     const headerServer = res.headers.get('server');
     const vercelId = res.headers.get('x-vercel-id');
-    const isVercel = Boolean(vercelId || (headerServer && /vercel/i.test(headerServer)));
+    const vercelCache = res.headers.get('x-vercel-cache');
+    const isVercel = Boolean(vercelId || vercelCache || (headerServer && /vercel/i.test(headerServer)));
     const ok = res.ok;
-    return { ssl: ok, verified: isVercel && ok, platformHeader: headerServer, ok };
-  } catch {
+    
+    // Si llegamos aquí y no hubo error, significa que SSL funciona
+    return { 
+      ssl: true, // Si no hubo error de conexión SSL, está funcionando
+      verified: isVercel && ok, 
+      platformHeader: headerServer, 
+      ok,
+      source: 'http-probe'
+    };
+  } catch (error) {
     clearTimeout(timeout);
-    return { ssl: false, verified: false, platformHeader: null, ok: false };
+    
+    // Intentar verificar si es un error SSL específico o conexión general
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isSslError = errorMessage.includes('certificate') || errorMessage.includes('SSL') || errorMessage.includes('TLS');
+    
+    return { 
+      ssl: false, 
+      verified: false, 
+      platformHeader: null, 
+      ok: false,
+      source: 'http-probe',
+      error: errorMessage
+    };
   }
 }
 

@@ -111,6 +111,8 @@
       "language": {
         "title": "Store Language",
         "description": "Select the default language for common store elements",
+        "label": "Language",
+        "hint": "This will be the default language for common store elements like buttons, labels and system messages",
         "spanish": "Spanish",
         "english": "English"
       }
@@ -120,6 +122,8 @@
       "description": "Use your own domain for your store. Example: my-store.com",
       "domainLabel": "Domain",
       "placeholder": "my-store.com",
+      "hint": "Enter your custom domain without 'https://' or 'www'",
+      "statusTitle": "Domain status",
       "status": "Status",
       "ssl": "SSL",
       "sslActive": "active",
@@ -130,6 +134,7 @@
       "lastChecked": "Last checked",
       "save": "Save domain",
       "saving": "Saving…",
+      "verifying": "Verifying…",
       "verifyNow": "Verify now"
     },
     "payments": {
