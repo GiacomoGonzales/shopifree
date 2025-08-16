@@ -2972,6 +2972,19 @@
     color: var(--nbd-neutral-600);
     cursor: pointer;
     transition: all var(--nbd-transition-base);
+    border-radius: 0;
+}
+
+/* Primer botón (izquierda) - esquinas izquierdas redondeadas */
+[data-theme="new-base-default"] .nbd-quantity-btn:first-child {
+    border-top-left-radius: var(--nbd-radius-lg);
+    border-bottom-left-radius: var(--nbd-radius-lg);
+}
+
+/* Último botón (derecha) - esquinas derechas redondeadas */
+[data-theme="new-base-default"] .nbd-quantity-btn:last-child {
+    border-top-right-radius: var(--nbd-radius-lg);
+    border-bottom-right-radius: var(--nbd-radius-lg);
 }
 
 [data-theme="new-base-default"] .nbd-quantity-btn:hover {
@@ -4083,9 +4096,9 @@
         min-height: 300px;
     }
     
-    /* Reducir tamaños de fuente en móvil */
+    /* Font-size de 16px mínimo en input para evitar zoom en iOS */
     .nbd-search-input {
-        font-size: var(--nbd-font-size-sm);
+        font-size: var(--nbd-font-size-base); /* 16px para evitar zoom en iOS */
     }
     
     .nbd-search-empty h3 {
@@ -4167,7 +4180,7 @@
 }
 
 .nbd-cart-title {
-    font-size: var(--nbd-font-size-xl);
+    font-size: var(--nbd-font-size-lg);
     font-weight: 600;
     color: var(--nbd-neutral-900);
     margin: 0;
@@ -4177,7 +4190,7 @@
 }
 
 .nbd-cart-count {
-    font-size: var(--nbd-font-size-sm);
+    font-size: var(--nbd-font-size-xs);
     color: var(--nbd-neutral-600);
     font-weight: 400;
 }
@@ -4226,14 +4239,14 @@
 }
 
 .nbd-cart-empty h3 {
-    font-size: var(--nbd-font-size-xl);
+    font-size: var(--nbd-font-size-lg);
     font-weight: 600;
     color: var(--nbd-neutral-900);
     margin-bottom: var(--nbd-space-sm);
 }
 
 .nbd-cart-empty p {
-    font-size: var(--nbd-font-size-base);
+    font-size: var(--nbd-font-size-sm);
     color: var(--nbd-neutral-600);
     margin-bottom: var(--nbd-space-xl);
     line-height: 1.5;
@@ -4251,11 +4264,11 @@
 
 .nbd-cart-item {
     display: grid;
-    grid-template-columns: 60px 1fr auto auto;
+    grid-template-columns: 60px 1fr auto auto auto;
     grid-template-areas: 
-        "image info controls total";
+        "image info controls total remove";
     gap: var(--nbd-space-md);
-    align-items: start;
+    align-items: center;
     padding: var(--nbd-space-md);
     border: 1px solid var(--nbd-neutral-200);
     border-radius: var(--nbd-radius-lg);
@@ -4303,7 +4316,7 @@
 }
 
 .nbd-cart-item-name {
-    font-size: var(--nbd-font-size-base);
+    font-size: var(--nbd-font-size-sm);
     font-weight: 600;
     color: var(--nbd-neutral-900);
     margin-bottom: var(--nbd-space-xs);
@@ -4315,13 +4328,13 @@
 }
 
 .nbd-cart-item-variant {
-    font-size: var(--nbd-font-size-sm);
+    font-size: var(--nbd-font-size-xs);
     color: var(--nbd-neutral-600);
     margin-bottom: var(--nbd-space-xs);
 }
 
 .nbd-cart-item-price {
-    font-size: var(--nbd-font-size-sm);
+    font-size: var(--nbd-font-size-xs);
     color: var(--nbd-neutral-700);
     font-weight: 500;
 }
@@ -4330,8 +4343,7 @@
 .nbd-cart-item-controls {
     grid-area: controls;
     display: flex;
-    flex-direction: column;
-    gap: var(--nbd-space-sm);
+    justify-content: center;
     align-items: center;
 }
 
@@ -4354,6 +4366,19 @@
     color: var(--nbd-neutral-600);
     cursor: pointer;
     transition: all var(--nbd-transition-base);
+    border-radius: 0;
+}
+
+/* Primer botón (izquierda) - esquinas izquierdas redondeadas */
+.nbd-quantity-btn:first-child {
+    border-top-left-radius: var(--nbd-radius-lg);
+    border-bottom-left-radius: var(--nbd-radius-lg);
+}
+
+/* Último botón (derecha) - esquinas derechas redondeadas */
+.nbd-quantity-btn:last-child {
+    border-top-right-radius: var(--nbd-radius-lg);
+    border-bottom-right-radius: var(--nbd-radius-lg);
 }
 
 .nbd-quantity-btn:hover:not(:disabled) {
@@ -4378,6 +4403,7 @@
 }
 
 .nbd-remove-item {
+    grid-area: remove;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4399,7 +4425,7 @@
 /* Cart Item Total */
 .nbd-cart-item-total {
     grid-area: total;
-    font-size: var(--nbd-font-size-base);
+    font-size: var(--nbd-font-size-sm);
     font-weight: 600;
     color: var(--nbd-primary);
     text-align: right;
@@ -4424,18 +4450,18 @@
 }
 
 .nbd-cart-subtotal span:first-child {
-    font-size: var(--nbd-font-size-base);
+    font-size: var(--nbd-font-size-sm);
     color: var(--nbd-neutral-700);
 }
 
 .nbd-cart-total-price {
-    font-size: var(--nbd-font-size-xl);
+    font-size: var(--nbd-font-size-lg);
     font-weight: 600;
     color: var(--nbd-primary);
 }
 
 .nbd-cart-shipping-note {
-    font-size: var(--nbd-font-size-sm);
+    font-size: var(--nbd-font-size-xs);
     color: var(--nbd-neutral-600);
     margin: 0;
     line-height: 1.4;
@@ -4473,10 +4499,11 @@
     .nbd-cart-item {
         grid-template-columns: 50px 1fr auto;
         grid-template-areas: 
-            "image info controls"
-            "image total total";
+            "image info remove"
+            "image controls total";
         gap: var(--nbd-space-sm);
         padding: var(--nbd-space-sm);
+        align-items: start;
     }
     
     .nbd-cart-item-image {
@@ -4485,14 +4512,56 @@
     }
     
     .nbd-cart-item-controls {
-        flex-direction: row;
-        gap: var(--nbd-space-xs);
+        justify-content: flex-start;
+        align-items: center;
     }
     
     .nbd-cart-item-total {
         grid-area: total;
-        text-align: left;
-        margin-top: var(--nbd-space-xs);
+        text-align: right;
+        font-size: var(--nbd-font-size-base);
+        font-weight: 700;
+        color: var(--nbd-primary);
+        justify-self: end;
+        align-self: center;
+    }
+    
+    /* Ajustar información del producto en móvil */
+    .nbd-cart-item-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--nbd-space-xs);
+        min-width: 0;
+    }
+    
+    /* Ajustar nombre del producto en móvil */
+    .nbd-cart-item-name {
+        font-size: var(--nbd-font-size-sm);
+        line-height: 1.3;
+        margin-bottom: var(--nbd-space-xs);
+    }
+    
+    /* Ajustar variante en móvil */
+    .nbd-cart-item-variant {
+        font-size: var(--nbd-font-size-xs);
+        margin-bottom: 0;
+    }
+    
+    /* Ocultar precio individual en móvil para evitar confusión */
+    .nbd-cart-item-price {
+        display: none;
+    }
+    
+    /* Hacer los controles más compactos en móvil */
+    .nbd-quantity-control {
+        transform: scale(0.9);
+        transform-origin: left center;
+    }
+    
+    .nbd-remove-item {
+        width: 28px;
+        height: 28px;
+        align-self: start;
     }
     
     .nbd-cart-footer {

@@ -9,6 +9,19 @@ import Layout from '../../../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../../../lib/store';
 import { getStoreCategories, Category } from '../../../../../lib/categories';
 
+// Helper function para optimizar URLs de video de Cloudinary
+function optimizeCloudinaryVideo(url: string): string {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  
+  // Si ya tiene transformaciones, devolverlo tal como está
+  if (url.includes('/video/upload/') && !url.includes('/video/upload/v')) {
+    // Agregar transformaciones básicas para mejor rendimiento
+    return url.replace('/video/upload/', '/video/upload/q_auto,f_auto,br_800k,w_900,h_900,c_limit/');
+  }
+  
+  return url;
+}
+
 type Props = {
   storeSubdomain: string;
   productSlug: string;
@@ -24,8 +37,9 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   const [products, setProducts] = useState<PublicProduct[]>([]);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   
-  // Estados para carrusel de galería
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  // Estados para carrusel de galería - swipe simplificado
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -138,12 +152,10 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   // Obtener el medio activo
   const activeMedia = allMedia[activeMediaIndex] || allMedia[0];
   
-  // Función para cambiar imagen con transición suave
+  // Función para cambiar imagen - simplificada
   const changeMedia = (newIndex: number) => {
     if (newIndex >= 0 && newIndex < allMedia.length && newIndex !== activeMediaIndex) {
-      setIsTransitioning(true);
       setActiveMediaIndex(newIndex);
-      setTimeout(() => setIsTransitioning(false), 300);
     }
   };
 
@@ -160,57 +172,48 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
     }
   };
 
-  // Touch events simplificados y sin errores
-  const handleSwipeGesture = (e: React.TouchEvent) => {
-    if (typeof window === 'undefined' || window.innerWidth > 768) return;
+  // Constante para el threshold mínimo de swipe
+  const minSwipeDistance = 50;
+
+  // Handle del inicio del touch (solo móvil)
+  const onTouchStart = (e: React.TouchEvent) => {
+    // Solo en móvil
+    if (typeof window !== 'undefined' && window.innerWidth > 768) return;
     
-    const container = e.currentTarget as HTMLElement;
-    let startX = 0;
-    let isDragging = false;
+    setTouchEnd(null); // Reset del end al iniciar
+    setTouchStart(e.targetTouches[0].clientX);
+  };
 
-    const onTouchStart = (te: TouchEvent) => {
-      startX = te.touches[0].clientX;
-      isDragging = true;
-      container.style.transition = 'none';
-    };
+  // Handle del movimiento del touch (solo móvil)
+  const onTouchMove = (e: React.TouchEvent) => {
+    // Solo en móvil
+    if (typeof window !== 'undefined' && window.innerWidth > 768) return;
+    
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
 
-    const onTouchMove = (te: TouchEvent) => {
-      if (!isDragging) return;
-      
-      const currentX = te.touches[0].clientX;
-      const deltaX = currentX - startX;
-      const translateX = (-activeMediaIndex * 100) + (deltaX / container.offsetWidth * 100);
-      
-      container.style.transform = `translateX(${translateX}%)`;
-    };
+  // Handle del final del touch y detección de swipe (solo móvil)
+  const onTouchEnd = () => {
+    // Solo en móvil
+    if (typeof window !== 'undefined' && window.innerWidth > 768) return;
+    
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
 
-    const onTouchEnd = (te: TouchEvent) => {
-      if (!isDragging) return;
-      
-      const endX = te.changedTouches[0].clientX;
-      const deltaX = endX - startX;
-      const threshold = container.offsetWidth / 4;
-      
-      container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-      
-      if (deltaX > threshold && activeMediaIndex > 0) {
-        changeMedia(activeMediaIndex - 1);
-      } else if (deltaX < -threshold && activeMediaIndex < allMedia.length - 1) {
-        changeMedia(activeMediaIndex + 1);
-      } else {
-        container.style.transform = `translateX(-${activeMediaIndex * 100}%)`;
-      }
-      
-      isDragging = false;
-      
-      // Limpiar event listeners
-      container.removeEventListener('touchmove', onTouchMove);
-      container.removeEventListener('touchend', onTouchEnd);
-    };
-
-    container.addEventListener('touchstart', onTouchStart, { passive: true });
-    container.addEventListener('touchmove', onTouchMove, { passive: false });
-    container.addEventListener('touchend', onTouchEnd, { passive: true });
+    if (isLeftSwipe && activeMediaIndex < allMedia.length - 1) {
+      // Swipe izquierda -> siguiente imagen
+      changeMedia(activeMediaIndex + 1);
+    } else if (isRightSwipe && activeMediaIndex > 0) {
+      // Swipe derecha -> imagen anterior
+      changeMedia(activeMediaIndex - 1);
+    }
+    
+    // Reset de estados
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   const getCurrentMediaElement = () => {
@@ -219,7 +222,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
     if (activeMedia.type === 'video') {
       return (
         <video 
-          src={activeMedia.url} 
+          src={optimizeCloudinaryVideo(activeMedia.url)} 
           muted 
           autoPlay 
           playsInline 
@@ -227,7 +230,21 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
           preload="metadata"
           controls
           onError={(e) => {
-            console.log('Main video error:', e);
+            console.warn('Main video error:', activeMedia.url, e);
+            // Intentar recargar una vez
+            const video = e.target as HTMLVideoElement;
+            if (!video.dataset.retried) {
+              video.dataset.retried = 'true';
+              setTimeout(() => {
+                video.load();
+              }, 1000);
+            }
+          }}
+          onLoadStart={() => {
+            // Video iniciando carga
+          }}
+          onCanPlay={() => {
+            // Video listo para reproducir
           }}
         />
       );
@@ -309,21 +326,42 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
                   className="nbd-carousel-track"
                   style={{
                     transform: `translateX(-${activeMediaIndex * 100}%)`,
-                    transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
-                  onTouchStart={handleSwipeGesture}
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
                 >
                   {allMedia.map((media, index) => (
                     <div key={index} className="nbd-carousel-slide">
                       {media.type === 'video' ? (
                         <video 
-                          src={media.url} 
+                          src={optimizeCloudinaryVideo(media.url)} 
                           muted 
                           autoPlay={index === activeMediaIndex}
                           loop 
                           playsInline
-                          preload="metadata"
+                          preload={index === activeMediaIndex ? "metadata" : "none"}
                           controls={index === activeMediaIndex}
+                          crossOrigin="anonymous"
+                          disablePictureInPicture
+                          onError={(e) => {
+                            console.warn('Error loading video:', media.url, e);
+                            // Intentar recargar una vez
+                            const video = e.target as HTMLVideoElement;
+                            if (!video.dataset.retried) {
+                              video.dataset.retried = 'true';
+                              setTimeout(() => {
+                                video.load();
+                              }, 1000);
+                            }
+                          }}
+                          onLoadStart={() => {
+                            // Opcional: logging de inicio de carga
+                          }}
+                          onCanPlay={() => {
+                            // Video listo para reproducir
+                          }}
                           style={{ 
                             width: '100%', 
                             height: '100%', 
@@ -337,6 +375,16 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
                         <img 
                           src={toCloudinarySquare(media.url, 900)} 
                           alt={`${product.name} ${index + 1}`}
+                          loading="lazy"
+                          onError={(e) => {
+                            console.warn('Error loading image:', media.url, e);
+                            // Fallback a imagen original si Cloudinary falla
+                            const img = e.target as HTMLImageElement;
+                            if (!img.dataset.retried && img.src !== media.url) {
+                              img.dataset.retried = 'true';
+                              img.src = media.url;
+                            }
+                          }}
                           style={{ 
                             width: '100%', 
                             height: '100%', 
@@ -363,7 +411,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
                       {media.type === 'video' ? (
                         <div className="nbd-video-thumbnail">
                           <video 
-                            src={media.url} 
+                            src={optimizeCloudinaryVideo(media.url)} 
                             muted 
                             loop 
                             playsInline
@@ -405,16 +453,29 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
                               }
                             }}
                             onError={(e) => {
-                              console.error('Video thumbnail load error:', e);
+                              console.warn('Video thumbnail load error:', media.url, e);
                               // En caso de error, mostrar fallback
-                              const parent = e.currentTarget.parentElement;
-                              if (parent) {
+                              const video = e.currentTarget;
+                              const parent = video.parentElement;
+                              
+                              // Solo intentar fallback una vez
+                              if (!video.dataset.fallbackApplied && parent) {
+                                video.dataset.fallbackApplied = 'true';
                                 parent.innerHTML = `
-                                  <div class="nbd-video-fallback">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                                      <path d="M8 5V19L19 12L8 5Z" fill="white"/>
+                                  <div class="nbd-video-fallback" style="
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    background: rgba(0,0,0,0.1); 
+                                    width: 100%; 
+                                    height: 100%;
+                                    border-radius: var(--nbd-radius-md);
+                                    position: relative;
+                                  ">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="opacity: 0.6;">
+                                      <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
                                     </svg>
-                                    <span>Video</span>
+                                    <div style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; text-transform: uppercase;">VIDEO</div>
                                   </div>
                                 `;
                               }

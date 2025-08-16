@@ -44,12 +44,13 @@ export default function SearchComponent({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Auto-focus en el input cuando se abre
+    // Auto-focus en el input cuando se abre (solo en desktop para evitar zoom en iOS)
     useEffect(() => {
-        if (isOpen && searchInputRef.current) {
+        if (isOpen && searchInputRef.current && !isMobile) {
+            // Solo hacer auto-focus en desktop
             searchInputRef.current.focus();
         }
-    }, [isOpen]);
+    }, [isOpen, isMobile]);
 
     // Limpiar búsqueda al cerrar
     useEffect(() => {
@@ -127,6 +128,10 @@ export default function SearchComponent({
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="nbd-search-input"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck="false"
                     />
                     {searchQuery && (
                         <button

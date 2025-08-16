@@ -372,6 +372,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
     // Función para agregar producto al carrito
     const handleAddToCart = (product: PublicProduct) => {
         addItem({
+            id: product.id, // Campo requerido por CartItem
             productId: product.id,
             name: product.name,
             price: product.price,
