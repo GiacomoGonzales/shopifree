@@ -75,16 +75,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
 
     // Verificar que todas las variantes estén seleccionadas
     const missingVariants = availableVariants.filter(([key]) => {
-      const displayName = {
-        'color': 'Color',
-        'size': 'Talla',
-        'size_clothing': 'Talla',
-        'size_shoes': 'Talla de Calzado',
-        'material': 'Material',
-        'style': 'Estilo',
-        'clothing_style': 'Estilo'
-      }[key];
-      return !selectedVariant[displayName];
+      return !selectedVariant[key];
     });
 
     if (missingVariants.length > 0) {
