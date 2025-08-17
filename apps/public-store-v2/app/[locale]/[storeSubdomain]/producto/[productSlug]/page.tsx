@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import ProductDetail from './product-detail';
-import { getStoreIdBySubdomain } from '../../../../../lib/store';
+import { getStoreIdBySubdomain, getStoreBasicInfo } from '../../../../../lib/store';
 import { getProduct } from '../../../../../lib/products';
 import { generateAllImageVariants } from '../../../../../lib/image-optimization';
 
@@ -19,65 +19,69 @@ export default function ProductoPage({ params }: { params: { productSlug: string
     );
 }
 
-export async function generateMetadata({ params }: { params: { productSlug: string; storeSubdomain: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { productSlug: string; storeSubdomain: string; locale: string } }): Promise<Metadata> {
   try {
     const storeId = await getStoreIdBySubdomain(params.storeSubdomain);
     if (!storeId) return { title: 'Producto' };
-    const product = await getProduct(storeId, params.productSlug);
-    if (!product) return { title: 'Producto' };
-    const title = product.name || 'Producto';
-    const description = product.description || undefined;
-    const image = product.image || undefined;
     
-    if (!image) {
-      return {
-        title,
-        description,
-        openGraph: {
-          title,
-          description: description || undefined
-        },
-        twitter: {
-          card: 'summary_large_image',
-          title,
-          description: description || undefined
-        }
-      };
-    }
+    const [product, storeInfo] = await Promise.all([
+      getProduct(storeId, params.productSlug),
+      getStoreBasicInfo(storeId)
+    ]);
+    
+    if (!product) return { title: 'Producto' };
+    
+    const storeName = storeInfo?.storeName || params.storeSubdomain;
+    const title = `${product.name} - ${storeName}`;
+    const ogTitle = `${product.name} | ${storeName}`;
+    const description = product.description || `Descubre ${product.name} en ${storeName}. Calidad garantizada y entrega rápida.`;
+    const image = product.image || storeInfo?.logoUrl || "/default-og.png";
     
     // Generar imágenes optimizadas para diferentes plataformas
     const imageVariants = generateAllImageVariants(image);
     
+    // Construir URL absoluta correcta
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+    const productUrl = `${baseUrl}/${params.locale}/${params.storeSubdomain}/producto/${params.productSlug}`;
+    
     return {
       title,
       description,
+      keywords: [product.name, storeName, 'producto', 'comprar online', 'tienda'].filter(Boolean).join(', '),
+      
+      // Open Graph para WhatsApp, Facebook, Instagram
       openGraph: {
-        title,
-        description: description || undefined,
+        title: ogTitle,
+        description,
         images: [
           {
             url: imageVariants.social,
             width: 1200,
             height: 630,
-            alt: title
+            alt: `${product.name} - ${storeName}`
           },
           {
             url: imageVariants.whatsapp,
             width: 400,
             height: 400,
-            alt: title
+            alt: `${product.name} - ${storeName}`
           }
-        ]
+        ],
+        type: 'website',
+        siteName: storeName,
+        url: productUrl
       },
+      
+      // Twitter/X optimizado
       twitter: {
         card: 'summary_large_image',
-        title,
-        description: description || undefined,
+        title: ogTitle,
+        description,
         images: [{
           url: imageVariants.social,
           width: 1200,
           height: 630,
-          alt: title
+          alt: `${product.name} - ${storeName}`
         }]
       }
     };

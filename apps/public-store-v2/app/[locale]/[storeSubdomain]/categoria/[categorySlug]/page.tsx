@@ -34,6 +34,10 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
         const categoryImage = category?.imageUrl || storeInfo?.logoUrl || "/default-og.png";
         const imageVariants = generateAllImageVariants(categoryImage);
         
+        // Construir URL absoluta correcta
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+        const categoryUrl = `${baseUrl}/${params.locale}/${params.storeSubdomain}/categoria/${params.categorySlug}`;
+        
         return {
             title,
             description,
@@ -59,7 +63,7 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
                 ],
                 type: 'website',
                 siteName: storeName,
-                url: `/${params.locale}/${params.storeSubdomain}/categoria/${params.categorySlug}`
+                url: categoryUrl
             },
             
             // Twitter/X optimizado

@@ -29,40 +29,76 @@ export default function SEOScripts({
   structuredDataEnabled = true,
   storeInfo
 }: SEOScriptsProps) {
-  // Generar datos estructurados JSON-LD para la tienda
-  const generateStoreStructuredData = () => {
+  // Generar datos estructurados JSON-LD mejorados
+  const generateStructuredData = () => {
     if (!structuredDataEnabled || !storeInfo) return null;
 
-    const structuredData = {
+    // Schema de WebSite con SearchAction
+    const websiteSchema = {
       "@context": "https://schema.org",
-      "@type": "Store",
+      "@type": "WebSite",
+      "@id": `${storeInfo.url}#website`,
+      "name": storeInfo.name,
+      "url": storeInfo.url,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${storeInfo.url}/buscar?q={search_term_string}`
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@id": `${storeInfo.url}#organization`
+      }
+    };
+
+    // Schema de Organization/Store más completo
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": ["Organization", "Store"],
+      "@id": `${storeInfo.url}#organization`,
       "name": storeInfo.name,
       "description": storeInfo.description,
       "url": storeInfo.url,
-      "logo": storeInfo.logoUrl,
+      "logo": storeInfo.logoUrl ? {
+        "@type": "ImageObject",
+        "url": storeInfo.logoUrl,
+        "width": "200",
+        "height": "200"
+      } : undefined,
+      "image": storeInfo.logoUrl,
       "address": storeInfo.address ? {
         "@type": "PostalAddress",
         "streetAddress": storeInfo.address
       } : undefined,
       "telephone": storeInfo.phone,
       "email": storeInfo.email,
+      "priceRange": "$$",
+      "currenciesAccepted": "COP, USD",
+      "paymentAccepted": "Cash, Credit Card, Debit Card, PayPal",
+      "openingHours": "Mo-Su 00:00-23:59",
+      "sameAs": [], // Se puede llenar con redes sociales si están disponibles
       "potentialAction": {
-        "@type": "ViewAction",
+        "@type": "BuyAction",
         "target": storeInfo.url
       }
     };
 
     // Limpiar campos undefined
-    Object.keys(structuredData).forEach(key => {
-      if (structuredData[key as keyof typeof structuredData] === undefined) {
-        delete structuredData[key as keyof typeof structuredData];
-      }
-    });
+    const cleanSchema = (schema: any) => {
+      Object.keys(schema).forEach(key => {
+        if (schema[key] === undefined) {
+          delete schema[key];
+        }
+      });
+      return schema;
+    };
 
-    return structuredData;
+    return [cleanSchema(websiteSchema), cleanSchema(organizationSchema)];
   };
 
-  const storeStructuredData = generateStoreStructuredData();
+  const structuredDataSchemas = generateStructuredData();
 
   return (
     <>
@@ -132,15 +168,16 @@ export default function SEOScripts({
       )}
 
       {/* Datos Estructurados JSON-LD */}
-      {storeStructuredData && (
+      {structuredDataSchemas && structuredDataSchemas.map((schema, index) => (
         <Script 
-          id="store-structured-data" 
+          key={`structured-data-${index}`}
+          id={`structured-data-${index}`}
           type="application/ld+json"
           strategy="beforeInteractive"
         >
-          {JSON.stringify(storeStructuredData)}
+          {JSON.stringify(schema)}
         </Script>
-      )}
+      ))}
 
       {/* Debug logging */}
       <Script id="seo-debug" strategy="afterInteractive">

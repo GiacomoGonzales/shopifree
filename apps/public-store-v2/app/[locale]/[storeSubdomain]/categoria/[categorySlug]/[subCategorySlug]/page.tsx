@@ -34,6 +34,10 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
         // Imagen de la subcategoría, categoría padre o fallback a imagen de la tienda
         const categoryImage = subCategory?.imageUrl || parentCategory?.imageUrl || storeInfo?.logoUrl || "/default-og.png";
         const imageVariants = generateAllImageVariants(categoryImage);
+        
+        // Construir URL absoluta correcta
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+        const subCategoryUrl = `${baseUrl}/${params.locale}/${params.storeSubdomain}/categoria/${params.categorySlug}/${params.subCategorySlug}`;
 
         return {
             title,
@@ -60,7 +64,7 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
                 ],
                 type: 'website',
                 siteName: storeName,
-                url: `/${params.locale}/${params.storeSubdomain}/categoria/${params.categorySlug}/${params.subCategorySlug}`
+                url: subCategoryUrl
             },
             
             // Twitter/X optimizado
