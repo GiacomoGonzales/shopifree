@@ -1,6 +1,6 @@
 'use client';
 
-import { useCart } from '../../lib/cart-context';
+import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 
