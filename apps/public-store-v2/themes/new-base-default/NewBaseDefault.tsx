@@ -24,7 +24,7 @@ type Props = {
 
 export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) {
     const t = useTranslations('common');
-    const { addItem } = useCart();
+    const { addItem, openCart } = useCart();
     
     // Función para detectar si estamos en un dominio personalizado
     const isCustomDomain = () => {
@@ -371,6 +371,31 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
 
     // Función para agregar producto al carrito
     const handleAddToCart = (product: PublicProduct) => {
+        // Verificar si el producto tiene variantes disponibles
+        const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
+        const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
+            return variantFields.includes(key) && Array.isArray(value) && value.length > 1;
+        }) : [];
+        
+        const hasVariants = availableVariants.length > 0;
+
+        // Crear información sobre qué variantes tiene disponibles
+        let missingVariants: string[] = [];
+        if (hasVariants) {
+            missingVariants = availableVariants.map(([key]) => {
+                const displayNames: { [k: string]: string } = {
+                    'color': 'color',
+                    'size': 'talla',
+                    'size_clothing': 'talla',
+                    'size_shoes': 'talla',
+                    'material': 'material',
+                    'style': 'estilo',
+                    'clothing_style': 'estilo'
+                };
+                return displayNames[key] || key;
+            });
+        }
+
         addItem({
             id: product.id, // Campo requerido por CartItem
             productId: product.id,
@@ -378,11 +403,17 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
             price: product.price,
             currency: storeInfo?.currency || 'COP',
             image: product.image || '',
-            slug: product.slug || product.id
+            slug: product.slug || product.id,
+            // Marcar como incompleto si tiene variantes
+            incomplete: hasVariants,
+            missingVariants: hasVariants ? missingVariants : undefined
         }, 1);
         
+        // Abrir el carrito automáticamente después de agregar el producto
+        openCart();
+        
         // Feedback visual opcional (puede implementarse después)
-        console.log(`Agregado al carrito: ${product.name}`);
+        console.log(`Agregado al carrito: ${product.name}${hasVariants ? ' (opciones pendientes)' : ''}`);
     };
 
     // Verificar si hay más productos para mostrar
@@ -782,11 +813,14 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                                 )}
                                             </div>
                                             
-                                            <button 
-                                                className="nbd-add-to-cart"
-                                                onClick={() => handleAddToCart(product)}
-                                                aria-label={`Agregar ${product.name} al carrito`}
-                                            >
+                                                                        <button 
+                                className="nbd-add-to-cart"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddToCart(product);
+                                }}
+                                aria-label={`Agregar ${product.name} al carrito`}
+                            >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                 </svg>

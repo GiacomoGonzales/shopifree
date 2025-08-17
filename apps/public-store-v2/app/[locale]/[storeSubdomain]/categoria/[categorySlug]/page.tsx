@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import ThemeRenderer from "../../../../../components/ThemeRenderer";
 import { getStoreIdBySubdomain, getStoreBasicInfo } from "../../../../../lib/store";
 import { getStoreCategories } from "../../../../../lib/categories";
+import { generateAllImageVariants } from "../../../../../lib/image-optimization";
 
 // Generar metadata para SEO
 export async function generateMetadata({ params }: { params: { categorySlug: string; locale: string; storeSubdomain: string } }): Promise<Metadata> {
@@ -22,11 +23,57 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
 
         const category = categories.find(c => c.slug === params.categorySlug);
         const storeName = storeInfo?.storeName || params.storeSubdomain;
-
+        
+        // Preparar datos para metadatos
+        const title = category ? `${category.name} - ${storeName}` : `${params.categorySlug} - ${storeName}`;
+        const description = category?.description || `Descubre todos los productos de ${category?.name || params.categorySlug} en ${storeName}`;
+        const ogTitle = category ? `${category.name} | ${storeName}` : title;
+        const ogDescription = category?.description || `Explora la colección completa de ${category?.name || params.categorySlug} en ${storeName}. Encuentra productos únicos y de calidad.`;
+        
+        // Imagen de la categoría o fallback a imagen de la tienda
+        const categoryImage = category?.imageUrl || storeInfo?.logoUrl || "/default-og.png";
+        const imageVariants = generateAllImageVariants(categoryImage);
+        
         return {
-            title: category ? `${category.name} - ${storeName}` : `${params.categorySlug} - ${storeName}`,
-            description: category?.description || `Descubre todos los productos de ${category?.name || params.categorySlug} en ${storeName}`,
-            keywords: category ? [category.name, storeName, 'tienda online', 'productos'].filter(Boolean).join(', ') : undefined
+            title,
+            description,
+            keywords: category ? [category.name, storeName, 'tienda online', 'productos', 'categoría'].filter(Boolean).join(', ') : undefined,
+            
+            // Open Graph para WhatsApp, Facebook, Instagram
+            openGraph: {
+                title: ogTitle,
+                description: ogDescription,
+                images: [
+                    {
+                        url: imageVariants.social,
+                        width: 1200,
+                        height: 630,
+                        alt: `${category?.name || params.categorySlug} - ${storeName}`
+                    },
+                    {
+                        url: imageVariants.whatsapp,
+                        width: 400,
+                        height: 400,
+                        alt: `${category?.name || params.categorySlug} - ${storeName}`
+                    }
+                ],
+                type: 'website',
+                siteName: storeName,
+                url: `/${params.locale}/${params.storeSubdomain}/categoria/${params.categorySlug}`
+            },
+            
+            // Twitter/X optimizado
+            twitter: {
+                card: "summary_large_image",
+                title: ogTitle,
+                description: ogDescription,
+                images: [{
+                    url: imageVariants.social,
+                    width: 1200,
+                    height: 630,
+                    alt: `${category?.name || params.categorySlug} - ${storeName}`
+                }]
+            }
         };
     } catch (error) {
         console.error('Error generating metadata:', error);

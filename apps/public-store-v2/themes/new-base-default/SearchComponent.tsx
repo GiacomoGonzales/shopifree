@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { PublicProduct } from '../../lib/products';
+import { StoreBasicInfo } from '../../lib/store';
+import { formatPrice } from '../../lib/currency';
 
 interface SearchComponentProps {
     products: PublicProduct[];
@@ -9,6 +11,7 @@ interface SearchComponentProps {
     onClose: () => void;
     isCustomDomain?: boolean;
     storeSubdomain?: string;
+    storeInfo?: StoreBasicInfo | null;
 }
 
 export default function SearchComponent({ 
@@ -16,7 +19,8 @@ export default function SearchComponent({
     isOpen, 
     onClose, 
     isCustomDomain = false, 
-    storeSubdomain = '' 
+    storeSubdomain = '',
+    storeInfo = null
 }: SearchComponentProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobile, setIsMobile] = useState(false);
@@ -46,11 +50,14 @@ export default function SearchComponent({
 
     // Auto-focus en el input cuando se abre (solo en desktop para evitar zoom en iOS)
     useEffect(() => {
-        if (isOpen && searchInputRef.current && !isMobile) {
-            // Solo hacer auto-focus en desktop
-            searchInputRef.current.focus();
+        if (isOpen && searchInputRef.current) {
+            // Solo hacer auto-focus en desktop - verificar directamente el tamaño de ventana
+            const isMobileDevice = window.innerWidth <= 768;
+            if (!isMobileDevice) {
+                searchInputRef.current.focus();
+            }
         }
-    }, [isOpen, isMobile]);
+    }, [isOpen]);
 
     // Limpiar búsqueda al cerrar
     useEffect(() => {
@@ -101,14 +108,7 @@ export default function SearchComponent({
         return `/${storeSubdomain}/producto/${productSlug}`;
     };
 
-    // Formatear precio
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('es-CO', {
-            style: 'currency',
-            currency: 'COP',
-            minimumFractionDigits: 0,
-        }).format(price);
-    };
+
 
     if (!isOpen) return null;
 
@@ -217,11 +217,11 @@ export default function SearchComponent({
                                         <div className="nbd-search-result-price">
                                             {product.comparePrice && product.comparePrice > product.price && (
                                                 <span className="nbd-search-result-compare-price">
-                                                    {formatPrice(product.comparePrice)}
+                                                    {formatPrice(product.comparePrice, storeInfo?.currency)}
                                                 </span>
                                             )}
                                             <span className="nbd-search-result-current-price">
-                                                {formatPrice(product.price)}
+                                                {formatPrice(product.price, storeInfo?.currency)}
                                             </span>
                                         </div>
                                     </div>

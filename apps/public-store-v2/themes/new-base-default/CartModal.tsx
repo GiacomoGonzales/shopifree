@@ -6,6 +6,64 @@ import { toCloudinarySquare } from '../../lib/images';
 
 export default function CartModal() {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
+    
+    // Detectar si hay productos incompletos
+    const hasIncompleteItems = state.items.some(item => item.incomplete);
+
+    // Función para obtener las opciones faltantes de un producto
+    const getMissingOptions = (item: CartItem) => {
+        return item.missingVariants || ['opciones'];
+    };
+
+    // Función para construir URLs correctamente según el tipo de dominio
+    const buildProductUrl = (slug: string) => {
+        if (typeof window === 'undefined') return `/producto/${slug}`;
+        
+        const pathname = window.location.pathname;
+        const locale = pathname.split('/')[1] || 'es';
+        
+        // Detectar si estamos en un dominio personalizado
+        const host = window.location.hostname;
+        const isCustomDomain = !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+        
+        if (isCustomDomain) {
+            // En dominio personalizado: NO incluir subdominio
+            return `/${locale}/producto/${slug}`;
+        } else {
+            // En dominio de plataforma: incluir subdominio
+            // Extraer subdominio del pathname actual
+            const pathParts = pathname.split('/');
+            const storeSubdomain = pathParts[2]; // [0]='', [1]=locale, [2]=subdomain
+            return `/${locale}/${storeSubdomain}/producto/${slug}`;
+        }
+    };
+
+    // Función para ir al home/página principal
+    const goToHome = () => {
+        if (typeof window === 'undefined') return;
+        
+        const pathname = window.location.pathname;
+        const locale = pathname.split('/')[1] || 'es';
+        
+        // Detectar si estamos en un dominio personalizado
+        const host = window.location.hostname;
+        const isCustomDomain = !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+        
+        let homeUrl;
+        if (isCustomDomain) {
+            // En dominio personalizado: solo locale
+            homeUrl = `/${locale}`;
+        } else {
+            // En dominio de plataforma: incluir subdominio
+            const pathParts = pathname.split('/');
+            const storeSubdomain = pathParts[2]; // [0]='', [1]=locale, [2]=subdomain
+            homeUrl = `/${locale}/${storeSubdomain}`;
+        }
+        
+        // Cerrar carrito y navegar
+        closeCart();
+        window.location.href = homeUrl;
+    };
 
     if (!state.isOpen) return null;
 
@@ -100,6 +158,20 @@ export default function CartModal() {
                                             {item.variant && (
                                                 <p className="nbd-cart-item-variant">{item.variant.name}</p>
                                             )}
+                                            {item.incomplete && (
+                                                <div className="nbd-cart-item-incomplete">
+                                                    <span className="nbd-incomplete-message">
+                                                        ⚠ Seleccionar {getMissingOptions(item).join(', ')} - 
+                                                        <a 
+                                                            href={buildProductUrl(item.slug)}
+                                                            className="nbd-complete-options-link"
+                                                            onClick={() => closeCart()}
+                                                        >
+                                                            modificar
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div className="nbd-cart-item-price">
                                                 {formatPrice(item.variant?.price || item.price, item.currency)}
                                             </div>
@@ -162,24 +234,33 @@ export default function CartModal() {
                                             {formatPrice(state.totalPrice, state.items[0]?.currency || 'COP')}
                                         </span>
                                     </div>
-                                    <p className="nbd-cart-shipping-note">
-                                        Los gastos de envío se calcularán en el checkout
-                                    </p>
+                                    {hasIncompleteItems ? (
+                                        <div className="nbd-cart-incomplete-warning">
+                                            <p className="nbd-incomplete-warning-text">
+                                                ⚠ Algunos productos necesitan opciones completas
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <p className="nbd-cart-shipping-note">
+                                            Los gastos de envío se calcularán en el checkout
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Acciones */}
                                 <div className="nbd-cart-actions">
                                     <button 
-                                        onClick={clearCart}
-                                        className="nbd-btn nbd-btn--ghost nbd-cart-clear"
+                                        onClick={goToHome}
+                                        className="nbd-btn nbd-btn--ghost nbd-cart-continue"
                                     >
-                                        Vaciar carrito
+                                        Seguir comprando
                                     </button>
                                     <button 
                                         onClick={handleCheckout}
-                                        className="nbd-btn nbd-btn--primary nbd-cart-checkout"
+                                        className={`nbd-btn nbd-btn--primary nbd-cart-checkout ${hasIncompleteItems ? 'nbd-btn--disabled' : ''}`}
+                                        disabled={hasIncompleteItems}
                                     >
-                                        Proceder al checkout
+                                        {hasIncompleteItems ? 'Completa las opciones' : 'Proceder al checkout'}
                                     </button>
                                 </div>
                             </div>

@@ -1,0 +1,104 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { PublicProduct } from '../lib/products';
+
+interface VariantOptions {
+  [key: string]: string[];
+}
+
+interface SelectedVariant {
+  [key: string]: string;
+}
+
+interface ProductVariantSelectorProps {
+  product: PublicProduct;
+  onVariantChange: (selectedVariant: SelectedVariant) => void;
+}
+
+export default function ProductVariantSelector({ product, onVariantChange }: ProductVariantSelectorProps) {
+  const [selectedVariant, setSelectedVariant] = useState<SelectedVariant>({});
+  const [variantOptions, setVariantOptions] = useState<VariantOptions>({});
+
+  // Extraer opciones de variantes de los metadatos del producto
+  useEffect(() => {
+    if (!product.tags) return;
+
+    const options: VariantOptions = {};
+    
+    // Buscar campos de variantes específicos
+    Object.entries(product.tags).forEach(([key, value]) => {
+      // Mapear nombres de campos comunes a nombres de variantes
+      const variantFieldMap: { [key: string]: string } = {
+        'color': 'Color',
+        'size': 'Talla',
+        'size_clothing': 'Talla',
+        'size_shoes': 'Talla de Calzado',
+        'material': 'Material',
+        'style': 'Estilo',
+        'clothing_style': 'Estilo'
+      };
+
+      const displayName = variantFieldMap[key];
+      if (displayName && value) {
+        // Si es un array, usar directamente; si es string, convertir a array
+        const values = Array.isArray(value) ? value : [value];
+        if (values.length > 1) { // Solo mostrar como variante si hay múltiples opciones
+          options[displayName] = values;
+        }
+      }
+    });
+
+    setVariantOptions(options);
+
+    // No preseleccionar ninguna opción - el usuario debe elegir
+    setSelectedVariant({});
+  }, [product.tags]);
+
+  // Notificar cambios al componente padre
+  useEffect(() => {
+    onVariantChange(selectedVariant);
+  }, [selectedVariant, onVariantChange]);
+
+  const handleVariantSelect = (variantName: string, value: string) => {
+    setSelectedVariant(prev => ({
+      ...prev,
+      [variantName]: value
+    }));
+  };
+
+  // Si no hay variantes, no mostrar el selector
+  if (Object.keys(variantOptions).length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="nbd-variant-selector">
+      {Object.entries(variantOptions).map(([variantName, values]) => (
+        <div key={variantName} className="nbd-variant-group">
+          <label className="nbd-variant-label">
+            {variantName}: <span className={`nbd-variant-selected ${
+              !selectedVariant[variantName] ? 'nbd-variant-selected--placeholder' : ''
+            }`}>
+              {selectedVariant[variantName] || 'Seleccionar'}
+            </span>
+          </label>
+          <div className="nbd-variant-options">
+            {values.map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={`nbd-variant-option ${
+                  selectedVariant[variantName] === value ? 'nbd-variant-option--selected' : ''
+                }`}
+                onClick={() => handleVariantSelect(variantName, value)}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

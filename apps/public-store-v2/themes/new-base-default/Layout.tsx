@@ -7,6 +7,7 @@ import { Category } from "../../lib/categories";
 import { PublicProduct } from "../../lib/products";
 import Header from "./Header";
 import Footer from "./Footer";
+import CartModal from "./CartModal";
 
 type Props = {
     children: ReactNode;
@@ -35,6 +36,9 @@ export default function Layout({ children, storeInfo, categories, storeSubdomain
                     storeSubdomain={storeSubdomain || ''} 
                 />
             )}
+            
+            {/* Modal del carrito */}
+            <CartModal />
         </div>
     );
 }

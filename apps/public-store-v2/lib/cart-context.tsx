@@ -12,6 +12,8 @@ export interface CartItem {
   slug: string;
   quantity: number;
   variant?: { id: string; name: string; price: number };
+  incomplete?: boolean;
+  missingVariants?: string[];
 }
 
 export interface CartState {

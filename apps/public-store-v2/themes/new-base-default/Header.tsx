@@ -204,6 +204,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                 onClose={() => setSearchOpen(false)}
                 isCustomDomain={isCustomDomain()}
                 storeSubdomain={storeSubdomain}
+                storeInfo={storeInfo}
             />
         </>
     );

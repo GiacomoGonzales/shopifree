@@ -8,6 +8,8 @@ import { formatPrice } from '../../../../../lib/currency';
 import Layout from '../../../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../../../lib/store';
 import { getStoreCategories, Category } from '../../../../../lib/categories';
+import { useCart } from '../../../../../lib/cart-context';
+import ProductVariantSelector from '../../../../../components/ProductVariantSelector';
 
 // Helper function para optimizar URLs de video de Cloudinary
 function optimizeCloudinaryVideo(url: string): string {
@@ -40,6 +42,122 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
   // Estados para carrusel de galería - swipe simplificado
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Estado para variantes seleccionadas
+  const [selectedVariant, setSelectedVariant] = useState<{ [key: string]: string }>({});
+
+  // Hook del carrito
+  const { addItem, openCart, state, removeItem } = useCart();
+
+  // Función para manejar cambios de variantes
+  const handleVariantChange = (variant: { [key: string]: string }) => {
+    setSelectedVariant(variant);
+  };
+
+  // Función para agregar producto al carrito
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    // Verificar si el producto tiene variantes disponibles y si todas están seleccionadas
+    const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
+    const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
+      const displayName = {
+        'color': 'Color',
+        'size': 'Talla',
+        'size_clothing': 'Talla',
+        'size_shoes': 'Talla de Calzado',
+        'material': 'Material',
+        'style': 'Estilo',
+        'clothing_style': 'Estilo'
+      }[key];
+      return displayName && Array.isArray(value) && value.length > 1;
+    }) : [];
+
+    // Verificar que todas las variantes estén seleccionadas
+    const missingVariants = availableVariants.filter(([key]) => {
+      const displayName = {
+        'color': 'Color',
+        'size': 'Talla',
+        'size_clothing': 'Talla',
+        'size_shoes': 'Talla de Calzado',
+        'material': 'Material',
+        'style': 'Estilo',
+        'clothing_style': 'Estilo'
+      }[key];
+      return !selectedVariant[displayName];
+    });
+
+    if (missingVariants.length > 0) {
+      const missingNames = missingVariants.map(([key]) => {
+        return {
+          'color': 'Color',
+          'size': 'Talla',
+          'size_clothing': 'Talla',
+          'size_shoes': 'Talla de Calzado',
+          'material': 'Material',
+          'style': 'Estilo',
+          'clothing_style': 'Estilo'
+        }[key];
+      }).join(', ');
+      alert(`Por favor selecciona: ${missingNames}`);
+      return;
+    }
+    
+    // Obtener la cantidad del input
+    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
+    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+
+    // Crear información de variante si hay variantes seleccionadas
+    let variantInfo = null;
+    let variantId = product.id;
+
+    if (Object.keys(selectedVariant).length > 0) {
+      // Crear ID único para la variante
+      const variantParts = Object.entries(selectedVariant).map(([key, value]) => `${key}:${value}`);
+      variantId = `${product.id}-${variantParts.join('-')}`;
+      
+      // Crear descripción de variantes para mostrar por separado
+      const variantDescription = Object.entries(selectedVariant)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ');
+
+      // Información de variante para el carrito
+      variantInfo = {
+        id: variantParts.join('-'),
+        name: variantDescription,
+        price: product.price // Por ahora usar el mismo precio, se puede extender para precios específicos de variante
+      };
+    }
+    
+    // Verificar si existe un item incompleto del mismo producto para reemplazarlo
+    const existingIncompleteItem = state.items.find(
+      item => item.productId === product.id && item.incomplete
+    );
+
+    if (existingIncompleteItem) {
+      // Eliminar el item incompleto antes de agregar el completo
+      removeItem(existingIncompleteItem.id);
+    }
+
+    addItem({
+      id: variantId,
+      productId: product.id,
+      name: product.name, // Usar el nombre original del producto
+      price: product.price,
+      currency: storeInfo?.currency || 'COP',
+      image: product.image || '',
+      slug: product.slug || product.id,
+      variant: variantInfo,
+      incomplete: false // Siempre completo desde la página de producto
+    }, quantity);
+    
+    // Abrir el carrito automáticamente después de agregar el producto
+    openCart();
+    
+    // Feedback visual opcional
+    const variantText = variantInfo ? ` con variantes: ${variantInfo.name}` : '';
+    console.log(`Agregado al carrito: ${product.name}${variantText} (${quantity} unidades)`);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -541,7 +659,11 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
                 </div>
           ) : null}
 
-
+              {/* Selector de variantes */}
+              <ProductVariantSelector 
+                product={product}
+                onVariantChange={handleVariantChange}
+              />
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">
@@ -614,7 +736,11 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
               {/* Acciones */}
               <div className="nbd-product-actions">
                 {/* Botón principal - Agregar al carrito */}
-                <button className="nbd-btn nbd-btn--primary nbd-btn--cart">
+                <button 
+                  className="nbd-btn nbd-btn--primary nbd-btn--cart"
+                  onClick={handleAddToCart}
+                  disabled={!product || typeof product.price !== 'number'}
+                >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
                   </svg>
