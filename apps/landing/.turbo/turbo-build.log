@@ -10,6 +10,7 @@
   - Environments: .env.local
 
    Creating an optimized production build ...
+⚠️  Usando colores hardcodeados como fallback en landing/tailwind.config.js
  ✓ Compiled successfully
    Linting and checking validity of types ...
    Collecting page data ...
@@ -46,47 +47,47 @@ A `locale` is expected to be returned from `getRequestConfig`, but none was retu
 
 See: https://next-intl.dev/blog/next-intl-3-22#await-request-locale
 
+   Generating static pages (2/11) 
+   Generating static pages (5/11) 
 
 The `locale` parameter in `getRequestConfig` is deprecated, please switch to `await requestLocale`. See https://next-intl.dev/blog/next-intl-3-22#await-request-locale
 
+   Generating static pages (8/11) 
 
 A `locale` is expected to be returned from `getRequestConfig`, but none was returned. This will be an error in the next major version of next-intl.
 
+ ✓ Generating static pages (11/11)
 See: https://next-intl.dev/blog/next-intl-3-22#await-request-locale
 
 
-   Generating static pages (2/11) 
 The `locale` parameter in `getRequestConfig` is deprecated, please switch to `await requestLocale`. See https://next-intl.dev/blog/next-intl-3-22#await-request-locale
 
-   Generating static pages (5/11) 
 
-   Generating static pages (8/11) 
 A `locale` is expected to be returned from `getRequestConfig`, but none was returned. This will be an error in the next major version of next-intl.
- ✓ Generating static pages (11/11)
 
 See: https://next-intl.dev/blog/next-intl-3-22#await-request-locale
    Finalizing page optimization ...
-
    Collecting build traces ...
+
 
 Route (app)                              Size     First Load JS
 ┌ ○ /_not-found                          873 B            88 kB
-├ ● /[locale]                            18.6 kB         114 kB
+├ ● /[locale]                            11.3 kB         128 kB
 ├   ├ /en
 ├   └ /es
-├ ● /[locale]/contact                    2.36 kB        98.2 kB
+├ ● /[locale]/contact                    2.36 kB        98.3 kB
 ├   ├ /en/contact
 ├   └ /es/contact
-├ ● /[locale]/privacy                    1.13 kB          97 kB
+├ ● /[locale]/privacy                    3.74 kB         121 kB
 ├   ├ /en/privacy
 ├   └ /es/privacy
-└ ● /[locale]/terms                      1.28 kB        97.1 kB
+└ ● /[locale]/terms                      3.89 kB         121 kB
     ├ /en/terms
     └ /es/terms
-+ First Load JS shared by all            87.1 kB
-  ├ chunks/1dd3208c-82be33c4361f6614.js  53.6 kB
-  ├ chunks/528-0dc2d489044e296e.js       31.6 kB
-  └ other shared chunks (total)          1.89 kB
++ First Load JS shared by all            87.2 kB
+  ├ chunks/1dd3208c-ffdb7cb84a564ccd.js  53.6 kB
+  ├ chunks/528-6464bb10c6f4a001.js       31.6 kB
+  └ other shared chunks (total)          1.95 kB
 
 
 ƒ Middleware                             39.3 kB
