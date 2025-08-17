@@ -219,10 +219,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Intercepta TODO menos rutas técnicas (sitemap, robots, assets, API, Next.js)
-    '/((?!_next/|api/|favicon|sitemap\\.xml|robots\\.txt|assets/|.*\\..*).*)'
-  ]
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"]
 };
 
 

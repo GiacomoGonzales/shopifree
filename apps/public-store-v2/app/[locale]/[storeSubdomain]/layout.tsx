@@ -93,7 +93,11 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         }
     };
 
-    // Meta tags inválidos removidos - Google lee sitemap desde robots.txt
+    // Agregar referencia al sitemap dinámico
+    metadata.other = {
+        'sitemap': `${storeUrl}/sitemap.xml`,
+        'robots': `${storeUrl}/robots.txt`
+    };
     
     // Agregar favicon personalizado si está configurado
     if (data?.favicon) {

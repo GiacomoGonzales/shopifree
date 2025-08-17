@@ -3,18 +3,29 @@ export async function GET(
   { params }: { params: { storeSubdomain: string; locale: string } }
 ) {
   const { storeSubdomain, locale } = params;
+  const requestUrl = new URL(request.url);
   
-  // Construir URL base
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
-  const sitemapUrl = `${baseUrl}/${locale}/${storeSubdomain}/sitemap.xml`;
+  // Detectar si es dominio personalizado
+  const isCustomDomain = !requestUrl.hostname.endsWith('shopifree.app') && 
+                         !requestUrl.hostname.endsWith('localhost') && 
+                         requestUrl.hostname !== 'localhost';
+  
+  let sitemapUrl: string;
+  
+  if (isCustomDomain) {
+    // Para dominios personalizados: https://lunara-store.xyz/es/sitemap.xml
+    sitemapUrl = `${requestUrl.protocol}//${requestUrl.hostname}/${locale}/sitemap.xml`;
+  } else {
+    // Para subdominios de shopifree: https://shopifree.app/es/storeSubdomain/sitemap.xml
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+    sitemapUrl = `${baseUrl}/${locale}/${storeSubdomain}/sitemap.xml`;
+  }
   
   const robotsTxt = `User-agent: *
 Allow: /
 
-# Sitemap específico de esta tienda
 Sitemap: ${sitemapUrl}
 
-# Bloquear archivos y directorios no relevantes para SEO
 Disallow: /api/
 Disallow: /_next/
 Disallow: /admin/
@@ -24,7 +35,7 @@ Disallow: /dashboard/
   return new Response(robotsTxt, {
     headers: { 
       'Content-Type': 'text/plain',
-      'Cache-Control': 'public, max-age=86400' // Cache 24h
+      'Cache-Control': 'public, max-age=3600' // Cache 1h para actualizaciones más rápidas
     }
   });
 }
