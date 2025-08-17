@@ -92,6 +92,12 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
             'x-default': `${baseUrl}/es/${subdomain}` // Español como idioma por defecto
         }
     };
+
+    // Agregar referencia al sitemap dinámico
+    metadata.other = {
+        'sitemap': `${storeUrl}/sitemap.xml`,
+        'robots': `${storeUrl}/robots.txt`
+    };
     
     // Agregar favicon personalizado si está configurado
     if (data?.favicon) {
