@@ -53,8 +53,8 @@ export async function GET(
     if (products && products.length > 0) {
       products.forEach(product => {
         const productUrl = `${storeBaseUrl}/producto/${product.slug}`;
-        // Usar fecha de actualización del producto si existe
-        const lastmod = product.updatedAt ? new Date(product.updatedAt).toISOString().split('T')[0] : undefined;
+        // Usar fecha de creación del producto si existe
+        const lastmod = product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : undefined;
         urls += generateSitemapEntry(productUrl, lastmod, 'monthly', '0.8');
       });
     }
