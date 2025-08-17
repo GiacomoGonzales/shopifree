@@ -99,7 +99,7 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
     // Crear información de variante si hay variantes seleccionadas
-    let variantInfo = null;
+    let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let variantId = product.id;
 
     if (Object.keys(selectedVariant).length > 0) {
