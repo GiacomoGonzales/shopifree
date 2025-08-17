@@ -75,7 +75,8 @@ export default function ProductDetail({ storeSubdomain, productSlug, locale }: P
 
     // Verificar que todas las variantes estén seleccionadas
     const missingVariants = availableVariants.filter(([key]) => {
-      return !selectedVariant[key];
+      const value = selectedVariant[key];
+      return !value || value === '' || value === 'Seleccionar';
     });
 
     if (missingVariants.length > 0) {

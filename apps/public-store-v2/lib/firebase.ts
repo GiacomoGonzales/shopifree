@@ -1,5 +1,3 @@
-"use client";
-
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 
@@ -25,7 +23,6 @@ let db: Firestore | null = null;
 
 export function getFirebaseDb(): Firestore | null {
 	try {
-		if (typeof window === "undefined") return null;
 		if (!hasValidConfig()) {
 			console.warn("[public-store-v2] Firebase config ausente o inválida");
 			return null;

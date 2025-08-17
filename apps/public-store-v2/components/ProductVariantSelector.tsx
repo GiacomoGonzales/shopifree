@@ -44,7 +44,7 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
         // Si es un array, usar directamente; si es string, convertir a array
         const values = Array.isArray(value) ? value : [value];
         if (values.length > 1) { // Solo mostrar como variante si hay múltiples opciones
-          options[displayName] = values;
+          options[key] = values; // Usar la clave original (size, color) no el displayName
         }
       }
     });
@@ -63,7 +63,7 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
   const handleVariantSelect = (variantName: string, value: string) => {
     setSelectedVariant(prev => ({
       ...prev,
-      [variantName]: value
+      [variantName]: value // Ahora variantName ya es la clave original (size, color)
     }));
   };
 
@@ -72,15 +72,29 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
     return null;
   }
 
+  // Mapear claves a nombres mostrados
+  const getDisplayName = (key: string) => {
+    const map: { [key: string]: string } = {
+      'color': 'Color',
+      'size': 'Talla',
+      'size_clothing': 'Talla',
+      'size_shoes': 'Talla de Calzado',
+      'material': 'Material',
+      'style': 'Estilo',
+      'clothing_style': 'Estilo'
+    };
+    return map[key] || key;
+  };
+
   return (
     <div className="nbd-variant-selector">
-      {Object.entries(variantOptions).map(([variantName, values]) => (
-        <div key={variantName} className="nbd-variant-group">
+      {Object.entries(variantOptions).map(([variantKey, values]) => (
+        <div key={variantKey} className="nbd-variant-group">
           <label className="nbd-variant-label">
-            {variantName}: <span className={`nbd-variant-selected ${
-              !selectedVariant[variantName] ? 'nbd-variant-selected--placeholder' : ''
+            {getDisplayName(variantKey)}: <span className={`nbd-variant-selected ${
+              !selectedVariant[variantKey] ? 'nbd-variant-selected--placeholder' : ''
             }`}>
-              {selectedVariant[variantName] || 'Seleccionar'}
+              {selectedVariant[variantKey] || 'Seleccionar'}
             </span>
           </label>
           <div className="nbd-variant-options">
@@ -89,9 +103,9 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
                 key={value}
                 type="button"
                 className={`nbd-variant-option ${
-                  selectedVariant[variantName] === value ? 'nbd-variant-option--selected' : ''
+                  selectedVariant[variantKey] === value ? 'nbd-variant-option--selected' : ''
                 }`}
-                onClick={() => handleVariantSelect(variantName, value)}
+                onClick={() => handleVariantSelect(variantKey, value)}
               >
                 {value}
               </button>
