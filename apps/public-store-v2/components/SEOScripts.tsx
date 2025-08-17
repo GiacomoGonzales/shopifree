@@ -186,7 +186,7 @@ export default function SEOScripts({
             googleAnalytics: ${!!googleAnalytics},
             metaPixel: ${!!metaPixel},
             tiktokPixel: ${!!tiktokPixel},
-            structuredData: ${!!storeStructuredData}
+            structuredData: ${!!structuredDataSchemas}
           });
         `}
       </Script>
