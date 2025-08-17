@@ -25,6 +25,12 @@ export async function GET(
     baseUrl = `${protocol}://${requestUrl.hostname}${port}/${locale}/${storeSubdomain}`;
   }
   
+  // IMPORTANTE: Forzar Content-Type correcto
+  const headers = {
+    'Content-Type': 'application/xml',
+    'Cache-Control': 'public, max-age=3600', // Cache por 1 hora
+  };
+  
   console.log('🔍 [SITEMAP] Request URL:', requestUrl.href);
   console.log('🔍 [SITEMAP] Is custom domain:', isCustomDomain);
   console.log('🔍 [SITEMAP] Base URL:', baseUrl);
@@ -169,9 +175,5 @@ export async function GET(
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
 </urlset>`;
 
-  return new Response(xml, {
-    headers: {
-      'Content-Type': 'application/xml',
-    }
-  });
+  return new Response(xml, { headers });
 }
