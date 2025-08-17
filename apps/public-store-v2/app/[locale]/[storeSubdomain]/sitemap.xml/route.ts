@@ -7,7 +7,27 @@ export async function GET(
   { params }: { params: { storeSubdomain: string; locale: string } }
 ) {
   const { storeSubdomain, locale } = params;
-  const baseUrl = `http://localhost:3004/${locale}/${storeSubdomain}`;
+  
+  // Detectar la URL base correcta
+  const requestUrl = new URL(request.url);
+  const isCustomDomain = !requestUrl.hostname.endsWith('shopifree.app') && 
+                        !requestUrl.hostname.endsWith('localhost') && 
+                        requestUrl.hostname !== 'localhost';
+  
+  let baseUrl: string;
+  if (isCustomDomain) {
+    // Dominio personalizado: usar solo el protocolo y hostname
+    baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}/${locale}`;
+  } else {
+    // Dominio de Shopifree o localhost: incluir el subdominio en la ruta
+    const protocol = requestUrl.hostname === 'localhost' ? 'http' : 'https';
+    const port = requestUrl.hostname === 'localhost' ? ':3004' : '';
+    baseUrl = `${protocol}://${requestUrl.hostname}${port}/${locale}/${storeSubdomain}`;
+  }
+  
+  console.log('🔍 [SITEMAP] Request URL:', requestUrl.href);
+  console.log('🔍 [SITEMAP] Is custom domain:', isCustomDomain);
+  console.log('🔍 [SITEMAP] Base URL:', baseUrl);
   
   // Página principal (siempre presente)
   let urls = `
