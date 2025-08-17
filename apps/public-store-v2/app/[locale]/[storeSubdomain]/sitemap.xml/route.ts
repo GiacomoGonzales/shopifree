@@ -76,7 +76,14 @@ export async function GET(
             let lastmod;
             try {
               if (product.createdAt) {
-                const date = typeof product.createdAt === 'string' ? new Date(product.createdAt) : product.createdAt.toDate();
+                let date: Date;
+                if (typeof product.createdAt === 'string') {
+                  date = new Date(product.createdAt);
+                } else if (product.createdAt && typeof product.createdAt === 'object' && 'toDate' in product.createdAt) {
+                  date = (product.createdAt as any).toDate();
+                } else {
+                  date = new Date(product.createdAt as any);
+                }
                 lastmod = date.toISOString().split('T')[0];
               }
             } catch (e) {
