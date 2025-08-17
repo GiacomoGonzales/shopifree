@@ -8,21 +8,21 @@ export async function GET(request: Request) {
                          !requestUrl.hostname.endsWith('localhost') && 
                          requestUrl.hostname !== 'localhost';
   
-  let sitemapUrl: string;
+  let baseUrl: string;
   
   if (isCustomDomain) {
-    // Para dominios personalizados: https://lunara-store.xyz/es/sitemap.xml
-    sitemapUrl = `${requestUrl.protocol}//${requestUrl.hostname}/es/sitemap.xml`;
+    // Para dominios personalizados: https://lunara-store.xyz
+    baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}`;
   } else {
-    // Para subdominios de shopifree: https://shopifree.app/sitemap.xml (global)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
-    sitemapUrl = `${baseUrl}/sitemap.xml`;
+    // Para subdominios de shopifree: https://shopifree.app
+    baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
   }
   
   const robotsTxt = `User-agent: *
 Allow: /
 
-Sitemap: ${sitemapUrl}
+Sitemap: ${baseUrl}/sitemap.xml
+Sitemap: ${baseUrl}/es/sitemap.xml
 
 Disallow: /api/
 Disallow: /_next/
