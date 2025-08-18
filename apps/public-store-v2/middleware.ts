@@ -174,6 +174,8 @@ export async function middleware(req: NextRequest) {
       console.log(`🔒 [Redirect] SUBDOMAIN→CUSTOM: ${host} → ${customDomain}`);
       return NextResponse.redirect(customUrl, 301);
     }
+    
+    // Si no hay dominio personalizado, continuar con REGLA 5 para manejar el subdominio
   }
   
   // 🔥 REGLA 4: REWRITE DOMINIOS PERSONALIZADOS A TIENDA
@@ -211,6 +213,41 @@ export async function middleware(req: NextRequest) {
           console.log(`🔄 [Rewrite] Custom domain path → store: ${currentPath} → ${newPath}`);
           return NextResponse.rewrite(rewriteUrl);
         }
+      }
+    }
+  }
+  
+  // 🔥 REGLA 5: REWRITE SUBDOMINIOS SHOPIFREE.APP A TIENDA
+  if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
+    const subdomain = host.split('.')[0];
+    const currentPath = nextUrl.pathname;
+    const search = nextUrl.search;
+    
+    // Si está en root (/), redirigir a /es
+    if (currentPath === '/') {
+      const redirectUrl = new URL(`/es`, req.url);
+      console.log(`🔄 [Redirect] Subdomain root → /es: ${currentPath} → /es`);
+      return NextResponse.redirect(redirectUrl, 302);
+    }
+    
+    // Si está en /locale sin tienda, rewrite a /locale/tienda
+    const pathSegments = currentPath.split('/').filter(Boolean);
+    if (pathSegments.length === 1 && ['es', 'en'].includes(pathSegments[0])) {
+      const rewritePath = `/${pathSegments[0]}/${subdomain}`;
+      const rewriteUrl = new URL(rewritePath + search, req.url);
+      console.log(`🔄 [Rewrite] Subdomain → store: ${currentPath} → ${rewritePath}`);
+      return NextResponse.rewrite(rewriteUrl);
+    }
+    
+    // Si la ruta no incluye el subdomain, agregarlo
+    if (pathSegments.length >= 1 && !pathSegments.includes(subdomain)) {
+      const locale = pathSegments[0];
+      if (['es', 'en'].includes(locale)) {
+        // Rewrite /es/categoria/algo → /es/tienda/categoria/algo
+        const newPath = `/${locale}/${subdomain}/${pathSegments.slice(1).join('/')}`;
+        const rewriteUrl = new URL(newPath + search, req.url);
+        console.log(`🔄 [Rewrite] Subdomain path → store: ${currentPath} → ${newPath}`);
+        return NextResponse.rewrite(rewriteUrl);
       }
     }
   }
