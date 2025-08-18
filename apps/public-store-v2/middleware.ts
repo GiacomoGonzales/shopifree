@@ -1,5 +1,6 @@
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
+import { isValidLocale, extractLocaleFromPath, buildNormalizedUrl } from "./lib/locale-validation";
 
 const supportedLocales = ["es", "en"] as const;
 
@@ -137,6 +138,20 @@ export async function middleware(req: NextRequest) {
 	let host = normalizeHost(req.headers.get('host'));
 	if (!host) return intl(req);
 
+	// 🔒 VALIDAR LOCALE - Bloquear URLs infinitas por locales inválidos
+	const localeValidation = extractLocaleFromPath(originalPathname);
+	if (localeValidation.locale && !localeValidation.isValid) {
+		// Locale inválido detectado: redirigir 308 a /es/...
+		const normalizedUrl = buildNormalizedUrl(
+			`${nextUrl.protocol}//${host}`,
+			'es',
+			localeValidation.pathWithoutLocale,
+			search
+		);
+		console.log(`🔒 [Locale Block] ${originalPathname} → ${normalizedUrl} (invalid locale: ${localeValidation.locale})`);
+		return NextResponse.redirect(normalizedUrl, 308);
+	}
+
 	// 🔄 REDIRECCIONES 301 (host policy)
 	const protocol = req.headers.get('x-forwarded-proto') || nextUrl.protocol.slice(0, -1);
 	
@@ -271,7 +286,10 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|robots|sitemap|favicon|.*\\..*).*)"]
+  matcher: [
+    // Excluir: /_next/*, /api/*, /robots.txt, */sitemap*.xml, archivos estáticos
+    "/((?!_next|api|robots\\.txt|.*sitemap.*\\.xml|favicon|.*\\..*).*)"
+  ]
 };
 
 

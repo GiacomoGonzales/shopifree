@@ -4,10 +4,15 @@ import { getStoreMetadata } from "../../../server-only/store-metadata";
 import SEOScripts from "../../../components/SEOScripts";
 import { generateAllImageVariants } from "../../../lib/image-optimization";
 import { resolveStoreFromRequest } from "../../../lib/resolve-store";
+import { isValidLocale, normalizeLocale, VALID_LOCALES } from "../../../lib/locale-validation";
 
 export async function generateMetadata({ params }: { params: { storeSubdomain: string; locale: string } }): Promise<Metadata> {
     const subdomain = params?.storeSubdomain ?? "store";
-    const locale = params?.locale ?? "es";
+    const rawLocale = params?.locale ?? "es";
+    
+    // Normalizar locale a uno válido
+    const locale = normalizeLocale(rawLocale);
+    
     const data = await getStoreMetadata(subdomain);
     
     // Usar resolveStoreFromRequest para obtener host canónico correcto
@@ -98,15 +103,18 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         };
     }
     
-    // Configurar canonical URL y hreflang con host canónico
+    // Configurar canonical URL y hreflang con host canónico - solo locales válidos
+    const hreflangLanguages: Record<string, string> = {};
+    
+    // Generar hreflang solo para locales válidos
+    VALID_LOCALES.forEach(validLocale => {
+        hreflangLanguages[validLocale] = `${canonicalHost}/${validLocale}`;
+    });
+    hreflangLanguages['x-default'] = `${canonicalHost}/es`;
+    
     metadata.alternates = {
         canonical: storeUrl,
-        languages: {
-            // Siempre usar el host canónico resuelto
-            'es': `${canonicalHost}/es`,
-            'en': `${canonicalHost}/en`,
-            'x-default': `${canonicalHost}/es`
-        }
+        languages: hreflangLanguages
     };
 
     // Agregar referencia al sitemap dinámico con host canónico

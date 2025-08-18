@@ -1,10 +1,16 @@
 import { resolveStoreFromRequest } from '../../../lib/resolve-store';
+import { isValidLocale } from '../../../lib/locale-validation';
 
 export async function GET(
   request: Request,
   { params }: { params: { locale: string } }
 ) {
   const { locale } = params;
+  
+  // Validar locale - devolver 404 para locales inválidos
+  if (!isValidLocale(locale)) {
+    return new Response('Not Found', { status: 404 });
+  }
     const resolved = await resolveStoreFromRequest(request, { locale });
 
   console.log('🗺️ [Sitemap Locale] Generando sitemap para:', { locale, resolved });

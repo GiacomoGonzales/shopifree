@@ -1,12 +1,18 @@
 import { resolveStoreFromRequest } from '../../../../lib/resolve-store';
 import { getStoreCategories } from '../../../../lib/categories';
 import { getStoreProducts } from '../../../../lib/products';
+import { isValidLocale } from '../../../../lib/locale-validation';
 
 export async function GET(
   request: Request,
   { params }: { params: { storeSubdomain: string; locale: string } }
 ) {
   const { storeSubdomain, locale } = params;
+  
+  // Validar locale - devolver 404 para locales inválidos
+  if (!isValidLocale(locale)) {
+    return new Response('Not Found', { status: 404 });
+  }
   const resolved = await resolveStoreFromRequest(request, { storeSubdomain, locale });
   
   console.log('🗺️ [Sitemap Store] Generando sitemap para:', { storeSubdomain, locale, resolved });

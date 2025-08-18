@@ -1,4 +1,5 @@
 import { resolveStoreFromRequest } from '../../lib/resolve-store';
+import { VALID_LOCALES } from '../../lib/locale-validation';
 
 export async function GET(request: Request) {
   const resolved = await resolveStoreFromRequest(request, {});
@@ -10,26 +11,19 @@ export async function GET(request: Request) {
   let sitemapIndex: string;
   const lastmod = new Date().toISOString().split('T')[0];
   
-  if (isCustomDomain && storeSubdomain) {
-    // En dominio personalizado: listar sólo hijos reales con URLs del host canónico
+  if (storeSubdomain) {
+    // Para tiendas válidas: generar índice con solo locales válidos
+    const sitemaps = VALID_LOCALES.map(locale => `  <sitemap>
+    <loc>${canonicalHost}/${locale}/sitemap.xml</loc>
+    <lastmod>${lastmod}</lastmod>
+  </sitemap>`).join('\n');
+    
     sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${canonicalHost}/es/sitemap.xml</loc>
-    <lastmod>${lastmod}</lastmod>
-  </sitemap>
-</sitemapindex>`;
-  } else if (storeSubdomain) {
-    // Para subdominios de plataforma que tienen dominio personalizado: usar el canónico
-    sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${canonicalHost}/es/sitemap.xml</loc>
-    <lastmod>${lastmod}</lastmod>
-  </sitemap>
+${sitemaps}
 </sitemapindex>`;
   } else {
-    // Fallback básico
+    // Fallback básico: solo español
     sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
