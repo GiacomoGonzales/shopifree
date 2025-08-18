@@ -31,7 +31,26 @@ export default function GSCIntegration({
   const submitSitemapUrl = `https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(propertyUrl)}&sitemap_url=${encodeURIComponent(sitemapUrl)}`;
   
   const handleSave = () => {
-    onUpdate({ googleSearchConsole: verificationToken });
+    // Extraer solo el token, no toda la etiqueta HTML
+    let cleanToken = verificationToken.trim();
+    
+    // Si contiene una etiqueta HTML completa, extraer el content
+    if (cleanToken.includes('<meta') && cleanToken.includes('content=')) {
+      const match = cleanToken.match(/content=["']([^"']+)["']/);
+      if (match) {
+        cleanToken = match[1];
+      }
+    }
+    // Si contiene el prefijo google-site-verification=, removerlo
+    else if (cleanToken.startsWith('google-site-verification=')) {
+      cleanToken = cleanToken.replace('google-site-verification=', '');
+    }
+    // Si contiene .html, removerlo
+    else if (cleanToken.includes('.html')) {
+      cleanToken = cleanToken.replace(/^google/, '').replace(/\.html$/, '');
+    }
+    
+    onUpdate({ googleSearchConsole: cleanToken });
   };
   
   return (
