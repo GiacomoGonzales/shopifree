@@ -68,9 +68,10 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 		const storeId = storeDoc.id;
 		const storeData = storeDoc.data();
 		
-		// 2. Obtener los datos de SEO desde advanced.seo
+		// 2. Obtener los datos de SEO desde advanced.seo y settings
 		const seoData = storeData?.advanced?.seo || {};
 		const integrationsData = storeData?.advanced?.integrations || {};
+		const settingsData = storeData?.settings || {};
 		
 		// 3. Construir el objeto de metadata con todos los campos SEO
 		const metadata: StoreMetadata = {
@@ -89,7 +90,7 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 			ogTitle: seoData.ogTitle,
 			ogDescription: seoData.ogDescription,
 			robots: seoData.robots,
-			canonicalUrl: seoData.canonicalUrl,
+			canonicalUrl: settingsData.canonicalUrl || seoData.canonicalUrl, // ✅ Priorizar settings.canonicalUrl
 			structuredDataEnabled: seoData.structuredDataEnabled ?? true,
 			
 			// Analytics y tracking
@@ -110,7 +111,8 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 			title: metadata.title,
 			hasOgImage: !!metadata.ogImage,
 			hasKeywords: !!metadata.keywords,
-			hasAnalytics: !!metadata.googleAnalytics
+			hasAnalytics: !!metadata.googleAnalytics,
+			canonicalUrl: metadata.canonicalUrl
 		});
 		
 		return metadata;

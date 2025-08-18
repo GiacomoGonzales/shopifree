@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from 'next/headers';
 import { getStoreMetadata } from "../../../server-only/store-metadata";
 import SEOScripts from "../../../components/SEOScripts";
 import { generateAllImageVariants } from "../../../lib/image-optimization";
@@ -7,6 +8,19 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const subdomain = params?.storeSubdomain ?? "store";
     const locale = params?.locale ?? "es";
     const data = await getStoreMetadata(subdomain);
+    
+    // Detectar dominio personalizado usando headers
+    const headersList = headers();
+    const host = headersList.get('host') || '';
+    const isCustomDomain = !host.endsWith('shopifree.app') && 
+                          !host.endsWith('localhost') && 
+                          host !== 'localhost';
+    
+    console.log('🔍 [Layout] Debug dominio:', { 
+        host, 
+        isCustomDomain, 
+        canonicalUrl: data?.canonicalUrl
+    });
     
     // Usar datos SEO personalizados o fallbacks
     const title = data?.title ?? `${subdomain} | Shopifree`;
@@ -17,9 +31,20 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const keywords = data?.keywords;
     const robots = data?.robots || "index,follow";
     
-    // Construir URLs absolutas correctas
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
-    const storeUrl = data?.canonicalUrl || `${baseUrl}/${locale}/${subdomain}`;
+    // Construir URLs absolutas correctas según el tipo de dominio
+    let baseUrl: string;
+    let storeUrl: string;
+    
+    if (isCustomDomain) {
+        // Para dominios personalizados: usar el hostname del request
+        const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+        baseUrl = `${protocol}://${host}`;
+        storeUrl = data?.canonicalUrl || baseUrl;
+    } else {
+        // Para subdominios de plataforma: usar configuración normal
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+        storeUrl = data?.canonicalUrl || `${baseUrl}/${locale}/${subdomain}`;
+    }
     
     // Site name mejorado (solo nombre de tienda, sin eslogan)
     const siteName = data?.storeName || subdomain;
@@ -83,13 +108,19 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         };
     }
     
-    // Configurar canonical URL y hreflang
+    // Configurar canonical URL y hreflang basado en el tipo de dominio
     metadata.alternates = {
-        canonical: data?.canonicalUrl || storeUrl,
-        languages: {
+        canonical: storeUrl,
+        languages: isCustomDomain ? {
+            // Para dominios personalizados: usar el mismo dominio
+            'es': `${baseUrl}/es`,
+            'en': `${baseUrl}/en`,
+            'x-default': `${baseUrl}/es`
+        } : {
+            // Para subdominios de plataforma: usar formato con subdominio
             'es': `${baseUrl}/es/${subdomain}`,
             'en': `${baseUrl}/en/${subdomain}`,
-            'x-default': `${baseUrl}/es/${subdomain}` // Español como idioma por defecto
+            'x-default': `${baseUrl}/es/${subdomain}`
         }
     };
 
