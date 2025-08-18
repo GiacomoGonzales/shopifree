@@ -287,8 +287,8 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Excluir: /_next/*, /api/*, /robots.txt, */sitemap*.xml, archivos estáticos
-    "/((?!_next|api|robots\\.txt|.*sitemap.*\\.xml|favicon|.*\\..*).*)"
+    // Excluir: /_next/*, /api/*, /robots.txt, */sitemap*.xml, google*.html, archivos estáticos
+    "/((?!_next|api|robots\\.txt|.*sitemap.*\\.xml|google.*\\.html|favicon|.*\\..*).*)"
   ]
 };
 

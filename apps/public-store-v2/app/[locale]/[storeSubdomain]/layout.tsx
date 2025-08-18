@@ -5,6 +5,7 @@ import SEOScripts from "../../../components/SEOScripts";
 import { generateAllImageVariants } from "../../../lib/image-optimization";
 import { resolveStoreFromRequest } from "../../../lib/resolve-store";
 import { isValidLocale, normalizeLocale, VALID_LOCALES } from "../../../lib/locale-validation";
+import { extractGoogleVerificationToken, isValidGoogleToken } from "../../../lib/google-verification";
 
 export async function generateMetadata({ params }: { params: { storeSubdomain: string; locale: string } }): Promise<Metadata> {
     const subdomain = params?.storeSubdomain ?? "store";
@@ -96,10 +97,11 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         }
     };
     
-    // Agregar Google Search Console verification
-    if (data?.googleSearchConsole) {
+    // Agregar Google Search Console verification - solo si token válido
+    const googleToken = extractGoogleVerificationToken(data?.googleSearchConsole);
+    if (isValidGoogleToken(googleToken)) {
         metadata.verification = {
-            google: data.googleSearchConsole.replace('google-site-verification=', '')
+            google: googleToken
         };
     }
     
@@ -117,11 +119,9 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         languages: hreflangLanguages
     };
 
-    // Agregar referencia al sitemap dinámico con host canónico
-    metadata.other = {
-        'sitemap': `${canonicalHost}/sitemap.xml`,
-        'robots': `${canonicalHost}/robots.txt`
-    };
+    // NOTA: Removemos meta name="sitemap" y meta robots con URLs
+    // Los sitemaps se declaran en robots.txt, no en meta tags
+    // Los robots se declaran en meta robots sin URLs
     
     // Agregar favicon personalizado si está configurado
     if (data?.favicon) {
