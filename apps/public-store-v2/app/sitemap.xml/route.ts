@@ -1,44 +1,46 @@
+import { resolveStoreFromRequest } from '../../lib/resolve-store';
+
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
+  const resolved = await resolveStoreFromRequest(request, {});
+  console.log('🗂️ [Sitemap Index] Store resuelto:', resolved);
   
-  // Detectar si es dominio personalizado
-  const isCustomDomain = !requestUrl.hostname.endsWith('shopifree.app') && 
-                         !requestUrl.hostname.endsWith('localhost') && 
-                         requestUrl.hostname !== 'localhost';
+  const { canonicalHost, storeSubdomain } = resolved;
+  const isCustomDomain = !request.url.includes('shopifree.app') && !request.url.includes('localhost');
   
-  let baseUrl: string;
-  
-  if (isCustomDomain) {
-    // Para dominios personalizados: https://lunara-store.xyz
-    baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}`;
-  } else {
-    // Para subdominios de shopifree: https://shopifree.app
-    baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
-  }
-  
-  // Para dominios personalizados, apuntar al sitemap que SÍ funciona  
+  // Armar el índice según el tipo de dominio
   let sitemapIndex: string;
+  const lastmod = new Date().toISOString().split('T')[0];
   
-  if (isCustomDomain) {
-    // Para dominios personalizados: usar el formato que funciona
+  if (isCustomDomain && storeSubdomain) {
+    // En dominio personalizado: listar sólo hijos reales
     sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${baseUrl}/es/lunara/sitemap.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <loc>${canonicalHost}/es/sitemap.xml</loc>
+    <lastmod>${lastmod}</lastmod>
+  </sitemap>
+</sitemapindex>`;
+  } else if (storeSubdomain) {
+    // Para subdominios de plataforma: formato con múltiples idiomas
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+    sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${baseUrl}/es/${storeSubdomain}/sitemap.xml</loc>
+    <lastmod>${lastmod}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/en/${storeSubdomain}/sitemap.xml</loc>
+    <lastmod>${lastmod}</lastmod>
   </sitemap>
 </sitemapindex>`;
   } else {
-    // Para subdominios de plataforma: formato normal
+    // Fallback básico
     sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${baseUrl}/es/sitemap.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${baseUrl}/en/sitemap.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <loc>${canonicalHost}/es/sitemap.xml</loc>
+    <lastmod>${lastmod}</lastmod>
   </sitemap>
 </sitemapindex>`;
   }

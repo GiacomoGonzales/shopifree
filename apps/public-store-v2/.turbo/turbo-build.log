@@ -6,96 +6,15 @@
   - Environments: .env.local
 
    Creating an optimized production build ...
-⚠️  Usando colores hardcodeados como fallback en public-store-v2/tailwind.config.js
- ✓ Compiled successfully
-   Linting and checking validity of types ...
-
-./components/SEOScripts.tsx
-172:9  Warning: `next/script`'s `beforeInteractive` strategy should not be used outside of `pages/_document.js`. See: https://nextjs.org/docs/messages/no-before-interactive-script-outside-document  @next/next/no-before-interactive-script-outside-document
-
-info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
-   Collecting page data ...
-   Generating static pages (0/10) ...
-Error en robots.txt: B [Error]: Dynamic server usage: Route /robots.txt couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
-    at V (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21778)
-    at Object.get (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:29465)
-    at n (C:\Users\giaco\Shopifree\apps\public-store-v2\.next\server\app\robots.txt\route.js:1:555)
-    at C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:38417
-    at C:\Users\giaco\Shopifree\node_modules\next\dist\server\lib\trace\tracer.js:140:36
-    at NoopContextManager.with (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
-    at ContextAPI.with (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
-    at NoopTracer.startActiveSpan (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
-    at ProxyTracer.startActiveSpan (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
-    at C:\Users\giaco\Shopifree\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
-  description: "Route /robots.txt couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
-  digest: 'DYNAMIC_SERVER_USAGE'
+uncaughtException [Error: EPERM: operation not permitted, open 'C:\Users\giaco\Shopifree\apps\public-store-v2\.next\trace'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'open',
+  path: 'C:\\Users\\giaco\\Shopifree\\apps\\public-store-v2\\.next\\trace'
 }
-Error en sitemap raíz: B [Error]: Dynamic server usage: Route /sitemap.xml couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
-    at V (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21778)
-    at Object.get (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:29465)
-    at n (C:\Users\giaco\Shopifree\apps\public-store-v2\.next\server\app\sitemap.xml\route.js:1:555)
-    at C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:38417
-    at C:\Users\giaco\Shopifree\node_modules\next\dist\server\lib\trace\tracer.js:140:36
-    at NoopContextManager.with (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
-    at ContextAPI.with (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
-    at NoopTracer.startActiveSpan (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
-    at ProxyTracer.startActiveSpan (C:\Users\giaco\Shopifree\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
-    at C:\Users\giaco\Shopifree\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
-  description: "Route /sitemap.xml couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
-  digest: 'DYNAMIC_SERVER_USAGE'
-}
-
-The `locale` parameter in `getRequestConfig` is deprecated, please switch to `await requestLocale`. See https://next-intl.dev/blog/next-intl-3-22#await-request-locale
-   Generating static pages (2/10) 
-   Generating static pages (4/10) 
-
-
-A `locale` is expected to be returned from `getRequestConfig`, but none was returned. This will be an error in the next major version of next-intl.
-
-See: https://next-intl.dev/blog/next-intl-3-22#await-request-locale
-
-
-The `locale` parameter in `getRequestConfig` is deprecated, please switch to `await requestLocale`. See https://next-intl.dev/blog/next-intl-3-22#await-request-locale
-
-
-A `locale` is expected to be returned from `getRequestConfig`, but none was returned. This will be an error in the next major version of next-intl.
-
-See: https://next-intl.dev/blog/next-intl-3-22#await-request-locale
-
-   Generating static pages (7/10) 
- ✓ Generating static pages (10/10)
-   Finalizing page optimization ...
-   Collecting build traces ...
-
-Route (app)                                                                Size     First Load JS
-┌ ○ /                                                                      158 B          87.9 kB
-├ ○ /_not-found                                                            158 B          87.9 kB
-├ ● /[locale]                                                              158 B          87.9 kB
-├   ├ /es
-├   └ /en
-├ ƒ /[locale]/[storeSubdomain]                                             2.66 kB         176 kB
-├ ƒ /[locale]/[storeSubdomain]/catalogo                                    158 B          87.9 kB
-├ ƒ /[locale]/[storeSubdomain]/categoria/[categorySlug]                    2.66 kB         176 kB
-├ ƒ /[locale]/[storeSubdomain]/categoria/[categorySlug]/[subCategorySlug]  2.66 kB         176 kB
-├ ƒ /[locale]/[storeSubdomain]/favoritos                                   158 B          87.9 kB
-├ ƒ /[locale]/[storeSubdomain]/ofertas                                     158 B          87.9 kB
-├ ƒ /[locale]/[storeSubdomain]/producto/[productSlug]                      15.9 kB         189 kB
-├ ƒ /[locale]/[storeSubdomain]/robots.txt                                  0 B                0 B
-├ ƒ /[locale]/[storeSubdomain]/sitemap.xml                                 0 B                0 B
-├ ƒ /[locale]/sitemap.xml                                                  0 B                0 B
-├ ○ /api/hello                                                             0 B                0 B
-├ ○ /healthz                                                               0 B                0 B
-├ ƒ /robots.txt                                                            0 B                0 B
-└ ƒ /sitemap.xml                                                           0 B                0 B
-+ First Load JS shared by all                                              87.7 kB
-  ├ chunks/1dd3208c-0b6f270b37c27f2a.js                                    53.6 kB
-  ├ chunks/528-10b9d4513d860223.js                                         31.6 kB
-  └ other shared chunks (total)                                            2.52 kB
-
-
-ƒ Middleware                                                               40.5 kB
-
-○  (Static)   prerendered as static content
-●  (SSG)      prerendered as static HTML (uses getStaticProps)
-ƒ  (Dynamic)  server-rendered on demand
-
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Users\giaco\Shopifree\apps\public-store-v2
+npm error workspace @shopifree/public-store-v2@1.0.0
+npm error location C:\Users\giaco\Shopifree\apps\public-store-v2
+npm error command failed

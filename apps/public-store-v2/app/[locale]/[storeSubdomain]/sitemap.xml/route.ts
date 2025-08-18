@@ -1,4 +1,4 @@
-import { getStoreIdBySubdomain } from '../../../../lib/store';
+import { resolveStoreFromRequest } from '../../../../lib/resolve-store';
 import { getStoreCategories } from '../../../../lib/categories';
 import { getStoreProducts } from '../../../../lib/products';
 
@@ -7,8 +7,13 @@ export async function GET(
   { params }: { params: { storeSubdomain: string; locale: string } }
 ) {
   const { storeSubdomain, locale } = params;
+  const resolved = await resolveStoreFromRequest(request, { storeSubdomain, locale });
   
-  // Detectar la URL base correcta
+  console.log('🗺️ [Sitemap Store] Generando sitemap para:', { storeSubdomain, locale, resolved });
+
+  const { storeId, canonicalHost } = resolved;
+  
+  // Detectar la URL base correcta para URLs internas
   const requestUrl = new URL(request.url);
   const isCustomDomain = !requestUrl.hostname.endsWith('shopifree.app') && 
                         !requestUrl.hostname.endsWith('localhost') && 
@@ -17,7 +22,7 @@ export async function GET(
   let baseUrl: string;
   if (isCustomDomain) {
     // Dominio personalizado: usar solo el protocolo y hostname
-    baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}/${locale}`;
+    baseUrl = `${canonicalHost}/${locale}`;
   } else {
     // Dominio de Shopifree o localhost: incluir el subdominio en la ruta
     const protocol = requestUrl.hostname === 'localhost' ? 'http' : 'https';
@@ -45,10 +50,8 @@ export async function GET(
   </url>`;
 
   try {
-    // Intentar obtener categorías reales
-    console.log('🔍 [SITEMAP] Obteniendo storeId para:', storeSubdomain);
-    const storeId = await getStoreIdBySubdomain(storeSubdomain);
-    console.log('🔍 [SITEMAP] StoreId obtenido:', storeId);
+    // El storeId ya fue resuelto por resolveStoreFromRequest
+    console.log('🔍 [SITEMAP] StoreId ya resuelto:', storeId);
     
     if (storeId) {
       console.log('🔍 [SITEMAP] Obteniendo categorías para storeId:', storeId);

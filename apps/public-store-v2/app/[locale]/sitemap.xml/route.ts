@@ -1,35 +1,23 @@
-import { getStoreIdBySubdomain } from '../../../lib/store';
-import { getStoreCategories } from '../../../lib/categories';
-import { getStoreProducts } from '../../../lib/products';
+import { resolveStoreFromRequest } from '../../../lib/resolve-store';
 
 export async function GET(
   request: Request,
   { params }: { params: { locale: string } }
 ) {
   const { locale } = params;
-  const requestUrl = new URL(request.url);
-  const hostname = requestUrl.hostname;
-
-  console.log('🗺️ [Sitemap Custom Domain] Generando sitemap para:', { locale, hostname });
-
-  // Para dominios personalizados, usar el hostname completo como subdomain para búsqueda
-  const storeSubdomain = hostname;
-  const baseUrl = `${requestUrl.protocol}//${hostname}`;
-
-  console.log('🌐 [Sitemap Custom Domain] Configuración:', { baseUrl, storeSubdomain });
-
-  // HARDCODED: Sabemos que lunara-store.xyz es la tienda "lunara"
-  const storeId = "9t8vyVWzUgf1FUmjKIoq"; // ID real de la tienda Lunara
+  const resolved = await resolveStoreFromRequest(request, { locale });
   
-  console.log('🔍 [Sitemap Custom Domain] Store ID encontrado:', storeId);
+  console.log('🗺️ [Sitemap Locale] Generando sitemap para:', { locale, resolved });
 
+  const { storeId, canonicalHost } = resolved;
+  
   if (!storeId) {
-    console.log('❌ [Sitemap Custom Domain] No se encontró store para hostname:', storeSubdomain);
+    console.log('❌ [Sitemap Locale] No se encontró store');
     // Devolver sitemap básico si no se encuentra la tienda
     const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${baseUrl}/${locale}</loc>
+    <loc>${canonicalHost}/${locale}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -48,7 +36,7 @@ export async function GET(
 
   // URL de home
   urls += `  <url>
-    <loc>${baseUrl}/${locale}</loc>
+    <loc>${canonicalHost}/${locale}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -76,7 +64,7 @@ export async function GET(
             if (categoryName && categorySlug) {
               const categoryUrl = encodeURIComponent(categorySlug);
               urls += `  <url>
-    <loc>${baseUrl}/${locale}/categoria/${categoryUrl}</loc>
+    <loc>${canonicalHost}/${locale}/categoria/${categoryUrl}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -113,7 +101,7 @@ export async function GET(
             
             if (productId) {
               urls += `  <url>
-    <loc>${baseUrl}/${locale}/producto/${productId}</loc>
+    <loc>${canonicalHost}/${locale}/producto/${productId}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -134,7 +122,7 @@ export async function GET(
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}</urlset>`;
 
-  console.log('✅ [Sitemap Custom Domain] Sitemap generado exitosamente:', { locale, storeSubdomain, urls: urls.split('<url>').length - 1 });
+  console.log('✅ [Sitemap Locale] Sitemap generado exitosamente:', { locale, urls: urls.split('<url>').length - 1 });
 
   return new Response(sitemap, {
     headers: { 
