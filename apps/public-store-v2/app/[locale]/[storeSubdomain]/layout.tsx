@@ -6,6 +6,7 @@ import { generateAllImageVariants } from "../../../lib/image-optimization";
 import { resolveStoreFromRequest } from "../../../lib/resolve-store";
 import { isValidLocale, normalizeLocale, VALID_LOCALES } from "../../../lib/locale-validation";
 import { extractGoogleVerificationToken, isValidGoogleToken } from "../../../lib/google-verification";
+import { getCanonicalHost } from "../../../lib/canonical-resolver";
 
 export async function generateMetadata({ params }: { params: { storeSubdomain: string; locale: string } }): Promise<Metadata> {
     const subdomain = params?.storeSubdomain ?? "store";
@@ -16,18 +17,22 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     
     const data = await getStoreMetadata(subdomain);
     
-    // Usar resolveStoreFromRequest para obtener host canónico correcto
+    // Obtener host canónico oficial usando nueva función
+    const canonical = await getCanonicalHost(subdomain);
+    const canonicalUrl = `${canonical.canonicalHost}/${locale}`;
+    
+    // Detectar si current host es el canónico
     const headersList = headers();
-    const host = headersList.get('host') || 'localhost:3004';
-    const fakeRequest = new Request(`https://${host}/`);
-    const resolved = await resolveStoreFromRequest(fakeRequest, { storeSubdomain: subdomain, locale });
-    const { canonicalHost, isCustomDomain } = resolved;
+    const currentHost = headersList.get('host') || 'localhost:3004';
+    const currentUrl = `https://${currentHost}`;
+    const isCanonicalVersion = currentUrl === canonical.canonicalHost;
     
     console.log('🔍 [Layout] Store resuelto:', { 
         subdomain,
-        canonicalHost, 
-        isCustomDomain, 
-        canonicalUrl: data?.canonicalUrl
+        canonicalHost: canonical.canonicalHost, 
+        isCustomDomain: canonical.isCustomDomain,
+        isCanonicalVersion,
+        canonicalUrl
     });
     
     // Usar datos SEO personalizados o fallbacks
@@ -40,7 +45,7 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const robots = data?.robots || "index,follow";
     
     // Usar el host canónico resuelto
-    const storeUrl = `${canonicalHost}/${locale}`;
+    const storeUrl = canonicalUrl;
     
     // Site name mejorado (solo nombre de tienda, sin eslogan)
     const siteName = data?.storeName || subdomain;
@@ -53,7 +58,8 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         title,
         description,
         keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
-        robots,
+        // 🔥 NOINDEX SI NO ES VERSION CANÓNICA
+        robots: isCanonicalVersion ? robots : 'noindex, nofollow',
         
         // Open Graph para redes sociales - Múltiples imágenes para diferentes plataformas
         openGraph: {
@@ -97,22 +103,24 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         }
     };
     
-    // Agregar Google Search Console verification - solo si token válido
-    const googleToken = extractGoogleVerificationToken(data?.googleSearchConsole);
-    if (isValidGoogleToken(googleToken)) {
-        metadata.verification = {
-            google: googleToken
-        };
+    // Agregar Google Search Console verification - solo si token válido Y es versión canónica
+    if (isCanonicalVersion) {
+        const googleToken = extractGoogleVerificationToken(data?.googleSearchConsole);
+        if (isValidGoogleToken(googleToken)) {
+            metadata.verification = {
+                google: googleToken
+            };
+        }
     }
     
     // Configurar canonical URL y hreflang con host canónico - solo locales válidos
     const hreflangLanguages: Record<string, string> = {};
     
-    // Generar hreflang solo para locales válidos
+    // Generar hreflang solo para locales válidos - siempre usar canonical host
     VALID_LOCALES.forEach(validLocale => {
-        hreflangLanguages[validLocale] = `${canonicalHost}/${validLocale}`;
+        hreflangLanguages[validLocale] = `${canonical.canonicalHost}/${validLocale}`;
     });
-    hreflangLanguages['x-default'] = `${canonicalHost}/es`;
+    hreflangLanguages['x-default'] = `${canonical.canonicalHost}/es`;
     
     metadata.alternates = {
         canonical: storeUrl,

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { StoreWithId } from '../../lib/store'
 import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile, replaceImageInCloudinary } from '../../lib/cloudinary'
 import Image from 'next/image'
+import GSCIntegration from './GSCIntegration'
 
 interface SEOData {
   // SEO básico
@@ -1146,6 +1147,17 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         {activeTab === 'social' && renderSocialSEO()}
         {activeTab === 'advanced' && renderAdvancedSEO()}
       </div>
+
+      {/* Google Search Console Integration */}
+      <GSCIntegration
+        storeSubdomain={store.subdomain}
+        customDomain={store.customDomain}
+        googleSearchConsole={seoData.googleSearchConsole}
+        onUpdate={(data) => {
+          setSeoData(prev => ({ ...prev, ...data }));
+          handleSave();
+        }}
+      />
 
       {/* Consejos SEO */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
