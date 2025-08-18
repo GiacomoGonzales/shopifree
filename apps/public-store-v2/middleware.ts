@@ -123,6 +123,13 @@ async function findSubdomainForCustomHost(host: string): Promise<string | null> 
 
 export async function middleware(req: NextRequest) {
 	const { nextUrl } = req;
+	
+	// Add noindex header to API routes
+	if (nextUrl.pathname.startsWith('/api')) {
+		const response = NextResponse.next();
+		response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+		return response;
+	}
 	const originalPathname = nextUrl.pathname;
 	const search = nextUrl.search;
 
@@ -130,13 +137,58 @@ export async function middleware(req: NextRequest) {
 	let host = normalizeHost(req.headers.get('host'));
 	if (!host) return intl(req);
 
-	// Redirigir www. -> raíz (301)
-	if (host.startsWith('www.')) {
-		const bare = host.slice(4);
-		const to = new URL(nextUrl);
-		to.host = bare;
-		return NextResponse.redirect(to, 301);
+	// 🔄 REDIRECCIONES 301 (host policy)
+	const protocol = req.headers.get('x-forwarded-proto') || nextUrl.protocol.slice(0, -1);
+	
+	// 1. http → https
+	if (protocol === 'http' && process.env.NODE_ENV === 'production') {
+		const httpsUrl = new URL(req.url);
+		httpsUrl.protocol = 'https:';
+		return NextResponse.redirect(httpsUrl, 301);
 	}
+	
+	// 2. www → apex
+	if (host.startsWith('www.')) {
+		const apexHost = host.slice(4);
+		const apexUrl = new URL(req.url);
+		apexUrl.hostname = apexHost;
+		return NextResponse.redirect(apexUrl, 301);
+	}
+	
+	// 3. *.shopifree.app → custom domain (solo en producción)
+	if (host.endsWith('shopifree.app') && host !== 'shopifree.app' && process.env.NODE_ENV === 'production') {
+		const subdomain = host.split('.')[0];
+		
+		// Verificar si esta tienda tiene dominio personalizado configurado
+		try {
+			const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT;
+			const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY;
+			
+			if (projectId && apiKey && subdomain === 'lunara') { // Solo para Lunara por ahora
+				const domainRes = await fetch(
+					`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/J0YnmGq3CvniogUb6BPp/settings/domain?key=${apiKey}`
+				);
+				
+				if (domainRes.ok) {
+					const domainDoc = await domainRes.json();
+					const customDomain = domainDoc?.fields?.customDomain?.stringValue;
+					const status = domainDoc?.fields?.status?.stringValue;
+					
+					if (customDomain && status === 'connected') {
+						// Redirigir a dominio personalizado
+						const customUrl = new URL(req.url);
+						customUrl.hostname = customDomain;
+						console.log(`🔄 [Redirect] ${host} → ${customDomain}`);
+						return NextResponse.redirect(customUrl, 301);
+					}
+				}
+			}
+		} catch (error) {
+			console.error('Error verificando dominio personalizado para redirect:', error);
+		}
+	}
+
+	// (www redirect ya manejado arriba)
 
 	// Dominios de la plataforma (*.shopifree.app, *.localhost)
 	const isPlatformDomain = host.endsWith('shopifree.app') || host.endsWith('localhost');

@@ -2,6 +2,7 @@ export interface ResolvedStore {
   storeId: string | null;
   storeSubdomain: string | null;
   canonicalHost: string;
+  isCustomDomain: boolean;
 }
 
 export async function resolveStoreFromRequest(
@@ -10,7 +11,8 @@ export async function resolveStoreFromRequest(
 ): Promise<ResolvedStore> {
   const requestUrl = new URL(request.url);
   const hostname = requestUrl.hostname;
-  const canonicalHost = `${requestUrl.protocol}//${hostname}`;
+  let canonicalHost = `${requestUrl.protocol}//${hostname}`;
+  let isCustomDomain = false;
 
   // Si params.storeSubdomain existe, úsalo
   if (params.storeSubdomain) {
@@ -51,8 +53,46 @@ export async function resolveStoreFromRequest(
               const storeIndex = pathParts.indexOf('stores');
               if (storeIndex !== -1 && storeIndex + 1 < pathParts.length) {
                 const storeId = pathParts[storeIndex + 1];
-                console.log('✅ [ResolveStore] StoreId encontrado por subdomain:', { storeId, storeSubdomain: params.storeSubdomain });
-                return { storeId, storeSubdomain: params.storeSubdomain, canonicalHost };
+                
+                // Para subdominios de plataforma, verificar si tienen dominio personalizado configurado
+                try {
+                  const domainDocRes = await fetch(
+                    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`
+                  );
+                  
+                  if (domainDocRes.ok) {
+                    const domainDoc = await domainDocRes.json();
+                    const customDomain = domainDoc?.fields?.customDomain?.stringValue;
+                    const status = domainDoc?.fields?.status?.stringValue;
+                    
+                    if (customDomain && status === 'connected') {
+                      // Esta tienda tiene dominio personalizado configurado y conectado
+                      canonicalHost = `https://${customDomain}`;
+                      isCustomDomain = true;
+                    } else {
+                      // No tiene dominio personalizado: usar subdominio de plataforma
+                      canonicalHost = `https://${params.storeSubdomain}.shopifree.app`;
+                      isCustomDomain = false;
+                    }
+                  } else {
+                    // No se pudo obtener configuración de dominio: usar subdominio de plataforma
+                    canonicalHost = `https://${params.storeSubdomain}.shopifree.app`;
+                    isCustomDomain = false;
+                  }
+                } catch (e) {
+                  console.error('Error verificando dominio personalizado:', e);
+                  // Fallback: usar subdominio de plataforma
+                  canonicalHost = `https://${params.storeSubdomain}.shopifree.app`;
+                  isCustomDomain = false;
+                }
+                
+                console.log('✅ [ResolveStore] StoreId encontrado por subdomain:', { 
+                  storeId, 
+                  storeSubdomain: params.storeSubdomain, 
+                  canonicalHost, 
+                  isCustomDomain 
+                });
+                return { storeId, storeSubdomain: params.storeSubdomain, canonicalHost, isCustomDomain };
               }
             }
           }
@@ -62,7 +102,7 @@ export async function resolveStoreFromRequest(
       console.error('❌ [ResolveStore] Error buscando por subdomain:', error);
     }
     
-    return { storeId: null, storeSubdomain: params.storeSubdomain, canonicalHost };
+    return { storeId: null, storeSubdomain: params.storeSubdomain, canonicalHost, isCustomDomain: false };
   }
 
   // Si no, obtener el host del request y mapearlo a la tienda
@@ -74,7 +114,7 @@ export async function resolveStoreFromRequest(
     
     if (!projectId || !apiKey) {
       console.log('❌ [ResolveStore] Faltan credenciales de Firebase');
-      return { storeId: null, storeSubdomain: null, canonicalHost };
+      return { storeId: null, storeSubdomain: null, canonicalHost, isCustomDomain: false };
     }
 
     const endpoint = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`;
@@ -122,7 +162,7 @@ export async function resolveStoreFromRequest(
               
               if (customDomain && customDomain.toLowerCase() === hostname.toLowerCase()) {
                 console.log('✅ [ResolveStore] StoreId encontrado por dominio personalizado:', { storeId, storeSubdomain: subdomain, hostname });
-                return { storeId, storeSubdomain: subdomain, canonicalHost };
+                return { storeId, storeSubdomain: subdomain, canonicalHost, isCustomDomain: true };
               }
             }
           } catch (e) {
@@ -137,5 +177,5 @@ export async function resolveStoreFromRequest(
   }
   
   console.log('❌ [ResolveStore] No se encontró tienda para hostname:', hostname);
-  return { storeId: null, storeSubdomain: null, canonicalHost };
+  return { storeId: null, storeSubdomain: null, canonicalHost, isCustomDomain: false };
 }

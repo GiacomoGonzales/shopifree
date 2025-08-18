@@ -1,34 +1,45 @@
-// No necesitamos importar store para este caso global
+import { resolveStoreFromRequest } from '../../lib/resolve-store';
 
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
+  console.log('🤖 [Robots Global] Generando robots.txt para request:', request.url);
   
-  // Detectar si es dominio personalizado
-  const isCustomDomain = !requestUrl.hostname.endsWith('shopifree.app') && 
-                         !requestUrl.hostname.endsWith('localhost') && 
-                         requestUrl.hostname !== 'localhost';
+  const resolved = await resolveStoreFromRequest(request, {});
+  console.log('🤖 [Robots Global] Store resuelto:', resolved);
   
-  let baseUrl: string;
+  const { canonicalHost, storeSubdomain } = resolved;
   
-  if (isCustomDomain) {
-    // Para dominios personalizados: https://lunara-store.xyz
-    baseUrl = `${requestUrl.protocol}//${requestUrl.hostname}`;
-  } else {
-    // Para subdominios de shopifree: https://shopifree.app
-    baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
-  }
+  let robotsTxt: string;
   
-  const robotsTxt = `User-agent: *
+  if (storeSubdomain) {
+    // Para tiendas válidas: incluir sitemaps del host canónico
+    robotsTxt = `User-agent: *
 Allow: /
 
-Sitemap: ${baseUrl}/sitemap.xml
-Sitemap: ${baseUrl}/es/sitemap.xml
+# Sitemaps para ${storeSubdomain}
+Sitemap: ${canonicalHost}/sitemap.xml
+Sitemap: ${canonicalHost}/es/sitemap.xml
 
+# Disallow paths
 Disallow: /api/
 Disallow: /_next/
 Disallow: /admin/
 Disallow: /dashboard/
 `;
+  } else {
+    // Para requests sin tienda válida: robots básico
+    robotsTxt = `User-agent: *
+Allow: /
+
+# Sitemap básico
+Sitemap: ${canonicalHost}/sitemap.xml
+
+# Disallow paths
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+Disallow: /dashboard/
+`;
+  }
 
   return new Response(robotsTxt, {
     headers: { 

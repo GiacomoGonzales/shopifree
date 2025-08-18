@@ -5,11 +5,11 @@ export async function GET(
   { params }: { params: { locale: string } }
 ) {
   const { locale } = params;
-  const resolved = await resolveStoreFromRequest(request, { locale });
-  
+    const resolved = await resolveStoreFromRequest(request, { locale });
+
   console.log('🗺️ [Sitemap Locale] Generando sitemap para:', { locale, resolved });
 
-  const { storeId, canonicalHost } = resolved;
+  const { storeId, canonicalHost, storeSubdomain } = resolved;
   
   if (!storeId) {
     console.log('❌ [Sitemap Locale] No se encontró store');
@@ -126,7 +126,7 @@ ${urls}</urlset>`;
 
   return new Response(sitemap, {
     headers: { 
-      'Content-Type': 'application/xml',
+      'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600'
     }
   });

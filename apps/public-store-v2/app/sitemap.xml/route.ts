@@ -4,15 +4,14 @@ export async function GET(request: Request) {
   const resolved = await resolveStoreFromRequest(request, {});
   console.log('🗂️ [Sitemap Index] Store resuelto:', resolved);
   
-  const { canonicalHost, storeSubdomain } = resolved;
-  const isCustomDomain = !request.url.includes('shopifree.app') && !request.url.includes('localhost');
+  const { canonicalHost, storeSubdomain, isCustomDomain } = resolved;
   
   // Armar el índice según el tipo de dominio
   let sitemapIndex: string;
   const lastmod = new Date().toISOString().split('T')[0];
   
   if (isCustomDomain && storeSubdomain) {
-    // En dominio personalizado: listar sólo hijos reales
+    // En dominio personalizado: listar sólo hijos reales con URLs del host canónico
     sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
@@ -21,16 +20,11 @@ export async function GET(request: Request) {
   </sitemap>
 </sitemapindex>`;
   } else if (storeSubdomain) {
-    // Para subdominios de plataforma: formato con múltiples idiomas
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shopifree.app';
+    // Para subdominios de plataforma que tienen dominio personalizado: usar el canónico
     sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${baseUrl}/es/${storeSubdomain}/sitemap.xml</loc>
-    <lastmod>${lastmod}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${baseUrl}/en/${storeSubdomain}/sitemap.xml</loc>
+    <loc>${canonicalHost}/es/sitemap.xml</loc>
     <lastmod>${lastmod}</lastmod>
   </sitemap>
 </sitemapindex>`;
@@ -47,7 +41,7 @@ export async function GET(request: Request) {
 
   return new Response(sitemapIndex, {
     headers: { 
-      'Content-Type': 'application/xml',
+      'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600'
     }
   });
