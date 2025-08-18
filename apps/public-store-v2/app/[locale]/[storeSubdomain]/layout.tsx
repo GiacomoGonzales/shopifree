@@ -103,14 +103,23 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         }
     };
     
-    // Agregar Google Search Console verification - solo si token válido Y es versión canónica
-    if (isCanonicalVersion) {
-        const googleToken = extractGoogleVerificationToken(data?.googleSearchConsole);
-        if (isValidGoogleToken(googleToken)) {
-            metadata.verification = {
-                google: googleToken
-            };
-        }
+    // Agregar Google Search Console verification
+    const googleToken = extractGoogleVerificationToken(data?.googleSearchConsole);
+    console.log('🔍 [GSC Debug]:', {
+        isCanonicalVersion,
+        currentUrl,
+        canonicalHost: canonical.canonicalHost,
+        hasToken: !!googleToken,
+        rawGoogleSearchConsole: data?.googleSearchConsole,
+        extractedToken: googleToken
+    });
+    
+    // TEMPORAL: Mostrar siempre el token si existe y es válido (para debug)
+    if (isValidGoogleToken(googleToken)) {
+        metadata.verification = {
+            google: googleToken
+        };
+        console.log('✅ [GSC] Token añadido al metadata:', googleToken);
     }
     
     // Configurar canonical URL y hreflang con host canónico - solo locales válidos
