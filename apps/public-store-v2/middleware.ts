@@ -79,6 +79,59 @@ async function getCustomDomainCached(subdomain: string): Promise<string | null> 
   }
 }
 
+async function findSubdomainByCustomDomain(hostname: string): Promise<string | null> {
+  try {
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    
+    if (!projectId || !apiKey) return null;
+    
+    // Buscar en todas las tiendas
+    const storeQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: "stores" }]
+        }
+      })
+    });
+    
+    if (!storeQuery.ok) return null;
+    
+    const storeData = await storeQuery.json();
+    if (!Array.isArray(storeData)) return null;
+    
+    // Para cada tienda, verificar su dominio personalizado
+    for (const row of storeData) {
+      const storeDoc = row?.document;
+      if (!storeDoc) continue;
+      
+      const storeId = storeDoc.name.split('/').pop();
+      const subdomain = storeDoc.fields?.subdomain?.stringValue;
+      
+      if (!subdomain) continue;
+      
+      // Verificar dominio personalizado
+      const domainQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`);
+      
+      if (domainQuery.ok) {
+        const domainDoc = await domainQuery.json();
+        const customDomain = domainDoc?.fields?.customDomain?.stringValue;
+        
+        if (customDomain && customDomain.toLowerCase() === hostname.toLowerCase()) {
+          return subdomain;
+        }
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error finding subdomain by custom domain:', error);
+    return null;
+  }
+}
+
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const host = req.headers.get('host') || '';
@@ -120,6 +173,45 @@ export async function middleware(req: NextRequest) {
       customUrl.hostname = customDomain;
       console.log(`🔒 [Redirect] SUBDOMAIN→CUSTOM: ${host} → ${customDomain}`);
       return NextResponse.redirect(customUrl, 301);
+    }
+  }
+  
+  // 🔥 REGLA 4: REWRITE DOMINIOS PERSONALIZADOS A TIENDA
+  if (!host.endsWith('.shopifree.app') && !host.endsWith('.localhost') && host !== 'localhost') {
+    // Es un dominio personalizado - buscar el subdomain correspondiente
+    const storeSubdomain = await findSubdomainByCustomDomain(host);
+    
+    if (storeSubdomain) {
+      const currentPath = nextUrl.pathname;
+      const search = nextUrl.search;
+      
+      // Si está en root (/), redirigir a /es
+      if (currentPath === '/') {
+        const redirectUrl = new URL(`/es`, req.url);
+        console.log(`🔄 [Redirect] Custom domain root → /es: ${currentPath} → /es`);
+        return NextResponse.redirect(redirectUrl, 302);
+      }
+      
+      // Si está en /locale sin tienda, rewrite a /locale/tienda
+      const pathSegments = currentPath.split('/').filter(Boolean);
+      if (pathSegments.length === 1 && ['es', 'en'].includes(pathSegments[0])) {
+        const rewritePath = `/${pathSegments[0]}/${storeSubdomain}`;
+        const rewriteUrl = new URL(rewritePath + search, req.url);
+        console.log(`🔄 [Rewrite] Custom domain → store: ${currentPath} → ${rewritePath}`);
+        return NextResponse.rewrite(rewriteUrl);
+      }
+      
+      // Si la ruta no incluye el subdomain, agregarlo
+      if (pathSegments.length >= 1 && !pathSegments.includes(storeSubdomain)) {
+        const locale = pathSegments[0];
+        if (['es', 'en'].includes(locale)) {
+          // Rewrite /es/categoria/algo → /es/tienda/categoria/algo
+          const newPath = `/${locale}/${storeSubdomain}/${pathSegments.slice(1).join('/')}`;
+          const rewriteUrl = new URL(newPath + search, req.url);
+          console.log(`🔄 [Rewrite] Custom domain path → store: ${currentPath} → ${newPath}`);
+          return NextResponse.rewrite(rewriteUrl);
+        }
+      }
     }
   }
   
