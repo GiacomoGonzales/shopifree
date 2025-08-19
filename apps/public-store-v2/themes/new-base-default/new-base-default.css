@@ -4230,6 +4230,7 @@
     width: 450px;
     max-width: 100vw;
     height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for iPhone Safari */
     background: var(--nbd-neutral-0);
     z-index: 9999;
     display: flex;
@@ -4514,8 +4515,10 @@
     border-top: 1px solid var(--nbd-neutral-200);
     background: var(--nbd-neutral-50);
     padding: var(--nbd-space-xl);
-    /* iOS safe area support - avoid bottom UI overlap */
-    padding-bottom: calc(var(--nbd-space-xl) + env(safe-area-inset-bottom));
+    /* iPhone Safari dynamic viewport support - stay above URL bar */
+    position: sticky;
+    bottom: 0;
+    z-index: 10001;
 }
 
 .nbd-cart-summary {
@@ -4706,8 +4709,7 @@
     
     .nbd-cart-footer {
         padding: var(--nbd-space-lg);
-        /* iOS safe area support for mobile - avoid bottom UI overlap */
-        padding-bottom: calc(var(--nbd-space-lg) + env(safe-area-inset-bottom));
+        /* Keep sticky positioning and dynamic viewport for iPhone */
     }
     
     .nbd-cart-actions {
@@ -4738,6 +4740,7 @@
     width: 100%;
     max-width: 1200px;
     height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for iPhone Safari */
     background: var(--nbd-neutral-0);
     z-index: 100000;
     display: flex;
@@ -5182,8 +5185,10 @@
     background: var(--nbd-neutral-50);
     border-top: 2px solid var(--nbd-neutral-100);
     padding: var(--nbd-space-xl);
-    /* iOS safe area support - avoid bottom UI overlap */
-    padding-bottom: calc(var(--nbd-space-xl) + env(safe-area-inset-bottom));
+    /* iPhone Safari dynamic viewport support - stay above URL bar */
+    position: sticky;
+    bottom: 0;
+    z-index: 100001;
 }
 
 .nbd-checkout-actions {
