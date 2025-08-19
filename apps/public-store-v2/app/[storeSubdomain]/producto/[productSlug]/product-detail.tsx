@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getStoreIdBySubdomain } from '../../../../lib/store';
+import { getStoreIdBySubdomain, getStoreLocaleConfig } from '../../../../lib/store';
 import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../../lib/products';
 import { toCloudinarySquare } from '../../../../lib/images';
 import { formatPrice } from '../../../../lib/currency';
@@ -37,6 +37,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [products, setProducts] = useState<PublicProduct[]>([]);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+  const [locale, setLocale] = useState<string>('es');
   
   // Estados para carrusel de galería - swipe simplificado
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -161,16 +162,18 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
           const p = await getProduct(id, productSlug);
           if (!alive) return;
           setProduct(p);
-          // cargar info base para header/footer
-          const [info, cats, prods] = await Promise.all([
+          // cargar info base para header/footer y configuración de locale
+          const [info, cats, prods, storeConfig] = await Promise.all([
             getStoreBasicInfo(id),
             getStoreCategories(id),
-            getStoreProducts(id)
+            getStoreProducts(id),
+            getStoreLocaleConfig(id)
           ]);
           if (!alive) return;
           setStoreInfo(info);
           setCategories(cats);
           setProducts(prods);
+          setLocale(storeConfig?.primaryLocale || 'es');
         }
       } finally {
         if (alive) setLoading(false);
