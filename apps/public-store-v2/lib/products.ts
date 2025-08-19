@@ -27,9 +27,31 @@ function transformToPublicProduct(raw: any): PublicProduct {
 	const firstImage = mediaFiles.find((m) => (m.type === "image") || /\.(png|jpe?g|webp|gif)$/i.test(m.url || ""));
 	const firstVideo = mediaFiles.find((m) => m.type === "video" || /\.(mp4|webm|ogg)$/i.test(m.url || "") || (m.url || "").includes("/video/upload/"));
 
+	// Generar slug si no existe
+	const productName = String(raw.name ?? raw.title ?? "Producto");
+	let productSlug = typeof raw.slug === 'string' && raw.slug.trim() !== '' ? raw.slug : undefined;
+	
+	// Si no hay slug, generar uno a partir del nombre
+	if (!productSlug && productName && productName !== "Producto") {
+		productSlug = productName
+			.toLowerCase()
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '') // remover acentos
+			.replace(/[^a-z0-9\s-]/g, '') // solo letras, números, espacios y guiones
+			.trim()
+			.replace(/\s+/g, '-') // espacios a guiones
+			.replace(/-+/g, '-') // múltiples guiones a uno solo
+			.replace(/^-|-$/g, ''); // remover guiones al inicio/final
+		
+		// Si después de todo eso queda vacío, usar el ID
+		if (!productSlug) {
+			productSlug = `producto-${raw.id}`;
+		}
+	}
+
 	return {
 		id: String(raw.id ?? ""),
-		name: String(raw.name ?? raw.title ?? "Producto"),
+		name: productName,
 		description: typeof raw.description === "string" ? raw.description : "",
 		price: Number(raw.price ?? 0),
 		comparePrice: raw.comparePrice ?? null,
@@ -38,7 +60,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
 		mediaFiles,
 		currency: raw.currency ?? "USD",
 		status: raw.status ?? "active",
-        slug: typeof raw.slug === 'string' ? raw.slug : undefined,
+        slug: productSlug,
         categoryId: typeof raw.categoryId === 'string' ? raw.categoryId : 
                   Array.isArray(raw.selectedParentCategoryIds) && raw.selectedParentCategoryIds.length > 0 ? raw.selectedParentCategoryIds[0] : undefined,
         selectedParentCategoryIds: Array.isArray(raw.selectedParentCategoryIds) ? raw.selectedParentCategoryIds : undefined,
