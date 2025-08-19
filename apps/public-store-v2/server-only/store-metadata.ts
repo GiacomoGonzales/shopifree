@@ -40,7 +40,8 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 			storeName: mockData.storeName,
 			logoUrl: mockData.logo,
 			googleSearchConsole: mockData.seo.googleSearchConsole,
-			keywords: mockData.seo.keywords,
+			// ❌ REMOVIDO: keywords - ya no se usa en metadatos
+			// keywords: mockData.seo.keywords,
 			ogTitle: mockData.seo.title,
 			ogDescription: mockData.seo.description,
 			ogImage: '/default-og.png'
@@ -132,7 +133,8 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 		console.log(`✅ [store-metadata] Datos SEO cargados para ${subdomain}:`, {
 			title: metadata.title,
 			hasOgImage: !!metadata.ogImage,
-			hasKeywords: !!metadata.keywords,
+			// ❌ REMOVIDO: keywords debug - ya no usamos keywords
+			// hasKeywords: !!metadata.keywords,
 			hasAnalytics: !!metadata.googleAnalytics,
 			canonicalUrl: metadata.canonicalUrl
 		});
