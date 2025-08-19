@@ -7,7 +7,7 @@ import { resolveStoreFromRequest } from "../../lib/resolve-store";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "../../i18n";
 import { extractGoogleVerificationToken, isValidGoogleToken } from "../../lib/google-verification";
 import { getCanonicalHost } from "../../lib/canonical-resolver";
-import { getStoreLocaleConfig, type ValidLocale } from "../../lib/store";
+import { getStorePrimaryLocale, type ValidLocale } from "../../lib/store";
 import { StoreLanguageRoot } from "../../lib/store-language-root";
 
 export async function generateMetadata({ params }: { params: { storeSubdomain: string } }): Promise<Metadata> {
@@ -18,15 +18,11 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     // Obtener host canónico oficial usando nueva función
     const canonical = await getCanonicalHost(subdomain);
     
-    // 🚀 NUEVA LÓGICA: Obtener configuración de single locale para esta tienda
-    const storeConfig = canonical.storeId ? await getStoreLocaleConfig(canonical.storeId) : null;
-    const effectiveLocale = storeConfig?.primaryLocale || 'es';
-    const singleLocaleUrls = storeConfig?.singleLocaleUrls || false;
+    // Obtener idioma principal de la tienda
+    const effectiveLocale = canonical.storeId ? await getStorePrimaryLocale(canonical.storeId) || 'es' : 'es';
     
-    // Construir canonical URL según la configuración
-    const canonicalUrl = singleLocaleUrls 
-        ? canonical.canonicalHost  // Sin prefijo de idioma
-        : `${canonical.canonicalHost}/${effectiveLocale}`;  // Con prefijo
+    // SIEMPRE usar URLs sin prefijo de idioma
+    const canonicalUrl = canonical.canonicalHost;
     
     // Detectar si current host es el canónico
     const headersList = headers();
@@ -63,7 +59,6 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         canonicalHostWithoutProtocol,
         isCanonicalVersion,
         canonicalUrl,
-        singleLocaleUrls,
         effectiveLocale,
         robotsConfig: robots,
         finalRobots: isCanonicalVersion ? robots : (robots === 'noindex, nofollow' ? robots : 'index, follow')
@@ -150,27 +145,12 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         console.warn('⚠️ [GSC] Token presente pero inválido:', googleToken);
     }
     
-    // 🚀 NUEVA LÓGICA: Configurar canonical URL y hreflang según singleLocaleUrls
+    // Configurar canonical URL (sin hreflang porque todas las tiendas usan URLs simples)
     metadata.alternates = {
         canonical: canonicalUrl
     };
     
-    // Solo agregar hreflang si NO es single locale mode
-    if (!singleLocaleUrls) {
-        const hreflangLanguages: Record<string, string> = {};
-        
-        // Generar hreflang solo para locales válidos - siempre usar canonical host
-        SUPPORTED_LOCALES.forEach(supportedLocale => {
-            hreflangLanguages[supportedLocale] = `${canonical.canonicalHost}/${supportedLocale}`;
-        });
-        hreflangLanguages['x-default'] = `${canonical.canonicalHost}/${effectiveLocale}`;
-        
-        metadata.alternates.languages = hreflangLanguages;
-        
-        console.log('🌐 [Hreflang] Multi-locale URLs habilitadas para', subdomain);
-    } else {
-        console.log('🎯 [Single Locale] Sin hreflang para', subdomain, '- primaryLocale:', effectiveLocale);
-    }
+    console.log('🎯 [Simple Mode] URLs sin prefijo para', subdomain, '- primaryLocale:', effectiveLocale);
 
     // NOTA: Removemos meta name="sitemap" y meta robots con URLs
     // Los sitemaps se declaran en robots.txt, no en meta tags
@@ -216,8 +196,8 @@ export default async function StoreLocaleLayout({
     
     // 🚀 NUEVA LÓGICA: Obtener configuración de idioma para HTML lang
     const canonical = await getCanonicalHost(subdomain);
-    const storeConfig = canonical.storeId ? await getStoreLocaleConfig(canonical.storeId) : null;
-    const effectiveLocale = storeConfig?.primaryLocale || 'es';
+    const primaryLocale = canonical.storeId ? await getStorePrimaryLocale(canonical.storeId) : null;
+    const effectiveLocale = primaryLocale || 'es';
     
     // Construir storeInfo desde los datos completos de seoData
     const storeInfo = seoData ? {

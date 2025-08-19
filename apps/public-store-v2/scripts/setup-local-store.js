@@ -17,17 +17,14 @@ const mockStoreData = {
     description: 'Los mejores productos naturales y orgánicos',
     language: 'es'
   },
-  advanced: {
-    singleLocaleUrls: true,
-    language: 'es'
-  }
+  language: 'es'
 };
 
 console.log('📋 Configuración de tienda de prueba:');
 console.log(`   Subdomain: ${mockStoreData.subdomain}`);
 console.log(`   Nombre: ${mockStoreData.storeName}`);
-console.log(`   Idioma: ${mockStoreData.advanced.language}`);
-console.log(`   Single Locale URLs: ${mockStoreData.advanced.singleLocaleUrls}`);
+console.log(`   Idioma: ${mockStoreData.language}`);
+console.log(`   URLs Mode: Simple (sin prefijos)`);
 console.log('');
 
 console.log('🌐 Para acceder localmente:');

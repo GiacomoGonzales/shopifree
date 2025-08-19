@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import ProductDetail from './product-detail';
-import { getStoreIdBySubdomain, getStoreBasicInfo, getStoreLocaleConfig } from '../../../../lib/store';
+import { getStoreIdBySubdomain, getStoreBasicInfo, getStorePrimaryLocale } from '../../../../lib/store';
 import { getProduct } from '../../../../lib/products';
 import { generateAllImageVariants } from '../../../../lib/image-optimization';
 import { getCanonicalHost } from '../../../../lib/canonical-resolver';
@@ -26,9 +26,8 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     if (!storeId) return { title: 'Producto' };
     
     // 🚀 Obtener configuración de locale de la tienda
-    const storeConfig = await getStoreLocaleConfig(storeId);
-    const effectiveLocale = storeConfig?.primaryLocale || 'es';
-    const singleLocaleUrls = storeConfig?.singleLocaleUrls || false;
+    // Obtener idioma principal de la tienda
+    const effectiveLocale = await getStorePrimaryLocale(storeId) || 'es';
     
     const [product, storeInfo] = await Promise.all([
       getProduct(storeId, params.productSlug),
@@ -46,11 +45,9 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     // Generar imágenes optimizadas para diferentes plataformas
     const imageVariants = generateAllImageVariants(image);
     
-    // 🚀 Construir URL absoluta correcta según configuración
+    // Construir URL absoluta (siempre sin prefijo)
     const canonical = await getCanonicalHost(params.storeSubdomain);
-    const productUrl = singleLocaleUrls 
-      ? `${canonical.canonicalHost}/producto/${params.productSlug}`  // Sin prefijo
-      : `${canonical.canonicalHost}/${effectiveLocale}/producto/${params.productSlug}`;  // Con prefijo
+    const productUrl = `${canonical.canonicalHost}/producto/${params.productSlug}`;
     
     return {
       title,

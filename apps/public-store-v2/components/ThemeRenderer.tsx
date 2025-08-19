@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStoreIdBySubdomain, getStoreTheme, getStoreLocaleConfig } from "../lib/store";
+import { getStoreIdBySubdomain, getStoreTheme, getStorePrimaryLocale } from "../lib/store";
 import dynamic from "next/dynamic";
 import SimpleLoadingSpinner from "./SimpleLoadingSpinner";
 
@@ -28,13 +28,13 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
                 if (!alive) return;
                 
                 if (storeId) {
-                    const [storeTheme, storeConfig] = await Promise.all([
+                    const [storeTheme, primaryLocale] = await Promise.all([
                         getStoreTheme(storeId),
-                        getStoreLocaleConfig(storeId)
+                        getStorePrimaryLocale(storeId)
                     ]);
                     if (!alive) return;
                     setTheme(storeTheme);
-                    setEffectiveLocale(storeConfig?.primaryLocale || 'es');
+                    setEffectiveLocale(primaryLocale || 'es');
                 } else {
                     // Si no encuentra la tienda, usar tema por defecto
                     setTheme('new-base-default');

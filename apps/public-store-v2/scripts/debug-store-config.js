@@ -125,25 +125,13 @@ async function debugWithRestApi(identifier, projectId, apiKey) {
     console.log('📋 CONFIGURACIÓN ACTUAL:');
     console.log('========================');
     
-    if (seoResponse.ok) {
-      const seoData = await seoResponse.json();
-      const singleLocaleUrls = seoData?.fields?.singleLocaleUrls?.booleanValue;
-      const primaryLocale = seoData?.fields?.primaryLocale?.stringValue;
-      
-      console.log(`Single Locale URLs: ${singleLocaleUrls ? '✅ ACTIVADO' : '❌ DESACTIVADO'}`);
-      console.log(`Primary Locale: ${primaryLocale || 'es'}`);
-      
-      if (!singleLocaleUrls) {
-        console.log('');
-        console.log('🔧 SOLUCIÓN:');
-        console.log('   La tienda necesita activar Single Locale URLs');
-        console.log('   1. Dashboard > Configuración > General > Configuración Avanzada');
-        console.log('   2. Activar "URLs de idioma único (Single Locale URLs)"');
-      }
-    } else {
-      console.log('⚠️ No hay configuración SEO');
-      console.log('   Single Locale URLs: ❌ DESACTIVADO (por defecto)');
-    }
+    // Obtener idioma principal de la tienda
+    const language = storeData?.fields?.language?.stringValue || 'es';
+    
+    console.log(`URLs Mode: ✅ SIMPLE (sin prefijos)`);
+    console.log(`Primary Language: ${language}`);
+    console.log('');
+    console.log('ℹ️ INFO: Todas las tiendas usan URLs simples por defecto');
     
   } catch (error) {
     console.error('❌ Error con REST API:', error.message);

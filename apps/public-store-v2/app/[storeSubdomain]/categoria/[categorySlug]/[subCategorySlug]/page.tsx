@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import ThemeRenderer from "../../../../../components/ThemeRenderer";
-import { getStoreIdBySubdomain, getStoreBasicInfo, getStoreLocaleConfig } from "../../../../../lib/store";
+import { getStoreIdBySubdomain, getStoreBasicInfo, getStorePrimaryLocale } from "../../../../../lib/store";
 import { getStoreCategories } from "../../../../../lib/categories";
 import { generateAllImageVariants } from "../../../../../lib/image-optimization";
 import { getCanonicalHost } from "../../../../../lib/canonical-resolver";
@@ -18,9 +18,8 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
         }
         
         // 🚀 Obtener configuración de locale de la tienda
-        const storeConfig = await getStoreLocaleConfig(storeId);
-        const effectiveLocale = storeConfig?.primaryLocale || 'es';
-        const singleLocaleUrls = storeConfig?.singleLocaleUrls || false;
+        // Obtener idioma principal de la tienda
+        const effectiveLocale = await getStorePrimaryLocale(storeId) || 'es';
 
         const [storeInfo, categories] = await Promise.all([
             getStoreBasicInfo(storeId),
@@ -42,11 +41,9 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
         const imageVariants = generateAllImageVariants(categoryImage);
         
         // Construir URL absoluta correcta
-        // 🚀 Construir URL absoluta correcta según configuración
+        // Construir URL absoluta (siempre sin prefijo)
         const canonical = await getCanonicalHost(params.storeSubdomain);
-        const subCategoryUrl = singleLocaleUrls 
-          ? `${canonical.canonicalHost}/categoria/${params.categorySlug}/${params.subCategorySlug}`  // Sin prefijo
-          : `${canonical.canonicalHost}/${effectiveLocale}/categoria/${params.categorySlug}/${params.subCategorySlug}`;  // Con prefijo
+        const subCategoryUrl = `${canonical.canonicalHost}/categoria/${params.categorySlug}/${params.subCategorySlug}`;
 
         return {
             title,

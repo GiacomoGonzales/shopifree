@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getStoreIdBySubdomain, getStoreLocaleConfig } from '../../../../lib/store';
+import { getStoreIdBySubdomain, getStorePrimaryLocale } from '../../../../lib/store';
 import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../../lib/products';
 import { toCloudinarySquare } from '../../../../lib/images';
 import { formatPrice } from '../../../../lib/currency';
@@ -159,21 +159,23 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
         if (!alive) return;
         setStoreId(id);
         if (id) {
+          console.log(`🔍 [ProductDetail] Buscando producto con slug: "${productSlug}" en store: ${id}`);
           const p = await getProduct(id, productSlug);
+          console.log(`🔍 [ProductDetail] Resultado de getProduct:`, p);
           if (!alive) return;
           setProduct(p);
           // cargar info base para header/footer y configuración de locale
-          const [info, cats, prods, storeConfig] = await Promise.all([
+          const [info, cats, prods, primaryLocale] = await Promise.all([
             getStoreBasicInfo(id),
             getStoreCategories(id),
             getStoreProducts(id),
-            getStoreLocaleConfig(id)
+            getStorePrimaryLocale(id)
           ]);
           if (!alive) return;
           setStoreInfo(info);
           setCategories(cats);
           setProducts(prods);
-          setLocale(storeConfig?.primaryLocale || 'es');
+          setLocale(primaryLocale || 'es');
         }
       } finally {
         if (alive) setLoading(false);

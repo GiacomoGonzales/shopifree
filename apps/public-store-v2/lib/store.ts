@@ -120,8 +120,8 @@ export type ValidLocale = 'es' | 'en' | 'pt';
  * Falls back to 'es' if not configured
  */
 export function getPrimaryLocale(storeData: any): ValidLocale {
-    // Check advanced.language first, then seo.language as fallback
-    const language = storeData?.advanced?.language || storeData?.seo?.language;
+    // Check main language field
+    const language = storeData?.language;
     
     // Normalize and validate
     if (language === 'en') return 'en';
@@ -129,21 +129,13 @@ export function getPrimaryLocale(storeData: any): ValidLocale {
     return 'es'; // Default fallback
 }
 
-/**
- * Checks if a store has the single locale URLs feature enabled
- */
-export function hasSingleLocaleUrls(storeData: any): boolean {
-    return Boolean(storeData?.advanced?.singleLocaleUrls);
-}
+
 
 /**
- * Get store configuration for single locale feature
+ * Get store primary locale
  * Used in middleware and SSR functions
  */
-export async function getStoreLocaleConfig(storeId: string): Promise<{
-    primaryLocale: ValidLocale;
-    singleLocaleUrls: boolean;
-} | null> {
+export async function getStorePrimaryLocale(storeId: string): Promise<ValidLocale | null> {
     // 🧪 MODO DESARROLLO: Solo usar mock si no podemos conectar a Firestore
     if (process.env.NODE_ENV === 'development') {
         // Intentar conectar a Firestore primero
@@ -156,15 +148,11 @@ export async function getStoreLocaleConfig(storeId: string): Promise<{
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    const language = data?.advanced?.language || data?.seo?.language || 'es';
-                    const singleLocaleUrls = data?.advanced?.singleLocaleUrls || false;
+                    const language = data?.language || 'es';
                     
-                    console.log(`🔗 [Firestore] Store ${storeId}: language=${language}, singleLocaleUrls=${singleLocaleUrls}`);
+                    console.log(`🔗 [Firestore] Store ${storeId}: language=${language}`);
                     
-                    return {
-                        primaryLocale: language as ValidLocale,
-                        singleLocaleUrls
-                    };
+                    return language as ValidLocale;
                 }
             }
         } catch (error) {
@@ -173,16 +161,10 @@ export async function getStoreLocaleConfig(storeId: string): Promise<{
         
         // Fallback a mock solo si Firestore falla
         if (storeId === 'mock-tiendaverde') {
-            return {
-                primaryLocale: 'es',
-                singleLocaleUrls: true
-            };
+            return 'es';
         }
         if (storeId === 'mock-english-store') {
-            return {
-                primaryLocale: 'en',
-                singleLocaleUrls: true
-            };
+            return 'en';
         }
     }
 
@@ -198,12 +180,9 @@ export async function getStoreLocaleConfig(storeId: string): Promise<{
         
         const data = snap.data();
         
-        return {
-            primaryLocale: getPrimaryLocale(data),
-            singleLocaleUrls: hasSingleLocaleUrls(data)
-        };
+        return getPrimaryLocale(data);
     } catch (e) {
-        console.warn("[public-store-v2] getStoreLocaleConfig fallo", e);
+        console.warn("[public-store-v2] getStorePrimaryLocale fallo", e);
         return null;
     }
 }

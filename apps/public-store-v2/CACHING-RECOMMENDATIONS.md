@@ -3,7 +3,7 @@
 ## 📝 Resumen
 
 Con la migración a single locale URLs, es importante revisar las estrategias de cache para asegurar que:
-1. Los datos se invaliden correctamente cuando cambie `primaryLocale` o `singleLocaleUrls`
+1. Los datos se invaliden correctamente cuando cambie `primaryLocale`
 2. El sitemap.xml se regenere al cambiar la configuración
 3. Los metadatos (canonical, lang, og:locale) se actualicen correctamente
 
@@ -45,7 +45,7 @@ Crear webhook/trigger para invalidar cache cuando:
 ```typescript
 // scripts/invalidate-cache-on-config-change.js
 async function invalidateStoreCache(storeId, changes) {
-  if (changes.includes('primaryLocale') || changes.includes('singleLocaleUrls')) {
+  if (changes.includes('primaryLocale')) {
     // Invalidar cache en Vercel
     await fetch(`https://api.vercel.com/v1/purge?token=${VERCEL_TOKEN}`, {
       method: 'POST',
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
   const canonical = await getCanonicalHost(storeSubdomain);
   
   // Cache por configuración específica
-  const cacheKey = `sitemap:${canonical.storeId}:${singleLocaleUrls}:${primaryLocale}`;
+  const cacheKey = `sitemap:${canonical.storeId}:${primaryLocale}`;
   
   // ... resto del código
 }

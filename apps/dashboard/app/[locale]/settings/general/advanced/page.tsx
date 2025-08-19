@@ -58,8 +58,7 @@ export default function GeneralSettingsAdvancedPage() {
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [language, setLanguage] = useState<'es' | 'en' | 'pt'>('es')
-  const [singleLocaleUrls, setSingleLocaleUrls] = useState<boolean>(false)
+
   const [message, setMessage] = useState<string | null>(null)
 
   // Estado para dominio personalizado
@@ -74,10 +73,7 @@ export default function GeneralSettingsAdvancedPage() {
       try {
         const s = await getUserStore(user.uid)
         setStore(s)
-        const current = (s?.advanced?.language as 'es' | 'en' | 'pt' | undefined) || 'es'
-        setLanguage(current)
-        const currentSingleLocale = s?.advanced?.singleLocaleUrls || false
-        setSingleLocaleUrls(currentSingleLocale)
+
         // Cargar domain settings desde subcolección: stores/{storeId}/settings/domain
         if (s?.id) {
           const db = getFirebaseDb()
@@ -99,31 +95,7 @@ export default function GeneralSettingsAdvancedPage() {
     load()
   }, [user?.uid])
 
-  const handleSave = async () => {
-    if (!store?.id) return
-    setSaving(true)
-    try {
-      // ✅ FIXED: Preservar todos los datos existentes en 'advanced' al actualizar el idioma
-      await updateStore(store.id, { 
-        advanced: { 
-          ...(store.advanced || {}), 
-          language,
-          singleLocaleUrls,
-          // Preservar explícitamente los datos existentes
-          seo: store.advanced?.seo || {},
-          shipping: store.advanced?.shipping || {},
-          integrations: store.advanced?.integrations || {}
-        } 
-      })
-      setMessage(tAdv('actions.saved'))
-      setTimeout(() => setMessage(null), 2500)
-    } catch (e) {
-      setMessage(tAdv('actions.error'))
-      setTimeout(() => setMessage(null), 2500)
-    } finally {
-      setSaving(false)
-    }
-  }
+
 
   const saveCustomDomain = async () => {
     if (!store?.id) return
@@ -233,83 +205,6 @@ export default function GeneralSettingsAdvancedPage() {
           <GeneralSettingsNav currentSection="advanced" />
 
           <div className="max-w-4xl space-y-6">
-            <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-              <div className="px-6 py-6 space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">{tAdv('checkout.language.title')}</h3>
-                  <p className="mt-1 text-sm text-gray-600">{tAdv('checkout.language.description')}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {tAdv('checkout.language.label')}
-                  </label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value as 'es' | 'en' | 'pt')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm bg-white"
-                    disabled={saving || loading}
-                  >
-                    <option value="es">{tAdv('checkout.language.spanish')}</option>
-                    <option value="en">{tAdv('checkout.language.english')}</option>
-                    <option value="pt">{tAdv('checkout.language.portuguese')}</option>
-                  </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    {tAdv('checkout.language.hint')}
-                  </p>
-                </div>
-
-                {/* Opción de URLs de un solo idioma */}
-                <div>
-                  <div className="flex items-start space-x-3">
-                    <input
-                      id="singleLocaleUrls"
-                      type="checkbox"
-                      checked={singleLocaleUrls}
-                      onChange={(e) => setSingleLocaleUrls(e.target.checked)}
-                      disabled={saving || loading}
-                      className="mt-1 h-4 w-4 text-black border-gray-300 rounded focus:ring-gray-600"
-                    />
-                    <div className="flex-1">
-                      <label htmlFor="singleLocaleUrls" className="block text-sm font-medium text-gray-700">
-                        URLs sin prefijo de idioma
-                      </label>
-                      <p className="mt-1 text-xs text-gray-500">
-                        Si está activado, las URLs de tu tienda no incluirán prefijos como /es o /en. 
-                        Ejemplo: tutienda.com/productos en lugar de tutienda.com/es/productos
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Botón de guardar configuración de idioma */}
-            <div className="flex justify-between items-center">
-              {message && (
-                <div className={`px-4 py-2 rounded-md text-sm font-medium ${
-                  message === tAdv('actions.saved')
-                    ? 'bg-gray-100 text-gray-800 border border-gray-300'
-                    : 'bg-red-100 text-red-800 border border-red-200'
-                }`}>
-                  {message}
-                </div>
-              )}
-              <div className="ml-auto">
-                <button
-                  onClick={handleSave}
-                  disabled={saving || loading}
-                  className={`px-6 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 ${
-                    saving 
-                      ? 'bg-gray-600 cursor-wait' 
-                      : 'bg-black hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed'
-                  }`}
-                >
-                  {saving ? t('actions.saving') : t('actions.save')}
-                </button>
-              </div>
-            </div>
 
             {/* Conectar dominio personalizado */}
             <div className="bg-white shadow-sm rounded-lg border border-gray-200">

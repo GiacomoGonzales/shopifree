@@ -14,10 +14,7 @@ export const mockStoreData = {
     keywords: 'productos naturales, orgánicos, alimentación saludable',
     googleSearchConsole: 'mock-verification-token'
   },
-  advanced: {
-    singleLocaleUrls: true,
-    language: 'es'
-  },
+  language: 'es',
   colors: {
     primary: '#22c55e',
     secondary: '#16a34a',
@@ -137,10 +134,7 @@ export function getMockStoreData(subdomain: string) {
         keywords: 'natural products,organic,healthy food',
         googleSearchConsole: 'mock-verification-token-en'
       },
-      advanced: {
-        singleLocaleUrls: true,
-        language: 'en'
-      }
+      language: 'en'
     };
   }
   

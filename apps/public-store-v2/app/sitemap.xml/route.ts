@@ -2,7 +2,7 @@ import { getCanonicalHost, type CanonicalResult } from '../../lib/canonical-reso
 import { SUPPORTED_LOCALES } from '../../i18n';
 import { getStoreCategories } from '../../lib/categories';
 import { getStoreProducts } from '../../lib/products';
-import { getStoreLocaleConfig, type ValidLocale } from '../../lib/store';
+import { getStorePrimaryLocale, type ValidLocale } from '../../lib/store';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -33,24 +33,19 @@ export async function GET(request: Request) {
     return new Response('Store not found', { status: 404 });
   }
   
-  // 🚀 NUEVA LÓGICA: Obtener configuración de single locale para la tienda
-  const storeConfig = canonical.storeId ? await getStoreLocaleConfig(canonical.storeId) : null;
-  const singleLocaleUrls = storeConfig?.singleLocaleUrls || false;
-  const primaryLocale = storeConfig?.primaryLocale || 'es';
+  // Obtener idioma principal de la tienda
+  const primaryLocale = canonical.storeId ? await getStorePrimaryLocale(canonical.storeId) || 'es' : 'es';
   
-  console.log('✅ [Sitemap] Generando sitemap para:', {
+  console.log('✅ [Sitemap] Generando sitemap simple para:', {
     storeSubdomain,
     storeId: canonical.storeId,
     canonicalHost: canonical.canonicalHost,
     isCustomDomain: canonical.isCustomDomain,
-    singleLocaleUrls,
     primaryLocale
   });
   
-  // Generar sitemap según la configuración
-  const sitemap = singleLocaleUrls 
-    ? await generateSingleLocaleSitemap(canonical, primaryLocale)
-    : await generateMultiLocaleSitemap(canonical);
+  // SIEMPRE usar modo simple (sin prefijos de idioma)
+  const sitemap = await generateSimpleSitemap(canonical, primaryLocale);
   
   return new Response(sitemap, {
     status: 200,
@@ -61,8 +56,8 @@ export async function GET(request: Request) {
   });
 }
 
-// 🚀 Nuevo: Sitemap para single locale URLs (sin prefijos de idioma)
-async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLocale: ValidLocale): Promise<string> {
+// Sitemap simple: URLs sin prefijos de idioma
+async function generateSimpleSitemap(canonical: CanonicalResult, primaryLocale: ValidLocale): Promise<string> {
   const { canonicalHost, storeId } = canonical;
   
   let urls = '';
@@ -80,7 +75,7 @@ async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLo
   try {
     if (storeId) {
       const categories = await getStoreCategories(storeId);
-      console.log('📂 [Sitemap Single] Categorías obtenidas:', categories?.length || 0);
+      console.log('📂 [Sitemap Simple] Categorías obtenidas:', categories?.length || 0);
       
       if (categories && categories.length > 0) {
         for (const category of categories) {
@@ -96,14 +91,14 @@ async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLo
       }
     }
   } catch (error) {
-    console.error('❌ [Sitemap Single] Error fetching categories:', error);
+    console.error('❌ [Sitemap Simple] Error fetching categories:', error);
   }
   
   // 🛍️ PRODUCTOS sin prefijo de idioma
   try {
     if (storeId) {
       const products = await getStoreProducts(storeId);
-      console.log('🛍️ [Sitemap Single] Productos obtenidos:', products?.length || 0);
+      console.log('🛍️ [Sitemap Simple] Productos obtenidos:', products?.length || 0);
       
       if (products && products.length > 0) {
         let productsAdded = 0;
@@ -119,16 +114,16 @@ async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLo
             productsAdded++;
           }
         }
-        console.log(`✅ [Sitemap Single] Productos añadidos al sitemap: ${productsAdded}`);
+        console.log(`✅ [Sitemap Simple] Productos añadidos al sitemap: ${productsAdded}`);
       } else {
-        console.log('⚠️ [Sitemap Single] No hay productos para mostrar');
+        console.log('⚠️ [Sitemap Simple] No hay productos para mostrar');
       }
     }
   } catch (error) {
-    console.error('❌ [Sitemap Single] Error fetching products:', error);
+    console.error('❌ [Sitemap Simple] Error fetching products:', error);
   }
   
-  console.log('✅ [Sitemap Single] URLs sin prefijo generadas para locale:', primaryLocale);
+  console.log('✅ [Sitemap Simple] URLs sin prefijo generadas para locale:', primaryLocale);
   
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -136,96 +131,7 @@ ${urls}
 </urlset>`;
 }
 
-// 📚 Legacy: Sitemap para multi-locale URLs (con prefijos de idioma y hreflang)
-async function generateMultiLocaleSitemap(canonical: CanonicalResult): Promise<string> {
-  const { canonicalHost, storeId } = canonical;
-  
-  let urls = '';
-  
-  // 🏠 HOME en ambos idiomas con hreflang
-  for (const locale of SUPPORTED_LOCALES) {
-    urls += `
-  <url>
-    <loc>${canonicalHost}/${locale}</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="${canonicalHost}/es"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${canonicalHost}/en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${canonicalHost}/es"/>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>`;
-  }
-  
-  // 📂 CATEGORÍAS en ambos idiomas
-  try {
-    if (storeId) {
-      const categories = await getStoreCategories(storeId);
-      console.log('📂 [Sitemap Multi] Categorías obtenidas:', categories?.length || 0);
-      
-      if (categories && categories.length > 0) {
-        for (const category of categories) {
-          if (category.slug) {
-            for (const locale of SUPPORTED_LOCALES) {
-              urls += `
-  <url>
-    <loc>${canonicalHost}/${locale}/categoria/${category.slug}</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="${canonicalHost}/es/categoria/${category.slug}"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${canonicalHost}/en/categoria/${category.slug}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${canonicalHost}/es/categoria/${category.slug}"/>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>`;
-            }
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error('❌ [Sitemap Multi] Error fetching categories:', error);
-  }
-  
-  // 🛍️ PRODUCTOS en ambos idiomas
-  try {
-    if (storeId) {
-      const products = await getStoreProducts(storeId);
-      console.log('🛍️ [Sitemap Multi] Productos obtenidos:', products?.length || 0);
-      
-      if (products && products.length > 0) {
-        let productsAdded = 0;
-        for (const product of products) {
-          console.log(`🔍 [Sitemap] Producto: ${product.name} - Status: ${product.status} - Slug: ${product.slug || 'NO_SLUG'}`);
-          if (product.slug) {
-            for (const locale of SUPPORTED_LOCALES) {
-              urls += `
-  <url>
-    <loc>${canonicalHost}/${locale}/producto/${product.slug}</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="${canonicalHost}/es/producto/${product.slug}"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${canonicalHost}/en/producto/${product.slug}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${canonicalHost}/es/producto/${product.slug}"/>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-            }
-            productsAdded++;
-          }
-        }
-        console.log(`✅ [Sitemap Multi] Productos añadidos al sitemap: ${productsAdded}`);
-      } else {
-        console.log('⚠️ [Sitemap Multi] No hay productos para mostrar');
-      }
-    }
-  } catch (error) {
-    console.error('❌ [Sitemap Multi] Error fetching products:', error);
-  }
-  
-  console.log('✅ [Sitemap Multi] URLs multi-idioma generadas con hreflang');
-  
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${urls}
-</urlset>`;
-}
+
 
 // Función helper para buscar subdomain por dominio personalizado
 async function findSubdomainByCustomDomain(hostname: string): Promise<string | null> {

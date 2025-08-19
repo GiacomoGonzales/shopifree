@@ -27,11 +27,11 @@ function transformToPublicProduct(raw: any): PublicProduct {
 	const firstImage = mediaFiles.find((m) => (m.type === "image") || /\.(png|jpe?g|webp|gif)$/i.test(m.url || ""));
 	const firstVideo = mediaFiles.find((m) => m.type === "video" || /\.(mp4|webm|ogg)$/i.test(m.url || "") || (m.url || "").includes("/video/upload/"));
 
-	// Generar slug si no existe
+	// Usar urlSlug de Firestore o generar uno si no existe
 	const productName = String(raw.name ?? raw.title ?? "Producto");
-	let productSlug = typeof raw.slug === 'string' && raw.slug.trim() !== '' ? raw.slug : undefined;
+	let productSlug = typeof raw.urlSlug === 'string' && raw.urlSlug.trim() !== '' ? raw.urlSlug : undefined;
 	
-	// Si no hay slug, generar uno a partir del nombre
+	// Si no hay urlSlug, generar uno a partir del nombre (fallback)
 	if (!productSlug && productName && productName !== "Producto") {
 		productSlug = productName
 			.toLowerCase()
@@ -91,7 +91,7 @@ export async function getStoreProducts(storeId: string): Promise<PublicProduct[]
 		snap.forEach((doc) => {
 			const data = { id: doc.id, ...doc.data() } as any;
 			const p = transformToPublicProduct(data);
-			console.log(`📦 [getStoreProducts] Producto procesado: ${p.name} - Status: ${p.status} - Slug: ${p.slug || 'NO_SLUG'}`);
+			console.log(`📦 [getStoreProducts] Producto procesado: ${p.name} - Status: ${p.status} - urlSlug: ${p.slug || 'NO_SLUG'}`);
 			if (p.status === "active") {
 				items.push(p);
 				console.log(`✅ [getStoreProducts] Producto activo añadido: ${p.name}`);
@@ -112,7 +112,7 @@ export async function getProductBySlug(storeId: string, slug: string): Promise<P
         const db = getFirebaseDb();
         if (!db) return null;
         const ref = collection(db, "stores", storeId, "products");
-        const snap = await getDocs(query(ref, where("slug", "==", slug)));
+        const snap = await getDocs(query(ref, where("urlSlug", "==", slug)));
         if (snap.empty) return null;
         const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
         const p = transformToPublicProduct(data);
@@ -125,15 +125,20 @@ export async function getProductBySlug(storeId: string, slug: string): Promise<P
 
 export async function getProduct(storeId: string, slugOrId: string): Promise<PublicProduct | null> {
     try {
+        console.log(`🔍 [getProduct] Buscando producto: "${slugOrId}" en store: ${storeId}`);
         const db = getFirebaseDb();
         if (!db) return null;
-        // 1) intentar por slug
+        // 1) intentar por urlSlug (campo real en Firestore)
         const ref = collection(db, "stores", storeId, "products");
-        const snap = await getDocs(query(ref, where("slug", "==", slugOrId)));
+        const snap = await getDocs(query(ref, where("urlSlug", "==", slugOrId)));
+        console.log(`🔍 [getProduct] Búsqueda por urlSlug encontró ${snap.docs.length} documentos`);
         if (!snap.empty) {
             const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+            console.log(`🔍 [getProduct] Datos del producto encontrado:`, { id: data.id, name: data.name, urlSlug: data.urlSlug, status: data.status });
             const p = transformToPublicProduct(data);
-            return p.status === 'active' ? p : null;
+            const result = p.status === 'active' ? p : null;
+            console.log(`🔍 [getProduct] Producto transformado (activo: ${p.status === 'active'}):`, result);
+            return result;
         }
         // 2) fallback por ID de documento
         const { doc, getDoc } = await import('firebase/firestore');

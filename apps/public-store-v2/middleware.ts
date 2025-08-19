@@ -5,9 +5,8 @@ interface CustomDomainCache {
 }
 
 interface StoreConfigCache {
-  [storeId: string]: { 
-    primaryLocale: string; 
-    singleLocaleUrls: boolean; 
+  [storeId: string]: {
+    primaryLocale: string;
     expires: number;
   };
 }
@@ -143,7 +142,6 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
 
 async function getStoreConfigCached(storeSubdomain: string): Promise<{
   primaryLocale: string;
-  singleLocaleUrls: boolean;
   storeId: string | null;
 } | null> {
   try {
@@ -186,39 +184,29 @@ async function getStoreConfigCached(storeSubdomain: string): Promise<{
     if (cached && cached.expires > now) {
       return {
         primaryLocale: cached.primaryLocale,
-        singleLocaleUrls: cached.singleLocaleUrls,
         storeId
       };
     }
     
     // Extract store configuration
     const fields = storeDoc.fields || {};
-    const advanced = fields.advanced?.mapValue?.fields || {};
-    const seo = fields.seo?.mapValue?.fields || {};
     
-    // Get primary locale (advanced.language or seo.language, fallback to 'es')
-    const advancedLanguage = advanced.language?.stringValue;
-    const seoLanguage = seo.language?.stringValue;
-    const language = advancedLanguage || seoLanguage || 'es';
+    // Get primary locale from main language field, fallback to 'es'
+    const language = fields.language?.stringValue || 'es';
     
     // Ensure we validate the language correctly
     const primaryLocale = ['es', 'en', 'pt'].includes(language) ? language : 'es';
     
-    // Get single locale URLs flag (advanced.singleLocaleUrls, default false)
-    const singleLocaleUrls = Boolean(advanced.singleLocaleUrls?.booleanValue);
-    
     // Cache result for 5 minutes
     storeConfigCache[storeId] = {
       primaryLocale,
-      singleLocaleUrls,
       expires: now + 300000
     };
     
-    console.log(`🏪 [Store Config] ${storeSubdomain}: primaryLocale=${primaryLocale}, singleLocaleUrls=${singleLocaleUrls}, advancedLanguage=${advancedLanguage}, seoLanguage=${seoLanguage}`);
+    console.log(`🏪 [Store Config] ${storeSubdomain}: primaryLocale=${primaryLocale}`);
     
     return {
       primaryLocale,
-      singleLocaleUrls,
       storeId
     };
     
@@ -229,14 +217,14 @@ async function getStoreConfigCached(storeSubdomain: string): Promise<{
 }
 
 // 🚀 Función helper para manejar single locale mode
-async function handleSingleLocaleMode(req: NextRequest, storeSubdomain: string, primaryLocale: string): Promise<NextResponse> {
+async function handleSimpleMode(req: NextRequest, storeSubdomain: string): Promise<NextResponse> {
   const { nextUrl } = req;
   const currentPath = nextUrl.pathname;
   const search = nextUrl.search;
   
   const pathSegments = currentPath.split('/').filter(Boolean);
   
-  console.log(`🎯 [Single Locale] Procesando tienda ${storeSubdomain} con primaryLocale=${primaryLocale}`);
+  console.log(`🎯 [Simple Mode] Procesando tienda ${storeSubdomain}`);
 
   // Detectar si la URL tiene prefijo de idioma
   const firstSegment = pathSegments[0];
@@ -248,7 +236,7 @@ async function handleSingleLocaleMode(req: NextRequest, storeSubdomain: string, 
     const newPath = pathWithoutLocale ? `/${pathWithoutLocale}` : '/';
     const redirectUrl = new URL(newPath + search, req.url);
 
-    console.log(`🔄 [301 Redirect] ${currentPath} → ${newPath} (single locale mode)`);
+    console.log(`🔄 [301 Redirect] ${currentPath} → ${newPath} (simple mode)`);
     return NextResponse.redirect(redirectUrl, 301);
   }
 
@@ -286,26 +274,31 @@ export async function middleware(req: NextRequest) {
   if (isLocalDev) {
     console.log(`🧪 [Local Dev] Host: ${host}, Path: ${nextUrl.pathname}`);
     
-    // Determinar subdomain para localhost
-    let storeSubdomain = nextUrl.pathname.split('/')[1] || 'tiendaverde';
-    if (storeSubdomain === 'es' || storeSubdomain === 'en' || storeSubdomain === 'pt') {
-      storeSubdomain = nextUrl.pathname.split('/')[2] || 'tiendaverde';
+    const pathSegments = nextUrl.pathname.split('/').filter(Boolean);
+    
+    // Si la URL incluye el subdomain (ej: /tiendaverde/producto/algo)
+    if (pathSegments.length > 0 && !['producto', 'categoria', 'api', '_next'].includes(pathSegments[0])) {
+      const storeSubdomain = pathSegments[0];
+      
+      // Remover el subdomain del path y crear nueva URL
+      const pathWithoutSubdomain = pathSegments.slice(1).join('/');
+      const newPath = pathWithoutSubdomain ? `/${pathWithoutSubdomain}` : '/';
+      
+      console.log(`🔧 [Local Dev] Detected subdomain: ${storeSubdomain}, rewriting ${nextUrl.pathname} → ${newPath}`);
+      
+      // Crear nueva request con el path limpio
+      const newUrl = new URL(newPath + nextUrl.search, req.url);
+      const newReq = new NextRequest(newUrl, {
+        headers: req.headers,
+        method: req.method,
+      });
+      
+      return await handleSimpleMode(newReq, storeSubdomain);
     }
     
-    // ✅ MEJORA: En desarrollo local, permitir rutas directas sin configuración compleja
-    console.log(`🔧 [Local Dev] Processing store: ${storeSubdomain}`);
-    
-    // Obtener configuración real de Firestore incluso en desarrollo
-    const storeConfig = await getStoreConfigCached(storeSubdomain);
-    if (storeConfig) {
-      const { primaryLocale, singleLocaleUrls } = storeConfig;
-      console.log(`📋 [Local Dev] Store config found:`, { primaryLocale, singleLocaleUrls });
-      if (singleLocaleUrls) {
-        return await handleSingleLocaleMode(req, storeSubdomain, primaryLocale);
-      }
-    } else {
-      console.log(`⚠️ [Local Dev] No store config found for: ${storeSubdomain}, continuing...`);
-    }
+    // Si es una URL directa sin subdomain (ej: /producto/algo)
+    console.log(`📋 [Local Dev] Direct URL, using default store: tiendaverde`);
+    return await handleSimpleMode(req, 'tiendaverde');
   }
   
   console.log(`🔍 [Middleware] Processing: ${protocol}://${host}${nextUrl.pathname}`);
@@ -363,116 +356,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   
-  const { primaryLocale, singleLocaleUrls } = storeConfig;
-  const currentPath = nextUrl.pathname;
-  const search = nextUrl.search;
-  const pathSegments = currentPath.split('/').filter(Boolean);
-  
-  // 🚀 NUEVA LÓGICA: Single Locale URLs
-  if (singleLocaleUrls) {
-    console.log(`🎯 [Single Locale] Procesando tienda ${storeSubdomain} con primaryLocale=${primaryLocale}`);
-    
-    // Detectar si la URL tiene prefijo de idioma
-    const firstSegment = pathSegments[0];
-    const hasLocalePrefix = ['es', 'en', 'pt'].includes(firstSegment);
-    
-    if (hasLocalePrefix) {
-      // REDIRECT 301: /{locale}/(.*) → /(.*)
-      const pathWithoutLocale = pathSegments.slice(1).join('/');
-      const newPath = pathWithoutLocale ? `/${pathWithoutLocale}` : '/';
-      const redirectUrl = new URL(newPath + search, req.url);
-      
-      console.log(`🔄 [301 Redirect] ${currentPath} → ${newPath} (single locale mode)`);
-      return NextResponse.redirect(redirectUrl, 301);
-    }
-    
-    // 🚀 REWRITE INTERNO: /(.*) → /{storeSubdomain}/(.*)
-    if (currentPath === '/') {
-      // Root path
-      const rewritePath = `/${storeSubdomain}`;
-      const rewriteUrl = new URL(rewritePath + search, req.url);
-      console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
-      return NextResponse.rewrite(rewriteUrl);
-    } else {
-      // Other paths
-      const rewritePath = `/${storeSubdomain}${currentPath}`;
-      const rewriteUrl = new URL(rewritePath + search, req.url);
-      console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
-      return NextResponse.rewrite(rewriteUrl);
-    }
-  }
-  
-  // 🔄 LÓGICA MEJORADA: Modo adaptativo basado en configuración
-  console.log(`📚 [Adaptive Mode] Procesando tienda ${storeSubdomain} con URLs multi-idioma, primaryLocale=${primaryLocale}`);
-  
-  // NUEVO: Si está en root (/), verificar si deberíamos usar single locale mode automáticamente
-  if (currentPath === '/') {
-    // Para tiendas configuradas en inglés o portugués (independientemente del dominio),
-    // usar URLs sin prefijo de idioma por defecto
-    const isNonSpanish = primaryLocale !== 'es';
-    
-    if (isNonSpanish) {
-      // Usar single locale mode automáticamente para inglés y portugués
-      console.log(`🎯 [Auto Single Locale] Tienda con idioma ${primaryLocale}, usando modo sin prefijo`);
-      const rewritePath = `/${storeSubdomain}`;
-      const rewriteUrl = new URL(rewritePath + search, req.url);
-      console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
-      return NextResponse.rewrite(rewriteUrl);
-    } else {
-      // Solo para español, usar prefijo de idioma
-      const redirectUrl = new URL(`/${primaryLocale}`, req.url);
-      console.log(`🔄 [Redirect] Root → primary locale: ${currentPath} → /${primaryLocale}`);
-      return NextResponse.redirect(redirectUrl, 302);
-    }
-  }
-  
-  // Verificar si debemos usar modo adaptativo para esta tienda
-  const isNonSpanish = primaryLocale !== 'es';
-  const shouldUseAdaptiveMode = isNonSpanish; // Aplicar a todas las tiendas no-españolas
-  
-  if (shouldUseAdaptiveMode) {
-    // MODO ADAPTATIVO: Redirigir URLs con prefijo de idioma a URLs sin prefijo
-    const firstSegment = pathSegments[0];
-    const hasLocalePrefix = ['es', 'en', 'pt'].includes(firstSegment);
-    
-    if (hasLocalePrefix) {
-      // REDIRECT 301: /{locale}/(.*) → /(.*)
-      const pathWithoutLocale = pathSegments.slice(1).join('/');
-      const newPath = pathWithoutLocale ? `/${pathWithoutLocale}` : '/';
-      const redirectUrl = new URL(newPath + search, req.url);
-      console.log(`🔄 [301 Redirect Adaptive] ${currentPath} → ${newPath} (removing locale prefix)`);
-      return NextResponse.redirect(redirectUrl, 301);
-    }
-    
-    // REWRITE INTERNO: /(.*) → /{storeSubdomain}/(.*)
-    const rewritePath = currentPath === '/' ? `/${storeSubdomain}` : `/${storeSubdomain}${currentPath}`;
-    const rewriteUrl = new URL(rewritePath + search, req.url);
-    console.log(`🔄 [Rewrite Adaptive] ${currentPath} → ${rewritePath}`);
-    return NextResponse.rewrite(rewriteUrl);
-  } else {
-    // MODO LEGACY: URLs con prefijo de idioma
-    // Si está en /locale sin tienda, rewrite a /locale/tienda
-    if (pathSegments.length === 1 && ['es', 'en', 'pt'].includes(pathSegments[0])) {
-      const rewritePath = `/${pathSegments[0]}/${storeSubdomain}`;
-      const rewriteUrl = new URL(rewritePath + search, req.url);
-      console.log(`🔄 [Rewrite] Locale only → store: ${currentPath} → ${rewritePath}`);
-      return NextResponse.rewrite(rewriteUrl);
-    }
-    
-    // Si la ruta no incluye el subdomain, agregarlo
-    if (pathSegments.length >= 1 && !pathSegments.includes(storeSubdomain)) {
-      const locale = pathSegments[0];
-      if (['es', 'en', 'pt'].includes(locale)) {
-        // Rewrite /es/categoria/algo → /es/tienda/categoria/algo
-        const newPath = `/${locale}/${storeSubdomain}/${pathSegments.slice(1).join('/')}`;
-        const rewriteUrl = new URL(newPath + search, req.url);
-        console.log(`🔄 [Rewrite] Add subdomain: ${currentPath} → ${newPath}`);
-        return NextResponse.rewrite(rewriteUrl);
-      }
-    }
-  }
-  
-  return NextResponse.next();
+  // MODO SIMPLE: Todas las tiendas usan URLs sin prefijos
+  console.log(`🎯 [Simple Mode] Procesando tienda: ${storeSubdomain}`);
+    return await handleSimpleMode(req, storeSubdomain);
 }
 
 export const config = {

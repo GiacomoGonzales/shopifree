@@ -28,6 +28,7 @@ export interface StoreConfig {
   currency: string
   phone: string
   emailStore?: string // Nuevo campo para correo electrónico de la tienda
+  language?: 'es' | 'en' | 'pt' // Idioma principal de la tienda
   logo?: string // Legacy field - deprecated
   storePhoto?: string // Legacy field - deprecated
   logoUrl?: string // New Cloudinary URL for logo
@@ -198,7 +199,6 @@ export interface StoreConfig {
       googleAnalytics?: string
       metaPixel?: string
     }
-    language?: 'es' | 'en' | 'pt'
   }
   ownerId: string
   createdAt: Date | unknown
@@ -224,6 +224,7 @@ export interface StoreWithId {
   currency: string
   phone: string
   emailStore?: string
+  language?: 'es' | 'en' | 'pt' // Idioma principal de la tienda
   logo?: string
   storePhoto?: string
   logoUrl?: string
@@ -274,8 +275,6 @@ export interface StoreWithId {
       googleAnalytics?: string
       metaPixel?: string
     }
-    language?: 'es' | 'en' | 'pt'
-    singleLocaleUrls?: boolean // Si true, las URLs no tendrán prefijo de idioma (/en, /es)
   }
   payments?: {
     provider?: string
