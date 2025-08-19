@@ -25,8 +25,9 @@ export async function GET(request: Request) {
 </urlset>`, {
         status: 200,
         headers: { 
-          'Content-Type': 'application/xml; charset=utf-8',
-          'Cache-Control': 'public, max-age=300'
+          'Content-Type': 'application/xml; charset=UTF-8',
+          'Cache-Control': 'public, max-age=300',
+          'X-Robots-Tag': 'index'
         }
       });
     }
@@ -42,8 +43,9 @@ export async function GET(request: Request) {
 </urlset>`, {
         status: 200,
         headers: { 
-          'Content-Type': 'application/xml; charset=utf-8',
-          'Cache-Control': 'public, max-age=300'
+          'Content-Type': 'application/xml; charset=UTF-8',
+          'Cache-Control': 'public, max-age=300',
+          'X-Robots-Tag': 'index'
         }
       });
     }
@@ -60,7 +62,7 @@ export async function GET(request: Request) {
     return new Response(sitemap, {
       status: 200,
       headers: { 
-        'Content-Type': 'application/xml; charset=utf-8',
+        'Content-Type': 'application/xml; charset=UTF-8',
         'Cache-Control': 'public, max-age=3600',
         'X-Robots-Tag': 'index'
       }
@@ -75,8 +77,9 @@ export async function GET(request: Request) {
 </urlset>`, {
       status: 200,
       headers: { 
-        'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=60'
+        'Content-Type': 'application/xml; charset=UTF-8',
+        'Cache-Control': 'public, max-age=60',
+        'X-Robots-Tag': 'index'
       }
     });
   }

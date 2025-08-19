@@ -261,10 +261,12 @@ export async function middleware(req: NextRequest) {
   const host = req.headers.get('host') || '';
   const protocol = req.headers.get('x-forwarded-proto') || nextUrl.protocol.slice(0, -1);
   
-  // Skip middleware para archivos estáticos, API routes y dashboard
+  // Skip middleware para archivos estáticos, API routes, dashboard, sitemap y robots
   if (nextUrl.pathname.startsWith('/_next') || 
       nextUrl.pathname.startsWith('/api') ||
       nextUrl.pathname.startsWith('/dashboard') ||
+      nextUrl.pathname === '/sitemap.xml' ||
+      nextUrl.pathname === '/robots.txt' ||
       nextUrl.pathname.includes('.')) {
     return NextResponse.next();
   }
@@ -363,7 +365,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Excluir solo archivos estáticos y API
-    "/((?!_next|api|.*\\..*).*)"
+    // Excluir archivos estáticos, API, sitemap y robots
+    "/((?!_next|api|sitemap\\.xml|robots\\.txt|.*\\..*).*)"
   ]
 };

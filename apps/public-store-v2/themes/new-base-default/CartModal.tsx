@@ -1,13 +1,21 @@
 'use client';
 
+import { useState } from 'react';
 import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
+import { StoreBasicInfo } from '../../lib/store';
+import CheckoutModal from './CheckoutModal';
 
-export default function CartModal() {
+interface CartModalProps {
+    storeInfo?: StoreBasicInfo | null;
+}
+
+export default function CartModal({ storeInfo }: CartModalProps) {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
     const { t } = useStoreLanguage();
+    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     
     // Detectar si hay productos incompletos
     const hasIncompleteItems = state.items.some(item => item.incomplete);
@@ -76,8 +84,19 @@ export default function CartModal() {
     };
 
     const handleCheckout = () => {
-        // Por ahora solo cerrar el carrito
-        // TODO: Implementar checkout real
+        if (hasIncompleteItems) {
+            return; // No permitir checkout si hay productos incompletos
+        }
+        setIsCheckoutOpen(true);
+    };
+
+    const handleCheckoutClose = () => {
+        setIsCheckoutOpen(false);
+    };
+
+    const handleCheckoutSuccess = () => {
+        // Aquí se podría mostrar un mensaje de éxito
+        console.log('¡Pedido completado exitosamente!');
         closeCart();
     };
 
@@ -268,6 +287,14 @@ export default function CartModal() {
                     )}
                 </div>
             </div>
+
+            {/* Modal de checkout */}
+            <CheckoutModal 
+                isOpen={isCheckoutOpen}
+                onClose={handleCheckoutClose}
+                onSuccess={handleCheckoutSuccess}
+                storeInfo={storeInfo}
+            />
         </>
     );
 }

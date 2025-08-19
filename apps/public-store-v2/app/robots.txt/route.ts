@@ -23,7 +23,11 @@ Disallow: /
 # No sitemap - domain not configured
 `;
     return new Response(robotsTxt, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      status: 200,
+      headers: { 
+        'Content-Type': 'text/plain; charset=UTF-8',
+        'Cache-Control': 'public, max-age=3600'
+      }
     });
   }
   
@@ -46,8 +50,9 @@ Disallow: /dashboard/
 `;
 
   return new Response(robotsTxt, {
+    status: 200,
     headers: { 
-      'Content-Type': 'text/plain; charset=utf-8',
+      'Content-Type': 'text/plain; charset=UTF-8',
       'Cache-Control': 'public, max-age=3600'
     }
   });
