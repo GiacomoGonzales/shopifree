@@ -165,7 +165,7 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         canonical: canonicalUrl
     };
     
-    // 🚀 NOTA: Preconnect/DNS-prefetch se manejan en el layout raíz para evitar duplicación
+    // 🚀 NOTA: Preconnects se añaden directamente en el JSX del layout
     
     console.log('🎯 [Simple Mode] URLs sin prefijo para', subdomain, '- primaryLocale:', effectiveLocale);
 
@@ -233,7 +233,9 @@ export default async function StoreLocaleLayout({
     
     return (
         <>
-            {/* 🚀 CORREGIDO: Solo elementos que NO maneja generateMetadata() automáticamente */}
+            {/* 🚀 Preconnects críticos para Cloudinary - una sola vez */}
+            <link rel="preconnect" href="https://res.cloudinary.com" />
+            <link rel="dns-prefetch" href="https://res.cloudinary.com" />
             
             {/* Scripts de SEO y Analytics - estos no van en metadata */}
             <SEOScripts
