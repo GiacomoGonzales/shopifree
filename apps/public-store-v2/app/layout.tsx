@@ -10,6 +10,11 @@ export const metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html suppressHydrationWarning lang="es">
+            <head>
+                {/* 🚀 Preconnect críticos para rendimiento - una sola vez */}
+                <link rel="preconnect" href="https://res.cloudinary.com" />
+                <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+            </head>
             <body>
                 <CartProvider>
                     {children}

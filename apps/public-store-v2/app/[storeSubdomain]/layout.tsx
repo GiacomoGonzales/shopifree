@@ -84,9 +84,15 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         // ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009 y Google la ignora
         // keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
         
-        // 🚀 CORRECCIÓN SEO: Permitir indexación en la mayoría de casos
-        // Solo aplicar noindex si específicamente está configurado o en casos muy específicos
-        robots: isCanonicalVersion ? robots : (robots === 'noindex, nofollow' ? robots : 'index, follow'),
+        // 🚀 MEJORADO: Robots con directivas adicionales para mejor SEO
+        robots: {
+            index: isCanonicalVersion ? (robots?.includes('noindex') ? false : true) : (robots === 'noindex, nofollow' ? false : true),
+            follow: isCanonicalVersion ? (robots?.includes('nofollow') ? false : true) : (robots === 'noindex, nofollow' ? false : true),
+            // 🎯 Directivas adicionales recomendadas
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+            'max-video-preview': -1
+        },
         
         // Open Graph para redes sociales - Múltiples imágenes para diferentes plataformas
         // NOTA: No especificamos og:image:type para permitir que Cloudinary f_auto 
@@ -159,6 +165,8 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         canonical: canonicalUrl
     };
     
+    // 🚀 NOTA: Preconnect/DNS-prefetch se manejan en el layout raíz para evitar duplicación
+    
     console.log('🎯 [Simple Mode] URLs sin prefijo para', subdomain, '- primaryLocale:', effectiveLocale);
 
     // NOTA: Removemos meta name="sitemap" y meta robots con URLs
@@ -225,18 +233,9 @@ export default async function StoreLocaleLayout({
     
     return (
         <>
-            {/* Preconnect para recursos externos críticos */}
-            <link rel="preconnect" href="https://res.cloudinary.com" />
-            <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+            {/* 🚀 CORREGIDO: Solo elementos que NO maneja generateMetadata() automáticamente */}
             
-            {/* Script para ajustar el lang del HTML raíz */}
-            <script 
-                dangerouslySetInnerHTML={{
-                    __html: `document.documentElement.lang = '${effectiveLocale}';`
-                }}
-            />
-            
-            {/* Scripts de SEO y Analytics */}
+            {/* Scripts de SEO y Analytics - estos no van en metadata */}
             <SEOScripts
                 storeSubdomain={subdomain}
                 googleAnalytics={seoData?.googleAnalytics}
