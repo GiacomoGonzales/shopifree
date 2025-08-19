@@ -292,13 +292,19 @@ export async function middleware(req: NextRequest) {
       storeSubdomain = nextUrl.pathname.split('/')[2] || 'tiendaverde';
     }
     
+    // ✅ MEJORA: En desarrollo local, permitir rutas directas sin configuración compleja
+    console.log(`🔧 [Local Dev] Processing store: ${storeSubdomain}`);
+    
     // Obtener configuración real de Firestore incluso en desarrollo
     const storeConfig = await getStoreConfigCached(storeSubdomain);
     if (storeConfig) {
       const { primaryLocale, singleLocaleUrls } = storeConfig;
+      console.log(`📋 [Local Dev] Store config found:`, { primaryLocale, singleLocaleUrls });
       if (singleLocaleUrls) {
         return await handleSingleLocaleMode(req, storeSubdomain, primaryLocale);
       }
+    } else {
+      console.log(`⚠️ [Local Dev] No store config found for: ${storeSubdomain}, continuing...`);
     }
   }
   

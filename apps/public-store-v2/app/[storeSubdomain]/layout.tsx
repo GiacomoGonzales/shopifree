@@ -32,16 +32,32 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const headersList = headers();
     const currentHost = headersList.get('host') || 'localhost:3004';
     const currentUrl = `https://${currentHost}`;
-    const isCanonicalVersion = currentUrl === canonical.canonicalHost;
+    
+    // 🔥 CORRECCIÓN CRÍTICA: Mejorar detección de versión canónica
+    // Considerar canónica si:
+    // 1. Es exactamente el host canónico
+    // 2. Es desarrollo local
+    // 3. Es el mismo dominio sin protocolo (para single locale URLs)
+    const canonicalHostWithoutProtocol = canonical.canonicalHost.replace('https://', '').replace('http://', '');
+    const isCanonicalVersion = 
+        currentUrl === canonical.canonicalHost || 
+        currentHost === canonicalHostWithoutProtocol ||
+        (process.env.NODE_ENV === 'development' && currentHost.includes('localhost')) ||
+        (process.env.NODE_ENV === 'development' && currentHost.includes('127.0.0.1'));
     
     console.log('🔍 [Layout] Store resuelto:', { 
         subdomain,
         canonicalHost: canonical.canonicalHost, 
         isCustomDomain: canonical.isCustomDomain,
+        currentHost,
+        currentUrl,
+        canonicalHostWithoutProtocol,
         isCanonicalVersion,
         canonicalUrl,
         singleLocaleUrls,
-        effectiveLocale
+        effectiveLocale,
+        robotsConfig: robots,
+        finalRobots: isCanonicalVersion ? robots : (robots === 'noindex, nofollow' ? robots : 'index, follow')
     });
     
     // Usar datos SEO personalizados o fallbacks
@@ -67,8 +83,9 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         title,
         description,
         keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
-        // 🔥 NOINDEX SI NO ES VERSION CANÓNICA
-        robots: isCanonicalVersion ? robots : 'noindex, nofollow',
+        // 🚀 CORRECCIÓN SEO: Permitir indexación en la mayoría de casos
+        // Solo aplicar noindex si específicamente está configurado o en casos muy específicos
+        robots: isCanonicalVersion ? robots : (robots === 'noindex, nofollow' ? robots : 'index, follow'),
         
         // Open Graph para redes sociales - Múltiples imágenes para diferentes plataformas
         openGraph: {
@@ -123,12 +140,14 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         extractedToken: googleToken
     });
     
-    // TEMPORAL: Mostrar siempre el token si existe y es válido (para debug)
+    // ✅ MEJORADO: Agregar Google Search Console verification siempre que sea válido
     if (isValidGoogleToken(googleToken)) {
         metadata.verification = {
             google: googleToken
         };
         console.log('✅ [GSC] Token añadido al metadata:', googleToken);
+    } else if (googleToken) {
+        console.warn('⚠️ [GSC] Token presente pero inválido:', googleToken);
     }
     
     // 🚀 NUEVA LÓGICA: Configurar canonical URL y hreflang según singleLocaleUrls
