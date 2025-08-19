@@ -50,21 +50,34 @@ function transformToPublicProduct(raw: any): PublicProduct {
 
 export async function getStoreProducts(storeId: string): Promise<PublicProduct[]> {
 	try {
+		console.log(`🔍 [getStoreProducts] Obteniendo productos para storeId: ${storeId}`);
 		const db = getFirebaseDb();
-		if (!db) return [];
+		if (!db) {
+			console.warn(`❌ [getStoreProducts] No hay conexión a Firebase`);
+			return [];
+		}
 		const ref = collection(db, "stores", storeId, "products");
 		let snap;
 		try {
 			snap = await getDocs(query(ref, where("status", "==", "active")));
+			console.log(`📊 [getStoreProducts] Query por status=active devolvió: ${snap.size} productos`);
 		} catch {
 			snap = await getDocs(ref);
+			console.log(`📊 [getStoreProducts] Query general devolvió: ${snap.size} productos`);
 		}
 		const items: PublicProduct[] = [];
 		snap.forEach((doc) => {
 			const data = { id: doc.id, ...doc.data() } as any;
 			const p = transformToPublicProduct(data);
-			if (p.status === "active") items.push(p);
+			console.log(`📦 [getStoreProducts] Producto procesado: ${p.name} - Status: ${p.status} - Slug: ${p.slug || 'NO_SLUG'}`);
+			if (p.status === "active") {
+				items.push(p);
+				console.log(`✅ [getStoreProducts] Producto activo añadido: ${p.name}`);
+			} else {
+				console.log(`⚠️ [getStoreProducts] Producto no activo omitido: ${p.name} (status: ${p.status})`);
+			}
 		});
+		console.log(`🎯 [getStoreProducts] Total productos activos devueltos: ${items.length}`);
 		return items;
 	} catch (e) {
 		console.warn("[public-store-v2] getStoreProducts fallo", e);

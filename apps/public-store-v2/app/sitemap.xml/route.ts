@@ -106,7 +106,9 @@ async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLo
       console.log('🛍️ [Sitemap Single] Productos obtenidos:', products?.length || 0);
       
       if (products && products.length > 0) {
+        let productsAdded = 0;
         for (const product of products) {
+          console.log(`🔍 [Sitemap] Producto: ${product.name} - Status: ${product.status} - Slug: ${product.slug || 'NO_SLUG'}`);
           if (product.slug) {
             urls += `
   <url>
@@ -114,8 +116,12 @@ async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLo
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>`;
+            productsAdded++;
           }
         }
+        console.log(`✅ [Sitemap Single] Productos añadidos al sitemap: ${productsAdded}`);
+      } else {
+        console.log('⚠️ [Sitemap Single] No hay productos para mostrar');
       }
     }
   } catch (error) {
@@ -185,7 +191,9 @@ async function generateMultiLocaleSitemap(canonical: CanonicalResult): Promise<s
       console.log('🛍️ [Sitemap Multi] Productos obtenidos:', products?.length || 0);
       
       if (products && products.length > 0) {
+        let productsAdded = 0;
         for (const product of products) {
+          console.log(`🔍 [Sitemap] Producto: ${product.name} - Status: ${product.status} - Slug: ${product.slug || 'NO_SLUG'}`);
           if (product.slug) {
             for (const locale of SUPPORTED_LOCALES) {
               urls += `
@@ -198,8 +206,12 @@ async function generateMultiLocaleSitemap(canonical: CanonicalResult): Promise<s
     <priority>0.8</priority>
   </url>`;
             }
+            productsAdded++;
           }
         }
+        console.log(`✅ [Sitemap Multi] Productos añadidos al sitemap: ${productsAdded}`);
+      } else {
+        console.log('⚠️ [Sitemap Multi] No hay productos para mostrar');
       }
     }
   } catch (error) {
