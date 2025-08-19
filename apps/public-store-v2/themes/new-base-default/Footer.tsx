@@ -2,6 +2,7 @@
 
 import { StoreBasicInfo } from "../../lib/store";
 import { Category } from "../../lib/categories";
+import { useStoreLanguage } from "../../lib/store-language-context";
 
 type Props = {
     storeInfo: StoreBasicInfo | null;
@@ -12,6 +13,7 @@ type Props = {
 export default function Footer({ storeInfo, categories, storeSubdomain }: Props) {
     const currentYear = new Date().getFullYear();
     const topCategories = Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : [];
+    const { t } = useStoreLanguage();
 
     return (
         <footer className="nbd-footer">
@@ -116,16 +118,16 @@ export default function Footer({ storeInfo, categories, storeSubdomain }: Props)
 
                     {/* Navegación */}
                     <div className="nbd-footer-section">
-                        <h3 className="nbd-footer-title">Navegación</h3>
+                        <h3 className="nbd-footer-title">{t('navigation')}</h3>
                         <ul className="nbd-footer-links">
                             <li>
                                 <a href="#categorias" className="nbd-footer-link">
-                                    Categorías
+                                    {t('categories')}
                                 </a>
                             </li>
                             <li>
                                 <a href="#productos" className="nbd-footer-link">
-                                    Productos
+                                    {t('products')}
                                 </a>
                             </li>
                             {topCategories.slice(0, 4).map((category) => (
@@ -143,7 +145,7 @@ export default function Footer({ storeInfo, categories, storeSubdomain }: Props)
 
                     {/* Contacto */}
                     <div className="nbd-footer-section">
-                        <h3 className="nbd-footer-title">Contacto</h3>
+                        <h3 className="nbd-footer-title">{t('contact')}</h3>
                         <div className="nbd-contact-info">
                             {storeInfo?.phone && (
                                 <div className="nbd-contact-item">
@@ -176,26 +178,26 @@ export default function Footer({ storeInfo, categories, storeSubdomain }: Props)
 
                     {/* Información adicional */}
                     <div className="nbd-footer-section">
-                        <h3 className="nbd-footer-title">Información</h3>
+                        <h3 className="nbd-footer-title">{t('information')}</h3>
                         <ul className="nbd-footer-links">
                             <li>
                                 <a href="#sobre-nosotros" className="nbd-footer-link">
-                                    Sobre nosotros
+                                    {t('aboutUs')}
                                 </a>
                             </li>
                             <li>
                                 <a href="#politicas" className="nbd-footer-link">
-                                    Políticas de privacidad
+                                    {t('privacyPolicy')}
                                 </a>
                             </li>
                             <li>
                                 <a href="#terminos" className="nbd-footer-link">
-                                    Términos y condiciones
+                                    {t('termsConditions')}
                                 </a>
                             </li>
                             <li>
                                 <a href="#envios" className="nbd-footer-link">
-                                    Envíos y devoluciones
+                                    {t('shippingReturns')}
                                 </a>
                             </li>
                         </ul>
@@ -206,10 +208,10 @@ export default function Footer({ storeInfo, categories, storeSubdomain }: Props)
                 <div className="nbd-footer-bottom">
                     <div className="nbd-footer-bottom-content">
                         <p className="nbd-footer-copyright">
-                            © {currentYear} {storeInfo?.storeName || 'Shopifree'}. Todos los derechos reservados.
+                            © {currentYear} {storeInfo?.storeName || 'Shopifree'}. {t('allRightsReserved')}.
                         </p>
                         <div className="nbd-footer-credits">
-                            <span>Powered by</span>
+                            <span>{t('poweredBy')}</span>
                             <a 
                                 href="https://shopifree.app" 
                                 target="_blank" 

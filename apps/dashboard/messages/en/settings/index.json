@@ -114,7 +114,8 @@
         "label": "Language",
         "hint": "This will be the default language for common store elements like buttons, labels and system messages",
         "spanish": "Spanish",
-        "english": "English"
+        "english": "English",
+        "portuguese": "Portuguese"
       }
     },
     "customDomain": {

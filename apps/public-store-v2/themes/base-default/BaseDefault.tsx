@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
 import "./base-default.css";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
@@ -16,7 +15,16 @@ type Props = {
 };
 
 export default function BaseDefault({ storeSubdomain }: Props) {
-    const t = useTranslations('common');
+    // 🚀 Textos estáticos para UI sin internacionalización en cliente
+    const t = (key: string) => {
+        const texts: Record<string, string> = {
+            'common.loading': 'Cargando…',
+            'common.all': 'Todos',
+            'common.offers': 'Ver Ofertas',
+            'common.catalog': 'Explorar Catálogo'
+        };
+        return texts[key] || key;
+    };
 
     const [storeId, setStoreId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);

@@ -173,7 +173,7 @@ export default function SEOScripts({
           key={`structured-data-${index}`}
           id={`structured-data-${index}`}
           type="application/ld+json"
-          strategy="beforeInteractive"
+          strategy="worker"
         >
           {JSON.stringify(schema)}
         </Script>

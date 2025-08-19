@@ -1,0 +1,74 @@
+{
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Configurações da loja",
+    "description": "Configure as configurações gerais da sua loja, informações de contato e preferências.",
+    "tabs": {
+      "basic": "Geral",
+      "advanced": "Configuração Avançada"
+    },
+    "sections": {
+      "info": "Informações da loja",
+      "contact": "Contato",
+      "sales": "Vendas",
+      "advanced": "Configuração Avançada"
+    },
+    "advanced": {
+      "actions": {
+        "saved": "Configurações salvas",
+        "error": "Erro ao salvar",
+        "saving": "Salvando..."
+      },
+      "tabs": {
+        "checkout": "Método de Checkout",
+        "payments": "Gateway de Pagamento",
+        "shipping": "Envios",
+        "seo": "SEO"
+      },
+      "checkout": {
+        "title": "Método de Checkout",
+        "description": "Configure como receber pedidos",
+        "whatsappCheckout": "Venda por WhatsApp (Plano Free)",
+        "traditionalCheckout": "Checkout tradicional (Planos Premium/Pro)",
+        "language": {
+          "title": "Idioma da loja",
+          "description": "Selecione o idioma padrão para elementos comuns da loja",
+          "label": "Idioma",
+          "hint": "Este será o idioma padrão para elementos comuns da sua loja como botões, etiquetas e mensagens do sistema",
+          "spanish": "Espanhol",
+          "english": "Inglês",
+          "portuguese": "Português"
+        }
+      },
+      "customDomain": {
+        "title": "Conectar domínio personalizado",
+        "description": "Use seu próprio domínio para sua loja. Exemplo: minha-loja.com",
+        "domainLabel": "Domínio",
+        "placeholder": "minha-loja.com",
+        "hint": "Digite seu domínio personalizado sem 'https://' ou 'www'",
+        "statusTitle": "Status do domínio",
+        "status": "Status",
+        "ssl": "SSL",
+        "sslActive": "ativo",
+        "sslPending": "pendente",
+        "verified": "Verificado",
+        "yes": "sim",
+        "no": "não",
+        "lastChecked": "Última verificação",
+        "save": "Salvar domínio",
+        "saving": "Salvando…",
+        "verifying": "Verificando…",
+        "verifyNow": "Verificar agora"
+      },
+      "payments": {
+        "title": "Gateway de Pagamento",
+        "description": "Configure seu método de pagamento",
+        "provider": "Provedor",
+        "selectProvider": "Selecione um provedor",
+        "culqi": "Culqi",
+        "mercadopago": "MercadoPago",
+        "comingSoon": "Em breve"
+      }
+    }
+  }
+}

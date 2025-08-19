@@ -58,7 +58,7 @@ export default function GeneralSettingsAdvancedPage() {
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [language, setLanguage] = useState<'es' | 'en'>('es')
+  const [language, setLanguage] = useState<'es' | 'en' | 'pt'>('es')
   const [message, setMessage] = useState<string | null>(null)
 
   // Estado para dominio personalizado
@@ -73,7 +73,7 @@ export default function GeneralSettingsAdvancedPage() {
       try {
         const s = await getUserStore(user.uid)
         setStore(s)
-        const current = (s?.advanced?.language as 'es' | 'en' | undefined) || 'es'
+        const current = (s?.advanced?.language as 'es' | 'en' | 'pt' | undefined) || 'es'
         setLanguage(current)
         // Cargar domain settings desde subcolección: stores/{storeId}/settings/domain
         if (s?.id) {
@@ -242,12 +242,13 @@ export default function GeneralSettingsAdvancedPage() {
                   </label>
                   <select
                     value={language}
-                    onChange={(e) => setLanguage(e.target.value as 'es' | 'en')}
+                    onChange={(e) => setLanguage(e.target.value as 'es' | 'en' | 'pt')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-600 focus:border-gray-600 text-sm bg-white"
                     disabled={saving || loading}
                   >
                     <option value="es">{tAdv('checkout.language.spanish')}</option>
                     <option value="en">{tAdv('checkout.language.english')}</option>
+                    <option value="pt">{tAdv('checkout.language.portuguese')}</option>
                   </select>
                   <p className="mt-2 text-xs text-gray-500">
                     {tAdv('checkout.language.hint')}

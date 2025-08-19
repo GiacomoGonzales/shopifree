@@ -115,7 +115,8 @@
         "label": "Idioma",
         "hint": "Este será el idioma predeterminado para elementos comunes de tu tienda como botones, etiquetas y mensajes del sistema",
         "spanish": "Español",
-        "english": "Inglés"
+        "english": "Inglés",
+        "portuguese": "Portugués"
       }
     },
     "customDomain": {

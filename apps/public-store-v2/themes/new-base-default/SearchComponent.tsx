@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { PublicProduct } from '../../lib/products';
 import { StoreBasicInfo } from '../../lib/store';
 import { formatPrice } from '../../lib/currency';
+import { useStoreLanguage } from '../../lib/store-language-context';
 
 interface SearchComponentProps {
     products: PublicProduct[];
@@ -25,6 +26,7 @@ export default function SearchComponent({
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useStoreLanguage();
 
     // Detectar si es móvil
     useEffect(() => {
@@ -124,7 +126,7 @@ export default function SearchComponent({
                     <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder="Buscar productos..."
+                        placeholder={t('searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="nbd-search-input"
@@ -150,7 +152,7 @@ export default function SearchComponent({
                     className="nbd-search-close"
                     aria-label="Cerrar búsqueda"
                 >
-                    {isMobile ? 'Cancelar' : (
+                    {isMobile ? t('searchCancel') : (
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                         </svg>
@@ -166,8 +168,8 @@ export default function SearchComponent({
                             <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
                             <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                         </svg>
-                        <h3>Buscar productos</h3>
-                        <p>Encuentra lo que necesitas escribiendo el nombre del producto, marca o categoría.</p>
+                        <h3>{t('search')}</h3>
+                        <p>{t('searchDescription')}</p>
                     </div>
                 ) : searchResults.length === 0 ? (
                     <div className="nbd-search-empty">
@@ -175,14 +177,14 @@ export default function SearchComponent({
                             <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
                             <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                         </svg>
-                        <h3>Sin resultados</h3>
-                        <p>No encontramos productos que coincidan con "{searchQuery}".</p>
-                        <p className="nbd-search-suggestion">Intenta con términos más generales o revisa la ortografía.</p>
+                        <h3>{t('searchNoResultsTitle')}</h3>
+                        <p>{t('searchNoResultsText')} "{searchQuery}".</p>
+                        <p className="nbd-search-suggestion">{t('searchNoResultsTip')}</p>
                     </div>
                 ) : (
                     <>
                         <div className="nbd-search-results-header">
-                            <h3>Resultados ({searchResults.length})</h3>
+                            <h3>{t('searchResultsCount')} ({searchResults.length})</h3>
                         </div>
                         <div className="nbd-search-results">
                             {searchResults.map((product) => (

@@ -6,6 +6,7 @@ import { Category } from "../../lib/categories";
 import { toCloudinarySquare } from "../../lib/images";
 import { useCart } from "../../lib/cart-context";
 import { PublicProduct } from "../../lib/products";
+import { useStoreLanguage } from "../../lib/store-language-context";
 import SearchComponent from "./SearchComponent";
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
 export default function Header({ storeInfo, categories, storeSubdomain, products }: Props) {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, openCart } = useCart();
+    const { t } = useStoreLanguage();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
 
@@ -27,14 +29,16 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
-    const locale = useMemo(() => {
-        try {
-            const parts = window.location.pathname.split("/").filter(Boolean);
-            return parts[0] || "es";
-        } catch {
-            return "es";
-        }
-    }, []);
+    // 🚀 NOTA: locale ya no se extrae de URL ya que no hay prefijo de idioma
+    // El idioma se maneja a nivel SSR por configuración de tienda
+    // const locale = useMemo(() => {
+    //     try {
+    //         const parts = window.location.pathname.split("/").filter(Boolean);
+    //         return parts[0] || "es";
+    //     } catch {
+    //         return "es";
+    //     }
+    // }, []);
 
     const topCategories = useMemo(() => 
         (Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : []), 
@@ -48,14 +52,15 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
         return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
     };
     
+    // 🚀 NUEVA FUNCIÓN: URLs sin prefijo de idioma
     const getSubdomainUrl = (path: string) => {
         const isCustom = isCustomDomain();
         if (isCustom) {
-            // En dominio personalizado: NO incluir subdominio
-            return `/${locale}${path}`;
+            // En dominio personalizado: URL directa sin subdominio ni locale
+            return path.startsWith('/') ? path : `/${path}`;
         } else {
-            // En dominio de plataforma: incluir subdominio
-            return `/${locale}/${storeSubdomain}${path}`;
+            // En dominio de plataforma: incluir subdominio sin locale
+            return `/${storeSubdomain}${path.startsWith('/') ? path : `/${path}`}`;
         }
     };
 
@@ -88,7 +93,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                     {/* Navegación principal - Desktop */}
                     <nav className="nbd-nav">
                         <a href="#productos" className="nbd-nav-link">
-                            Productos
+                            {t('products')}
                         </a>
                         {topCategories.slice(0, 4).map(category => (
                             <a
@@ -108,7 +113,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                         <button 
                             className="nbd-action-btn" 
                             onClick={() => setSearchOpen(true)}
-                            aria-label="Buscar productos"
+                            aria-label={t('search')}
                         >
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
@@ -120,7 +125,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                         <button
                             onClick={openCart}
                             className="nbd-cart-btn"
-                            aria-label={`Carrito (${state.items.length} productos)`}
+                            aria-label={`${t('cart')} (${state.items.length} ${t('products')})`}
                         >
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                                 <path d="M6 2L3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6l-3-4H6z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -176,7 +181,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                                     <path d="M20 7L12 3L4 7L12 11L20 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M4 7V17L12 21L20 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                Productos
+                                {t('products')}
                             </a>
                             
                             {topCategories.map(category => (

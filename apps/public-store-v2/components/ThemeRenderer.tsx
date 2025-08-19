@@ -6,9 +6,7 @@ import dynamic from "next/dynamic";
 import SimpleLoadingSpinner from "./SimpleLoadingSpinner";
 
 // Importación dinámica de temas disponibles
-// TODO: Agregar más temas aquí conforme se vayan creando
 const NewBaseDefault = dynamic(() => import("../themes/new-base-default/NewBaseDefault"), { 
-    ssr: false,
     loading: () => <SimpleLoadingSpinner />
 });
 
@@ -57,13 +55,23 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
     
     switch (themeToRender) {
         case 'new-base-default':
-            return <NewBaseDefault storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
+            return (
+                <NewBaseDefault 
+                    storeSubdomain={storeSubdomain} 
+                    categorySlug={categorySlug}
+                />
+            );
         // TODO: Agregar más casos aquí conforme se creen nuevos temas
         // case 'otro-tema':
         //     return <OtroTema storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
         default:
             // Por ahora, solo tenemos new-base-default disponible
             console.log(`Using new-base-default theme (requested: "${themeToRender}")`);
-            return <NewBaseDefault storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
+            return (
+                <NewBaseDefault 
+                    storeSubdomain={storeSubdomain} 
+                    categorySlug={categorySlug}
+                />
+            );
     }
 }

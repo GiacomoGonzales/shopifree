@@ -3,9 +3,11 @@
 import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
+import { useStoreLanguage } from '../../lib/store-language-context';
 
 export default function CartModal() {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
+    const { t } = useStoreLanguage();
     
     // Detectar si hay productos incompletos
     const hasIncompleteItems = state.items.some(item => item.incomplete);
@@ -15,35 +17,33 @@ export default function CartModal() {
         return item.missingVariants || ['opciones'];
     };
 
-    // Función para construir URLs correctamente según el tipo de dominio
+    // 🚀 NUEVA FUNCIÓN: Construir URLs de producto sin prefijo de idioma
     const buildProductUrl = (slug: string) => {
         if (typeof window === 'undefined') return `/producto/${slug}`;
         
         const pathname = window.location.pathname;
-        const locale = pathname.split('/')[1] || 'es';
         
         // Detectar si estamos en un dominio personalizado
         const host = window.location.hostname;
         const isCustomDomain = !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
         
         if (isCustomDomain) {
-            // En dominio personalizado: NO incluir subdominio
-            return `/${locale}/producto/${slug}`;
+            // En dominio personalizado: URL directa sin subdominio ni locale
+            return `/producto/${slug}`;
         } else {
-            // En dominio de plataforma: incluir subdominio
-            // Extraer subdominio del pathname actual
+            // En dominio de plataforma: incluir subdominio sin locale
+            // Extraer subdominio del pathname actual (ahora está en posición [1])
             const pathParts = pathname.split('/');
-            const storeSubdomain = pathParts[2]; // [0]='', [1]=locale, [2]=subdomain
-            return `/${locale}/${storeSubdomain}/producto/${slug}`;
+            const storeSubdomain = pathParts[1]; // [0]='', [1]=subdomain
+            return `/${storeSubdomain}/producto/${slug}`;
         }
     };
 
-    // Función para ir al home/página principal
+    // 🚀 NUEVA FUNCIÓN: Ir al home sin prefijo de idioma
     const goToHome = () => {
         if (typeof window === 'undefined') return;
         
         const pathname = window.location.pathname;
-        const locale = pathname.split('/')[1] || 'es';
         
         // Detectar si estamos en un dominio personalizado
         const host = window.location.hostname;
@@ -51,13 +51,13 @@ export default function CartModal() {
         
         let homeUrl;
         if (isCustomDomain) {
-            // En dominio personalizado: solo locale
-            homeUrl = `/${locale}`;
+            // En dominio personalizado: root
+            homeUrl = '/';
         } else {
-            // En dominio de plataforma: incluir subdominio
+            // En dominio de plataforma: incluir subdominio sin locale
             const pathParts = pathname.split('/');
-            const storeSubdomain = pathParts[2]; // [0]='', [1]=locale, [2]=subdomain
-            homeUrl = `/${locale}/${storeSubdomain}`;
+            const storeSubdomain = pathParts[1]; // [0]='', [1]=subdomain
+            homeUrl = `/${storeSubdomain}`;
         }
         
         // Cerrar carrito y navegar
@@ -91,7 +91,7 @@ export default function CartModal() {
                 {/* Header del carrito */}
                 <div className="nbd-cart-header">
                     <h2 className="nbd-cart-title">
-                        Carrito de compras
+                        {t('cart')}
                         {state.totalItems > 0 && (
                             <span className="nbd-cart-count">({state.totalItems})</span>
                         )}
@@ -118,8 +118,8 @@ export default function CartModal() {
                                     <path d="M16 10c0 2.21-1.79 4-4 4s-4-1.79-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </div>
-                            <h3>Tu carrito está vacío</h3>
-                            <p>Agrega productos para comenzar tu compra.</p>
+                            <h3>{t('cartEmpty')}</h3>
+                            <p>{t('addProducts')}</p>
                             <button 
                                 onClick={closeCart}
                                 className="nbd-btn nbd-btn--primary"

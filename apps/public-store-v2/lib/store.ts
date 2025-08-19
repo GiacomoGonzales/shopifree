@@ -1,5 +1,6 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirebaseDb } from "./firebase";
+import { doc, getDoc } from 'firebase/firestore';
 
 export async function getStoreIdBySubdomain(subdomain: string): Promise<string | null> {
 	try {
@@ -29,7 +30,7 @@ export type StoreBasicInfo = {
     emailStore?: string;
     phone?: string;
     address?: string;
-    language?: 'es' | 'en';
+    language?: 'es' | 'en' | 'pt';
     theme?: string;
     socialMedia?: {
         instagram?: string;
@@ -96,7 +97,9 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             emailStore: data.emailStore || data.email || undefined,
             phone: data.phone || data.phoneNumber || undefined,
             address: data.address || data.direction || data.direccion || undefined,
-            language: (data?.advanced?.language === 'en' ? 'en' : (data?.advanced?.language === 'es' ? 'es' : undefined)),
+            language: (data?.advanced?.language === 'en' ? 'en' : 
+                    data?.advanced?.language === 'pt' ? 'pt' : 
+                    data?.advanced?.language === 'es' ? 'es' : undefined),
             theme: data.theme || 'new-base-default',
             socialMedia: socialFromGroup,
         };
@@ -104,6 +107,105 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
 		console.warn("[public-store-v2] getStoreBasicInfo fallo", e);
 		return null;
 	}
+}
+
+/**
+ * Helper functions for single locale URLs feature
+ */
+
+export type ValidLocale = 'es' | 'en' | 'pt';
+
+/**
+ * Gets the primary locale for a store from its configuration
+ * Falls back to 'es' if not configured
+ */
+export function getPrimaryLocale(storeData: any): ValidLocale {
+    // Check advanced.language first, then seo.language as fallback
+    const language = storeData?.advanced?.language || storeData?.seo?.language;
+    
+    // Normalize and validate
+    if (language === 'en') return 'en';
+    if (language === 'pt') return 'pt';
+    return 'es'; // Default fallback
+}
+
+/**
+ * Checks if a store has the single locale URLs feature enabled
+ */
+export function hasSingleLocaleUrls(storeData: any): boolean {
+    return Boolean(storeData?.advanced?.singleLocaleUrls);
+}
+
+/**
+ * Get store configuration for single locale feature
+ * Used in middleware and SSR functions
+ */
+export async function getStoreLocaleConfig(storeId: string): Promise<{
+    primaryLocale: ValidLocale;
+    singleLocaleUrls: boolean;
+} | null> {
+    // 🧪 MODO DESARROLLO: Solo usar mock si no podemos conectar a Firestore
+    if (process.env.NODE_ENV === 'development') {
+        // Intentar conectar a Firestore primero
+        try {
+            const db = getFirebaseDb();
+            if (db && storeId && storeId !== 'mock-tiendaverde' && storeId !== 'mock-english-store') {
+                // Intentar leer configuración real de Firestore
+                const docRef = doc(db, 'stores', storeId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const language = data?.advanced?.language || data?.seo?.language || 'es';
+                    const singleLocaleUrls = data?.advanced?.singleLocaleUrls || false;
+                    
+                    console.log(`🔗 [Firestore] Store ${storeId}: language=${language}, singleLocaleUrls=${singleLocaleUrls}`);
+                    
+                    return {
+                        primaryLocale: language as ValidLocale,
+                        singleLocaleUrls
+                    };
+                }
+            }
+        } catch (error) {
+            console.log(`⚠️ [Firestore] No se pudo conectar, usando mock: ${error}`);
+        }
+        
+        // Fallback a mock solo si Firestore falla
+        if (storeId === 'mock-tiendaverde') {
+            return {
+                primaryLocale: 'es',
+                singleLocaleUrls: true
+            };
+        }
+        if (storeId === 'mock-english-store') {
+            return {
+                primaryLocale: 'en',
+                singleLocaleUrls: true
+            };
+        }
+    }
+
+    try {
+        const db = getFirebaseDb();
+        if (!db) return null;
+        
+        const { doc, getDoc } = await import("firebase/firestore");
+        const ref = doc(db, "stores", storeId);
+        const snap = await getDoc(ref);
+        
+        if (!snap.exists()) return null;
+        
+        const data = snap.data();
+        
+        return {
+            primaryLocale: getPrimaryLocale(data),
+            singleLocaleUrls: hasSingleLocaleUrls(data)
+        };
+    } catch (e) {
+        console.warn("[public-store-v2] getStoreLocaleConfig fallo", e);
+        return null;
+    }
 }
 
 

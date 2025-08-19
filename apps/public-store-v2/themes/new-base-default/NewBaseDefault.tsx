@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
 import "./new-base-default.css";
 import "./loading-spinner.css";
 import LoadingSpinner from "./LoadingSpinner";
@@ -13,6 +12,7 @@ import { getStoreFilters, Filter } from "../../lib/filters";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
 import { useCart } from "../../lib/cart-context";
+import { useStoreLanguage } from "../../lib/store-language-context";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
@@ -20,11 +20,104 @@ import CartModal from "./CartModal";
 type Props = {
     storeSubdomain: string;
     categorySlug?: string;
+    effectiveLocale: string;
 };
 
-export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) {
-    const t = useTranslations('common');
+export default function NewBaseDefault({ storeSubdomain, categorySlug, effectiveLocale }: Props) {
+    // 🌐 Usar textos dinámicos según el idioma configurado en la tienda
+    const { t, language } = useStoreLanguage();
     const { addItem, openCart } = useCart();
+    
+    // 🆕 Textos adicionales que faltan - Helper rápido
+    const additionalText = (key: string) => {
+        const texts: Record<string, Record<string, string>> = {
+            es: {
+                'newsletterTitle': 'Mantente al día con nuestras ofertas',
+                'newsletterDescription': 'Suscríbete a nuestro newsletter y recibe las últimas novedades, ofertas exclusivas y descuentos especiales directamente en tu correo.',
+                'emailPlaceholder': 'tu@email.com',
+                'subscribed': '¡Suscrito!',
+                'privacyNotice': 'Al suscribirte, aceptas recibir emails promocionales. Puedes darte de baja en cualquier momento.',
+                'loadMore': 'Cargar más productos',
+                'showing': 'Mostrando',
+                'of': 'de',
+                'products': 'productos',
+                'product': 'producto',
+                'offer': 'Oferta',
+                'ourBrands': 'Nuestras marcas',
+                'brandSubtitle': 'Trabajamos con las mejores marcas para ofrecerte calidad garantizada',
+                'noImage': 'Sin imagen',
+                'clearFilters': 'Limpiar filtros',
+                'apply': 'Aplicar',
+                'noFiltersAvailable': 'No hay filtros disponibles',
+                'filtersConfigured': 'Los filtros se configuran desde el panel de administración.',
+                'noProductsCategory': 'No hay productos en esta categoría',
+                'exploreOther': 'Explora otras categorías o vuelve más tarde',
+                'newest': 'Más recientes',
+                'oldest': 'Más antiguos',
+                'priceLowHigh': 'Precio: menor a mayor',
+                'priceHighLow': 'Precio: mayor a menor',
+                'nameAZ': 'Nombre: A-Z',
+                'nameZA': 'Nombre: Z-A'
+            },
+            en: {
+                'newsletterTitle': 'Stay updated with our offers',
+                'newsletterDescription': 'Subscribe to our newsletter and receive the latest news, exclusive offers and special discounts directly in your email.',
+                'emailPlaceholder': 'your@email.com',
+                'subscribed': 'Subscribed!',
+                'privacyNotice': 'By subscribing, you agree to receive promotional emails. You can unsubscribe at any time.',
+                'loadMore': 'Load more products',
+                'showing': 'Showing',
+                'of': 'of',
+                'products': 'products',
+                'product': 'product',
+                'offer': 'Offer',
+                'ourBrands': 'Our brands',
+                'brandSubtitle': 'We work with the best brands to offer you guaranteed quality',
+                'noImage': 'No image',
+                'clearFilters': 'Clear filters',
+                'apply': 'Apply',
+                'noFiltersAvailable': 'No filters available',
+                'filtersConfigured': 'Filters are configured from the admin panel.',
+                'noProductsCategory': 'No products in this category',
+                'exploreOther': 'Explore other categories or come back later',
+                'newest': 'Most recent',
+                'oldest': 'Oldest',
+                'priceLowHigh': 'Price: low to high',
+                'priceHighLow': 'Price: high to low',
+                'nameAZ': 'Name: A-Z',
+                'nameZA': 'Name: Z-A'
+            },
+            pt: {
+                'newsletterTitle': 'Mantenha-se atualizado com nossas ofertas',
+                'newsletterDescription': 'Subscreva a nossa newsletter e receba as últimas novidades, ofertas exclusivas e descontos especiais diretamente no seu email.',
+                'emailPlaceholder': 'seu@email.com',
+                'subscribed': 'Subscrito!',
+                'privacyNotice': 'Ao subscrever, aceita receber emails promocionais. Pode cancelar a subscrição a qualquer momento.',
+                'loadMore': 'Carregar mais produtos',
+                'showing': 'Mostrando',
+                'of': 'de',
+                'products': 'produtos',
+                'product': 'produto',
+                'offer': 'Oferta',
+                'ourBrands': 'Nossas marcas',
+                'brandSubtitle': 'Trabalhamos com as melhores marcas para oferecer qualidade garantida',
+                'noImage': 'Sem imagem',
+                'clearFilters': 'Limpar filtros',
+                'apply': 'Aplicar',
+                'noFiltersAvailable': 'Nenhum filtro disponível',
+                'filtersConfigured': 'Os filtros são configurados no painel de administração.',
+                'noProductsCategory': 'Nenhum produto nesta categoria',
+                'exploreOther': 'Explore outras categorias ou volte mais tarde',
+                'newest': 'Mais recentes',
+                'oldest': 'Mais antigos',
+                'priceLowHigh': 'Preço: menor a maior',
+                'priceHighLow': 'Preço: maior a menor',
+                'nameAZ': 'Nome: A-Z',
+                'nameZA': 'Nome: Z-A'
+            }
+        };
+        return texts[language]?.[key] || texts['es']?.[key] || key;
+    };
     
     // Función para detectar si estamos en un dominio personalizado
     const isCustomDomain = () => {
@@ -33,19 +126,18 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
         return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
     };
     
-    // Función para construir URLs correctamente según el tipo de dominio
+    // 🚀 NUEVA FUNCIÓN: Construir URLs sin prefijo de idioma (single locale mode)
     const buildUrl = (path: string) => {
         if (typeof window === 'undefined') return path;
         
-        const locale = window.location.pathname.split('/')[1] || 'es';
         const isCustom = isCustomDomain();
         
         if (isCustom) {
-            // En dominio personalizado: NO incluir subdominio
-            return `/${locale}${path}`;
+            // En dominio personalizado: URL directa sin subdominio ni locale
+            return path.startsWith('/') ? path : `/${path}`;
         } else {
-            // En dominio de plataforma: incluir subdominio
-            return `/${locale}/${storeSubdomain}${path}`;
+            // En dominio de plataforma: incluir subdominio sin locale
+            return `/${storeSubdomain}${path.startsWith('/') ? path : `/${path}`}`;
         }
     };
     
@@ -311,14 +403,14 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
     };
 
     // Opciones de ordenamiento
-    const sortOptions = [
-        { value: 'newest', label: 'Más recientes' },
-        { value: 'oldest', label: 'Más antiguos' },
-        { value: 'price-low', label: 'Precio: menor a mayor' },
-        { value: 'price-high', label: 'Precio: mayor a menor' },
-        { value: 'name-asc', label: 'Nombre: A-Z' },
-        { value: 'name-desc', label: 'Nombre: Z-A' }
-    ] as const;
+    const sortOptions = useMemo(() => [
+        { value: 'newest', label: additionalText('newest') },
+        { value: 'oldest', label: additionalText('oldest') },
+        { value: 'price-low', label: additionalText('priceLowHigh') },
+        { value: 'price-high', label: additionalText('priceHighLow') },
+        { value: 'name-asc', label: additionalText('nameAZ') },
+        { value: 'name-desc', label: additionalText('nameZA') }
+    ] as const, [language]);
 
     // Funciones para manejar filtros
     const toggleFiltersModal = () => {
@@ -447,7 +539,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                Inicio
+{t('home')}
                             </a>
                             <span className="nbd-breadcrumbs-sep">/</span>
                             <span className="nbd-breadcrumb-current">{currentCategory.name}</span>
@@ -472,13 +564,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                             )}
                             <div className="nbd-hero-actions">
                                 <a href="#productos" className="nbd-btn nbd-btn--primary">
-                                    <span>Explorar productos</span>
+                                    <span>{t('exploreProducts')}</span>
                                     <svg className="nbd-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
                                         <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                 </a>
                                 <a href="#categorias" className="nbd-btn nbd-btn--secondary">
-                                    Ver categorías
+                                    {t('viewCategories')}
                                 </a>
                             </div>
                         </div>
@@ -541,7 +633,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                     <section id="categorias" className="nbd-categories-mosaic">
                 <div className="nbd-container">
                     <div className="nbd-section-header">
-                                <h2 className="nbd-section-title">Categorías</h2>
+                                <h2 className="nbd-section-title">{t('categories')}</h2>
                             </div>
                             
                             <div className={`nbd-mosaic-grid ${getLayoutClass(categoriesToShow.length)}`}>
@@ -603,7 +695,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                                         </p>
                                                     )}
                                                     <p className="nbd-mosaic-count">
-                                                        {productCount} {productCount === 1 ? 'producto' : 'productos'}
+                                                        {productCount} {productCount === 1 ? additionalText('product') : additionalText('products')}
                                                     </p>
                                                 </div>
                                                 
@@ -628,10 +720,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                     {/* Solo mostrar header de productos en home, no en páginas de categoría */}
                     {!isOnCategoryPage && (
                         <div className="nbd-section-header">
-                            <h2 className="nbd-section-title">
-                                {activeCategory ? 
-                                    `${categories?.find(c => c.slug === activeCategory)?.name || 'Productos'}` : 
-                                    'Nuestros productos'
+                                                        <h2 className="nbd-section-title">
+                                {activeCategory ?
+                                    `${categories?.find(c => c.slug === activeCategory)?.name || t('products')}` :
+                                    t('products')
                                 }
                             </h2>
                         </div>
@@ -648,7 +740,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                 <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                             </svg>
-                            <span>Filtros</span>
+                            <span>{t('filters')}</span>
                             {getActiveFiltersCount() > 0 && (
                                 <span className="nbd-filter-badge">{getActiveFiltersCount()}</span>
                             )}
@@ -663,7 +755,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                     <path d="M3 7h3m0 0l3-3m-3 3l3 3M3 17h9m0 0l3-3m-3 3l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <span>Ordenar</span>
+                                <span>{t('sortOrder')}</span>
                                 <svg 
                                     width="12" height="12" 
                                     viewBox="0 0 24 24" 
@@ -728,7 +820,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                                 </svg>
                             )}
-                            <span>Vista</span>
+                            <span>{t('viewType')}</span>
                         </button>
                     </div>
 
@@ -779,7 +871,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                                                 <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                             </svg>
-                                            <span className="nbd-placeholder-text">Sin imagen</span>
+                                            <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
                                         </div>
                                         
                                         {!product.image && !product.mediaFiles?.[0]?.url && (
@@ -787,13 +879,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                                                     <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                 </svg>
-                                                <span className="nbd-placeholder-text">Sin imagen</span>
+                                                <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
                                             </div>
                                         )}
                                         
                                         {product.comparePrice && product.comparePrice > product.price && (
                                             <div className="nbd-product-badge">
-                                                Oferta
+                                                {additionalText('offer')}
                                             </div>
                                         )}
                                     </div>
@@ -837,8 +929,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                         <path d="M4 7V17L12 21L20 17V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                 </div>
-                                <h3 className="nbd-empty-title">No hay productos en esta categoría</h3>
-                                <p className="nbd-empty-description">Explora otras categorías o vuelve más tarde</p>
+                                <h3 className="nbd-empty-title">{additionalText('noProductsCategory')}</h3>
+                                <p className="nbd-empty-description">{additionalText('exploreOther')}</p>
                             </div>
                         )}
                     </div>
@@ -861,7 +953,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                     <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
-                                <span>Cargar más productos ({Math.min(8, filteredProducts.length - productsToShow)})</span>
+                                <span>{additionalText('loadMore')} ({Math.min(8, filteredProducts.length - productsToShow)})</span>
                             </button>
                             <p style={{
                                 fontSize: 'var(--nbd-font-size-sm)',
@@ -869,7 +961,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                 marginTop: 'var(--nbd-space-md)',
                                 marginBottom: '0'
                             }}>
-                                Mostrando {displayedProducts.length} de {filteredProducts.length} productos
+{additionalText('showing')} {displayedProducts.length} {additionalText('of')} {filteredProducts.length} {additionalText('products')}
                             </p>
                         </div>
                     )}
@@ -889,10 +981,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                 </svg>
                             </div>
                             <h2 className="nbd-newsletter-title">
-                                Mantente al día con nuestras ofertas
+                                {additionalText('newsletterTitle')}
                             </h2>
                             <p className="nbd-newsletter-description">
-                                Suscríbete a nuestro newsletter y recibe las últimas novedades, ofertas exclusivas y descuentos especiales directamente en tu correo.
+                                {additionalText('newsletterDescription')}
                             </p>
                         </div>
                         
@@ -910,7 +1002,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                             <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
-                                        <span>¡Suscrito!</span>
+                                        <span>${additionalText('subscribed')}</span>
                                     `;
                                     button.disabled = true;
                                     button.style.background = 'var(--nbd-success)';
@@ -927,7 +1019,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     <input
                                         type="email"
                                         name="email"
-                                        placeholder="tu@email.com"
+                                        placeholder={additionalText('emailPlaceholder')}
                                         className="nbd-newsletter-input"
                                         autoComplete="email"
                                         required
@@ -936,11 +1028,11 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                             <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
-                                        <span>Suscribirse</span>
+                                        <span>{t('subscribe')}</span>
                                     </button>
                                 </div>
                                 <p className="nbd-newsletter-privacy">
-                                    Al suscribirte, aceptas recibir emails promocionales. Puedes darte de baja en cualquier momento.
+                                    {additionalText('privacyNotice')}
                                 </p>
                             </form>
                         </div>
@@ -954,9 +1046,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                 <section className="nbd-brands-carousel">
                     <div className="nbd-container">
                         <div className="nbd-section-header">
-                            <h2 className="nbd-section-title">Nuestras marcas</h2>
+                            <h2 className="nbd-section-title">{additionalText('ourBrands')}</h2>
                             <p className="nbd-section-subtitle">
-                                Trabajamos con las mejores marcas para ofrecerte calidad garantizada
+                                {additionalText('brandSubtitle')}
                             </p>
                         </div>
                         
@@ -1010,7 +1102,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                     <div className="nbd-modal-content nbd-filters-modal">
                         {/* Header del modal */}
                         <div className="nbd-modal-header">
-                            <h3 className="nbd-modal-title">Filtros</h3>
+                            <h3 className="nbd-modal-title">{t('filters')}</h3>
                             <button 
                                 className="nbd-modal-close"
                                 onClick={() => setFiltersModalOpen(false)}
@@ -1028,8 +1120,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                                         <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                                     </svg>
-                                    <h4>No hay filtros disponibles</h4>
-                                    <p>Los filtros se configuran desde el panel de administración.</p>
+                                    <h4>{additionalText('noFiltersAvailable')}</h4>
+                                    <p>{additionalText('filtersConfigured')}</p>
                                 </div>
                             ) : (
                                 <div className="nbd-filters-list">
@@ -1067,13 +1159,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug }: Props) 
                                     onClick={clearAllFilters}
                                     disabled={getActiveFiltersCount() === 0}
                                 >
-                                    Limpiar filtros
+{additionalText('clearFilters')}
                                 </button>
                                 <button 
                                     className="nbd-btn nbd-btn--primary"
                                     onClick={() => setFiltersModalOpen(false)}
                                 >
-                                    Aplicar ({getActiveFiltersCount()})
+{additionalText('apply')} ({getActiveFiltersCount()})
                                 </button>
                             </div>
                         )}

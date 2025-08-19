@@ -1,7 +1,8 @@
 import { getCanonicalHost, type CanonicalResult } from '../../lib/canonical-resolver';
-import { VALID_LOCALES } from '../../lib/locale-validation';
+import { SUPPORTED_LOCALES } from '../../i18n';
 import { getStoreCategories } from '../../lib/categories';
 import { getStoreProducts } from '../../lib/products';
+import { getStoreLocaleConfig, type ValidLocale } from '../../lib/store';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -32,15 +33,24 @@ export async function GET(request: Request) {
     return new Response('Store not found', { status: 404 });
   }
   
+  // 🚀 NUEVA LÓGICA: Obtener configuración de single locale para la tienda
+  const storeConfig = canonical.storeId ? await getStoreLocaleConfig(canonical.storeId) : null;
+  const singleLocaleUrls = storeConfig?.singleLocaleUrls || false;
+  const primaryLocale = storeConfig?.primaryLocale || 'es';
+  
   console.log('✅ [Sitemap] Generando sitemap para:', {
     storeSubdomain,
     storeId: canonical.storeId,
     canonicalHost: canonical.canonicalHost,
-    isCustomDomain: canonical.isCustomDomain
+    isCustomDomain: canonical.isCustomDomain,
+    singleLocaleUrls,
+    primaryLocale
   });
   
-  // Generar sitemap con TODAS las URLs en AMBOS idiomas
-  const sitemap = await generateCompleteSitemap(canonical);
+  // Generar sitemap según la configuración
+  const sitemap = singleLocaleUrls 
+    ? await generateSingleLocaleSitemap(canonical, primaryLocale)
+    : await generateMultiLocaleSitemap(canonical);
   
   return new Response(sitemap, {
     status: 200,
@@ -51,13 +61,83 @@ export async function GET(request: Request) {
   });
 }
 
-async function generateCompleteSitemap(canonical: CanonicalResult): Promise<string> {
+// 🚀 Nuevo: Sitemap para single locale URLs (sin prefijos de idioma)
+async function generateSingleLocaleSitemap(canonical: CanonicalResult, primaryLocale: ValidLocale): Promise<string> {
+  const { canonicalHost, storeId } = canonical;
+  
+  let urls = '';
+  
+  // 🏠 HOME sin prefijo de idioma
+  urls += `
+  <url>
+    <loc>${canonicalHost}/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`;
+  
+  // 📂 CATEGORÍAS sin prefijo de idioma
+  try {
+    if (storeId) {
+      const categories = await getStoreCategories(storeId);
+      console.log('📂 [Sitemap Single] Categorías obtenidas:', categories?.length || 0);
+      
+      if (categories && categories.length > 0) {
+        for (const category of categories) {
+          if (category.slug) {
+            urls += `
+  <url>
+    <loc>${canonicalHost}/categoria/${category.slug}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ [Sitemap Single] Error fetching categories:', error);
+  }
+  
+  // 🛍️ PRODUCTOS sin prefijo de idioma
+  try {
+    if (storeId) {
+      const products = await getStoreProducts(storeId);
+      console.log('🛍️ [Sitemap Single] Productos obtenidos:', products?.length || 0);
+      
+      if (products && products.length > 0) {
+        for (const product of products) {
+          if (product.slug) {
+            urls += `
+  <url>
+    <loc>${canonicalHost}/producto/${product.slug}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ [Sitemap Single] Error fetching products:', error);
+  }
+  
+  console.log('✅ [Sitemap Single] URLs sin prefijo generadas para locale:', primaryLocale);
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`;
+}
+
+// 📚 Legacy: Sitemap para multi-locale URLs (con prefijos de idioma y hreflang)
+async function generateMultiLocaleSitemap(canonical: CanonicalResult): Promise<string> {
   const { canonicalHost, storeId } = canonical;
   
   let urls = '';
   
   // 🏠 HOME en ambos idiomas con hreflang
-  for (const locale of VALID_LOCALES) {
+  for (const locale of SUPPORTED_LOCALES) {
     urls += `
   <url>
     <loc>${canonicalHost}/${locale}</loc>
@@ -74,12 +154,12 @@ async function generateCompleteSitemap(canonical: CanonicalResult): Promise<stri
   try {
     if (storeId) {
       const categories = await getStoreCategories(storeId);
-      console.log('📂 [Sitemap] Categorías obtenidas:', categories?.length || 0);
+      console.log('📂 [Sitemap Multi] Categorías obtenidas:', categories?.length || 0);
       
       if (categories && categories.length > 0) {
         for (const category of categories) {
           if (category.slug) {
-            for (const locale of VALID_LOCALES) {
+            for (const locale of SUPPORTED_LOCALES) {
               urls += `
   <url>
     <loc>${canonicalHost}/${locale}/categoria/${category.slug}</loc>
@@ -95,19 +175,19 @@ async function generateCompleteSitemap(canonical: CanonicalResult): Promise<stri
       }
     }
   } catch (error) {
-    console.error('❌ [Sitemap] Error fetching categories:', error);
+    console.error('❌ [Sitemap Multi] Error fetching categories:', error);
   }
   
   // 🛍️ PRODUCTOS en ambos idiomas
   try {
     if (storeId) {
       const products = await getStoreProducts(storeId);
-      console.log('🛍️ [Sitemap] Productos obtenidos:', products?.length || 0);
+      console.log('🛍️ [Sitemap Multi] Productos obtenidos:', products?.length || 0);
       
       if (products && products.length > 0) {
         for (const product of products) {
           if (product.slug) {
-            for (const locale of VALID_LOCALES) {
+            for (const locale of SUPPORTED_LOCALES) {
               urls += `
   <url>
     <loc>${canonicalHost}/${locale}/producto/${product.slug}</loc>
@@ -123,8 +203,10 @@ async function generateCompleteSitemap(canonical: CanonicalResult): Promise<stri
       }
     }
   } catch (error) {
-    console.error('❌ [Sitemap] Error fetching products:', error);
+    console.error('❌ [Sitemap Multi] Error fetching products:', error);
   }
+  
+  console.log('✅ [Sitemap Multi] URLs multi-idioma generadas con hreflang');
   
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"

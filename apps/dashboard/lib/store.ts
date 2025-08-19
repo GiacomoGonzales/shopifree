@@ -198,7 +198,7 @@ export interface StoreConfig {
       googleAnalytics?: string
       metaPixel?: string
     }
-    language?: 'es' | 'en'
+    language?: 'es' | 'en' | 'pt'
   }
   ownerId: string
   createdAt: Date | unknown
@@ -274,7 +274,7 @@ export interface StoreWithId {
       googleAnalytics?: string
       metaPixel?: string
     }
-    language?: 'es' | 'en'
+    language?: 'es' | 'en' | 'pt'
   }
   payments?: {
     provider?: string

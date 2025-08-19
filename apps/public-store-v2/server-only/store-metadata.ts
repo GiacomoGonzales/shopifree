@@ -26,6 +26,26 @@ type StoreMetadata = {
 };
 
 export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata | null> {
+	// 🧪 MODO DESARROLLO: Usar datos mock para tiendas de prueba
+	if (process.env.NODE_ENV === 'development' && (subdomain === 'tiendaverde' || subdomain === 'tiendaenglish')) {
+		const { getMockStoreData } = await import('../lib/mock-data');
+		const mockData = getMockStoreData(subdomain);
+		
+		console.log(`🧪 [Mock Data] Usando datos mock para ${subdomain}`);
+		
+		return {
+			title: mockData.title,
+			description: mockData.description,
+			storeName: mockData.storeName,
+			logoUrl: mockData.logo,
+			googleSearchConsole: mockData.seo.googleSearchConsole,
+			keywords: mockData.seo.keywords,
+			ogTitle: mockData.seo.title,
+			ogDescription: mockData.seo.description,
+			ogImage: '/default-og.png'
+		};
+	}
+
 	try {
 		// Importar dinámicamente Firebase Admin o client dependiendo del entorno
 		const { getApps, getApp, initializeApp } = await import('firebase/app');
