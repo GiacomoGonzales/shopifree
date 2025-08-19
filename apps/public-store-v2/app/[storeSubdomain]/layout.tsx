@@ -45,6 +45,15 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         (process.env.NODE_ENV === 'development' && currentHost.includes('localhost')) ||
         (process.env.NODE_ENV === 'development' && currentHost.includes('127.0.0.1'));
     
+    // Usar datos SEO personalizados o fallbacks
+    const title = data?.title ?? `${subdomain} | Shopifree`;
+    const description = data?.description ?? "Tienda en Shopifree.";
+    const ogTitle = data?.ogTitle || title;
+    const ogDescription = data?.ogDescription || description;
+    const ogImage = data?.ogImage || data?.image || "/default-og.png";
+    const keywords = data?.keywords;
+    const robots = data?.robots || "index,follow";
+    
     console.log('🔍 [Layout] Store resuelto:', { 
         subdomain,
         canonicalHost: canonical.canonicalHost, 
@@ -59,15 +68,6 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         robotsConfig: robots,
         finalRobots: isCanonicalVersion ? robots : (robots === 'noindex, nofollow' ? robots : 'index, follow')
     });
-    
-    // Usar datos SEO personalizados o fallbacks
-    const title = data?.title ?? `${subdomain} | Shopifree`;
-    const description = data?.description ?? "Tienda en Shopifree.";
-    const ogTitle = data?.ogTitle || title;
-    const ogDescription = data?.ogDescription || description;
-    const ogImage = data?.ogImage || data?.image || "/default-og.png";
-    const keywords = data?.keywords;
-    const robots = data?.robots || "index,follow";
     
     // Usar el host canónico resuelto
     const storeUrl = canonicalUrl;
