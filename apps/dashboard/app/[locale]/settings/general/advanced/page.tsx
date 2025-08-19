@@ -59,6 +59,7 @@ export default function GeneralSettingsAdvancedPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [language, setLanguage] = useState<'es' | 'en' | 'pt'>('es')
+  const [singleLocaleUrls, setSingleLocaleUrls] = useState<boolean>(false)
   const [message, setMessage] = useState<string | null>(null)
 
   // Estado para dominio personalizado
@@ -75,6 +76,8 @@ export default function GeneralSettingsAdvancedPage() {
         setStore(s)
         const current = (s?.advanced?.language as 'es' | 'en' | 'pt' | undefined) || 'es'
         setLanguage(current)
+        const currentSingleLocale = s?.advanced?.singleLocaleUrls || false
+        setSingleLocaleUrls(currentSingleLocale)
         // Cargar domain settings desde subcolección: stores/{storeId}/settings/domain
         if (s?.id) {
           const db = getFirebaseDb()
@@ -105,6 +108,7 @@ export default function GeneralSettingsAdvancedPage() {
         advanced: { 
           ...(store.advanced || {}), 
           language,
+          singleLocaleUrls,
           // Preservar explícitamente los datos existentes
           seo: store.advanced?.seo || {},
           shipping: store.advanced?.shipping || {},
@@ -255,6 +259,28 @@ export default function GeneralSettingsAdvancedPage() {
                   </p>
                 </div>
 
+                {/* Opción de URLs de un solo idioma */}
+                <div>
+                  <div className="flex items-start space-x-3">
+                    <input
+                      id="singleLocaleUrls"
+                      type="checkbox"
+                      checked={singleLocaleUrls}
+                      onChange={(e) => setSingleLocaleUrls(e.target.checked)}
+                      disabled={saving || loading}
+                      className="mt-1 h-4 w-4 text-black border-gray-300 rounded focus:ring-gray-600"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="singleLocaleUrls" className="block text-sm font-medium text-gray-700">
+                        URLs sin prefijo de idioma
+                      </label>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Si está activado, las URLs de tu tienda no incluirán prefijos como /es o /en. 
+                        Ejemplo: tutienda.com/productos en lugar de tutienda.com/es/productos
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
               </div>
             </div>

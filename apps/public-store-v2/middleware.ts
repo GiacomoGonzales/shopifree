@@ -201,7 +201,8 @@ async function getStoreConfigCached(storeSubdomain: string): Promise<{
     const seoLanguage = seo.language?.stringValue;
     const language = advancedLanguage || seoLanguage || 'es';
     
-    const primaryLocale = ['en', 'pt'].includes(language) ? language : 'es';
+    // Ensure we validate the language correctly
+    const primaryLocale = ['es', 'en', 'pt'].includes(language) ? language : 'es';
     
     // Get single locale URLs flag (advanced.singleLocaleUrls, default false)
     const singleLocaleUrls = Boolean(advanced.singleLocaleUrls?.booleanValue);
@@ -213,7 +214,7 @@ async function getStoreConfigCached(storeSubdomain: string): Promise<{
       expires: now + 300000
     };
     
-    console.log(`🏪 [Store Config] ${storeSubdomain}: primaryLocale=${primaryLocale}, singleLocaleUrls=${singleLocaleUrls}`);
+    console.log(`🏪 [Store Config] ${storeSubdomain}: primaryLocale=${primaryLocale}, singleLocaleUrls=${singleLocaleUrls}, advancedLanguage=${advancedLanguage}, seoLanguage=${seoLanguage}`);
     
     return {
       primaryLocale,
@@ -395,33 +396,75 @@ export async function middleware(req: NextRequest) {
     }
   }
   
-  // 🔄 LÓGICA LEGACY: Multi-locale URLs (comportamiento actual)
-  console.log(`📚 [Legacy Mode] Procesando tienda ${storeSubdomain} con URLs multi-idioma`);
+  // 🔄 LÓGICA MEJORADA: Modo adaptativo basado en configuración
+  console.log(`📚 [Adaptive Mode] Procesando tienda ${storeSubdomain} con URLs multi-idioma, primaryLocale=${primaryLocale}`);
   
-  // Si está en root (/), redirigir al idioma primario
+  // NUEVO: Si está en root (/), verificar si deberíamos usar single locale mode automáticamente
   if (currentPath === '/') {
-    const redirectUrl = new URL(`/${primaryLocale}`, req.url);
-    console.log(`🔄 [Redirect] Root → primary locale: ${currentPath} → /${primaryLocale}`);
-    return NextResponse.redirect(redirectUrl, 302);
-  }
-  
-  // Si está en /locale sin tienda, rewrite a /locale/tienda
-  if (pathSegments.length === 1 && ['es', 'en', 'pt'].includes(pathSegments[0])) {
-    const rewritePath = `/${pathSegments[0]}/${storeSubdomain}`;
-    const rewriteUrl = new URL(rewritePath + search, req.url);
-    console.log(`🔄 [Rewrite] Locale only → store: ${currentPath} → ${rewritePath}`);
-    return NextResponse.rewrite(rewriteUrl);
-  }
-  
-  // Si la ruta no incluye el subdomain, agregarlo
-  if (pathSegments.length >= 1 && !pathSegments.includes(storeSubdomain)) {
-    const locale = pathSegments[0];
-    if (['es', 'en', 'pt'].includes(locale)) {
-      // Rewrite /es/categoria/algo → /es/tienda/categoria/algo
-      const newPath = `/${locale}/${storeSubdomain}/${pathSegments.slice(1).join('/')}`;
-      const rewriteUrl = new URL(newPath + search, req.url);
-      console.log(`🔄 [Rewrite] Add subdomain: ${currentPath} → ${newPath}`);
+    // Para tiendas con dominio personalizado y configuradas en inglés o portugués,
+    // probablemente quieren URLs sin prefijo de idioma
+    const isCustomDomain = !host.endsWith('.shopifree.app');
+    const isNonSpanish = primaryLocale !== 'es';
+    
+    if (isCustomDomain && isNonSpanish) {
+      // Usar single locale mode automáticamente
+      console.log(`🎯 [Auto Single Locale] Tienda con dominio personalizado y idioma ${primaryLocale}, usando modo sin prefijo`);
+      const rewritePath = `/${storeSubdomain}`;
+      const rewriteUrl = new URL(rewritePath + search, req.url);
+      console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
       return NextResponse.rewrite(rewriteUrl);
+    } else {
+      // Usar legacy mode con prefijo de idioma
+      const redirectUrl = new URL(`/${primaryLocale}`, req.url);
+      console.log(`🔄 [Redirect] Root → primary locale: ${currentPath} → /${primaryLocale}`);
+      return NextResponse.redirect(redirectUrl, 302);
+    }
+  }
+  
+  // Verificar si debemos usar modo adaptativo para esta tienda
+  const isCustomDomain = !host.endsWith('.shopifree.app');
+  const isNonSpanish = primaryLocale !== 'es';
+  const shouldUseAdaptiveMode = isCustomDomain && isNonSpanish;
+  
+  if (shouldUseAdaptiveMode) {
+    // MODO ADAPTATIVO: Redirigir URLs con prefijo de idioma a URLs sin prefijo
+    const firstSegment = pathSegments[0];
+    const hasLocalePrefix = ['es', 'en', 'pt'].includes(firstSegment);
+    
+    if (hasLocalePrefix) {
+      // REDIRECT 301: /{locale}/(.*) → /(.*)
+      const pathWithoutLocale = pathSegments.slice(1).join('/');
+      const newPath = pathWithoutLocale ? `/${pathWithoutLocale}` : '/';
+      const redirectUrl = new URL(newPath + search, req.url);
+      console.log(`🔄 [301 Redirect Adaptive] ${currentPath} → ${newPath} (removing locale prefix)`);
+      return NextResponse.redirect(redirectUrl, 301);
+    }
+    
+    // REWRITE INTERNO: /(.*) → /{storeSubdomain}/(.*)
+    const rewritePath = currentPath === '/' ? `/${storeSubdomain}` : `/${storeSubdomain}${currentPath}`;
+    const rewriteUrl = new URL(rewritePath + search, req.url);
+    console.log(`🔄 [Rewrite Adaptive] ${currentPath} → ${rewritePath}`);
+    return NextResponse.rewrite(rewriteUrl);
+  } else {
+    // MODO LEGACY: URLs con prefijo de idioma
+    // Si está en /locale sin tienda, rewrite a /locale/tienda
+    if (pathSegments.length === 1 && ['es', 'en', 'pt'].includes(pathSegments[0])) {
+      const rewritePath = `/${pathSegments[0]}/${storeSubdomain}`;
+      const rewriteUrl = new URL(rewritePath + search, req.url);
+      console.log(`🔄 [Rewrite] Locale only → store: ${currentPath} → ${rewritePath}`);
+      return NextResponse.rewrite(rewriteUrl);
+    }
+    
+    // Si la ruta no incluye el subdomain, agregarlo
+    if (pathSegments.length >= 1 && !pathSegments.includes(storeSubdomain)) {
+      const locale = pathSegments[0];
+      if (['es', 'en', 'pt'].includes(locale)) {
+        // Rewrite /es/categoria/algo → /es/tienda/categoria/algo
+        const newPath = `/${locale}/${storeSubdomain}/${pathSegments.slice(1).join('/')}`;
+        const rewriteUrl = new URL(newPath + search, req.url);
+        console.log(`🔄 [Rewrite] Add subdomain: ${currentPath} → ${newPath}`);
+        return NextResponse.rewrite(rewriteUrl);
+      }
     }
   }
   

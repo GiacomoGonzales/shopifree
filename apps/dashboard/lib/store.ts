@@ -275,6 +275,7 @@ export interface StoreWithId {
       metaPixel?: string
     }
     language?: 'es' | 'en' | 'pt'
+    singleLocaleUrls?: boolean // Si true, las URLs no tendrán prefijo de idioma (/en, /es)
   }
   payments?: {
     provider?: string
