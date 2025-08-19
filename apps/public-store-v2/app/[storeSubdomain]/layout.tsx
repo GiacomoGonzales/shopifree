@@ -47,7 +47,8 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const ogTitle = data?.ogTitle || title;
     const ogDescription = data?.ogDescription || description;
     const ogImage = data?.ogImage || data?.image || "/default-og.png";
-    const keywords = data?.keywords;
+    // ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009
+    // const keywords = data?.keywords;
     const robots = data?.robots || "index,follow";
     
     console.log('🔍 [Layout] Store resuelto:', { 
@@ -71,18 +72,25 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     const siteName = data?.storeName || subdomain;
     
     // Generar imágenes optimizadas para diferentes plataformas
+    // Usar el logo de la tienda para Apple Touch Icon si está disponible
+    const iconSource = data?.logoUrl || ogImage;
     const imageVariants = generateAllImageVariants(ogImage, data?.whatsappImage);
+    const appleIconVariant = iconSource !== ogImage ? generateAllImageVariants(iconSource).appleTouchIcon : imageVariants.appleTouchIcon;
     
     // Construir objeto de metadata completo
     const metadata: Metadata = {
         title,
         description,
-        keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
+        // ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009 y Google la ignora
+        // keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
+        
         // 🚀 CORRECCIÓN SEO: Permitir indexación en la mayoría de casos
         // Solo aplicar noindex si específicamente está configurado o en casos muy específicos
         robots: isCanonicalVersion ? robots : (robots === 'noindex, nofollow' ? robots : 'index, follow'),
         
         // Open Graph para redes sociales - Múltiples imágenes para diferentes plataformas
+        // NOTA: No especificamos og:image:type para permitir que Cloudinary f_auto 
+        // seleccione el mejor formato (WebP, AVIF, etc.) según el navegador
         openGraph: {
             title: ogTitle,
             description: ogDescription,
@@ -94,7 +102,8 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
                     width: 1200,
                     height: 630,
                     alt: ogTitle,
-                    type: 'image/jpeg',
+                    // ❌ REMOVIDO: type - inconsistente con f_auto de Cloudinary
+                    // type: 'image/jpeg',
                     secureUrl: imageVariants.social
                 },
                 {
@@ -102,7 +111,8 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
                     width: 400,
                     height: 400,
                     alt: ogTitle,
-                    type: 'image/jpeg',
+                    // ❌ REMOVIDO: type - inconsistente con f_auto de Cloudinary  
+                    // type: 'image/jpeg',
                     secureUrl: imageVariants.whatsapp
                 }
             ],
@@ -110,15 +120,14 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
             siteName: siteName
         },
         
-        // Twitter/X optimizado - usar imagen social estándar
+        // Twitter/X optimizado - solo datos necesarios
         twitter: {
             card: "summary_large_image",
             title: ogTitle,
             description: ogDescription,
             images: [{
                 url: imageVariants.social,
-                width: 1200,
-                height: 630,
+                // ❌ REMOVIDO: width y height - Twitter no las usa, solo añaden ruido
                 alt: ogTitle
             }]
         }
@@ -156,7 +165,7 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     // Los sitemaps se declaran en robots.txt, no en meta tags
     // Los robots se declaran en meta robots sin URLs
     
-    // Agregar favicon personalizado si está configurado
+    // Agregar íconos personalizados si están configurados
     if (data?.favicon) {
         metadata.icons = {
             icon: [
@@ -164,7 +173,8 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
                 { url: data.favicon, sizes: '16x16', type: 'image/png' }
             ],
             shortcut: data.favicon,
-            apple: data.favicon
+            // 🍎 MEJORADO: Apple Touch Icon optimizado a 180x180px usando el logo de la tienda
+            apple: appleIconVariant || data.favicon
         };
     }
     
@@ -173,9 +183,12 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         title,
         hasCustomOG: !!data?.ogImage,
         hasWhatsAppImage: !!data?.whatsappImage,
-        hasKeywords: !!keywords,
+        // ❌ REMOVIDO: keywords debug - ya no usamos keywords
+        // hasKeywords: !!keywords,
         hasCanonical: !!data?.canonicalUrl,
         hasFavicon: !!data?.favicon,
+        hasAppleTouchIcon: !!appleIconVariant,
+        appleTouchIconUrl: appleIconVariant,
         ...imageVariants.info
     });
     
@@ -211,29 +224,33 @@ export default async function StoreLocaleLayout({
     } : undefined;
     
     return (
-        <html lang={effectiveLocale}>
-            <head>
-                {/* Preconnect para recursos externos críticos */}
-                <link rel="preconnect" href="https://res.cloudinary.com" />
-                <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-                
-                {/* Scripts de SEO y Analytics */}
-                <SEOScripts
-                    storeSubdomain={subdomain}
-                    googleAnalytics={seoData?.googleAnalytics}
-                    googleSearchConsole={seoData?.googleSearchConsole}
-                    metaPixel={seoData?.metaPixel}
-                    tiktokPixel={seoData?.tiktokPixel}
-                    structuredDataEnabled={seoData?.structuredDataEnabled}
-                    storeInfo={storeInfo}
-                />
-            </head>
-            <body>
-                <StoreLanguageRoot language={effectiveLocale as any}>
-                    {children}
-                </StoreLanguageRoot>
-            </body>
-        </html>
+        <>
+            {/* Preconnect para recursos externos críticos */}
+            <link rel="preconnect" href="https://res.cloudinary.com" />
+            <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+            
+            {/* Script para ajustar el lang del HTML raíz */}
+            <script 
+                dangerouslySetInnerHTML={{
+                    __html: `document.documentElement.lang = '${effectiveLocale}';`
+                }}
+            />
+            
+            {/* Scripts de SEO y Analytics */}
+            <SEOScripts
+                storeSubdomain={subdomain}
+                googleAnalytics={seoData?.googleAnalytics}
+                googleSearchConsole={seoData?.googleSearchConsole}
+                metaPixel={seoData?.metaPixel}
+                tiktokPixel={seoData?.tiktokPixel}
+                structuredDataEnabled={seoData?.structuredDataEnabled}
+                storeInfo={storeInfo}
+            />
+            
+            <StoreLanguageRoot language={effectiveLocale as any}>
+                {children}
+            </StoreLanguageRoot>
+        </>
     );
 }
 

@@ -4,7 +4,8 @@ type StoreMetadata = {
 	title?: string;
 	description?: string;
 	image?: string;
-	keywords?: string;
+	// ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009
+	// keywords?: string;
 	ogTitle?: string;
 	ogDescription?: string;
 	ogImage?: string;
@@ -106,7 +107,8 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 			favicon: seoData.favicon,
 			
 			// SEO avanzado
-			keywords: seoData.keywords ? seoData.keywords.join(', ') : undefined,
+			// ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009
+			// keywords: seoData.keywords ? seoData.keywords.join(', ') : undefined,
 			ogTitle: seoData.ogTitle,
 			ogDescription: seoData.ogDescription,
 			robots: seoData.robots,

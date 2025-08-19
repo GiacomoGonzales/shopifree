@@ -52,15 +52,15 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
         return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
     };
     
-    // 🚀 NUEVA FUNCIÓN: URLs sin prefijo de idioma
+    // 🚀 CORREGIDO: URLs sin prefijo de idioma
     const getSubdomainUrl = (path: string) => {
         const isCustom = isCustomDomain();
         if (isCustom) {
-            // En dominio personalizado: URL directa sin subdominio ni locale
+            // En dominio personalizado: URL directa sin subdominio
             return path.startsWith('/') ? path : `/${path}`;
         } else {
-            // En dominio de plataforma: incluir subdominio sin locale
-            return `/${storeSubdomain}${path.startsWith('/') ? path : `/${path}`}`;
+            // En localhost desarrollo: URL directa (middleware maneja internamente)
+            return path.startsWith('/') ? path : `/${path}`;
         }
     };
 

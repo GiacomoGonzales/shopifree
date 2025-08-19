@@ -131,9 +131,31 @@ export default function BaseDefault({ storeSubdomain }: Props) {
 
     if (loading) {
         return (
-            <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-                <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
-                <p className="text-gray-600 text-sm">Cargando...</p>
+            <div data-theme="base-default" className="bd-theme min-h-screen">
+                {/* Header skeleton */}
+                <div className="h-16 bg-gray-100 animate-pulse mb-8"></div>
+                
+                <div className="container mx-auto px-4">
+                    {/* Hero skeleton */}
+                    <div className="h-64 bg-gray-100 rounded-lg animate-pulse mb-8"></div>
+                    
+                    {/* Products grid skeleton */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="bg-gray-100 rounded-lg p-4 animate-pulse">
+                                <div className="aspect-square bg-gray-200 rounded mb-4"></div>
+                                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {/* Loading indicator */}
+                    <div className="flex items-center justify-center gap-3 mt-8">
+                        <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                        <p className="text-gray-500 text-sm">Cargando tienda...</p>
+                    </div>
+                </div>
             </div>
         );
     }

@@ -5,16 +5,12 @@ import { getStoreIdBySubdomain, getStoreBasicInfo, getStorePrimaryLocale } from 
 import { getProduct } from '../../../../lib/products';
 import { generateAllImageVariants } from '../../../../lib/image-optimization';
 import { getCanonicalHost } from '../../../../lib/canonical-resolver';
+import SimpleLoadingSpinner from '../../../../components/SimpleLoadingSpinner';
 
 export default function ProductoPage({ params }: { params: { productSlug: string; storeSubdomain: string } }) {
     const { productSlug, storeSubdomain } = params as any;
     return (
-        <Suspense fallback={
-            <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-                <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
-                <p className="text-gray-600 text-sm">Cargando...</p>
-            </div>
-        }>
+        <Suspense fallback={<SimpleLoadingSpinner inline={true} />}>
             <ProductDetail productSlug={productSlug} storeSubdomain={storeSubdomain} />
         </Suspense>
     );
@@ -52,7 +48,8 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     return {
       title,
       description,
-      keywords: [product.name, storeName, 'producto', 'comprar online', 'tienda'].filter(Boolean).join(', '),
+      // ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009
+      // keywords: [product.name, storeName, 'producto', 'comprar online', 'tienda'].filter(Boolean).join(', '),
       
       // Open Graph para WhatsApp, Facebook, Instagram
       openGraph: {
@@ -90,8 +87,7 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
         description,
         images: [{
           url: imageVariants.social,
-          width: 1200,
-          height: 630,
+          // ❌ REMOVIDO: width y height - Twitter no las usa
           alt: `${product.name} - ${storeName}`
         }]
       }

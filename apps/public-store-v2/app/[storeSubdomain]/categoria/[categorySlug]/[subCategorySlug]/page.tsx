@@ -5,6 +5,7 @@ import { getStoreIdBySubdomain, getStoreBasicInfo, getStorePrimaryLocale } from 
 import { getStoreCategories } from "../../../../../lib/categories";
 import { generateAllImageVariants } from "../../../../../lib/image-optimization";
 import { getCanonicalHost } from "../../../../../lib/canonical-resolver";
+import SimpleLoadingSpinner from "../../../../../components/SimpleLoadingSpinner";
 
 // Generar metadata para SEO
 export async function generateMetadata({ params }: { params: { categorySlug: string; subCategorySlug: string; storeSubdomain: string } }): Promise<Metadata> {
@@ -48,7 +49,8 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
         return {
             title,
             description,
-            keywords: subCategory ? [subCategory.name, parentCategory?.name, storeName, 'tienda online', 'productos', 'categoría'].filter(Boolean).join(', ') : undefined,
+            // ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009
+            // keywords: subCategory ? [subCategory.name, parentCategory?.name, storeName, 'tienda online', 'productos', 'categoría'].filter(Boolean).join(', ') : undefined,
             
             // Open Graph para WhatsApp, Facebook, Instagram
             openGraph: {
@@ -86,8 +88,7 @@ export async function generateMetadata({ params }: { params: { categorySlug: str
                 description: ogDescription,
                 images: [{
                     url: imageVariants.social,
-                    width: 1200,
-                    height: 630,
+                    // ❌ REMOVIDO: width y height - Twitter no las usa
                     alt: `${subCategory?.name || params.subCategorySlug} - ${storeName}`
                 }]
             }
@@ -106,12 +107,7 @@ export default function SubCategoriaPage({ params }: { params: { categorySlug: s
     const categorySlug = params?.subCategorySlug; // Use subcategory slug as the main category
     
     return (
-        <Suspense fallback={
-            <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-                <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
-                <p className="text-gray-600 text-sm">Cargando...</p>
-            </div>
-        }>
+        <Suspense fallback={<SimpleLoadingSpinner inline={true} />}>
             <ThemeRenderer storeSubdomain={subdomain} categorySlug={categorySlug} />
         </Suspense>
     );

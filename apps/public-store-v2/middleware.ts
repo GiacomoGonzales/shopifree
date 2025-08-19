@@ -5,8 +5,8 @@ interface CustomDomainCache {
 }
 
 interface StoreConfigCache {
-  [storeId: string]: {
-    primaryLocale: string;
+  [storeId: string]: { 
+    primaryLocale: string; 
     expires: number;
   };
 }

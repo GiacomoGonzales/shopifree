@@ -24,14 +24,15 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
-    const locale = useMemo(() => {
-        try {
-            const parts = window.location.pathname.split("/").filter(Boolean);
-            return parts[0] || "es";
-        } catch {
-            return "es";
-        }
-    }, []);
+    // 🚀 ELIMINADO: Ya no extraemos locale de URL porque usamos URLs simples sin prefijo
+    // const locale = useMemo(() => {
+    //     try {
+    //         const parts = window.location.pathname.split("/").filter(Boolean);
+    //         return parts[0] || "es";
+    //     } catch {
+    //         return "es";
+    //     }
+    // }, []);
 
     const topCategories = useMemo(() => 
         (Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : []), 
@@ -49,7 +50,24 @@ export default function Header({ storeInfo, categories, storeSubdomain }: Props)
         return map;
     }, [categories]);
 
-    const getSubdomainUrl = (path: string) => `/${locale}/${storeSubdomain}${path}`;
+    // 🚀 CORREGIDO: URLs simples sin prefijo de idioma
+    const getSubdomainUrl = (path: string) => {
+        // Función para detectar si estamos en un dominio personalizado
+        const isCustomDomain = () => {
+            if (typeof window === 'undefined') return false;
+            const host = window.location.hostname;
+            return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+        };
+        
+        const isCustom = isCustomDomain();
+        if (isCustom) {
+            // En dominio personalizado: URL directa sin subdominio
+            return path.startsWith('/') ? path : `/${path}`;
+        } else {
+            // En localhost desarrollo: URL directa (middleware maneja internamente)
+            return path.startsWith('/') ? path : `/${path}`;
+        }
+    };
 
     return (
         <header className={`bd-header ${isScrolled ? 'bd-header--scrolled' : ''}`}>

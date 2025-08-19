@@ -217,9 +217,29 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-3"></div>
-        <p className="text-gray-600 text-sm">Cargando...</p>
+      <div className="container mx-auto px-4 py-8">
+        {/* Product skeleton */}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Image skeleton */}
+            <div className="aspect-square bg-gray-100 rounded-lg animate-pulse"></div>
+            
+            {/* Content skeleton */}
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-100 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-100 rounded w-2/3 animate-pulse"></div>
+              <div className="h-16 bg-gray-100 rounded animate-pulse"></div>
+              <div className="h-12 bg-gray-100 rounded w-1/3 animate-pulse"></div>
+              <div className="h-10 bg-gray-100 rounded animate-pulse"></div>
+            </div>
+          </div>
+          
+          {/* Loading indicator */}
+          <div className="flex items-center justify-center gap-3 mt-8">
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+            <p className="text-gray-500 text-sm">Cargando producto...</p>
+          </div>
+        </div>
       </div>
     );
   }

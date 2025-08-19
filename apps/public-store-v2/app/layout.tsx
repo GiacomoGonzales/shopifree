@@ -9,7 +9,7 @@ export const metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html suppressHydrationWarning>
+        <html suppressHydrationWarning lang="es">
             <body>
                 <CartProvider>
                     {children}
