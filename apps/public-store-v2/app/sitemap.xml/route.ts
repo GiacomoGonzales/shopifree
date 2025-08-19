@@ -131,7 +131,7 @@ async function generateSimpleSitemap(canonical: CanonicalResult): Promise<string
         }
       }
     } catch (error) {
-      console.warn('⚠️ [Sitemap] No se pudieron cargar categorías:', error.message);
+      console.warn('⚠️ [Sitemap] No se pudieron cargar categorías:', error instanceof Error ? error.message : String(error));
     }
     
     // Agregar productos (con manejo de errores mejorado)
@@ -161,7 +161,7 @@ async function generateSimpleSitemap(canonical: CanonicalResult): Promise<string
         console.log('✅ [Sitemap] Productos añadidos:', activeProducts.length);
       }
     } catch (error) {
-      console.warn('⚠️ [Sitemap] No se pudieron cargar productos:', error.message);
+      console.warn('⚠️ [Sitemap] No se pudieron cargar productos:', error instanceof Error ? error.message : String(error));
     }
   }
   
@@ -228,7 +228,7 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
             }
           }
         } catch (error) {
-          console.warn(`⚠️ [Sitemap] Error verificando dominio para ${subdomain}:`, error.message);
+          console.warn(`⚠️ [Sitemap] Error verificando dominio para ${subdomain}:`, error instanceof Error ? error.message : String(error));
         }
         
         return null;
@@ -243,7 +243,7 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
     return await Promise.race([searchPromise(), timeoutPromise]);
     
   } catch (error) {
-    console.warn('⚠️ [Sitemap] Error buscando dominio personalizado:', error.message);
+    console.warn('⚠️ [Sitemap] Error buscando dominio personalizado:', error instanceof Error ? error.message : String(error));
     return null;
   }
 }
