@@ -401,20 +401,19 @@ export async function middleware(req: NextRequest) {
   
   // NUEVO: Si está en root (/), verificar si deberíamos usar single locale mode automáticamente
   if (currentPath === '/') {
-    // Para tiendas con dominio personalizado y configuradas en inglés o portugués,
-    // probablemente quieren URLs sin prefijo de idioma
-    const isCustomDomain = !host.endsWith('.shopifree.app');
+    // Para tiendas configuradas en inglés o portugués (independientemente del dominio),
+    // usar URLs sin prefijo de idioma por defecto
     const isNonSpanish = primaryLocale !== 'es';
     
-    if (isCustomDomain && isNonSpanish) {
-      // Usar single locale mode automáticamente
-      console.log(`🎯 [Auto Single Locale] Tienda con dominio personalizado y idioma ${primaryLocale}, usando modo sin prefijo`);
+    if (isNonSpanish) {
+      // Usar single locale mode automáticamente para inglés y portugués
+      console.log(`🎯 [Auto Single Locale] Tienda con idioma ${primaryLocale}, usando modo sin prefijo`);
       const rewritePath = `/${storeSubdomain}`;
       const rewriteUrl = new URL(rewritePath + search, req.url);
       console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
       return NextResponse.rewrite(rewriteUrl);
     } else {
-      // Usar legacy mode con prefijo de idioma
+      // Solo para español, usar prefijo de idioma
       const redirectUrl = new URL(`/${primaryLocale}`, req.url);
       console.log(`🔄 [Redirect] Root → primary locale: ${currentPath} → /${primaryLocale}`);
       return NextResponse.redirect(redirectUrl, 302);
@@ -422,9 +421,8 @@ export async function middleware(req: NextRequest) {
   }
   
   // Verificar si debemos usar modo adaptativo para esta tienda
-  const isCustomDomain = !host.endsWith('.shopifree.app');
   const isNonSpanish = primaryLocale !== 'es';
-  const shouldUseAdaptiveMode = isCustomDomain && isNonSpanish;
+  const shouldUseAdaptiveMode = isNonSpanish; // Aplicar a todas las tiendas no-españolas
   
   if (shouldUseAdaptiveMode) {
     // MODO ADAPTATIVO: Redirigir URLs con prefijo de idioma a URLs sin prefijo
