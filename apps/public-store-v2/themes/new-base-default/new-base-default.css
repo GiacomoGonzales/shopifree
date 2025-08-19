@@ -4514,6 +4514,8 @@
     border-top: 1px solid var(--nbd-neutral-200);
     background: var(--nbd-neutral-50);
     padding: var(--nbd-space-xl);
+    /* iOS safe area support - avoid bottom UI overlap */
+    padding-bottom: calc(var(--nbd-space-xl) + env(safe-area-inset-bottom));
 }
 
 .nbd-cart-summary {
@@ -4704,6 +4706,8 @@
     
     .nbd-cart-footer {
         padding: var(--nbd-space-lg);
+        /* iOS safe area support for mobile - avoid bottom UI overlap */
+        padding-bottom: calc(var(--nbd-space-lg) + env(safe-area-inset-bottom));
     }
     
     .nbd-cart-actions {
@@ -5178,6 +5182,8 @@
     background: var(--nbd-neutral-50);
     border-top: 2px solid var(--nbd-neutral-100);
     padding: var(--nbd-space-xl);
+    /* iOS safe area support - avoid bottom UI overlap */
+    padding-bottom: calc(var(--nbd-space-xl) + env(safe-area-inset-bottom));
 }
 
 .nbd-checkout-actions {
