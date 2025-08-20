@@ -1195,7 +1195,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             )}
 
             {/* Modal del carrito */}
-            <CartModal storeInfo={storeInfo} storeId={resolvedStoreId} />
+            <CartModal storeInfo={storeInfo} storeId={resolvedStoreId || undefined} />
         </div>
     );
 }

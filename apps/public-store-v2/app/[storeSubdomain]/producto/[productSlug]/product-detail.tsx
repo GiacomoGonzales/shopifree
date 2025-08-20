@@ -425,7 +425,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   };
 
   return (
-    <Layout storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products}>
+    <Layout storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products} storeId={storeId}>
       {/* JSON-LD SEO */}
       {breadcrumbJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />

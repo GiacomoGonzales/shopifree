@@ -15,9 +15,10 @@ type Props = {
     categories?: Category[] | null;
     storeSubdomain?: string;
     products?: PublicProduct[];
+    storeId?: string | null;
 };
 
-export default function Layout({ children, storeInfo, categories, storeSubdomain, products }: Props) {
+export default function Layout({ children, storeInfo, categories, storeSubdomain, products, storeId }: Props) {
     return (
         <div data-theme="new-base-default" className="nbd-theme">
             {(storeInfo || categories || storeSubdomain) && (
@@ -38,7 +39,7 @@ export default function Layout({ children, storeInfo, categories, storeSubdomain
             )}
             
             {/* Modal del carrito */}
-            <CartModal storeInfo={storeInfo} storeId={storeId} />
+            <CartModal storeInfo={storeInfo} storeId={storeId || undefined} />
         </div>
     );
 }
