@@ -30,11 +30,10 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
     try {
         const db = getFirebaseDb();
         if (!db) {
-            console.warn('[delivery-zones] Firebase no está disponible');
+            console.error('[delivery-zones] ❌ Firebase no está disponible - verificar variables de entorno');
             return [];
         }
 
-        console.log(`[delivery-zones] Obteniendo zonas desde Firestore para ${storeId}`);
         const { collection, getDocs } = await import('firebase/firestore');
         const deliveryZonesRef = collection(db, 'stores', storeId, 'deliveryZones');
         const snapshot = await getDocs(deliveryZonesRef);
@@ -42,12 +41,13 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
         const zones: DeliveryZone[] = [];
         snapshot.forEach((doc) => {
             const data = doc.data();
-            console.log(`[delivery-zones] Procesando zona: ${doc.id}`, data);
             
-            // Transformar coordenadas desde el formato de Firestore
+            // Transformar coordenadas desde el formato de Firestore (soporte para 'coordenadas' y 'coordinates')
             const coordinates = [];
-            if (data.coordinates && Array.isArray(data.coordinates)) {
-                for (const coord of data.coordinates) {
+            const coordsData = data.coordinates || data.coordenadas; // Soporte para ambos formatos
+            
+            if (coordsData && Array.isArray(coordsData)) {
+                for (const coord of coordsData) {
                     if (coord.lat !== undefined && coord.lng !== undefined) {
                         coordinates.push({
                             lat: typeof coord.lat === 'number' ? coord.lat : parseFloat(coord.lat),
@@ -55,16 +55,11 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
                         });
                     }
                 }
-                console.log(`[delivery-zones] Zona "${data.name || data.nombre || doc.id}" tiene ${coordinates.length} coordenadas`);
-            } else {
-                console.warn(`[delivery-zones] Zona "${data.name || data.nombre || doc.id}" no tiene coordenadas válidas:`, data.coordinates);
             }
 
             // Soporte para formato alternativo de precios
             const priceStandard = data.priceStandard || data.precio || 0;
             const priceExpress = data.priceExpress || data.precioExpress || (data.precio ? data.precio * 1.5 : 0);
-
-            console.log(`[delivery-zones] Precios para "${data.name || data.nombre}": estándar=${priceStandard}, express=${priceExpress}`);
 
             zones.push({
                 id: doc.id,
@@ -84,7 +79,6 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
             timestamp: Date.now()
         };
 
-        console.log(`[delivery-zones] Cargadas ${activeZones.length} zonas para tienda ${storeId}`);
         return activeZones;
 
     } catch (error) {
@@ -109,7 +103,7 @@ export function isPointInPolygon(
     const y = point.lat;
     let inside = false;
 
-    console.log(`[delivery-zones] Evaluando punto (${y}, ${x}) contra polígono de ${polygon.length} puntos`);
+
 
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         const xi = polygon[i].lng;
@@ -122,7 +116,6 @@ export function isPointInPolygon(
         }
     }
 
-    console.log(`[delivery-zones] Resultado: ${inside ? 'DENTRO' : 'FUERA'} del polígono`);
     return inside;
 }
 
@@ -133,21 +126,12 @@ export function findDeliveryZoneForCoordinates(
     coordinates: { lat: number; lng: number },
     zones: DeliveryZone[]
 ): DeliveryZone | null {
-    console.log(`[delivery-zones] Buscando zona para coordenadas: lat=${coordinates.lat}, lng=${coordinates.lng}`);
-    console.log(`[delivery-zones] Evaluando ${zones.length} zonas disponibles`);
-    
     for (const zone of zones) {
-        console.log(`[delivery-zones] Evaluando zona "${zone.name}" con ${zone.coordinates.length} coordenadas`);
         const isInside = isPointInPolygon(coordinates, zone.coordinates);
-        console.log(`[delivery-zones] ¿Está dentro de "${zone.name}"? ${isInside}`);
-        
         if (isInside) {
-            console.log(`[delivery-zones] ✅ Ubicación encontrada en zona: ${zone.name} (precio estándar: ${zone.priceStandard}, express: ${zone.priceExpress})`);
             return zone;
         }
     }
-
-    console.log(`[delivery-zones] ❌ Ubicación fuera de todas las zonas de cobertura`);
     return null;
 }
 
@@ -159,38 +143,37 @@ export function calculateShippingCost(
     zones: DeliveryZone[],
     shippingMethod: 'standard' | 'express' | 'pickup'
 ): number {
-    console.log(`[delivery-zones] Calculando costo de envío para método: ${shippingMethod}`);
-    
     // Si es recojo en tienda, no hay costo
     if (shippingMethod === 'pickup') {
-        console.log(`[delivery-zones] Recojo en tienda - costo: 0`);
         return 0;
     }
 
-    // Si no hay coordenadas, no hay costo (hasta que se determine la zona)
+    // Si no hay coordenadas, no hay costo
     if (!coordinates) {
-        console.log(`[delivery-zones] Sin coordenadas - sin costo hasta determinar zona`);
         return 0;
     }
 
-    console.log(`[delivery-zones] Buscando zona para coordenadas: lat=${coordinates.lat}, lng=${coordinates.lng}`);
-
-    // Buscar la zona que contiene las coordenadas
-    const zone = findDeliveryZoneForCoordinates(coordinates, zones);
-    
-    if (zone) {
-        console.log(`[delivery-zones] Zona encontrada: ${zone.name}`);
-        // Usar precio de la zona
-        if (shippingMethod === 'express' && zone.priceExpress !== undefined && zone.priceExpress > 0) {
-            console.log(`[delivery-zones] Usando precio express de zona: ${zone.priceExpress}`);
-            return zone.priceExpress;
-        } else if (shippingMethod === 'standard' && zone.priceStandard !== undefined && zone.priceStandard > 0) {
-            console.log(`[delivery-zones] Usando precio estándar de zona: ${zone.priceStandard}`);
-            return zone.priceStandard;
+    // Si hay zonas configuradas, buscar la zona que contiene las coordenadas
+    if (zones.length > 0) {
+        const zone = findDeliveryZoneForCoordinates(coordinates, zones);
+        
+        if (zone) {
+            // Usar precio de la zona
+            if (shippingMethod === 'express' && zone.priceExpress !== undefined && zone.priceExpress > 0) {
+                return zone.priceExpress;
+            } else if (shippingMethod === 'standard' && zone.priceStandard !== undefined && zone.priceStandard > 0) {
+                return zone.priceStandard;
+            }
         }
     }
 
-    // Si no se encuentra zona o no tiene precio configurado, no cobrar
-    console.log(`[delivery-zones] No se encontró zona válida con precio - sin costo de envío`);
-    return 0;
+    // FALLBACK: Usar precio base para Lima (coordenadas válidas de Perú)
+    const isInLima = coordinates.lat >= -12.5 && coordinates.lat <= -11.5 && 
+                     coordinates.lng >= -77.5 && coordinates.lng <= -76.5;
+    
+    if (isInLima) {
+        return shippingMethod === 'express' ? 15 : 8;
+    } else {
+        return shippingMethod === 'express' ? 25 : 15;
+    }
 }

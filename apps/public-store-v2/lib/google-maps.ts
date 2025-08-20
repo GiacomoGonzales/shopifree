@@ -88,7 +88,7 @@ class GoogleMapsLoader {
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
       if (!apiKey) {
         console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not found. Google Maps features disabled.');
-        reject(new Error('Google Maps API key not configured'));
+        reject(new Error('Google Maps API key not configured. Features like location mapping will not be available.'));
         return;
       }
 

@@ -4222,8 +4222,13 @@
     /* Font-size de 16px mínimo en input para evitar zoom en iOS */
     .nbd-search-input,
     .nbd-form-input,
-    .nbd-form-textarea {
-        font-size: var(--nbd-font-size-base); /* 16px para evitar zoom en iOS */
+    .nbd-form-textarea,
+    .nbd-checkout-modal .nbd-form-input,
+    .nbd-checkout-modal input[type="text"],
+    .nbd-checkout-modal input[type="email"],
+    .nbd-checkout-modal input[type="tel"],
+    .nbd-checkout-modal textarea {
+        font-size: var(--nbd-font-size-base) !important; /* 16px para evitar zoom en iOS */
     }
     
     .nbd-search-empty h3 {
@@ -4765,6 +4770,39 @@
 }
 
 /* ===================================================
+   PREVENIR ZOOM EN iOS - CHECKOUT INPUTS
+   =================================================== */
+
+/* Regla específica para evitar zoom automático en iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    .nbd-checkout-modal input,
+    .nbd-checkout-modal textarea,
+    .nbd-checkout-modal select {
+        font-size: 16px !important;
+    }
+}
+
+/* Fallback para todos los móviles */
+@media screen and (max-width: 768px) {
+    .nbd-checkout-modal input,
+    .nbd-checkout-modal textarea,
+    .nbd-checkout-modal select {
+        font-size: 16px !important;
+    }
+    
+    /* Específicamente para inputs de texto para evitar zoom */
+    .nbd-checkout-modal input[type="text"],
+    .nbd-checkout-modal input[type="email"],
+    .nbd-checkout-modal input[type="tel"],
+    .nbd-checkout-modal input[type="password"],
+    .nbd-checkout-modal input[type="search"],
+    .nbd-checkout-modal textarea {
+        font-size: 16px !important;
+        -webkit-text-size-adjust: 100%;
+    }
+}
+
+/* ===================================================
    CHECKOUT MODAL - MODERNO Y ELEGANTE
    =================================================== */
 
@@ -5080,6 +5118,8 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+
 
 /* Contenedor del mapa */
 .nbd-map-container {

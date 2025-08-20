@@ -10,7 +10,8 @@ import { googleMapsLoader } from '../../lib/google-maps';
 import { 
     getStoreDeliveryZones, 
     calculateShippingCost, 
-    DeliveryZone 
+    DeliveryZone,
+    findDeliveryZoneForCoordinates 
 } from '../../lib/delivery-zones';
 
 interface CheckoutData {
@@ -35,6 +36,8 @@ interface CheckoutModalProps {
 }
 
 export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, storeId }: CheckoutModalProps) {
+    
+
     const { state, clearCart } = useCart();
     const { t } = useStoreLanguage();
     const [currentStep, setCurrentStep] = useState(1);
@@ -49,6 +52,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [userCoordinates, setUserCoordinates] = useState<{lat: number; lng: number} | null>(null);
     const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
     const [loadingZones, setLoadingZones] = useState(false);
+    const [shippingCost, setShippingCost] = useState(0);
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
         firstName: '',
@@ -67,9 +71,24 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     
     // Calcular costos usando zonas de entrega
     const subtotal = state.totalPrice;
-    const shipping = formData.shippingMethod === 'pickup' ? 0 : 
-                    (userCoordinates ? calculateShippingCost(userCoordinates, deliveryZones, formData.shippingMethod) : 0);
+    const shipping = formData.shippingMethod === 'pickup' ? 0 : shippingCost;
     const total = subtotal + shipping;
+
+    // Calcular y actualizar costo de envío
+    useEffect(() => {
+        if (formData.shippingMethod === 'pickup') {
+            setShippingCost(0);
+            return;
+        }
+
+        // Calcular costo si hay coordenadas (con o sin zonas configuradas)
+        if (userCoordinates) {
+            const calculatedShipping = calculateShippingCost(userCoordinates, deliveryZones, formData.shippingMethod);
+            setShippingCost(calculatedShipping);
+        } else {
+            setShippingCost(0);
+        }
+    }, [userCoordinates, deliveryZones, formData.shippingMethod]);
 
     // Reset al abrir/cerrar
     useEffect(() => {
@@ -82,6 +101,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             setMap(null);
             setMarker(null);
             setUserCoordinates(null);
+            setShippingCost(0);
         }
     }, [isOpen]);
 
@@ -92,7 +112,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             getStoreDeliveryZones(storeId)
                 .then((zones) => {
                     setDeliveryZones(zones);
-                    console.log(`[CheckoutModal] Cargadas ${zones.length} zonas de entrega`);
                 })
                 .catch((error) => {
                     console.error('[CheckoutModal] Error cargando zonas de entrega:', error);
@@ -106,13 +125,20 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Cargar Google Maps API usando el loader centralizado (igual que en dashboard)
     useEffect(() => {
         if (isOpen && currentStep === 2 && formData.shippingMethod !== 'pickup') {
+            // Verificar si hay API key configurada
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+            if (!apiKey) {
+                setIsGoogleMapsLoaded(false);
+                return;
+            }
+            
             googleMapsLoader.load()
                 .then(() => {
-                    console.log('Google Maps loaded for CheckoutModal');
                     setIsGoogleMapsLoaded(true);
                 })
                 .catch((error: Error) => {
-                    console.error('Error loading Google Maps:', error);
+                    // No mostrar error en consola si es problema de configuración
+                    setIsGoogleMapsLoaded(false);
                 });
         }
     }, [isOpen, currentStep, formData.shippingMethod]);
@@ -156,12 +182,25 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Función para obtener ubicación del usuario
     const getUserLocation = () => {
         if (!navigator.geolocation) {
-            alert('Tu navegador no soporta geolocalización');
+            alert('Tu navegador no soporta geolocalización. Por favor ingresa tu dirección manualmente.');
             return;
         }
 
-        // Si Google Maps no está cargado, cargar primero
+        // Verificar si estamos en HTTPS (requerido para geolocalización en producción)
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            alert('La geolocalización requiere conexión HTTPS. Por favor ingresa tu dirección manualmente.');
+            return;
+        }
+
+        // Si Google Maps no está cargado, intentar cargar pero continuar sin mapa si falla
         if (!isGoogleMapsLoaded) {
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+            if (!apiKey) {
+                // Si no hay API key, usar directamente geolocalización sin mapa
+                getLocationWithoutMap();
+                return;
+            }
+            
             setGettingLocation(true);
             googleMapsLoader.load()
                 .then(() => {
@@ -170,14 +209,41 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     getLocationAndShowMap();
                 })
                 .catch((error: Error) => {
-                    setGettingLocation(false);
-                    console.error('Error loading Google Maps:', error);
-                    alert('Error al cargar Google Maps. Por favor intenta de nuevo.');
+                    // Continuar con geolocalización sin mapa
+                    getLocationWithoutMap();
                 });
         } else {
             // Si ya está cargado, obtener ubicación directamente
             getLocationAndShowMap();
         }
+    };
+
+    // Función para obtener ubicación sin mapa (fallback)
+    const getLocationWithoutMap = () => {
+        setGettingLocation(true);
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setGettingLocation(false);
+                
+                // Guardar coordenadas del usuario
+                setUserCoordinates({ lat: latitude, lng: longitude });
+                
+                // Mostrar confirmación simple al usuario
+                alert('¡Ubicación confirmada! El costo de envío se ha actualizado.');
+            },
+            (error) => {
+                setGettingLocation(false);
+                console.error('Error getting location:', error);
+                handleGeolocationError(error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000, // Aumentar timeout a 15 segundos
+                maximumAge: 300000 // 5 minutos
+            }
+        );
     };
 
     const getLocationAndShowMap = () => {
@@ -200,27 +266,34 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             (error) => {
                 setGettingLocation(false);
                 console.error('Error getting location:', error);
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        alert('Debes permitir el acceso a la ubicación para usar esta función.');
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        alert('La información de ubicación no está disponible.');
-                        break;
-                    case error.TIMEOUT:
-                        alert('Se agotó el tiempo para obtener la ubicación.');
-                        break;
-                    default:
-                        alert('Ocurrió un error al obtener la ubicación.');
-                        break;
-                }
+                handleGeolocationError(error);
             },
             {
                 enableHighAccuracy: true,
-                timeout: 10000,
+                timeout: 15000, // Aumentar timeout a 15 segundos
                 maximumAge: 300000 // 5 minutos
             }
         );
+    };
+
+    // Función centralizada para manejar errores de geolocalización
+    const handleGeolocationError = (error: GeolocationPositionError) => {
+        let message = '';
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                message = 'Debes permitir el acceso a la ubicación para usar esta función. Revisa la configuración de tu navegador.';
+                break;
+            case error.POSITION_UNAVAILABLE:
+                message = 'La información de ubicación no está disponible. Por favor ingresa tu dirección manualmente.';
+                break;
+            case error.TIMEOUT:
+                message = 'Se agotó el tiempo para obtener la ubicación. Intenta de nuevo o ingresa tu dirección manualmente.';
+                break;
+            default:
+                message = 'Ocurrió un error al obtener la ubicación. Por favor ingresa tu dirección manualmente.';
+                break;
+        }
+        alert(message);
     };
 
     // Inicializar mapa con ubicación
@@ -509,7 +582,15 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <span className="nbd-method-name">Envío a domicilio</span>
                                                     <span className="nbd-method-desc">3-5 días hábiles</span>
                                                 </div>
-
+                                                <span className="nbd-method-price">
+                                                    {userCoordinates && deliveryZones.length > 0 ? (
+                                                        formData.shippingMethod === 'standard' && shippingCost > 0 ? 
+                                                            formatPrice(shippingCost, currency) : 
+                                                            userCoordinates ? 'Gratis' : 'Calculando...'
+                                                    ) : (
+                                                        loadingZones ? 'Cargando...' : 'Usar ubicación'
+                                                    )}
+                                                </span>
                                             </div>
                                         </label>
                                         <label className={`nbd-method-option ${formData.shippingMethod === 'express' ? 'selected' : ''}`}>
@@ -540,8 +621,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 <button
                                                     type="button"
                                                     onClick={getUserLocation}
-                                                    disabled={gettingLocation || !isGoogleMapsLoaded}
+                                                    disabled={gettingLocation}
                                                     className="nbd-location-btn"
+                                                    title="Obtener mi ubicación actual"
                                                 >
                                                     {gettingLocation ? (
                                                         <>
@@ -580,6 +662,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 placeholder="Escribe tu dirección completa..."
                                                 required
                                             />
+
                                         </div>
 
                                         {/* Mapa interactivo */}
