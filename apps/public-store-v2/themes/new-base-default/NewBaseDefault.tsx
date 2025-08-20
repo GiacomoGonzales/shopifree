@@ -21,12 +21,13 @@ type Props = {
     storeSubdomain: string;
     categorySlug?: string;
     effectiveLocale: string;
+    storeId?: string | null;
 };
 
-export default function NewBaseDefault({ storeSubdomain, categorySlug, effectiveLocale }: Props) {
+export default function NewBaseDefault({ storeSubdomain, categorySlug, effectiveLocale, storeId }: Props) {
     // 🌐 Usar textos dinámicos según el idioma configurado en la tienda
     const { t, language } = useStoreLanguage();
-    const { addItem, openCart } = useCart();
+    const { addItem, openCart, state: cartState } = useCart();
     
     // 🆕 Textos adicionales que faltan - Helper rápido
     const additionalText = (key: string) => {
@@ -146,7 +147,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const categorySlugFromUrl = categorySlug || (isOnCategoryPage ? 
         window.location.pathname.split('/categoria/')[1]?.split('/')[0] : null);
 
-    const [storeId, setStoreId] = useState<string | null>(null);
+    const [storeIdState, setStoreIdState] = useState<string | null>(null);
+    const resolvedStoreId = storeId || storeIdState;
     const [loading, setLoading] = useState<boolean>(true);
     const [products, setProducts] = useState<PublicProduct[] | null>(null);
     const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
@@ -159,8 +161,20 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
     const [currentSort, setCurrentSort] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc'>('newest');
     const [filters, setFilters] = useState<Filter[]>([]);
+    const [loadingCartButton, setLoadingCartButton] = useState<string | null>(null); // ID del producto que está siendo agregado
     const [filtersModalOpen, setFiltersModalOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+
+    // Resetear botón cuando se cierre el carrito (solo cuando se cierra, no cuando se abre)
+    useEffect(() => {
+        if (!cartState.isOpen && loadingCartButton) {
+            // Agregar una pequeña demora antes de resetear para que el usuario vea el efecto completo
+            const timeout = setTimeout(() => {
+                setLoadingCartButton(null);
+            }, 300);
+            return () => clearTimeout(timeout);
+        }
+    }, [cartState.isOpen, loadingCartButton]);
 
     // Cargar datos de la tienda
     useEffect(() => {
@@ -169,7 +183,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             try {
                 const id = await getStoreIdBySubdomain(storeSubdomain);
                 if (!alive) return;
-                setStoreId(id);
+                setStoreIdState(id);
                 if (id) {
                     const [items, info, cats, brandList, filterList] = await Promise.all([
                         getStoreProducts(id),
@@ -461,8 +475,11 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
         return Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
     };
 
-    // Función para agregar producto al carrito
-    const handleAddToCart = (product: PublicProduct) => {
+    // Función para agregar producto al carrito con efecto visual
+    const handleAddToCart = async (product: PublicProduct) => {
+        // Iniciar efecto visual en el botón
+        setLoadingCartButton(product.id);
+        
         // Verificar si el producto tiene variantes disponibles
         const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
         const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
@@ -487,6 +504,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                 return displayNames[key] || key;
             });
         }
+
+        // Demora antes de agregar al carrito (800ms para un efecto visual agradable)
+        await new Promise(resolve => setTimeout(resolve, 800));
 
         addItem({
             id: product.id, // Campo requerido por CartItem
@@ -906,12 +926,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                                             </div>
                                             
                                                                         <button 
-                                className="nbd-add-to-cart"
+                                className={`nbd-add-to-cart ${loadingCartButton === product.id ? 'nbd-add-to-cart--loading' : ''}`}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleAddToCart(product);
                                 }}
                                 aria-label={`Agregar ${product.name} al carrito`}
+                                disabled={loadingCartButton === product.id}
                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -1174,7 +1195,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             )}
 
             {/* Modal del carrito */}
-            <CartModal />
+            <CartModal storeInfo={storeInfo} storeId={resolvedStoreId} />
         </div>
     );
 }

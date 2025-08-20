@@ -5,6 +5,7 @@
 
 /**
  * Genera imagen optimizada para WhatsApp (400x400px) automáticamente desde Cloudinary
+ * Usa c_fill con gravity para mejor recorte y formato JPEG para compatibilidad
  * @param originalImage URL original de la imagen
  * @returns URL optimizada para WhatsApp o imagen original si no es de Cloudinary
  */
@@ -17,7 +18,7 @@ export function generateWhatsAppImage(originalImage: string): string {
     if (originalImage.includes('cloudinary.com') && originalImage.includes('/upload/')) {
         return originalImage.replace(
             '/upload/',
-            '/upload/c_fill,w_400,h_400,q_auto,f_auto/'
+            '/upload/c_fill,w_400,h_400,g_auto,q_auto,f_jpg/'
         );
     }
     

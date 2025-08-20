@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
 import { StoreBasicInfo } from '../../lib/store';
+import { googleMapsLoader } from '../../lib/google-maps';
+import { 
+    getStoreDeliveryZones, 
+    calculateShippingCost, 
+    DeliveryZone 
+} from '../../lib/delivery-zones';
 
 interface CheckoutData {
     email: string;
@@ -25,13 +31,24 @@ interface CheckoutModalProps {
     onClose: () => void;
     onSuccess: () => void;
     storeInfo?: StoreBasicInfo | null;
+    storeId?: string;
 }
 
-export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }: CheckoutModalProps) {
+export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, storeId }: CheckoutModalProps) {
     const { state, clearCart } = useCart();
     const { t } = useStoreLanguage();
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+    const autocompleteRef = useRef<HTMLInputElement>(null);
+    const mapRef = useRef<HTMLDivElement>(null);
+    const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+    const [showMap, setShowMap] = useState(false);
+    const [gettingLocation, setGettingLocation] = useState(false);
+    const [userCoordinates, setUserCoordinates] = useState<{lat: number; lng: number} | null>(null);
+    const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+    const [loadingZones, setLoadingZones] = useState(false);
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
         firstName: '',
@@ -48,22 +65,253 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
     // Obtener moneda de la tienda
     const currency = storeInfo?.currency || 'PEN';
     
-    // Calcular costos
+    // Calcular costos usando zonas de entrega
     const subtotal = state.totalPrice;
-    const shipping = formData.shippingMethod === 'express' ? 15000 : 
-                    formData.shippingMethod === 'pickup' ? 0 : 8000;
+    const shipping = formData.shippingMethod === 'pickup' ? 0 : 
+                    (userCoordinates ? calculateShippingCost(userCoordinates, deliveryZones, formData.shippingMethod) : 0);
     const total = subtotal + shipping;
 
-    // Reset al abrir
+    // Reset al abrir/cerrar
     useEffect(() => {
         if (isOpen) {
             setCurrentStep(1);
             setIsSubmitting(false);
+        } else {
+            // Limpiar estados al cerrar
+            setShowMap(false);
+            setMap(null);
+            setMarker(null);
+            setUserCoordinates(null);
         }
     }, [isOpen]);
 
+    // Cargar zonas de entrega cuando se abre el modal
+    useEffect(() => {
+        if (isOpen && storeId && deliveryZones.length === 0 && !loadingZones) {
+            setLoadingZones(true);
+            getStoreDeliveryZones(storeId)
+                .then((zones) => {
+                    setDeliveryZones(zones);
+                    console.log(`[CheckoutModal] Cargadas ${zones.length} zonas de entrega`);
+                })
+                .catch((error) => {
+                    console.error('[CheckoutModal] Error cargando zonas de entrega:', error);
+                })
+                .finally(() => {
+                    setLoadingZones(false);
+                });
+        }
+    }, [isOpen, storeId]);
+
+    // Cargar Google Maps API usando el loader centralizado (igual que en dashboard)
+    useEffect(() => {
+        if (isOpen && currentStep === 2 && formData.shippingMethod !== 'pickup') {
+            googleMapsLoader.load()
+                .then(() => {
+                    console.log('Google Maps loaded for CheckoutModal');
+                    setIsGoogleMapsLoaded(true);
+                })
+                .catch((error: Error) => {
+                    console.error('Error loading Google Maps:', error);
+                });
+        }
+    }, [isOpen, currentStep, formData.shippingMethod]);
+
+    // Cleanup del mapa al cerrar el modal o cambiar de método de envío
+    useEffect(() => {
+        if (!isOpen || formData.shippingMethod === 'pickup') {
+            setShowMap(false);
+            setMap(null);
+            setMarker(null);
+        }
+    }, [isOpen, formData.shippingMethod]);
+
+    // Configurar autocompletado cuando Google Maps esté cargado (igual que en dashboard)
+    useEffect(() => {
+        if (isGoogleMapsLoaded && autocompleteRef.current && formData.shippingMethod !== 'pickup') {
+            const autocomplete = new window.google.maps.places.Autocomplete(autocompleteRef.current, {
+                types: ['address'],
+                componentRestrictions: { country: ['mx', 'ar', 'co', 'pe', 'cl', 've', 'ec', 'bo', 'py', 'uy', 'br', 'es', 'us'] }
+            });
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                
+                if (place.geometry && place.geometry.location) {
+                    const address = place.formatted_address || place.name || '';
+                    handleInputChange('address', address);
+                }
+            });
+
+            return () => {
+                window.google.maps.event.clearInstanceListeners(autocomplete);
+            };
+        }
+    }, [isGoogleMapsLoaded, formData.shippingMethod]);
+
     const handleInputChange = (field: keyof CheckoutData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    // Función para obtener ubicación del usuario
+    const getUserLocation = () => {
+        if (!navigator.geolocation) {
+            alert('Tu navegador no soporta geolocalización');
+            return;
+        }
+
+        // Si Google Maps no está cargado, cargar primero
+        if (!isGoogleMapsLoaded) {
+            setGettingLocation(true);
+            googleMapsLoader.load()
+                .then(() => {
+                    setIsGoogleMapsLoaded(true);
+                    // Una vez cargado, obtener ubicación
+                    getLocationAndShowMap();
+                })
+                .catch((error: Error) => {
+                    setGettingLocation(false);
+                    console.error('Error loading Google Maps:', error);
+                    alert('Error al cargar Google Maps. Por favor intenta de nuevo.');
+                });
+        } else {
+            // Si ya está cargado, obtener ubicación directamente
+            getLocationAndShowMap();
+        }
+    };
+
+    const getLocationAndShowMap = () => {
+        setGettingLocation(true);
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setGettingLocation(false);
+                setShowMap(true);
+                
+                // Guardar coordenadas del usuario
+                setUserCoordinates({ lat: latitude, lng: longitude });
+                
+                // Usar setTimeout para asegurar que el DOM esté listo
+                setTimeout(() => {
+                    initializeMap(latitude, longitude);
+                }, 100);
+            },
+            (error) => {
+                setGettingLocation(false);
+                console.error('Error getting location:', error);
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert('Debes permitir el acceso a la ubicación para usar esta función.');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert('La información de ubicación no está disponible.');
+                        break;
+                    case error.TIMEOUT:
+                        alert('Se agotó el tiempo para obtener la ubicación.');
+                        break;
+                    default:
+                        alert('Ocurrió un error al obtener la ubicación.');
+                        break;
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000 // 5 minutos
+            }
+        );
+    };
+
+    // Inicializar mapa con ubicación
+    const initializeMap = (lat: number, lng: number) => {
+        if (!mapRef.current || !isGoogleMapsLoaded || !window.google?.maps) {
+            console.log('Map initialization skipped:', {
+                hasMapRef: !!mapRef.current,
+                isGoogleMapsLoaded,
+                hasGoogleMaps: !!window.google?.maps
+            });
+            return;
+        }
+
+        console.log('Initializing map at:', lat, lng);
+
+        try {
+            const newMap = new window.google.maps.Map(mapRef.current, {
+                center: { lat, lng },
+                zoom: 16,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+
+            const newMarker = new window.google.maps.Marker({
+                position: { lat, lng },
+                map: newMap,
+                draggable: true,
+                title: "Arrastra para ajustar tu ubicación exacta"
+            });
+
+            // Listener para cuando se mueva el marcador
+            newMarker.addListener('dragend', () => {
+                const position = newMarker.getPosition();
+                if (position) {
+                    reverseGeocode(position.lat(), position.lng());
+                }
+            });
+
+            // Listener para clicks en el mapa
+            newMap.addListener('click', (event: google.maps.MapMouseEvent) => {
+                if (event.latLng) {
+                    newMarker.setPosition(event.latLng);
+                    reverseGeocode(event.latLng.lat(), event.latLng.lng());
+                }
+            });
+
+            // Listener para cuando el mapa esté completamente cargado
+            newMap.addListener('idle', () => {
+                console.log('Map fully loaded and ready');
+            });
+
+            setMap(newMap);
+            setMarker(newMarker);
+
+            // Obtener dirección inicial con un pequeño delay
+            setTimeout(() => {
+                reverseGeocode(lat, lng);
+            }, 500);
+
+        } catch (error) {
+            console.error('Error initializing map:', error);
+        }
+    };
+
+    // Convertir coordenadas a dirección
+    const reverseGeocode = (lat: number, lng: number) => {
+        if (!isGoogleMapsLoaded) return;
+
+        // Actualizar coordenadas del usuario
+        setUserCoordinates({ lat, lng });
+
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode(
+            { location: { lat, lng } },
+            (results, status) => {
+                if (status === 'OK' && results && results[0]) {
+                    const address = results[0].formatted_address;
+                    handleInputChange('address', address);
+                } else {
+                    console.error('Geocoder failed:', status);
+                }
+            }
+        );
     };
 
     const validateStep = (step: number): boolean => {
@@ -71,9 +319,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
             case 1:
                 return !!(formData.email && formData.firstName && formData.lastName && formData.phone);
             case 2:
-                return !!(formData.address && formData.city);
+                // Para recojo en tienda no necesita dirección
+                if (formData.shippingMethod === 'pickup') {
+                    return true;
+                }
+                // Para envío a domicilio o express necesita dirección
+                return !!formData.address;
             case 3:
-                return true; // Métodos de envío y pago siempre válidos (tienen defaults)
+                return !!(formData.paymentMethod); // Método de pago requerido
             default:
                 return false;
         }
@@ -144,7 +397,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
                                     </div>
                                     <span className="nbd-step-label">
                                         {step === 1 && 'Información'}
-                                        {step === 2 && 'Dirección'}
+                                        {step === 2 && 'Envío'}
                                         {step === 3 && 'Pago'}
                                     </span>
                                 </div>
@@ -219,56 +472,30 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
                             </div>
                         )}
 
-                        {/* Paso 2: Dirección */}
+                        {/* Paso 2: Envío */}
                         {currentStep === 2 && (
                             <div className="nbd-checkout-step">
-                                <h3 className="nbd-step-title">Dirección de envío</h3>
-                                <div className="nbd-form-grid">
-                                    <div className="nbd-form-group nbd-form-group--full">
-                                        <label className="nbd-form-label">Dirección *</label>
-                                        <input
-                                            type="text"
-                                            className="nbd-form-input"
-                                            value={formData.address}
-                                            onChange={(e) => handleInputChange('address', e.target.value)}
-                                            placeholder="Calle 123 #45-67"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="nbd-form-group">
-                                        <label className="nbd-form-label">Ciudad *</label>
-                                        <input
-                                            type="text"
-                                            className="nbd-form-input"
-                                            value={formData.city}
-                                            onChange={(e) => handleInputChange('city', e.target.value)}
-                                            placeholder="Bogotá"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="nbd-form-group">
-                                        <label className="nbd-form-label">Código postal</label>
-                                        <input
-                                            type="text"
-                                            className="nbd-form-input"
-                                            value={formData.zipCode}
-                                            onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                                            placeholder="110111"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Paso 3: Métodos */}
-                        {currentStep === 3 && (
-                            <div className="nbd-checkout-step">
-                                <h3 className="nbd-step-title">Entrega y pago</h3>
+                                <h3 className="nbd-step-title">Método de envío</h3>
                                 
-                                {/* Método de envío */}
+                                {/* Opciones de envío */}
                                 <div className="nbd-method-section">
-                                    <h4 className="nbd-method-title">Método de entrega</h4>
                                     <div className="nbd-method-options">
+                                        <label className={`nbd-method-option ${formData.shippingMethod === 'pickup' ? 'selected' : ''}`}>
+                                            <input
+                                                type="radio"
+                                                name="shipping"
+                                                value="pickup"
+                                                checked={formData.shippingMethod === 'pickup'}
+                                                onChange={(e) => handleInputChange('shippingMethod', e.target.value as any)}
+                                            />
+                                            <div className="nbd-method-content">
+                                                <div className="nbd-method-info">
+                                                    <span className="nbd-method-name">Recojo en tienda</span>
+                                                    <span className="nbd-method-desc">Disponible hoy</span>
+                                                </div>
+                                                <span className="nbd-method-price">Gratis</span>
+                                            </div>
+                                        </label>
                                         <label className={`nbd-method-option ${formData.shippingMethod === 'standard' ? 'selected' : ''}`}>
                                             <input
                                                 type="radio"
@@ -279,10 +506,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Envío estándar</span>
+                                                    <span className="nbd-method-name">Envío a domicilio</span>
                                                     <span className="nbd-method-desc">3-5 días hábiles</span>
                                                 </div>
-                                                <span className="nbd-method-price">{formatPrice(8000, currency)}</span>
+
                                             </div>
                                         </label>
                                         <label className={`nbd-method-option ${formData.shippingMethod === 'express' ? 'selected' : ''}`}>
@@ -295,34 +522,96 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Envío express</span>
+                                                    <span className="nbd-method-name">Envío Express</span>
                                                     <span className="nbd-method-desc">1-2 días hábiles</span>
                                                 </div>
-                                                <span className="nbd-method-price">{formatPrice(15000, currency)}</span>
-                                            </div>
-                                        </label>
-                                        <label className={`nbd-method-option ${formData.shippingMethod === 'pickup' ? 'selected' : ''}`}>
-                                            <input
-                                                type="radio"
-                                                name="shipping"
-                                                value="pickup"
-                                                checked={formData.shippingMethod === 'pickup'}
-                                                onChange={(e) => handleInputChange('shippingMethod', e.target.value as any)}
-                                            />
-                                            <div className="nbd-method-content">
-                                                <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Recoger en tienda</span>
-                                                    <span className="nbd-method-desc">Disponible hoy</span>
-                                                </div>
-                                                <span className="nbd-method-price">Gratis</span>
+
                                             </div>
                                         </label>
                                     </div>
                                 </div>
 
+                                {/* Dirección (solo si no es recojo en tienda) */}
+                                {formData.shippingMethod !== 'pickup' && (
+                                    <div style={{ marginTop: 'var(--nbd-space-xl)' }}>
+                                        <div className="nbd-form-group nbd-form-group--full">
+                                            <div className="nbd-address-header">
+                                                <label className="nbd-form-label">Dirección de envío *</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={getUserLocation}
+                                                    disabled={gettingLocation || !isGoogleMapsLoaded}
+                                                    className="nbd-location-btn"
+                                                >
+                                                    {gettingLocation ? (
+                                                        <>
+                                                            <div className="nbd-location-spinner"></div>
+                                                            Obteniendo...
+                                                        </>
+                                                                                                            ) : (
+                                                            <>
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path 
+                                                                        d="M21 10C21 17L12 23L3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" 
+                                                                        stroke="currentColor" 
+                                                                        strokeWidth="2"
+                                                                        fill="none"
+                                                                    />
+                                                                    <circle 
+                                                                        cx="12" 
+                                                                        cy="10" 
+                                                                        r="3" 
+                                                                        stroke="currentColor" 
+                                                                        strokeWidth="2"
+                                                                        fill="none"
+                                                                    />
+                                                                </svg>
+                                                                Usar mi ubicación
+                                                            </>
+                                                        )}
+                                                </button>
+                                            </div>
+                                            <input
+                                                ref={autocompleteRef}
+                                                type="text"
+                                                className="nbd-form-input"
+                                                value={formData.address}
+                                                onChange={(e) => handleInputChange('address', e.target.value)}
+                                                placeholder="Escribe tu dirección completa..."
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Mapa interactivo */}
+                                        {showMap && (
+                                            <div className="nbd-map-container">
+                                                <div className="nbd-map-header">
+                                                    <h4>📍 Ajusta tu ubicación exacta</h4>
+                                                    <p>Arrastra el marcador o haz clic en el mapa para marcar tu ubicación precisa</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowMap(false)}
+                                                        className="nbd-map-close"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                <div ref={mapRef} className="nbd-map"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Paso 3: Pago */}
+                        {currentStep === 3 && (
+                            <div className="nbd-checkout-step">
+                                <h3 className="nbd-step-title">Método de pago</h3>
+                                
                                 {/* Método de pago */}
                                 <div className="nbd-method-section">
-                                    <h4 className="nbd-method-title">Método de pago</h4>
+                                    <h4 className="nbd-method-title">Elige cómo quieres pagar</h4>
                                     <div className="nbd-method-options">
                                         <label className={`nbd-method-option ${formData.paymentMethod === 'cash' ? 'selected' : ''}`}>
                                             <input
@@ -438,7 +727,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo }:
                                 <div className="nbd-summary-line">
                                     <span>Envío</span>
                                     <span>
-                                        {shipping === 0 ? 'Gratis' : formatPrice(shipping, currency)}
+                                        {formData.shippingMethod === 'pickup' ? 'Gratis' : 
+                                         userCoordinates ? formatPrice(shipping, currency) : 
+                                         'Proporciona tu ubicación'}
                                     </span>
                                 </div>
                                 <div className="nbd-summary-line nbd-summary-total">

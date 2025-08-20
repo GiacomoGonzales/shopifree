@@ -91,10 +91,10 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
       {Object.entries(variantOptions).map(([variantKey, values]) => (
         <div key={variantKey} className="nbd-variant-group">
           <label className="nbd-variant-label">
-            {getDisplayName(variantKey)}: <span className={`nbd-variant-selected ${
+            {getDisplayName(variantKey)}{selectedVariant[variantKey] ? ': ' : ''}<span className={`nbd-variant-selected ${
               !selectedVariant[variantKey] ? 'nbd-variant-selected--placeholder' : ''
             }`}>
-              {selectedVariant[variantKey] || 'Seleccionar'}
+              {selectedVariant[variantKey] || ''}
             </span>
           </label>
           <div className="nbd-variant-options">

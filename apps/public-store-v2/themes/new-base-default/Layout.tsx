@@ -38,7 +38,7 @@ export default function Layout({ children, storeInfo, categories, storeSubdomain
             )}
             
             {/* Modal del carrito */}
-            <CartModal storeInfo={storeInfo} />
+            <CartModal storeInfo={storeInfo} storeId={storeId} />
         </div>
     );
 }

@@ -86,11 +86,34 @@ export default function LocaleLayout({
           }
         })()
         
+        // Cargar específicamente onboarding/user.json y onboarding/store.json
+        const onboardingUserPromise = (async () => {
+          try {
+            const onboardingUserModule = await import(`../../messages/${locale}/onboarding/user.json`)
+            return { section: 'onboarding-user', data: onboardingUserModule.default }
+          } catch {
+            console.log('⚠️ No se pudo cargar onboarding/user.json, usando fallback')
+            return { section: 'onboarding-user', data: {} }
+          }
+        })()
+
+        const onboardingStorePromise = (async () => {
+          try {
+            const onboardingStoreModule = await import(`../../messages/${locale}/onboarding/store.json`)
+            return { section: 'onboarding-store', data: onboardingStoreModule.default }
+          } catch {
+            console.log('⚠️ No se pudo cargar onboarding/store.json, usando fallback')
+            return { section: 'onboarding-store', data: {} }
+          }
+        })()
+        
         const sectionResults = await Promise.all(sectionPromises)
         const seoResult = await seoPromise
         const productsCreateResult = await productsCreatePromise
         const categoriesResult = await categoriesPromise
         const metadataResult = await metadataPromise
+        const onboardingUserResult = await onboardingUserPromise
+        const onboardingStoreResult = await onboardingStorePromise
         
         // Construir el objeto de secciones
         sectionResults.forEach(({ section, data }) => {
@@ -123,6 +146,12 @@ export default function LocaleLayout({
         sectionMessages.categories = categoriesResult.data.categories || {}
         sectionMessages.metadata = metadataResult.data.metadata || {}
         
+        // Agregar las traducciones de onboarding en la estructura correcta
+        sectionMessages.onboarding = {
+          user: onboardingUserResult.data,
+          store: onboardingStoreResult.data
+        }
+        
         // Estructura final de mensajes que next-intl espera
         const finalMessages = {
           // Mantener la estructura original del archivo principal
@@ -148,6 +177,9 @@ export default function LocaleLayout({
         console.log('🔧 Categorization cargado:', !!finalMessages.categorization)
         console.log('🔧 Categorization.categories cargado:', !!finalMessages.categorization?.categories)
         console.log('🔧 Categorization.metadata cargado:', !!finalMessages.categorization?.metadata)
+        console.log('🔧 Onboarding cargado:', !!finalMessages.onboarding)
+        console.log('🔧 Onboarding.user cargado:', !!finalMessages.onboarding?.user)
+        console.log('🔧 Onboarding.store cargado:', !!finalMessages.onboarding?.store)
         console.log('📋 Traducciones totales cargadas:', Object.keys(finalMessages).length)
         
         // Debug específico para categorías

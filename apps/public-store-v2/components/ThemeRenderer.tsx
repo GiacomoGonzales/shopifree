@@ -19,20 +19,22 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
     const [theme, setTheme] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [effectiveLocale, setEffectiveLocale] = useState<string>('es');
+    const [storeId, setStoreId] = useState<string | null>(null);
 
     useEffect(() => {
         let alive = true;
         (async () => {
             try {
-                const storeId = await getStoreIdBySubdomain(storeSubdomain);
+                const storeIdResult = await getStoreIdBySubdomain(storeSubdomain);
                 if (!alive) return;
                 
-                if (storeId) {
+                if (storeIdResult) {
                     const [storeTheme, primaryLocale] = await Promise.all([
-                        getStoreTheme(storeId),
-                        getStorePrimaryLocale(storeId)
+                        getStoreTheme(storeIdResult),
+                        getStorePrimaryLocale(storeIdResult)
                     ]);
                     if (!alive) return;
+                    setStoreId(storeIdResult);
                     setTheme(storeTheme);
                     setEffectiveLocale(primaryLocale || 'es');
                 } else {
@@ -69,6 +71,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
                     storeSubdomain={storeSubdomain} 
                     categorySlug={categorySlug}
                     effectiveLocale={effectiveLocale}
+                    storeId={storeId}
                 />
             );
         // TODO: Agregar más casos aquí conforme se creen nuevos temas
@@ -82,6 +85,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
                     storeSubdomain={storeSubdomain} 
                     categorySlug={categorySlug}
                     effectiveLocale={effectiveLocale}
+                    storeId={storeId}
                 />
             );
     }

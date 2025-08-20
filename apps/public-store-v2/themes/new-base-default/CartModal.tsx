@@ -10,9 +10,10 @@ import CheckoutModal from './CheckoutModal';
 
 interface CartModalProps {
     storeInfo?: StoreBasicInfo | null;
+    storeId?: string;
 }
 
-export default function CartModal({ storeInfo }: CartModalProps) {
+export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
     const { t } = useStoreLanguage();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -294,6 +295,7 @@ export default function CartModal({ storeInfo }: CartModalProps) {
                 onClose={handleCheckoutClose}
                 onSuccess={handleCheckoutSuccess}
                 storeInfo={storeInfo}
+                storeId={storeId}
             />
         </>
     );

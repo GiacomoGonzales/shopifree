@@ -1802,6 +1802,18 @@
         width: 16px;
         height: 16px;
     }
+
+    /* Efectos para botones en vistas móviles */
+    .nbd-mobile-grid .nbd-add-to-cart--loading,
+    .nbd-mobile-list .nbd-add-to-cart--loading {
+        background: var(--nbd-success) !important;
+    }
+
+    .nbd-mobile-grid .nbd-add-to-cart--loading:hover,
+    .nbd-mobile-list .nbd-add-to-cart--loading:hover {
+        background: var(--nbd-success) !important;
+        transform: scale(1.05);
+    }
     
     /* Etiqueta OFERTA responsive */
     
@@ -1993,11 +2005,44 @@
     justify-content: center;
     cursor: pointer;
     transition: all var(--nbd-transition-base);
+    position: relative;
+    overflow: hidden;
 }
 
 .nbd-add-to-cart:hover {
     background: var(--nbd-neutral-800);
     transform: scale(1.1);
+}
+
+/* Efecto de loading al agregar al carrito */
+.nbd-add-to-cart--loading {
+    background: var(--nbd-success) !important;
+    transform: scale(1.05);
+    cursor: not-allowed;
+    animation: nbd-cart-button-pulse 1.2s ease-in-out;
+}
+
+.nbd-add-to-cart--loading:hover {
+    background: var(--nbd-success) !important;
+    transform: scale(1.05);
+}
+
+/* Animación sutil y moderna para el botón */
+@keyframes nbd-cart-button-pulse {
+    0% {
+        background: var(--nbd-primary);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+    50% {
+        background: var(--nbd-success);
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.3);
+        transform: scale(1.1);
+    }
+    100% {
+        background: var(--nbd-success);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        transform: scale(1.05);
+    }
 }
 
 /* Estado vacío */
@@ -4175,7 +4220,9 @@
     }
     
     /* Font-size de 16px mínimo en input para evitar zoom en iOS */
-    .nbd-search-input {
+    .nbd-search-input,
+    .nbd-form-input,
+    .nbd-form-textarea {
         font-size: var(--nbd-font-size-base); /* 16px para evitar zoom en iOS */
     }
     
@@ -4970,6 +5017,169 @@
 .nbd-form-textarea {
     resize: vertical;
     min-height: 80px;
+}
+
+.nbd-form-help {
+    display: block;
+    margin-top: var(--nbd-space-xs);
+    font-size: var(--nbd-font-size-xs);
+    color: var(--nbd-neutral-500);
+    font-style: italic;
+}
+
+/* Address Header con botón de ubicación */
+.nbd-address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--nbd-space-sm);
+}
+
+/* Botón de ubicación */
+.nbd-location-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--nbd-space-xs);
+    padding: var(--nbd-space-xs) var(--nbd-space-sm);
+    background: var(--nbd-success);
+    color: white;
+    border: none;
+    border-radius: var(--nbd-radius-lg);
+    font-size: var(--nbd-font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--nbd-transition-base);
+}
+
+.nbd-location-btn:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.nbd-location-btn:disabled {
+    background: var(--nbd-neutral-400);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.nbd-location-btn svg {
+    flex-shrink: 0;
+}
+
+/* Spinner del botón de ubicación */
+.nbd-location-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid white;
+    animation: nbd-spin 1s linear infinite;
+}
+
+@keyframes nbd-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Contenedor del mapa */
+.nbd-map-container {
+    margin-top: var(--nbd-space-lg);
+    border: 2px solid var(--nbd-neutral-200);
+    border-radius: var(--nbd-radius-xl);
+    overflow: hidden;
+    background: var(--nbd-neutral-50);
+}
+
+.nbd-map-header {
+    padding: var(--nbd-space-lg);
+    background: var(--nbd-neutral-0);
+    border-bottom: 1px solid var(--nbd-neutral-200);
+    position: relative;
+}
+
+.nbd-map-header h4 {
+    font-size: var(--nbd-font-size-base);
+    font-weight: 600;
+    color: var(--nbd-primary);
+    margin: 0 0 var(--nbd-space-xs) 0;
+}
+
+.nbd-map-header p {
+    font-size: var(--nbd-font-size-sm);
+    color: var(--nbd-neutral-600);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.nbd-map-close {
+    position: absolute;
+    top: var(--nbd-space-lg);
+    right: var(--nbd-space-lg);
+    width: 32px;
+    height: 32px;
+    background: var(--nbd-neutral-200);
+    color: var(--nbd-neutral-600);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--nbd-transition-base);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.nbd-map-close:hover {
+    background: var(--nbd-neutral-300);
+    color: var(--nbd-neutral-800);
+}
+
+/* El mapa en sí */
+.nbd-map {
+    width: 100%;
+    height: 300px;
+    background: var(--nbd-neutral-200);
+}
+
+/* Responsive para móvil */
+@media (max-width: 768px) {
+    .nbd-address-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--nbd-space-sm);
+    }
+    
+    .nbd-location-btn {
+        align-self: flex-end;
+        font-size: var(--nbd-font-size-xs);
+        padding: var(--nbd-space-xs) var(--nbd-space-sm);
+    }
+    
+    .nbd-map-header {
+        padding: var(--nbd-space-md);
+    }
+    
+    .nbd-map-header h4 {
+        font-size: var(--nbd-font-size-sm);
+        margin-right: var(--nbd-space-xl);
+    }
+    
+    .nbd-map-header p {
+        font-size: var(--nbd-font-size-xs);
+    }
+    
+    .nbd-map-close {
+        top: var(--nbd-space-md);
+        right: var(--nbd-space-md);
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .nbd-map {
+        height: 250px;
+    }
 }
 
 /* Method sections */
