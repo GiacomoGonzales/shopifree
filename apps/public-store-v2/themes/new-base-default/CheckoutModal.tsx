@@ -933,26 +933,62 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     hasGoogleMaps,
                                                     hasCoordinates,
                                                     userCoordinates,
-                                                    userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A'
+                                                    shouldShowButton: hasCoordinates,
+                                                    windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'N/A',
+                                                    userAgent: typeof window !== 'undefined' ? navigator.userAgent.substring(0, 50) + '...' : 'N/A'
                                                 });
                                                 
-                                                // Mostrar botón si hay coordenadas, independientemente del estado de Google Maps
-                                                const shouldShowButton = hasCoordinates && (isGoogleMapsLoaded || hasGoogleMaps);
+                                                // Log extra para debug en móviles
+                                                if (isMobileDevice) {
+                                                    console.log('📱 [MOBILE SPECIFIC]:', {
+                                                        'Will show button?': hasCoordinates,
+                                                        'Coordinates exists?': !!userCoordinates,
+                                                        'Coordinates value': userCoordinates
+                                                    });
+                                                }
+                                                
+                                                // Mostrar botón si hay coordenadas (simplificado para móviles)
+                                                // También revisar si el formulario tiene coordenadas guardadas
+                                                const hasFormCoordinates = !!(formData.lat && formData.lng);
+                                                const hasAddressText = !!(formData.address && formData.address.length > 10);
+                                                
+                                                // En móviles, ser más permisivo - mostrar botón si hay cualquier indicación de ubicación
+                                                let shouldShowButton = hasCoordinates || hasFormCoordinates;
+                                                if (isMobileDevice && !shouldShowButton && hasAddressText) {
+                                                    console.log('📱 [MOBILE FALLBACK] Showing button due to address text');
+                                                    shouldShowButton = true;
+                                                }
+                                                
+                                                if (isMobileDevice) {
+                                                    console.log('📱 [BUTTON DECISION]:', {
+                                                        hasCoordinates,
+                                                        hasFormCoordinates,
+                                                        formDataLat: formData.lat,
+                                                        formDataLng: formData.lng,
+                                                        finalDecision: shouldShowButton
+                                                    });
+                                                }
                                                 
                                                 if (!shouldShowButton) {
+                                                    console.log('❌ [BUTTON HIDDEN] No coordinates found');
                                                     return null;
                                                 }
                                                 
+                                                console.log('✅ [BUTTON RENDERED] Map toggle button is being rendered');
+                                                
                                                 return (
-                                                    <div className="nbd-map-toggle-container">
+                                                    <div className="nbd-map-toggle-container" style={{backgroundColor: isMobileDevice ? '#f0f8ff' : 'transparent', border: isMobileDevice ? '2px solid #007bff' : 'none'}}>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
+                                                                console.log('🔘 [BUTTON CLICKED] Map toggle button clicked');
                                                                 if (!showMap) {
                                                                     setShowMap(true);
                                                                     setTimeout(() => {
                                                                         if (userCoordinates) {
                                                                             initializeMap(userCoordinates.lat, userCoordinates.lng);
+                                                                        } else if (formData.lat && formData.lng) {
+                                                                            initializeMap(formData.lat, formData.lng);
                                                                         }
                                                                     }, 100);
                                                                 } else {
@@ -960,6 +996,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                                 }
                                                             }}
                                                             className="nbd-map-toggle-btn"
+                                                            style={{backgroundColor: isMobileDevice ? '#007bff' : '', color: isMobileDevice ? 'white' : ''}}
                                                         >
                                                                                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke="currentColor" strokeWidth="2" fill="none"/>
