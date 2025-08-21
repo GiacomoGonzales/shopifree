@@ -535,12 +535,19 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     setTimeout(() => {
                         console.log('🗺️ [Mobile Check] Verifying map content loaded');
                         // Intentar forzar la carga de tiles
-                        window.google.maps.event.trigger(newMap, 'resize');
-                        newMap.setZoom(newMap.getZoom() + 1);
-                        setTimeout(() => {
-                            newMap.setZoom(newMap.getZoom() - 1);
-                            newMap.setCenter({ lat, lng });
-                        }, 100);
+                        if (newMap && window.google?.maps) {
+                            window.google.maps.event.trigger(newMap, 'resize');
+                            const currentZoom = newMap.getZoom();
+                            if (currentZoom !== undefined) {
+                                newMap.setZoom(currentZoom + 1);
+                                setTimeout(() => {
+                                    if (newMap && currentZoom !== undefined) {
+                                        newMap.setZoom(currentZoom);
+                                        newMap.setCenter({ lat, lng });
+                                    }
+                                }, 100);
+                            }
+                        }
                     }, 500);
                 }
             }, 100);
