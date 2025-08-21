@@ -489,20 +489,61 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         console.log('✅ Initializing map at:', lat, lng);
 
         try {
-            const newMap = new window.google.maps.Map(mapRef.current, {
+            // Configuración específica para móviles
+            const mapOptions = {
                 center: { lat, lng },
-                zoom: 16,
+                zoom: isMobileDevice ? 15 : 16, // Zoom ligeramente menor en móviles
+                mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+                // Configuraciones específicas para móviles
+                gestureHandling: isMobileDevice ? 'cooperative' : 'auto',
+                zoomControl: true,
                 mapTypeControl: false,
+                scaleControl: false,
                 streetViewControl: false,
-                fullscreenControl: false,
-                styles: [
+                rotateControl: false,
+                fullscreenControl: !isMobileDevice,
+                // Configuraciones para mejorar el rendimiento en móviles
+                styles: isMobileDevice ? [
                     {
                         featureType: "poi",
                         elementType: "labels",
                         stylers: [{ visibility: "off" }]
                     }
-                ]
+                ] : undefined
+            };
+            
+            console.log('🗺️ [Map Creation] Creating map with options:', mapOptions);
+            const newMap = new window.google.maps.Map(mapRef.current, mapOptions);
+            
+            // Eventos específicos para debug en móviles
+            newMap.addListener('idle', () => {
+                console.log('🗺️ [Map Event] Map is idle and ready');
             });
+            
+            newMap.addListener('tilesloaded', () => {
+                console.log('🗺️ [Map Event] Map tiles loaded successfully');
+            });
+            
+            // Forzar resize después de un breve delay (importante para móviles)
+            setTimeout(() => {
+                console.log('🗺️ [Map Resize] Triggering resize for mobile');
+                window.google.maps.event.trigger(newMap, 'resize');
+                newMap.setCenter({ lat, lng });
+                
+                // Verificación adicional para móviles
+                if (isMobileDevice) {
+                    setTimeout(() => {
+                        console.log('🗺️ [Mobile Check] Verifying map content loaded');
+                        // Intentar forzar la carga de tiles
+                        window.google.maps.event.trigger(newMap, 'resize');
+                        newMap.setZoom(newMap.getZoom() + 1);
+                        setTimeout(() => {
+                            newMap.setZoom(newMap.getZoom() - 1);
+                            newMap.setCenter({ lat, lng });
+                        }, 100);
+                    }, 500);
+                }
+            }, 100);
 
             const newMarker = new window.google.maps.Marker({
                 position: { lat, lng },
