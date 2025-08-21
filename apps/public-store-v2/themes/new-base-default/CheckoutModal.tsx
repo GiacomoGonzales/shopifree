@@ -25,6 +25,11 @@ interface CheckoutData {
     shippingMethod: 'standard' | 'express' | 'pickup';
     paymentMethod: 'cash' | 'transfer' | 'card';
     notes: string;
+    // Nuevos campos para manejo avanzado de direcciones
+    addressText: string; // Lo que escribió el usuario
+    lat: number | null; // Latitud del pin final
+    lng: number | null; // Longitud del pin final
+    addressNormalized: string; // Dirección sugerida/normalizada
 }
 
 interface CheckoutModalProps {
@@ -53,6 +58,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
     const [loadingZones, setLoadingZones] = useState(false);
     const [shippingCost, setShippingCost] = useState(0);
+    const [suggestedAddress, setSuggestedAddress] = useState<string>('');
+    const [showAddressSuggestion, setShowAddressSuggestion] = useState(false);
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
         firstName: '',
@@ -63,7 +70,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         zipCode: '',
         shippingMethod: 'standard',
         paymentMethod: 'cash',
-        notes: ''
+        notes: '',
+        // Nuevos campos para manejo avanzado de direcciones
+        addressText: '',
+        lat: null,
+        lng: null,
+        addressNormalized: ''
     });
 
     // Obtener moneda de la tienda
@@ -177,6 +189,65 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
     const handleInputChange = (field: keyof CheckoutData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+        
+        // Si es el campo address, actualizar también addressText
+        if (field === 'address') {
+            setFormData(prev => ({ ...prev, addressText: value }));
+        }
+    };
+
+    // Función para geocoding directo (texto → lat/lng)
+    const handleDirectGeocoding = (addressText: string) => {
+        if (!isGoogleMapsLoaded || !addressText.trim()) return;
+
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode(
+            { address: addressText },
+            (results, status) => {
+                if (status === 'OK' && results && results[0]) {
+                    const location = results[0].geometry.location;
+                    const lat = location.lat();
+                    const lng = location.lng();
+                    
+                    // Actualizar coordenadas en formData y userCoordinates
+                    setFormData(prev => ({ 
+                        ...prev, 
+                        lat: lat, 
+                        lng: lng,
+                        // Opcionalmente normalizar la dirección
+                        addressNormalized: results[0].formatted_address
+                    }));
+                    setUserCoordinates({ lat, lng });
+                    
+                    // Si hay mapa y marcador, actualizar posición
+                    if (map && marker) {
+                        const newPosition = new google.maps.LatLng(lat, lng);
+                        map.setCenter(newPosition);
+                        marker.setPosition(newPosition);
+                    } else if (isGoogleMapsLoaded) {
+                        // Si no hay mapa visible, mostrarlo
+                        setShowMap(true);
+                        setTimeout(() => {
+                            initializeMap(lat, lng);
+                        }, 100);
+                    }
+                } else {
+                    console.error('Geocoding failed:', status);
+                    alert('No se pudo encontrar la dirección. Por favor verifica que esté correcta.');
+                }
+            }
+        );
+    };
+
+    // Función para manejar Enter en el campo de dirección
+    const handleAddressKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const addressText = (e.target as HTMLInputElement).value;
+            if (addressText.trim()) {
+                handleDirectGeocoding(addressText);
+            }
+        }
     };
 
     // Función para obtener ubicación del usuario
@@ -229,9 +300,29 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 
                 // Guardar coordenadas del usuario
                 setUserCoordinates({ lat: latitude, lng: longitude });
+                setFormData(prev => ({ ...prev, lat: latitude, lng: longitude }));
                 
-                // Mostrar confirmación simple al usuario
-                alert('¡Ubicación confirmada! El costo de envío se ha actualizado.');
+                // Si Google Maps está disponible, hacer reverse geocoding
+                if (isGoogleMapsLoaded) {
+                    const geocoder = new window.google.maps.Geocoder();
+                    geocoder.geocode(
+                        { location: { lat: latitude, lng: longitude } },
+                        (results, status) => {
+                            if (status === 'OK' && results && results[0]) {
+                                const suggestedAddr = results[0].formatted_address;
+                                // Proponer la dirección encontrada
+                                setSuggestedAddress(suggestedAddr);
+                                setShowAddressSuggestion(true);
+                                setFormData(prev => ({ ...prev, addressNormalized: suggestedAddr }));
+                                alert('¡Ubicación obtenida! Se ha encontrado una dirección sugerida.');
+                            } else {
+                                alert('¡Ubicación confirmada! El costo de envío se ha actualizado.');
+                            }
+                        }
+                    );
+                } else {
+                    alert('¡Ubicación confirmada! El costo de envío se ha actualizado.');
+                }
             },
             (error) => {
                 setGettingLocation(false);
@@ -336,7 +427,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             newMarker.addListener('dragend', () => {
                 const position = newMarker.getPosition();
                 if (position) {
-                    reverseGeocode(position.lat(), position.lng());
+                    reverseGeocode(position.lat(), position.lng(), true); // fromUserAction = true
                 }
             });
 
@@ -344,7 +435,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             newMap.addListener('click', (event: google.maps.MapMouseEvent) => {
                 if (event.latLng) {
                     newMarker.setPosition(event.latLng);
-                    reverseGeocode(event.latLng.lat(), event.latLng.lng());
+                    reverseGeocode(event.latLng.lat(), event.latLng.lng(), true); // fromUserAction = true
                 }
             });
 
@@ -366,25 +457,61 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     };
 
-    // Convertir coordenadas a dirección
-    const reverseGeocode = (lat: number, lng: number) => {
+    // Convertir coordenadas a dirección (mejorado para mostrar sugerencias)
+    const reverseGeocode = (lat: number, lng: number, fromUserAction: boolean = false) => {
         if (!isGoogleMapsLoaded) return;
 
-        // Actualizar coordenadas del usuario
+        // Actualizar coordenadas del usuario y en formData
         setUserCoordinates({ lat, lng });
+        setFormData(prev => ({ ...prev, lat, lng }));
 
         const geocoder = new window.google.maps.Geocoder();
         geocoder.geocode(
             { location: { lat, lng } },
             (results, status) => {
                 if (status === 'OK' && results && results[0]) {
-                    const address = results[0].formatted_address;
-                    handleInputChange('address', address);
+                    const suggestedAddr = results[0].formatted_address;
+                    
+                    if (fromUserAction && formData.addressText.trim()) {
+                        // Si viene de una acción del usuario (arrastrar pin) y ya hay texto,
+                        // mostrar como sugerencia sin reemplazar
+                        setSuggestedAddress(suggestedAddr);
+                        setShowAddressSuggestion(true);
+                        setFormData(prev => ({ ...prev, addressNormalized: suggestedAddr }));
+                    } else {
+                        // Si no hay texto del usuario o es la primera vez, usar directamente
+                        handleInputChange('address', suggestedAddr);
+                        setFormData(prev => ({ 
+                            ...prev, 
+                            addressText: suggestedAddr,
+                            addressNormalized: suggestedAddr 
+                        }));
+                    }
                 } else {
                     console.error('Geocoder failed:', status);
                 }
             }
         );
+    };
+
+    // Función para aceptar la dirección sugerida
+    const acceptSuggestedAddress = () => {
+        if (suggestedAddress) {
+            handleInputChange('address', suggestedAddress);
+            setFormData(prev => ({ 
+                ...prev, 
+                addressText: suggestedAddress,
+                addressNormalized: suggestedAddress 
+            }));
+            setShowAddressSuggestion(false);
+            setSuggestedAddress('');
+        }
+    };
+
+    // Función para rechazar la dirección sugerida
+    const rejectSuggestedAddress = () => {
+        setShowAddressSuggestion(false);
+        setSuggestedAddress('');
     };
 
     const validateStep = (step: number): boolean => {
@@ -425,12 +552,49 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         // Simular proceso de checkout
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Aquí iría la integración real con el sistema de checkout
-        console.log('Datos del checkout:', {
-            formData,
+        // Preparar payload completo del checkout con información de dirección
+        const checkoutPayload = {
+            // Información del cliente
+            customer: {
+                email: formData.email,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phone: formData.phone
+            },
+            // Información de envío con campos avanzados
+            shipping: {
+                method: formData.shippingMethod,
+                addressText: formData.addressText || formData.address, // Lo que escribió el usuario
+                lat: formData.lat, // Coordenadas del pin final
+                lng: formData.lng,
+                addressNormalized: formData.addressNormalized, // Dirección sugerida/normalizada
+                city: formData.city,
+                zipCode: formData.zipCode,
+                cost: shipping
+            },
+            // Información de pago
+            payment: {
+                method: formData.paymentMethod,
+                notes: formData.notes
+            },
+            // Items del pedido
             items: state.items,
-            totals: { subtotal, shipping, total }
-        });
+            // Totales
+            totals: { 
+                subtotal, 
+                shipping, 
+                total 
+            },
+            // Metadata adicional
+            metadata: {
+                storeId: storeId,
+                currency: currency,
+                timestamp: new Date().toISOString()
+            }
+        };
+        
+        // Aquí iría la integración real con el sistema de checkout
+        console.log('Datos del checkout completos:', checkoutPayload);
         
         clearCart();
         setIsSubmitting(false);
@@ -659,9 +823,39 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 className="nbd-form-input"
                                                 value={formData.address}
                                                 onChange={(e) => handleInputChange('address', e.target.value)}
-                                                placeholder="Escribe tu dirección completa..."
+                                                onKeyPress={handleAddressKeyPress}
+                                                placeholder="Escribe tu dirección completa y presiona ENTER..."
                                                 required
                                             />
+
+                                            {/* Sugerencia de dirección */}
+                                            {showAddressSuggestion && suggestedAddress && (
+                                                <div className="nbd-address-suggestion">
+                                                    <div className="nbd-suggestion-content">
+                                                        <div className="nbd-suggestion-icon">📍</div>
+                                                        <div className="nbd-suggestion-text">
+                                                            <p className="nbd-suggestion-label">Dirección sugerida:</p>
+                                                            <p className="nbd-suggestion-address">{suggestedAddress}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="nbd-suggestion-actions">
+                                                        <button
+                                                            type="button"
+                                                            onClick={acceptSuggestedAddress}
+                                                            className="nbd-suggestion-btn nbd-suggestion-btn--accept"
+                                                        >
+                                                            Usar esta dirección
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={rejectSuggestedAddress}
+                                                            className="nbd-suggestion-btn nbd-suggestion-btn--reject"
+                                                        >
+                                                            Mantener la mía
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                         </div>
 

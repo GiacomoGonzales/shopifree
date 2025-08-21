@@ -5065,6 +5065,120 @@
     font-style: italic;
 }
 
+/* ===================================================
+   SUGERENCIA DE DIRECCIÓN
+   =================================================== */
+
+.nbd-address-suggestion {
+    margin-top: var(--nbd-space-md);
+    padding: var(--nbd-space-md);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px solid var(--nbd-primary-100);
+    border-radius: var(--nbd-radius-lg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    animation: nbd-slide-down 0.3s ease-out;
+}
+
+.nbd-suggestion-content {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--nbd-space-sm);
+    margin-bottom: var(--nbd-space-md);
+}
+
+.nbd-suggestion-icon {
+    font-size: 1.25rem;
+    margin-top: 2px;
+}
+
+.nbd-suggestion-text {
+    flex: 1;
+}
+
+.nbd-suggestion-label {
+    margin: 0 0 var(--nbd-space-xs) 0;
+    font-size: var(--nbd-font-size-sm);
+    font-weight: 600;
+    color: var(--nbd-primary);
+}
+
+.nbd-suggestion-address {
+    margin: 0;
+    font-size: var(--nbd-font-size-sm);
+    color: var(--nbd-neutral-700);
+    line-height: 1.4;
+    background: var(--nbd-neutral-0);
+    padding: var(--nbd-space-xs) var(--nbd-space-sm);
+    border-radius: var(--nbd-radius-md);
+    border: 1px solid var(--nbd-neutral-200);
+}
+
+.nbd-suggestion-actions {
+    display: flex;
+    gap: var(--nbd-space-sm);
+    flex-wrap: wrap;
+}
+
+.nbd-suggestion-btn {
+    padding: var(--nbd-space-xs) var(--nbd-space-md);
+    border-radius: var(--nbd-radius-md);
+    font-size: var(--nbd-font-size-sm);
+    font-weight: 600;
+    border: 2px solid;
+    cursor: pointer;
+    transition: all var(--nbd-transition-base);
+    flex: 1;
+    min-width: 120px;
+}
+
+.nbd-suggestion-btn--accept {
+    background: var(--nbd-primary);
+    color: var(--nbd-neutral-0);
+    border-color: var(--nbd-primary);
+}
+
+.nbd-suggestion-btn--accept:hover {
+    background: var(--nbd-primary-600);
+    border-color: var(--nbd-primary-600);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nbd-suggestion-btn--reject {
+    background: var(--nbd-neutral-0);
+    color: var(--nbd-neutral-700);
+    border-color: var(--nbd-neutral-300);
+}
+
+.nbd-suggestion-btn--reject:hover {
+    background: var(--nbd-neutral-50);
+    border-color: var(--nbd-neutral-400);
+    transform: translateY(-1px);
+}
+
+@keyframes nbd-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .nbd-suggestion-actions {
+        flex-direction: column;
+    }
+    
+    .nbd-suggestion-btn {
+        flex: none;
+        min-width: auto;
+    }
+}
+
 /* Address Header con botón de ubicación */
 .nbd-address-header {
     display: flex;
