@@ -92,12 +92,42 @@ class GoogleMapsLoader {
         return;
       }
 
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=es&callback=${callbackName}`;
+      // Configuración optimizada para móviles
+      const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+      const loadingParams = new URLSearchParams({
+        key: apiKey,
+        libraries: 'places',
+        language: 'es',
+        callback: callbackName,
+        // Agregar parámetros específicos para móviles
+        ...(isMobileDevice && {
+          loading: 'async',
+          region: 'PE' // Región Perú para mejor rendimiento local
+        })
+      });
+      
+      script.src = `https://maps.googleapis.com/maps/api/js?${loadingParams.toString()}`;
       script.async = true;
       script.defer = true;
+      
+      // Mejorar manejo de errores para móviles
       script.onerror = (error) => {
-        console.error('Error loading Google Maps API:', error);
+        console.error('❌ Error loading Google Maps API:', error);
+        console.log('🔍 Debug info:', {
+          isMobileDevice,
+          userAgent: navigator.userAgent,
+          screenWidth: window.innerWidth,
+          connectionType: (navigator as any).connection?.effectiveType || 'unknown'
+        });
         reject(new Error('Failed to load Google Maps API'));
+      };
+      
+      // Agregar evento de carga exitosa
+      script.onload = () => {
+        console.log('✅ Google Maps script loaded successfully');
+        if (isMobileDevice) {
+          console.log('📱 Google Maps loaded on mobile device');
+        }
       };
 
       document.head.appendChild(script);
@@ -116,6 +146,55 @@ class GoogleMapsLoader {
 
   isGoogleMapsLoaded(): boolean {
     return this.isLoaded && !!window.google?.maps;
+  }
+
+  // Método específico para dispositivos móviles
+  isMobileDevice(): boolean {
+    if (typeof window === 'undefined') return false;
+    
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isSmallScreen = window.innerWidth <= 768;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    return isMobileUA || (isSmallScreen && isTouchDevice);
+  }
+
+  // Método para forzar carga en móviles con reintentos
+  async loadForMobile(): Promise<void> {
+    if (!this.isMobileDevice()) {
+      return this.load();
+    }
+
+    console.log('📱 Loading Google Maps specifically for mobile device...');
+    
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`🔄 Mobile load attempt ${attempts}/${maxAttempts}`);
+        
+        await this.load();
+        
+        if (this.isGoogleMapsLoaded()) {
+          console.log('✅ Google Maps successfully loaded for mobile');
+          return;
+        }
+        
+        // Esperar antes del siguiente intento
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        }
+      } catch (error) {
+        console.warn(`⚠️ Mobile load attempt ${attempts} failed:`, error);
+        
+        if (attempts === maxAttempts) {
+          throw new Error(`Failed to load Google Maps after ${maxAttempts} attempts on mobile`);
+        }
+      }
+    }
   }
 }
 

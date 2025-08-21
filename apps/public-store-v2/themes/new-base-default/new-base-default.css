@@ -5376,7 +5376,7 @@
     background: var(--nbd-neutral-200);
 }
 
-/* Responsive para móvil */
+/* Responsive para móvil - Mejorado para dispositivos reales */
 @media (max-width: 768px) {
     .nbd-address-header {
         flex-direction: column;
@@ -5390,8 +5390,46 @@
         padding: var(--nbd-space-xs) var(--nbd-space-sm);
     }
     
+    /* Forzar visibilidad del botón de mapa en móviles */
+    .nbd-map-toggle-container {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+    
+    .nbd-map-toggle-btn {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        min-height: 44px; /* Tamaño mínimo táctil recomendado */
+        font-size: var(--nbd-font-size-sm) !important;
+        padding: var(--nbd-space-md) !important;
+        touch-action: manipulation; /* Optimizar para táctil */
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Contenedor del mapa mejorado para móviles */
+    .nbd-map-container {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 10 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-top: var(--nbd-space-md);
+        border-radius: var(--nbd-radius-lg);
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
     .nbd-map-header {
         padding: var(--nbd-space-md);
+        background: var(--nbd-neutral-0) !important;
+        border-bottom: 1px solid var(--nbd-neutral-200);
+        position: relative;
     }
     
     .nbd-map-header h4 {
@@ -5409,10 +5447,37 @@
         width: 28px;
         height: 28px;
         font-size: 14px;
+        z-index: 20;
     }
     
+    /* El mapa en sí - optimizado para móviles */
     .nbd-map {
-        height: 250px;
+        height: 280px !important; /* Altura aumentada para móviles */
+        width: 100% !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background: var(--nbd-neutral-200) !important;
+        position: relative !important;
+        z-index: 5 !important;
+        /* Prevenir problemas de renderizado en iOS */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    /* Forzar que los elementos de Google Maps sean visibles */
+    .nbd-map * {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Asegurar que los controles de Google Maps sean táctiles */
+    .nbd-map .gmnoprint,
+    .nbd-map .gm-style-cc,
+    .nbd-map .gm-bundled-control {
+        touch-action: manipulation !important;
     }
 }
 

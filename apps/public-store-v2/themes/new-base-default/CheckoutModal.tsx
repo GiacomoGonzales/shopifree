@@ -141,7 +141,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     }, [isOpen, storeId]);
 
-    // Cargar Google Maps API usando el loader centralizado (igual que en dashboard)
+    // Cargar Google Maps API usando el loader centralizado - Mejorado para móviles
     useEffect(() => {
         if (isOpen && currentStep === 2 && formData.shippingMethod !== 'pickup') {
             // Verificar si hay API key configurada
@@ -151,13 +151,34 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 return;
             }
             
-            googleMapsLoader.load()
+            const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+            
+            // Usar método específico para móviles
+            const loadMaps = isMobileDevice ? 
+                googleMapsLoader.loadForMobile() : 
+                googleMapsLoader.load();
+                
+            loadMaps
                 .then(() => {
+                    console.log('✅ Google Maps loaded successfully', { isMobileDevice });
                     setIsGoogleMapsLoaded(true);
                 })
                 .catch((error: Error) => {
-                    // No mostrar error en consola si es problema de configuración
+                    console.error('❌ Failed to load Google Maps:', error);
                     setIsGoogleMapsLoaded(false);
+                    
+                    // Intento adicional para móviles
+                    if (isMobileDevice) {
+                        console.log('🔄 Retrying Google Maps load for mobile...');
+                        setTimeout(() => {
+                            googleMapsLoader.load().then(() => {
+                                console.log('✅ Google Maps loaded on retry');
+                                setIsGoogleMapsLoaded(true);
+                            }).catch(retryError => {
+                                console.error('❌ Retry also failed:', retryError);
+                            });
+                        }, 2000);
+                    }
                 });
         }
     }, [isOpen, currentStep, formData.shippingMethod]);
@@ -280,15 +301,40 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             }
             
             setGettingLocation(true);
-            googleMapsLoader.load()
+            const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+            
+            // Usar método específico para móviles
+            const loadMaps = isMobileDevice ? 
+                googleMapsLoader.loadForMobile() : 
+                googleMapsLoader.load();
+                
+            loadMaps
                 .then(() => {
+                    console.log('✅ Google Maps loaded for location', { isMobileDevice });
                     setIsGoogleMapsLoaded(true);
                     // Una vez cargado, obtener ubicación
                     getLocationAndShowMap();
                 })
                 .catch((error: Error) => {
-                    // Continuar con geolocalización sin mapa
-                    getLocationWithoutMap();
+                    console.error('❌ Failed to load Google Maps for location:', error);
+                    
+                    // Intento adicional para móviles antes del fallback
+                    if (isMobileDevice) {
+                        console.log('🔄 Retrying location load for mobile...');
+                        setTimeout(() => {
+                            googleMapsLoader.load().then(() => {
+                                console.log('✅ Location retry successful');
+                                setIsGoogleMapsLoaded(true);
+                                getLocationAndShowMap();
+                            }).catch(retryError => {
+                                console.error('❌ Location retry failed, using fallback');
+                                getLocationWithoutMap();
+                            });
+                        }, 1500);
+                    } else {
+                        // Continuar con geolocalización sin mapa
+                        getLocationWithoutMap();
+                    }
                 });
         } else {
             // Si ya está cargado, obtener ubicación directamente
@@ -400,18 +446,47 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         alert(message);
     };
 
-    // Inicializar mapa con ubicación
+    // Inicializar mapa con ubicación - Mejorado para móviles
     const initializeMap = (lat: number, lng: number) => {
-        if (!mapRef.current || !isGoogleMapsLoaded || !window.google?.maps) {
-            console.log('Map initialization skipped:', {
-                hasMapRef: !!mapRef.current,
-                isGoogleMapsLoaded,
-                hasGoogleMaps: !!window.google?.maps
-            });
+        const hasMapRef = !!mapRef.current;
+        const hasGoogleMaps = !!window.google?.maps;
+        const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+        
+        console.log('🗺️ [Map Init Debug]:', {
+            hasMapRef,
+            isGoogleMapsLoaded,
+            hasGoogleMaps,
+            isMobileDevice,
+            coordinates: { lat, lng },
+            mapRefElement: mapRef.current,
+            userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A'
+        });
+
+        if (!mapRef.current) {
+            console.error('❌ Map container ref not available');
             return;
         }
 
-        console.log('Initializing map at:', lat, lng);
+        if (!hasGoogleMaps) {
+            console.error('❌ Google Maps API not loaded');
+            // En móviles, intentar cargar Google Maps con método específico
+            if (isMobileDevice) {
+                console.log('🔄 Attempting to load Google Maps for mobile...');
+                googleMapsLoader.loadForMobile().then(() => {
+                    console.log('✅ Google Maps loaded for mobile, retrying map initialization...');
+                    if (window.google?.maps && mapRef.current) {
+                        initializeMap(lat, lng);
+                    }
+                }).catch(error => {
+                    console.error('❌ Failed to load Google Maps for mobile:', error);
+                    // Mostrar mensaje de error al usuario
+                    alert('No se pudo cargar el mapa. Por favor, verifica tu conexión a internet e intenta de nuevo.');
+                });
+            }
+            return;
+        }
+
+        console.log('✅ Initializing map at:', lat, lng);
 
         try {
             const newMap = new window.google.maps.Map(mapRef.current, {
@@ -801,7 +876,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                             <>
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                     <path 
-                                                                        d="M21 10C21 17L12 23L3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" 
+                                                                        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" 
                                                                         stroke="currentColor" 
                                                                         strokeWidth="2"
                                                                         fill="none"
@@ -845,31 +920,57 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 </button>
                                             </div>
 
-                                            {/* Botón para mostrar/ocultar mapa */}
-                                            {isGoogleMapsLoaded && userCoordinates && (
-                                                <div className="nbd-map-toggle-container">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (!showMap) {
-                                                                setShowMap(true);
-                                                                setTimeout(() => {
-                                                                    initializeMap(userCoordinates.lat, userCoordinates.lng);
-                                                                }, 100);
-                                                            } else {
-                                                                setShowMap(false);
-                                                            }
-                                                        }}
-                                                        className="nbd-map-toggle-btn"
-                                                    >
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M3 6h18l-2 8H5L3 6z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                                                            <path d="M3 6l2-4h14l2 4" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                            {/* Botón para mostrar/ocultar mapa - Mejorado para móviles */}
+                                            {(() => {
+                                                // Debug logs para móviles
+                                                const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+                                                const hasGoogleMaps = !!window.google?.maps;
+                                                const hasCoordinates = !!userCoordinates;
+                                                
+                                                console.log('🗺️ [Mobile Map Debug]:', {
+                                                    isMobileDevice,
+                                                    isGoogleMapsLoaded,
+                                                    hasGoogleMaps,
+                                                    hasCoordinates,
+                                                    userCoordinates,
+                                                    userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A'
+                                                });
+                                                
+                                                // Mostrar botón si hay coordenadas, independientemente del estado de Google Maps
+                                                const shouldShowButton = hasCoordinates && (isGoogleMapsLoaded || hasGoogleMaps);
+                                                
+                                                if (!shouldShowButton) {
+                                                    return null;
+                                                }
+                                                
+                                                return (
+                                                    <div className="nbd-map-toggle-container">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (!showMap) {
+                                                                    setShowMap(true);
+                                                                    setTimeout(() => {
+                                                                        if (userCoordinates) {
+                                                                            initializeMap(userCoordinates.lat, userCoordinates.lng);
+                                                                        }
+                                                                    }, 100);
+                                                                } else {
+                                                                    setShowMap(false);
+                                                                }
+                                                            }}
+                                                            className="nbd-map-toggle-btn"
+                                                        >
+                                                                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                                            <path d="m8 2 8 4" stroke="currentColor" strokeWidth="2"/>
+                                                            <path d="m16 6 8-4" stroke="currentColor" strokeWidth="2"/>
                                                         </svg>
-                                                        {showMap ? 'Ocultar mapa' : 'Ver mapa para ajustar ubicación'}
-                                                    </button>
-                                                </div>
-                                            )}
+                                                            {showMap ? 'Ocultar mapa' : 'Ver mapa para ajustar ubicación'}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })()}
 
                                             {/* Sugerencia de dirección */}
                                             {showAddressSuggestion && suggestedAddress && (
