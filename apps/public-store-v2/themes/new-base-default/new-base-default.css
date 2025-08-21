@@ -5187,6 +5187,86 @@
     margin-bottom: var(--nbd-space-sm);
 }
 
+/* Contenedor del input de dirección con botón de búsqueda */
+.nbd-address-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nbd-address-input {
+    flex: 1;
+    padding-right: 50px; /* Espacio para el botón */
+}
+
+.nbd-search-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--nbd-primary);
+    color: var(--nbd-neutral-0);
+    border: none;
+    border-radius: var(--nbd-radius-md);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--nbd-transition-base);
+    z-index: 1;
+}
+
+.nbd-search-btn:hover:not(:disabled) {
+    background: var(--nbd-primary-600);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.nbd-search-btn:disabled {
+    background: var(--nbd-neutral-300);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.nbd-search-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Botón para mostrar/ocultar mapa */
+.nbd-map-toggle-container {
+    margin-top: var(--nbd-space-sm);
+}
+
+.nbd-map-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--nbd-space-xs);
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+    background: var(--nbd-neutral-50);
+    color: var(--nbd-primary);
+    border: 2px solid var(--nbd-primary-200);
+    border-radius: var(--nbd-radius-lg);
+    font-size: var(--nbd-font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--nbd-transition-base);
+    width: 100%;
+    justify-content: center;
+}
+
+.nbd-map-toggle-btn:hover {
+    background: var(--nbd-primary-50);
+    border-color: var(--nbd-primary);
+    transform: translateY(-1px);
+}
+
+.nbd-map-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Botón de ubicación */
 .nbd-location-btn {
     display: flex;
@@ -5351,15 +5431,15 @@
 .nbd-method-options {
     display: flex;
     flex-direction: column;
-    gap: var(--nbd-space-md);
+    gap: var(--nbd-space-sm);
 }
 
 .nbd-method-option {
     display: flex;
     align-items: center;
-    padding: var(--nbd-space-md);
-    border: 2px solid var(--nbd-neutral-200);
-    border-radius: var(--nbd-radius-lg);
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+    border: 1px solid var(--nbd-neutral-200);
+    border-radius: var(--nbd-radius-md);
     cursor: pointer;
     transition: all var(--nbd-transition-base);
     background: var(--nbd-neutral-0);
@@ -5374,14 +5454,14 @@
     border-color: var(--nbd-primary);
     background: var(--nbd-primary);
     color: var(--nbd-neutral-0);
-    box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+    box-shadow: 0 0 0 2px rgba(23, 23, 23, 0.1);
 }
 
 .nbd-method-option input[type="radio"] {
     margin: 0;
-    margin-right: var(--nbd-space-md);
-    width: 20px;
-    height: 20px;
+    margin-right: var(--nbd-space-sm);
+    width: 16px;
+    height: 16px;
     accent-color: var(--nbd-neutral-0);
 }
 
@@ -5399,19 +5479,17 @@
 }
 
 .nbd-method-name {
-    font-size: var(--nbd-font-size-sm);
-    font-weight: 600;
+    font-size: var(--nbd-font-size-xs);
+    font-weight: 500;
 }
 
 .nbd-method-desc {
     font-size: var(--nbd-font-size-xs);
-    opacity: 0.8;
+    opacity: 0.7;
+    font-weight: 400;
 }
 
-.nbd-method-price {
-    font-size: var(--nbd-font-size-base);
-    font-weight: 600;
-}
+/* .nbd-method-price eliminado - los precios solo se muestran en el resumen */
 
 .nbd-method-icon {
     font-size: var(--nbd-font-size-xl);

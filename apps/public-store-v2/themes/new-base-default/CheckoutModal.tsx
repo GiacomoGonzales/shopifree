@@ -60,6 +60,13 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [shippingCost, setShippingCost] = useState(0);
     const [suggestedAddress, setSuggestedAddress] = useState<string>('');
     const [showAddressSuggestion, setShowAddressSuggestion] = useState(false);
+    
+    // Detectar si es dispositivo móvil
+    const isMobile = () => {
+        if (typeof window === 'undefined') return false;
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               window.innerWidth <= 768;
+    };
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
         firstName: '',
@@ -225,7 +232,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         map.setCenter(newPosition);
                         marker.setPosition(newPosition);
                     } else if (isGoogleMapsLoaded) {
-                        // Si no hay mapa visible, mostrarlo
+                        // Si no hay mapa visible, mostrarlo (especialmente importante en móvil)
                         setShowMap(true);
                         setTimeout(() => {
                             initializeMap(lat, lng);
@@ -302,8 +309,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 setUserCoordinates({ lat: latitude, lng: longitude });
                 setFormData(prev => ({ ...prev, lat: latitude, lng: longitude }));
                 
-                // Si Google Maps está disponible, hacer reverse geocoding
+                // Si Google Maps está disponible, hacer reverse geocoding Y mostrar mapa
                 if (isGoogleMapsLoaded) {
+                    // Mostrar el mapa inmediatamente
+                    setShowMap(true);
+                    
+                    // Inicializar el mapa después de un pequeño delay
+                    setTimeout(() => {
+                        initializeMap(latitude, longitude);
+                    }, 100);
+                    
                     const geocoder = new window.google.maps.Geocoder();
                     geocoder.geocode(
                         { location: { lat: latitude, lng: longitude } },
@@ -314,9 +329,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                 setSuggestedAddress(suggestedAddr);
                                 setShowAddressSuggestion(true);
                                 setFormData(prev => ({ ...prev, addressNormalized: suggestedAddr }));
-                                alert('¡Ubicación obtenida! Se ha encontrado una dirección sugerida.');
-                            } else {
-                                alert('¡Ubicación confirmada! El costo de envío se ha actualizado.');
+                                // alert('¡Ubicación obtenida! Se ha encontrado una dirección sugerida.');
                             }
                         }
                     );
@@ -730,7 +743,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <span className="nbd-method-name">Recojo en tienda</span>
                                                     <span className="nbd-method-desc">Disponible hoy</span>
                                                 </div>
-                                                <span className="nbd-method-price">Gratis</span>
                                             </div>
                                         </label>
                                         <label className={`nbd-method-option ${formData.shippingMethod === 'standard' ? 'selected' : ''}`}>
@@ -746,15 +758,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <span className="nbd-method-name">Envío a domicilio</span>
                                                     <span className="nbd-method-desc">3-5 días hábiles</span>
                                                 </div>
-                                                <span className="nbd-method-price">
-                                                    {userCoordinates && deliveryZones.length > 0 ? (
-                                                        formData.shippingMethod === 'standard' && shippingCost > 0 ? 
-                                                            formatPrice(shippingCost, currency) : 
-                                                            userCoordinates ? 'Gratis' : 'Calculando...'
-                                                    ) : (
-                                                        loadingZones ? 'Cargando...' : 'Usar ubicación'
-                                                    )}
-                                                </span>
                                             </div>
                                         </label>
                                         <label className={`nbd-method-option ${formData.shippingMethod === 'express' ? 'selected' : ''}`}>
@@ -817,16 +820,56 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                         )}
                                                 </button>
                                             </div>
-                                            <input
-                                                ref={autocompleteRef}
-                                                type="text"
-                                                className="nbd-form-input"
-                                                value={formData.address}
-                                                onChange={(e) => handleInputChange('address', e.target.value)}
-                                                onKeyPress={handleAddressKeyPress}
-                                                placeholder="Escribe tu dirección completa y presiona ENTER..."
-                                                required
-                                            />
+                                            <div className="nbd-address-input-container">
+                                                <input
+                                                    ref={autocompleteRef}
+                                                    type="text"
+                                                    className="nbd-form-input nbd-address-input"
+                                                    value={formData.address}
+                                                    onChange={(e) => handleInputChange('address', e.target.value)}
+                                                    onKeyPress={handleAddressKeyPress}
+                                                    placeholder="Escribe tu dirección completa..."
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDirectGeocoding(formData.address)}
+                                                    disabled={!formData.address.trim()}
+                                                    className="nbd-search-btn"
+                                                    title="Buscar dirección"
+                                                >
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                                                        <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            {/* Botón para mostrar/ocultar mapa */}
+                                            {isGoogleMapsLoaded && userCoordinates && (
+                                                <div className="nbd-map-toggle-container">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (!showMap) {
+                                                                setShowMap(true);
+                                                                setTimeout(() => {
+                                                                    initializeMap(userCoordinates.lat, userCoordinates.lng);
+                                                                }, 100);
+                                                            } else {
+                                                                setShowMap(false);
+                                                            }
+                                                        }}
+                                                        className="nbd-map-toggle-btn"
+                                                    >
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M3 6h18l-2 8H5L3 6z" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                                            <path d="M3 6l2-4h14l2 4" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                                        </svg>
+                                                        {showMap ? 'Ocultar mapa' : 'Ver mapa para ajustar ubicación'}
+                                                    </button>
+                                                </div>
+                                            )}
 
                                             {/* Sugerencia de dirección */}
                                             {showAddressSuggestion && suggestedAddress && (
