@@ -5234,38 +5234,7 @@
     height: 18px;
 }
 
-/* Botón para mostrar/ocultar mapa */
-.nbd-map-toggle-container {
-    margin-top: var(--nbd-space-sm);
-}
-
-.nbd-map-toggle-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--nbd-space-xs);
-    padding: var(--nbd-space-sm) var(--nbd-space-md);
-    background: var(--nbd-neutral-50);
-    color: var(--nbd-primary);
-    border: 2px solid var(--nbd-primary-200);
-    border-radius: var(--nbd-radius-lg);
-    font-size: var(--nbd-font-size-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--nbd-transition-base);
-    width: 100%;
-    justify-content: center;
-}
-
-.nbd-map-toggle-btn:hover {
-    background: var(--nbd-primary-50);
-    border-color: var(--nbd-primary);
-    transform: translateY(-1px);
-}
-
-.nbd-map-toggle-btn svg {
-    width: 16px;
-    height: 16px;
-}
+/* Estilos simplificados - sin botón toggle */
 
 /* Botón de ubicación */
 .nbd-location-btn {
@@ -5390,25 +5359,7 @@
         padding: var(--nbd-space-xs) var(--nbd-space-sm);
     }
     
-    /* Forzar visibilidad del botón de mapa en móviles */
-    .nbd-map-toggle-container {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: relative !important;
-        z-index: 1 !important;
-    }
-    
-    .nbd-map-toggle-btn {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        min-height: 44px; /* Tamaño mínimo táctil recomendado */
-        font-size: var(--nbd-font-size-sm) !important;
-        padding: var(--nbd-space-md) !important;
-        touch-action: manipulation; /* Optimizar para táctil */
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    }
+    /* Mapa simplificado - sin botón toggle, aparece automáticamente */
     
     /* Contenedor del mapa mejorado para móviles */
     .nbd-map-container {

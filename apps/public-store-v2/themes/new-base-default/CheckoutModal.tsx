@@ -52,7 +52,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const mapRef = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [marker, setMarker] = useState<google.maps.Marker | null>(null);
-    const [showMap, setShowMap] = useState(false);
+    // Removed showMap state - map shows automatically when there are coordinates
     const [gettingLocation, setGettingLocation] = useState(false);
     const [userCoordinates, setUserCoordinates] = useState<{lat: number; lng: number} | null>(null);
     const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
@@ -186,9 +186,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Cleanup del mapa al cerrar el modal o cambiar de método de envío
     useEffect(() => {
         if (!isOpen || formData.shippingMethod === 'pickup') {
-            setShowMap(false);
             setMap(null);
             setMarker(null);
+            setUserCoordinates(null);
         }
     }, [isOpen, formData.shippingMethod]);
 
@@ -355,10 +355,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 setUserCoordinates({ lat: latitude, lng: longitude });
                 setFormData(prev => ({ ...prev, lat: latitude, lng: longitude }));
                 
-                // Si Google Maps está disponible, hacer reverse geocoding Y mostrar mapa
+                // Inicializar mapa automáticamente cuando obtenemos ubicación
                 if (isGoogleMapsLoaded) {
-                    // Mostrar el mapa inmediatamente
-                    setShowMap(true);
+                    console.log('🗺️ [Geolocation] Auto-initializing map with user location');
+                    setTimeout(() => initializeMap(latitude, longitude), 200);
+                }
+                
+                // Si Google Maps está disponible, hacer reverse geocoding
+                if (isGoogleMapsLoaded) {
                     
                     // Inicializar el mapa después de un pequeño delay
                     setTimeout(() => {
@@ -403,12 +407,13 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             (position) => {
                 const { latitude, longitude } = position.coords;
                 setGettingLocation(false);
-                setShowMap(true);
                 
                 // Guardar coordenadas del usuario
                 setUserCoordinates({ lat: latitude, lng: longitude });
+                setFormData(prev => ({ ...prev, lat: latitude, lng: longitude }));
                 
-                // Usar setTimeout para asegurar que el DOM esté listo
+                // El mapa aparecerá automáticamente cuando detecte coordenadas
+                console.log('🗺️ [Location+Map] Coordinates saved, map will auto-show');
                 setTimeout(() => {
                     initializeMap(latitude, longitude);
                 }, 100);
@@ -968,94 +973,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 </button>
                                             </div>
 
-                                            {/* Botón para mostrar/ocultar mapa - Mejorado para móviles */}
-                                            {(() => {
-                                                // Debug logs para móviles
-                                                const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
-                                                const hasGoogleMaps = !!window.google?.maps;
-                                                const hasCoordinates = !!userCoordinates;
-                                                
-                                                console.log('🗺️ [Mobile Map Debug]:', {
-                                                    isMobileDevice,
-                                                    isGoogleMapsLoaded,
-                                                    hasGoogleMaps,
-                                                    hasCoordinates,
-                                                    userCoordinates,
-                                                    shouldShowButton: hasCoordinates,
-                                                    windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'N/A',
-                                                    userAgent: typeof window !== 'undefined' ? navigator.userAgent.substring(0, 50) + '...' : 'N/A'
-                                                });
-                                                
-                                                // Log extra para debug en móviles
-                                                if (isMobileDevice) {
-                                                    console.log('📱 [MOBILE SPECIFIC]:', {
-                                                        'Will show button?': hasCoordinates,
-                                                        'Coordinates exists?': !!userCoordinates,
-                                                        'Coordinates value': userCoordinates
-                                                    });
-                                                }
-                                                
-                                                // Mostrar botón si hay coordenadas (simplificado para móviles)
-                                                // También revisar si el formulario tiene coordenadas guardadas
-                                                const hasFormCoordinates = !!(formData.lat && formData.lng);
-                                                const hasAddressText = !!(formData.address && formData.address.length > 10);
-                                                
-                                                // En móviles, ser más permisivo - mostrar botón si hay cualquier indicación de ubicación
-                                                let shouldShowButton = hasCoordinates || hasFormCoordinates;
-                                                if (isMobileDevice && !shouldShowButton && hasAddressText) {
-                                                    console.log('📱 [MOBILE FALLBACK] Showing button due to address text');
-                                                    shouldShowButton = true;
-                                                }
-                                                
-                                                if (isMobileDevice) {
-                                                    console.log('📱 [BUTTON DECISION]:', {
-                                                        hasCoordinates,
-                                                        hasFormCoordinates,
-                                                        formDataLat: formData.lat,
-                                                        formDataLng: formData.lng,
-                                                        finalDecision: shouldShowButton
-                                                    });
-                                                }
-                                                
-                                                if (!shouldShowButton) {
-                                                    console.log('❌ [BUTTON HIDDEN] No coordinates found');
-                                                    return null;
-                                                }
-                                                
-                                                console.log('✅ [BUTTON RENDERED] Map toggle button is being rendered');
-                                                
-                                                return (
-                                                    <div className="nbd-map-toggle-container" style={{backgroundColor: isMobileDevice ? '#f0f8ff' : 'transparent', border: isMobileDevice ? '2px solid #007bff' : 'none'}}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                console.log('🔘 [BUTTON CLICKED] Map toggle button clicked');
-                                                                if (!showMap) {
-                                                                    setShowMap(true);
-                                                                    setTimeout(() => {
-                                                                        if (userCoordinates) {
-                                                                            initializeMap(userCoordinates.lat, userCoordinates.lng);
-                                                                        } else if (formData.lat && formData.lng) {
-                                                                            initializeMap(formData.lat, formData.lng);
-                                                                        }
-                                                                    }, 100);
-                                                                } else {
-                                                                    setShowMap(false);
-                                                                }
-                                                            }}
-                                                            className="nbd-map-toggle-btn"
-                                                            style={{backgroundColor: isMobileDevice ? '#007bff' : '', color: isMobileDevice ? 'white' : ''}}
-                                                        >
-                                                                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                                                            <path d="m8 2 8 4" stroke="currentColor" strokeWidth="2"/>
-                                                            <path d="m16 6 8-4" stroke="currentColor" strokeWidth="2"/>
-                                                        </svg>
-                                                            {showMap ? 'Ocultar mapa' : 'Ver mapa para ajustar ubicación'}
-                                                        </button>
-                                                    </div>
-                                                );
-                                            })()}
+
 
                                             {/* Sugerencia de dirección */}
                                             {showAddressSuggestion && suggestedAddress && (
@@ -1088,23 +1006,43 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                                         </div>
 
-                                        {/* Mapa interactivo */}
-                                        {showMap && (
-                                            <div className="nbd-map-container">
-                                                <div className="nbd-map-header">
-                                                    <h4>📍 Ajusta tu ubicación exacta</h4>
-                                                    <p>Arrastra el marcador o haz clic en el mapa para marcar tu ubicación precisa</p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowMap(false)}
-                                                        className="nbd-map-close"
-                                                    >
-                                                        ✕
-                                                    </button>
+                                        {/* Mapa interactivo - Simplificado: siempre visible cuando hay ubicación */}
+                                        {(() => {
+                                            const hasCoordinates = !!(userCoordinates || (formData.lat && formData.lng));
+                                            const hasAddress = !!(formData.address && formData.address.length > 5);
+                                            const shouldShowMap = hasCoordinates || hasAddress;
+                                            
+                                            console.log('🗺️ [Simple Map] Should show:', shouldShowMap, {
+                                                userCoordinates,
+                                                formData: { lat: formData.lat, lng: formData.lng, address: formData.address },
+                                                hasCoordinates,
+                                                hasAddress
+                                            });
+                                            
+                                            if (!shouldShowMap) return null;
+                                            
+                                            // Auto-inicializar mapa cuando aparece
+                                            React.useEffect(() => {
+                                                if (shouldShowMap && isGoogleMapsLoaded) {
+                                                    const lat = userCoordinates?.lat || formData.lat;
+                                                    const lng = userCoordinates?.lng || formData.lng;
+                                                    if (lat && lng) {
+                                                        console.log('🗺️ [Auto Init] Initializing map automatically');
+                                                        setTimeout(() => initializeMap(lat, lng), 100);
+                                                    }
+                                                }
+                                            }, [shouldShowMap, isGoogleMapsLoaded, userCoordinates, formData.lat, formData.lng]);
+                                            
+                                            return (
+                                                <div className="nbd-map-container">
+                                                    <div className="nbd-map-header">
+                                                        <h4>📍 Tu ubicación</h4>
+                                                        <p>Arrastra el marcador para ajustar tu ubicación exacta</p>
+                                                    </div>
+                                                    <div ref={mapRef} className="nbd-map"></div>
                                                 </div>
-                                                <div ref={mapRef} className="nbd-map"></div>
-                                            </div>
-                                        )}
+                                            );
+                                        })()}
                                     </div>
                                 )}
                             </div>
