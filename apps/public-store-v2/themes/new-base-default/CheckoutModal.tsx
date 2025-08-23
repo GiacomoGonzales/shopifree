@@ -116,7 +116,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             setIsSubmitting(false);
         } else {
             // Limpiar estados al cerrar
-            setShowMap(false);
             setMap(null);
             setMarker(null);
             setUserCoordinates(null);
@@ -253,8 +252,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         map.setCenter(newPosition);
                         marker.setPosition(newPosition);
                     } else if (isGoogleMapsLoaded) {
-                        // Si no hay mapa visible, mostrarlo (especialmente importante en móvil)
-                        setShowMap(true);
+                        // Inicializar mapa automáticamente
                         setTimeout(() => {
                             initializeMap(lat, lng);
                         }, 100);
@@ -1022,7 +1020,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             if (!shouldShowMap) return null;
                                             
                                             // Auto-inicializar mapa cuando aparece
-                                            React.useEffect(() => {
+                                            useEffect(() => {
                                                 if (shouldShowMap && isGoogleMapsLoaded) {
                                                     const lat = userCoordinates?.lat || formData.lat;
                                                     const lng = userCoordinates?.lng || formData.lng;
