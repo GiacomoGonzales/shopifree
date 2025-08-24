@@ -483,12 +483,23 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         });
 
         if (!mapRef.current) {
-            console.error('❌ Map container ref not available');
+            console.error('❌ Map container ref not available', {
+                isMobileDevice,
+                mapRefCurrent: mapRef.current,
+                documentReady: document.readyState
+            });
             return;
         }
 
         if (!hasGoogleMaps) {
-            console.error('❌ Google Maps API not loaded');
+            console.error('❌ Google Maps API not loaded', {
+                isMobileDevice,
+                windowGoogle: !!window.google,
+                windowGoogleMaps: !!window.google?.maps,
+                isGoogleMapsLoaded,
+                userAgent: navigator.userAgent
+            });
+            
             // En móviles, intentar cargar Google Maps con método específico
             if (isMobileDevice) {
                 console.log('🔄 Attempting to load Google Maps for mobile...');
@@ -499,8 +510,28 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     }
                 }).catch(error => {
                     console.error('❌ Failed to load Google Maps for mobile:', error);
-                    // Mostrar mensaje de error al usuario
-                    alert('No se pudo cargar el mapa. Por favor, verifica tu conexión a internet e intenta de nuevo.');
+                    // En lugar de alert, mostrar mensaje en el contenedor del mapa
+                    if (mapRef.current) {
+                        mapRef.current.innerHTML = `
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100%;
+                                background: #ffebee;
+                                color: #c62828;
+                                text-align: center;
+                                padding: 20px;
+                                border-radius: 8px;
+                            ">
+                                <div>
+                                    <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">No se pudo cargar el mapa</div>
+                                    <small>Verifica tu conexión a internet</small>
+                                </div>
+                            </div>
+                        `;
+                    }
                 });
             }
             return;
@@ -535,13 +566,54 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             console.log('🗺️ [Map Creation] Creating map with options:', mapOptions);
             const newMap = new window.google.maps.Map(mapRef.current, mapOptions);
             
+            // Timeout para detectar si el mapa no se carga en móviles
+            let mapLoadTimeout: NodeJS.Timeout | null = null;
+            let mapLoaded = false;
+            
+            if (isMobileDevice) {
+                mapLoadTimeout = setTimeout(() => {
+                    if (!mapLoaded && mapRef.current) {
+                        console.warn('⚠️ Map load timeout on mobile device');
+                        mapRef.current.innerHTML = `
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100%;
+                                background: #fff3cd;
+                                color: #856404;
+                                text-align: center;
+                                padding: 20px;
+                                border-radius: 8px;
+                            ">
+                                <div>
+                                    <div style="font-size: 24px; margin-bottom: 8px;">⏱️</div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">El mapa está tardando en cargar</div>
+                                    <small>Esto puede deberse a una conexión lenta</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }, 10000); // 10 segundos timeout
+            }
+            
             // Eventos específicos para debug en móviles
             newMap.addListener('idle', () => {
                 console.log('🗺️ [Map Event] Map is idle and ready');
+                mapLoaded = true;
+                if (mapLoadTimeout) {
+                    clearTimeout(mapLoadTimeout);
+                    mapLoadTimeout = null;
+                }
             });
             
             newMap.addListener('tilesloaded', () => {
                 console.log('🗺️ [Map Event] Map tiles loaded successfully');
+                mapLoaded = true;
+                if (mapLoadTimeout) {
+                    clearTimeout(mapLoadTimeout);
+                    mapLoadTimeout = null;
+                }
             });
             
             // Forzar resize después de un breve delay (importante para móviles)
@@ -1026,12 +1098,19 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             const hasCoordinates = !!(userCoordinates || (formData.lat && formData.lng));
                                             const hasAddress = !!(formData.address && formData.address.length > 5);
                                             const shouldShowMap = hasCoordinates || hasAddress;
+                                            const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
                                             
                                             console.log('🗺️ [Simple Map] Should show:', shouldShowMap, {
                                                 userCoordinates,
                                                 formData: { lat: formData.lat, lng: formData.lng, address: formData.address },
                                                 hasCoordinates,
-                                                hasAddress
+                                                hasAddress,
+                                                isMobileDevice,
+                                                isGoogleMapsLoaded,
+                                                mapExists: !!map,
+                                                mapRefExists: !!mapRef.current,
+                                                windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'N/A',
+                                                userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A'
                                             });
                                             
                                             if (!shouldShowMap) return null;
@@ -1041,8 +1120,35 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <div className="nbd-map-header">
                                                         <h4>📍 Tu ubicación</h4>
                                                         <p>Arrastra el marcador para ajustar tu ubicación exacta</p>
+                                                        {isMobileDevice && !isGoogleMapsLoaded && (
+                                                            <div className="nbd-mobile-map-status">
+                                                                <small style={{ color: '#666', fontSize: '12px' }}>
+                                                                    🔄 Cargando mapa para móvil...
+                                                                </small>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div ref={mapRef} className="nbd-map"></div>
+                                                    <div ref={mapRef} className="nbd-map">
+                                                        {isMobileDevice && !map && !isGoogleMapsLoaded && (
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                height: '100%',
+                                                                background: '#f5f5f5',
+                                                                color: '#666',
+                                                                fontSize: '14px',
+                                                                textAlign: 'center',
+                                                                padding: '20px'
+                                                            }}>
+                                                                <div>
+                                                                    <div>🗺️</div>
+                                                                    <div>Cargando mapa...</div>
+                                                                    <small>Si no aparece, verifica tu conexión</small>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
                                         })()}

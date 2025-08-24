@@ -113,13 +113,24 @@ class GoogleMapsLoader {
       // Mejorar manejo de errores para móviles
       script.onerror = (error) => {
         console.error('❌ Error loading Google Maps API:', error);
-        console.log('🔍 Debug info:', {
+        const debugInfo = {
           isMobileDevice,
           userAgent: navigator.userAgent,
           screenWidth: window.innerWidth,
-          connectionType: (navigator as any).connection?.effectiveType || 'unknown'
-        });
-        reject(new Error('Failed to load Google Maps API'));
+          connectionType: (navigator as any).connection?.effectiveType || 'unknown',
+          onLine: navigator.onLine,
+          cookieEnabled: navigator.cookieEnabled,
+          language: navigator.language,
+          platform: navigator.platform
+        };
+        console.log('🔍 Debug info:', debugInfo);
+        
+        // Error más específico para móviles
+        const errorMessage = isMobileDevice 
+          ? 'Failed to load Google Maps API on mobile device. Check internet connection and try again.'
+          : 'Failed to load Google Maps API';
+        
+        reject(new Error(errorMessage));
       };
       
       // Agregar evento de carga exitosa
