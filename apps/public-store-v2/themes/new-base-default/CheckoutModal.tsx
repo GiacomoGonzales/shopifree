@@ -16,8 +16,7 @@ import {
 
 interface CheckoutData {
     email: string;
-    firstName: string;
-    lastName: string;
+    fullName: string; // Campo de nombre completo
     phone: string;
     address: string;
     city: string;
@@ -76,8 +75,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     };
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
-        firstName: '',
-        lastName: '',
+        fullName: '',
         phone: '',
         address: '',
         city: '',
@@ -827,7 +825,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const validateStep = (step: number): boolean => {
         switch (step) {
             case 1:
-                return !!(formData.email && formData.firstName && formData.lastName && formData.phone);
+                return !!(formData.email && formData.fullName && formData.phone);
             case 2:
                 // Para recojo en tienda no necesita dirección
                 if (formData.shippingMethod === 'pickup') {
@@ -886,8 +884,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             // Información del cliente
             customer: {
                 email: formData.email,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
+                fullName: formData.fullName,
                 phone: formData.phone
             },
             // Información de envío con campos avanzados
@@ -991,6 +988,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                 <h3 className="nbd-step-title">Información de contacto</h3>
                                 <div className="nbd-form-grid">
                                     <div className="nbd-form-group nbd-form-group--full">
+                                        <label className="nbd-form-label">Nombre completo *</label>
+                                        <input
+                                            type="text"
+                                            className="nbd-form-input"
+                                            value={formData.fullName}
+                                            onChange={(e) => handleInputChange('fullName', e.target.value)}
+                                            placeholder="Juan García López"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="nbd-form-group nbd-form-group--full">
                                         <label className="nbd-form-label">Email *</label>
                                         <input
                                             type="email"
@@ -1001,28 +1009,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             required
                                         />
                                     </div>
-                                    <div className="nbd-form-group">
-                                        <label className="nbd-form-label">Nombre *</label>
-                                        <input
-                                            type="text"
-                                            className="nbd-form-input"
-                                            value={formData.firstName}
-                                            onChange={(e) => handleInputChange('firstName', e.target.value)}
-                                            placeholder="Juan"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="nbd-form-group">
-                                        <label className="nbd-form-label">Apellido *</label>
-                                        <input
-                                            type="text"
-                                            className="nbd-form-input"
-                                            value={formData.lastName}
-                                            onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                            placeholder="Pérez"
-                                            required
-                                        />
-                                    </div>
                                     <div className="nbd-form-group nbd-form-group--full">
                                         <label className="nbd-form-label">Teléfono *</label>
                                         <input
@@ -1030,7 +1016,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             className="nbd-form-input"
                                             value={formData.phone}
                                             onChange={(e) => handleInputChange('phone', e.target.value)}
-                                            placeholder="+57 300 123 4567"
+                                            placeholder="+99 999 999 999"
                                             required
                                         />
                                     </div>
