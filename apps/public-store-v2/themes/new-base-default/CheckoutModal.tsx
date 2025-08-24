@@ -214,6 +214,23 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     }, [isGoogleMapsLoaded, formData.shippingMethod]);
 
+    // Auto-inicializar mapa cuando aparece (solo si no existe ya)
+    useEffect(() => {
+        const hasCoordinates = !!(userCoordinates || (formData.lat && formData.lng));
+        const hasAddress = !!(formData.address && formData.address.length > 5);
+        const shouldShowMap = hasCoordinates || hasAddress;
+        
+        // Solo inicializar si no hay mapa ya creado
+        if (shouldShowMap && isGoogleMapsLoaded && !map) {
+            const lat = userCoordinates?.lat || formData.lat;
+            const lng = userCoordinates?.lng || formData.lng;
+            if (lat && lng) {
+                console.log('🗺️ [Auto Init] Initializing map automatically');
+                setTimeout(() => initializeMap(lat, lng), 100);
+            }
+        }
+    }, [userCoordinates, formData.lat, formData.lng, formData.address, isGoogleMapsLoaded, map]);
+
     const handleInputChange = (field: keyof CheckoutData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         
@@ -1018,18 +1035,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             });
                                             
                                             if (!shouldShowMap) return null;
-                                            
-                                            // Auto-inicializar mapa cuando aparece
-                                            useEffect(() => {
-                                                if (shouldShowMap && isGoogleMapsLoaded) {
-                                                    const lat = userCoordinates?.lat || formData.lat;
-                                                    const lng = userCoordinates?.lng || formData.lng;
-                                                    if (lat && lng) {
-                                                        console.log('🗺️ [Auto Init] Initializing map automatically');
-                                                        setTimeout(() => initializeMap(lat, lng), 100);
-                                                    }
-                                                }
-                                            }, [shouldShowMap, isGoogleMapsLoaded, userCoordinates, formData.lat, formData.lng]);
                                             
                                             return (
                                                 <div className="nbd-map-container">
