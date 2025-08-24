@@ -30,6 +30,13 @@ interface CheckoutData {
     lat: number | null; // Latitud del pin final
     lng: number | null; // Longitud del pin final
     addressNormalized: string; // Dirección sugerida/normalizada
+    // Campos de cupón de descuento
+    couponCode: string; // Código del cupón ingresado
+    appliedCoupon: {
+        code: string;
+        discount: number; // Porcentaje o monto fijo
+        type: 'percentage' | 'fixed'; // Tipo de descuento
+    } | null;
 }
 
 interface CheckoutModalProps {
@@ -82,16 +89,31 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         addressText: '',
         lat: null,
         lng: null,
-        addressNormalized: ''
+        addressNormalized: '',
+        // Campos de cupón de descuento
+        couponCode: '',
+        appliedCoupon: null
     });
 
     // Obtener moneda de la tienda
     const currency = storeInfo?.currency || 'PEN';
     
+    // Estados para manejo de cupones
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponError, setCouponError] = useState<string | null>(null);
+    
     // Calcular costos usando zonas de entrega
     const subtotal = state.totalPrice;
     const shipping = formData.shippingMethod === 'pickup' ? 0 : shippingCost;
-    const total = subtotal + shipping;
+    
+    // Calcular descuento del cupón
+    const discount = formData.appliedCoupon 
+        ? formData.appliedCoupon.type === 'percentage' 
+            ? (subtotal * formData.appliedCoupon.discount) / 100
+            : formData.appliedCoupon.discount
+        : 0;
+    
+    const total = subtotal + shipping - discount;
 
     // Calcular y actualizar costo de envío
     useEffect(() => {
@@ -114,6 +136,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         if (isOpen) {
             setCurrentStep(1);
             setIsSubmitting(false);
+            // Scroll to top al abrir el modal en móviles
+            setTimeout(() => scrollToTopOnMobile(), 200);
         } else {
             // Limpiar estados al cerrar
             setMap(null);
@@ -238,6 +262,64 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         if (field === 'address') {
             setFormData(prev => ({ ...prev, addressText: value }));
         }
+        
+        // Si es el campo couponCode, limpiar errores y cupón aplicado
+        if (field === 'couponCode') {
+            setCouponError(null);
+            if (formData.appliedCoupon) {
+                setFormData(prev => ({ ...prev, appliedCoupon: null }));
+            }
+        }
+    };
+
+    // Función para validar y aplicar cupón
+    const applyCoupon = async () => {
+        const code = formData.couponCode.trim().toUpperCase();
+        
+        if (!code) {
+            setCouponError('Ingresa un código de cupón');
+            return;
+        }
+
+        setCouponLoading(true);
+        setCouponError(null);
+
+        try {
+            // Simular validación de cupón (aquí puedes integrar con tu API)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Cupones de ejemplo - en producción esto vendría de tu base de datos
+            const validCoupons = {
+                'DESCUENTO10': { code: 'DESCUENTO10', discount: 10, type: 'percentage' as const },
+                'DESCUENTO20': { code: 'DESCUENTO20', discount: 20, type: 'percentage' as const },
+                'ENVIOGRATIS': { code: 'ENVIOGRATIS', discount: shipping, type: 'fixed' as const },
+                'PRIMERACOMPRA': { code: 'PRIMERACOMPRA', discount: 15, type: 'percentage' as const },
+                '50SOLES': { code: '50SOLES', discount: 50, type: 'fixed' as const }
+            };
+
+            const coupon = validCoupons[code as keyof typeof validCoupons];
+            
+            if (coupon) {
+                setFormData(prev => ({ ...prev, appliedCoupon: coupon }));
+                setCouponError(null);
+            } else {
+                setCouponError('Código de cupón no válido');
+            }
+        } catch (error) {
+            setCouponError('Error al validar el cupón. Intenta de nuevo.');
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    // Función para remover cupón aplicado
+    const removeCoupon = () => {
+        setFormData(prev => ({ 
+            ...prev, 
+            appliedCoupon: null,
+            couponCode: ''
+        }));
+        setCouponError(null);
     };
 
     // Función para geocoding directo (texto → lat/lng)
@@ -760,15 +842,34 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     };
 
+    // Función para hacer scroll to top en móviles
+    const scrollToTopOnMobile = () => {
+        // Solo en dispositivos móviles
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+            // Buscar el contenedor del modal checkout
+            const checkoutModal = document.querySelector('.nbd-checkout-modal');
+            if (checkoutModal) {
+                checkoutModal.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    };
+
     const nextStep = () => {
         if (validateStep(currentStep) && currentStep < 3) {
             setCurrentStep(currentStep + 1);
+            // Scroll to top en móviles después de cambiar de paso
+            setTimeout(() => scrollToTopOnMobile(), 100);
         }
     };
 
     const prevStep = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
+            // Scroll to top en móviles después de cambiar de paso
+            setTimeout(() => scrollToTopOnMobile(), 100);
         }
     };
 
@@ -1217,6 +1318,57 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     </div>
                                 </div>
 
+                                {/* Cupón de descuento */}
+                                <div className="nbd-form-group nbd-form-group--full">
+                                    <label className="nbd-form-label">Descuento</label>
+                                    
+                                    {!formData.appliedCoupon ? (
+                                        <div>
+                                            <div className="nbd-coupon-input-group">
+                                                <input
+                                                    type="text"
+                                                    className="nbd-form-input nbd-coupon-input"
+                                                    value={formData.couponCode}
+                                                    onChange={(e) => handleInputChange('couponCode', e.target.value.toUpperCase())}
+                                                    placeholder="Código de descuento"
+                                                    disabled={couponLoading}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="nbd-btn nbd-btn--secondary nbd-coupon-apply-btn"
+                                                    onClick={applyCoupon}
+                                                    disabled={couponLoading || !formData.couponCode.trim()}
+                                                >
+                                                    {couponLoading ? 'Validando...' : 'Aplicar'}
+                                                </button>
+                                            </div>
+                                            
+                                            {couponError && (
+                                                <div className="nbd-coupon-error">
+                                                    {couponError}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="nbd-coupon-applied">
+                                            <div className="nbd-coupon-applied-content">
+                                                <div className="nbd-coupon-applied-info">
+                                                    <span className="nbd-coupon-applied-code">
+                                                        ✓ {formData.appliedCoupon.code} aplicado
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="nbd-btn nbd-btn--ghost nbd-btn--small nbd-coupon-remove-btn"
+                                                    onClick={removeCoupon}
+                                                >
+                                                    Quitar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Notas adicionales */}
                                 <div className="nbd-form-group nbd-form-group--full">
                                     <label className="nbd-form-label">Notas adicionales (opcional)</label>
@@ -1285,6 +1437,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                          'Proporciona tu ubicación'}
                                     </span>
                                 </div>
+                                {formData.appliedCoupon && discount > 0 && (
+                                    <div className="nbd-summary-line nbd-summary-discount">
+                                        <span>
+                                            Descuento ({formData.appliedCoupon.code})
+                                        </span>
+                                        <span className="nbd-discount-amount">
+                                            -{formatPrice(discount, currency)}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="nbd-summary-line nbd-summary-total">
                                     <span>Total</span>
                                     <span>{formatPrice(total, currency)}</span>

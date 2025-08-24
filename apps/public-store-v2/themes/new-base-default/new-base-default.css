@@ -5676,10 +5676,9 @@
     background: var(--nbd-neutral-50);
     border-top: 2px solid var(--nbd-neutral-100);
     padding: var(--nbd-space-xl);
-    /* iPhone Safari dynamic viewport support - stay above URL bar */
-    position: sticky;
-    bottom: 0;
-    z-index: 100001;
+    /* Posicionamiento normal - no fijo en pantalla */
+    position: relative;
+    margin-top: var(--nbd-space-lg);
 }
 
 .nbd-checkout-actions {
@@ -5717,10 +5716,29 @@
     .nbd-checkout-modal {
         width: 100%;
         max-width: none;
+        /* Cambiar a scroll completo en móviles - no flex layout */
+        display: block;
+        overflow-y: auto;
+    }
+    
+    .nbd-checkout-content {
+        /* Quitar flex y overflow en móviles */
+        flex: none;
+        overflow-y: visible;
+        padding-bottom: 0;
     }
     
     .nbd-checkout-header {
         padding: var(--nbd-space-lg);
+        /* Asegurar que el header no sea sticky en móviles */
+        position: relative;
+    }
+    
+    .nbd-checkout-footer {
+        /* Asegurar que el footer no sea sticky en móviles */
+        position: relative;
+        margin-top: var(--nbd-space-lg);
+        margin-bottom: var(--nbd-space-lg);
     }
     
     .nbd-progress-steps {
@@ -5754,5 +5772,135 @@
     
     .nbd-checkout-actions .nbd-btn {
         width: 100%;
+    }
+}
+
+/* Estilos para cupón de descuento - layout mejorado */
+.nbd-coupon-input-group {
+    display: flex;
+    align-items: stretch; /* Hace que ambos elementos tengan la misma altura */
+    gap: var(--nbd-space-sm);
+    margin-bottom: var(--nbd-space-sm);
+}
+
+.nbd-coupon-input {
+    flex: 1;
+    margin: 0; /* Quitar márgenes por defecto */
+    height: auto; /* Altura automática */
+    min-height: 44px; /* Altura mínima consistente */
+    display: flex;
+    align-items: center;
+}
+
+.nbd-coupon-apply-btn {
+    flex-shrink: 0;
+    min-width: 85px;
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+    font-size: var(--nbd-font-size-sm);
+    white-space: nowrap;
+    height: auto; /* Altura automática para igualar al input */
+    min-height: 44px; /* Misma altura mínima que el input */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nbd-coupon-error {
+    color: var(--nbd-error);
+    font-size: var(--nbd-font-size-sm);
+    margin: var(--nbd-space-xs) 0;
+    padding: var(--nbd-space-xs) 0;
+}
+
+.nbd-coupon-applied {
+    background: var(--nbd-success-light, #f0f9ff);
+    border: 1px solid var(--nbd-success-border, #e0f2fe);
+    border-radius: var(--nbd-radius-md);
+    padding: var(--nbd-space-md);
+    margin: var(--nbd-space-sm) 0;
+}
+
+.nbd-coupon-applied-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nbd-space-sm);
+}
+
+.nbd-coupon-applied-info {
+    display: flex;
+    align-items: center;
+    gap: var(--nbd-space-sm);
+    color: var(--nbd-success);
+    flex: 1;
+}
+
+.nbd-coupon-applied-code {
+    font-weight: 600;
+    font-size: var(--nbd-font-size-sm);
+}
+
+.nbd-coupon-remove-btn {
+    flex-shrink: 0;
+    padding: var(--nbd-space-xs) var(--nbd-space-sm);
+    font-size: var(--nbd-font-size-xs);
+    min-width: auto;
+}
+
+/* Estilos para el resumen con descuento */
+.nbd-summary-discount {
+    color: var(--nbd-success) !important;
+}
+
+.nbd-discount-amount {
+    font-weight: 600;
+    color: var(--nbd-success) !important;
+}
+
+/* Responsive para cupones */
+@media (max-width: 768px) {
+    .nbd-coupon-input-group {
+        /* Mantener layout horizontal pero mejor alineado */
+        flex-direction: row;
+        align-items: stretch; /* Ambos elementos misma altura */
+        gap: var(--nbd-space-xs);
+    }
+    
+    .nbd-coupon-input {
+        flex: 1;
+        min-width: 0; /* Permite que se encoja */
+        font-size: 16px !important; /* Evitar zoom en iOS */
+        height: 44px; /* Altura fija */
+        min-height: 44px;
+        padding: var(--nbd-space-xs) var(--nbd-space-sm);
+        border-radius: var(--nbd-radius-md);
+        display: flex;
+        align-items: center;
+    }
+    
+    .nbd-coupon-apply-btn {
+        min-width: 75px;
+        max-width: 75px;
+        padding: var(--nbd-space-xs) var(--nbd-space-sm);
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: var(--nbd-radius-md);
+        height: 44px; /* Misma altura que input */
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nbd-coupon-applied-content {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--nbd-space-xs);
+    }
+    
+    .nbd-coupon-remove-btn {
+        font-size: 11px;
+        padding: var(--nbd-space-xs);
+        min-width: 50px;
     }
 }
