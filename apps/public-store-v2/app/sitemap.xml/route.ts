@@ -2,23 +2,27 @@ import { getCanonicalHost, type CanonicalResult } from '../../lib/canonical-reso
 import { getStoreCategories } from '../../lib/categories';
 import { getStoreProducts } from '../../lib/products';
 
+// Forzar renderización dinámica - el sitemap debe ser dinámico por naturaleza
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
-    const requestUrl = new URL(request.url);
+    // Usar headers en lugar de request.url para evitar errores de renderización estática
+    const hostname = request.headers.get('host') || '';
     let storeSubdomain: string | null = null;
     
-    console.log('🗺️ [Sitemap] Request para:', requestUrl.hostname);
+    console.log('🗺️ [Sitemap] Request para:', hostname);
     
     // Detectar subdomain del hostname
-    if (requestUrl.hostname.endsWith('.shopifree.app')) {
-      storeSubdomain = requestUrl.hostname.split('.')[0];
-    } else if (requestUrl.hostname !== 'localhost' && !requestUrl.hostname.endsWith('.vercel.app')) {
+    if (hostname.endsWith('.shopifree.app')) {
+      storeSubdomain = hostname.split('.')[0];
+    } else if (hostname !== 'localhost' && !hostname.endsWith('.vercel.app') && hostname) {
       // Dominio personalizado - buscar subdomain correspondiente
-      storeSubdomain = await findSubdomainByCustomDomain(requestUrl.hostname);
+      storeSubdomain = await findSubdomainByCustomDomain(hostname);
     }
     
     if (!storeSubdomain) {
-      console.log('❌ [Sitemap] Tienda no encontrada para:', requestUrl.hostname);
+      console.log('❌ [Sitemap] Tienda no encontrada para:', hostname);
       return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Sitemap vacío: dominio no configurado -->
