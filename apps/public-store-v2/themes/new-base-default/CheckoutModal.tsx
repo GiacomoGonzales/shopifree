@@ -620,115 +620,48 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         console.log('✅ Initializing map at:', lat, lng);
 
         try {
-            // Configuración específica para móviles
+            // Configuración SIMPLE del mapa
             const mapOptions = {
                 center: { lat, lng },
-                zoom: isMobileDevice ? 15 : 16, // Zoom ligeramente menor en móviles
+                zoom: 15,
                 mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-                // Configuraciones específicas para móviles
-                gestureHandling: isMobileDevice ? 'cooperative' : 'auto',
                 zoomControl: true,
                 mapTypeControl: false,
                 scaleControl: false,
                 streetViewControl: false,
                 rotateControl: false,
-                fullscreenControl: !isMobileDevice,
-                // Configuraciones para mejorar el rendimiento en móviles
-                styles: isMobileDevice ? [
-                    {
-                        featureType: "poi",
-                        elementType: "labels",
-                        stylers: [{ visibility: "off" }]
-                    }
-                ] : undefined
+                fullscreenControl: false
             };
             
             console.log('🗺️ [Map Creation] Creating map with options:', mapOptions);
             const newMap = new window.google.maps.Map(mapRef.current, mapOptions);
             
-            // Timeout para detectar si el mapa no se carga en móviles
-            let mapLoadTimeout: NodeJS.Timeout | null = null;
-            let mapLoaded = false;
-            
-            if (isMobileDevice) {
-                mapLoadTimeout = setTimeout(() => {
-                    if (!mapLoaded && mapRef.current) {
-                        console.warn('⚠️ Map load timeout on mobile device');
-                        mapRef.current.innerHTML = `
-                            <div style="
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                height: 100%;
-                                background: #fff3cd;
-                                color: #856404;
-                                text-align: center;
-                                padding: 20px;
-                                border-radius: 8px;
-                            ">
-                                <div>
-                                    <div style="font-size: 24px; margin-bottom: 8px;">⏱️</div>
-                                    <div style="font-weight: 600; margin-bottom: 4px;">El mapa está tardando en cargar</div>
-                                    <small>Esto puede deberse a una conexión lenta</small>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }, 10000); // 10 segundos timeout
-            }
-            
-            // Eventos específicos para debug en móviles
-            newMap.addListener('idle', () => {
-                console.log('🗺️ [Map Event] Map is idle and ready');
-                mapLoaded = true;
-                if (mapLoadTimeout) {
-                    clearTimeout(mapLoadTimeout);
-                    mapLoadTimeout = null;
-                }
-            });
-            
-            newMap.addListener('tilesloaded', () => {
-                console.log('🗺️ [Map Event] Map tiles loaded successfully');
-                mapLoaded = true;
-                if (mapLoadTimeout) {
-                    clearTimeout(mapLoadTimeout);
-                    mapLoadTimeout = null;
-                }
-            });
-            
-            // Forzar resize después de un breve delay (importante para móviles)
+            // Resize SIMPLE
             setTimeout(() => {
-                console.log('🗺️ [Map Resize] Triggering resize for mobile');
                 window.google.maps.event.trigger(newMap, 'resize');
                 newMap.setCenter({ lat, lng });
-                
-                // Verificación adicional para móviles
-                if (isMobileDevice) {
-                    setTimeout(() => {
-                        console.log('🗺️ [Mobile Check] Verifying map content loaded');
-                        // Intentar forzar la carga de tiles
-                        if (newMap && window.google?.maps) {
-                            window.google.maps.event.trigger(newMap, 'resize');
-                            const currentZoom = newMap.getZoom();
-                            if (currentZoom !== undefined) {
-                                newMap.setZoom(currentZoom + 1);
-                                setTimeout(() => {
-                                    if (newMap && currentZoom !== undefined) {
-                                        newMap.setZoom(currentZoom);
-                                        newMap.setCenter({ lat, lng });
-                                    }
-                                }, 100);
-                            }
-                        }
-                    }, 500);
-                }
             }, 100);
 
+            // Marcador personalizado (solo en móviles)
+            const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+            
             const newMarker = new window.google.maps.Marker({
                 position: { lat, lng },
                 map: newMap,
                 draggable: true,
-                title: "Arrastra para ajustar tu ubicación exacta"
+                title: "Arrastra para ajustar tu ubicación exacta",
+                // Icono personalizado solo para móviles
+                icon: isMobileDevice ? {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 24 32" fill="none">
+                            <path d="M12 0C5.373 0 0 5.373 0 12c0 12 12 20 12 20s12-8 12-20C24 5.373 18.627 0 12 0z" fill="#FF4444" stroke="#ffffff" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="6" fill="#ffffff"/>
+                            <circle cx="12" cy="12" r="3" fill="#FF4444"/>
+                        </svg>
+                    `),
+                    scaledSize: new window.google.maps.Size(36, 48),
+                    anchor: new window.google.maps.Point(18, 48)
+                } : undefined
             });
 
             // Listener para cuando se mueva el marcador
@@ -747,10 +680,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 }
             });
 
-            // Listener para cuando el mapa esté completamente cargado
-            newMap.addListener('idle', () => {
-                console.log('Map fully loaded and ready');
-            });
+
 
             setMap(newMap);
             setMarker(newMarker);
