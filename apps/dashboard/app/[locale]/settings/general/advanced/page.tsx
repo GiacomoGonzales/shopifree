@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../../../components/DashboardLayout'
 import GeneralSettingsNav from '../../../../../components/settings/GeneralSettingsNav'
+import LanguageSection from '../../../../../components/settings/LanguageSection'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../../lib/store'
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
@@ -66,6 +67,28 @@ export default function GeneralSettingsAdvancedPage() {
   const [domainSaving, setDomainSaving] = useState(false)
   const [customDomain, setCustomDomain] = useState('')
   const [domainDoc, setDomainDoc] = useState<any | null>(null)
+
+  // Función para actualizar la tienda
+  const handleStoreUpdate = async (data: Partial<StoreWithId>): Promise<boolean> => {
+    if (!store?.id) return false
+    setSaving(true)
+    try {
+      const success = await updateStore(store.id, data)
+      if (success) {
+        // Recargar datos de la tienda para reflejar cambios
+        const updatedStore = await getUserStore(user?.uid || '')
+        if (updatedStore) {
+          setStore(updatedStore)
+        }
+      }
+      return success
+    } catch (error) {
+      console.error('Error updating store:', error)
+      return false
+    } finally {
+      setSaving(false)
+    }
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -205,6 +228,15 @@ export default function GeneralSettingsAdvancedPage() {
           <GeneralSettingsNav currentSection="advanced" />
 
           <div className="max-w-4xl space-y-6">
+
+            {/* Selector de idioma de la tienda */}
+            {store && (
+              <LanguageSection 
+                store={store} 
+                onUpdate={handleStoreUpdate} 
+                saving={saving} 
+              />
+            )}
 
             {/* Conectar dominio personalizado */}
             <div className="bg-white shadow-sm rounded-lg border border-gray-200">

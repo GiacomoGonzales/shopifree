@@ -5818,8 +5818,8 @@
     }
     
     .nbd-coupon-apply-btn {
-        min-width: 75px;
-        max-width: 75px;
+        min-width: 60px;
+        max-width: 60px;
         padding: var(--nbd-space-xs) var(--nbd-space-sm);
         font-size: 14px;
         font-weight: 600;

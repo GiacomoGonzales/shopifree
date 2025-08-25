@@ -120,8 +120,8 @@ export type ValidLocale = 'es' | 'en' | 'pt';
  * Falls back to 'es' if not configured
  */
 export function getPrimaryLocale(storeData: any): ValidLocale {
-    // Check main language field
-    const language = storeData?.language;
+    // Check advanced.language field
+    const language = storeData?.advanced?.language;
     
     // Normalize and validate
     if (language === 'en') return 'en';
@@ -148,9 +148,9 @@ export async function getStorePrimaryLocale(storeId: string): Promise<ValidLocal
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    const language = data?.language || 'es';
+                    const language = data?.advanced?.language || 'es';
                     
-                    console.log(`🔗 [Firestore] Store ${storeId}: language=${language}`);
+                    console.log(`🔗 [Firestore] Store ${storeId}: advanced.language=${language}`);
                     
                     return language as ValidLocale;
                 }
@@ -183,6 +183,68 @@ export async function getStorePrimaryLocale(storeId: string): Promise<ValidLocal
         return getPrimaryLocale(data);
     } catch (e) {
         console.warn("[public-store-v2] getStorePrimaryLocale fallo", e);
+        return null;
+    }
+}
+
+/**
+ * Shipping configuration types
+ */
+export type StorePickupLocation = {
+    id: string;
+    name: string;
+    address: string;
+    schedules: Array<{
+        day: string;
+        openTime: string;
+        closeTime: string;
+    }>;
+    preparationTime: string;
+};
+
+export type StorePickupConfig = {
+    enabled: boolean;
+    locations?: StorePickupLocation[];
+    // Legacy fields for backward compatibility
+    address?: string;
+    preparationTime?: string;
+    schedules?: Array<{
+        day: string;
+        startTime: string;
+        endTime: string;
+    }>;
+};
+
+export type StoreShippingConfig = {
+    storePickup?: StorePickupConfig;
+};
+
+/**
+ * Get store shipping configuration from Firestore
+ */
+export async function getStoreShippingConfig(storeId: string): Promise<StoreShippingConfig | null> {
+    try {
+        const db = getFirebaseDb();
+        if (!db) return null;
+        
+        const { doc, getDoc } = await import("firebase/firestore");
+        const ref = doc(db, "stores", storeId);
+        const snap = await getDoc(ref);
+        
+        if (!snap.exists()) return null;
+        
+        const data = snap.data();
+        console.log(`🚚 [Store] Raw Firestore data for ${storeId}:`, data);
+        
+        // Obtener configuración de shipping desde advanced.shipping
+        const shippingConfig = data.advanced?.shipping || {};
+        console.log(`🚚 [Store] Shipping config from advanced:`, shippingConfig);
+        
+        return {
+            storePickup: shippingConfig.storePickup || { enabled: false }
+        } as StoreShippingConfig;
+    } catch (e) {
+        console.warn("[public-store-v2] getStoreShippingConfig failed", e);
         return null;
     }
 }

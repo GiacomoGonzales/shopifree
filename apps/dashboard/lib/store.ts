@@ -59,6 +59,7 @@ export interface StoreConfig {
   }
   // Configuración avanzada
   advanced?: {
+    language?: 'es' | 'en' | 'pt' // Idioma de la tienda pública
     customDomain?: {
       domain?: string
       verified?: boolean

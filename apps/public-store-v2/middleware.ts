@@ -191,8 +191,8 @@ async function getStoreConfigCached(storeSubdomain: string): Promise<{
     // Extract store configuration
     const fields = storeDoc.fields || {};
     
-    // Get primary locale from main language field, fallback to 'es'
-    const language = fields.language?.stringValue || 'es';
+    // Get primary locale from advanced.language field, fallback to 'es'
+    const language = fields.advanced?.mapValue?.fields?.language?.stringValue || 'es';
     
     // Ensure we validate the language correctly
     const primaryLocale = ['es', 'en', 'pt'].includes(language) ? language : 'es';

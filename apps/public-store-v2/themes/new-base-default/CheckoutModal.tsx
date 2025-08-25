@@ -5,7 +5,7 @@ import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
-import { StoreBasicInfo } from '../../lib/store';
+import { StoreBasicInfo, getStoreShippingConfig, StoreShippingConfig, StorePickupLocation } from '../../lib/store';
 import { googleMapsLoader } from '../../lib/google-maps';
 import { 
     getStoreDeliveryZones, 
@@ -53,6 +53,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const { t } = useStoreLanguage();
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [shippingConfig, setShippingConfig] = useState<StoreShippingConfig | null>(null);
+    const [selectedLocation, setSelectedLocation] = useState<StorePickupLocation | null>(null);
     const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
     const autocompleteRef = useRef<HTMLInputElement>(null);
     const mapRef = useRef<HTMLDivElement>(null);
@@ -72,6 +74,25 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         if (typeof window === 'undefined') return false;
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                window.innerWidth <= 768;
+    };
+
+    // Función para formatear nombres de días
+    const formatDayName = (day: string) => {
+        const dayNames: Record<string, string> = {
+            'monday': 'Lunes',
+            'tuesday': 'Martes', 
+            'wednesday': 'Miércoles',
+            'thursday': 'Jueves',
+            'friday': 'Viernes',
+            'saturday': 'Sábado',
+            'sunday': 'Domingo'
+        };
+        return dayNames[day] || day;
+    };
+
+    // Función para formatear hora (de 24h a 12h si es necesario)
+    const formatTime = (time: string) => {
+        return time; // Por ahora mantener formato 24h
     };
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
@@ -112,6 +133,33 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         : 0;
     
     const total = subtotal + shipping - discount;
+
+    // Cargar configuración de envío cuando se abre el modal
+    useEffect(() => {
+        if (isOpen && storeId) {
+            console.log('🚚 [CheckoutModal] Loading shipping config for store:', storeId);
+            getStoreShippingConfig(storeId).then(config => {
+                console.log('🚚 [CheckoutModal] Raw shipping config:', config);
+                setShippingConfig(config);
+                console.log('🚚 [CheckoutModal] Store pickup enabled?', config?.storePickup?.enabled);
+                
+                // Auto-seleccionar primera sucursal si solo hay una
+                const locations = config?.storePickup?.locations || [];
+                if (locations.length === 1) {
+                    setSelectedLocation(locations[0]);
+                    console.log('🚚 [CheckoutModal] Auto-selected single location:', locations[0].name);
+                }
+            });
+        }
+    }, [isOpen, storeId]);
+
+    // Si pickup está deshabilitado y el usuario lo tenía seleccionado, cambiar a standard
+    useEffect(() => {
+        if (shippingConfig && formData.shippingMethod === 'pickup' && !shippingConfig.storePickup?.enabled) {
+            console.log('🚚 [CheckoutModal] Pickup disabled, switching to standard shipping');
+            setFormData(prev => ({ ...prev, shippingMethod: 'standard' }));
+        }
+    }, [shippingConfig, formData.shippingMethod]);
 
     // Calcular y actualizar costo de envío
     useEffect(() => {
@@ -275,7 +323,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         const code = formData.couponCode.trim().toUpperCase();
         
         if (!code) {
-            setCouponError('Ingresa un código de cupón');
+            setCouponError(t('enterCouponCode'));
             return;
         }
 
@@ -301,7 +349,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 setFormData(prev => ({ ...prev, appliedCoupon: coupon }));
                 setCouponError(null);
             } else {
-                setCouponError('Código de cupón no válido');
+                setCouponError(t('invalidCouponCode'));
             }
         } catch (error) {
             setCouponError('Error al validar el cupón. Intenta de nuevo.');
@@ -531,16 +579,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         let message = '';
         switch(error.code) {
             case error.PERMISSION_DENIED:
-                message = 'Debes permitir el acceso a la ubicación para usar esta función. Revisa la configuración de tu navegador.';
+                message = t('locationPermissionDenied');
                 break;
             case error.POSITION_UNAVAILABLE:
-                message = 'La información de ubicación no está disponible. Por favor ingresa tu dirección manualmente.';
+                message = t('locationUnavailable');
                 break;
             case error.TIMEOUT:
-                message = 'Se agotó el tiempo para obtener la ubicación. Intenta de nuevo o ingresa tu dirección manualmente.';
+                message = t('locationTimeout');
                 break;
             default:
-                message = 'Ocurrió un error al obtener la ubicación. Por favor ingresa tu dirección manualmente.';
+                message = t('locationError');
                 break;
         }
         alert(message);
@@ -889,9 +937,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                         )}
                                     </div>
                                     <span className="nbd-step-label">
-                                        {step === 1 && 'Información'}
-                                        {step === 2 && 'Envío'}
-                                        {step === 3 && 'Pago'}
+                                        {step === 1 && t('information')}
+                                        {step === 2 && t('shipping')}
+                                        {step === 3 && t('payment')}
                                     </span>
                                 </div>
                             ))}
@@ -900,7 +948,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     <button 
                         onClick={onClose}
                         className="nbd-checkout-close"
-                        aria-label="Cerrar checkout"
+                        aria-label={t('closeCheckout')}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -915,38 +963,38 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             {/* Paso 1: Información personal */}
                             {currentStep === 1 && (
                             <div className="nbd-checkout-step">
-                                <h3 className="nbd-step-title">Información de contacto</h3>
+                                <h3 className="nbd-step-title">{t('contactInformation')}</h3>
                                 <div className="nbd-form-grid">
                                     <div className="nbd-form-group nbd-form-group--full">
-                                        <label className="nbd-form-label">Nombre completo *</label>
+                                        <label className="nbd-form-label">{t('fullName')} *</label>
                                         <input
                                             type="text"
                                             className="nbd-form-input"
                                             value={formData.fullName}
                                             onChange={(e) => handleInputChange('fullName', e.target.value)}
-                                            placeholder="Juan García López"
+                                            placeholder={t('fullNamePlaceholder')}
                                             required
                                         />
                                     </div>
                                     <div className="nbd-form-group nbd-form-group--full">
-                                        <label className="nbd-form-label">Email *</label>
+                                        <label className="nbd-form-label">{t('email')} *</label>
                                         <input
                                             type="email"
                                             className="nbd-form-input"
                                             value={formData.email}
                                             onChange={(e) => handleInputChange('email', e.target.value)}
-                                            placeholder="tu@email.com"
+                                            placeholder={t('emailPlaceholder')}
                                             required
                                         />
                                     </div>
                                     <div className="nbd-form-group nbd-form-group--full">
-                                        <label className="nbd-form-label">Teléfono *</label>
+                                        <label className="nbd-form-label">{t('phone')} *</label>
                                         <input
                                             type="tel"
                                             className="nbd-form-input"
                                             value={formData.phone}
                                             onChange={(e) => handleInputChange('phone', e.target.value)}
-                                            placeholder="+99 999 999 999"
+                                            placeholder={t('phonePlaceholder')}
                                             required
                                         />
                                     </div>
@@ -957,26 +1005,29 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         {/* Paso 2: Envío */}
                         {currentStep === 2 && (
                             <div className="nbd-checkout-step">
-                                <h3 className="nbd-step-title">Método de envío</h3>
+                                <h3 className="nbd-step-title">{t('shippingMethod')}</h3>
                                 
                                 {/* Opciones de envío */}
                                 <div className="nbd-method-section">
                                     <div className="nbd-method-options">
-                                        <label className={`nbd-method-option ${formData.shippingMethod === 'pickup' ? 'selected' : ''}`}>
-                                            <input
-                                                type="radio"
-                                                name="shipping"
-                                                value="pickup"
-                                                checked={formData.shippingMethod === 'pickup'}
-                                                onChange={(e) => handleInputChange('shippingMethod', e.target.value as any)}
-                                            />
-                                            <div className="nbd-method-content">
-                                                <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Recojo en tienda</span>
-                                                    <span className="nbd-method-desc">Disponible hoy</span>
+                                        {/* Opción de recojo en tienda - solo si está habilitada */}
+                                        {shippingConfig?.storePickup?.enabled && (
+                                            <label className={`nbd-method-option ${formData.shippingMethod === 'pickup' ? 'selected' : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="shipping"
+                                                    value="pickup"
+                                                    checked={formData.shippingMethod === 'pickup'}
+                                                    onChange={(e) => handleInputChange('shippingMethod', e.target.value as any)}
+                                                />
+                                                <div className="nbd-method-content">
+                                                    <div className="nbd-method-info">
+                                                        <span className="nbd-method-name">{t('pickupInStore')}</span>
+                                                        <span className="nbd-method-desc">{t('availableToday')}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </label>
+                                            </label>
+                                        )}
                                         <label className={`nbd-method-option ${formData.shippingMethod === 'standard' ? 'selected' : ''}`}>
                                             <input
                                                 type="radio"
@@ -987,8 +1038,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Envío a domicilio</span>
-                                                    <span className="nbd-method-desc">3-5 días hábiles</span>
+                                                    <span className="nbd-method-name">{t('homeDelivery')}</span>
+                                                    <span className="nbd-method-desc">{t('businessDays3to5')}</span>
                                                 </div>
                                             </div>
                                         </label>
@@ -1002,8 +1053,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Envío Express</span>
-                                                    <span className="nbd-method-desc">1-2 días hábiles</span>
+                                                    <span className="nbd-method-name">{t('expressShipping')}</span>
+                                                    <span className="nbd-method-desc">{t('businessDays1to2')}</span>
                                                 </div>
 
                                             </div>
@@ -1011,23 +1062,149 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     </div>
                                 </div>
 
+                                {/* Selección de sucursal (solo si es recojo en tienda) */}
+                                {formData.shippingMethod === 'pickup' && shippingConfig?.storePickup?.locations && (
+                                    <div style={{ marginTop: 'var(--nbd-space-xl)' }}>
+                                        <div className="nbd-form-group nbd-form-group--full">
+                                            <label className="nbd-form-label">
+                                                {shippingConfig.storePickup.locations.length > 1 ? 'Selecciona sucursal' : 'Sucursal para recojo'}
+                                            </label>
+                                            
+                                            <div className="nbd-locations-list" style={{ marginTop: 'var(--nbd-space-md)' }}>
+                                                {shippingConfig.storePickup.locations.map((location) => (
+                                                    <div 
+                                                        key={location.id} 
+                                                        className={`nbd-location-option ${selectedLocation?.id === location.id ? 'selected' : ''}`}
+                                                        onClick={() => setSelectedLocation(location)}
+                                                        style={{
+                                                            border: '1px solid #e5e7eb',
+                                                            borderRadius: '8px',
+                                                            padding: '16px',
+                                                            marginBottom: '12px',
+                                                            cursor: 'pointer',
+                                                            backgroundColor: selectedLocation?.id === location.id ? '#f9fafb' : 'white',
+                                                            borderColor: selectedLocation?.id === location.id ? '#374151' : '#e5e7eb',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                                            {/* Radio button indicator */}
+                                                            <div style={{ 
+                                                                width: '16px', 
+                                                                height: '16px', 
+                                                                border: '2px solid #d1d5db',
+                                                                borderRadius: '50%',
+                                                                marginTop: '2px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                borderColor: selectedLocation?.id === location.id ? '#374151' : '#d1d5db'
+                                                            }}>
+                                                                {selectedLocation?.id === location.id && (
+                                                                    <div style={{
+                                                                        width: '8px',
+                                                                        height: '8px',
+                                                                        backgroundColor: '#374151',
+                                                                        borderRadius: '50%'
+                                                                    }}></div>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            {/* Location info */}
+                                                            <div style={{ flex: 1 }}>
+                                                                <h4 style={{ 
+                                                                    fontSize: '14px', 
+                                                                    fontWeight: '500', 
+                                                                    color: '#111827',
+                                                                    margin: '0 0 4px 0'
+                                                                }}>
+                                                                    {location.name}
+                                                                </h4>
+                                                                
+                                                                {location.address && (
+                                                                    <p style={{ 
+                                                                        fontSize: '13px', 
+                                                                        color: '#6b7280',
+                                                                        margin: '0 0 8px 0',
+                                                                        lineHeight: '1.4'
+                                                                    }}>
+                                                                        {location.address}
+                                                                    </p>
+                                                                )}
+                                                                
+                                                                {location.preparationTime && (
+                                                                    <p style={{ 
+                                                                        fontSize: '12px', 
+                                                                        color: '#6b7280',
+                                                                        margin: '0 0 8px 0'
+                                                                    }}>
+                                                                        Listo en: {location.preparationTime}
+                                                                    </p>
+                                                                )}
+                                                                
+                                                                {location.schedules && location.schedules.length > 0 && (
+                                                                    <div style={{ marginTop: '8px' }}>
+                                                                        <p style={{ 
+                                                                            fontSize: '12px', 
+                                                                            color: '#6b7280',
+                                                                            margin: '0 0 4px 0',
+                                                                            fontWeight: '500'
+                                                                        }}>
+                                                                            Horarios:
+                                                                        </p>
+                                                                        <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                                                                            {location.schedules.map((schedule, index) => (
+                                                                                <div 
+                                                                                    key={index} 
+                                                                                    style={{ 
+                                                                                        display: 'flex', 
+                                                                                        justifyContent: 'space-between',
+                                                                                        alignItems: 'center',
+                                                                                        marginBottom: '2px',
+                                                                                        minHeight: '16px'
+                                                                                    }}
+                                                                                >
+                                                                                    <span style={{ flex: '0 0 auto' }}>
+                                                                                        {formatDayName(schedule.day)}:
+                                                                                    </span>
+                                                                                    <span style={{ 
+                                                                                        flex: '1 1 auto', 
+                                                                                        textAlign: 'right',
+                                                                                        marginLeft: '8px'
+                                                                                    }}>
+                                                                                        {formatTime(schedule.openTime)} - {formatTime(schedule.closeTime)}
+                                                                                    </span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Dirección (solo si no es recojo en tienda) */}
                                 {formData.shippingMethod !== 'pickup' && (
                                     <div style={{ marginTop: 'var(--nbd-space-xl)' }}>
                                         <div className="nbd-form-group nbd-form-group--full">
                                             <div className="nbd-address-header">
-                                                <label className="nbd-form-label">Dirección de envío *</label>
+                                                <label className="nbd-form-label">{t('shippingAddress')} *</label>
                                                 <button
                                                     type="button"
                                                     onClick={getUserLocation}
                                                     disabled={gettingLocation}
                                                     className="nbd-location-btn"
-                                                    title="Obtener mi ubicación actual"
+                                                    title={t('getMyLocation')}
                                                 >
                                                     {gettingLocation ? (
                                                         <>
                                                             <div className="nbd-location-spinner"></div>
-                                                            Obteniendo...
+                                                            {t('getting')}
                                                         </>
                                                                                                             ) : (
                                                             <>
@@ -1047,7 +1224,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                                         fill="none"
                                                                     />
                                                                 </svg>
-                                                                Usar mi ubicación
+                                                                {t('getMyLocation')}
                                                             </>
                                                         )}
                                                 </button>
@@ -1060,7 +1237,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     value={formData.address}
                                                     onChange={(e) => handleInputChange('address', e.target.value)}
                                                     onKeyPress={handleAddressKeyPress}
-                                                    placeholder="Escribe tu dirección completa..."
+                                                    placeholder={t('shippingAddressPlaceholder')}
                                                     required
                                                 />
                                                 <button
@@ -1068,7 +1245,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     onClick={() => handleDirectGeocoding(formData.address)}
                                                     disabled={!formData.address.trim()}
                                                     className="nbd-search-btn"
-                                                    title="Buscar dirección"
+                                                    title={t('searchAddress')}
                                                 >
                                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
@@ -1085,7 +1262,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <div className="nbd-suggestion-content">
                                                         <div className="nbd-suggestion-icon">📍</div>
                                                         <div className="nbd-suggestion-text">
-                                                            <p className="nbd-suggestion-label">Dirección sugerida:</p>
+                                                            <p className="nbd-suggestion-label">{t('suggestedAddressLabel')}</p>
                                                             <p className="nbd-suggestion-address">{suggestedAddress}</p>
                                                         </div>
                                                     </div>
@@ -1135,8 +1312,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             return (
                                                 <div className="nbd-map-container">
                                                     <div className="nbd-map-header">
-                                                        <h4>📍 Tu ubicación</h4>
-                                                        <p>Arrastra el marcador para ajustar tu ubicación exacta</p>
+                                                        <h4>📍 {t('yourLocation')}</h4>
+                                                        <p>{t('dragMarker')}</p>
                                                         {isMobileDevice && !isGoogleMapsLoaded && (
                                                             <div className="nbd-mobile-map-status">
                                                                 <small style={{ color: '#666', fontSize: '12px' }}>
@@ -1160,8 +1337,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                             }}>
                                                                 <div>
                                                                     <div>🗺️</div>
-                                                                    <div>Cargando mapa...</div>
-                                                                    <small>Si no aparece, verifica tu conexión</small>
+                                                                    <div>{t('loadingMap')}</div>
+                                                                    <small>{t('checkConnection')}</small>
                                                                 </div>
                                                             </div>
                                                         )}
@@ -1177,11 +1354,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         {/* Paso 3: Pago */}
                         {currentStep === 3 && (
                             <div className="nbd-checkout-step">
-                                <h3 className="nbd-step-title">Método de pago</h3>
+                                <h3 className="nbd-step-title">{t('paymentMethod')}</h3>
                                 
                                 {/* Método de pago */}
                                 <div className="nbd-method-section">
-                                    <h4 className="nbd-method-title">Elige cómo quieres pagar</h4>
+                                    <h4 className="nbd-method-title">{t('choosePayment')}</h4>
                                     <div className="nbd-method-options">
                                         <label className={`nbd-method-option ${formData.paymentMethod === 'cash' ? 'selected' : ''}`}>
                                             <input
@@ -1193,8 +1370,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Pago en efectivo</span>
-                                                    <span className="nbd-method-desc">Contraentrega</span>
+                                                    <span className="nbd-method-name">{t('cashPayment')}</span>
+                                                    <span className="nbd-method-desc">{t('cashOnDelivery')}</span>
                                                 </div>
                                                 <div className="nbd-method-icon">💵</div>
                                             </div>
@@ -1209,8 +1386,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Transferencia bancaria</span>
-                                                    <span className="nbd-method-desc">Envío datos por WhatsApp</span>
+                                                    <span className="nbd-method-name">{t('bankTransfer')}</span>
+                                                    <span className="nbd-method-desc">{t('whatsappData')}</span>
                                                 </div>
                                                 <div className="nbd-method-icon">🏦</div>
                                             </div>
@@ -1225,8 +1402,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             />
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">Tarjeta de crédito</span>
-                                                    <span className="nbd-method-desc">Visa, Mastercard</span>
+                                                    <span className="nbd-method-name">{t('creditCard')}</span>
+                                                    <span className="nbd-method-desc">{t('visaMastercard')}</span>
                                                 </div>
                                                 <div className="nbd-method-icon">💳</div>
                                             </div>
@@ -1236,7 +1413,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                                 {/* Cupón de descuento */}
                                 <div className="nbd-form-group nbd-form-group--full">
-                                    <label className="nbd-form-label">Descuento</label>
+                                    <label className="nbd-form-label">{t('discount')}</label>
                                     
                                     {!formData.appliedCoupon ? (
                                         <div>
@@ -1246,7 +1423,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     className="nbd-form-input nbd-coupon-input"
                                                     value={formData.couponCode}
                                                     onChange={(e) => handleInputChange('couponCode', e.target.value.toUpperCase())}
-                                                    placeholder="Código de descuento"
+                                                    placeholder={t('discountPlaceholder')}
                                                     disabled={couponLoading}
                                                 />
                                                 <button
@@ -1255,7 +1432,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     onClick={applyCoupon}
                                                     disabled={couponLoading || !formData.couponCode.trim()}
                                                 >
-                                                    {couponLoading ? 'Validando...' : 'Aplicar'}
+                                                    {couponLoading ? (isMobile() ? t('validatingShort') : t('validating')) : t('apply')}
                                                 </button>
                                             </div>
                                             
@@ -1287,12 +1464,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                                 {/* Notas adicionales */}
                                 <div className="nbd-form-group nbd-form-group--full">
-                                    <label className="nbd-form-label">Notas adicionales (opcional)</label>
+                                    <label className="nbd-form-label">{t('additionalNotes')}</label>
                                     <textarea
                                         className="nbd-form-textarea"
                                         value={formData.notes}
                                         onChange={(e) => handleInputChange('notes', e.target.value)}
-                                        placeholder="Instrucciones especiales, horario de entrega, etc."
+                                        placeholder={t('notesPlaceholder')}
                                         rows={3}
                                     />
                                 </div>
@@ -1302,7 +1479,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                         {/* Sidebar con resumen */}
                         <div className="nbd-checkout-sidebar">
-                            <h4 className="nbd-summary-title">Resumen del pedido</h4>
+                            <h4 className="nbd-summary-title">{t('orderSummary')}</h4>
                             
                             {/* Lista de productos */}
                             <div className="nbd-summary-items">
@@ -1330,7 +1507,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             {item.variant && (
                                                 <span className="nbd-summary-item-variant">{item.variant.name}</span>
                                             )}
-                                            <span className="nbd-summary-item-qty">Cantidad: {item.quantity}</span>
+                                            <span className="nbd-summary-item-qty">{t('quantity')} {item.quantity}</span>
                                         </div>
                                         <div className="nbd-summary-item-price">
                                             {formatPrice((item.variant?.price || item.price) * item.quantity, currency)}
@@ -1342,15 +1519,15 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             {/* Totales */}
                             <div className="nbd-summary-totals">
                                 <div className="nbd-summary-line">
-                                    <span>Subtotal</span>
+                                    <span>{t('subtotal')}</span>
                                     <span>{formatPrice(subtotal, currency)}</span>
                                 </div>
                                 <div className="nbd-summary-line">
-                                    <span>Envío</span>
+                                    <span>{t('shipping')}</span>
                                     <span>
-                                        {formData.shippingMethod === 'pickup' ? 'Gratis' : 
+                                        {formData.shippingMethod === 'pickup' ? formatPrice(0, currency) : 
                                          userCoordinates ? formatPrice(shipping, currency) : 
-                                         'Proporciona tu ubicación'}
+                                         t('provideLocation')}
                                     </span>
                                 </div>
                                 {formData.appliedCoupon && discount > 0 && (
@@ -1364,7 +1541,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     </div>
                                 )}
                                 <div className="nbd-summary-line nbd-summary-total">
-                                    <span>Total</span>
+                                    <span>{t('total')}</span>
                                     <span>{formatPrice(total, currency)}</span>
                                 </div>
                             </div>
@@ -1380,7 +1557,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                 onClick={prevStep}
                                 className="nbd-btn nbd-btn--ghost"
                             >
-                                ← Anterior
+                                ← {t('previous')}
                             </button>
                         )}
                         <div className="nbd-checkout-actions-right">
@@ -1390,7 +1567,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     disabled={!validateStep(currentStep)}
                                     className={`nbd-btn nbd-btn--primary ${!validateStep(currentStep) ? 'nbd-btn--disabled' : ''}`}
                                 >
-                                    Siguiente →
+                                    {t('next')} →
                                 </button>
                             ) : (
                                 <button 
@@ -1401,10 +1578,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     {isSubmitting ? (
                                         <>
                                             <div className="nbd-loading-spinner"></div>
-                                            Procesando...
+                                            {t('processing')}
                                         </>
                                     ) : (
-                                        'Confirmar pedido'
+                                        t('confirmOrder')
                                     )}
                                 </button>
                             )}
