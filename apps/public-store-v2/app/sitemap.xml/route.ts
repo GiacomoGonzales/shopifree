@@ -1,67 +1,19 @@
-import { getCanonicalHost, type CanonicalResult } from '../../lib/canonical-resolver';
-import { getStoreCategories } from '../../lib/categories';
-import { getStoreProducts } from '../../lib/products';
-
 // Forzar renderización dinámica - el sitemap debe ser dinámico por naturaleza
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    // Usar headers en lugar de request.url para evitar errores de renderización estática
+    // Usar headers para obtener el hostname
     const hostname = request.headers.get('host') || '';
-    let storeSubdomain: string | null = null;
     
-    console.log('🗺️ [Sitemap] Request para:', hostname);
+    // Detectar el protocolo (http o https)
+    const protocol = request.headers.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+    const baseUrl = `${protocol}://${hostname}`;
     
-    // Detectar subdomain del hostname
-    if (hostname.endsWith('.shopifree.app')) {
-      storeSubdomain = hostname.split('.')[0];
-    } else if (hostname !== 'localhost' && !hostname.endsWith('.vercel.app') && hostname) {
-      // Dominio personalizado - buscar subdomain correspondiente
-      storeSubdomain = await findSubdomainByCustomDomain(hostname);
-    }
+    console.log('🗺️ [Sitemap] Generando sitemap básico para:', baseUrl);
     
-    if (!storeSubdomain) {
-      console.log('❌ [Sitemap] Tienda no encontrada para:', hostname);
-      return new Response(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Sitemap vacío: dominio no configurado -->
-</urlset>`, {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/xml; charset=UTF-8',
-          'Cache-Control': 'public, max-age=300',
-          'X-Robots-Tag': 'index'
-        }
-      });
-    }
-    
-    // Obtener canonical host oficial
-    const canonical = await getCanonicalHost(storeSubdomain);
-    
-    if (!canonical.storeId) {
-      console.log('❌ [Sitemap] StoreId no encontrado para:', storeSubdomain);
-      return new Response(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Sitemap vacío: tienda no configurada -->
-</urlset>`, {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/xml; charset=UTF-8',
-          'Cache-Control': 'public, max-age=300',
-          'X-Robots-Tag': 'index'
-        }
-      });
-    }
-    
-    console.log('✅ [Sitemap] Generando para:', {
-      storeSubdomain,
-      storeId: canonical.storeId,
-      canonicalHost: canonical.canonicalHost
-    });
-    
-    // Generar sitemap simplificado
-    const sitemap = await generateSimpleSitemap(canonical);
+    // Generar sitemap ultra simplificado - solo URLs estáticas básicas
+    const sitemap = generateBasicSitemap(baseUrl);
     
     return new Response(sitemap, {
       status: 200,
@@ -72,185 +24,54 @@ export async function GET(request: Request) {
       }
     });
   } catch (error) {
-    console.error('❌ [Sitemap] Error crítico:', error);
+    console.error('❌ [Sitemap] Error:', error);
     
     // Retornar sitemap mínimo válido en caso de error
     return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Sitemap de error temporal -->
+  <url>
+    <loc>https://example.com</loc>
+    <lastmod>2024-01-01</lastmod>
+  </url>
 </urlset>`, {
       status: 200,
       headers: { 
         'Content-Type': 'application/xml; charset=UTF-8',
-        'Cache-Control': 'public, max-age=60',
-        'X-Robots-Tag': 'index'
+        'Cache-Control': 'public, max-age=60'
       }
     });
   }
 }
 
-// Sitemap simplificado: URLs básicas sin complejidad
-async function generateSimpleSitemap(canonical: CanonicalResult): Promise<string> {
-  const { canonicalHost, storeId } = canonical;
+// Función ultra básica para generar sitemap
+function generateBasicSitemap(baseUrl: string): string {
   const currentDate = new Date().toISOString().split('T')[0];
   
-  let urls = `
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${canonicalHost}/</loc>
+    <loc>${baseUrl}/</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-  </url>`;
-  
-  // Agregar páginas estáticas principales
-  const staticPages = ['catalogo', 'ofertas', 'favoritos'];
-  for (const page of staticPages) {
-    urls += `
+  </url>
   <url>
-    <loc>${canonicalHost}/${page}</loc>
+    <loc>${baseUrl}/catalogo</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>`;
-  }
-  
-  // Agregar categorías (con manejo de errores mejorado)
-  if (storeId) {
-    try {
-      const categories = await Promise.race([
-        getStoreCategories(storeId),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-      ]);
-      
-      if (categories && Array.isArray(categories)) {
-        console.log('📂 [Sitemap] Categorías encontradas:', categories.length);
-        
-        for (const category of categories.slice(0, 50)) { // Limitar a 50 categorías
-          if (category.slug && typeof category.slug === 'string') {
-            urls += `
+  </url>
   <url>
-    <loc>${canonicalHost}/categoria/${encodeURIComponent(category.slug)}</loc>
+    <loc>${baseUrl}/ofertas</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/favoritos</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>`;
-          }
-        }
-      }
-    } catch (error) {
-      console.warn('⚠️ [Sitemap] No se pudieron cargar categorías:', error instanceof Error ? error.message : String(error));
-    }
-    
-    // Agregar productos (con manejo de errores mejorado)
-    try {
-      const products = await Promise.race([
-        getStoreProducts(storeId),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-      ]);
-      
-      if (products && Array.isArray(products)) {
-        console.log('🛍️ [Sitemap] Productos encontrados:', products.length);
-        
-        const activeProducts = products
-          .filter(p => p.slug && typeof p.slug === 'string' && p.status === 'active')
-          .slice(0, 100); // Limitar a 100 productos para evitar sitemaps muy largos
-        
-        for (const product of activeProducts) {
-          urls += `
-  <url>
-    <loc>${canonicalHost}/producto/${encodeURIComponent(product.slug)}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
-        }
-        
-        console.log('✅ [Sitemap] Productos añadidos:', activeProducts.length);
-      }
-    } catch (error) {
-      console.warn('⚠️ [Sitemap] No se pudieron cargar productos:', error instanceof Error ? error.message : String(error));
-    }
-  }
-  
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
+  </url>
 </urlset>`;
-}
-
-
-
-// Función helper simplificada para buscar subdomain por dominio personalizado
-async function findSubdomainByCustomDomain(hostname: string): Promise<string | null> {
-  try {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-    
-    if (!projectId || !apiKey) {
-      console.warn('⚠️ [Sitemap] Variables de entorno Firebase no configuradas');
-      return null;
-    }
-    
-    // Timeout de 3 segundos para evitar sitemaps lentos
-    const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 3000)
-    );
-    
-    const searchPromise = async (): Promise<string | null> => {
-      // Buscar en todas las tiendas con límite
-      const storeQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          structuredQuery: {
-            from: [{ collectionId: "stores" }],
-            limit: 50 // Limitar búsqueda para mejorar performance
-          }
-        })
-      });
-      
-      if (!storeQuery.ok) return null;
-      
-      const storeData = await storeQuery.json();
-      if (!Array.isArray(storeData)) return null;
-      
-      // Verificar dominios personalizados en paralelo (máximo 10 simultáneas)
-      const checks = storeData.slice(0, 10).map(async (row) => {
-        const storeDoc = row?.document;
-        if (!storeDoc) return null;
-        
-        const storeId = storeDoc.name.split('/').pop();
-        const subdomain = storeDoc.fields?.subdomain?.stringValue;
-        
-        if (!subdomain) return null;
-        
-        try {
-          const domainQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`);
-          
-          if (domainQuery.ok) {
-            const domainDoc = await domainQuery.json();
-            const customDomain = domainDoc?.fields?.customDomain?.stringValue;
-            
-            if (customDomain && customDomain.toLowerCase() === hostname.toLowerCase()) {
-              return subdomain;
-            }
-          }
-        } catch (error) {
-          console.warn(`⚠️ [Sitemap] Error verificando dominio para ${subdomain}:`, error instanceof Error ? error.message : String(error));
-        }
-        
-        return null;
-      });
-      
-      const results = await Promise.allSettled(checks);
-      const found = results.find(result => result.status === 'fulfilled' && result.value);
-      
-      return found && found.status === 'fulfilled' ? found.value : null;
-    };
-    
-    return await Promise.race([searchPromise(), timeoutPromise]);
-    
-  } catch (error) {
-    console.warn('⚠️ [Sitemap] Error buscando dominio personalizado:', error instanceof Error ? error.message : String(error));
-    return null;
-  }
 }
