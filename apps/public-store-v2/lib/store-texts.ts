@@ -23,7 +23,6 @@ export interface StoreTexts {
   continueShopping: string;
   proceedToCheckout: string;
   checkout: string;
-  quantity: string;
   
   // Productos
   products: string;
@@ -75,7 +74,6 @@ export interface StoreTexts {
   
   // Footer
   navigation: string;
-  information: string;
   subscribe: string;
   
   // Ordenamiento y vista
@@ -127,8 +125,6 @@ export interface StoreTexts {
   quantity: string;
   yourLocation: string;
   useMyLocation: string;
-  previous: string;
-  next: string;
   confirmOrder: string;
   discount: string;
   discountCode: string;
@@ -180,7 +176,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     continueShopping: 'Seguir comprando',
     proceedToCheckout: 'Proceder al checkout',
     checkout: 'Finalizar compra',
-    quantity: 'Cantidad',
     
     // Productos
     products: 'Productos',
@@ -232,7 +227,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     
     // Footer
     navigation: 'Navegación',
-    information: 'Información',
     subscribe: 'Suscribirse',
     
     // Ordenamiento y vista
@@ -284,8 +278,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     quantity: 'Cantidad:',
     yourLocation: 'Tu ubicación',
     useMyLocation: 'Usar mi ubicación',
-    previous: 'Anterior',
-    next: 'Siguiente',
     confirmOrder: 'Confirmar pedido',
     discount: 'Descuento',
     discountCode: 'Código de descuento',
@@ -336,7 +328,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     continueShopping: 'Continue Shopping',
     proceedToCheckout: 'Proceed to Checkout',
     checkout: 'Checkout',
-    quantity: 'Quantity',
     
     // Productos
     products: 'Products',
@@ -388,7 +379,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     
     // Footer
     navigation: 'Navigation',
-    information: 'Information',
     subscribe: 'Subscribe',
     
     // Ordenamiento y vista
@@ -440,8 +430,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     quantity: 'Quantity:',
     yourLocation: 'Your location',
     useMyLocation: 'Use my location',
-    previous: 'Previous',
-    next: 'Next',
     confirmOrder: 'Confirm Order',
     discount: 'Discount',
     discountCode: 'Discount Code',
@@ -492,7 +480,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     continueShopping: 'Continuar comprando',
     proceedToCheckout: 'Proceder ao checkout',
     checkout: 'Finalizar compra',
-    quantity: 'Quantidade',
     
     // Produtos
     products: 'Produtos',
@@ -544,7 +531,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     
     // Rodapé
     navigation: 'Navegação',
-    information: 'Informação',
     subscribe: 'Subscrever',
     
     // Ordenação e vista
@@ -596,8 +582,6 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     quantity: 'Quantidade:',
     yourLocation: 'Sua localização',
     useMyLocation: 'Usar minha localização',
-    previous: 'Anterior',
-    next: 'Próximo',
     confirmOrder: 'Confirmar Pedido',
     discount: 'Desconto',
     discountCode: 'Código de Desconto',
