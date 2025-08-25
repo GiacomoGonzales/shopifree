@@ -6,15 +6,41 @@
   - Environments: .env.local
 
    Creating an optimized production build ...
-uncaughtException [Error: EPERM: operation not permitted, open 'C:\Users\giaco\Shopifree\apps\public-store-v2\.next\trace'] {
-  errno: -4048,
-  code: 'EPERM',
-  syscall: 'open',
-  path: 'C:\\Users\\giaco\\Shopifree\\apps\\public-store-v2\\.next\\trace'
-}
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path C:\Users\giaco\Shopifree\apps\public-store-v2
-npm error workspace @shopifree/public-store-v2@1.0.0
-npm error location C:\Users\giaco\Shopifree\apps\public-store-v2
-npm error command failed
+⚠️  Usando colores hardcodeados como fallback en public-store-v2/tailwind.config.js
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/8) ...
+   Generating static pages (2/8) 
+   Generating static pages (4/8) 
+   Generating static pages (6/8) 
+ ✓ Generating static pages (8/8)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                       Size     First Load JS
+┌ ○ /                                                             156 B          87.8 kB
+├ ○ /_not-found                                                   156 B          87.8 kB
+├ ƒ /[storeSubdomain]                                             182 B           181 kB
+├ ƒ /[storeSubdomain]/catalogo                                    156 B          87.8 kB
+├ ƒ /[storeSubdomain]/categoria/[categorySlug]                    191 B           181 kB
+├ ƒ /[storeSubdomain]/categoria/[categorySlug]/[subCategorySlug]  191 B           181 kB
+├ ƒ /[storeSubdomain]/favoritos                                   156 B          87.8 kB
+├ ƒ /[storeSubdomain]/ofertas                                     156 B          87.8 kB
+├ ƒ /[storeSubdomain]/producto/[productSlug]                      26.1 kB         204 kB
+├ ○ /api/hello                                                    0 B                0 B
+├ ○ /google[verification].html                                    0 B                0 B
+├ ○ /healthz                                                      0 B                0 B
+├ ƒ /robots.txt                                                   0 B                0 B
+└ ƒ /sitemap.xml                                                  0 B                0 B
++ First Load JS shared by all                                     87.7 kB
+  ├ chunks/1dd3208c-0b6f270b37c27f2a.js                           53.6 kB
+  ├ chunks/528-10b9d4513d860223.js                                31.6 kB
+  └ other shared chunks (total)                                   2.47 kB
+
+
+ƒ Middleware                                                      28.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

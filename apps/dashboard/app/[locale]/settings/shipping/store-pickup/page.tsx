@@ -21,13 +21,13 @@ interface ShippingData {
     locations: Array<{
       id: string
       name: string
-      address: string
-      schedules: Array<{
-        day: string
-        openTime: string
-        closeTime: string
-      }>
-      preparationTime: string
+    address: string
+    schedules: Array<{
+      day: string
+      openTime: string
+      closeTime: string
+    }>
+    preparationTime: string
     }>
   }
 }
@@ -205,10 +205,10 @@ export default function ShippingStorePickupPage() {
         locations: prev.storePickup.locations.map(loc => 
           loc.id === locationId ? {
             ...loc,
-            schedules: [
+        schedules: [
               ...loc.schedules,
-              { day: 'monday', openTime: '09:00', closeTime: '18:00' }
-            ]
+          { day: 'monday', openTime: '09:00', closeTime: '18:00' }
+        ]
           } : loc
         )
       }
@@ -368,7 +368,7 @@ export default function ShippingStorePickupPage() {
                           <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Dirección
-                            </label>
+                      </label>
                             <div className="flex items-center">
                               <input
                                 type="text"
@@ -378,96 +378,96 @@ export default function ShippingStorePickupPage() {
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                               />
                               {locationIndex === 0 && (store?.location?.address || store?.address) && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
+                        <button
+                          type="button"
+                          onClick={() => {
                                     const storeAddress = store.location?.address || store.address;
                                     updateLocation(location.id, 'address', storeAddress);
-                                  }}
+                          }}
                                   className="ml-2 text-sm text-gray-600 hover:text-gray-800 whitespace-nowrap"
-                                >
+                        >
                                   Usar dirección general
-                                </button>
-                              )}
-                            </div>
-                          </div>
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
-                          {/* Tiempo de preparación */}
+                  {/* Tiempo de preparación */}
                           <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Tiempo estimado de preparación
-                            </label>
-                            <input
-                              type="text"
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tiempo estimado de preparación
+                    </label>
+                    <input
+                      type="text"
                               value={location.preparationTime}
                               onChange={(e) => updateLocation(location.id, 'preparationTime', e.target.value)}
-                              placeholder="2-4 horas"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                            />
-                          </div>
+                      placeholder="2-4 horas"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                    />
+                  </div>
 
                           {/* Horarios */}
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <label className="block text-sm font-medium text-gray-700">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
                                 Horarios de atención
-                              </label>
-                              <button
-                                type="button"
+                      </label>
+                      <button
+                        type="button"
                                 onClick={() => addSchedule(location.id)}
-                                className="text-sm text-gray-600 hover:text-gray-800"
-                              >
-                                Agregar horario
-                              </button>
-                            </div>
-                            
-                            <div className="space-y-2">
+                        className="text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Agregar horario
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-2">
                               {location.schedules.map((schedule, index) => (
-                                <div key={index} className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                                  <select
-                                    value={schedule.day}
+                        <div key={index} className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                          <select
+                            value={schedule.day}
                                     onChange={(e) => updateSchedule(location.id, index, 'day', e.target.value)}
-                                    className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                                  >
-                                    <option value="monday">Lunes</option>
-                                    <option value="tuesday">Martes</option>
-                                    <option value="wednesday">Miércoles</option>
-                                    <option value="thursday">Jueves</option>
-                                    <option value="friday">Viernes</option>
-                                    <option value="saturday">Sábado</option>
-                                    <option value="sunday">Domingo</option>
-                                  </select>
-                                  
-                                  <div className="flex items-center space-x-2 w-full sm:w-auto">
-                                    <input
-                                      type="time"
-                                      value={schedule.openTime}
+                            className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                          >
+                            <option value="monday">Lunes</option>
+                            <option value="tuesday">Martes</option>
+                            <option value="wednesday">Miércoles</option>
+                            <option value="thursday">Jueves</option>
+                            <option value="friday">Viernes</option>
+                            <option value="saturday">Sábado</option>
+                            <option value="sunday">Domingo</option>
+                          </select>
+                          
+                          <div className="flex items-center space-x-2 w-full sm:w-auto">
+                            <input
+                              type="time"
+                              value={schedule.openTime}
                                       onChange={(e) => updateSchedule(location.id, index, 'openTime', e.target.value)}
-                                      className="flex-1 sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                                    />
-                                    
-                                    <span className="text-gray-500">-</span>
-                                    
-                                    <input
-                                      type="time"
-                                      value={schedule.closeTime}
+                              className="flex-1 sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                            />
+                            
+                            <span className="text-gray-500">-</span>
+                            
+                            <input
+                              type="time"
+                              value={schedule.closeTime}
                                       onChange={(e) => updateSchedule(location.id, index, 'closeTime', e.target.value)}
-                                      className="flex-1 sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
-                                    />
-                                    
-                                    <button
-                                      type="button"
+                              className="flex-1 sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                            />
+                            
+                            <button
+                              type="button"
                                       onClick={() => removeSchedule(location.id, index)}
-                                      className="text-red-600 hover:text-red-800 p-1 flex-shrink-0"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                              
+                              className="text-red-600 hover:text-red-800 p-1 flex-shrink-0"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      
                               {location.schedules.length === 0 && (
-                                <p className="text-sm text-gray-500 italic">
+                        <p className="text-sm text-gray-500 italic">
                                   No hay horarios configurados. Agrega al menos un horario de atención.
                                 </p>
                               )}

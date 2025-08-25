@@ -1,3 +1,7 @@
+import { getCanonicalHost } from '../../lib/canonical-resolver';
+import { getStoreCategories } from '../../lib/categories';
+import { getStoreProducts } from '../../lib/products';
+
 // Forzar renderización dinámica - el sitemap debe ser dinámico por naturaleza
 export const dynamic = 'force-dynamic';
 
@@ -10,68 +14,207 @@ export async function GET(request: Request) {
     const protocol = request.headers.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
     const baseUrl = `${protocol}://${hostname}`;
     
-    console.log('🗺️ [Sitemap] Generando sitemap básico para:', baseUrl);
+    console.log('🗺️ [Sitemap] Generando sitemap para:', baseUrl);
     
-    // Generar sitemap ultra simplificado - solo URLs estáticas básicas
-    const sitemap = generateBasicSitemap(baseUrl);
+    // Detectar subdomain del hostname
+    let storeSubdomain: string | null = null;
+    if (hostname.endsWith('.shopifree.app')) {
+      storeSubdomain = hostname.split('.')[0];
+    } else if (hostname !== 'localhost' && !hostname.endsWith('.vercel.app') && hostname) {
+      // Dominio personalizado - buscar subdomain correspondiente
+      storeSubdomain = await findSubdomainByCustomDomain(hostname);
+    }
+    
+    if (!storeSubdomain) {
+      console.log('❌ [Sitemap] Tienda no encontrada para:', hostname);
+      return new Response(`${baseUrl}/`, {
+        status: 200,
+        headers: { 
+          'Content-Type': 'text/plain; charset=UTF-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
+    
+    // Obtener canonical host oficial
+    const canonical = await getCanonicalHost(storeSubdomain);
+    
+    if (!canonical.storeId) {
+      console.log('❌ [Sitemap] StoreId no encontrado para:', storeSubdomain);
+      return new Response(`${baseUrl}/`, {
+        status: 200,
+        headers: { 
+          'Content-Type': 'text/plain; charset=UTF-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
+    
+    console.log('✅ [Sitemap] Generando para:', {
+      storeSubdomain,
+      storeId: canonical.storeId,
+      canonicalHost: canonical.canonicalHost
+    });
+    
+    // Generar sitemap con productos y categorías reales
+    const sitemap = await generateRealSitemap(canonical.canonicalHost, canonical.storeId);
     
     return new Response(sitemap, {
       status: 200,
       headers: { 
-        'Content-Type': 'application/xml; charset=UTF-8',
-        'Cache-Control': 'public, max-age=3600',
-        'X-Robots-Tag': 'index'
+        'Content-Type': 'text/plain; charset=UTF-8',
+        'Cache-Control': 'public, max-age=3600'
       }
     });
   } catch (error) {
     console.error('❌ [Sitemap] Error:', error);
     
     // Retornar sitemap mínimo válido en caso de error
-    return new Response(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://example.com</loc>
-    <lastmod>2024-01-01</lastmod>
-  </url>
-</urlset>`, {
+    const protocol = request.headers.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+    const hostname = request.headers.get('host') || 'example.com';
+    const fallbackUrls = `${protocol}://${hostname}/`;
+    
+    return new Response(fallbackUrls, {
       status: 200,
       headers: { 
-        'Content-Type': 'application/xml; charset=UTF-8',
+        'Content-Type': 'text/plain; charset=UTF-8',
         'Cache-Control': 'public, max-age=60'
       }
     });
   }
 }
 
-// Función ultra básica para generar sitemap
-function generateBasicSitemap(baseUrl: string): string {
-  const currentDate = new Date().toISOString().split('T')[0];
+// Generar sitemap con productos y categorías reales
+async function generateRealSitemap(canonicalHost: string, storeId: string): Promise<string> {
+  let urls: string[] = [];
   
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/catalogo</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/ofertas</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/favoritos</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-</urlset>`;
+  // Agregar página principal
+  urls.push(`${canonicalHost}/`);
+  
+  // Agregar páginas estáticas principales
+  urls.push(`${canonicalHost}/catalogo`);
+  urls.push(`${canonicalHost}/ofertas`);
+  urls.push(`${canonicalHost}/favoritos`);
+  
+  // Agregar categorías reales
+  try {
+    const categories = await Promise.race([
+      getStoreCategories(storeId),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+    
+    if (categories && Array.isArray(categories)) {
+      console.log('📂 [Sitemap] Categorías encontradas:', categories.length);
+      
+      for (const category of categories.slice(0, 50)) { // Limitar a 50 categorías
+        if (category.slug && typeof category.slug === 'string') {
+          urls.push(`${canonicalHost}/categoria/${encodeURIComponent(category.slug)}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ [Sitemap] No se pudieron cargar categorías:', error instanceof Error ? error.message : String(error));
+  }
+  
+  // Agregar productos reales
+  try {
+    const products = await Promise.race([
+      getStoreProducts(storeId),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+    
+    if (products && Array.isArray(products)) {
+      console.log('🛍️ [Sitemap] Productos encontrados:', products.length);
+      
+      const activeProducts = products
+        .filter(p => p.slug && typeof p.slug === 'string' && p.status === 'active')
+        .slice(0, 100); // Limitar a 100 productos para evitar sitemaps muy largos
+      
+      for (const product of activeProducts) {
+        urls.push(`${canonicalHost}/producto/${encodeURIComponent(product.slug)}`);
+      }
+      
+      console.log('✅ [Sitemap] Productos añadidos:', activeProducts.length);
+    }
+  } catch (error) {
+    console.warn('⚠️ [Sitemap] No se pudieron cargar productos:', error instanceof Error ? error.message : String(error));
+  }
+  
+  return urls.join('\n');
+}
+
+// Función helper simplificada para buscar subdomain por dominio personalizado
+async function findSubdomainByCustomDomain(hostname: string): Promise<string | null> {
+  try {
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    
+    if (!projectId || !apiKey) {
+      console.warn('⚠️ [Sitemap] Variables de entorno Firebase no configuradas');
+      return null;
+    }
+    
+    // Timeout de 3 segundos para evitar sitemaps lentos
+    const timeoutPromise = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
+    
+    const searchPromise = async (): Promise<string | null> => {
+      // Buscar en todas las tiendas con límite
+      const storeQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: "stores" }],
+            limit: 50 // Limitar búsqueda para mejorar performance
+          }
+        })
+      });
+      
+      if (!storeQuery.ok) return null;
+      
+      const storeData = await storeQuery.json();
+      if (!Array.isArray(storeData)) return null;
+      
+      // Verificar dominios personalizados en paralelo (máximo 10 simultáneas)
+      const checks = storeData.slice(0, 10).map(async (row) => {
+        const storeDoc = row?.document;
+        if (!storeDoc) return null;
+        
+        const storeId = storeDoc.name.split('/').pop();
+        const subdomain = storeDoc.fields?.subdomain?.stringValue;
+        
+        if (!subdomain) return null;
+        
+        try {
+          const domainQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`);
+          
+          if (domainQuery.ok) {
+            const domainDoc = await domainQuery.json();
+            const customDomain = domainDoc?.fields?.customDomain?.stringValue;
+            
+            if (customDomain && customDomain.toLowerCase() === hostname.toLowerCase()) {
+              return subdomain;
+            }
+          }
+        } catch (error) {
+          console.warn(`⚠️ [Sitemap] Error verificando dominio para ${subdomain}:`, error instanceof Error ? error.message : String(error));
+        }
+        
+        return null;
+      });
+      
+      const results = await Promise.allSettled(checks);
+      const found = results.find(result => result.status === 'fulfilled' && result.value);
+      
+      return found && found.status === 'fulfilled' ? found.value : null;
+    };
+    
+    return await Promise.race([searchPromise(), timeoutPromise]);
+    
+  } catch (error) {
+    console.warn('⚠️ [Sitemap] Error buscando dominio personalizado:', error instanceof Error ? error.message : String(error));
+    return null;
+  }
 }
