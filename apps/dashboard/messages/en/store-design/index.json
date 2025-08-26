@@ -98,7 +98,7 @@
         },
         "minimalClean": {
           "name": "Minimal Clean",
-          "description": "Ultra-minimalist design with clean lines and ample spaces. Perfect for premium products.",
+          "description": "Ultra-minimalist design with clean lines and wide spaces. Perfect for premium products.",
           "features": {
             "ultraMinimalist": "Ultra minimalist",
             "wideSpaces": "Wide spaces",
@@ -116,7 +116,8 @@
             "generousSpacing": "Generous spacing",
             "sophisticatedNav": "Sophisticated navigation",
             "subtleAnimations": "Subtle animations"
-                  }
+          }
+        }
       }
     }
   },
@@ -153,8 +154,7 @@
     "remove": "Remove",
     "verify": "Verify",
     "test": "Test"
-  }
-},
+  },
   "messages": {
     "saved": "Changes saved successfully",
     "error": "An error occurred while saving changes",
@@ -170,39 +170,5 @@
     "applying": "Applying theme...",
     "success": "Theme {themeName} applied successfully",
     "error": "Error applying theme"
-  },
-  "branding": {
-    "title": "Branding",
-    "subtitle": "Customize colors and visual identity of your store",
-    "logo": "Logo",
-    "logoUpload": "Upload logo",
-    "logoHint": "Recommended: 200x200px, PNG or JPG format",
-    "logoUploadHint": "Drag an image here or click to select",
-    "logoRequired": "required",
-    "storePhoto": "Store photo",
-    "storePhotoUpload": "Upload photo",
-    "storePhotoHint": "Optional: Photo of your physical store",
-    "storePhotoUploadHint": "Drag an image here or click to select",
-    "primaryColor": "Primary color",
-    "secondaryColor": "Secondary color",
-    "fileFormat": "PNG, JPG or JPEG up to 5MB",
-    "optional": "optional",
-    "uploading": "Uploading image...",
-    "uploadSuccess": "Image uploaded successfully",
-    "uploadError": "Error uploading image",
-    "changeImage": "Change",
-    "removeImage": "Remove"
-  },
-  "actions": {
-    "save": "Save changes",
-    "saving": "Saving...",
-    "saved": "Changes saved",
-    "error": "Error saving",
-    "cancel": "Cancel",
-    "uploading": "Uploading...",
-    "upload": "Upload file",
-    "remove": "Remove",
-    "verify": "Verify",
-    "test": "Test"
   }
 } 

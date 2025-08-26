@@ -116,7 +116,8 @@
             "generousSpacing": "Espaciado generoso",
             "sophisticatedNav": "Navegación sofisticada",
             "subtleAnimations": "Animaciones sutiles"
-                  }
+          }
+        }
       }
     }
   },
@@ -153,8 +154,7 @@
     "remove": "Eliminar",
     "verify": "Verificar",
     "test": "Probar"
-  }
-},
+  },
   "messages": {
     "saved": "Cambios guardados exitosamente",
     "error": "Ocurrió un error al guardar los cambios",
@@ -170,39 +170,5 @@
     "applying": "Aplicando tema...",
     "success": "Tema {themeName} aplicado exitosamente",
     "error": "Error al aplicar el tema"
-  },
-  "branding": {
-    "title": "Imagen de Marca",
-    "subtitle": "Personaliza los colores y la identidad visual de tu tienda",
-    "logo": "Logo",
-    "logoUpload": "Subir logo",
-    "logoHint": "Recomendado: 200x200px, formato PNG o JPG",
-    "logoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-    "logoRequired": "obligatorio",
-    "storePhoto": "Foto del local",
-    "storePhotoUpload": "Subir foto",
-    "storePhotoHint": "Opcional: Foto de tu local físico",
-    "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
-    "primaryColor": "Color primario",
-    "secondaryColor": "Color secundario",
-    "fileFormat": "PNG, JPG o JPEG hasta 5MB",
-    "optional": "opcional",
-    "uploading": "Subiendo imagen...",
-    "uploadSuccess": "Imagen subida exitosamente",
-    "uploadError": "Error al subir imagen",
-    "changeImage": "Cambiar",
-    "removeImage": "Eliminar"
-  },
-  "actions": {
-    "save": "Guardar cambios",
-    "saving": "Guardando...",
-    "saved": "Cambios guardados",
-    "error": "Error al guardar",
-    "cancel": "Cancelar",
-    "uploading": "Subiendo...",
-    "upload": "Subir archivo",
-    "remove": "Eliminar",
-    "verify": "Verificar",
-    "test": "Probar"
   }
 } 

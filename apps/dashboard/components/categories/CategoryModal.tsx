@@ -194,7 +194,7 @@ export default function CategoryModal({
         <div className="mt-3">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900">
-              {category ? t('editCategory') : t('addCategory')}
+              {category ? t('modal.editTitle') : t('modal.createTitle')}
             </h3>
             <button
               onClick={onClose}
@@ -216,13 +216,13 @@ export default function CategoryModal({
             {/* Nombre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('form.name')} *
+                {t('modal.name')} *
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder={t('form.namePlaceholder')}
+                placeholder={t('modal.namePlaceholder')}
                 className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-gray-600 focus:border-gray-600 ${
                   errors.name ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -235,13 +235,13 @@ export default function CategoryModal({
             {/* Descripción */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('form.description')}
+                {t('modal.description')}
               </label>
               <textarea
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder={t('form.descriptionPlaceholder')}
+                placeholder={t('modal.descriptionPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-600 focus:border-gray-600"
               />
             </div>
@@ -249,7 +249,7 @@ export default function CategoryModal({
             {/* Imagen */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {t('form.image')}
+                {t('modal.image')}
               </label>
               <div className="relative">
                 {imagePreview ? (
@@ -263,7 +263,7 @@ export default function CategoryModal({
                     <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
                       <div className="flex space-x-2">
                         <label className="px-3 py-1 bg-white text-gray-700 text-xs rounded shadow hover:bg-gray-50 transition-colors cursor-pointer">
-                          {t('imageUpload.change')}
+                          {t('modal.changeImage')}
                           <input
                             type="file"
                             accept="image/*"
@@ -276,7 +276,7 @@ export default function CategoryModal({
                           onClick={handleRemoveImage}
                           className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
                         >
-                          {t('imageUpload.remove')}
+                          {t('modal.removeImage')}
                         </button>
                       </div>
                     </div>
@@ -310,7 +310,7 @@ export default function CategoryModal({
                           </svg>
                         </div>
                         <p className="text-sm font-medium text-gray-600">
-                          {t('imageUpload.uploading')}
+                          {t('modal.uploading')}
                         </p>
                       </div>
                     ) : (
@@ -336,14 +336,14 @@ export default function CategoryModal({
                               ? 'text-gray-700' 
                               : 'text-gray-700 group-hover:text-gray-800'
                           }`}>
-                            {isDraggingOver ? '¡Suelta aquí tu imagen!' : t('imageUpload.dropZone')}
+                            {isDraggingOver ? '¡Suelta aquí tu imagen!' : t('modal.imageUploadHint')}
                           </p>
                           <p className={`text-xs mt-1 transition-colors ${
                             isDraggingOver 
                               ? 'text-gray-500' 
                               : 'text-gray-500'
                           }`}>
-                            {t('imageUpload.formats')}
+                            {t('modal.imageFormats')}
                           </p>
                         </div>
                       </div>
@@ -354,20 +354,20 @@ export default function CategoryModal({
               {errors.image && (
                 <p className="mt-1 text-sm text-red-600">{errors.image}</p>
               )}
-              <p className="mt-2 text-xs text-gray-500">{t('form.imageHint')}</p>
+              <p className="mt-2 text-xs text-gray-500">{t('modal.imageUploadHint')}</p>
             </div>
 
             {/* Categoría padre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('form.parentCategory')}
+                {t('modal.parentCategory')}
               </label>
               <select
                 value={formData.parentCategoryId}
                 onChange={(e) => setFormData({ ...formData, parentCategoryId: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-600 focus:border-gray-600"
               >
-                <option value="">{t('form.noParentCategory')}</option>
+                <option value="">{t('modal.noParentCategory')}</option>
                 {parentCategories
                   .filter(cat => !category || cat.id !== category.id) // No mostrar la categoría actual como padre
                   .map((cat) => (
@@ -376,7 +376,7 @@ export default function CategoryModal({
                     </option>
                   ))}
               </select>
-              <p className="mt-1 text-sm text-gray-500">{t('form.parentCategoryPlaceholder')}</p>
+              <p className="mt-1 text-sm text-gray-500">{t('modal.parentCategoryPlaceholder')}</p>
             </div>
 
             {/* Botones */}
@@ -387,7 +387,7 @@ export default function CategoryModal({
                 disabled={isSaving}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50"
               >
-                {t('actions.cancel')}
+                {t('modal.cancel')}
               </button>
               <button
                 type="submit"
@@ -400,10 +400,10 @@ export default function CategoryModal({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {isUploading ? t('imageUpload.uploading') : t('actions.saving')}
+                    {isUploading ? t('modal.uploading') : t('modal.saving')}
                   </>
                 ) : (
-                  category ? t('actions.update') : t('actions.create')
+                  category ? t('modal.save') : t('modal.save')
                 )}
               </button>
             </div>

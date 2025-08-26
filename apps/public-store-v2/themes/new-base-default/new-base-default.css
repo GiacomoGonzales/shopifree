@@ -1294,6 +1294,7 @@
 .nbd-products {
     padding: var(--nbd-space-2xl) 0;
     background: var(--nbd-neutral-0);
+    scroll-margin-top: var(--nbd-header-height);
 }
 
 /* Controles de productos */

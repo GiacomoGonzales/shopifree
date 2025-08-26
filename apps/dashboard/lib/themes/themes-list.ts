@@ -4,7 +4,7 @@ import { Theme } from './theme-types'
 export const availableThemes: Theme[] = [
   {
     id: 'new-base-default',
-    translationKey: 'newBaseDefault',
+    translationKey: 'baseDefault',
     preview: '/themes/new-base-default/preview.svg',
     category: 'modern',
     recommended: true,

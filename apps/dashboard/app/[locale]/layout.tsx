@@ -117,7 +117,7 @@ export default function LocaleLayout({
         
         // Construir el objeto de secciones
         sectionResults.forEach(({ section, data }) => {
-          sectionMessages[section] = data
+          sectionMessages[section === 'store-design' ? 'storeDesign' : section] = data
         })
         
         // Agregar las traducciones de SEO específicamente para settings.seo
@@ -143,8 +143,16 @@ export default function LocaleLayout({
         }
 
         // También agregar en el nivel raíz para compatibilidad con useTranslations
-        sectionMessages.categories = categoriesResult.data.categories || {}
-        sectionMessages.metadata = metadataResult.data.metadata || {}
+        // NO sobrescribir las traducciones principales de categories/index.json
+        if (!sectionMessages.categories) {
+          sectionMessages.categories = {}
+        }
+        // Agregar solo las traducciones específicas sin sobrescribir
+        sectionMessages.categories = {
+          ...sectionMessages.categories,
+          categories: categoriesResult.data.categories || {},
+          metadata: metadataResult.data.metadata || {}
+        }
         
         // Agregar las traducciones de onboarding en la estructura correcta
         sectionMessages.onboarding = {

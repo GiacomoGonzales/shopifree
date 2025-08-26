@@ -320,7 +320,7 @@ export default function CustomerModal({
                             value={newTag}
                             onChange={(e) => setNewTag(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
-                            placeholder={t('details.addTagPlaceholder')}
+                            placeholder={t('details.tagPlaceholder')}
                             className="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-gray-500 focus:border-gray-500"
                           />
                           <button
@@ -363,7 +363,7 @@ export default function CustomerModal({
                             className="h-4 w-4 text-gray-900 focus:ring-gray-500 border-gray-300 rounded"
                           />
                           <label className="ml-2 block text-sm text-gray-900">
-                            {t('details.newsletterSubscription')}
+                            {t('details.newsletter')}
                           </label>
                         </div>
                         <div className="flex items-center">
@@ -374,7 +374,7 @@ export default function CustomerModal({
                             className="h-4 w-4 text-gray-900 focus:ring-gray-500 border-gray-300 rounded"
                           />
                           <label className="ml-2 block text-sm text-gray-900">
-                            {t('details.orderNotifications')}
+                            {t('details.notifications')}
                           </label>
                         </div>
                       </div>
@@ -384,13 +384,13 @@ export default function CustomerModal({
                           <svg className={`h-5 w-5 ${preferences.newsletter ? 'text-green-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={preferences.newsletter ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
                           </svg>
-                          <span className="ml-2 text-sm text-gray-900">{t('details.newsletterSubscription')}</span>
+                          <span className="ml-2 text-sm text-gray-900">{t('details.newsletter')}</span>
                         </div>
                         <div className="flex items-center">
                           <svg className={`h-5 w-5 ${preferences.notifyOrderStatus ? 'text-green-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={preferences.notifyOrderStatus ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
                           </svg>
-                          <span className="ml-2 text-sm text-gray-900">{t('details.orderNotifications')}</span>
+                          <span className="ml-2 text-sm text-gray-900">{t('details.notifications')}</span>
                         </div>
                       </div>
                     )}

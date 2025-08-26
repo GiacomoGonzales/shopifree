@@ -681,6 +681,7 @@
 [data-theme="base-default"] .bd-products {
     padding: 5rem 0;
     background-color: white;
+    scroll-margin-top: 80px;
 }
 
 [data-theme="base-default"] .bd-products-container {
