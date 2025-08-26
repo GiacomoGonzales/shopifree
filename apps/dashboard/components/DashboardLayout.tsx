@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const t = useTranslations('navigation')
-  const { user, signOut } = useAuth()
+  const { user, userData, signOut } = useAuth()
 
   // Inicializar estados expandidos basándose en la URL actual para evitar efectos visuales
   const [settingsExpanded, setSettingsExpanded] = useState(() => {
@@ -791,7 +791,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Versión escritorio: texto completo */}
                 <div className="hidden lg:flex items-center">
                   <span className="text-sm font-medium text-gray-700">
-                    {t('hello')}, {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
+                    {t('hello')}, {userData?.displayName || user?.displayName || 'Usuario'}
                   </span>
                 </div>
               </div>

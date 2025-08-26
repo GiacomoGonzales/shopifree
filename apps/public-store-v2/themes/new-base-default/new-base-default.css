@@ -450,6 +450,33 @@
     box-shadow: var(--nbd-shadow-lg);
 }
 
+/* Botón WhatsApp */
+.nbd-btn--whatsapp {
+    background: #25D366;
+    color: white;
+    border-color: #25D366;
+    box-shadow: var(--nbd-shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nbd-btn--whatsapp:hover {
+    background: #128C7E;
+    border-color: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: var(--nbd-shadow-lg);
+}
+
+.nbd-btn--whatsapp:disabled {
+    background: #a3a3a3;
+    border-color: #a3a3a3;
+    color: white;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
 /* Botón outline */
 .nbd-btn--outline {
     background: transparent;
@@ -5439,10 +5466,10 @@
 }
 
 .nbd-method-option.selected {
-    border-color: var(--nbd-primary);
-    background: var(--nbd-primary);
-    color: var(--nbd-neutral-0);
-    box-shadow: 0 0 0 2px rgba(23, 23, 23, 0.1);
+    border-color: var(--nbd-neutral-400);
+    background: var(--nbd-neutral-100);
+    color: var(--nbd-neutral-900);
+    box-shadow: 0 0 0 2px rgba(163, 163, 163, 0.2);
 }
 
 .nbd-method-option input[type="radio"] {
@@ -5485,7 +5512,8 @@
 }
 
 .nbd-method-option.selected .nbd-method-icon {
-    filter: grayscale(1) brightness(10);
+    /* Mantener colores originales de la imagen sin filtros */
+    filter: none;
 }
 
 /* Sidebar - contenedor único simplificado */

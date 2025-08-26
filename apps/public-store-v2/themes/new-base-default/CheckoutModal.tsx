@@ -5,7 +5,7 @@ import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
-import { StoreBasicInfo, getStoreShippingConfig, StoreShippingConfig, StorePickupLocation } from '../../lib/store';
+import { StoreBasicInfo, getStoreShippingConfig, StoreShippingConfig, StorePickupLocation, getStoreCheckoutConfig, StoreAdvancedConfig } from '../../lib/store';
 import { googleMapsLoader } from '../../lib/google-maps';
 import { 
     getStoreDeliveryZones, 
@@ -13,6 +13,43 @@ import {
     DeliveryZone,
     findDeliveryZoneForCoordinates 
 } from '../../lib/delivery-zones';
+
+// Definición de métodos de pago con imágenes
+const paymentMethodsConfig = {
+    'efectivo': {
+        id: 'cash',
+        name: 'Pago en efectivo',
+        description: 'Efectivo contra entrega',
+        imageUrl: '/paymentimages/efectivo.png'
+    },
+    'tarjeta': {
+        id: 'card',
+        name: 'Tarjeta al repartidor',
+        description: 'POS móvil para tarjetas',
+        imageUrl: '/paymentimages/tarjeta.png'
+    },
+    'yape': {
+        id: 'transfer',
+        name: 'Yape',
+        description: 'Transferencia móvil Yape',
+        imageUrl: '/paymentimages/yape.png'
+    }
+};
+
+// Icono SVG de fallback para transferencia bancaria
+const BankIcon = () => (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 6.99H19V9H21V6C21 4.9 20.1 4 19 4H5C3.9 4 3 4.9 3 6V9H5V6.99ZM5 13V16H8V13H5ZM11 13V16H14V13H11ZM17 13V16H19V13H17ZM2 18V20H22V18H2Z" fill="currentColor"/>
+    </svg>
+);
+
+// Método de pago por defecto (transferencia bancaria) para compatibilidad
+const defaultPaymentMethod = {
+    id: 'transfer',
+    name: 'Transferencia bancaria',
+    description: 'Datos por WhatsApp',
+    imageUrl: null // Usará el icono SVG como fallback
+};
 
 interface CheckoutData {
     email: string;
@@ -54,6 +91,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shippingConfig, setShippingConfig] = useState<StoreShippingConfig | null>(null);
+    const [checkoutConfig, setCheckoutConfig] = useState<StoreAdvancedConfig | null>(null);
     const [selectedLocation, setSelectedLocation] = useState<StorePickupLocation | null>(null);
     const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
     const autocompleteRef = useRef<HTMLInputElement>(null);
@@ -121,6 +159,27 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
     
+    // Función para obtener métodos de pago disponibles basados en la configuración
+    const getAvailablePaymentMethods = () => {
+        const methods = [];
+        
+        // Si está habilitado el pago contra entrega, agregar métodos configurados
+        if (checkoutConfig?.payments?.acceptCashOnDelivery && checkoutConfig?.payments?.cashOnDeliveryMethods) {
+            checkoutConfig.payments.cashOnDeliveryMethods.forEach(methodId => {
+                if (paymentMethodsConfig[methodId as keyof typeof paymentMethodsConfig]) {
+                    methods.push(paymentMethodsConfig[methodId as keyof typeof paymentMethodsConfig]);
+                }
+            });
+        }
+        
+        // Si no hay métodos configurados o como fallback, agregar transferencia bancaria
+        if (methods.length === 0) {
+            methods.push(defaultPaymentMethod);
+        }
+        
+        return methods;
+    };
+    
     // Calcular costos usando zonas de entrega
     const subtotal = state.totalPrice;
     const shipping = formData.shippingMethod === 'pickup' ? 0 : shippingCost;
@@ -134,21 +193,47 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     
     const total = subtotal + shipping - discount;
 
-    // Cargar configuración de envío cuando se abre el modal
+    // Cargar configuración de envío y checkout cuando se abre el modal
     useEffect(() => {
         if (isOpen && storeId) {
-            console.log('🚚 [CheckoutModal] Loading shipping config for store:', storeId);
+            console.log('🚚 [CheckoutModal] Loading configs for store:', storeId);
+            
+            // Cargar configuración de envío
             getStoreShippingConfig(storeId).then(config => {
                 console.log('🚚 [CheckoutModal] Raw shipping config:', config);
                 setShippingConfig(config);
                 console.log('🚚 [CheckoutModal] Store pickup enabled?', config?.storePickup?.enabled);
                 
-                // Auto-seleccionar primera sucursal si solo hay una
+                // Auto-seleccionar primera sucursal por defecto
                 const locations = config?.storePickup?.locations || [];
-                if (locations.length === 1) {
+                if (locations.length > 0) {
                     setSelectedLocation(locations[0]);
-                    console.log('🚚 [CheckoutModal] Auto-selected single location:', locations[0].name);
+                    console.log('🚚 [CheckoutModal] Auto-selected first location:', locations[0].name);
                 }
+            });
+            
+            // Cargar configuración de checkout
+            getStoreCheckoutConfig(storeId).then(config => {
+                console.log('💳 [CheckoutModal] Checkout config:', config);
+                setCheckoutConfig(config);
+                
+                // Auto-seleccionar primer método de pago disponible si no hay ninguno seleccionado
+                setTimeout(() => {
+                    if (!formData.paymentMethod || formData.paymentMethod === 'cash') {
+                        const availableMethods = config?.payments?.acceptCashOnDelivery && config?.payments?.cashOnDeliveryMethods?.length 
+                            ? config.payments.cashOnDeliveryMethods 
+                            : ['transfer'];
+                        
+                        let firstMethodId = 'transfer'; // fallback
+                        if (availableMethods.length > 0) {
+                            const firstConfigMethod = availableMethods[0];
+                            firstMethodId = paymentMethodsConfig[firstConfigMethod as keyof typeof paymentMethodsConfig]?.id || 'transfer';
+                        }
+                        
+                        setFormData(prev => ({ ...prev, paymentMethod: firstMethodId as any }));
+                        console.log('💳 [CheckoutModal] Auto-selected payment method:', firstMethodId);
+                    }
+                }, 100);
             });
         }
     }, [isOpen, storeId]);
@@ -160,6 +245,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             setFormData(prev => ({ ...prev, shippingMethod: 'standard' }));
         }
     }, [shippingConfig, formData.shippingMethod]);
+
+    // Cuando el usuario selecciona pickup, auto-seleccionar primera sucursal si no hay ninguna seleccionada
+    useEffect(() => {
+        if (formData.shippingMethod === 'pickup' && shippingConfig?.storePickup?.locations && !selectedLocation) {
+            const locations = shippingConfig.storePickup.locations;
+            if (locations.length > 0) {
+                setSelectedLocation(locations[0]);
+                console.log('🚚 [CheckoutModal] Auto-selected first location on pickup selection:', locations[0].name);
+            }
+        }
+    }, [formData.shippingMethod, shippingConfig, selectedLocation]);
 
     // Calcular y actualizar costo de envío
     useEffect(() => {
@@ -805,9 +901,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             case 1:
                 return !!(formData.email && formData.fullName && formData.phone);
             case 2:
-                // Para recojo en tienda no necesita dirección
+                // Para recojo en tienda necesita sucursal seleccionada
                 if (formData.shippingMethod === 'pickup') {
-                    return true;
+                    return !!selectedLocation;
                 }
                 // Para envío a domicilio o express necesita dirección
                 return !!formData.address;
@@ -849,61 +945,142 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     };
 
+    // Función para generar mensaje de WhatsApp
+    const generateWhatsAppMessage = () => {
+        const storeName = storeInfo?.storeName || 'Tienda';
+        const whatsappPhone = storeInfo?.socialMedia?.whatsapp || storeInfo?.phone;
+        
+        let message = `¡Hola! Me interesa realizar un pedido desde ${storeName}:\n\n`;
+        
+        // Agregar productos
+        message += `📦 *PRODUCTOS:*\n`;
+        state.items.forEach((item, index) => {
+            const itemTotal = (item.variant?.price || item.price) * item.quantity;
+            message += `${index + 1}. ${item.name}`;
+            if (item.variant) {
+                message += ` (${item.variant.name})`;
+            }
+            message += `\n   Cantidad: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, currency)} = ${formatPrice(itemTotal, currency)}\n`;
+        });
+        
+        // Agregar información del cliente
+        message += `\n👤 *DATOS DEL CLIENTE:*\n`;
+        message += `Nombre: ${formData.fullName}\n`;
+        message += `Email: ${formData.email}\n`;
+        message += `Teléfono: ${formData.phone}\n`;
+        
+        // Agregar información de envío
+        message += `\n🚚 *ENVÍO:*\n`;
+        if (formData.shippingMethod === 'pickup') {
+            message += `Método: Recojo en tienda\n`;
+            if (selectedLocation) {
+                message += `Sucursal: ${selectedLocation.name}\n`;
+                if (selectedLocation.address) {
+                    message += `Dirección: ${selectedLocation.address}\n`;
+                }
+            }
+        } else {
+            message += `Método: ${formData.shippingMethod === 'express' ? 'Envío express' : 'Envío estándar'}\n`;
+            message += `Dirección: ${formData.address}\n`;
+            if (formData.city) message += `Ciudad: ${formData.city}\n`;
+        }
+        
+        // Agregar información de pago
+        message += `\n💳 *PAGO:*\n`;
+        const selectedMethod = getAvailablePaymentMethods().find(method => method.id === formData.paymentMethod);
+        const paymentMethodName = selectedMethod?.name || formData.paymentMethod;
+        message += `Método: ${paymentMethodName}\n`;
+        
+        // Agregar totales
+        message += `\n💰 *RESUMEN:*\n`;
+        message += `Subtotal: ${formatPrice(subtotal, currency)}\n`;
+        message += `Envío: ${formatPrice(shipping, currency)}\n`;
+        if (discount > 0) {
+            message += `Descuento: -${formatPrice(discount, currency)}\n`;
+        }
+        message += `*Total: ${formatPrice(total, currency)}*\n`;
+        
+        // Agregar notas si las hay
+        if (formData.notes.trim()) {
+            message += `\n📝 *NOTAS:*\n${formData.notes}\n`;
+        }
+        
+        return { message, phone: whatsappPhone };
+    };
+
     const handleSubmit = async () => {
         if (!validateStep(3)) return;
         
         setIsSubmitting(true);
         
-        // Simular proceso de checkout
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Verificar método de checkout
+        const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
         
-        // Preparar payload completo del checkout con información de dirección
-        const checkoutPayload = {
-            // Información del cliente
-            customer: {
-                email: formData.email,
-                fullName: formData.fullName,
-                phone: formData.phone
-            },
-            // Información de envío con campos avanzados
-            shipping: {
-                method: formData.shippingMethod,
-                addressText: formData.addressText || formData.address, // Lo que escribió el usuario
-                lat: formData.lat, // Coordenadas del pin final
-                lng: formData.lng,
-                addressNormalized: formData.addressNormalized, // Dirección sugerida/normalizada
-                city: formData.city,
-                zipCode: formData.zipCode,
-                cost: shipping
-            },
-            // Información de pago
-            payment: {
-                method: formData.paymentMethod,
-                notes: formData.notes
-            },
-            // Items del pedido
-            items: state.items,
-            // Totales
-            totals: { 
-                subtotal, 
-                shipping, 
-                total 
-            },
-            // Metadata adicional
-            metadata: {
-                storeId: storeId,
-                currency: currency,
-                timestamp: new Date().toISOString()
+        if (isWhatsAppCheckout) {
+            // Para WhatsApp: generar mensaje y abrir WhatsApp
+            const { message, phone } = generateWhatsAppMessage();
+            
+            if (phone) {
+                // Limpiar número de teléfono (quitar espacios, guiones, etc.)
+                const cleanPhone = phone.replace(/[^\d+]/g, '');
+                const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                
+                // Abrir WhatsApp
+                window.open(whatsappUrl, '_blank');
+                
+                // Limpiar carrito después de un breve delay para que el usuario vea que se procesó
+                setTimeout(() => {
+                    clearCart();
+                    setIsSubmitting(false);
+                    onSuccess();
+                    onClose();
+                }, 1000);
+            } else {
+                // Si no hay teléfono configurado, mostrar error
+                alert('No se ha configurado un número de WhatsApp para esta tienda. Por favor contacta al administrador.');
+                setIsSubmitting(false);
             }
-        };
-        
-        // Aquí iría la integración real con el sistema de checkout
-        console.log('Datos del checkout completos:', checkoutPayload);
-        
-        clearCart();
-        setIsSubmitting(false);
-        onSuccess();
-        onClose();
+        } else {
+            // Para checkout tradicional: procesar normalmente
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Preparar payload completo del checkout
+            const checkoutPayload = {
+                customer: {
+                    email: formData.email,
+                    fullName: formData.fullName,
+                    phone: formData.phone
+                },
+                shipping: {
+                    method: formData.shippingMethod,
+                    addressText: formData.addressText || formData.address,
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    addressNormalized: formData.addressNormalized,
+                    city: formData.city,
+                    zipCode: formData.zipCode,
+                    cost: shipping
+                },
+                payment: {
+                    method: formData.paymentMethod,
+                    notes: formData.notes
+                },
+                items: state.items,
+                totals: { subtotal, shipping, total },
+                metadata: {
+                    storeId: storeId,
+                    currency: currency,
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            console.log('Checkout tradicional:', checkoutPayload);
+            
+            clearCart();
+            setIsSubmitting(false);
+            onSuccess();
+            onClose();
+        }
     };
 
     if (!isOpen) return null;
@@ -1067,8 +1244,18 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     <div style={{ marginTop: 'var(--nbd-space-xl)' }}>
                                         <div className="nbd-form-group nbd-form-group--full">
                                             <label className="nbd-form-label">
-                                                {shippingConfig.storePickup.locations.length > 1 ? 'Selecciona sucursal' : 'Sucursal para recojo'}
+                                                {shippingConfig.storePickup.locations.length > 1 ? 'Selecciona sucursal *' : 'Sucursal para recojo'}
                                             </label>
+                                            {shippingConfig.storePickup.locations.length > 1 && !selectedLocation && (
+                                                <p className="nbd-form-hint" style={{ 
+                                                    fontSize: '12px', 
+                                                    color: '#ef4444', 
+                                                    marginTop: '4px',
+                                                    marginBottom: '8px'
+                                                }}>
+                                                    Debes seleccionar una sucursal para continuar
+                                                </p>
+                                            )}
                                             
                                             <div className="nbd-locations-list" style={{ marginTop: 'var(--nbd-space-md)' }}>
                                                 {shippingConfig.storePickup.locations.map((location) => (
@@ -1360,54 +1547,44 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                 <div className="nbd-method-section">
                                     <h4 className="nbd-method-title">{t('choosePayment')}</h4>
                                     <div className="nbd-method-options">
-                                        <label className={`nbd-method-option ${formData.paymentMethod === 'cash' ? 'selected' : ''}`}>
-                                            <input
-                                                type="radio"
-                                                name="payment"
-                                                value="cash"
-                                                checked={formData.paymentMethod === 'cash'}
-                                                onChange={(e) => handleInputChange('paymentMethod', e.target.value as any)}
-                                            />
-                                            <div className="nbd-method-content">
-                                                <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">{t('cashPayment')}</span>
-                                                    <span className="nbd-method-desc">{t('cashOnDelivery')}</span>
+                                        {getAvailablePaymentMethods().map((method) => (
+                                            <label key={method.id} className={`nbd-method-option ${formData.paymentMethod === method.id ? 'selected' : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="payment"
+                                                    value={method.id}
+                                                    checked={formData.paymentMethod === method.id}
+                                                    onChange={(e) => handleInputChange('paymentMethod', e.target.value as any)}
+                                                />
+                                                <div className="nbd-method-content">
+                                                    <div className="nbd-method-info">
+                                                        <span className="nbd-method-name">{method.name}</span>
+                                                        <span className="nbd-method-desc">{method.description}</span>
+                                                    </div>
+                                                    <div className="nbd-method-icon">
+                                                        {method.imageUrl ? (
+                                                            <img 
+                                                                src={method.imageUrl} 
+                                                                alt={method.name}
+                                                                style={{
+                                                                    width: '32px',
+                                                                    height: '32px',
+                                                                    objectFit: 'contain'
+                                                                }}
+                                                                onError={(e) => {
+                                                                    // Fallback si no carga la imagen
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.style.display = 'none';
+                                                                    target.parentElement!.innerHTML = '<div style="width: 32px; height: 32px; background: #f3f4f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 16px;">💳</div>';
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <BankIcon />
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="nbd-method-icon">💵</div>
-                                            </div>
-                                        </label>
-                                        <label className={`nbd-method-option ${formData.paymentMethod === 'transfer' ? 'selected' : ''}`}>
-                                            <input
-                                                type="radio"
-                                                name="payment"
-                                                value="transfer"
-                                                checked={formData.paymentMethod === 'transfer'}
-                                                onChange={(e) => handleInputChange('paymentMethod', e.target.value as any)}
-                                            />
-                                            <div className="nbd-method-content">
-                                                <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">{t('bankTransfer')}</span>
-                                                    <span className="nbd-method-desc">{t('whatsappData')}</span>
-                                                </div>
-                                                <div className="nbd-method-icon">🏦</div>
-                                            </div>
-                                        </label>
-                                        <label className={`nbd-method-option ${formData.paymentMethod === 'card' ? 'selected' : ''}`}>
-                                            <input
-                                                type="radio"
-                                                name="payment"
-                                                value="card"
-                                                checked={formData.paymentMethod === 'card'}
-                                                onChange={(e) => handleInputChange('paymentMethod', e.target.value as any)}
-                                            />
-                                            <div className="nbd-method-content">
-                                                <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">{t('creditCard')}</span>
-                                                    <span className="nbd-method-desc">{t('visaMastercard')}</span>
-                                                </div>
-                                                <div className="nbd-method-icon">💳</div>
-                                            </div>
-                                        </label>
+                                            </label>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -1570,20 +1747,45 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     {t('next')} →
                                 </button>
                             ) : (
-                                <button 
-                                    onClick={handleSubmit}
-                                    disabled={isSubmitting || !validateStep(currentStep)}
-                                    className={`nbd-btn nbd-btn--primary nbd-checkout-submit ${(isSubmitting || !validateStep(currentStep)) ? 'nbd-btn--disabled' : ''}`}
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <div className="nbd-loading-spinner"></div>
-                                            {t('processing')}
-                                        </>
-                                    ) : (
-                                        t('confirmOrder')
-                                    )}
-                                </button>
+                                (() => {
+                                    const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
+                                    return (
+                                        <button 
+                                            onClick={handleSubmit}
+                                            disabled={isSubmitting || !validateStep(currentStep)}
+                                            className={`nbd-btn nbd-checkout-submit ${(isSubmitting || !validateStep(currentStep)) ? 'nbd-btn--disabled' : ''} ${
+                                                isWhatsAppCheckout ? 'nbd-btn--whatsapp' : 'nbd-btn--primary'
+                                            }`}
+                                            style={isWhatsAppCheckout ? {
+                                                backgroundColor: '#25D366',
+                                                borderColor: '#25D366',
+                                                color: 'white'
+                                            } : {}}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <div className="nbd-loading-spinner"></div>
+                                                    {isWhatsAppCheckout ? 'Enviando...' : t('processing')}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {isWhatsAppCheckout && (
+                                                        <svg 
+                                                            width="20" 
+                                                            height="20" 
+                                                            viewBox="0 0 24 24" 
+                                                            fill="currentColor"
+                                                            style={{ marginRight: '8px' }}
+                                                        >
+                                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
+                                                        </svg>
+                                                    )}
+                                                    {isWhatsAppCheckout ? 'Enviar por WhatsApp' : t('confirmOrder')}
+                                                </>
+                                            )}
+                                        </button>
+                                    );
+                                })()
                             )}
                         </div>
                     </div>

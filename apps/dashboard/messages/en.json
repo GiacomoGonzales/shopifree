@@ -152,9 +152,9 @@
           "currencyHint": "Main currency to display prices in your store",
           "checkoutMethod": "Checkout method",
           "whatsappSales": "WhatsApp Sales",
-          "whatsappSalesDescription": "Customers contact you via WhatsApp to place orders",
+          "whatsappSalesDescription": "Complete purchase process, but final order is sent via WhatsApp for manual coordination",
           "traditionalCheckout": "Traditional checkout",
-          "traditionalCheckoutDescription": "Integrated shopping cart (Coming soon)"
+          "traditionalCheckoutDescription": "Automated process with email/WhatsApp confirmation (requires subscription plan)"
         },
         "socialMedia": {
           "title": "Social Media",

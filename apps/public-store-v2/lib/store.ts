@@ -43,6 +43,22 @@ export type StoreBasicInfo = {
     };
 };
 
+export type StoreCheckoutConfig = {
+    method: 'whatsapp' | 'traditional';
+    whatsappMessage?: string;
+};
+
+export type StorePaymentsConfig = {
+    acceptCashOnDelivery?: boolean;
+    cashOnDeliveryMethods?: string[];
+    acceptOnlinePayment?: boolean;
+};
+
+export type StoreAdvancedConfig = {
+    checkout?: StoreCheckoutConfig;
+    payments?: StorePaymentsConfig;
+};
+
 export async function getStoreTheme(storeId: string): Promise<string> {
 	try {
 		const db = getFirebaseDb();
@@ -245,6 +261,42 @@ export async function getStoreShippingConfig(storeId: string): Promise<StoreShip
         } as StoreShippingConfig;
     } catch (e) {
         console.warn("[public-store-v2] getStoreShippingConfig failed", e);
+        return null;
+    }
+}
+
+/**
+ * Get store checkout configuration from Firestore
+ */
+export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdvancedConfig | null> {
+    try {
+        const db = getFirebaseDb();
+        if (!db) return null;
+        
+        const { doc, getDoc } = await import("firebase/firestore");
+        const ref = doc(db, "stores", storeId);
+        const snap = await getDoc(ref);
+        
+        if (!snap.exists()) return null;
+        
+        const data = snap.data();
+        
+        // Obtener configuración avanzada
+        const advanced = data.advanced || {};
+        
+        return {
+            checkout: {
+                method: advanced.checkout?.method || 'whatsapp',
+                whatsappMessage: advanced.checkout?.whatsappMessage
+            },
+            payments: {
+                acceptCashOnDelivery: advanced.payments?.acceptCashOnDelivery || false,
+                cashOnDeliveryMethods: advanced.payments?.cashOnDeliveryMethods || [],
+                acceptOnlinePayment: advanced.payments?.acceptOnlinePayment || false
+            }
+        } as StoreAdvancedConfig;
+    } catch (e) {
+        console.warn("[public-store-v2] getStoreCheckoutConfig failed", e);
         return null;
     }
 }

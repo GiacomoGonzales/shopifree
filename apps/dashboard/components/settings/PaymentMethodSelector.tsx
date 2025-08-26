@@ -45,6 +45,7 @@ interface PaymentMethodSettings {
 interface PaymentMethodSelectorProps {
   settings: PaymentMethodSettings
   onSettingsChange: (settings: PaymentMethodSettings) => void
+  checkoutMethod?: 'whatsapp' | 'traditional'
 }
 
 const paymentMethods = [
@@ -86,7 +87,7 @@ const Icons = {
   )
 }
 
-export default function PaymentMethodSelector({ settings, onSettingsChange }: PaymentMethodSelectorProps) {
+export default function PaymentMethodSelector({ settings, onSettingsChange, checkoutMethod = 'whatsapp' }: PaymentMethodSelectorProps) {
   const handleCashOnDeliveryToggle = (enabled: boolean) => {
     onSettingsChange({
       ...settings,
@@ -124,7 +125,7 @@ export default function PaymentMethodSelector({ settings, onSettingsChange }: Pa
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-900">Pago contra entrega</h4>
-              <p className="text-xs text-gray-500">El cliente paga al recibir el producto</p>
+              <p className="text-xs text-gray-500">El cliente paga al recibir el producto (compatible con WhatsApp y checkout tradicional)</p>
             </div>
           </div>
           <Switch
@@ -180,33 +181,35 @@ export default function PaymentMethodSelector({ settings, onSettingsChange }: Pa
         )}
       </div>
 
-      {/* Pago online */}
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Icons.Globe />
+      {/* Pago online - Solo para checkout tradicional */}
+      {checkoutMethod === 'traditional' && (
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Icons.Globe />
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Aceptar pagos online</h4>
+                <p className="text-xs text-gray-500">Procesar pagos mediante pasarela de pago</p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-sm font-medium text-gray-900">Aceptar pagos online</h4>
-              <p className="text-xs text-gray-500">Procesar pagos mediante pasarela de pago</p>
-            </div>
+            <Switch
+              checked={settings.acceptOnlinePayment}
+              onChange={handleOnlinePaymentToggle}
+              colorScheme="green"
+            />
           </div>
-          <Switch
-            checked={settings.acceptOnlinePayment}
-            onChange={handleOnlinePaymentToggle}
-            colorScheme="green"
-          />
+          
+          {settings.acceptOnlinePayment && (
+            <div className="ml-14 mt-3">
+              <p className="text-xs text-gray-600">
+                Configure su pasarela de pago en la sección "Pasarela de Pago" más abajo
+              </p>
+            </div>
+          )}
         </div>
-        
-        {settings.acceptOnlinePayment && (
-          <div className="ml-14 mt-3">
-            <p className="text-xs text-gray-600">
-              Configure su pasarela de pago en la sección "Pasarela de Pago" más abajo
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }

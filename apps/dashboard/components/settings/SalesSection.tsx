@@ -254,6 +254,7 @@ export default function SalesSection() {
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 {t('sales.checkoutMethod')}
               </label>
+              {/* Updated descriptions */}
               <div className="space-y-3">
                 <div className="relative flex items-start">
                   <div className="flex items-center h-5">
@@ -270,7 +271,7 @@ export default function SalesSection() {
                     <label htmlFor="whatsapp-sales" className="font-medium text-gray-700">
                       {t('sales.whatsappSales')}
                     </label>
-                    <p className="text-gray-500">{t('sales.whatsappSalesDescription')}</p>
+                    <p className="text-gray-500">Proceso completo de compra, el pedido es enviado por WhatsApp para coordinación manual de envío y pago</p>
                   </div>
                 </div>
                 
@@ -289,7 +290,7 @@ export default function SalesSection() {
                     <label htmlFor="traditional-checkout" className="font-medium text-gray-700">
                       {t('sales.traditionalCheckout')}
                     </label>
-                    <p className="text-gray-500">{t('sales.traditionalCheckoutDescription')}</p>
+                    <p className="text-gray-500">Proceso automatizado con confirmación por email/WhatsApp (requiere plan de suscripción)</p>
                   </div>
                 </div>
               </div>
@@ -298,28 +299,27 @@ export default function SalesSection() {
         </div>
       </div>
 
-      {/* Métodos de pago - Solo visible cuando se selecciona checkout tradicional */}
-      {formData.advanced?.checkout?.method === 'traditional' && (
-        <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-          <div className="px-6 py-6 space-y-6">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Métodos de pago aceptados</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Configure los métodos de pago que acepta su tienda para el checkout tradicional
-              </p>
-            </div>
-
-            <PaymentMethodSelector
-              settings={{
-                acceptCashOnDelivery: formData.advanced.payments.acceptCashOnDelivery,
-                cashOnDeliveryMethods: formData.advanced.payments.cashOnDeliveryMethods,
-                acceptOnlinePayment: formData.advanced.payments.acceptOnlinePayment
-              }}
-              onSettingsChange={handlePaymentMethodsChange}
-            />
+      {/* Métodos de pago aceptados */}
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div className="px-6 py-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">Métodos de pago aceptados</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Configure los métodos de pago que acepta su tienda
+            </p>
           </div>
+
+          <PaymentMethodSelector
+            settings={{
+              acceptCashOnDelivery: formData.advanced.payments.acceptCashOnDelivery,
+              cashOnDeliveryMethods: formData.advanced.payments.cashOnDeliveryMethods,
+              acceptOnlinePayment: formData.advanced.payments.acceptOnlinePayment
+            }}
+            onSettingsChange={handlePaymentMethodsChange}
+            checkoutMethod={formData.advanced?.checkout?.method || 'whatsapp'}
+          />
         </div>
-      )}
+      </div>
 
       {/* Configuración de Pasarela de Pago */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
