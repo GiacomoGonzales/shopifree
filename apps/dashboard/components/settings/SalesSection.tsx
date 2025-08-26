@@ -177,8 +177,24 @@ export default function SalesSection() {
     
     setSaving(true)
     try {
-      await updateStore(store.id, formData)
-      setStore(prev => prev ? { ...prev, ...formData } : null)
+      // Crear objeto de actualización preservando datos existentes de shipping
+      const updateData = {
+        currency: formData.currency,
+        advanced: {
+          ...store?.advanced, // Preservar todos los datos existentes de advanced
+          checkout: {
+            ...store?.advanced?.checkout, // Preservar checkout existente
+            ...formData.advanced.checkout  // Solo sobrescribir campos específicos de ventas
+          },
+          payments: {
+            ...store?.advanced?.payments, // Preservar payments existentes (ej: de SEO)
+            ...formData.advanced.payments  // Solo sobrescribir campos específicos de ventas
+          }
+        }
+      }
+      
+      await updateStore(store.id, updateData)
+      setStore(prev => prev ? { ...prev, ...updateData } : null)
       setSaveMessage(tActions('saved'))
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (error) {

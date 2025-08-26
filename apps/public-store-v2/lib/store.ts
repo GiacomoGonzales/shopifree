@@ -231,8 +231,15 @@ export type StorePickupConfig = {
     }>;
 };
 
+export type StoreLocalDeliveryConfig = {
+    enabled?: boolean;
+    allowGPS?: boolean;
+    noCoverageMessage?: string;
+};
+
 export type StoreShippingConfig = {
     storePickup?: StorePickupConfig;
+    localDelivery?: StoreLocalDeliveryConfig;
 };
 
 /**
@@ -257,7 +264,12 @@ export async function getStoreShippingConfig(storeId: string): Promise<StoreShip
         console.log(`🚚 [Store] Shipping config from advanced:`, shippingConfig);
         
         return {
-            storePickup: shippingConfig.storePickup || { enabled: false }
+            storePickup: shippingConfig.storePickup || { enabled: false },
+            localDelivery: {
+                enabled: shippingConfig.localDelivery?.enabled || false,
+                allowGPS: shippingConfig.localDelivery?.allowGPS || false,
+                noCoverageMessage: shippingConfig.localDelivery?.noCoverageMessage || "Lo sentimos, no hacemos entregas en tu zona"
+            }
         } as StoreShippingConfig;
     } catch (e) {
         console.warn("[public-store-v2] getStoreShippingConfig failed", e);

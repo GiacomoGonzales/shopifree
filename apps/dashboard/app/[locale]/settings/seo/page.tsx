@@ -36,8 +36,17 @@ export default function SEOPage() {
     
     setSaving(true)
     try {
-      await updateStore(store.id, data)
-      setStore(prev => prev ? { ...prev, ...data } : null)
+      // Preservar datos existentes de advanced al igual que en SalesSection
+      const updateData = {
+        ...data,
+        advanced: data.advanced ? {
+          ...store?.advanced, // Preservar todos los datos existentes de advanced
+          ...data.advanced    // Solo sobrescribir los datos específicos que se están actualizando
+        } : store?.advanced
+      }
+      
+      await updateStore(store.id, updateData)
+      setStore(prev => prev ? { ...prev, ...updateData } : null)
       return true
     } catch (error) {
       console.error('Error updating store:', error)

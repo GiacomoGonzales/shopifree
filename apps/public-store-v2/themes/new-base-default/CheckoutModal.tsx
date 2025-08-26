@@ -105,6 +105,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [loadingZones, setLoadingZones] = useState(false);
     const [shippingCost, setShippingCost] = useState(0);
     const [suggestedAddress, setSuggestedAddress] = useState<string>('');
+    const [isOutsideCoverage, setIsOutsideCoverage] = useState(false);
     const [showAddressSuggestion, setShowAddressSuggestion] = useState(false);
     
     // Detectar si es dispositivo móvil
@@ -191,7 +192,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             : formData.appliedCoupon.discount
         : 0;
     
-    const total = subtotal + shipping - discount;
+    // Si está fuera de cobertura, no incluir shipping en el total (se coordina aparte)
+    const total = isOutsideCoverage 
+        ? subtotal - discount 
+        : subtotal + shipping - discount;
 
     // Cargar configuración de envío y checkout cuando se abre el modal
     useEffect(() => {
@@ -268,8 +272,30 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         if (userCoordinates) {
             const calculatedShipping = calculateShippingCost(userCoordinates, deliveryZones, formData.shippingMethod);
             setShippingCost(calculatedShipping);
+            
+            // Verificar si está fuera de cobertura cuando hay zonas configuradas
+            if (deliveryZones.length > 0) {
+                const zone = findDeliveryZoneForCoordinates(userCoordinates, deliveryZones);
+                const outsideCoverage = !zone;
+                setIsOutsideCoverage(outsideCoverage);
+                
+                const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
+                console.log('🔍 [Coverage Check]', {
+                    coordinates: userCoordinates,
+                    zonesCount: deliveryZones.length,
+                    foundZone: zone ? zone.name : 'NINGUNA',
+                    isOutsideCoverage: outsideCoverage,
+                    checkoutMethod: checkoutConfig?.checkout?.method,
+                    canContinueIfOutside: isWhatsAppCheckout,
+                    noCoverageMessage: shippingConfig?.localDelivery?.noCoverageMessage
+                });
+            } else {
+                setIsOutsideCoverage(false); // Si no hay zonas, no hay restricción
+                console.log('🔍 [Coverage Check] No hay zonas configuradas, permitiendo entrega');
+            }
         } else {
             setShippingCost(0);
+            setIsOutsideCoverage(false);
         }
     }, [userCoordinates, deliveryZones, formData.shippingMethod]);
 
@@ -905,8 +931,20 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 if (formData.shippingMethod === 'pickup') {
                     return !!selectedLocation;
                 }
+                
                 // Para envío a domicilio o express necesita dirección
-                return !!formData.address;
+                if (!formData.address) {
+                    return false;
+                }
+                
+                // Si está fuera de cobertura, verificar método de checkout
+                if (isOutsideCoverage) {
+                    const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
+                    // WhatsApp permite continuar fuera de cobertura, checkout tradicional no
+                    return isWhatsAppCheckout;
+                }
+                
+                return true;
             case 3:
                 return !!(formData.paymentMethod); // Método de pago requerido
             default:
@@ -994,11 +1032,28 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         // Agregar totales
         message += `\n💰 *RESUMEN:*\n`;
         message += `Subtotal: ${formatPrice(subtotal, currency)}\n`;
-        message += `Envío: ${formatPrice(shipping, currency)}\n`;
+        
+        // Mostrar envío según cobertura
+        if (formData.shippingMethod === 'pickup') {
+            message += `Envío: Recojo en tienda (gratis)\n`;
+        } else if (isOutsideCoverage) {
+            message += `Envío: A coordinar\n`;
+        } else {
+            message += `Envío: ${formatPrice(shipping, currency)}\n`;
+        }
+        
         if (discount > 0) {
             message += `Descuento: -${formatPrice(discount, currency)}\n`;
         }
-        message += `*Total: ${formatPrice(total, currency)}*\n`;
+        
+        // Para total, si está fuera de cobertura, no incluir shipping en el cálculo automático
+        const finalTotal = (formData.shippingMethod === 'pickup' || isOutsideCoverage) 
+            ? subtotal - discount 
+            : total;
+            
+        message += isOutsideCoverage 
+            ? `*Subtotal: ${formatPrice(finalTotal, currency)}* (envío a coordinar)\n`
+            : `*Total: ${formatPrice(finalTotal, currency)}*\n`;
         
         // Agregar notas si las hay
         if (formData.notes.trim()) {
@@ -1508,6 +1563,58 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                                 </small>
                                                             </div>
                                                         )}
+                                                        
+                                                        {/* Mensaje de zona no cubierta */}
+                                                        {isOutsideCoverage && (() => {
+                                                            const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
+                                                            const canContinue = isWhatsAppCheckout;
+                                                            
+                                                            return (
+                                                                <div style={{
+                                                                    marginTop: '12px',
+                                                                    padding: '12px',
+                                                                    backgroundColor: canContinue ? '#fef3f2' : '#fef2f2',
+                                                                    border: canContinue ? '1px solid #fed7d7' : '1px solid #fecaca',
+                                                                    borderRadius: '8px'
+                                                                }}>
+                                                                    <div style={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'flex-start',
+                                                                        gap: '8px'
+                                                                    }}>
+                                                                        <span style={{ fontSize: '16px' }}>
+                                                                            {canContinue ? '⚠️' : '🚫'}
+                                                                        </span>
+                                                                        <div>
+                                                                            <div style={{ 
+                                                                                color: canContinue ? '#dc2626' : '#dc2626', 
+                                                                                fontSize: '14px',
+                                                                                fontWeight: '500',
+                                                                                marginBottom: '4px'
+                                                                            }}>
+                                                                                {shippingConfig?.localDelivery?.noCoverageMessage || "Lo sentimos, no hacemos entregas en tu zona"}
+                                                                            </div>
+                                                                            {canContinue ? (
+                                                                                <div style={{ 
+                                                                                    color: '#059669', 
+                                                                                    fontSize: '12px',
+                                                                                    fontWeight: '500'
+                                                                                }}>
+                                                                                    ✅ Puedes continuar - Se coordinará por WhatsApp
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div style={{ 
+                                                                                    color: '#dc2626', 
+                                                                                    fontSize: '12px'
+                                                                                }}>
+                                                                                    ❌ No se puede procesar automáticamente
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </div>
                                                     <div ref={mapRef} className="nbd-map">
                                                         {isMobileDevice && !map && !isGoogleMapsLoaded && (
@@ -1702,9 +1809,22 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                 <div className="nbd-summary-line">
                                     <span>{t('shipping')}</span>
                                     <span>
-                                        {formData.shippingMethod === 'pickup' ? formatPrice(0, currency) : 
-                                         userCoordinates ? formatPrice(shipping, currency) : 
-                                         t('provideLocation')}
+                                        {(() => {
+                                            if (formData.shippingMethod === 'pickup') {
+                                                return formatPrice(0, currency);
+                                            }
+                                            
+                                            if (!userCoordinates) {
+                                                return t('provideLocation');
+                                            }
+                                            
+                                            if (isOutsideCoverage) {
+                                                const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
+                                                return isWhatsAppCheckout ? 'A coordinar' : '--';
+                                            }
+                                            
+                                            return formatPrice(shipping, currency);
+                                        })()}
                                     </span>
                                 </div>
                                 {formData.appliedCoupon && discount > 0 && (
@@ -1718,7 +1838,19 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     </div>
                                 )}
                                 <div className="nbd-summary-line nbd-summary-total">
-                                    <span>{t('total')}</span>
+                                    <span>
+                                        {isOutsideCoverage ? 'Subtotal' : t('total')}
+                                        {isOutsideCoverage && (
+                                            <small style={{ 
+                                                display: 'block',
+                                                fontSize: '11px',
+                                                color: '#666',
+                                                fontWeight: 'normal'
+                                            }}>
+                                                (envío a coordinar)
+                                            </small>
+                                        )}
+                                    </span>
                                     <span>{formatPrice(total, currency)}</span>
                                 </div>
                             </div>
@@ -1733,6 +1865,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             <button 
                                 onClick={prevStep}
                                 className="nbd-btn nbd-btn--ghost"
+                                style={{ touchAction: 'manipulation' }}
                             >
                                 ← {t('previous')}
                             </button>
@@ -1743,6 +1876,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     onClick={nextStep}
                                     disabled={!validateStep(currentStep)}
                                     className={`nbd-btn nbd-btn--primary ${!validateStep(currentStep) ? 'nbd-btn--disabled' : ''}`}
+                                    style={{ touchAction: 'manipulation' }}
                                 >
                                     {t('next')} →
                                 </button>
@@ -1756,11 +1890,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             className={`nbd-btn nbd-checkout-submit ${(isSubmitting || !validateStep(currentStep)) ? 'nbd-btn--disabled' : ''} ${
                                                 isWhatsAppCheckout ? 'nbd-btn--whatsapp' : 'nbd-btn--primary'
                                             }`}
-                                            style={isWhatsAppCheckout ? {
-                                                backgroundColor: '#25D366',
-                                                borderColor: '#25D366',
-                                                color: 'white'
-                                            } : {}}
+                                            style={{
+                                                touchAction: 'manipulation',
+                                                ...(isWhatsAppCheckout ? {
+                                                    backgroundColor: '#25D366',
+                                                    borderColor: '#25D366',
+                                                    color: 'white'
+                                                } : {})
+                                            }}
                                         >
                                             {isSubmitting ? (
                                                 <>

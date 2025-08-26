@@ -435,6 +435,24 @@
 
 /* TIPOS DE BOTONES */
 
+/* Mejorar comportamiento táctil en móviles */
+.nbd-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Eliminar hover en dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+    .nbd-btn:hover {
+        transform: none;
+        box-shadow: var(--nbd-shadow-md);
+    }
+}
+
 /* Botón primario */
 .nbd-btn--primary {
     background: var(--nbd-primary);
@@ -5477,7 +5495,36 @@
     margin-right: var(--nbd-space-sm);
     width: 16px;
     height: 16px;
-    accent-color: var(--nbd-neutral-0);
+    accent-color: var(--nbd-neutral-900); /* Color negro para el punto interno */
+    cursor: pointer;
+}
+
+/* Estilos mejorados para radio buttons - consistencia visual */
+.nbd-method-option input[type="radio"]:checked {
+    background-color: var(--nbd-neutral-900);
+    border-color: var(--nbd-neutral-900);
+}
+
+/* Asegurar que el punto se vea en todos los navegadores */
+.nbd-method-option input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    margin: 2px auto;
+}
+
+/* Aplicar estilos consistentes a todos los radio buttons del checkout */
+.nbd-checkout-content input[type="radio"] {
+    accent-color: var(--nbd-neutral-900);
+    cursor: pointer;
+}
+
+.nbd-checkout-content input[type="radio"]:checked {
+    background-color: var(--nbd-neutral-900);
+    border-color: var(--nbd-neutral-900);
 }
 
 .nbd-method-content {
