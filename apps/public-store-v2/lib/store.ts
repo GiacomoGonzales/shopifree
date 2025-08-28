@@ -375,6 +375,159 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       console.log(`🎯 Applied hover gradient to newsletter button: ${hoverGradient}`);
     }
     
+    // APLICAR DEGRADADO dinámico a los botones de la hero section
+    const heroPrimaryButton = document.querySelector('.nbd-hero-actions .nbd-btn--primary') as HTMLElement;
+    if (heroPrimaryButton) {
+      const dynamicHeroPrimaryGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      heroPrimaryButton.style.background = dynamicHeroPrimaryGradient;
+      heroPrimaryButton.style.borderColor = primaryColor;
+      console.log(`🎯 Applied dynamic gradient to hero primary button: ${dynamicHeroPrimaryGradient}`);
+      
+      // Aplicar hover gradient para el botón primario
+      const heroPrimaryHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
+      heroPrimaryButton.addEventListener('mouseenter', () => {
+        heroPrimaryButton.style.background = heroPrimaryHoverGradient;
+        heroPrimaryButton.style.borderColor = darkerColor;
+      });
+      heroPrimaryButton.addEventListener('mouseleave', () => {
+        heroPrimaryButton.style.background = dynamicHeroPrimaryGradient;
+        heroPrimaryButton.style.borderColor = primaryColor;
+      });
+      console.log(`🎯 Applied hover gradient to hero primary button: ${heroPrimaryHoverGradient}`);
+    }
+    
+    // APLICAR ESTILO dinámico al botón secundario de la hero section (transparente con borde y texto del color dinámico)
+    const heroSecondaryButton = document.querySelector('.nbd-hero-actions .nbd-btn--secondary') as HTMLElement;
+    if (heroSecondaryButton) {
+      heroSecondaryButton.style.background = 'transparent';
+      heroSecondaryButton.style.borderColor = primaryColor;
+      heroSecondaryButton.style.color = primaryColor;
+      console.log(`🎯 Applied dynamic color to hero secondary button: ${primaryColor}`);
+      
+      // Aplicar hover para el botón secundario (se rellena con el degradado)
+      const heroSecondaryHoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      heroSecondaryButton.addEventListener('mouseenter', () => {
+        heroSecondaryButton.style.background = heroSecondaryHoverGradient;
+        heroSecondaryButton.style.color = 'white';
+        heroSecondaryButton.style.borderColor = primaryColor;
+      });
+      heroSecondaryButton.addEventListener('mouseleave', () => {
+        heroSecondaryButton.style.background = 'transparent';
+        heroSecondaryButton.style.color = primaryColor;
+        heroSecondaryButton.style.borderColor = primaryColor;
+      });
+      console.log(`🎯 Applied hover gradient to hero secondary button: ${heroSecondaryHoverGradient}`);
+    }
+    
+    // APLICAR DEGRADADO dinámico al botón "Proceder al checkout" del carrito
+    const cartCheckoutButton = document.querySelector('.nbd-cart-checkout') as HTMLElement;
+    if (cartCheckoutButton) {
+      const dynamicCartCheckoutGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      cartCheckoutButton.style.background = dynamicCartCheckoutGradient;
+      cartCheckoutButton.style.borderColor = primaryColor;
+      console.log(`🎯 Applied dynamic gradient to cart checkout button: ${dynamicCartCheckoutGradient}`);
+      
+      // Aplicar hover gradient para el botón de checkout
+      const cartCheckoutHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
+      cartCheckoutButton.addEventListener('mouseenter', () => {
+        if (!cartCheckoutButton.disabled) {
+          cartCheckoutButton.style.background = cartCheckoutHoverGradient;
+          cartCheckoutButton.style.borderColor = darkerColor;
+        }
+      });
+      cartCheckoutButton.addEventListener('mouseleave', () => {
+        if (!cartCheckoutButton.disabled) {
+          cartCheckoutButton.style.background = dynamicCartCheckoutGradient;
+          cartCheckoutButton.style.borderColor = primaryColor;
+        }
+      });
+      console.log(`🎯 Applied hover gradient to cart checkout button: ${cartCheckoutHoverGradient}`);
+    }
+    
+    // APLICAR ESTILO dinámico al botón "Seguir comprando" del carrito (transparente con borde y texto del color dinámico)
+    const cartContinueButton = document.querySelector('.nbd-cart-continue') as HTMLElement;
+    if (cartContinueButton) {
+      cartContinueButton.style.background = 'transparent';
+      cartContinueButton.style.borderColor = primaryColor;
+      cartContinueButton.style.color = primaryColor;
+      console.log(`🎯 Applied dynamic color to cart continue button: ${primaryColor}`);
+      
+      // Aplicar hover para el botón "Seguir comprando" (se rellena con el degradado)
+      const cartContinueHoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      cartContinueButton.addEventListener('mouseenter', () => {
+        cartContinueButton.style.background = cartContinueHoverGradient;
+        cartContinueButton.style.color = 'white';
+        cartContinueButton.style.borderColor = primaryColor;
+      });
+      cartContinueButton.addEventListener('mouseleave', () => {
+        cartContinueButton.style.background = 'transparent';
+        cartContinueButton.style.color = primaryColor;
+        cartContinueButton.style.borderColor = primaryColor;
+      });
+      console.log(`🎯 Applied hover gradient to cart continue button: ${cartContinueHoverGradient}`);
+    }
+    
+    // APLICAR DEGRADADO dinámico a TODOS los botones primarios del sitio (.nbd-btn--primary)
+    const allPrimaryButtons = document.querySelectorAll('.nbd-btn--primary:not(.nbd-hero-actions .nbd-btn--primary):not(.nbd-cart-checkout):not(.nbd-newsletter-submit)') as NodeListOf<HTMLElement>;
+    allPrimaryButtons.forEach(button => {
+      const dynamicGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      button.style.background = dynamicGradient;
+      button.style.borderColor = primaryColor;
+      console.log(`🎯 Applied dynamic gradient to primary button: ${dynamicGradient}`);
+      
+      // Aplicar hover gradient
+      const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
+      button.addEventListener('mouseenter', () => {
+        if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+          button.style.background = hoverGradient;
+          button.style.borderColor = darkerColor;
+        }
+      });
+      button.addEventListener('mouseleave', () => {
+        if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+          button.style.background = dynamicGradient;
+          button.style.borderColor = primaryColor;
+        }
+      });
+    });
+    
+    // APLICAR ESTILO dinámico a TODOS los botones secundarios del sitio (.nbd-btn--secondary)
+    const allSecondaryButtons = document.querySelectorAll('.nbd-btn--secondary:not(.nbd-hero-actions .nbd-btn--secondary)') as NodeListOf<HTMLElement>;
+    allSecondaryButtons.forEach(button => {
+      button.style.background = 'transparent';
+      button.style.borderColor = primaryColor;
+      button.style.color = primaryColor;
+      console.log(`🎯 Applied dynamic color to secondary button: ${primaryColor}`);
+      
+      // Aplicar hover
+      const hoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      button.addEventListener('mouseenter', () => {
+        button.style.background = hoverGradient;
+        button.style.color = 'white';
+        button.style.borderColor = primaryColor;
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.background = 'transparent';
+        button.style.color = primaryColor;
+        button.style.borderColor = primaryColor;
+      });
+    });
+    
+    // APLICAR ESTILO dinámico a botones ghost que interactúan con colores primarios
+    const ghostButtons = document.querySelectorAll('.nbd-btn--ghost') as NodeListOf<HTMLElement>;
+    ghostButtons.forEach(button => {
+      // Mantener el estilo ghost original pero mejorar el hover
+      const originalColor = button.style.color;
+      button.addEventListener('mouseenter', () => {
+        button.style.color = primaryColor;
+        button.style.borderColor = primaryColor;
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.color = originalColor || '';
+        button.style.borderColor = '';
+      });
+    });
+    
     // APLICAR color dinámico a todos los botones de agregar al carrito (existentes)
     const addToCartButtons = document.querySelectorAll('.nbd-add-to-cart--loading') as NodeListOf<HTMLElement>;
     addToCartButtons.forEach(button => {
@@ -420,6 +573,109 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
             const loadingButtons = element.querySelectorAll?.('.nbd-add-to-cart--loading') as NodeListOf<HTMLElement>;
             loadingButtons?.forEach(button => {
               button.style.backgroundColor = primaryColor;
+            });
+            
+            // DETECTAR botones del carrito modal cuando se crean dinámicamente
+            const newCartCheckoutButton = element.querySelector?.('.nbd-cart-checkout') as HTMLElement;
+            if (newCartCheckoutButton) {
+              const dynamicCartCheckoutGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+              newCartCheckoutButton.style.background = dynamicCartCheckoutGradient;
+              newCartCheckoutButton.style.borderColor = primaryColor;
+              console.log(`🎯 Applied dynamic gradient to NEW cart checkout button: ${dynamicCartCheckoutGradient}`);
+              
+              // Aplicar hover gradient
+              const cartCheckoutHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
+              newCartCheckoutButton.addEventListener('mouseenter', () => {
+                if (!newCartCheckoutButton.disabled) {
+                  newCartCheckoutButton.style.background = cartCheckoutHoverGradient;
+                  newCartCheckoutButton.style.borderColor = darkerColor;
+                }
+              });
+              newCartCheckoutButton.addEventListener('mouseleave', () => {
+                if (!newCartCheckoutButton.disabled) {
+                  newCartCheckoutButton.style.background = dynamicCartCheckoutGradient;
+                  newCartCheckoutButton.style.borderColor = primaryColor;
+                }
+              });
+            }
+            
+            const newCartContinueButton = element.querySelector?.('.nbd-cart-continue') as HTMLElement;
+            if (newCartContinueButton) {
+              newCartContinueButton.style.background = 'transparent';
+              newCartContinueButton.style.borderColor = primaryColor;
+              newCartContinueButton.style.color = primaryColor;
+              console.log(`🎯 Applied dynamic color to NEW cart continue button: ${primaryColor}`);
+              
+              // Aplicar hover
+              const cartContinueHoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+              newCartContinueButton.addEventListener('mouseenter', () => {
+                newCartContinueButton.style.background = cartContinueHoverGradient;
+                newCartContinueButton.style.color = 'white';
+                newCartContinueButton.style.borderColor = primaryColor;
+              });
+              newCartContinueButton.addEventListener('mouseleave', () => {
+                newCartContinueButton.style.background = 'transparent';
+                newCartContinueButton.style.color = primaryColor;
+                newCartContinueButton.style.borderColor = primaryColor;
+              });
+            }
+            
+            // DETECTAR TODOS los botones primarios dinámicos
+            const newPrimaryButtons = element.querySelectorAll?.('.nbd-btn--primary:not(.nbd-hero-actions .nbd-btn--primary):not(.nbd-cart-checkout):not(.nbd-newsletter-submit)') as NodeListOf<HTMLElement>;
+            newPrimaryButtons?.forEach(button => {
+              const dynamicGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+              button.style.background = dynamicGradient;
+              button.style.borderColor = primaryColor;
+              console.log(`🎯 Applied dynamic gradient to NEW primary button: ${dynamicGradient}`);
+              
+              const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
+              button.addEventListener('mouseenter', () => {
+                if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+                  button.style.background = hoverGradient;
+                  button.style.borderColor = darkerColor;
+                }
+              });
+              button.addEventListener('mouseleave', () => {
+                if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+                  button.style.background = dynamicGradient;
+                  button.style.borderColor = primaryColor;
+                }
+              });
+            });
+            
+            // DETECTAR TODOS los botones secundarios dinámicos
+            const newSecondaryButtons = element.querySelectorAll?.('.nbd-btn--secondary:not(.nbd-hero-actions .nbd-btn--secondary)') as NodeListOf<HTMLElement>;
+            newSecondaryButtons?.forEach(button => {
+              button.style.background = 'transparent';
+              button.style.borderColor = primaryColor;
+              button.style.color = primaryColor;
+              console.log(`🎯 Applied dynamic color to NEW secondary button: ${primaryColor}`);
+              
+              const hoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+              button.addEventListener('mouseenter', () => {
+                button.style.background = hoverGradient;
+                button.style.color = 'white';
+                button.style.borderColor = primaryColor;
+              });
+              button.addEventListener('mouseleave', () => {
+                button.style.background = 'transparent';
+                button.style.color = primaryColor;
+                button.style.borderColor = primaryColor;
+              });
+            });
+            
+            // DETECTAR botones ghost dinámicos
+            const newGhostButtons = element.querySelectorAll?.('.nbd-btn--ghost') as NodeListOf<HTMLElement>;
+            newGhostButtons?.forEach(button => {
+              const originalColor = button.style.color;
+              button.addEventListener('mouseenter', () => {
+                button.style.color = primaryColor;
+                button.style.borderColor = primaryColor;
+              });
+              button.addEventListener('mouseleave', () => {
+                button.style.color = originalColor || '';
+                button.style.borderColor = '';
+              });
             });
           }
         });
