@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import ThemeRenderer from "../../components/ThemeRenderer";
-import SimpleLoadingSpinner from "../../components/SimpleLoadingSpinner";
-import { getStoreMetadata } from "../../server-only/store-metadata";
+import ThemeRenderer from "../components/ThemeRenderer";
+import SimpleLoadingSpinner from "../components/SimpleLoadingSpinner";
+import { getStoreMetadata } from "../server-only/store-metadata";
 
 export default async function StorePage({ params }: { params: { storeSubdomain: string } }) {
     const subdomain = params?.storeSubdomain ?? 'store';

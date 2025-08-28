@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getStoreIdBySubdomain, getStorePrimaryLocale } from '../../../../lib/store';
-import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../../lib/products';
-import { toCloudinarySquare } from '../../../../lib/images';
-import { formatPrice } from '../../../../lib/currency';
-import Layout from '../../../../themes/new-base-default/Layout';
-import { getStoreBasicInfo, StoreBasicInfo } from '../../../../lib/store';
-import { getStoreCategories, Category } from '../../../../lib/categories';
-import { useCart } from '../../../../lib/cart-context';
-import ProductVariantSelector from '../../../../components/ProductVariantSelector';
+import { getStoreIdBySubdomain, getStorePrimaryLocale } from '../../../lib/store';
+import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../lib/products';
+import { toCloudinarySquare } from '../../../lib/images';
+import { formatPrice } from '../../../lib/currency';
+import Layout from '../../../themes/new-base-default/Layout';
+import { getStoreBasicInfo, StoreBasicInfo } from '../../../lib/store';
+import { getStoreCategories, Category } from '../../../lib/categories';
+import { useCart } from '../../../lib/cart-context';
+import ProductVariantSelector from '../../../components/ProductVariantSelector';
 
 // Helper function para optimizar URLs de video de Cloudinary
 function optimizeCloudinaryVideo(url: string): string {
