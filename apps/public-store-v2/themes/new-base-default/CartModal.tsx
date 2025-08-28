@@ -32,20 +32,28 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
         if (typeof window === 'undefined') return `/producto/${slug}`;
         
         const pathname = window.location.pathname;
+        const currentHostname = window.location.hostname;
         
         // Detectar si estamos en un dominio personalizado
-        const host = window.location.hostname;
-        const isCustomDomain = !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+        const isCustomDomain = !currentHostname.endsWith('shopifree.app') && !currentHostname.endsWith('localhost') && currentHostname !== 'localhost';
         
         if (isCustomDomain) {
             // En dominio personalizado: URL directa sin subdominio ni locale
             return `/producto/${slug}`;
         } else {
-            // En dominio de plataforma: incluir subdominio sin locale
-            // Extraer subdominio del pathname actual (ahora está en posición [1])
+            // En dominio de plataforma: verificar si ya estamos en el subdominio correcto
+            // Extraer subdominio del pathname actual o del hostname
             const pathParts = pathname.split('/');
             const storeSubdomain = pathParts[1]; // [0]='', [1]=subdomain
-            return `/${storeSubdomain}/producto/${slug}`;
+            const expectedSubdomain = `${storeSubdomain}.shopifree.app`;
+            
+            if (currentHostname === expectedSubdomain) {
+                // Ya estamos en el subdominio correcto, no agregar el subdominio al path
+                return `/producto/${slug}`;
+            } else {
+                // Estamos en un contexto diferente, incluir el subdominio
+                return `/${storeSubdomain}/producto/${slug}`;
+            }
         }
     };
 

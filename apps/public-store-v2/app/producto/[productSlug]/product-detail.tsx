@@ -44,13 +44,22 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     if (typeof window === 'undefined') return path;
     
     const isCustom = isCustomDomain();
+    const currentHostname = window.location.hostname;
     
     if (isCustom) {
       // En dominio personalizado: URL directa sin subdominio ni locale
       return path.startsWith('/') ? path : `/${path}`;
     } else {
-      // En dominio de plataforma: incluir subdominio sin locale
-      return `/${storeSubdomain}${path.startsWith('/') ? path : `/${path}`}`;
+      // En dominio de plataforma: verificar si ya estamos en el subdominio correcto
+      const expectedSubdomain = `${storeSubdomain}.shopifree.app`;
+      
+      if (currentHostname === expectedSubdomain) {
+        // Ya estamos en el subdominio correcto, no agregar el subdominio al path
+        return path.startsWith('/') ? path : `/${path}`;
+      } else {
+        // Estamos en un contexto diferente, incluir el subdominio
+        return `/${storeSubdomain}${path.startsWith('/') ? path : `/${path}`}`;
+      }
     }
   };
   const [product, setProduct] = useState<PublicProduct | null>(null);
