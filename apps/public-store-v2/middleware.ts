@@ -257,9 +257,20 @@ async function handleSimpleMode(req: NextRequest, storeSubdomain: string, isLoca
     }
   }
   
-  // 🚀 PRODUCCIÓN: Para subdominios, no reescribir - Next.js ya está en el contexto correcto
-  console.log(`🎯 [Production] URL mantenida sin rewrite: ${currentPath}`);
-  return NextResponse.next();
+  // 🚀 PRODUCCIÓN: Para subdominios y dominios personalizados, hacer rewrite automático
+  if (currentPath === '/') {
+    // Root path - rewrite a la página principal de la tienda
+    const rewritePath = `/${storeSubdomain}`;
+    const rewriteUrl = new URL(rewritePath + search, req.url);
+    console.log(`🔄 [Production Rewrite] ${currentPath} → ${rewritePath} (tienda: ${storeSubdomain})`);
+    return NextResponse.rewrite(rewriteUrl);
+  } else {
+    // Other paths - rewrite agregando el subdomain
+    const rewritePath = `/${storeSubdomain}${currentPath}`;
+    const rewriteUrl = new URL(rewritePath + search, req.url);
+    console.log(`🔄 [Production Rewrite] ${currentPath} → ${rewritePath} (tienda: ${storeSubdomain})`);
+    return NextResponse.rewrite(rewriteUrl);
+  }
 }
 
 export async function middleware(req: NextRequest) {
