@@ -1596,7 +1596,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                                             </div>
                                                                             {canContinue ? (
                                                                                 <div style={{ 
-                                                                                    color: '#059669', 
+                                                                                    color: 'var(--nbd-success, #059669)', 
                                                                                     fontSize: '12px',
                                                                                     fontWeight: '500'
                                                                                 }}>

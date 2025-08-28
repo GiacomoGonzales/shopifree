@@ -3,8 +3,9 @@
 import { useEffect, useState, useMemo } from "react";
 import "./new-base-default.css";
 import "./loading-spinner.css";
+import "./texture-backgrounds.css";
 import LoadingSpinner from "./LoadingSpinner";
-import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo } from "../../lib/store";
+import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture, applyStoreColors } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
@@ -164,6 +165,53 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const [loadingCartButton, setLoadingCartButton] = useState<string | null>(null); // ID del producto que está siendo agregado
     const [filtersModalOpen, setFiltersModalOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+    const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
+
+    // Cargar textura de fondo configurada
+    useEffect(() => {
+        if (resolvedStoreId) {
+            loadBackgroundTexture(resolvedStoreId);
+        }
+    }, [resolvedStoreId]);
+
+    const loadBackgroundTexture = async (storeId: string) => {
+        try {
+            const texture = await getStoreBackgroundTexture(storeId);
+            setBackgroundTexture(texture || 'default');
+        } catch (error) {
+            console.log('Using default background texture');
+        }
+    };
+
+    // Determinar la clase de textura
+    const getTextureClass = () => {
+        if (backgroundTexture === 'default') return '';
+        return `texture-${backgroundTexture}`;
+    };
+
+    // Aplicar colores dinámicos de la tienda
+    useEffect(() => {
+        console.log('🔄 Store color effect running...', {
+            storeInfo: storeInfo ? 'loaded' : 'null',
+            primaryColor: storeInfo?.primaryColor,
+            secondaryColor: storeInfo?.secondaryColor
+        });
+        
+        if (storeInfo?.primaryColor) {
+            console.log('✅ Applying store colors...');
+            
+            // Aplicar inmediatamente
+            applyStoreColors(storeInfo.primaryColor, storeInfo.secondaryColor);
+            
+            // También aplicar después de un pequeño delay para asegurar que el DOM esté listo
+            setTimeout(() => {
+                console.log('🔄 Re-applying colors after delay...');
+                applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
+            }, 100);
+        } else {
+            console.log('⚠️ No primary color found in store info');
+        }
+    }, [storeInfo?.primaryColor, storeInfo?.secondaryColor]);
 
     // Resetear botón cuando se cierre el carrito (solo cuando se cierra, no cuando se abre)
     useEffect(() => {
@@ -540,7 +588,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
         categories?.find(c => c.slug === categorySlugFromUrl) : null;
 
     return (
-        <div data-theme="new-base-default" className="nbd-theme">
+        <div data-theme="new-base-default" className={`nbd-theme ${getTextureClass()}`}>
             <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products || []} />
             
             {/* Si estamos en una página de categoría, mostrar header limpio */}

@@ -45,6 +45,7 @@ export interface StoreConfig {
     order: number
   }> // Imágenes del carrusel principal
   theme?: string // ID del tema visual seleccionado
+  backgroundTexture?: string // ID de la textura de fondo seleccionada
   socialMedia?: { // Cambiado de redes
     facebook?: string
     instagram?: string

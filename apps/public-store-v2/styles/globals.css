@@ -97,8 +97,9 @@
   * { border-color: rgb(var(--border)); }
 
   html, body {
-    @apply bg-white text-neutral-900;
+    @apply text-neutral-900;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: var(--nbd-neutral-0);
   }
 }
 

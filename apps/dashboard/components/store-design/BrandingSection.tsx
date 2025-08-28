@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import '../../../public-store-v2/themes/new-base-default/texture-backgrounds.css'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../lib/store'
 import { validateImageFile, replaceImageInCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 import { brandColors } from '@shopifree/ui'
+import { AVAILABLE_TEXTURES, TextureBackground } from '../../../public-store-v2/lib/texture-backgrounds'
 
 interface FormData {
   primaryColor: string;
@@ -16,6 +18,7 @@ interface FormData {
   logoPublicId: string;
   storefrontImagePublicId: string;
   headerLogoPublicId: string;
+  backgroundTexture: string;
 }
 
 export default function BrandingSection() {
@@ -43,6 +46,7 @@ export default function BrandingSection() {
     logoPublicId: '',
     storefrontImagePublicId: '',
     headerLogoPublicId: '',
+    backgroundTexture: 'default',
   })
 
   // Cargar datos de la tienda
@@ -63,6 +67,7 @@ export default function BrandingSection() {
             logoPublicId: userStore.logoPublicId || '',
             storefrontImagePublicId: userStore.storefrontImagePublicId || '',
             headerLogoPublicId: userStore.headerLogoPublicId || '',
+            backgroundTexture: userStore.backgroundTexture || 'default',
           })
         }
       } catch (error) {
@@ -594,6 +599,76 @@ export default function BrandingSection() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Sección de textura de fondo */}
+          <div className="space-y-6">
+            <h4 className="text-base font-medium text-gray-900">Fondo de la tienda</h4>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Textura de fondo
+              </label>
+              <p className="text-sm text-gray-600 mb-4">
+                Selecciona una textura sutil para el fondo de tu tienda pública
+              </p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Opción: Sin textura (fondo liso) */}
+                <div 
+                  className={`relative cursor-pointer rounded-lg border-2 transition-all duration-200 ${
+                    formData.backgroundTexture === 'default' 
+                      ? 'border-gray-600 ring-2 ring-gray-200' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleChange('backgroundTexture', 'default')}
+                >
+                  <div className="aspect-square bg-white rounded-md border border-gray-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full mx-auto mb-2"></div>
+                      <span className="text-xs text-gray-600 font-medium">Liso</span>
+                    </div>
+                  </div>
+                  {formData.backgroundTexture === 'default' && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* Texturas disponibles */}
+                {AVAILABLE_TEXTURES.map((texture) => (
+                  <div 
+                    key={texture.id}
+                    className={`relative cursor-pointer rounded-lg border-2 transition-all duration-200 ${
+                      formData.backgroundTexture === texture.id 
+                        ? 'border-gray-600 ring-2 ring-gray-200' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => handleChange('backgroundTexture', texture.id)}
+                  >
+                    <div className={`aspect-square rounded-md overflow-hidden ${texture.cssClass} border border-gray-100 flex items-end`}>
+                      <div className="w-full bg-white bg-opacity-90 p-2 backdrop-blur-sm">
+                        <h5 className="text-xs font-medium text-gray-900 truncate">{texture.name}</h5>
+                        <p className="text-xs text-gray-600 truncate">{texture.description}</p>
+                      </div>
+                    </div>
+                    {formData.backgroundTexture === texture.id && (
+                      <div className="absolute top-2 right-2 w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <p className="mt-3 text-xs text-gray-500">
+                Las texturas son sutiles y no afectan la legibilidad del contenido de tu tienda.
+              </p>
             </div>
           </div>
         </div>

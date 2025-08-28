@@ -30,7 +30,7 @@
     --nbd-primary: var(--nbd-neutral-900);
     --nbd-secondary: var(--nbd-neutral-600);
     --nbd-accent: #171717;
-    --nbd-success: #10b981;
+    --nbd-success: #10b981; /* Will be overridden dynamically by store colors */
     --nbd-warning: #f59e0b;
     --nbd-error: #ef4444;
     
@@ -152,7 +152,6 @@
    =================================================== */
 .nbd-hero {
     min-height: 85vh;
-    background: linear-gradient(135deg, var(--nbd-neutral-50) 0%, var(--nbd-neutral-0) 50%, var(--nbd-neutral-100) 100%);
     display: flex;
     align-items: center;
     position: relative;
@@ -175,11 +174,9 @@
 
 .nbd-hero-container {
     width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: var(--nbd-space-3xl) var(--nbd-space-xl) var(--nbd-space-4xl);
     position: relative;
     z-index: 1;
+    padding: 0 var(--nbd-space-xl);
 }
 
 .nbd-hero-content {
@@ -187,6 +184,9 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--nbd-space-4xl);
     align-items: center;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--nbd-space-3xl) 0 var(--nbd-space-4xl);
 }
 
 @media (max-width: 1024px) {
@@ -588,6 +588,7 @@
 .nbd-categories-mosaic {
     padding: var(--nbd-space-2xl) 0;
     background: var(--nbd-neutral-50);
+    scroll-margin-top: var(--nbd-header-height);
 }
 
 /* Grid base del mosaico */
@@ -1123,7 +1124,7 @@
 .nbd-newsletter-icon {
     width: 72px;
     height: 72px;
-    background: linear-gradient(135deg, var(--nbd-success) 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--nbd-success) 0%, var(--nbd-success-dark, #059669) 100%);
     color: var(--nbd-neutral-0);
     border-radius: var(--nbd-radius-2xl);
     display: flex;
@@ -1250,7 +1251,7 @@
 }
 
 .nbd-newsletter-submit:hover {
-    background: #059669;
+    background: var(--nbd-success-dark, #059669);
     transform: translateY(-2px);
     box-shadow: var(--nbd-shadow-lg);
 }
@@ -1293,7 +1294,6 @@
    =================================================== */
 .nbd-products {
     padding: var(--nbd-space-2xl) 0;
-    background: var(--nbd-neutral-0);
     scroll-margin-top: var(--nbd-header-height);
 }
 
@@ -1849,15 +1849,16 @@
         height: 16px;
     }
 
-    /* Efectos para botones en vistas móviles */
+    /* Efectos para botones en vistas móviles - SIN VERDE INICIAL */
     .nbd-mobile-grid .nbd-add-to-cart--loading,
     .nbd-mobile-list .nbd-add-to-cart--loading {
-        background: var(--nbd-success) !important;
+        background: var(--nbd-primary) !important; /* JavaScript aplicará el color dinámico */
+        animation: nbd-cart-button-bounce 0.6s ease-out;
     }
 
     .nbd-mobile-grid .nbd-add-to-cart--loading:hover,
     .nbd-mobile-list .nbd-add-to-cart--loading:hover {
-        background: var(--nbd-success) !important;
+        background: var(--nbd-primary) !important; /* JavaScript manejará el hover */
         transform: scale(1.05);
     }
     
@@ -2050,43 +2051,47 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all var(--nbd-transition-base);
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nbd-add-to-cart:hover {
     background: var(--nbd-neutral-800);
-    transform: scale(1.1);
+    transform: scale(1.08);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Efecto de loading al agregar al carrito */
+.nbd-add-to-cart:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* Efecto de loading al agregar al carrito - SIN VERDE INICIAL */
 .nbd-add-to-cart--loading {
-    background: var(--nbd-success) !important;
+    background: var(--nbd-primary) !important; /* Usa el mismo color base inicialmente */
     transform: scale(1.05);
     cursor: not-allowed;
-    animation: nbd-cart-button-pulse 1.2s ease-in-out;
+    animation: nbd-cart-button-bounce 0.6s ease-out;
+    box-shadow: 0 0 0 0 var(--nbd-primary);
+    /* JavaScript aplicará el color dinámico inmediatamente */
 }
 
 .nbd-add-to-cart--loading:hover {
-    background: var(--nbd-success) !important;
+    background: var(--nbd-primary) !important; /* JavaScript manejará el hover también */
     transform: scale(1.05);
 }
 
 /* Animación sutil y moderna para el botón */
-@keyframes nbd-cart-button-pulse {
+@keyframes nbd-cart-button-bounce {
     0% {
-        background: var(--nbd-primary);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        transform: scale(1.05);
     }
     50% {
-        background: var(--nbd-success);
-        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.3);
-        transform: scale(1.1);
+        transform: scale(1.15);
     }
     100% {
-        background: var(--nbd-success);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
         transform: scale(1.05);
     }
 }
@@ -2817,7 +2822,11 @@
     }
     
     .nbd-hero-container {
-        padding: var(--nbd-space-2xl) var(--nbd-space-lg) var(--nbd-space-2xl);
+        padding: 0 var(--nbd-space-lg);
+    }
+    
+    .nbd-hero-content {
+        padding: var(--nbd-space-2xl) 0;
     }
     
     .nbd-section-title {
@@ -2838,6 +2847,7 @@
     .nbd-categories,
     .nbd-categories-mosaic {
         padding: var(--nbd-space-2xl) 0 var(--nbd-space-lg) 0;
+        scroll-margin-top: var(--nbd-header-height);
     }
     
     .nbd-products {
@@ -5299,7 +5309,7 @@
 }
 
 .nbd-location-btn:hover:not(:disabled) {
-    background: #059669;
+    background: var(--nbd-success-dark, #059669);
     transform: translateY(-1px);
 }
 

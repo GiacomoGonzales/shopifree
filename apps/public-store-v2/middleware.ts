@@ -217,14 +217,14 @@ async function getStoreConfigCached(storeSubdomain: string): Promise<{
 }
 
 // 🚀 Función helper para manejar single locale mode
-async function handleSimpleMode(req: NextRequest, storeSubdomain: string): Promise<NextResponse> {
+async function handleSimpleMode(req: NextRequest, storeSubdomain: string, isLocalDev: boolean = false): Promise<NextResponse> {
   const { nextUrl } = req;
   const currentPath = nextUrl.pathname;
   const search = nextUrl.search;
   
   const pathSegments = currentPath.split('/').filter(Boolean);
   
-  console.log(`🎯 [Simple Mode] Procesando tienda ${storeSubdomain}`);
+  console.log(`🎯 [Simple Mode] Procesando tienda ${storeSubdomain}, isLocalDev: ${isLocalDev}`);
 
   // Detectar si la URL tiene prefijo de idioma
   const firstSegment = pathSegments[0];
@@ -240,20 +240,26 @@ async function handleSimpleMode(req: NextRequest, storeSubdomain: string): Promi
     return NextResponse.redirect(redirectUrl, 301);
   }
 
-  // 🚀 REWRITE INTERNO: /(.*) → /{storeSubdomain}/(.*)
-  if (currentPath === '/') {
-    // Root path
-    const rewritePath = `/${storeSubdomain}`;
-    const rewriteUrl = new URL(rewritePath + search, req.url);
-    console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
-    return NextResponse.rewrite(rewriteUrl);
-  } else {
-    // Other paths
-    const rewritePath = `/${storeSubdomain}${currentPath}`;
-    const rewriteUrl = new URL(rewritePath + search, req.url);
-    console.log(`🔄 [Rewrite] ${currentPath} → ${rewritePath}`);
-    return NextResponse.rewrite(rewriteUrl);
+  // 🚀 REWRITE INTERNO: Solo para desarrollo local
+  if (isLocalDev) {
+    if (currentPath === '/') {
+      // Root path
+      const rewritePath = `/${storeSubdomain}`;
+      const rewriteUrl = new URL(rewritePath + search, req.url);
+      console.log(`🔄 [Local Rewrite] ${currentPath} → ${rewritePath}`);
+      return NextResponse.rewrite(rewriteUrl);
+    } else {
+      // Other paths
+      const rewritePath = `/${storeSubdomain}${currentPath}`;
+      const rewriteUrl = new URL(rewritePath + search, req.url);
+      console.log(`🔄 [Local Rewrite] ${currentPath} → ${rewritePath}`);
+      return NextResponse.rewrite(rewriteUrl);
+    }
   }
+  
+  // 🚀 PRODUCCIÓN: Para subdominios, no reescribir - Next.js ya está en el contexto correcto
+  console.log(`🎯 [Production] URL mantenida sin rewrite: ${currentPath}`);
+  return NextResponse.next();
 }
 
 export async function middleware(req: NextRequest) {
@@ -295,12 +301,12 @@ export async function middleware(req: NextRequest) {
         method: req.method,
       });
       
-      return await handleSimpleMode(newReq, storeSubdomain);
+      return await handleSimpleMode(newReq, storeSubdomain, true);
     }
     
     // Si es una URL directa sin subdomain (ej: /producto/algo)
     console.log(`📋 [Local Dev] Direct URL, using default store: tiendaverde`);
-    return await handleSimpleMode(req, 'tiendaverde');
+    return await handleSimpleMode(req, 'tiendaverde', true);
   }
   
   console.log(`🔍 [Middleware] Processing: ${protocol}://${host}${nextUrl.pathname}`);
@@ -360,7 +366,7 @@ export async function middleware(req: NextRequest) {
   
   // MODO SIMPLE: Todas las tiendas usan URLs sin prefijos
   console.log(`🎯 [Simple Mode] Procesando tienda: ${storeSubdomain}`);
-    return await handleSimpleMode(req, storeSubdomain);
+    return await handleSimpleMode(req, storeSubdomain, false);
 }
 
 export const config = {

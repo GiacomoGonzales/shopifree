@@ -32,6 +32,8 @@ export type StoreBasicInfo = {
     address?: string;
     language?: 'es' | 'en' | 'pt';
     theme?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
     socialMedia?: {
         instagram?: string;
         facebook?: string;
@@ -117,6 +119,8 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
                     data?.advanced?.language === 'pt' ? 'pt' : 
                     data?.advanced?.language === 'es' ? 'es' : undefined),
             theme: data.theme || 'new-base-default',
+            primaryColor: data.primaryColor || undefined,
+            secondaryColor: data.secondaryColor || undefined,
             socialMedia: socialFromGroup,
         };
 	} catch (e) {
@@ -311,6 +315,180 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
         console.warn("[public-store-v2] getStoreCheckoutConfig failed", e);
         return null;
     }
+}
+
+// Función para obtener la textura de fondo de una tienda
+export async function getStoreBackgroundTexture(storeId: string): Promise<string | null> {
+  try {
+    const db = getFirebaseDb();
+    if (!db) return null;
+    const storeDoc = await getDoc(doc(db, 'stores', storeId));
+    return storeDoc.data()?.backgroundTexture || null;
+  } catch (error) {
+    console.error('Error getting background texture:', error);
+    return null;
+  }
+}
+
+// Función para aplicar colores dinámicos de la tienda al tema
+export function applyStoreColors(primaryColor: string, secondaryColor?: string): void {
+  if (typeof document === 'undefined') return; // SSR safety
+  
+  // Aplicar color primario como color de éxito (newsletters, botones, etc.)
+  if (primaryColor) {
+    console.log(`🎨 Applying primary color: ${primaryColor}`);
+    
+    // Generar variaciones del color primario
+    const lighterColor = lightenColor(primaryColor, 0.1);
+    const darkerColor = darkenColor(primaryColor, 0.2);
+    const muchDarkerColor = darkenColor(primaryColor, 0.4);
+    
+    // Aplicar el color primario y sus variaciones
+    document.documentElement.style.setProperty('--nbd-success', primaryColor);
+    document.documentElement.style.setProperty('--nbd-success-light', lighterColor);
+    document.documentElement.style.setProperty('--nbd-success-dark', darkerColor);
+    document.documentElement.style.setProperty('--nbd-success-darker', muchDarkerColor);
+    
+    // SOLUCIÓN DEFINITIVA: Aplicar gradiente directamente al ícono del newsletter
+    const newsletterIcon = document.querySelector('.nbd-newsletter-icon') as HTMLElement;
+    if (newsletterIcon) {
+      const dynamicGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      newsletterIcon.style.background = dynamicGradient;
+      console.log(`🎯 Applied direct gradient to newsletter icon: ${dynamicGradient}`);
+    }
+    
+    // TAMBIÉN aplicar DEGRADADO dinámico al botón de suscribirse (igual que el ícono)
+    const newsletterButton = document.querySelector('.nbd-newsletter-submit') as HTMLElement;
+    if (newsletterButton) {
+      const dynamicButtonGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
+      newsletterButton.style.background = dynamicButtonGradient;
+      console.log(`🎯 Applied dynamic gradient to newsletter button: ${dynamicButtonGradient}`);
+      
+      // Aplicar hover gradient también (más oscuro)
+      const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
+      newsletterButton.addEventListener('mouseenter', () => {
+        newsletterButton.style.background = hoverGradient;
+      });
+      newsletterButton.addEventListener('mouseleave', () => {
+        newsletterButton.style.background = dynamicButtonGradient;
+      });
+      console.log(`🎯 Applied hover gradient to newsletter button: ${hoverGradient}`);
+    }
+    
+    // APLICAR color dinámico a todos los botones de agregar al carrito (existentes)
+    const addToCartButtons = document.querySelectorAll('.nbd-add-to-cart--loading') as NodeListOf<HTMLElement>;
+    addToCartButtons.forEach(button => {
+      button.style.backgroundColor = primaryColor;
+    });
+    
+    // Observer para detectar cambios de clase en botones existentes
+    const classObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target as HTMLElement;
+          if (target.classList.contains('nbd-add-to-cart--loading')) {
+            // Se acaba de agregar la clase loading - aplicar color INMEDIATAMENTE
+            target.style.setProperty('background-color', primaryColor, 'important');
+            target.style.setProperty('transition', 'none', 'important'); // Sin transición para evitar el verde
+            
+            // Restaurar transición después de un frame para futuras interacciones
+            setTimeout(() => {
+              target.style.removeProperty('transition');
+            }, 0);
+            
+            console.log('🎯 Applied IMMEDIATE color to cart button:', primaryColor);
+          }
+        }
+      });
+    });
+    
+    // También escuchar para botones que se crean dinámicamente
+    const nodeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element;
+            
+            // Buscar botones de carrito en el elemento agregado
+            const cartButtons = element.querySelectorAll?.('.nbd-add-to-cart') as NodeListOf<HTMLElement>;
+            cartButtons?.forEach(button => {
+              // Observar cambios de clase en cada botón
+              classObserver.observe(button, { attributes: true, attributeFilter: ['class'] });
+            });
+            
+            // También aplicar color si ya tiene la clase loading
+            const loadingButtons = element.querySelectorAll?.('.nbd-add-to-cart--loading') as NodeListOf<HTMLElement>;
+            loadingButtons?.forEach(button => {
+              button.style.backgroundColor = primaryColor;
+            });
+          }
+        });
+      });
+    });
+    
+    // Observar todos los botones existentes para cambios de clase
+    const existingCartButtons = document.querySelectorAll('.nbd-add-to-cart') as NodeListOf<HTMLElement>;
+    existingCartButtons.forEach(button => {
+      classObserver.observe(button, { attributes: true, attributeFilter: ['class'] });
+    });
+    
+    nodeObserver.observe(document.body, { childList: true, subtree: true });
+    console.log(`🎯 Applied dynamic color system to add-to-cart buttons: ${primaryColor}`);
+    
+    // Forzar repaint para asegurar que los cambios se apliquen
+    document.documentElement.offsetHeight;
+    
+    console.log(`✅ Primary color applied successfully: ${primaryColor}`);
+    console.log(`✅ Light variant applied: ${lighterColor}`);
+    console.log(`✅ Dark variant applied: ${darkerColor}`);
+    console.log(`✅ Darker variant applied: ${muchDarkerColor}`);
+  }
+  
+  // Aplicar color secundario si está disponible
+  if (secondaryColor) {
+    document.documentElement.style.setProperty('--nbd-secondary-custom', secondaryColor);
+    console.log(`🎨 Applied secondary color: ${secondaryColor}`);
+  }
+}
+
+// Función auxiliar para oscurecer un color
+function darkenColor(color: string, amount: number): string {
+  // Si el color viene en formato hex
+  if (color.startsWith('#')) {
+    const hex = color.slice(1);
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    const darkenedR = Math.floor(r * (1 - amount));
+    const darkenedG = Math.floor(g * (1 - amount));
+    const darkenedB = Math.floor(b * (1 - amount));
+    
+    return `#${darkenedR.toString(16).padStart(2, '0')}${darkenedG.toString(16).padStart(2, '0')}${darkenedB.toString(16).padStart(2, '0')}`;
+  }
+  
+  // Si no es hex, devolver el color original
+  return color;
+}
+
+// Función auxiliar para aclarar un color
+function lightenColor(color: string, amount: number): string {
+  // Si el color viene en formato hex
+  if (color.startsWith('#')) {
+    const hex = color.slice(1);
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    const lightenedR = Math.min(255, Math.floor(r + (255 - r) * amount));
+    const lightenedG = Math.min(255, Math.floor(g + (255 - g) * amount));
+    const lightenedB = Math.min(255, Math.floor(b + (255 - b) * amount));
+    
+    return `#${lightenedR.toString(16).padStart(2, '0')}${lightenedG.toString(16).padStart(2, '0')}${lightenedB.toString(16).padStart(2, '0')}`;
+  }
+  
+  // Si no es hex, devolver el color original
+  return color;
 }
 
 
