@@ -430,13 +430,15 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       // Aplicar hover gradient para el botón de checkout
       const cartCheckoutHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
       cartCheckoutButton.addEventListener('mouseenter', () => {
-        if (!cartCheckoutButton.disabled) {
+        const isDisabled = (cartCheckoutButton as HTMLButtonElement).disabled || cartCheckoutButton.classList.contains('nbd-btn--disabled');
+        if (!isDisabled) {
           cartCheckoutButton.style.background = cartCheckoutHoverGradient;
           cartCheckoutButton.style.borderColor = darkerColor;
         }
       });
       cartCheckoutButton.addEventListener('mouseleave', () => {
-        if (!cartCheckoutButton.disabled) {
+        const isDisabled = (cartCheckoutButton as HTMLButtonElement).disabled || cartCheckoutButton.classList.contains('nbd-btn--disabled');
+        if (!isDisabled) {
           cartCheckoutButton.style.background = dynamicCartCheckoutGradient;
           cartCheckoutButton.style.borderColor = primaryColor;
         }
@@ -478,13 +480,15 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       // Aplicar hover gradient
       const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
       button.addEventListener('mouseenter', () => {
-        if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+        const isDisabled = (button as HTMLButtonElement).disabled || button.classList.contains('nbd-btn--disabled');
+        if (!isDisabled) {
           button.style.background = hoverGradient;
           button.style.borderColor = darkerColor;
         }
       });
       button.addEventListener('mouseleave', () => {
-        if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+        const isDisabled = (button as HTMLButtonElement).disabled || button.classList.contains('nbd-btn--disabled');
+        if (!isDisabled) {
           button.style.background = dynamicGradient;
           button.style.borderColor = primaryColor;
         }
@@ -586,13 +590,15 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               // Aplicar hover gradient
               const cartCheckoutHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
               newCartCheckoutButton.addEventListener('mouseenter', () => {
-                if (!newCartCheckoutButton.disabled) {
+                const isDisabled = (newCartCheckoutButton as HTMLButtonElement).disabled || newCartCheckoutButton.classList.contains('nbd-btn--disabled');
+                if (!isDisabled) {
                   newCartCheckoutButton.style.background = cartCheckoutHoverGradient;
                   newCartCheckoutButton.style.borderColor = darkerColor;
                 }
               });
               newCartCheckoutButton.addEventListener('mouseleave', () => {
-                if (!newCartCheckoutButton.disabled) {
+                const isDisabled = (newCartCheckoutButton as HTMLButtonElement).disabled || newCartCheckoutButton.classList.contains('nbd-btn--disabled');
+                if (!isDisabled) {
                   newCartCheckoutButton.style.background = dynamicCartCheckoutGradient;
                   newCartCheckoutButton.style.borderColor = primaryColor;
                 }
@@ -630,13 +636,15 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               
               const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
               button.addEventListener('mouseenter', () => {
-                if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+                const isDisabled = (button as HTMLButtonElement).disabled || button.classList.contains('nbd-btn--disabled');
+                if (!isDisabled) {
                   button.style.background = hoverGradient;
                   button.style.borderColor = darkerColor;
                 }
               });
               button.addEventListener('mouseleave', () => {
-                if (!button.disabled && !button.classList.contains('nbd-btn--disabled')) {
+                const isDisabled = (button as HTMLButtonElement).disabled || button.classList.contains('nbd-btn--disabled');
+                if (!isDisabled) {
                   button.style.background = dynamicGradient;
                   button.style.borderColor = primaryColor;
                 }
