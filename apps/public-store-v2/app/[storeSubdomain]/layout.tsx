@@ -84,6 +84,13 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
         // ❌ REMOVIDO: keywords - meta keywords es obsoleta desde 2009 y Google la ignora
         // keywords: keywords ? keywords.split(',').map(k => k.trim()) : undefined,
         
+        // 🍎 iOS Safari viewport para efecto inmersivo (fundir header con status bar)
+        viewport: {
+            width: 'device-width',
+            initialScale: 1,
+            viewportFit: 'cover'
+        },
+        
         // 🚀 MEJORADO: Robots con directivas adicionales para mejor SEO
         robots: {
             index: isCanonicalVersion ? (robots?.includes('noindex') ? false : true) : (robots === 'noindex, nofollow' ? false : true),
@@ -220,6 +227,18 @@ export default async function StoreLocaleLayout({
     const primaryLocale = canonical.storeId ? await getStorePrimaryLocale(canonical.storeId) : null;
     const effectiveLocale = primaryLocale || 'es';
     
+    // 🍎 Obtener el color primario de la tienda para theme-color
+    let primaryColor = '#ffffff'; // fallback por defecto
+    if (canonical.storeId) {
+        try {
+            const { getStoreBasicInfo } = await import('../../lib/store');
+            const storeInfo = await getStoreBasicInfo(canonical.storeId);
+            primaryColor = storeInfo?.primaryColor || '#ffffff';
+        } catch (error) {
+            console.log('Using default primary color for theme-color');
+        }
+    }
+    
     // Construir storeInfo desde los datos completos de seoData
     const storeInfo = seoData ? {
         name: seoData.storeName || seoData.title?.replace(' | Shopifree', '') || subdomain,
@@ -233,6 +252,11 @@ export default async function StoreLocaleLayout({
     
     return (
         <>
+            {/* 🍎 iOS Safari theme-color dinámico para fundir header con status bar */}
+            <meta name="theme-color" content={primaryColor} />
+            <meta name="mobile-web-app-capable" content="yes" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+            
             {/* 🚀 Preconnects críticos para Cloudinary - una sola vez */}
             <link rel="preconnect" href="https://res.cloudinary.com" />
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />

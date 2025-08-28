@@ -2160,6 +2160,8 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--nbd-neutral-200);
     transition: all var(--nbd-transition-base);
+    /* 🍎 iOS Safe Area - extiende hacia arriba para cubrir status bar */
+    padding-top: env(safe-area-inset-top);
 }
 
 .nbd-header--scrolled {
@@ -2171,6 +2173,9 @@
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 var(--nbd-space-xl);
+    /* 🍎 iOS Safe Area - padding lateral para notch/dynamic island */
+    padding-left: max(var(--nbd-space-xl), env(safe-area-inset-left));
+    padding-right: max(var(--nbd-space-xl), env(safe-area-inset-right));
     display: flex;
     align-items: center;
     justify-content: space-between;

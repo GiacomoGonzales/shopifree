@@ -86,6 +86,39 @@
   position: relative;
 }
 
+/* Optimizaciones específicas para móvil con texturas - mejor aprovechamiento del espacio */
+@media (max-width: 640px) {
+  .texture-subtle-dots .nbd-mobile-grid .nbd-product-card,
+  .texture-geometric-grid .nbd-mobile-grid .nbd-product-card,
+  .texture-organic-waves .nbd-mobile-grid .nbd-product-card,
+  .texture-diagonal-lines .nbd-mobile-grid .nbd-product-card,
+  .texture-fabric-weave .nbd-mobile-grid .nbd-product-card,
+  .texture-hexagon-pattern .nbd-mobile-grid .nbd-product-card,
+  .texture-noise-texture .nbd-mobile-grid .nbd-product-card,
+  .texture-floating-bubbles .nbd-mobile-grid .nbd-product-card,
+  .texture-asymmetric-waves .nbd-mobile-grid .nbd-product-card,
+  .texture-scattered-leaves .nbd-mobile-grid .nbd-product-card,
+  .texture-paper-texture .nbd-mobile-grid .nbd-product-card {
+    /* Mantener el padding original para mejor uso del espacio */
+    min-height: auto;
+  }
+  
+  /* Asegurar que el contenido de la tarjeta mantenga un buen padding en móvil */
+  .texture-subtle-dots .nbd-mobile-grid .nbd-product-content,
+  .texture-geometric-grid .nbd-mobile-grid .nbd-product-content,
+  .texture-organic-waves .nbd-mobile-grid .nbd-product-content,
+  .texture-diagonal-lines .nbd-mobile-grid .nbd-product-content,
+  .texture-fabric-weave .nbd-mobile-grid .nbd-product-content,
+  .texture-hexagon-pattern .nbd-mobile-grid .nbd-product-content,
+  .texture-noise-texture .nbd-mobile-grid .nbd-product-content,
+  .texture-floating-bubbles .nbd-mobile-grid .nbd-product-content,
+  .texture-asymmetric-waves .nbd-mobile-grid .nbd-product-content,
+  .texture-scattered-leaves .nbd-mobile-grid .nbd-product-content,
+  .texture-paper-texture .nbd-mobile-grid .nbd-product-content {
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+  }
+}
+
 /* Añadir un sutil outline interno para más contraste */
 .texture-subtle-dots .nbd-product-card::before,
 .texture-geometric-grid .nbd-product-card::before,
@@ -222,7 +255,7 @@
   margin: var(--nbd-space-2xl) 0;
 }
 
-/* Grid de productos con más espaciado para mostrar textura */
+/* Grid de productos optimizado para móvil con texturas */
 .texture-subtle-dots .nbd-products-grid,
 .texture-geometric-grid .nbd-products-grid,
 .texture-organic-waves .nbd-products-grid,
@@ -234,7 +267,41 @@
 .texture-asymmetric-waves .nbd-products-grid,
 .texture-scattered-leaves .nbd-products-grid,
 .texture-paper-texture .nbd-products-grid {
-  gap: var(--nbd-space-3xl);
+  gap: var(--nbd-space-2xl);
+}
+
+/* Optimización específica para móvil - mantener espacio aprovechado */
+@media (max-width: 1024px) {
+  .texture-subtle-dots .nbd-products-grid,
+  .texture-geometric-grid .nbd-products-grid,
+  .texture-organic-waves .nbd-products-grid,
+  .texture-diagonal-lines .nbd-products-grid,
+  .texture-fabric-weave .nbd-products-grid,
+  .texture-hexagon-pattern .nbd-products-grid,
+  .texture-noise-texture .nbd-products-grid,
+  .texture-floating-bubbles .nbd-products-grid,
+  .texture-asymmetric-waves .nbd-products-grid,
+  .texture-scattered-leaves .nbd-products-grid,
+  .texture-paper-texture .nbd-products-grid {
+    gap: var(--nbd-space-xl);
+  }
+}
+
+/* Para móviles pequeños, usar el mismo gap que sin texturas */
+@media (max-width: 640px) {
+  .texture-subtle-dots .nbd-products-grid,
+  .texture-geometric-grid .nbd-products-grid,
+  .texture-organic-waves .nbd-products-grid,
+  .texture-diagonal-lines .nbd-products-grid,
+  .texture-fabric-weave .nbd-products-grid,
+  .texture-hexagon-pattern .nbd-products-grid,
+  .texture-noise-texture .nbd-products-grid,
+  .texture-floating-bubbles .nbd-products-grid,
+  .texture-asymmetric-waves .nbd-products-grid,
+  .texture-scattered-leaves .nbd-products-grid,
+  .texture-paper-texture .nbd-products-grid {
+    gap: var(--nbd-space-md);
+  }
 }
 
 /* Header con textura visible */
@@ -420,4 +487,41 @@
   background-size: 8px 8px, 12px 12px, 15px 15px, 6px 6px, 10px 10px;
   background-position: 0 0, 4px 4px, 7px 2px, 2px 8px, 5px 6px;
   background-color: var(--nbd-neutral-900);
+}
+
+/* ===================================================
+   🍎 HEADER INMERSIVO iOS CON TEXTURAS
+   =================================================== */
+
+/* Header inmersivo con texturas - mantiene la transparencia para iOS */
+.texture-subtle-dots .nbd-header,
+.texture-geometric-grid .nbd-header,
+.texture-organic-waves .nbd-header,
+.texture-diagonal-lines .nbd-header,
+.texture-fabric-weave .nbd-header,
+.texture-hexagon-pattern .nbd-header,
+.texture-noise-texture .nbd-header,
+.texture-floating-bubbles .nbd-header,
+.texture-asymmetric-waves .nbd-header,
+.texture-scattered-leaves .nbd-header,
+.texture-paper-texture .nbd-header {
+  background: var(--nbd-bg-overlay-strong);
+  backdrop-filter: blur(8px);
+  /* En iOS Safari, esto se fundirá perfectamente con la status bar */
+}
+
+/* Header con scroll y texturas - más opaco para mejor legibilidad */
+.texture-subtle-dots .nbd-header--scrolled,
+.texture-geometric-grid .nbd-header--scrolled,
+.texture-organic-waves .nbd-header--scrolled,
+.texture-diagonal-lines .nbd-header--scrolled,
+.texture-fabric-weave .nbd-header--scrolled,
+.texture-hexagon-pattern .nbd-header--scrolled,
+.texture-noise-texture .nbd-header--scrolled,
+.texture-floating-bubbles .nbd-header--scrolled,
+.texture-asymmetric-waves .nbd-header--scrolled,
+.texture-scattered-leaves .nbd-header--scrolled,
+.texture-paper-texture .nbd-header--scrolled {
+  background: var(--nbd-bg-overlay);
+  backdrop-filter: blur(12px);
 }
