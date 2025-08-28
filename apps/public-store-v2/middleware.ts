@@ -352,8 +352,14 @@ export async function middleware(req: NextRequest) {
     storeSubdomain = await findSubdomainByCustomDomain(host);
   }
   
-  // Si no es una tienda, continuar sin procesar
+  // Si no es una tienda, verificar si estamos en producción y mostrar 404 apropiado
   if (!storeSubdomain) {
+    // En producción, si no se encuentra tienda para un subdominio, rediriger a la página principal
+    if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
+      console.log(`❌ [Middleware] Tienda no encontrada para subdominio: ${host.split('.')[0]}`);
+      // Redirigir a la página principal de Shopifree
+      return NextResponse.redirect(new URL('https://shopifree.app', req.url), 404);
+    }
     return NextResponse.next();
   }
   
@@ -361,6 +367,13 @@ export async function middleware(req: NextRequest) {
   const storeConfig = await getStoreConfigCached(storeSubdomain);
   if (!storeConfig) {
     console.log(`❌ [Middleware] No se encontró configuración para tienda: ${storeSubdomain}`);
+    
+    // Si es un subdominio válido pero no tiene configuración, redirigir a página principal
+    if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
+      console.log(`❌ [Middleware] Redirigiendo subdominio sin configuración: ${storeSubdomain}`);
+      return NextResponse.redirect(new URL('https://shopifree.app', req.url), 404);
+    }
+    
     return NextResponse.next();
   }
   

@@ -10,7 +10,7 @@ export const APP_URLS = {
     ? 'http://localhost:3002'
     : process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.shopifree.app',
   PUBLIC_STORE: process.env.NODE_ENV === 'development'
-    ? 'http://localhost:3003'
+    ? 'http://localhost:3004'
     : process.env.NEXT_PUBLIC_PUBLIC_STORE_URL || 'https://shopifree.app',
 }
 
