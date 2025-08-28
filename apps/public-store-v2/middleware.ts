@@ -92,7 +92,12 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
     const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
     
-    if (!projectId || !apiKey) return null;
+    console.log(`🔍 [Custom Domain] Buscando dominio: ${hostname}, projectId: ${projectId ? 'OK' : 'MISSING'}, apiKey: ${apiKey ? 'OK' : 'MISSING'}`);
+    
+    if (!projectId || !apiKey) {
+      console.log(`❌ [Custom Domain] Variables de entorno faltantes`);
+      return null;
+    }
     
     // Buscar en todas las tiendas
     const storeQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`, {
@@ -127,8 +132,12 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
         const domainDoc = await domainQuery.json();
         const customDomain = domainDoc?.fields?.customDomain?.stringValue;
         
-        if (customDomain && customDomain.toLowerCase() === hostname.toLowerCase()) {
-          return subdomain;
+        if (customDomain) {
+          console.log(`🔍 [Custom Domain] Verificando: ${customDomain} vs ${hostname}`);
+          if (customDomain.toLowerCase() === hostname.toLowerCase()) {
+            console.log(`✅ [Custom Domain] Coincidencia encontrada: ${hostname} → ${subdomain}`);
+            return subdomain;
+          }
         }
       }
     }
@@ -347,19 +356,21 @@ export async function middleware(req: NextRequest) {
   if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
     // Es un subdominio de Shopifree
     storeSubdomain = host.split('.')[0];
-  } else if (!host.endsWith('.localhost') && host !== 'localhost') {
+    console.log(`🏪 [Middleware] Subdominio detectado: ${storeSubdomain} desde host: ${host}`);
+  } else if (!host.endsWith('.localhost') && host !== 'localhost' && host !== 'shopifree.app') {
     // Podría ser un dominio personalizado
+    console.log(`🔍 [Middleware] Buscando dominio personalizado para host: ${host}`);
     storeSubdomain = await findSubdomainByCustomDomain(host);
+    if (storeSubdomain) {
+      console.log(`✅ [Middleware] Dominio personalizado encontrado: ${host} → ${storeSubdomain}`);
+    } else {
+      console.log(`❌ [Middleware] No se encontró dominio personalizado para: ${host}`);
+    }
   }
   
-  // Si no es una tienda, verificar si estamos en producción y mostrar 404 apropiado
+  // Si no es una tienda, continuar sin procesar
   if (!storeSubdomain) {
-    // En producción, si no se encuentra tienda para un subdominio, rediriger a la página principal
-    if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
-      console.log(`❌ [Middleware] Tienda no encontrada para subdominio: ${host.split('.')[0]}`);
-      // Redirigir a la página principal de Shopifree
-      return NextResponse.redirect(new URL('https://shopifree.app', req.url), 404);
-    }
+    console.log(`❌ [Middleware] No se encontró tienda para host: ${host}`);
     return NextResponse.next();
   }
   
@@ -367,13 +378,6 @@ export async function middleware(req: NextRequest) {
   const storeConfig = await getStoreConfigCached(storeSubdomain);
   if (!storeConfig) {
     console.log(`❌ [Middleware] No se encontró configuración para tienda: ${storeSubdomain}`);
-    
-    // Si es un subdominio válido pero no tiene configuración, redirigir a página principal
-    if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
-      console.log(`❌ [Middleware] Redirigiendo subdominio sin configuración: ${storeSubdomain}`);
-      return NextResponse.redirect(new URL('https://shopifree.app', req.url), 404);
-    }
-    
     return NextResponse.next();
   }
   
