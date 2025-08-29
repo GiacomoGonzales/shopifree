@@ -334,6 +334,15 @@
     box-shadow: var(--nbd-shadow-xl);
 }
 
+/* Contenedor unificado para imagen y video */
+.nbd-hero-media {
+    position: relative;
+    border-radius: var(--nbd-radius-2xl);
+    overflow: hidden;
+    aspect-ratio: 1;
+    box-shadow: var(--nbd-shadow-xl);
+}
+
 .nbd-hero-img {
     width: 100%;
     height: 100%;
@@ -341,14 +350,31 @@
     transition: transform var(--nbd-transition-slow);
 }
 
-.nbd-hero-image:hover .nbd-hero-img {
+/* Estilos específicos para video hero */
+.nbd-hero-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--nbd-neutral-100);
+    transition: transform var(--nbd-transition-slow);
+}
+
+/* Efectos hover - solo en imagen */
+.nbd-hero-image:hover .nbd-hero-img,
+.nbd-hero-media:hover .nbd-hero-img {
     transform: scale(1.05);
+}
+
+/* Video no necesita hover scale (ya está en movimiento) */
+.nbd-hero-media:hover .nbd-hero-video {
+    transform: none;
 }
 
 .nbd-hero-image-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(45deg, rgba(0,0,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
 }
 
 .nbd-hero-placeholder {
@@ -468,28 +494,32 @@
     box-shadow: var(--nbd-shadow-lg);
 }
 
-/* Botón WhatsApp */
-.nbd-btn--whatsapp {
-    background: #25D366;
-    color: white;
-    border-color: #25D366;
+/* Botón WhatsApp - Con alta especificidad para evitar sobrescritura */
+.nbd-checkout-modal .nbd-btn--whatsapp,
+.nbd-btn.nbd-btn--whatsapp {
+    background: #25D366 !important;
+    color: white !important;
+    border-color: #25D366 !important;
     box-shadow: var(--nbd-shadow-md);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.nbd-btn--whatsapp:hover {
-    background: #128C7E;
-    border-color: #128C7E;
+.nbd-checkout-modal .nbd-btn--whatsapp:hover:not(:disabled),
+.nbd-btn.nbd-btn--whatsapp:hover:not(:disabled) {
+    background: #128C7E !important;
+    border-color: #128C7E !important;
+    color: white !important;
     transform: translateY(-2px);
     box-shadow: var(--nbd-shadow-lg);
 }
 
-.nbd-btn--whatsapp:disabled {
-    background: #a3a3a3;
-    border-color: #a3a3a3;
-    color: white;
+.nbd-checkout-modal .nbd-btn--whatsapp:disabled,
+.nbd-btn.nbd-btn--whatsapp:disabled {
+    background: #a3a3a3 !important;
+    border-color: #a3a3a3 !important;
+    color: white !important;
     transform: none;
     box-shadow: none;
     cursor: not-allowed;
@@ -1082,7 +1112,7 @@
    =================================================== */
 .nbd-newsletter {
     padding: var(--nbd-space-2xl) 0;
-    background: linear-gradient(135deg, var(--nbd-neutral-900) 0%, var(--nbd-neutral-800) 100%);
+    background: linear-gradient(135deg, var(--nbd-newsletter-dark, var(--nbd-neutral-900)) 0%, var(--nbd-newsletter-darker, var(--nbd-neutral-800)) 100%);
     position: relative;
     overflow: hidden;
 }
@@ -1303,6 +1333,8 @@
     gap: var(--nbd-space-md);
     margin: var(--nbd-space-2xl) 0;
     justify-content: flex-end;
+    position: relative;
+    z-index: 100; /* Asegurar que esté sobre las tarjetas de producto */
 }
 
 .nbd-control-btn {
@@ -1312,7 +1344,7 @@
     padding: var(--nbd-space-sm) var(--nbd-space-md);
     background: none;
     border: none;
-    color: var(--nbd-neutral-600);
+    color: var(--nbd-primary);
     font-size: var(--nbd-text-sm);
     font-weight: var(--nbd-font-medium);
     cursor: pointer;
@@ -1343,6 +1375,7 @@
 /* Dropdown de ordenamiento */
 .nbd-sort-dropdown {
     position: relative;
+    z-index: 10000; /* Asegurar que el contenedor también tenga z-index alto */
 }
 
 .nbd-dropdown-arrow {
@@ -1362,7 +1395,7 @@
     border: 1px solid var(--nbd-neutral-200);
     border-radius: var(--nbd-radius-lg);
     box-shadow: var(--nbd-shadow-lg);
-    z-index: 1000;
+    z-index: 10001; /* Z-index muy alto para estar sobre todo */
     min-width: 200px;
     padding: var(--nbd-space-sm);
     animation: nbd-dropdown-fade-in 0.15s ease-out;
@@ -1389,14 +1422,38 @@
     color: var(--nbd-primary);
 }
 
-.nbd-dropdown-option--active {
-    background: var(--nbd-primary);
-    color: var(--nbd-neutral-0);
+/* Estilos ultra-específicos para el dropdown activo */
+.nbd-sort-dropdown .nbd-dropdown-menu .nbd-dropdown-option.nbd-dropdown-option--active,
+.nbd-sort-dropdown .nbd-dropdown-menu button.nbd-dropdown-option--active,
+button.nbd-dropdown-option.nbd-dropdown-option--active,
+.nbd-dropdown-menu .nbd-dropdown-option--active,
+.nbd-dropdown-option.nbd-dropdown-option--active {
+    background-color: var(--nbd-primary, #ef4444) !important;
+    background: var(--nbd-primary, #ef4444) !important;
+    background-image: none !important;
+    color: var(--nbd-neutral-0, white) !important;
+    font-weight: 600 !important;
+    /* Forzar la eliminación de cualquier estilo negro */
+    box-shadow: none !important;
+    border: none !important;
 }
 
-.nbd-dropdown-option--active:hover {
-    background: var(--nbd-secondary);
-    color: var(--nbd-neutral-0);
+/* Selector de última instancia para forzar el estilo */
+[data-theme="new-base-default"] .nbd-sort-dropdown .nbd-dropdown-menu .nbd-dropdown-option--active,
+html .nbd-sort-dropdown .nbd-dropdown-menu .nbd-dropdown-option--active {
+    background: #ef4444 !important;
+    background-color: #ef4444 !important;
+    color: white !important;
+}
+
+.nbd-sort-dropdown .nbd-dropdown-menu .nbd-dropdown-option.nbd-dropdown-option--active:hover,
+.nbd-sort-dropdown .nbd-dropdown-menu button.nbd-dropdown-option--active:hover,
+button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
+.nbd-dropdown-menu .nbd-dropdown-option--active:hover,
+.nbd-dropdown-option.nbd-dropdown-option--active:hover {
+    background-color: var(--nbd-primary, #ef4444) !important;
+    background: var(--nbd-primary, #ef4444) !important;
+    color: var(--nbd-neutral-0, white) !important;
 }
 
 @keyframes nbd-dropdown-fade-in {
@@ -2478,7 +2535,7 @@
    FOOTER MODERNO
    =================================================== */
 .nbd-footer {
-    background: var(--nbd-neutral-900);
+    background: linear-gradient(135deg, var(--nbd-newsletter-dark, var(--nbd-neutral-900)) 0%, var(--nbd-newsletter-darker, var(--nbd-neutral-800)) 100%);
     color: var(--nbd-neutral-300);
     margin-top: var(--nbd-space-xl);
 }
@@ -3106,20 +3163,11 @@
     background: var(--nbd-neutral-50);
 }
 
-/* Estados seleccionados con máximo contraste */
+/* Estados seleccionados - Los estilos se aplicarán via JavaScript */
 [data-theme="new-base-default"] .nbd-variant-option--selected,
 [data-theme="new-base-default"] .nbd-variant-option.nbd-variant-option--selected {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    border-color: #000000 !important;
-    font-weight: 600 !important;
-}
-
-[data-theme="new-base-default"] .nbd-variant-option--selected:hover,
-[data-theme="new-base-default"] .nbd-variant-option.nbd-variant-option--selected:hover {
-    background-color: #333333 !important;
-    color: #ffffff !important;
-    border-color: #333333 !important;
+    font-weight: 600;
+    /* Los colores se aplicarán dinámicamente via JavaScript */
 }
 
 /* Selector de cantidad */
@@ -4957,7 +5005,7 @@
 }
 
 .nbd-progress-step.completed::after {
-    background: var(--nbd-success);
+    background: var(--nbd-checkout-primary, var(--nbd-success));
 }
 
 .nbd-step-circle {
@@ -4981,7 +5029,7 @@
 }
 
 .nbd-progress-step.completed .nbd-step-circle {
-    background: var(--nbd-success);
+    background: var(--nbd-checkout-primary, var(--nbd-success));
     color: var(--nbd-neutral-0);
 }
 
@@ -4998,7 +5046,7 @@
 }
 
 .nbd-progress-step.completed .nbd-step-label {
-    color: var(--nbd-success);
+    color: var(--nbd-checkout-primary, var(--nbd-success));
 }
 
 .nbd-checkout-close {
@@ -5303,7 +5351,7 @@
     align-items: center;
     gap: var(--nbd-space-xs);
     padding: var(--nbd-space-xs) var(--nbd-space-sm);
-    background: var(--nbd-success);
+    background: var(--nbd-checkout-primary, var(--nbd-success));
     color: white;
     border: none;
     border-radius: var(--nbd-radius-lg);
@@ -5314,7 +5362,7 @@
 }
 
 .nbd-location-btn:hover:not(:disabled) {
-    background: var(--nbd-success-dark, #059669);
+    background: var(--nbd-checkout-dark, var(--nbd-success-dark, #059669));
     transform: translateY(-1px);
 }
 

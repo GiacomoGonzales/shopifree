@@ -8,16 +8,16 @@
     "themes": "Temas"
   },
   "sections": {
-    "hero": {
-      "title": "Imagen Hero",
-      "description": "Esta imagen se mostrará al inicio de tu tienda como portada. Usa una imagen horizontal de alta calidad para destacar tu marca.",
-      "upload": "Sube una imagen",
-      "dragAndDrop": "o arrastra y suelta",
-      "fileTypes": "PNG, JPG hasta 5MB",
-      "change": "Cambiar",
-      "delete": "Eliminar",
-      "uploading": "Subiendo imagen..."
-    },
+            "hero": {
+          "title": "Imagen/Video Hero",
+          "description": "Esta imagen se mostrará al inicio de tu tienda como portada. Usa una imagen o video cuadrado de alta calidad para destacar tu marca.",
+          "upload": "Sube una imagen",
+          "dragAndDrop": "o arrastra y suelta",
+          "fileTypes": "PNG, JPG hasta 5MB",
+          "change": "Cambiar",
+          "delete": "Eliminar",
+          "uploading": "Subiendo imagen..."
+        },
 
     "carousel": {
       "title": "Imágenes del Carrusel",

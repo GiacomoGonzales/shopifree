@@ -653,25 +653,48 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                         </div>
                         
                         <div className="nbd-hero-visual">
-                            {storeInfo?.heroImageUrl ? (
-                                <div className="nbd-hero-image">
-                                    <img
-                                        src={toCloudinarySquare(storeInfo.heroImageUrl, 1200)}
-                                        alt={storeInfo.storeName || 'Hero'}
-                                        className="nbd-hero-img"
-                                    />
-                                    <div className="nbd-hero-image-overlay"></div>
-                                </div>
-                            ) : (
-                                <div className="nbd-hero-placeholder">
-                                    <div className="nbd-placeholder-grid">
-                                        <div className="nbd-placeholder-item"></div>
-                                        <div className="nbd-placeholder-item"></div>
-                                        <div className="nbd-placeholder-item"></div>
-                                        <div className="nbd-placeholder-item"></div>
-                                    </div>
-                                </div>
-                            )}
+                            {(() => {
+                                // Priorizar nuevo formato de media, fallback a imagen legacy
+                                const heroMediaUrl = storeInfo?.heroMediaUrl || storeInfo?.heroImageUrl;
+                                const heroMediaType = storeInfo?.heroMediaType || (storeInfo?.heroImageUrl ? 'image' : null);
+                                
+                                if (heroMediaUrl) {
+                                    return (
+                                        <div className="nbd-hero-media">
+                                            {heroMediaType === 'video' ? (
+                                                <video
+                                                    src={heroMediaUrl}
+                                                    className="nbd-hero-video"
+                                                    autoPlay
+                                                    loop
+                                                    muted
+                                                    playsInline
+                                                    disablePictureInPicture
+                                                    controlsList="nodownload"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={toCloudinarySquare(heroMediaUrl, 1200)}
+                                                    alt={storeInfo.storeName || 'Hero'}
+                                                    className="nbd-hero-img"
+                                                />
+                                            )}
+                                            <div className="nbd-hero-image-overlay"></div>
+                                        </div>
+                                    );
+                                } else {
+                                    return (
+                                        <div className="nbd-hero-placeholder">
+                                            <div className="nbd-placeholder-grid">
+                                                <div className="nbd-placeholder-item"></div>
+                                                <div className="nbd-placeholder-item"></div>
+                                                <div className="nbd-placeholder-item"></div>
+                                                <div className="nbd-placeholder-item"></div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -1022,7 +1045,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                         }}>
                             <button 
                                 onClick={loadMoreProducts}
-                                className="nbd-btn nbd-btn--outline"
+                                className="nbd-btn nbd-btn--secondary"
                                 style={{
                                     minWidth: '200px',
                                     transition: 'all var(--nbd-transition-base)'

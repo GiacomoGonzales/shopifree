@@ -9,8 +9,8 @@ export default function ContentPage() {
   const locale = params?.locale || 'es'
 
   useEffect(() => {
-    // Redirigir automáticamente a la sección de páginas
-    router.replace(`/${locale}/content/pages`)
+    // Redirigir automáticamente a la sección de secciones
+    router.replace(`/${locale}/content/sections`)
   }, [router, locale])
 
   return null

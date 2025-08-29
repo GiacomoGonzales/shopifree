@@ -9,8 +9,8 @@
   },
   "sections": {
     "hero": {
-      "title": "Hero Image",
-      "description": "This image will be displayed at the top of your store as a cover. Use a high-quality horizontal image to highlight your brand.",
+      "title": "Hero Image/Video",
+      "description": "This image will be displayed at the top of your store as a cover. Use a high-quality square image or video to highlight your brand.",
       "upload": "Upload an image",
       "dragAndDrop": "or drag and drop",
       "fileTypes": "PNG, JPG up to 5MB",

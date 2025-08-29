@@ -20,6 +20,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [updating, setUpdating] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [storeData, setStoreData] = useState<{ id: string; storeName: string; currency: string } | null>(null)
   
   const { user } = useAuth()
@@ -28,7 +29,12 @@ export default function OrdersPage() {
   // Cargar datos de la tienda y suscribirse a pedidos
   useEffect(() => {
     const loadStoreAndOrders = async () => {
-      if (!user?.uid) return
+      if (!user?.uid) {
+        setLoading(false)
+        return
+      }
+      
+      setLoading(true) // Reiniciar loading al cambiar de usuario
 
       try {
         // Obtener datos de la tienda
@@ -45,9 +51,11 @@ export default function OrdersPage() {
           store.id,
           (ordersData) => {
             setOrders(ordersData)
+            setLoading(false) // Marcar como cargado cuando lleguen los datos
           },
           (error) => {
             console.error('Error loading orders:', error)
+            setLoading(false) // También marcar como cargado en caso de error
           }
         )
 
@@ -55,6 +63,7 @@ export default function OrdersPage() {
         return () => unsubscribe()
       } catch (error) {
         console.error('Error loading store:', error)
+        setLoading(false) // Marcar como cargado también en caso de error
       }
     }
 
@@ -127,8 +136,66 @@ export default function OrdersPage() {
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mt-8">
-            {orders.length === 0 ? (
-              // Estado vacío
+            {loading ? (
+              // Estado de carga
+              <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {t('table.date')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {t('table.customer')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {t('table.total')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {t('table.paymentMethod')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {t('table.status')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {t('table.actions')}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {/* Skeleton rows */}
+                      {[...Array(5)].map((_, index) => (
+                        <tr key={index} className="animate-pulse">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="space-y-2">
+                              <div className="h-4 bg-gray-200 rounded w-32"></div>
+                              <div className="h-3 bg-gray-200 rounded w-24"></div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-28"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : orders.length === 0 ? (
+              // Estado vacío (solo se muestra cuando no está cargando y no hay pedidos)
               <div className="text-center py-12">
                 <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />

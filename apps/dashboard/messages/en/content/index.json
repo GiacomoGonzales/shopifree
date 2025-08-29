@@ -3,8 +3,9 @@
   "subtitle": "Manage your store content",
   "description": "Manage pages, blogs, categories and all your store content.",
   "tabs": {
-    "pages": "Pages",
-    "filters": "Filters"
+    "sections": "Sections",
+    "filters": "Filters",
+    "shipping": "Shipping Policies"
   },
   "pages": {
     "title": "Available Pages",
@@ -100,5 +101,55 @@
     "filterCreated": "Filter created successfully",
     "filterUpdated": "Filter updated successfully",
     "filterDeleted": "Filter deleted successfully"
+  },
+  "sections": {
+    "title": "Site Sections",
+    "description": "Control which sections are displayed in your online store.",
+    "home": {
+      "title": "Home Page",
+      "hero": {
+        "title": "Hero Section",
+        "description": "Main banner with store title and description"
+      },
+      "categories": {
+        "title": "Categories Mosaic",
+        "description": "Grid of categories with images on the main page"
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Newsletter subscription form"
+      },
+      "brands": {
+        "title": "Brands Carousel",
+        "description": "Carousel with available brands in the store"
+      },
+      "collections": {
+        "title": "Collections Mosaic",
+        "description": "Featured collections grid with grouped products"
+      },
+      "promotional": {
+        "title": "Promotional Carousel",
+        "description": "Rotating promotional banners with offers and announcements"
+      },
+      "products": {
+        "title": "Products List",
+        "description": "Main products grid with filters and search"
+      }
+    },
+    "actions": {
+      "enable": "Enable",
+      "disable": "Disable", 
+      "save": "Save Changes",
+      "reset": "Reset"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "messages": {
+      "saved": "Sections configuration saved successfully",
+      "error": "Error saving sections configuration",
+      "confirmReset": "Are you sure you want to reset all sections to their default state?"
+    }
   }
 } 

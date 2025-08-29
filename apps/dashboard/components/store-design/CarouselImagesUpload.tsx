@@ -7,7 +7,7 @@ import { getFirebaseDb } from '../../lib/firebase'
 
 export default function CarouselImagesUpload() {
   const t = useTranslations('storeDesign.sections.carousel')
-  const { store, mutate } = useStore()
+  const { store, mutate, loading } = useStore()
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -140,6 +140,24 @@ export default function CarouselImagesUpload() {
 
   const handleDragEnd = () => {
     setDraggedIndex(null)
+  }
+
+
+
+
+
+  if (loading) {
+    return (
+      <div className="animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (

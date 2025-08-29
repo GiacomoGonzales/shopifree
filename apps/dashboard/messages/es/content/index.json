@@ -3,8 +3,9 @@
   "subtitle": "Gestiona el contenido de tu tienda",
   "description": "Administra páginas, blogs, categorías y todo el contenido de tu tienda.",
   "tabs": {
-    "pages": "Páginas",
-    "filters": "Filtros"
+    "sections": "Secciones",
+    "filters": "Filtros",
+    "shipping": "Políticas de envío"
   },
   "pages": {
     "title": "Páginas Disponibles",
@@ -100,5 +101,55 @@
     "filterCreated": "Filtro creado exitosamente",
     "filterUpdated": "Filtro actualizado exitosamente",
     "filterDeleted": "Filtro eliminado exitosamente"
+  },
+  "sections": {
+    "title": "Secciones del Sitio",
+    "description": "Controla qué secciones se muestran en tu tienda online.",
+    "home": {
+      "title": "Página de Inicio",
+      "hero": {
+        "title": "Sección Hero",
+        "description": "Banner principal con título y descripción de la tienda"
+      },
+      "categories": {
+        "title": "Mosaico de Categorías", 
+        "description": "Grid de categorías con imágenes en la página principal"
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Formulario de suscripción al newsletter"
+      },
+      "brands": {
+        "title": "Carrusel de Marcas",
+        "description": "Carrusel con las marcas disponibles en la tienda"
+      },
+      "collections": {
+        "title": "Mosaico de Colecciones",
+        "description": "Grid de colecciones destacadas con productos agrupados"
+      },
+      "promotional": {
+        "title": "Carrusel Publicitario",
+        "description": "Banners promocionales rotativos con ofertas y anuncios"
+      },
+      "products": {
+        "title": "Lista de Productos",
+        "description": "Grid principal de productos con filtros y búsqueda"
+      }
+    },
+    "actions": {
+      "enable": "Activar",
+      "disable": "Desactivar",
+      "save": "Guardar Cambios",
+      "reset": "Restablecer"
+    },
+    "status": {
+      "enabled": "Activada",
+      "disabled": "Desactivada"
+    },
+    "messages": {
+      "saved": "Configuración de secciones guardada exitosamente",
+      "error": "Error al guardar la configuración de secciones",
+      "confirmReset": "¿Estás seguro de que quieres restablecer todas las secciones a su estado predeterminado?"
+    }
   }
 } 
