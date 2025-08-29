@@ -3345,16 +3345,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     top: var(--nbd-space-2xl);
 }
 
-/* Contenedor del carrusel */
-.nbd-carousel-container {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1;
-    overflow: hidden;
-    border-radius: var(--nbd-radius-2xl);
-    background: var(--nbd-neutral-50);
-    box-shadow: var(--nbd-shadow-xl);
-}
+
 
 /* Track del carrusel */
 .nbd-carousel-track {
@@ -5980,5 +5971,72 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         font-size: 11px;
         padding: var(--nbd-space-xs);
         min-width: 50px;
+    }
+}
+
+/* CARRUSEL SIMPLE RECTANGULAR */
+.nbd-carousel-section {
+    margin: 40px 0;
+}
+
+.nbd-carousel-container {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nbd-carousel-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.nbd-carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.4s ease;
+}
+
+.nbd-carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nbd-carousel-indicators {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+}
+
+.nbd-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    border: none;
+    cursor: pointer;
+}
+
+.nbd-carousel-dot.active {
+    background: white;
+}
+
+@media (max-width: 768px) {
+    .nbd-carousel-wrapper {
+        height: 140px;
+    }
+    
+    .nbd-carousel-container {
+        padding: 0 15px;
     }
 }

@@ -175,6 +175,12 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const [filtersModalOpen, setFiltersModalOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
     const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
+    
+    // Estados para el carrusel
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [isAutoplay, setIsAutoplay] = useState(true);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
     // Cargar textura de fondo configurada
     useEffect(() => {
@@ -456,6 +462,69 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const displayedProducts = useMemo(() => {
         return sortedProducts.slice(0, productsToShow);
     }, [sortedProducts, productsToShow]);
+
+    // Carrusel - Autoplay automático
+    useEffect(() => {
+        if (!isAutoplay || !storeInfo?.carouselImages?.length) return;
+
+        const interval = setInterval(() => {
+            setCurrentSlide(prev => 
+                prev + 1 >= (storeInfo.carouselImages?.length || 0) ? 0 : prev + 1
+            );
+        }, 4000); // Cambiar cada 4 segundos
+
+        return () => clearInterval(interval);
+    }, [isAutoplay, storeInfo?.carouselImages?.length]);
+
+    // Funciones del carrusel
+    const nextSlide = () => {
+        setIsAutoplay(false); // Pausar autoplay cuando el usuario interactúa
+        setCurrentSlide(prev => 
+            prev + 1 >= (storeInfo?.carouselImages?.length || 0) ? 0 : prev + 1
+        );
+        // Reactivar autoplay después de 10 segundos
+        setTimeout(() => setIsAutoplay(true), 10000);
+    };
+
+    const prevSlide = () => {
+        setIsAutoplay(false);
+        setCurrentSlide(prev => 
+            prev - 1 < 0 ? (storeInfo?.carouselImages?.length || 0) - 1 : prev - 1
+        );
+        setTimeout(() => setIsAutoplay(true), 10000);
+    };
+
+    const goToSlide = (index: number) => {
+        setIsAutoplay(false);
+        setCurrentSlide(index);
+        setTimeout(() => setIsAutoplay(true), 10000);
+    };
+
+    // Funciones para el touch en móvil
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            nextSlide();
+        } else if (isRightSwipe) {
+            prevSlide();
+        }
+    };
 
     // Función para cargar más productos
     const loadMoreProducts = () => {
@@ -1068,6 +1137,48 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                     )}
                 </div>
             </section>
+
+            {/* Carrusel Simple */}
+            {!isOnCategoryPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 && (
+                <section className="nbd-carousel-section">
+                    <div className="nbd-carousel-container">
+                        <div 
+                            className="nbd-carousel-wrapper"
+                            onTouchStart={onTouchStart}
+                            onTouchMove={onTouchMove}
+                            onTouchEnd={onTouchEnd}
+                        >
+                            {storeInfo.carouselImages
+                                .sort((a, b) => a.order - b.order)
+                                .map((image, index) => (
+                                <div 
+                                    key={image.publicId} 
+                                    className="nbd-carousel-slide"
+                                    style={{
+                                        transform: `translateX(${(index - currentSlide) * 100}%)`
+                                    }}
+                                >
+                                    <img
+                                        src={image.url}
+                                        alt={`Promoción ${index + 1}`}
+                                        className="nbd-carousel-image"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="nbd-carousel-indicators">
+                            {storeInfo.carouselImages.map((_, index) => (
+                                <button
+                                    key={index}
+                                    className={`nbd-carousel-dot ${index === currentSlide ? 'active' : ''}`}
+                                    onClick={() => goToSlide(index)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Sección de Newsletter */}
             {!isOnCategoryPage && (

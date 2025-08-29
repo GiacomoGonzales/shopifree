@@ -36,6 +36,11 @@ export type StoreBasicInfo = {
     theme?: string;
     primaryColor?: string;
     secondaryColor?: string;
+    carouselImages?: Array<{
+        url: string;
+        publicId: string;
+        order: number;
+    }>;
     socialMedia?: {
         instagram?: string;
         facebook?: string;
@@ -125,6 +130,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             theme: data.theme || 'new-base-default',
             primaryColor: data.primaryColor || undefined,
             secondaryColor: data.secondaryColor || undefined,
+            carouselImages: data.carouselImages || undefined,
             socialMedia: socialFromGroup,
         };
 	} catch (e) {
