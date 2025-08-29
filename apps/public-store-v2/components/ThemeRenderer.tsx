@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { getStoreIdBySubdomain, getStoreTheme, getStorePrimaryLocale } from "../lib/store";
 import dynamic from "next/dynamic";
-import SimpleLoadingSpinner from "./SimpleLoadingSpinner";
+import UnifiedLoading from "./UnifiedLoading";
 
 // Importación dinámica de temas disponibles
 const NewBaseDefault = dynamic(() => import("../themes/new-base-default/NewBaseDefault"), { 
-    loading: () => <SimpleLoadingSpinner />
+    loading: () => <UnifiedLoading />
 });
 
 type Props = {

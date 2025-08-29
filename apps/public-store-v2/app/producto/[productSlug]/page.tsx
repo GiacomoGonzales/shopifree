@@ -6,12 +6,12 @@ import { getProduct } from '../../../lib/products';
 import { generateAllImageVariants } from '../../../lib/image-optimization';
 import { getCanonicalHost } from '../../../lib/canonical-resolver';
 import { formatPrice } from '../../../lib/currency';
-import SimpleLoadingSpinner from '../../../components/SimpleLoadingSpinner';
+import UnifiedLoading from '../../../components/UnifiedLoading';
 
 export default function ProductoPage({ params }: { params: { productSlug: string; storeSubdomain: string } }) {
     const { productSlug, storeSubdomain } = params as any;
     return (
-        <Suspense fallback={<SimpleLoadingSpinner inline={true} />}>
+        <Suspense fallback={<UnifiedLoading />}>
             <ProductDetail productSlug={productSlug} storeSubdomain={storeSubdomain} />
         </Suspense>
     );

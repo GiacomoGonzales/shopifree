@@ -5,7 +5,7 @@ import { getStoreIdBySubdomain, getStoreBasicInfo, getStorePrimaryLocale } from 
 import { getStoreCategories } from "../../../../lib/categories";
 import { generateAllImageVariants } from "../../../../lib/image-optimization";
 import { getCanonicalHost } from "../../../../lib/canonical-resolver";
-import SimpleLoadingSpinner from "../../../../components/SimpleLoadingSpinner";
+import UnifiedLoading from "../../../../components/UnifiedLoading";
 
 // Generar metadata para SEO
 export async function generateMetadata({ params }: { params: { categorySlug: string; storeSubdomain: string } }): Promise<Metadata> {
@@ -104,7 +104,7 @@ export default function CategoriaPage({ params }: { params: { categorySlug: stri
     const categorySlug = params?.categorySlug;
     
     return (
-        <Suspense fallback={<SimpleLoadingSpinner inline={true} />}>
+        <Suspense fallback={<UnifiedLoading />}>
             <ThemeRenderer storeSubdomain={subdomain} categorySlug={categorySlug} />
         </Suspense>
     );

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, startTransition } from "react";
 import "./new-base-default.css";
 import "./loading-spinner.css";
 import "./texture-backgrounds.css";
-import LoadingSpinner from "./LoadingSpinner";
+import UnifiedLoading from "../../components/UnifiedLoading";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture, applyStoreColors } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
@@ -256,11 +256,14 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                         getStoreFilters(id)
                     ]);
                     if (!alive) return;
-                    setProducts(items);
-                    setStoreInfo(info);
-                    setCategories(cats);
-                    setBrands(brandList);
-                    setFilters(filterList);
+                    // Actualizar todos los estados en una transición para evitar renders intermedios
+                    startTransition(() => {
+                        setProducts(items);
+                        setCategories(cats);
+                        setBrands(brandList);
+                        setFilters(filterList);
+                        setStoreInfo(info);
+                    });
                     
                     console.log("Categorías cargadas:", cats);
                     console.log("Categorías padre:", cats?.filter(c => !c.parentCategoryId));
@@ -658,7 +661,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const hasMoreProducts = sortedProducts.length > productsToShow;
 
     if (loading) {
-        return <LoadingSpinner />;
+        return <UnifiedLoading storeInfo={storeInfo} />;
     }
 
     // Encontrar la categoría actual si estamos en una página de categoría
