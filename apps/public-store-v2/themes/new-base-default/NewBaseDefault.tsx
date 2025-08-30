@@ -10,6 +10,8 @@ import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { getStoreFilters, Filter } from "../../lib/filters";
+import { getStoreCollections, PublicCollection, getCollectionBySlug } from "../../lib/collections";
+import CollectionsMosaic from "../../components/CollectionsMosaic";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
 import { useCart } from "../../lib/cart-context";
@@ -21,11 +23,12 @@ import CartModal from "./CartModal";
 type Props = {
     storeSubdomain: string;
     categorySlug?: string;
+    collectionSlug?: string;
     effectiveLocale: string;
     storeId?: string | null;
 };
 
-export default function NewBaseDefault({ storeSubdomain, categorySlug, effectiveLocale, storeId }: Props) {
+export default function NewBaseDefault({ storeSubdomain, categorySlug, collectionSlug, effectiveLocale, storeId }: Props) {
     // 🌐 Usar textos dinámicos según el idioma configurado en la tienda
     const { t, language } = useStoreLanguage();
     const { addItem, openCart, state: cartState } = useCart();
@@ -59,7 +62,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                 'priceLowHigh': 'Precio: menor a mayor',
                 'priceHighLow': 'Precio: mayor a menor',
                 'nameAZ': 'Nombre: A-Z',
-                'nameZA': 'Nombre: Z-A'
+                'nameZA': 'Nombre: Z-A',
+                'ourCollections': 'Nuestras Colecciones',
+                'collectionsSubtitle': 'Descubre nuestras colecciones cuidadosamente seleccionadas'
             },
             en: {
                 'newsletterTitle': 'Stay updated with our offers',
@@ -87,7 +92,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                 'priceLowHigh': 'Price: low to high',
                 'priceHighLow': 'Price: high to low',
                 'nameAZ': 'Name: A-Z',
-                'nameZA': 'Name: Z-A'
+                'nameZA': 'Name: Z-A',
+                'ourCollections': 'Our Collections',
+                'collectionsSubtitle': 'Discover our carefully curated collections'
             },
             pt: {
                 'newsletterTitle': 'Mantenha-se atualizado com nossas ofertas',
@@ -115,7 +122,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                 'priceLowHigh': 'Preço: menor a maior',
                 'priceHighLow': 'Preço: maior a menor',
                 'nameAZ': 'Nome: A-Z',
-                'nameZA': 'Nome: Z-A'
+                'nameZA': 'Nome: Z-A',
+                'ourCollections': 'Nossas Coleções',
+                'collectionsSubtitle': 'Descubra nossas coleções cuidadosamente selecionadas'
             }
         };
         return texts[language]?.[key] || texts['es']?.[key] || key;
@@ -152,10 +161,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
         }
     };
     
-    // Detectar si estamos en una página de categoría
+    // Detectar si estamos en una página de categoría o colección
     const isOnCategoryPage = !!categorySlug || (typeof window !== 'undefined' && window.location.pathname.includes('/categoria/'));
+    const isOnCollectionPage = !!collectionSlug || (typeof window !== 'undefined' && window.location.pathname.includes('/coleccion/'));
     const categorySlugFromUrl = categorySlug || (isOnCategoryPage ? 
         window.location.pathname.split('/categoria/')[1]?.split('/')[0] : null);
+    const collectionSlugFromUrl = collectionSlug || (isOnCollectionPage ? 
+        window.location.pathname.split('/coleccion/')[1]?.split('/')[0] : null);
 
     const [storeIdState, setStoreIdState] = useState<string | null>(null);
     const resolvedStoreId = storeId || storeIdState;
@@ -164,6 +176,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
     const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
     const [brands, setBrands] = useState<PublicBrand[] | null>(null);
+    const [collections, setCollections] = useState<PublicCollection[] | null>(null);
+    const [currentCollection, setCurrentCollection] = useState<PublicCollection | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(categorySlugFromUrl);
     const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
@@ -248,12 +262,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                 if (!alive) return;
                 setStoreIdState(id);
                 if (id) {
-                    const [items, info, cats, brandList, filterList] = await Promise.all([
+                    const [items, info, cats, brandList, filterList, collectionsList] = await Promise.all([
                         getStoreProducts(id),
                         getStoreBasicInfo(id),
                         getStoreCategories(id),
                         getStoreBrands(id),
-                        getStoreFilters(id)
+                        getStoreFilters(id),
+                        getStoreCollections(id)
                     ]);
                     if (!alive) return;
                     // Actualizar todos los estados en una transición para evitar renders intermedios
@@ -262,6 +277,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                         setCategories(cats);
                         setBrands(brandList);
                         setFilters(filterList);
+                        setCollections(collectionsList);
                         setStoreInfo(info);
                     });
                     
@@ -287,6 +303,28 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             setActiveCategory(categorySlug);
         }
     }, [categorySlug]);
+
+    // Cargar colección actual si estamos en una página de colección
+    useEffect(() => {
+        if (collectionSlugFromUrl && resolvedStoreId) {
+            let alive = true;
+            (async () => {
+                try {
+                    const collection = await getCollectionBySlug(resolvedStoreId, collectionSlugFromUrl);
+                    if (!alive) return;
+                    setCurrentCollection(collection);
+                } catch (error) {
+                    console.error('Error loading collection:', error);
+                    if (alive) setCurrentCollection(null);
+                }
+            })();
+            return () => {
+                alive = false;
+            };
+        } else if (!collectionSlugFromUrl) {
+            setCurrentCollection(null);
+        }
+    }, [collectionSlugFromUrl, resolvedStoreId]);
 
     // Resetear paginación cuando cambie la categoría activa
     useEffect(() => {
@@ -340,8 +378,25 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
 
         let base = [...products];
 
-        // Filtrar por categoría
-        if (activeCategory && activeCategory !== 'todos') {
+        // Filtrar por colección si estamos en una página de colección
+        if (isOnCollectionPage && currentCollection) {
+            console.log("=== COLLECTION FILTERING DEBUG ===");
+            console.log("collectionSlug prop:", collectionSlug);
+            console.log("isOnCollectionPage:", isOnCollectionPage);
+            console.log("Colección encontrada:", currentCollection);
+            console.log("IDs de productos en colección:", currentCollection.productIds);
+            console.log("Todos los productos:", base.map(p => ({id: p.id, name: p.name})));
+            
+            const beforeFilter = base.length;
+            // Filtrar productos que estén en los productIds de la colección
+            base = base.filter(p => currentCollection.productIds.includes(p.id));
+            
+            console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
+            console.log("Productos filtrados por colección:", base.map(p => ({id: p.id, name: p.name})));
+            console.log("=== END COLLECTION FILTERING DEBUG ===");
+        }
+        // Filtrar por categoría si no estamos en una página de colección
+        else if (activeCategory && activeCategory !== 'todos') {
             const cat = categories?.find(c => c.slug === activeCategory);
             console.log("=== CATEGORY FILTERING DEBUG ===");
             console.log("activeCategory:", activeCategory);
@@ -427,7 +482,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
         }
 
         return base;
-    }, [products, categories, activeCategory, selectedFilters]);
+    }, [products, categories, activeCategory, selectedFilters, isOnCollectionPage, currentCollection]);
 
     // Productos ordenados
     const sortedProducts = useMemo(() => {
@@ -697,8 +752,33 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
                 </div>
             )}
             
+            {/* Si estamos en una página de colección, mostrar header limpio */}
+            {isOnCollectionPage && currentCollection && (
+                <div className="nbd-category-page-header">
+                    <div className="nbd-container">
+                        <h1 className="nbd-category-title">{currentCollection.title}</h1>
+                        {currentCollection.description && (
+                            <p className="nbd-category-description">{currentCollection.description}</p>
+                        )}
+                        
+                        {/* Breadcrumbs debajo del título */}
+                        <nav className="nbd-category-breadcrumbs">
+                            <a href={buildUrl('')} className="nbd-breadcrumb-link">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {t('home')}
+                            </a>
+                            <span className="nbd-breadcrumbs-sep">/</span>
+                            <span className="nbd-breadcrumb-current">{currentCollection.title}</span>
+                        </nav>
+                    </div>
+                </div>
+            )}
+            
             {/* Hero Section Moderno - Solo en home */}
-            {!isOnCategoryPage && (
+            {!isOnCategoryPage && !isOnCollectionPage && (
             <section className="nbd-hero">
                 <div className="nbd-hero-container">
                     <div className="nbd-hero-content">
@@ -773,8 +853,16 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             </section>
             )}
 
+            {/* Sección de Colecciones - Solo en home */}
+            {!isOnCategoryPage && !isOnCollectionPage && collections && collections.length > 0 && (
+                <CollectionsMosaic 
+                    collections={collections}
+                    storeSubdomain={storeSubdomain}
+                />
+            )}
+
             {/* Sección de categorías con mosaico inteligente - Solo en home */}
-            {!isOnCategoryPage && (() => {
+            {!isOnCategoryPage && !isOnCollectionPage && (() => {
                 // Preparar categorías para mostrar (priorizando padre sobre subcategorías)
                 const allCategories = Array.isArray(categories) ? categories : [];
                 const parentCategories = allCategories.filter(c => !c.parentCategoryId);
@@ -889,8 +977,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             {/* Sección de productos */}
             <section id="productos" className="nbd-products">
                 <div className="nbd-container">
-                    {/* Solo mostrar header de productos en home, no en páginas de categoría */}
-                    {!isOnCategoryPage && (
+                    {/* Solo mostrar header de productos en home, no en páginas de categoría o colección */}
+                    {!isOnCategoryPage && !isOnCollectionPage && (
                         <div className="nbd-section-header">
                                                         <h2 className="nbd-section-title">
                                 {activeCategory ?
@@ -1142,7 +1230,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             </section>
 
             {/* Carrusel Simple */}
-            {!isOnCategoryPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 && (
                 <section className="nbd-carousel-section">
                     <div className="nbd-carousel-container">
                         <div 
@@ -1184,7 +1272,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             )}
 
             {/* Sección de Newsletter */}
-            {!isOnCategoryPage && (
+            {!isOnCategoryPage && !isOnCollectionPage && (
             <section className="nbd-newsletter">
                 <div className="nbd-container">
                     <div className="nbd-newsletter-content">
@@ -1257,7 +1345,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, effective
             )}
 
             {/* Sección de Marcas Carousel - Solo en home */}
-            {!isOnCategoryPage && brands && brands.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && brands && brands.length > 0 && (
                 <section className="nbd-brands-carousel">
                     <div className="nbd-container">
                         <div className="nbd-section-header">

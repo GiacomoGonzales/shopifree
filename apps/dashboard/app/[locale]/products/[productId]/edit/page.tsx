@@ -57,6 +57,10 @@ export default function EditProductPage() {
   const [comparePrice, setComparePrice] = useState('')
   const [cost, setCost] = useState('')
   const [chargeTaxes, setChargeTaxes] = useState(false)
+  
+  // Estados para manejo de stock
+  const [trackStock, setTrackStock] = useState(false)
+  const [stockQuantity, setStockQuantity] = useState('')
   const [requiresShipping, setRequiresShipping] = useState(true)
   const [weight, setWeight] = useState('')
   const [hasVariants, setHasVariants] = useState(false)
@@ -98,6 +102,10 @@ export default function EditProductPage() {
         setComparePrice(productData.comparePrice?.toString() || '')
         setCost(productData.cost?.toString() || '')
         setChargeTaxes(productData.chargeTaxes)
+        
+        // Inicializar campos de stock
+        setTrackStock(productData.trackStock || false)
+        setStockQuantity(productData.stockQuantity?.toString() || '')
         setRequiresShipping(productData.requiresShipping)
         setWeight(productData.weight?.toString() || '')
         setHasVariants(productData.hasVariants)
@@ -339,6 +347,10 @@ export default function EditProductPage() {
         comparePrice: comparePrice ? parseFloat(comparePrice) : null,
         cost: cost ? parseFloat(cost) : null,
         chargeTaxes,
+        
+        // Stock
+        trackStock,
+        stockQuantity: trackStock ? parseInt(stockQuantity) || 0 : null,
         
         // Organización
         selectedBrandId: selectedBrandId || null,
@@ -656,6 +668,38 @@ export default function EditProductPage() {
                   </label>
                 </div>
 
+                {/* Manejo de Stock */}
+                <div className="mt-4 space-y-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={trackStock}
+                      onChange={(e) => setTrackStock(e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Gestionar inventario</span>
+                  </label>
+                  
+                  {trackStock && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cantidad en stock
+                      </label>
+                      <input
+                        type="number"
+                        value={stockQuantity}
+                        onChange={(e) => setStockQuantity(e.target.value)}
+                        placeholder="0"
+                        min="0"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Si no gestionas inventario, el producto siempre aparecerá disponible
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -722,7 +766,7 @@ export default function EditProductPage() {
                                 Precio ({currencyName})
                               </th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Disponible
+                                Stock
                               </th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Acciones
@@ -792,7 +836,7 @@ export default function EditProductPage() {
                       {seoTitle || productName || 'Título del producto'}
                     </div>
                     <div className="text-green-700 text-sm">
-                      https://{store?.subdomain || 'mi-tienda'}.shopifree.app/products/{urlSlug || 'producto-123'}
+                      https://{store?.subdomain || 'mi-tienda'}.shopifree.app/producto/{urlSlug || 'producto-123'}
                     </div>
                     <div className="text-gray-600 text-sm">
                       {metaDescription || 'Descripción del producto que aparecerá en los resultados de búsqueda...'}

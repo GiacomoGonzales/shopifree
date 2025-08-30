@@ -49,6 +49,11 @@ const MenuIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
     </svg>
   ),
+  VisitStore: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  ),
   Reports: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -666,6 +671,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
+              {/* Botón Visitar mi tienda */}
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const { getUserStore } = await import('../lib/store')
+                    if (user?.uid) {
+                      const userStore = await getUserStore(user.uid)
+                      if (userStore?.subdomain) {
+                        window.open(`https://${userStore.subdomain}.shopifree.app`, '_blank')
+                      } else {
+                        console.error('No se encontró el subdominio de la tienda')
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Error al obtener información de la tienda:', error)
+                  }
+                }}
+                className="bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 transition-colors duration-200"
+                title={currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
+              >
+                <MenuIcons.VisitStore />
+                <span className="ml-2 hidden sm:inline">
+                  {currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
+                </span>
+              </button>
+              
               {/* Selector de idioma */}
               <div className="relative ml-3">
                 <button

@@ -65,7 +65,16 @@ function transformToPublicProduct(raw: any): PublicProduct {
                   Array.isArray(raw.selectedParentCategoryIds) && raw.selectedParentCategoryIds.length > 0 ? raw.selectedParentCategoryIds[0] : undefined,
         selectedParentCategoryIds: Array.isArray(raw.selectedParentCategoryIds) ? raw.selectedParentCategoryIds : undefined,
         brand: typeof raw.brand === 'string' ? raw.brand : undefined,
-        tags: raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : undefined,
+        tags: (() => {
+            let tags = raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : {};
+            
+            // Si las variantes están en raw.variants (directamente en el documento), agregarlas a tags
+            if (raw.variants && Array.isArray(raw.variants)) {
+                tags = { ...tags, variants: raw.variants };
+            }
+            
+            return tags;
+        })(),
         createdAt: raw.createdAt?.toDate?.()?.toISOString() || raw.createdAt || undefined,
 	};
 }

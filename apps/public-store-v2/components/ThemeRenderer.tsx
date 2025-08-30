@@ -13,9 +13,10 @@ const NewBaseDefault = dynamic(() => import("../themes/new-base-default/NewBaseD
 type Props = {
     storeSubdomain: string;
     categorySlug?: string;
+    collectionSlug?: string;
 };
 
-export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
+export default function ThemeRenderer({ storeSubdomain, categorySlug, collectionSlug }: Props) {
     const [theme, setTheme] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [effectiveLocale, setEffectiveLocale] = useState<string>('es');
@@ -70,6 +71,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
                 <NewBaseDefault 
                     storeSubdomain={storeSubdomain} 
                     categorySlug={categorySlug}
+                    collectionSlug={collectionSlug}
                     effectiveLocale={effectiveLocale}
                     storeId={storeId}
                 />
@@ -84,6 +86,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug }: Props) {
                 <NewBaseDefault 
                     storeSubdomain={storeSubdomain} 
                     categorySlug={categorySlug}
+                    collectionSlug={collectionSlug}
                     effectiveLocale={effectiveLocale}
                     storeId={storeId}
                 />

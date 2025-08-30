@@ -52,7 +52,7 @@ export default function CreateProductPage() {
   const { store, loading: storeLoading, currency, currencySymbol, currencyName, formatPrice } = useStore()
   const t = useTranslations('pages.products.create')
   const tCategories = useTranslations('categories')
-  const tMetadata = useTranslations('metadata')
+  const tMetadata = useTranslations('categories.metadata')
   
   // Debug: verificar si los hooks están funcionando
   console.log('🔧 Translation hooks loaded:')
@@ -91,6 +91,10 @@ export default function CreateProductPage() {
   const [comparePrice, setComparePrice] = useState('')
   const [cost, setCost] = useState('')
   const [chargeTaxes, setChargeTaxes] = useState(false)
+  
+  // Estados para manejo de stock
+  const [trackStock, setTrackStock] = useState(false)
+  const [stockQuantity, setStockQuantity] = useState('')
   const [requiresShipping, setRequiresShipping] = useState(true)
   const [weight, setWeight] = useState('')
   const [hasVariants, setHasVariants] = useState(false)
@@ -332,7 +336,7 @@ export default function CreateProductPage() {
     
     // Traducir los metadatos y agregar opciones personalizadas
     const translatedMetadata = metadata.map(field => {
-      // Traducir nombre del campo
+      // Traducir nombre del campo con la estructura correcta
       const fieldTranslationKey = `fields.${field.id}`
       const translatedName = tMetadata(fieldTranslationKey)
       console.log(`🔍 Translating field "${field.id}":`)
@@ -342,7 +346,7 @@ export default function CreateProductPage() {
       console.log(`  - Final name: "${translatedName || field.name}"`)
       
       let options = field.options?.map(option => {
-        // Traducir opciones usando la estructura del JSON
+        // Traducir opciones usando la estructura correcta del JSON
         const translationKey = `values.${field.id}_options.${option}`
         
         try {
@@ -388,8 +392,8 @@ export default function CreateProductPage() {
   const getCurrentCategories = (): CategoryNode[] => {
     if (categoryPath.length === 0) {
       return CATEGORY_OPTIONS.map(cat => {
-        // Traducir categoria usando la ruta directa
-        const translatedName = tCategories(cat.id) || cat.name
+        // Traducir categoria usando la estructura correcta del JSON
+        const translatedName = tCategories(`categories.${cat.id}`) || cat.name
         console.log(`🔍 Translating category ${cat.id}: ${cat.name} -> ${translatedName}`)
         
         return {
@@ -397,7 +401,7 @@ export default function CreateProductPage() {
           name: translatedName,
           children: cat.children?.map(child => ({
             ...child,
-            name: tCategories(child.id) || child.name
+            name: tCategories(`categories.${child.id}`) || child.name
           }))
         }
       })
@@ -415,7 +419,7 @@ export default function CreateProductPage() {
     
     return current.map(cat => ({
       ...cat,
-      name: tCategories(cat.id) || cat.name
+      name: tCategories(`categories.${cat.id}`) || cat.name
     }))
   }
 
@@ -426,7 +430,7 @@ export default function CreateProductPage() {
     for (const pathId of categoryPath) {
       const node = current.find((n: CategoryNode) => n.id === pathId)
       if (node) {
-        breadcrumb.push(tCategories(node.id) || node.name)
+        breadcrumb.push(tCategories(`categories.${node.id}`) || node.name)
         if (node.children) {
           current = node.children
         }
@@ -518,6 +522,10 @@ export default function CreateProductPage() {
         comparePrice: comparePrice ? parseFloat(comparePrice) : null,
         cost: cost ? parseFloat(cost) : null,
         chargeTaxes,
+        
+        // Stock
+        trackStock,
+        stockQuantity: trackStock ? parseInt(stockQuantity) || 0 : null,
         
         // Organización
         selectedBrandId: selectedBrandId || null,
@@ -813,6 +821,38 @@ export default function CreateProductPage() {
                   </label>
                 </div>
 
+                {/* Manejo de Stock */}
+                <div className="mt-4 space-y-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={trackStock}
+                      onChange={(e) => setTrackStock(e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Gestionar inventario</span>
+                  </label>
+                  
+                  {trackStock && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cantidad en stock
+                      </label>
+                      <input
+                        type="number"
+                        value={stockQuantity}
+                        onChange={(e) => setStockQuantity(e.target.value)}
+                        placeholder="0"
+                        min="0"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Si no gestionas inventario, el producto siempre aparecerá disponible
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -864,7 +904,7 @@ export default function CreateProductPage() {
                     <div className="relative">
                       <input
                         type="text"
-                        value={selectedCategory ? (tCategories(selectedCategory) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name || t('categorization.chooseCategoryPlaceholder')) : t('categorization.chooseCategoryPlaceholder')}
+                        value={selectedCategory ? (tCategories(`categories.${selectedCategory}`) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name || t('categorization.chooseCategoryPlaceholder')) : t('categorization.chooseCategoryPlaceholder')}
                         readOnly
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                         className="block w-full px-3 py-2 border-2 border-blue-500 rounded-md bg-white cursor-pointer focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -891,7 +931,7 @@ export default function CreateProductPage() {
                           <span className="mr-2">{getBreadcrumb().join(' > ')}</span>
                           {selectedCategory && (
                             <span className="text-blue-600 font-medium">
-                              {tCategories(selectedCategory) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name}
+                              {tCategories(`categories.${selectedCategory}`) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name}
                             </span>
                           )}
                         </div>
@@ -1158,7 +1198,7 @@ export default function CreateProductPage() {
                                 Precio ({currencyName})
                               </th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Disponible
+                                Stock
                               </th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Acciones

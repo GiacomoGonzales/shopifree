@@ -430,18 +430,18 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     
     // SOLUCIÓN SIMPLE: Aplicar estilos a selectores de variantes con observer limpio
     const applyVariantColors = () => {
-      // Aplicar a elementos existentes
-      const selectedVariants = document.querySelectorAll('.nbd-variant-option--selected') as NodeListOf<HTMLElement>;
+      // Aplicar a elementos existentes (EXCEPTO variantes con precios)
+      const selectedVariants = document.querySelectorAll('.nbd-variant-option--selected:not(.nbd-variant-option--pricing)') as NodeListOf<HTMLElement>;
       selectedVariants.forEach(variant => {
         variant.style.setProperty('background-color', primaryColor, 'important');
         variant.style.setProperty('border-color', primaryColor, 'important');
         variant.style.setProperty('color', 'white', 'important');
       });
       
-      // Observer simple solo para nuevas selecciones
+      // Observer simple solo para nuevas selecciones (EXCEPTO variantes con precios)
       const handleVariantClick = (e: Event) => {
         const target = e.target as HTMLElement;
-        if (target.classList.contains('nbd-variant-option')) {
+        if (target.classList.contains('nbd-variant-option') && !target.classList.contains('nbd-variant-option--pricing')) {
           // Pequeño delay para que la clase --selected se aplique primero
           setTimeout(() => {
             if (target.classList.contains('nbd-variant-option--selected')) {

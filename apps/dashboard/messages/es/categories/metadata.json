@@ -90,7 +90,8 @@
         "Ave": "Ave",
         "Pez": "Pez",
         "Roedor": "Roedor",
-        "Reptil": "Reptil"
+        "Reptil": "Reptil",
+        "Otro": "Otro"
       },
       "pet_size_options": {
         "Muy pequeño": "Muy pequeño",

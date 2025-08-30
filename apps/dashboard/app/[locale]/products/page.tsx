@@ -188,8 +188,8 @@ export default function ProductsPage() {
     
     // Construir URL de la tienda pública
     const storeUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:3004/${store.subdomain}/${productSlug}`
-      : `https://${store.subdomain}.shopifree.app/${productSlug}`
+      ? `http://localhost:3004/${store.subdomain}/producto/${productSlug}`
+      : `https://${store.subdomain}.shopifree.app/producto/${productSlug}`
     
     // Abrir en nueva pestaña
     window.open(storeUrl, '_blank', 'noopener,noreferrer')

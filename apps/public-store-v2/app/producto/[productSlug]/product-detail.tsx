@@ -10,6 +10,7 @@ import { getStoreBasicInfo, StoreBasicInfo } from '../../../lib/store';
 import { getStoreCategories, Category } from '../../../lib/categories';
 import { useCart } from '../../../lib/cart-context';
 import ProductVariantSelector from '../../../components/ProductVariantSelector';
+import ProductVariantsWithPricing, { ProductVariant } from '../../../components/ProductVariantsWithPricing';
 import UnifiedLoading from '../../../components/UnifiedLoading';
 
 // Helper function para optimizar URLs de video de Cloudinary
@@ -75,45 +76,64 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Estado para variantes seleccionadas
+  // Estado para variantes seleccionadas (selector tradicional)
   const [selectedVariant, setSelectedVariant] = useState<{ [key: string]: string }>({});
+  
+  // Estado para variantes con precios específicos
+  const [selectedPricingVariant, setSelectedPricingVariant] = useState<ProductVariant | null>(null);
 
   // Hook del carrito
   const { addItem, openCart, state, removeItem } = useCart();
 
-  // Función para manejar cambios de variantes
+  // Función para manejar cambios de variantes tradicionales
   const handleVariantChange = (variant: { [key: string]: string }) => {
     setSelectedVariant(variant);
+  };
+
+  // Función para manejar cambios de variantes con precios
+  const handlePricingVariantChange = (variant: ProductVariant | null) => {
+    setSelectedPricingVariant(variant);
+  };
+
+  // Función para verificar si el producto tiene variantes con precios específicos
+  const hasProductVariantsWithPricing = () => {
+    if (!product) return false;
+    
+    // Buscar variantes en diferentes ubicaciones
+    let hasVariants = false;
+    
+    // 1. En tags.variants (ubicación esperada)
+    if (product.tags && product.tags.variants) {
+      hasVariants = typeof product.tags.variants === 'string' || Array.isArray(product.tags.variants);
+    }
+    // 2. Directamente en el producto
+    else if ((product as any).variants) {
+      hasVariants = typeof (product as any).variants === 'string' || Array.isArray((product as any).variants);
+    }
+    // 3. En metaFieldValues
+    else if ((product as any).metaFieldValues && (product as any).metaFieldValues.variants) {
+      hasVariants = typeof (product as any).metaFieldValues.variants === 'string' || Array.isArray((product as any).metaFieldValues.variants);
+    }
+    
+
+    return hasVariants;
   };
 
   // Función para agregar producto al carrito
   const handleAddToCart = () => {
     if (!product) return;
 
-    // Verificar si el producto tiene variantes disponibles y si todas están seleccionadas
-    const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
-    const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
-      const displayName = {
-        'color': 'Color',
-        'size': 'Talla',
-        'size_clothing': 'Talla',
-        'size_shoes': 'Talla de Calzado',
-        'material': 'Material',
-        'style': 'Estilo',
-        'clothing_style': 'Estilo'
-      }[key];
-      return displayName && Array.isArray(value) && value.length > 1;
-    }) : [];
-
-    // Verificar que todas las variantes estén seleccionadas
-    const missingVariants = availableVariants.filter(([key]) => {
-      const value = selectedVariant[key];
-      return !value || value === '' || value === 'Seleccionar';
-    });
-
-    if (missingVariants.length > 0) {
-      const missingNames = missingVariants.map(([key]) => {
-        return {
+    // Verificar si el producto tiene variantes con precios específicos
+    if (hasProductVariantsWithPricing()) {
+      if (!selectedPricingVariant) {
+        alert('Por favor selecciona una variante del producto');
+        return;
+      }
+    } else {
+      // Verificar si el producto tiene variantes tradicionales disponibles y si todas están seleccionadas
+      const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
+      const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
+        const displayName = {
           'color': 'Color',
           'size': 'Talla',
           'size_clothing': 'Talla',
@@ -122,21 +142,53 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
           'style': 'Estilo',
           'clothing_style': 'Estilo'
         }[key];
-      }).join(', ');
-      alert(`Por favor selecciona: ${missingNames}`);
-      return;
+        return displayName && Array.isArray(value) && value.length > 1;
+      }) : [];
+
+      // Verificar que todas las variantes estén seleccionadas
+      const missingVariants = availableVariants.filter(([key]) => {
+        const value = selectedVariant[key];
+        return !value || value === '' || value === 'Seleccionar';
+      });
+
+      if (missingVariants.length > 0) {
+        const missingNames = missingVariants.map(([key]) => {
+          return {
+            'color': 'Color',
+            'size': 'Talla',
+            'size_clothing': 'Talla',
+            'size_shoes': 'Talla de Calzado',
+            'material': 'Material',
+            'style': 'Estilo',
+            'clothing_style': 'Estilo'
+          }[key];
+        }).join(', ');
+        alert(`Por favor selecciona: ${missingNames}`);
+        return;
+      }
     }
     
     // Obtener la cantidad del input
     const quantityInput = document.getElementById('quantity') as HTMLInputElement;
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
-    // Crear información de variante si hay variantes seleccionadas
+    // Crear información de variante basada en el tipo de selector usado
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let variantId = product.id;
+    let finalPrice = product.price;
 
-    if (Object.keys(selectedVariant).length > 0) {
-      // Crear ID único para la variante
+    if (selectedPricingVariant) {
+      // Usar variante con precio específico
+      variantId = `${product.id}-${selectedPricingVariant.id}`;
+      finalPrice = selectedPricingVariant.price;
+      
+      variantInfo = {
+        id: selectedPricingVariant.id,
+        name: selectedPricingVariant.value || selectedPricingVariant.name,
+        price: selectedPricingVariant.price
+      };
+    } else if (Object.keys(selectedVariant).length > 0) {
+      // Usar variantes tradicionales
       const variantParts = Object.entries(selectedVariant).map(([key, value]) => `${key}:${value}`);
       variantId = `${product.id}-${variantParts.join('-')}`;
       
@@ -149,7 +201,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
       variantInfo = {
         id: variantParts.join('-'),
         name: variantDescription,
-        price: product.price // Por ahora usar el mismo precio, se puede extender para precios específicos de variante
+        price: product.price // Usar el precio base del producto
       };
     }
     
@@ -167,7 +219,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
       id: variantId,
       productId: product.id,
       name: product.name, // Usar el nombre original del producto
-      price: product.price,
+      price: finalPrice, // Usar el precio final (del producto o de la variante)
       currency: storeInfo?.currency || 'COP',
       image: product.image || '',
       slug: product.slug || product.id,
@@ -668,18 +720,83 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                     </div>
                   ) : null}
             <p className="nbd-product-price">
-               {formatPrice(product.price, storeInfo?.currency)}
+               {formatPrice(selectedPricingVariant ? selectedPricingVariant.price : product.price, storeInfo?.currency)}
             </p>
+                  {selectedPricingVariant && selectedPricingVariant.price !== product.price && (
+                    <p className="nbd-product-base-price">
+                      Precio base: {formatPrice(product.price, storeInfo?.currency)}
+                    </p>
+                  )}
+                  
+                  {/* Información de stock - Solo mostrar si trackStock está habilitado */}
+                  {!hasProductVariantsWithPricing() && product && (product as any).trackStock === true && (
+                    <div className="nbd-stock-info">
+                      {(product as any).stockQuantity > 0 ? (
+                        <p className="nbd-stock-available">
+                          ✅ {(product as any).stockQuantity} en stock
+                        </p>
+                      ) : (
+                        <p className="nbd-stock-unavailable">
+                          ❌ Sin stock
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
           ) : null}
 
-              {/* Disponibilidad */}
-              <div className="nbd-product-availability">
-                <div className="nbd-availability-indicator">
-                  <div className="nbd-availability-dot"></div>
-                  <span>En stock</span>
-                </div>
-              </div>
+              {/* Disponibilidad - SIEMPRE mostrar */}
+              {(() => {
+                let isAvailable = false;
+                let statusText = '';
+                
+                if (hasProductVariantsWithPricing()) {
+                  // Producto con variantes - verificar si alguna tiene stock
+                  let variantsData = null;
+                  if (product.tags && product.tags.variants) {
+                    variantsData = product.tags.variants;
+                  } else if ((product as any).variants) {
+                    variantsData = (product as any).variants;
+                  }
+                  
+                  if (variantsData) {
+                    let variants = [];
+                    try {
+                      variants = typeof variantsData === 'string' ? JSON.parse(variantsData) : variantsData;
+                    } catch (e) {
+                      variants = Array.isArray(variantsData) ? variantsData : [];
+                    }
+                    
+                    // Verificar si alguna variante tiene stock
+                    isAvailable = variants.some((variant: any) => variant.stock > 0);
+                    statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
+                  } else {
+                    // Si no hay variantes, mostrar como disponible
+                    isAvailable = true;
+                    statusText = 'En stock';
+                  }
+                } else {
+                  // Producto simple - si no tiene stockQuantity, mostrar como disponible
+                  const stockQty = (product as any).stockQuantity;
+                  if (stockQty !== undefined && stockQty !== null) {
+                    isAvailable = stockQty > 0;
+                    statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
+                  } else {
+                    // Producto sin gestión de stock = siempre disponible
+                    isAvailable = true;
+                    statusText = 'En stock';
+                  }
+                }
+                
+                return (
+                  <div className="nbd-product-availability">
+                    <div className="nbd-availability-indicator">
+                      <div className={`nbd-availability-dot ${isAvailable ? 'available' : 'unavailable'}`}></div>
+                      <span>{statusText}</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Descripción */}
           {product.description ? (
@@ -690,10 +807,18 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
           ) : null}
 
               {/* Selector de variantes */}
-              <ProductVariantSelector 
-                product={product}
-                onVariantChange={handleVariantChange}
-              />
+              {hasProductVariantsWithPricing() ? (
+                <ProductVariantsWithPricing 
+                  product={product}
+                  storeInfo={storeInfo || undefined}
+                  onVariantChange={handlePricingVariantChange}
+                />
+              ) : (
+                <ProductVariantSelector 
+                  product={product}
+                  onVariantChange={handleVariantChange}
+                />
+              )}
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">
@@ -769,7 +894,16 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                 <button 
                   className="nbd-btn nbd-btn--primary nbd-btn--cart"
                   onClick={handleAddToCart}
-                  disabled={!product || typeof product.price !== 'number'}
+                  disabled={
+                    !product || 
+                    typeof product.price !== 'number' ||
+                    // Deshabilitar SOLO si gestiona stock Y no hay stock disponible
+                    (!hasProductVariantsWithPricing() && (product as any).trackStock === true && (product as any).stockQuantity <= 0) ||
+                    // Deshabilitar si hay variantes con precios pero ninguna seleccionada
+                    (hasProductVariantsWithPricing() && !selectedPricingVariant) ||
+                    // O si la variante seleccionada no está disponible (solo si gestiona stock)
+                    (hasProductVariantsWithPricing() && selectedPricingVariant && selectedPricingVariant.stock === 0)
+                  }
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
