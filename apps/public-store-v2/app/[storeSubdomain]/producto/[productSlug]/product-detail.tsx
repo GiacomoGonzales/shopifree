@@ -909,7 +909,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                     // Deshabilitar si hay variantes con precios pero ninguna seleccionada
                     (hasProductVariantsWithPricing() && !selectedPricingVariant) ||
                     // O si la variante seleccionada no está disponible (solo si gestiona stock)
-                    (hasProductVariantsWithPricing() && selectedPricingVariant && selectedPricingVariant.stock === 0)
+                    (hasProductVariantsWithPricing() && selectedPricingVariant && selectedPricingVariant.stock !== undefined && selectedPricingVariant.stock <= 0)
                   }
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
