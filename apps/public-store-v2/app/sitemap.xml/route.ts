@@ -1,6 +1,8 @@
 import { getCanonicalHost } from '../../lib/canonical-resolver';
 import { getStoreCategories } from '../../lib/categories';
 import { getStoreProducts } from '../../lib/products';
+import { getStoreCollections } from '../../lib/collections';
+import { getStoreBrands } from '../../lib/brands';
 
 // Forzar renderización dinámica - el sitemap debe ser dinámico por naturaleza
 export const dynamic = 'force-dynamic';
@@ -116,6 +118,54 @@ async function generateRealSitemap(canonicalHost: string, storeId: string): Prom
     console.warn('⚠️ [Sitemap] No se pudieron cargar categorías:', error instanceof Error ? error.message : String(error));
   }
   
+  // Agregar colecciones reales
+  try {
+    const collections = await Promise.race([
+      getStoreCollections(storeId),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+    
+    if (collections && Array.isArray(collections)) {
+      console.log('📂 [Sitemap] Colecciones encontradas:', collections.length);
+      
+      const visibleCollections = collections
+        .filter(c => c.slug && typeof c.slug === 'string' && c.visible)
+        .slice(0, 30); // Limitar a 30 colecciones para evitar sitemaps muy largos
+      
+      for (const collection of visibleCollections) {
+        urls.push(`${canonicalHost}/coleccion/${encodeURIComponent(collection.slug)}`);
+      }
+      
+      console.log('✅ [Sitemap] Colecciones añadidas:', visibleCollections.length);
+    }
+  } catch (error) {
+    console.warn('⚠️ [Sitemap] No se pudieron cargar colecciones:', error instanceof Error ? error.message : String(error));
+  }
+  
+  // Agregar marcas reales
+  try {
+    const brands = await Promise.race([
+      getStoreBrands(storeId),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+    
+    if (brands && Array.isArray(brands)) {
+      console.log('🏷️ [Sitemap] Marcas encontradas:', brands.length);
+      
+      const validBrands = brands
+        .filter(b => b.slug && typeof b.slug === 'string' && b.slug.trim() !== '')
+        .slice(0, 50); // Limitar a 50 marcas para evitar sitemaps muy largos
+      
+      for (const brand of validBrands) {
+        urls.push(`${canonicalHost}/marca/${encodeURIComponent(brand.slug)}`);
+      }
+      
+      console.log('✅ [Sitemap] Marcas añadidas:', validBrands.length);
+    }
+  } catch (error) {
+    console.warn('⚠️ [Sitemap] No se pudieron cargar marcas:', error instanceof Error ? error.message : String(error));
+  }
+
   // Agregar productos reales
   try {
     const products = await Promise.race([
