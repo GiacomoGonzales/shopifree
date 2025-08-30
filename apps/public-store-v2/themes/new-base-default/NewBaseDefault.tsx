@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, startTransition } from "react";
+import { useEffect, useState, useMemo, startTransition, useRef } from "react";
 import "./new-base-default.css";
 import "./loading-spinner.css";
 import "./texture-backgrounds.css";
@@ -11,6 +11,7 @@ import { getStoreCategories, Category } from "../../lib/categories";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { getStoreFilters, Filter } from "../../lib/filters";
 import { getStoreCollections, PublicCollection, getCollectionBySlug } from "../../lib/collections";
+import { getBrandBySlug } from "../../lib/brands";
 import CollectionsMosaic from "../../components/CollectionsMosaic";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
@@ -24,11 +25,12 @@ type Props = {
     storeSubdomain: string;
     categorySlug?: string;
     collectionSlug?: string;
+    brandSlug?: string;
     effectiveLocale: string;
     storeId?: string | null;
 };
 
-export default function NewBaseDefault({ storeSubdomain, categorySlug, collectionSlug, effectiveLocale, storeId }: Props) {
+export default function NewBaseDefault({ storeSubdomain, categorySlug, collectionSlug, brandSlug, effectiveLocale, storeId }: Props) {
     // 🌐 Usar textos dinámicos según el idioma configurado en la tienda
     const { t, language } = useStoreLanguage();
     const { addItem, openCart, state: cartState } = useCart();
@@ -161,13 +163,16 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
     };
     
-    // Detectar si estamos en una página de categoría o colección
+    // Detectar si estamos en una página de categoría, colección o marca
     const isOnCategoryPage = !!categorySlug || (typeof window !== 'undefined' && window.location.pathname.includes('/categoria/'));
     const isOnCollectionPage = !!collectionSlug || (typeof window !== 'undefined' && window.location.pathname.includes('/coleccion/'));
+    const isOnBrandPage = !!brandSlug || (typeof window !== 'undefined' && window.location.pathname.includes('/marca/'));
     const categorySlugFromUrl = categorySlug || (isOnCategoryPage ? 
         window.location.pathname.split('/categoria/')[1]?.split('/')[0] : null);
     const collectionSlugFromUrl = collectionSlug || (isOnCollectionPage ? 
         window.location.pathname.split('/coleccion/')[1]?.split('/')[0] : null);
+    const brandSlugFromUrl = brandSlug || (isOnBrandPage ? 
+        window.location.pathname.split('/marca/')[1]?.split('/')[0] : null);
 
     const [storeIdState, setStoreIdState] = useState<string | null>(null);
     const resolvedStoreId = storeId || storeIdState;
@@ -178,12 +183,16 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const [brands, setBrands] = useState<PublicBrand[] | null>(null);
     const [collections, setCollections] = useState<PublicCollection[] | null>(null);
     const [currentCollection, setCurrentCollection] = useState<PublicCollection | null>(null);
+    const [currentBrand, setCurrentBrand] = useState<PublicBrand | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(categorySlugFromUrl);
     const [selectedParentCategory, setSelectedParentCategory] = useState<string | null>(null);
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
     const [productsToShow, setProductsToShow] = useState<number>(8); // Mostrar 8 productos inicialmente
     const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
     const [currentSort, setCurrentSort] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc'>('newest');
+    const [isMobile, setIsMobile] = useState(false);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isJumpingRef = useRef(false);
     const [filters, setFilters] = useState<Filter[]>([]);
     const [loadingCartButton, setLoadingCartButton] = useState<string | null>(null); // ID del producto que está siendo agregado
     const [filtersModalOpen, setFiltersModalOpen] = useState(false);
@@ -326,10 +335,68 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
     }, [collectionSlugFromUrl, resolvedStoreId]);
 
+    // Cargar marca actual si estamos en una página de marca
+    useEffect(() => {
+        if (brandSlugFromUrl && resolvedStoreId) {
+            let alive = true;
+            (async () => {
+                try {
+                    const brand = await getBrandBySlug(resolvedStoreId, brandSlugFromUrl);
+                    if (!alive) return;
+                    setCurrentBrand(brand);
+                } catch (error) {
+                    console.error('Error loading brand:', error);
+                    if (alive) setCurrentBrand(null);
+                }
+            })();
+            return () => {
+                alive = false;
+            };
+        } else if (!brandSlugFromUrl) {
+            setCurrentBrand(null);
+        }
+    }, [brandSlugFromUrl, resolvedStoreId]);
+
     // Resetear paginación cuando cambie la categoría activa
     useEffect(() => {
         setProductsToShow(8);
     }, [activeCategory]);
+
+    // Detectar si estamos en móvil para el carrusel de marcas
+    useEffect(() => {
+        const checkIsMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        // Verificar al cargar
+        checkIsMobile();
+        
+        // Escuchar cambios de tamaño
+        window.addEventListener('resize', checkIsMobile);
+        
+        return () => {
+            window.removeEventListener('resize', checkIsMobile);
+        };
+    }, []);
+
+    // Inicializar posición de scroll en el medio para efecto infinito en móvil
+    useEffect(() => {
+        if (isMobile && brands && brands.length > 0) {
+            // Esperar a que el DOM se actualice
+            setTimeout(() => {
+                const container = document.querySelector('.nbd-brands-container') as HTMLElement;
+                if (container) {
+                    // Posicionar en el centro del segundo conjunto de marcas
+                    // Esto da máximo espacio antes de necesitar saltar
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+                    const singleSetWidth = maxScroll / 3; // 4 copias = 3 intervalos
+                    container.scrollLeft = singleSetWidth * 1.5; // Centro del segundo conjunto
+                }
+            }, 100);
+        }
+    }, [isMobile, brands]);
+
+
 
     // Cerrar dropdown cuando se hace clic fuera
     useEffect(() => {
@@ -394,6 +461,53 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
             console.log("Productos filtrados por colección:", base.map(p => ({id: p.id, name: p.name})));
             console.log("=== END COLLECTION FILTERING DEBUG ===");
+        }
+
+        // Filtrar por marca si estamos en una página de marca
+        if (isOnBrandPage && currentBrand) {
+            console.log("=== BRAND FILTERING DEBUG ===");
+            console.log("brandSlug prop:", brandSlug);
+            console.log("isOnBrandPage:", isOnBrandPage);
+            console.log("Marca encontrada:", currentBrand);
+            console.log("Todos los productos:", base.map(p => ({
+                id: p.id, 
+                name: p.name, 
+                brand: p.brand, 
+                selectedBrandId: p.selectedBrandId
+            })));
+            
+            const beforeFilter = base.length;
+            
+            // Filtrar productos que tengan el ID de marca actual
+            base = base.filter(p => {
+                // Comparar por selectedBrandId (método principal)
+                if (p.selectedBrandId && p.selectedBrandId === currentBrand.id) {
+                    return true;
+                }
+                
+                // Fallback: comparar por nombre de marca (por compatibilidad)
+                if (p.brand) {
+                    const productBrand = p.brand.toLowerCase().trim();
+                    const currentBrandName = currentBrand.name.toLowerCase().trim();
+                    return productBrand === currentBrandName;
+                }
+                
+                return false;
+            });
+            
+            console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
+            console.log("Productos filtrados por marca:", base.map(p => ({
+                id: p.id, 
+                name: p.name, 
+                brand: p.brand, 
+                selectedBrandId: p.selectedBrandId
+            })));
+            console.log("Comparando selectedBrandId con currentBrand.id:", {
+                currentBrandId: currentBrand.id,
+                currentBrandName: currentBrand.name,
+                currentBrandSlug: currentBrand.slug
+            });
+            console.log("=== END BRAND FILTERING DEBUG ===");
         }
         // Filtrar por categoría si no estamos en una página de colección
         else if (activeCategory && activeCategory !== 'todos') {
@@ -482,7 +596,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
 
         return base;
-    }, [products, categories, activeCategory, selectedFilters, isOnCollectionPage, currentCollection]);
+    }, [products, categories, activeCategory, selectedFilters, isOnCollectionPage, currentCollection, isOnBrandPage, currentBrand]);
 
     // Productos ordenados
     const sortedProducts = useMemo(() => {
@@ -776,9 +890,34 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     </div>
                 </div>
             )}
+
+            {/* Si estamos en una página de marca, mostrar header limpio */}
+            {isOnBrandPage && currentBrand && (
+                <div className="nbd-category-page-header">
+                    <div className="nbd-container">
+                        <h1 className="nbd-category-title">{currentBrand.name}</h1>
+                        {currentBrand.description && (
+                            <p className="nbd-category-description">{currentBrand.description}</p>
+                        )}
+                        
+                        {/* Breadcrumbs debajo del título */}
+                        <nav className="nbd-category-breadcrumbs">
+                            <a href={buildUrl('')} className="nbd-breadcrumb-link">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {t('home')}
+                            </a>
+                            <span className="nbd-breadcrumbs-sep">/</span>
+                            <span className="nbd-breadcrumb-current">{currentBrand.name}</span>
+                        </nav>
+                    </div>
+                </div>
+            )}
             
             {/* Hero Section Moderno - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
             <section className="nbd-hero">
                 <div className="nbd-hero-container">
                     <div className="nbd-hero-content">
@@ -854,7 +993,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             )}
 
             {/* Sección de Colecciones - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && collections && collections.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 && (
                 <CollectionsMosaic 
                     collections={collections}
                     storeSubdomain={storeSubdomain}
@@ -862,7 +1001,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             )}
 
             {/* Sección de categorías con mosaico inteligente - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && (() => {
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (() => {
                 // Preparar categorías para mostrar (priorizando padre sobre subcategorías)
                 const allCategories = Array.isArray(categories) ? categories : [];
                 const parentCategories = allCategories.filter(c => !c.parentCategoryId);
@@ -977,8 +1116,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             {/* Sección de productos */}
             <section id="productos" className="nbd-products">
                 <div className="nbd-container">
-                    {/* Solo mostrar header de productos en home, no en páginas de categoría o colección */}
-                    {!isOnCategoryPage && !isOnCollectionPage && (
+                    {/* Solo mostrar header de productos en home, no en páginas de categoría, colección o marca */}
+                    {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
                         <div className="nbd-section-header">
                                                         <h2 className="nbd-section-title">
                                 {activeCategory ?
@@ -1230,7 +1369,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             </section>
 
             {/* Carrusel Simple */}
-            {!isOnCategoryPage && !isOnCollectionPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 && (
                 <section className="nbd-carousel-section">
                     <div className="nbd-carousel-container">
                         <div 
@@ -1272,7 +1411,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             )}
 
             {/* Sección de Newsletter */}
-            {!isOnCategoryPage && !isOnCollectionPage && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
             <section className="nbd-newsletter">
                 <div className="nbd-container">
                     <div className="nbd-newsletter-content">
@@ -1345,7 +1484,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             )}
 
             {/* Sección de Marcas Carousel - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && brands && brands.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && brands && brands.length > 0 && (
                 <section className="nbd-brands-carousel">
                     <div className="nbd-container">
                         <div className="nbd-section-header">
@@ -1355,15 +1494,79 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                             </p>
                         </div>
                         
-                        <div className="nbd-brands-container">
+                        <div 
+                            className="nbd-brands-container"
+                            onScroll={isMobile ? (e) => {
+                                // Evitar loops infinitos durante saltos
+                                if (isJumpingRef.current) return;
+                                
+                                const container = e.currentTarget;
+                                const scrollLeft = container.scrollLeft;
+                                const scrollWidth = container.scrollWidth;
+                                const clientWidth = container.clientWidth;
+                                const maxScroll = scrollWidth - clientWidth;
+                                
+                                // Calcular el ancho de un conjunto completo de marcas
+                                const singleSetWidth = maxScroll / 3; // 4 copias = 3 intervalos
+                                
+                                // Limpiar timeout anterior
+                                if (scrollTimeoutRef.current) {
+                                    clearTimeout(scrollTimeoutRef.current);
+                                }
+                                
+                                // Usar timeout para hacer salto después de que el usuario pare de hacer scroll
+                                scrollTimeoutRef.current = setTimeout(() => {
+                                    // Saltar solo si estamos muy cerca de los límites
+                                    if (scrollLeft >= singleSetWidth * 2.9) { // 90% del tercer conjunto
+                                        isJumpingRef.current = true;
+                                        // Deshabilitar scroll suave temporalmente para salto instantáneo
+                                        const originalScrollBehavior = container.style.scrollBehavior;
+                                        container.style.scrollBehavior = 'auto';
+                                        
+                                        requestAnimationFrame(() => {
+                                            container.scrollLeft = singleSetWidth * 0.9; // Equivalente en el primer conjunto
+                                            
+                                            // Restaurar scroll suave después del salto
+                                            requestAnimationFrame(() => {
+                                                container.style.scrollBehavior = originalScrollBehavior;
+                                                isJumpingRef.current = false;
+                                            });
+                                        });
+                                    }
+                                    else if (scrollLeft <= singleSetWidth * 0.1) { // 10% del primer conjunto
+                                        isJumpingRef.current = true;
+                                        // Deshabilitar scroll suave temporalmente para salto instantáneo
+                                        const originalScrollBehavior = container.style.scrollBehavior;
+                                        container.style.scrollBehavior = 'auto';
+                                        
+                                        requestAnimationFrame(() => {
+                                            container.scrollLeft = singleSetWidth * 2.1; // Equivalente en el tercer conjunto
+                                            
+                                            // Restaurar scroll suave después del salto
+                                            requestAnimationFrame(() => {
+                                                container.style.scrollBehavior = originalScrollBehavior;
+                                                isJumpingRef.current = false;
+                                            });
+                                        });
+                                    }
+                                }, 100); // Esperar 100ms después de que pare el scroll
+                            } : undefined}
+                        >
                             <div className="nbd-brands-track" 
                                  style={{ 
                                      '--brands-count': brands.length,
                                      '--animation-duration': `${brands.length * 4}s`
                                  } as React.CSSProperties}>
-                                {/* Duplicar las marcas para efecto infinito */}
-                                {[...brands, ...brands].map((brand, index) => (
-                                    <div key={`${brand.id}-${index}`} className="nbd-brand-item">
+                                {/* Duplicar las marcas: desktop 2x, móvil 4x para scroll infinito */}
+                                {(isMobile ? 
+                                    [...brands, ...brands, ...brands, ...brands] : 
+                                    [...brands, ...brands]
+                                ).map((brand, index) => (
+                                    <a 
+                                        key={`${brand.id}-${index}`} 
+                                        href={buildUrl(`/marca/${brand.slug}`)}
+                                        className="nbd-brand-item"
+                                    >
                                         {brand.image ? (
                                             <img
                                                 src={toCloudinarySquare(brand.image, 400)}
@@ -1385,7 +1588,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                                 {brand.name}
                                             </div>
                                         )}
-                                    </div>
+                                    </a>
                                 ))}
                             </div>
                         </div>

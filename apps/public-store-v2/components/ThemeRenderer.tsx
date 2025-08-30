@@ -14,9 +14,10 @@ type Props = {
     storeSubdomain: string;
     categorySlug?: string;
     collectionSlug?: string;
+    brandSlug?: string;
 };
 
-export default function ThemeRenderer({ storeSubdomain, categorySlug, collectionSlug }: Props) {
+export default function ThemeRenderer({ storeSubdomain, categorySlug, collectionSlug, brandSlug }: Props) {
     const [theme, setTheme] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [effectiveLocale, setEffectiveLocale] = useState<string>('es');
@@ -72,6 +73,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                     storeSubdomain={storeSubdomain} 
                     categorySlug={categorySlug}
                     collectionSlug={collectionSlug}
+                    brandSlug={brandSlug}
                     effectiveLocale={effectiveLocale}
                     storeId={storeId}
                 />
@@ -87,6 +89,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                     storeSubdomain={storeSubdomain} 
                     categorySlug={categorySlug}
                     collectionSlug={collectionSlug}
+                    brandSlug={brandSlug}
                     effectiveLocale={effectiveLocale}
                     storeId={storeId}
                 />

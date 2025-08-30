@@ -18,6 +18,7 @@ export type PublicProduct = {
     categoryId?: string;
     selectedParentCategoryIds?: string[];
     brand?: string;
+    selectedBrandId?: string;
     tags?: Record<string, string>;
     createdAt?: string;
 };
@@ -65,6 +66,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
                   Array.isArray(raw.selectedParentCategoryIds) && raw.selectedParentCategoryIds.length > 0 ? raw.selectedParentCategoryIds[0] : undefined,
         selectedParentCategoryIds: Array.isArray(raw.selectedParentCategoryIds) ? raw.selectedParentCategoryIds : undefined,
         brand: typeof raw.brand === 'string' ? raw.brand : undefined,
+        selectedBrandId: typeof raw.selectedBrandId === 'string' ? raw.selectedBrandId : undefined,
         tags: (() => {
             let tags = raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : {};
             
