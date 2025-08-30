@@ -227,10 +227,17 @@ export default async function StoreLocaleLayout({
     const primaryLocale = canonical.storeId ? await getStorePrimaryLocale(canonical.storeId) : null;
     const effectiveLocale = primaryLocale || 'es';
     
-    // 🍎 Color transparente para theme-color que coincida exactamente con el header
-    // Header usa: rgba(255, 255, 255, 0.8) con backdrop-filter: blur(12px)
-    // Status bar usa la misma transparencia con black-translucent
-    const primaryColor = 'rgba(255, 255, 255, 0.8)';
+    // 🍎 Obtener el color primario de la tienda para theme-color dinámico
+    let primaryColor = '#ffffff'; // fallback por defecto
+    if (canonical.storeId) {
+        try {
+            const { getStoreBasicInfo } = await import('../../lib/store');
+            const storeInfo = await getStoreBasicInfo(canonical.storeId);
+            primaryColor = storeInfo?.primaryColor || '#ffffff';
+        } catch (error) {
+            console.log('Using default primary color for theme-color');
+        }
+    }
     
     // Construir storeInfo desde los datos completos de seoData
     const storeInfo = seoData ? {
@@ -245,10 +252,10 @@ export default async function StoreLocaleLayout({
     
     return (
         <>
-            {/* 🍎 iOS Safari configuración para status bar transparente */}
-            <meta name="theme-color" content="rgba(255, 255, 255, 0.8)" />
+            {/* 🍎 iOS Safari theme-color dinámico basado en color primario de la tienda */}
+            <meta name="theme-color" content={primaryColor} />
             <meta name="mobile-web-app-capable" content="yes" />
-            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="default" />
             
             {/* 🚀 Preconnects críticos para Cloudinary - una sola vez */}
             <link rel="preconnect" href="https://res.cloudinary.com" />
