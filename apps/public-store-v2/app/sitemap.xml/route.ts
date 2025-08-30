@@ -64,8 +64,9 @@ export async function GET(request: Request) {
     return new Response(sitemap, {
       status: 200,
       headers: { 
-        'Content-Type': 'text/plain; charset=UTF-8',
-        'Cache-Control': 'public, max-age=3600'
+        'Content-Type': 'application/xml; charset=UTF-8',
+        'Cache-Control': 'public, max-age=3600',
+        'X-Robots-Tag': 'index'
       }
     });
   } catch (error) {
@@ -76,11 +77,14 @@ export async function GET(request: Request) {
     const hostname = request.headers.get('host') || 'example.com';
     const fallbackUrls = `${protocol}://${hostname}/`;
     
-    return new Response(fallbackUrls, {
+    const fallbackXml = generateXmlSitemap([fallbackUrls]);
+    
+    return new Response(fallbackXml, {
       status: 200,
       headers: { 
-        'Content-Type': 'text/plain; charset=UTF-8',
-        'Cache-Control': 'public, max-age=60'
+        'Content-Type': 'application/xml; charset=UTF-8',
+        'Cache-Control': 'public, max-age=60',
+        'X-Robots-Tag': 'index'
       }
     });
   }
@@ -144,25 +148,52 @@ async function generateRealSitemap(canonicalHost: string, storeId: string): Prom
   
   // Agregar marcas reales
   try {
+    console.log('🏷️ [Sitemap] Iniciando carga de marcas para storeId:', storeId);
+    
     const brands = await Promise.race([
       getStoreBrands(storeId),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
     ]);
     
+    console.log('🏷️ [Sitemap] Marcas obtenidas:', brands);
+    
     if (brands && Array.isArray(brands)) {
       console.log('🏷️ [Sitemap] Marcas encontradas:', brands.length);
       
+      // Log detallado de cada marca
+      brands.forEach((brand, index) => {
+        console.log(`   Marca ${index + 1}:`, {
+          id: brand.id,
+          name: brand.name,
+          slug: brand.slug,
+          hasValidSlug: !!(brand.slug && typeof brand.slug === 'string' && brand.slug.trim() !== '')
+        });
+      });
+      
       const validBrands = brands
-        .filter(b => b.slug && typeof b.slug === 'string' && b.slug.trim() !== '')
+        .filter(b => {
+          const isValid = b.slug && typeof b.slug === 'string' && b.slug.trim() !== '';
+          if (!isValid) {
+            console.log(`   ⚠️ Marca inválida filtrada:`, { id: b.id, name: b.name, slug: b.slug });
+          }
+          return isValid;
+        })
         .slice(0, 50); // Limitar a 50 marcas para evitar sitemaps muy largos
       
+      console.log('🏷️ [Sitemap] Marcas válidas después del filtro:', validBrands.length);
+      
       for (const brand of validBrands) {
-        urls.push(`${canonicalHost}/marca/${encodeURIComponent(brand.slug)}`);
+        const brandUrl = `${canonicalHost}/marca/${encodeURIComponent(brand.slug)}`;
+        urls.push(brandUrl);
+        console.log(`   ✅ Marca añadida: ${brandUrl}`);
       }
       
-      console.log('✅ [Sitemap] Marcas añadidas:', validBrands.length);
+      console.log('✅ [Sitemap] Total marcas añadidas al sitemap:', validBrands.length);
+    } else {
+      console.log('❌ [Sitemap] Marcas no es un array válido:', typeof brands);
     }
   } catch (error) {
+    console.error('❌ [Sitemap] Error cargando marcas:', error);
     console.warn('⚠️ [Sitemap] No se pudieron cargar marcas:', error instanceof Error ? error.message : String(error));
   }
 
@@ -190,7 +221,24 @@ async function generateRealSitemap(canonicalHost: string, storeId: string): Prom
     console.warn('⚠️ [Sitemap] No se pudieron cargar productos:', error instanceof Error ? error.message : String(error));
   }
   
-  return urls.join('\n');
+  return generateXmlSitemap(urls);
+}
+
+// Generar XML válido para sitemap
+function generateXmlSitemap(urls: string[]): string {
+  const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  const urlEntries = urls.map(url => `  <url>
+    <loc>${url}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlEntries}
+</urlset>`;
 }
 
 // Función helper simplificada para buscar subdomain por dominio personalizado

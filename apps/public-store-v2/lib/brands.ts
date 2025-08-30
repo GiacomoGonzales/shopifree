@@ -1,5 +1,3 @@
-"use client";
-
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { getFirebaseDb } from "./firebase";
 
