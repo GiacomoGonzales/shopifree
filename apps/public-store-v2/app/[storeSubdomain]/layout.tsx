@@ -227,17 +227,10 @@ export default async function StoreLocaleLayout({
     const primaryLocale = canonical.storeId ? await getStorePrimaryLocale(canonical.storeId) : null;
     const effectiveLocale = primaryLocale || 'es';
     
-    // 🍎 Obtener el color primario de la tienda para theme-color
-    let primaryColor = '#ffffff'; // fallback por defecto
-    if (canonical.storeId) {
-        try {
-            const { getStoreBasicInfo } = await import('../../lib/store');
-            const storeInfo = await getStoreBasicInfo(canonical.storeId);
-            primaryColor = storeInfo?.primaryColor || '#ffffff';
-        } catch (error) {
-            console.log('Using default primary color for theme-color');
-        }
-    }
+    // 🍎 Color fijo para theme-color que coincida con el header
+    // Header usa: rgba(255, 255, 255, 0.8) con backdrop-filter: blur(12px)
+    // Para iOS status bar usamos blanco sólido para mejor legibilidad
+    const primaryColor = '#ffffff';
     
     // Construir storeInfo desde los datos completos de seoData
     const storeInfo = seoData ? {
@@ -252,7 +245,7 @@ export default async function StoreLocaleLayout({
     
     return (
         <>
-            {/* 🍎 iOS Safari theme-color dinámico para fundir header con status bar */}
+            {/* 🍎 iOS Safari theme-color fijo blanco para fundir header con status bar */}
             <meta name="theme-color" content={primaryColor} />
             <meta name="mobile-web-app-capable" content="yes" />
             <meta name="apple-mobile-web-app-status-bar-style" content="default" />
