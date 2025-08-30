@@ -18,9 +18,28 @@ const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: Co
     // Contar productos en la colección
     const productCount = collection.productIds?.length || 0;
     
+    // Función para detectar si estamos en un dominio personalizado
+    const isCustomDomain = () => {
+        if (typeof window === 'undefined') return false;
+        const host = window.location.hostname;
+        return !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+    };
+    
+    // Función para construir URLs correctamente
+    const getSubdomainUrl = (path: string) => {
+        const isCustom = isCustomDomain();
+        if (isCustom) {
+            // En dominio personalizado: URL directa sin subdominio
+            return path.startsWith('/') ? path : `/${path}`;
+        } else {
+            // En localhost desarrollo: URL directa (middleware maneja internamente)
+            return path.startsWith('/') ? path : `/${path}`;
+        }
+    };
+    
     return (
         <a
-            href={`/${storeSubdomain}/coleccion/${collection.slug}`}
+            href={getSubdomainUrl(`/coleccion/${collection.slug}`)}
             className={`nbd-collection-card nbd-collection-card--${size}`}
         >
             {/* Imagen de fondo */}
@@ -66,9 +85,7 @@ const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: Co
                             {collection.description}
                         </p>
                     )}
-                    <p className="nbd-collection-count">
-                        {productCount} {productCount === 1 ? additionalText('product') : additionalText('products')}
-                    </p>
+
                 </div>
                 
                 <div className="nbd-collection-arrow">

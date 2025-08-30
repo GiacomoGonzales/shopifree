@@ -6518,19 +6518,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     font-size: var(--nbd-font-size-base);
 }
 
-.nbd-collection-count {
-    font-size: var(--nbd-font-size-xs);
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: rgba(0, 0, 0, 0.4);
-    padding: var(--nbd-space-xs) var(--nbd-space-sm);
-    border-radius: var(--nbd-radius-full);
-    display: inline-block;
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+
+
 
 .nbd-collection-arrow {
     position: absolute;
