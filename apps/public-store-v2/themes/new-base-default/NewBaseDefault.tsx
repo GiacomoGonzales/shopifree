@@ -1596,7 +1596,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 </section>
             )}
 
-            <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} />
+            <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} storeId={storeId || undefined} />
 
             {/* Modal de Filtros */}
             {filtersModalOpen && (

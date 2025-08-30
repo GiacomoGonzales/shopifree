@@ -546,6 +546,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+}
+
+/* Textos del botón WhatsApp - Responsive */
+.nbd-whatsapp-text-full {
+    display: inline;
+}
+
+.nbd-whatsapp-text-short {
+    display: none;
 }
 
 .nbd-checkout-modal .nbd-btn--whatsapp:hover:not(:disabled),
@@ -2904,6 +2914,29 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 }
 
+/* Desactivar hover en dispositivos táctiles para evitar parpadeos durante scroll */
+@media (hover: none) and (pointer: coarse) {
+    .nbd-brand-image:hover {
+        /* Resetear TODOS los efectos hover en dispositivos táctiles */
+        transform: none !important;
+        filter: grayscale(100%) brightness(1.1) contrast(0.9) !important;
+        box-shadow: var(--nbd-shadow-lg) !important;
+    }
+    
+    .nbd-brand-fallback:hover {
+        /* Resetear TODOS los efectos hover en dispositivos táctiles */
+        transform: none !important;
+        background: linear-gradient(135deg, var(--nbd-neutral-600) 0%, var(--nbd-neutral-700) 100%) !important;
+        color: var(--nbd-neutral-0) !important;
+        box-shadow: var(--nbd-shadow-lg) !important;
+        filter: grayscale(100%) brightness(1.1) contrast(0.9) !important;
+    }
+    
+    .nbd-brands-container:hover .nbd-brands-track {
+        animation-play-state: running !important;
+    }
+}
+
 /* Responsive para móvil */
 @media (max-width: 768px) {
     .nbd-brands-carousel {
@@ -2949,20 +2982,45 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         font-size: var(--nbd-font-size-base);
     }
     
-    /* Desactivar efectos hover en móvil */
+    /* COMPLETAMENTE desactivar efectos hover en móvil para evitar parpadeos durante scroll */
     .nbd-brand-image:hover {
-        transform: none;
-        /* Mantener efecto de color en móvil */
-        filter: grayscale(0%) brightness(1) contrast(1);
-        box-shadow: var(--nbd-shadow-lg);
+        /* Resetear TODOS los efectos hover */
+        transform: none !important;
+        filter: grayscale(100%) brightness(1.1) contrast(0.9) !important; /* Mantener estado original */
+        box-shadow: var(--nbd-shadow-lg) !important; /* Mantener sombra original */
     }
     
     .nbd-brand-fallback:hover {
-        transform: none;
-        background: linear-gradient(135deg, var(--nbd-primary) 0%, var(--nbd-neutral-800) 100%);
-        color: var(--nbd-neutral-0);
-        box-shadow: var(--nbd-shadow-lg);
-        filter: grayscale(0%) brightness(1) contrast(1);
+        /* Resetear TODOS los efectos hover */
+        transform: none !important;
+        background: linear-gradient(135deg, var(--nbd-neutral-600) 0%, var(--nbd-neutral-700) 100%) !important; /* Estado original */
+        color: var(--nbd-neutral-0) !important;
+        box-shadow: var(--nbd-shadow-lg) !important; /* Mantener sombra original */
+        filter: grayscale(100%) brightness(1.1) contrast(0.9) !important; /* Mantener estado original */
+    }
+    
+    /* También desactivar hover en el contenedor para evitar pausar animación en móvil */
+    .nbd-brands-container:hover .nbd-brands-track {
+        animation-play-state: running !important; /* Mantener animación corriendo */
+    }
+    
+    /* Mantener efectos focus para accesibilidad en móvil */
+    .nbd-brand-image:focus {
+        filter: grayscale(0%) brightness(1) contrast(1) !important;
+        transform: scale(1.02) !important;
+        box-shadow: var(--nbd-shadow-xl) !important;
+        outline: 2px solid var(--nbd-primary);
+        outline-offset: 2px;
+    }
+    
+    .nbd-brand-fallback:focus {
+        background: linear-gradient(135deg, var(--nbd-primary) 0%, var(--nbd-neutral-800) 100%) !important;
+        color: var(--nbd-neutral-0) !important;
+        transform: scale(1.02) !important;
+        box-shadow: var(--nbd-shadow-xl) !important;
+        filter: grayscale(0%) brightness(1) contrast(1) !important;
+        outline: 2px solid var(--nbd-primary);
+        outline-offset: 2px;
     }
     
     /* ELIMINADO - Usará estilos base */
@@ -3951,6 +4009,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     .nbd-secondary-actions {
         width: 100%;
+        flex-direction: column;
+        gap: var(--nbd-space-sm);
     }
     
     .nbd-btn--half-width {
@@ -3958,8 +4018,42 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         flex: 1;
     }
     
+    /* Optimización del texto del botón WhatsApp en móvil */
+    .nbd-whatsapp-text-full {
+        display: none;
+    }
+    
+    .nbd-whatsapp-text-short {
+        display: inline;
+    }
+    
+    /* Mejorar el espaciado de botones secundarios en móvil */
+    .nbd-secondary-actions .nbd-btn {
+        min-height: 48px;
+        font-size: var(--nbd-font-size-sm);
+        padding: var(--nbd-space-sm) var(--nbd-space-md);
+    }
+    
     .nbd-gallery-indicators {
         justify-content: center;
+    }
+}
+
+/* Optimización adicional para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .nbd-secondary-actions {
+        gap: var(--nbd-space-xs);
+    }
+    
+    .nbd-secondary-actions .nbd-btn {
+        min-height: 44px;
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .nbd-btn.nbd-btn--whatsapp svg {
+        width: 18px;
+        height: 18px;
     }
     
     .nbd-gallery-indicator {
@@ -6745,3 +6839,97 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-collection-card:nth-child(4) { animation-delay: 0.4s; }
 .nbd-collection-card:nth-child(5) { animation-delay: 0.5s; }
 .nbd-collection-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* ===== ESTILOS STORE LOCATION MAP ===== */
+
+/* Contenedor principal del mapa de ubicación de la tienda */
+.nbd-store-map {
+    position: relative;
+    width: 100%;
+}
+
+.nbd-store-map-container {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--nbd-radius-md);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--nbd-neutral-200);
+    background: var(--nbd-neutral-100);
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Evitar parpadeos durante la carga */
+.nbd-store-map-container > div {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Estado de carga del mapa */
+.nbd-store-map-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--nbd-neutral-50);
+    border-radius: var(--nbd-radius-md);
+    z-index: 1;
+}
+
+.nbd-store-map-loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--nbd-neutral-300);
+    border-top: 2px solid var(--nbd-primary);
+    border-radius: 50%;
+    animation: nbd-spin 1s linear infinite;
+    margin-bottom: var(--nbd-space-sm);
+}
+
+.nbd-store-map-loading p {
+    font-size: var(--nbd-font-size-sm);
+    color: var(--nbd-neutral-600);
+    margin: 0;
+}
+
+/* Estado de error del mapa */
+.nbd-store-map-error {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--nbd-radius-md);
+    border: 1px solid var(--nbd-neutral-200);
+    background: var(--nbd-neutral-50);
+}
+
+.nbd-store-map-error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--nbd-neutral-500);
+    text-align: center;
+    padding: var(--nbd-space-md);
+}
+
+.nbd-store-map-error-content svg {
+    margin-bottom: var(--nbd-space-sm);
+    opacity: 0.5;
+}
+
+.nbd-store-map-error-content p {
+    font-size: var(--nbd-font-size-sm);
+    margin: 0;
+}
+
+/* Animación de spinner */
+@keyframes nbd-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== FIN ESTILOS STORE LOCATION MAP =====*/

@@ -49,6 +49,7 @@ export interface StoreTexts {
   // Footer
   aboutUs: string;
   contact: string;
+  findUs: string;
   followUs: string;
   allRightsReserved: string;
   
@@ -202,6 +203,7 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     // Footer
     aboutUs: 'Acerca de nosotros',
     contact: 'Contacto',
+    findUs: 'Ubícanos',
     followUs: 'Síguenos',
     allRightsReserved: 'Todos los derechos reservados',
     
@@ -354,6 +356,7 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     // Footer
     aboutUs: 'About Us',
     contact: 'Contact',
+    findUs: 'Find Us',
     followUs: 'Follow Us',
     allRightsReserved: 'All rights reserved',
     
@@ -506,6 +509,7 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     // Rodapé
     aboutUs: 'Sobre nós',
     contact: 'Contato',
+    findUs: 'Encontre-nos',
     followUs: 'Siga-nos',
     allRightsReserved: 'Todos os direitos reservados',
     
