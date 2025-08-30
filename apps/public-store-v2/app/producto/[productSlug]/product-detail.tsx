@@ -894,7 +894,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                 <button 
                   className="nbd-btn nbd-btn--primary nbd-btn--cart"
                   onClick={handleAddToCart}
-                  disabled={
+                  disabled={Boolean(
                     !product || 
                     typeof product.price !== 'number' ||
                     // Deshabilitar SOLO si gestiona stock Y no hay stock disponible
@@ -902,8 +902,8 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                     // Deshabilitar si hay variantes con precios pero ninguna seleccionada
                     (hasProductVariantsWithPricing() && !selectedPricingVariant) ||
                     // O si la variante seleccionada no está disponible (solo si gestiona stock)
-                    (hasProductVariantsWithPricing() && selectedPricingVariant && selectedPricingVariant.stock === 0)
-                  }
+                    (hasProductVariantsWithPricing() && selectedPricingVariant && selectedPricingVariant.stock !== undefined && selectedPricingVariant.stock <= 0)
+                  )}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
