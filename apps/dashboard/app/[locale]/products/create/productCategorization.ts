@@ -460,32 +460,187 @@ export const CATEGORY_OPTIONS: CategoryNode[] = [
     },
     { 
       id: 'electronics', 
-      name: 'Electrónica',
+      name: 'Tecnología',
+      isLeaf: true,
       children: [
         { 
           id: 'electronics-phones', 
-          name: 'Teléfonos',
+          name: 'Teléfonos y comunicación',
+          isLeaf: true,
           children: [
             { id: 'electronics-phones-smartphones', name: 'Smartphones', isLeaf: true },
-            { id: 'electronics-phones-accessories', name: 'Accesorios para teléfonos', isLeaf: true }
+            { id: 'electronics-phones-accessories', name: 'Accesorios para teléfonos', isLeaf: true },
+            { id: 'electronics-phones-landline', name: 'Teléfonos fijos', isLeaf: true },
+            { id: 'electronics-phones-walkie-talkies', name: 'Walkie-talkies', isLeaf: true }
           ]
         },
         { 
           id: 'electronics-computers', 
-          name: 'Computadoras',
+          name: 'Computadoras y accesorios',
+          isLeaf: true,
           children: [
             { id: 'electronics-computers-laptops', name: 'Laptops', isLeaf: true },
             { id: 'electronics-computers-desktop', name: 'Computadoras de escritorio', isLeaf: true },
-            { id: 'electronics-computers-tablets', name: 'Tablets', isLeaf: true }
+            { id: 'electronics-computers-tablets', name: 'Tablets', isLeaf: true },
+            { id: 'electronics-computers-accessories', name: 'Accesorios para computadora', isLeaf: true },
+            { id: 'electronics-computers-components', name: 'Componentes de PC', isLeaf: true },
+            { id: 'electronics-computers-monitors', name: 'Monitores', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'electronics-audio', 
+          name: 'Audio y sonido',
+          isLeaf: true,
+          children: [
+            { id: 'electronics-audio-headphones', name: 'Audífonos', isLeaf: true },
+            { id: 'electronics-audio-speakers', name: 'Altavoces', isLeaf: true },
+            { id: 'electronics-audio-soundbars', name: 'Barras de sonido', isLeaf: true },
+            { id: 'electronics-audio-microphones', name: 'Micrófonos', isLeaf: true },
+            { id: 'electronics-audio-home-audio', name: 'Sistemas de audio para hogar', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'electronics-tv-video', 
+          name: 'TV y video',
+          isLeaf: true,
+          children: [
+            { id: 'electronics-tv-smart-tv', name: 'Smart TV', isLeaf: true },
+            { id: 'electronics-tv-streaming', name: 'Dispositivos de streaming', isLeaf: true },
+            { id: 'electronics-tv-projectors', name: 'Proyectores', isLeaf: true },
+            { id: 'electronics-tv-accessories', name: 'Accesorios para TV', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'electronics-gaming', 
+          name: 'Gaming y videojuegos',
+          isLeaf: true,
+          children: [
+            { id: 'electronics-gaming-consoles', name: 'Consolas', isLeaf: true },
+            { id: 'electronics-gaming-controllers', name: 'Controles', isLeaf: true },
+            { id: 'electronics-gaming-accessories', name: 'Accesorios gaming', isLeaf: true },
+            { id: 'electronics-gaming-pc-gaming', name: 'PC Gaming', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'electronics-cameras', 
+          name: 'Cámaras y fotografía',
+          isLeaf: true,
+          children: [
+            { id: 'electronics-cameras-digital', name: 'Cámaras digitales', isLeaf: true },
+            { id: 'electronics-cameras-action', name: 'Cámaras de acción', isLeaf: true },
+            { id: 'electronics-cameras-security', name: 'Cámaras de seguridad', isLeaf: true },
+            { id: 'electronics-cameras-accessories', name: 'Accesorios para cámaras', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'electronics-wearables', 
+          name: 'Dispositivos wearables',
+          isLeaf: true,
+          children: [
+            { id: 'electronics-wearables-smartwatches', name: 'Smartwatches', isLeaf: true },
+            { id: 'electronics-wearables-fitness', name: 'Rastreadores de fitness', isLeaf: true },
+            { id: 'electronics-wearables-vr', name: 'Realidad virtual', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'electronics-smart-home', 
+          name: 'Hogar inteligente',
+          isLeaf: true,
+          children: [
+            { id: 'electronics-smart-home-assistants', name: 'Asistentes inteligentes', isLeaf: true },
+            { id: 'electronics-smart-home-security', name: 'Seguridad del hogar', isLeaf: true },
+            { id: 'electronics-smart-home-lighting', name: 'Iluminación inteligente', isLeaf: true },
+            { id: 'electronics-smart-home-climate', name: 'Control de clima', isLeaf: true }
           ]
         }
       ]
     },
     { 
       id: 'home-garden', 
-      name: 'Casa y jardín',
+      name: 'Hogar y decoración',
       isLeaf: true,
-      children: []
+      children: [
+        { 
+          id: 'home-furniture', 
+          name: 'Muebles',
+          isLeaf: true,
+          children: [
+            { id: 'home-furniture-living-room', name: 'Sala de estar', isLeaf: true },
+            { id: 'home-furniture-bedroom', name: 'Dormitorio', isLeaf: true },
+            { id: 'home-furniture-dining', name: 'Comedor', isLeaf: true },
+            { id: 'home-furniture-office', name: 'Oficina', isLeaf: true },
+            { id: 'home-furniture-storage', name: 'Almacenamiento', isLeaf: true },
+            { id: 'home-furniture-outdoor', name: 'Muebles de exterior', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'home-decor', 
+          name: 'Decoración',
+          isLeaf: true,
+          children: [
+            { id: 'home-decor-wall-art', name: 'Arte de pared', isLeaf: true },
+            { id: 'home-decor-lighting', name: 'Iluminación decorativa', isLeaf: true },
+            { id: 'home-decor-mirrors', name: 'Espejos', isLeaf: true },
+            { id: 'home-decor-vases', name: 'Jarrones y floreros', isLeaf: true },
+            { id: 'home-decor-candles', name: 'Velas y aromaterapia', isLeaf: true },
+            { id: 'home-decor-cushions', name: 'Cojines y textiles', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'home-kitchen', 
+          name: 'Cocina y comedor',
+          isLeaf: true,
+          children: [
+            { id: 'home-kitchen-appliances', name: 'Electrodomésticos', isLeaf: true },
+            { id: 'home-kitchen-cookware', name: 'Utensilios de cocina', isLeaf: true },
+            { id: 'home-kitchen-tableware', name: 'Vajilla y cristalería', isLeaf: true },
+            { id: 'home-kitchen-storage', name: 'Almacenamiento de cocina', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'home-bathroom', 
+          name: 'Baño',
+          isLeaf: true,
+          children: [
+            { id: 'home-bathroom-accessories', name: 'Accesorios de baño', isLeaf: true },
+            { id: 'home-bathroom-towels', name: 'Toallas y textiles', isLeaf: true },
+            { id: 'home-bathroom-storage', name: 'Almacenamiento', isLeaf: true },
+            { id: 'home-bathroom-fixtures', name: 'Grifería y accesorios', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'home-bedding', 
+          name: 'Ropa de cama',
+          isLeaf: true,
+          children: [
+            { id: 'home-bedding-sheets', name: 'Sábanas', isLeaf: true },
+            { id: 'home-bedding-comforters', name: 'Edredones y cobertores', isLeaf: true },
+            { id: 'home-bedding-pillows', name: 'Almohadas', isLeaf: true },
+            { id: 'home-bedding-blankets', name: 'Mantas', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'home-garden', 
+          name: 'Jardín y exterior',
+          isLeaf: true,
+          children: [
+            { id: 'home-garden-plants', name: 'Plantas y macetas', isLeaf: true },
+            { id: 'home-garden-tools', name: 'Herramientas de jardín', isLeaf: true },
+            { id: 'home-garden-outdoor-decor', name: 'Decoración exterior', isLeaf: true },
+            { id: 'home-garden-irrigation', name: 'Riego y cuidado', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'home-cleaning', 
+          name: 'Limpieza y organización',
+          isLeaf: true,
+          children: [
+            { id: 'home-cleaning-supplies', name: 'Productos de limpieza', isLeaf: true },
+            { id: 'home-cleaning-tools', name: 'Herramientas de limpieza', isLeaf: true },
+            { id: 'home-cleaning-organization', name: 'Organización', isLeaf: true }
+          ]
+        }
+      ]
     },
     { 
       id: 'health-beauty', 
@@ -525,6 +680,85 @@ export const CATEGORY_OPTIONS: CategoryNode[] = [
             { id: 'food-beverages-soft', name: 'Bebidas gaseosas', isLeaf: true },
             { id: 'food-beverages-juice', name: 'Jugos naturales', isLeaf: true },
             { id: 'food-beverages-coffee', name: 'Café y té', isLeaf: true }
+          ]
+        }
+      ]
+    },
+    { 
+      id: 'pets', 
+      name: 'Productos para mascotas',
+      isLeaf: true,
+      children: [
+        { 
+          id: 'pets-dogs', 
+          name: 'Perros',
+          isLeaf: true,
+          children: [
+            { id: 'pets-dogs-food', name: 'Comida para perros', isLeaf: true },
+            { id: 'pets-dogs-treats', name: 'Premios y snacks', isLeaf: true },
+            { id: 'pets-dogs-toys', name: 'Juguetes para perros', isLeaf: true },
+            { id: 'pets-dogs-accessories', name: 'Accesorios para perros', isLeaf: true },
+            { id: 'pets-dogs-grooming', name: 'Cuidado e higiene', isLeaf: true },
+            { id: 'pets-dogs-health', name: 'Salud y bienestar', isLeaf: true },
+            { id: 'pets-dogs-training', name: 'Entrenamiento', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'pets-cats', 
+          name: 'Gatos',
+          isLeaf: true,
+          children: [
+            { id: 'pets-cats-food', name: 'Comida para gatos', isLeaf: true },
+            { id: 'pets-cats-treats', name: 'Premios y snacks', isLeaf: true },
+            { id: 'pets-cats-toys', name: 'Juguetes para gatos', isLeaf: true },
+            { id: 'pets-cats-accessories', name: 'Accesorios para gatos', isLeaf: true },
+            { id: 'pets-cats-grooming', name: 'Cuidado e higiene', isLeaf: true },
+            { id: 'pets-cats-health', name: 'Salud y bienestar', isLeaf: true },
+            { id: 'pets-cats-litter', name: 'Arena y bandejas', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'pets-birds', 
+          name: 'Aves',
+          isLeaf: true,
+          children: [
+            { id: 'pets-birds-food', name: 'Comida para aves', isLeaf: true },
+            { id: 'pets-birds-cages', name: 'Jaulas y accesorios', isLeaf: true },
+            { id: 'pets-birds-toys', name: 'Juguetes para aves', isLeaf: true },
+            { id: 'pets-birds-health', name: 'Salud y bienestar', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'pets-fish', 
+          name: 'Peces',
+          isLeaf: true,
+          children: [
+            { id: 'pets-fish-food', name: 'Comida para peces', isLeaf: true },
+            { id: 'pets-fish-aquariums', name: 'Acuarios y decoración', isLeaf: true },
+            { id: 'pets-fish-equipment', name: 'Equipos y filtros', isLeaf: true },
+            { id: 'pets-fish-care', name: 'Cuidado del agua', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'pets-small-animals', 
+          name: 'Animales pequeños',
+          isLeaf: true,
+          children: [
+            { id: 'pets-small-food', name: 'Comida para roedores', isLeaf: true },
+            { id: 'pets-small-cages', name: 'Jaulas y hábitats', isLeaf: true },
+            { id: 'pets-small-toys', name: 'Juguetes y enriquecimiento', isLeaf: true },
+            { id: 'pets-small-bedding', name: 'Camas y sustratos', isLeaf: true }
+          ]
+        },
+        { 
+          id: 'pets-reptiles', 
+          name: 'Reptiles',
+          isLeaf: true,
+          children: [
+            { id: 'pets-reptiles-food', name: 'Comida para reptiles', isLeaf: true },
+            { id: 'pets-reptiles-terrariums', name: 'Terrarios y decoración', isLeaf: true },
+            { id: 'pets-reptiles-heating', name: 'Calefacción e iluminación', isLeaf: true },
+            { id: 'pets-reptiles-substrate', name: 'Sustratos y camas', isLeaf: true }
           ]
         }
       ]
@@ -978,19 +1212,703 @@ export const META_FIELDS_BY_CATEGORY: Record<string, MetaField[]> = {
     { id: 'style', name: 'Estilo', type: 'select', options: ['Planas', 'Con tacón', 'Plataforma', 'Deportivas'] },
     { id: 'gender', name: 'Género', type: 'select', options: ['Mujer', 'Hombre', 'Unisex', 'Niño'] }
   ],
+  // ===================================================
+  // TECNOLOGÍA - METADATOS COMPLETOS
+  // ===================================================
+
+  // Tecnología (categoría principal)
+  'electronics': [
+    { id: 'device_type', name: 'Tipo de dispositivo', type: 'select', options: ['Smartphone', 'Laptop', 'Tablet', 'Desktop', 'Audio', 'TV', 'Gaming', 'Cámara', 'Wearable', 'Smart Home'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'condition', name: 'Condición', type: 'select', options: ['Nuevo', 'Reacondicionado', 'Usado - Como nuevo', 'Usado - Bueno', 'Usado - Aceptable'] },
+    { id: 'warranty', name: 'Garantía', type: 'select', options: ['Sin garantía', '6 meses', '1 año', '2 años', '3 años', 'Garantía extendida'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Wi-Fi', 'Bluetooth', '5G', '4G', 'Ethernet', 'USB-C', 'Lightning', 'NFC'] },
+    { id: 'power_source', name: 'Fuente de poder', type: 'select', options: ['Batería', 'Cable', 'Batería/Cable', 'Solar', 'USB'] }
+  ],
+
+  // Teléfonos y comunicación (categoría general)
+  'electronics-phones': [
+    { id: 'phone_type', name: 'Tipo de teléfono', type: 'select', options: ['Smartphone', 'Teléfono básico', 'Teléfono fijo', 'Walkie-talkie', 'Satélite'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'operating_system', name: 'Sistema operativo', type: 'select', options: ['Android', 'iOS', 'Windows', 'Otro', 'No aplica'] },
+    { id: 'network', name: 'Red', type: 'tags', options: ['5G', '4G LTE', '3G', 'Wi-Fi', 'Bluetooth'] },
+    { id: 'condition', name: 'Condición', type: 'select', options: ['Nuevo', 'Reacondicionado', 'Usado'] },
+    { id: 'unlocked', name: 'Liberado', type: 'select', options: ['Sí', 'No', 'Carrier específico'] }
+  ],
+
   // Smartphones
   'electronics-phones-smartphones': [
-    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Samsung', 'Huawei', 'Xiaomi', 'OnePlus', 'Google'] },
-    { id: 'storage', name: 'Almacenamiento', type: 'tags', options: ['64GB', '128GB', '256GB', '512GB', '1TB'] },
-    { id: 'color', name: 'Color', type: 'tags', options: ['Negro', 'Blanco', 'Azul', 'Rojo', 'Verde', 'Morado'] },
-    { id: 'screen_size', name: 'Tamaño de Pantalla', type: 'select', options: ['5.4"', '6.1"', '6.5"', '6.7"', '6.8"'] }
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Samsung', 'Google', 'Xiaomi', 'OnePlus', 'Huawei', 'Motorola', 'Sony', 'Nokia', 'Realme', 'Oppo', 'Vivo', 'Otra'] },
+    { id: 'operating_system', name: 'Sistema operativo', type: 'select', options: ['iOS', 'Android 14', 'Android 13', 'Android 12', 'Android 11', 'Otro'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['32GB', '64GB', '128GB', '256GB', '512GB', '1TB', '2TB'] },
+    { id: 'ram', name: 'Memoria RAM', type: 'select', options: ['3GB', '4GB', '6GB', '8GB', '12GB', '16GB', '18GB', '24GB'] },
+    { id: 'screen_size', name: 'Tamaño de pantalla', type: 'select', options: ['Menos de 5"', '5.0"-5.4"', '5.5"-6.0"', '6.1"-6.5"', '6.6"-7.0"', 'Más de 7"'] },
+    { id: 'screen_type', name: 'Tipo de pantalla', type: 'select', options: ['OLED', 'AMOLED', 'Super AMOLED', 'LCD', 'IPS', 'Retina', 'Dynamic AMOLED'] },
+    { id: 'camera_mp', name: 'Cámara principal', type: 'select', options: ['Menos de 12MP', '12-20MP', '21-50MP', '51-100MP', 'Más de 100MP'] },
+    { id: 'battery', name: 'Batería', type: 'select', options: ['Menos de 3000mAh', '3000-4000mAh', '4000-5000mAh', 'Más de 5000mAh'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Negro', 'Blanco', 'Gris', 'Azul', 'Verde', 'Rosa', 'Rojo', 'Morado', 'Dorado', 'Plateado'] },
+    { id: 'network', name: 'Red', type: 'tags', options: ['5G', '4G LTE', 'Wi-Fi 6', 'Wi-Fi 5', 'Bluetooth 5.0+', 'NFC'] },
+    { id: 'condition', name: 'Condición', type: 'select', options: ['Nuevo', 'Reacondicionado', 'Usado - Excelente', 'Usado - Bueno'] },
+    { id: 'unlocked', name: 'Liberado', type: 'select', options: ['Sí', 'No'] }
   ],
+
+  // Accesorios para teléfonos
+  'electronics-phones-accessories': [
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Funda/Case', 'Protector de pantalla', 'Cargador', 'Cable', 'Soporte', 'Audífonos', 'Power bank', 'Lente', 'Ring holder'] },
+    { id: 'phone_compatibility', name: 'Compatible con', type: 'tags', options: ['iPhone 15', 'iPhone 14', 'iPhone 13', 'Samsung Galaxy S24', 'Samsung Galaxy S23', 'Google Pixel', 'Universal', 'Android', 'iOS'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Silicona', 'TPU', 'Plástico duro', 'Cuero', 'Metal', 'Vidrio templado', 'Fibra de carbono', 'Madera'] },
+    { id: 'protection_level', name: 'Nivel de protección', type: 'select', options: ['Básica', 'Media', 'Alta', 'Militar/Extrema'] },
+    { id: 'wireless', name: 'Inalámbrico', type: 'select', options: ['Sí', 'No'] },
+    { id: 'fast_charging', name: 'Carga rápida', type: 'select', options: ['Sí', 'No'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Negro', 'Transparente', 'Blanco', 'Azul', 'Rosa', 'Rojo', 'Verde', 'Multicolor'] }
+  ],
+
+  // Teléfonos fijos
+  'electronics-phones-landline': [
+    { id: 'phone_type', name: 'Tipo', type: 'select', options: ['Teléfono básico', 'Teléfono con contestador', 'Teléfono inalámbrico', 'Sistema multi-handset', 'IP phone'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Identificador de llamadas', 'Contestador automático', 'Manos libres', 'Bluetooth', 'Pantalla LCD', 'Memoria de números'] },
+    { id: 'range', name: 'Alcance', type: 'select', options: ['Hasta 50m', '50-100m', '100-300m', 'Más de 300m', 'No aplica'] },
+    { id: 'handsets', name: 'Número de auriculares', type: 'select', options: ['1', '2', '3', '4', '5+'] },
+    { id: 'power_source', name: 'Fuente de poder', type: 'select', options: ['Cable', 'Batería recargable', 'Pilas AA/AAA', 'Mixto'] }
+  ],
+
+  // Walkie-talkies
+  'electronics-phones-walkie-talkies': [
+    { id: 'range', name: 'Alcance', type: 'select', options: ['Hasta 1km', '1-5km', '5-10km', '10-20km', 'Más de 20km'] },
+    { id: 'channels', name: 'Canales', type: 'select', options: ['8 canales', '16 canales', '22 canales', '50+ canales'] },
+    { id: 'power_source', name: 'Fuente de poder', type: 'select', options: ['Batería recargable', 'Pilas AA', 'Ambos'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['VOX (manos libres)', 'Linterna', 'Resistente al agua', 'Clip de cinturón', 'Pantalla LCD', 'Alerta de emergencia'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Recreativo', 'Profesional', 'Emergencias', 'Outdoor', 'Construcción', 'Seguridad'] },
+    { id: 'weather_resistant', name: 'Resistente al clima', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Computadoras y accesorios (categoría general)
+  'electronics-computers': [
+    { id: 'computer_type', name: 'Tipo de computadora', type: 'select', options: ['Laptop', 'Desktop', 'All-in-one', 'Mini PC', 'Tablet', 'Workstation'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'operating_system', name: 'Sistema operativo', type: 'select', options: ['Windows 11', 'Windows 10', 'macOS', 'Chrome OS', 'Linux', 'iPadOS', 'Android'] },
+    { id: 'processor_brand', name: 'Marca del procesador', type: 'select', options: ['Intel', 'AMD', 'Apple Silicon', 'Qualcomm', 'MediaTek'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Oficina', 'Gaming', 'Diseño gráfico', 'Programación', 'Estudiante', 'Hogar', 'Empresarial', 'Creativos'] },
+    { id: 'condition', name: 'Condición', type: 'select', options: ['Nuevo', 'Reacondicionado', 'Usado'] }
+  ],
+
   // Laptops
   'electronics-computers-laptops': [
-    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer'] },
-    { id: 'processor', name: 'Procesador', type: 'select', options: ['Intel i3', 'Intel i5', 'Intel i7', 'AMD Ryzen 5', 'AMD Ryzen 7'] },
-    { id: 'ram', name: 'Memoria RAM', type: 'tags', options: ['8GB', '16GB', 'GB', '64GB'] },
-    { id: 'storage', name: 'Almacenamiento', type: 'tags', options: ['256GB SSD', '512GB SSD', '1TB SSD', '2TB SSD'] }
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MSI', 'Razer', 'Microsoft', 'Samsung', 'LG', 'Otra'] },
+    { id: 'processor', name: 'Procesador', type: 'select', options: ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 3', 'AMD Ryzen 5', 'AMD Ryzen 7', 'AMD Ryzen 9', 'Apple M1', 'Apple M2', 'Apple M3'] },
+    { id: 'ram', name: 'Memoria RAM', type: 'select', options: ['4GB', '8GB', '16GB', '32GB', '64GB', '128GB'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['128GB SSD', '256GB SSD', '512GB SSD', '1TB SSD', '2TB SSD', '4TB SSD', '1TB HDD', '2TB HDD'] },
+    { id: 'screen_size', name: 'Tamaño de pantalla', type: 'select', options: ['11"-12"', '13"-14"', '15"-16"', '17"-18"', 'Más de 18"'] },
+    { id: 'graphics', name: 'Tarjeta gráfica', type: 'select', options: ['Integrada', 'NVIDIA GTX', 'NVIDIA RTX', 'AMD Radeon', 'Apple GPU', 'Intel Iris'] },
+    { id: 'weight', name: 'Peso', type: 'select', options: ['Menos de 1kg', '1-1.5kg', '1.5-2kg', '2-2.5kg', 'Más de 2.5kg'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Oficina', 'Gaming', 'Diseño gráfico', 'Programación', 'Estudiante', 'Ultrabook', 'Workstation'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['Menos de 5h', '5-8h', '8-12h', '12-16h', 'Más de 16h'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Plateado', 'Gris espacial', 'Negro', 'Blanco', 'Azul', 'Rosa', 'Oro'] }
+  ],
+
+  // Computadoras de escritorio
+  'electronics-computers-desktop': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Apple', 'MSI', 'Alienware', 'Custom build', 'Otra'] },
+    { id: 'form_factor', name: 'Factor de forma', type: 'select', options: ['Torre completa', 'Torre media', 'Mini torre', 'All-in-one', 'Mini PC', 'Barebone'] },
+    { id: 'processor', name: 'Procesador', type: 'select', options: ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 3', 'AMD Ryzen 5', 'AMD Ryzen 7', 'AMD Ryzen 9'] },
+    { id: 'ram', name: 'Memoria RAM', type: 'select', options: ['8GB', '16GB', '32GB', '64GB', '128GB'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'tags', options: ['256GB SSD', '512GB SSD', '1TB SSD', '2TB SSD', '1TB HDD', '2TB HDD', '4TB HDD'] },
+    { id: 'graphics', name: 'Tarjeta gráfica', type: 'select', options: ['Integrada', 'NVIDIA GTX 1650', 'NVIDIA GTX 1660', 'NVIDIA RTX 3060', 'NVIDIA RTX 4060', 'NVIDIA RTX 4070', 'NVIDIA RTX 4080', 'AMD Radeon'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Oficina', 'Gaming', 'Diseño gráfico', 'Programación', 'Hogar', 'Workstation', 'Server'] },
+    { id: 'operating_system', name: 'Sistema operativo', type: 'select', options: ['Windows 11', 'Windows 10', 'macOS', 'Linux', 'Sin OS'] }
+  ],
+
+  // Tablets
+  'electronics-computers-tablets': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'Huawei', 'Amazon', 'Google', 'Xiaomi', 'Otra'] },
+    { id: 'operating_system', name: 'Sistema operativo', type: 'select', options: ['iPadOS', 'Android', 'Windows', 'Fire OS'] },
+    { id: 'screen_size', name: 'Tamaño de pantalla', type: 'select', options: ['7"-8"', '8"-10"', '10"-11"', '11"-13"', 'Más de 13"'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['32GB', '64GB', 'GB', '256GB', '512GB', '1TB', '2TB'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['Wi-Fi', 'Wi-Fi + Cellular', 'Wi-Fi + 5G', 'Wi-Fi + 4G LTE'] },
+    { id: 'stylus_support', name: 'Soporte para stylus', type: 'select', options: ['Sí', 'No', 'Opcional'] },
+    { id: 'keyboard_support', name: 'Teclado compatible', type: 'select', options: ['Sí', 'No', 'Opcional'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Entretenimiento', 'Productividad', 'Diseño', 'Educación', 'Gaming', 'Lectura'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Gris espacial', 'Plateado', 'Negro', 'Blanco', 'Azul', 'Rosa', 'Verde'] }
+  ],
+
+  // Accesorios para computadora
+  'electronics-computers-accessories': [
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Teclado', 'Mouse', 'Webcam', 'Micrófono', 'Hub USB', 'Dock', 'Soporte', 'Mousepad', 'Enfriador'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['USB', 'Bluetooth', 'Inalámbrico 2.4GHz', 'USB-C', 'Lightning', 'Cable'] },
+    { id: 'compatibility', name: 'Compatibilidad', type: 'tags', options: ['Windows', 'macOS', 'Linux', 'Android', 'iOS', 'Universal'] },
+    { id: 'gaming', name: 'Para gaming', type: 'select', options: ['Sí', 'No'] },
+    { id: 'ergonomic', name: 'Ergonómico', type: 'select', options: ['Sí', 'No'] },
+    { id: 'backlit', name: 'Retroiluminado', type: 'select', options: ['Sí', 'No', 'RGB'] }
+  ],
+
+  // Componentes de PC
+  'electronics-computers-components': [
+    { id: 'component_type', name: 'Tipo de componente', type: 'select', options: ['Procesador (CPU)', 'Tarjeta gráfica (GPU)', 'Memoria RAM', 'Almacenamiento', 'Placa madre', 'Fuente de poder', 'Ventilador/Cooling', 'Case'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'compatibility', name: 'Compatible con', type: 'tags', options: ['Intel', 'AMD', 'NVIDIA', 'ATI', 'DDR4', 'DDR5', 'SATA', 'NVMe'] },
+    { id: 'performance_level', name: 'Nivel de rendimiento', type: 'select', options: ['Básico', 'Intermedio', 'Alto rendimiento', 'Enthusiast', 'Profesional'] },
+    { id: 'form_factor', name: 'Factor de forma', type: 'select', options: ['ATX', 'Micro-ATX', 'Mini-ITX', 'E-ATX', 'Estándar'] },
+    { id: 'warranty', name: 'Garantía', type: 'select', options: ['1 año', '2 años', '3 años', '5 años', 'De por vida'] }
+  ],
+
+  // Monitores
+  'electronics-computers-monitors': [
+    { id: 'screen_size', name: 'Tamaño de pantalla', type: 'select', options: ['21"-24"', '25"-27"', '28"-32"', '33"-38"', 'Más de 38"'] },
+    { id: 'resolution', name: 'Resolución', type: 'select', options: ['1080p (Full HD)', '1440p (2K)', '4K (Ultra HD)', '5K', '8K'] },
+    { id: 'panel_type', name: 'Tipo de panel', type: 'select', options: ['IPS', 'VA', 'TN', 'OLED', 'QLED'] },
+    { id: 'refresh_rate', name: 'Tasa de refresco', type: 'select', options: ['60Hz', '75Hz', '120Hz', '144Hz', '165Hz', '240Hz', '360Hz'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['HDMI', 'DisplayPort', 'USB-C', 'VGA', 'DVI', 'Thunderbolt'] },
+    { id: 'gaming', name: 'Para gaming', type: 'select', options: ['Sí', 'No'] },
+    { id: 'curved', name: 'Curvo', type: 'select', options: ['Sí', 'No'] },
+    { id: 'adjustable', name: 'Ajustable', type: 'select', options: ['Altura', 'Inclinación', 'Rotación', 'Pivot', 'Completamente ajustable', 'No ajustable'] }
+  ],
+
+  // Audio y sonido (categoría general)
+  'electronics-audio': [
+    { id: 'audio_type', name: 'Tipo de audio', type: 'select', options: ['Audífonos', 'Altavoces', 'Barra de sonido', 'Micrófono', 'Sistema de audio', 'Amplificador'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Bluetooth', 'Wi-Fi', 'Cable 3.5mm', 'USB', 'USB-C', 'Lightning', 'Inalámbrico'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Música', 'Gaming', 'Trabajo', 'Deportes', 'Viajes', 'Hogar', 'Profesional', 'Streaming'] },
+    { id: 'wireless', name: 'Inalámbrico', type: 'select', options: ['Sí', 'No', 'Ambos'] },
+    { id: 'noise_cancellation', name: 'Cancelación de ruido', type: 'select', options: ['Activa', 'Pasiva', 'Híbrida', 'No'] }
+  ],
+
+  // Audífonos
+  'electronics-audio-headphones': [
+    { id: 'headphone_type', name: 'Tipo de audífono', type: 'select', options: ['In-ear', 'On-ear', 'Over-ear', 'True wireless', 'Wireless', 'Con cable'] },
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Sony', 'Bose', 'Sennheiser', 'Audio-Technica', 'JBL', 'Beats', 'Samsung', 'Jabra', 'Skullcandy', 'Otra'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['Bluetooth', 'Cable 3.5mm', 'USB-C', 'Lightning', 'USB', 'Inalámbrico 2.4GHz'] },
+    { id: 'noise_cancellation', name: 'Cancelación de ruido', type: 'select', options: ['ANC activa', 'Pasiva', 'Híbrida', 'No'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Música', 'Gaming', 'Trabajo', 'Deportes', 'Viajes', 'Llamadas', 'Streaming', 'Monitoreo'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['Menos de 5h', '5-10h', '10-20h', '20-30h', 'Más de 30h', 'No aplica'] },
+    { id: 'water_resistance', name: 'Resistencia al agua', type: 'select', options: ['IPX4', 'IPX5', 'IPX7', 'IPX8', 'No resistente'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Negro', 'Blanco', 'Gris', 'Azul', 'Rosa', 'Rojo', 'Verde', 'Plateado'] }
+  ],
+
+  // Altavoces
+  'electronics-audio-speakers': [
+    { id: 'speaker_type', name: 'Tipo de altavoz', type: 'select', options: ['Portátil', 'Inteligente', 'Bluetooth', 'Bookshelf', 'Soundbar', 'Subwoofer', 'Sistema 2.1', 'Sistema 5.1'] },
+    { id: 'brand', name: 'Marca', type: 'select', options: ['JBL', 'Bose', 'Sony', 'Amazon', 'Google', 'Apple', 'Marshall', 'Ultimate Ears', 'Harman Kardon', 'Bang & Olufsen', 'Otra'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Bluetooth', 'Wi-Fi', 'AUX 3.5mm', 'USB', 'USB-C', 'Optical', 'HDMI'] },
+    { id: 'power_output', name: 'Potencia', type: 'select', options: ['Menos de 10W', '10-20W', '20-50W', '50-100W', 'Más de 100W'] },
+    { id: 'smart_features', name: 'Características inteligentes', type: 'tags', options: ['Asistente de voz', 'Control por app', 'Multi-room', 'Streaming', 'Control táctil'] },
+    { id: 'portability', name: 'Portabilidad', type: 'select', options: ['Ultra portátil', 'Portátil', 'Semi-portátil', 'Estacionario'] },
+    { id: 'water_resistance', name: 'Resistencia al agua', type: 'select', options: ['IPX4', 'IPX5', 'IPX7', 'IPX8', 'No resistente'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['Menos de 5h', '5-10h', '10-20h', 'Más de 20h', 'No aplica (con cable)'] }
+  ],
+
+  // Barras de sonido
+  'electronics-audio-soundbars': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Samsung', 'LG', 'Sony', 'Bose', 'JBL', 'Yamaha', 'Polk', 'Vizio', 'Sonos', 'Otra'] },
+    { id: 'channels', name: 'Configuración de canales', type: 'select', options: ['2.0', '2.1', '3.1', '5.1', '7.1', 'Atmos'] },
+    { id: 'power_output', name: 'Potencia total', type: 'select', options: ['Menos de 100W', '100-200W', '200-400W', '400-600W', 'Más de 600W'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['HDMI ARC', 'HDMI eARC', 'Bluetooth', 'Wi-Fi', 'Optical', 'USB', 'AUX'] },
+    { id: 'subwoofer', name: 'Subwoofer', type: 'select', options: ['Incluido inalámbrico', 'Incluido con cable', 'No incluido', 'Opcional'] },
+    { id: 'smart_features', name: 'Características inteligentes', type: 'tags', options: ['Asistente de voz', 'Control por app', 'Streaming', 'Multi-room', 'Auto calibración'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Compacta (menos de 60cm)', 'Media (60-90cm)', 'Grande (90-120cm)', 'Extra grande (más de 120cm)'] }
+  ],
+
+  // Micrófonos
+  'electronics-audio-microphones': [
+    { id: 'microphone_type', name: 'Tipo de micrófono', type: 'select', options: ['USB', 'XLR', 'Inalámbrico', 'Lavalier', 'Shotgun', 'Dinámico', 'Condensador'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Streaming', 'Podcasting', 'Gaming', 'Música', 'Conferencias', 'Grabación profesional', 'Karaoke'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['USB', 'USB-C', 'XLR', 'Inalámbrico', '3.5mm', 'Lightning'] },
+    { id: 'polar_pattern', name: 'Patrón polar', type: 'select', options: ['Cardioide', 'Omnidireccional', 'Bidireccional', 'Shotgun', 'Múltiple'] },
+    { id: 'frequency_response', name: 'Respuesta de frecuencia', type: 'select', options: ['20Hz-20kHz', 'Extendida', 'Optimizada para voz', 'Flat response'] },
+    { id: 'phantom_power', name: 'Alimentación phantom', type: 'select', options: ['Requerida', 'No requerida', 'Opcional'] },
+    { id: 'accessories_included', name: 'Accesorios incluidos', type: 'tags', options: ['Soporte de mesa', 'Brazo articulado', 'Pop filter', 'Cable', 'Estuche', 'Shock mount'] }
+  ],
+
+  // Sistemas de audio para hogar
+  'electronics-audio-home-audio': [
+    { id: 'system_type', name: 'Tipo de sistema', type: 'select', options: ['Estéreo', '2.1', '5.1', '7.1', 'Atmos', 'Hi-Fi', 'Vintage'] },
+    { id: 'components', name: 'Componentes', type: 'tags', options: ['Amplificador', 'Receiver', 'Altavoces', 'Subwoofer', 'Reproductor CD', 'Tocadiscos', 'Streamer'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Bluetooth', 'Wi-Fi', 'HDMI', 'Optical', 'RCA', 'USB', 'Streaming'] },
+    { id: 'power_output', name: 'Potencia', type: 'select', options: ['Menos de 50W', '50-100W', '100-300W', '300-500W', 'Más de 500W'] },
+    { id: 'room_size', name: 'Tamaño de habitación', type: 'select', options: ['Pequeña (hasta 20m²)', 'Media (20-40m²)', 'Grande (40-80m²)', 'Muy grande (más de 80m²)'] },
+    { id: 'brand', name: 'Marca', type: 'text' }
+  ],
+
+  // TV y video (categoría general)
+  'electronics-tv-video': [
+    { id: 'device_type', name: 'Tipo de dispositivo', type: 'select', options: ['Smart TV', 'TV básico', 'Proyector', 'Streaming device', 'Media player', 'Reproductor Blu-ray'] },
+    { id: 'screen_technology', name: 'Tecnología de pantalla', type: 'select', options: ['LED', 'OLED', 'QLED', 'LCD', 'Plasma', 'Proyección'] },
+    { id: 'resolution', name: 'Resolución', type: 'select', options: ['HD (720p)', 'Full HD (1080p)', '4K (Ultra HD)', '8K'] },
+    { id: 'smart_features', name: 'Características inteligentes', type: 'tags', options: ['Smart TV', 'Streaming apps', 'Control por voz', 'Wi-Fi', 'Bluetooth'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['HDMI', 'USB', 'Wi-Fi', 'Bluetooth', 'Ethernet', 'Optical'] }
+  ],
+
+  // Smart TV
+  'electronics-tv-smart-tv': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Samsung', 'LG', 'Sony', 'TCL', 'Hisense', 'Panasonic', 'Philips', 'Roku', 'Otra'] },
+    { id: 'screen_size', name: 'Tamaño de pantalla', type: 'select', options: ['32"', '40"-43"', '48"-50"', '55"', '65"', '75"', '85"', 'Más de 85"'] },
+    { id: 'resolution', name: 'Resolución', type: 'select', options: ['Full HD (1080p)', '4K (Ultra HD)', '8K'] },
+    { id: 'display_technology', name: 'Tecnología de pantalla', type: 'select', options: ['LED', 'QLED', 'OLED', 'Neo QLED', 'Mini LED', 'LCD'] },
+    { id: 'smart_platform', name: 'Plataforma inteligente', type: 'select', options: ['Android TV', 'Google TV', 'Roku TV', 'webOS', 'Tizen', 'Fire TV', 'Apple TV'] },
+    { id: 'hdr_support', name: 'Soporte HDR', type: 'tags', options: ['HDR10', 'HDR10+', 'Dolby Vision', 'HLG', 'No HDR'] },
+    { id: 'refresh_rate', name: 'Tasa de refresco', type: 'select', options: ['60Hz', '120Hz', '144Hz', 'Variable'] },
+    { id: 'gaming_features', name: 'Características gaming', type: 'tags', options: ['HDMI 2.1', 'VRR', 'ALLM', 'Game Mode', 'Baja latencia'] },
+    { id: 'audio_features', name: 'Audio', type: 'tags', options: ['Dolby Atmos', 'DTS', 'Altavoces integrados', 'Soporte eARC'] }
+  ],
+
+  // Dispositivos de streaming
+  'electronics-tv-streaming': [
+    { id: 'device_type', name: 'Tipo de dispositivo', type: 'select', options: ['Stick', 'Box', 'Dongle', 'Media player'] },
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Amazon Fire TV', 'Roku', 'Google Chromecast', 'Apple TV', 'NVIDIA Shield', 'Xiaomi Mi Box', 'Otra'] },
+    { id: 'resolution_support', name: 'Resolución soportada', type: 'select', options: ['1080p', '4K', '4K HDR', '8K'] },
+    { id: 'streaming_services', name: 'Servicios compatibles', type: 'tags', options: ['Netflix', 'Amazon Prime', 'Disney+', 'YouTube', 'Spotify', 'Apple TV+', 'HBO Max', 'Paramount+'] },
+    { id: 'remote_type', name: 'Control remoto', type: 'select', options: ['Básico', 'Con voz', 'Touchpad', 'Gaming', 'App móvil'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Wi-Fi', 'Ethernet', 'Bluetooth', 'USB', 'HDMI', 'Micro SD'] }
+  ],
+
+  // Proyectores
+  'electronics-tv-projectors': [
+    { id: 'projector_type', name: 'Tipo de proyector', type: 'select', options: ['DLP', 'LCD', 'LED', 'Láser', 'Mini/Portátil'] },
+    { id: 'resolution', name: 'Resolución', type: 'select', options: ['HD (720p)', 'Full HD (1080p)', '4K', '8K'] },
+    { id: 'brightness', name: 'Brillo (lúmenes)', type: 'select', options: ['Menos de 1000', '1000-2000', '2000-3000', '3000-4000', 'Más de 4000'] },
+    { id: 'throw_distance', name: 'Distancia de proyección', type: 'select', options: ['Corta (menos de 1m)', 'Media (1-3m)', 'Larga (3-6m)', 'Ultra corta'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Hogar', 'Oficina', 'Educación', 'Gaming', 'Cine en casa', 'Portátil', 'Profesional'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['HDMI', 'USB', 'Wi-Fi', 'Bluetooth', 'VGA', 'USB-C'] },
+    { id: 'portability', name: 'Portabilidad', type: 'select', options: ['Ultra portátil', 'Portátil', 'Semi-portátil', 'Estacionario'] }
+  ],
+
+  // Accesorios para TV
+  'electronics-tv-accessories': [
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Soporte de pared', 'Soporte de mesa', 'Control remoto', 'Cable HDMI', 'Antena', 'Protector de pantalla', 'Limpiador'] },
+    { id: 'tv_size_compatibility', name: 'Compatible con TV de', type: 'select', options: ['32"-43"', '44"-55"', '56"-65"', '66"-75"', 'Más de 75"', 'Universal'] },
+    { id: 'vesa_compatibility', name: 'Compatibilidad VESA', type: 'tags', options: ['100x100', '200x200', '400x400', '600x400', '800x400', 'Universal'] },
+    { id: 'adjustable', name: 'Ajustable', type: 'select', options: ['Fijo', 'Inclinación', 'Articulado', 'Completamente ajustable'] },
+    { id: 'weight_capacity', name: 'Capacidad de peso', type: 'select', options: ['Hasta 15kg', '15-25kg', '25-40kg', '40-60kg', 'Más de 60kg'] }
+  ],
+
+  // Gaming y videojuegos (categoría general)
+  'electronics-gaming': [
+    { id: 'gaming_type', name: 'Tipo de gaming', type: 'select', options: ['Consola', 'PC Gaming', 'Móvil', 'VR', 'Arcade', 'Retro'] },
+    { id: 'platform', name: 'Plataforma', type: 'select', options: ['PlayStation', 'Xbox', 'Nintendo', 'PC', 'Móvil', 'Multi-plataforma'] },
+    { id: 'age_rating', name: 'Clasificación de edad', type: 'select', options: ['E (Everyone)', 'T (Teen)', 'M (Mature)', 'A (Adults Only)', 'RP (Rating Pending)'] },
+    { id: 'genre', name: 'Género', type: 'tags', options: ['Acción', 'Aventura', 'RPG', 'Deportes', 'Racing', 'Shooter', 'Estrategia', 'Puzzle', 'Simulación'] },
+    { id: 'multiplayer', name: 'Multijugador', type: 'select', options: ['Sí', 'No', 'Online', 'Local', 'Cooperativo'] }
+  ],
+
+  // Consolas
+  'electronics-gaming-consoles': [
+    { id: 'console_brand', name: 'Marca de consola', type: 'select', options: ['PlayStation', 'Xbox', 'Nintendo', 'Steam Deck', 'Retro', 'Otra'] },
+    { id: 'console_model', name: 'Modelo', type: 'select', options: ['PlayStation 5', 'Xbox Series X', 'Xbox Series S', 'Nintendo Switch', 'Nintendo Switch Lite', 'Steam Deck', 'Retro handheld'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['64GB', '256GB', '512GB', '1TB', '2TB'] },
+    { id: 'condition', name: 'Condición', type: 'select', options: ['Nueva', 'Reacondicionada', 'Usada - Excelente', 'Usada - Buena'] },
+    { id: 'bundle', name: 'Bundle incluido', type: 'tags', options: ['Solo consola', 'Con control extra', 'Con juegos', 'Bundle completo', 'Accesorios incluidos'] },
+    { id: 'region', name: 'Región', type: 'select', options: ['Global', 'NTSC', 'PAL', 'Japón', 'Europa', 'América'] }
+  ],
+
+  // Controles
+  'electronics-gaming-controllers': [
+    { id: 'controller_type', name: 'Tipo de control', type: 'select', options: ['PlayStation', 'Xbox', 'Nintendo', 'PC', 'Móvil', 'Universal', 'Arcade stick', 'Racing wheel'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['Inalámbrico', 'Cable USB', 'Bluetooth', 'Dongle 2.4GHz'] },
+    { id: 'compatibility', name: 'Compatible con', type: 'tags', options: ['PS5', 'PS4', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC', 'Android', 'iOS'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Vibración', 'Triggers adaptativos', 'Giroscopio', 'Touchpad', 'Audio jack', 'RGB', 'Programable'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['Menos de 10h', '10-20h', '20-40h', 'Más de 40h', 'No aplica (con cable)'] },
+    { id: 'ergonomic', name: 'Ergonómico', type: 'select', options: ['Sí', 'No'] },
+    { id: 'customizable', name: 'Personalizable', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Accesorios gaming
+  'electronics-gaming-accessories': [
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Headset gaming', 'Teclado gaming', 'Mouse gaming', 'Mousepad', 'Silla gaming', 'Micrófono', 'Webcam', 'Capturadora'] },
+    { id: 'platform', name: 'Compatible con', type: 'tags', options: ['PC', 'PlayStation', 'Xbox', 'Nintendo Switch', 'Móvil', 'Multi-plataforma'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['USB', 'Inalámbrico', 'Bluetooth', '3.5mm', 'USB-C'] },
+    { id: 'rgb_lighting', name: 'Iluminación RGB', type: 'select', options: ['Sí', 'No'] },
+    { id: 'professional', name: 'Nivel profesional', type: 'select', options: ['Casual', 'Enthusiast', 'Profesional', 'Esports'] },
+    { id: 'wireless', name: 'Inalámbrico', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // PC Gaming
+  'electronics-gaming-pc-gaming': [
+    { id: 'pc_type', name: 'Tipo de PC', type: 'select', options: ['Pre-construido', 'Custom build', 'Laptop gaming', 'Mini PC gaming'] },
+    { id: 'performance_tier', name: 'Nivel de rendimiento', type: 'select', options: ['Entry level', 'Mid-range', 'High-end', 'Enthusiast', 'Extreme'] },
+    { id: 'graphics_card', name: 'Tarjeta gráfica', type: 'select', options: ['GTX 1650', 'GTX 1660', 'RTX 3060', 'RTX 4060', 'RTX 4070', 'RTX 4080', 'RTX 4090', 'AMD equivalente'] },
+    { id: 'processor', name: 'Procesador', type: 'select', options: ['Intel i5', 'Intel i7', 'Intel i9', 'AMD Ryzen 5', 'AMD Ryzen 7', 'AMD Ryzen 9'] },
+    { id: 'ram', name: 'Memoria RAM', type: 'select', options: ['16GB', '32GB', '64GB', '128GB'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'tags', options: ['512GB SSD', '1TB SSD', '2TB SSD', '1TB HDD', '2TB HDD'] },
+    { id: 'target_fps', name: 'FPS objetivo', type: 'select', options: ['60 FPS', '120 FPS', '144 FPS', '240 FPS', '360 FPS'] },
+    { id: 'resolution_target', name: 'Resolución objetivo', type: 'select', options: ['1080p', '1440p', '4K', '8K'] }
+  ],
+
+  // Cámaras y fotografía (categoría general)
+  'electronics-cameras': [
+    { id: 'camera_type', name: 'Tipo de cámara', type: 'select', options: ['DSLR', 'Mirrorless', 'Compacta', 'Acción', 'Instantánea', 'Seguridad', 'Webcam'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Fotografía', 'Video', 'Deportes extremos', 'Viajes', 'Profesional', 'Principiante', 'Seguridad'] },
+    { id: 'skill_level', name: 'Nivel de habilidad', type: 'select', options: ['Principiante', 'Intermedio', 'Avanzado', 'Profesional'] },
+    { id: 'portability', name: 'Portabilidad', type: 'select', options: ['Ultra portátil', 'Portátil', 'Semi-portátil', 'Estacionario'] }
+  ],
+
+  // Cámaras digitales
+  'electronics-cameras-digital': [
+    { id: 'camera_type', name: 'Tipo de cámara', type: 'select', options: ['DSLR', 'Mirrorless', 'Compacta', 'Medium format', 'Film/Análoga'] },
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Canon', 'Nikon', 'Sony', 'Fujifilm', 'Panasonic', 'Olympus', 'Leica', 'Pentax', 'Otra'] },
+    { id: 'megapixels', name: 'Megapíxeles', type: 'select', options: ['Menos de 16MP', '16-24MP', '24-36MP', '36-50MP', 'Más de 50MP'] },
+    { id: 'sensor_size', name: 'Tamaño del sensor', type: 'select', options: ['1/2.3"', 'Micro 4/3', 'APS-C', 'Full Frame', 'Medium Format'] },
+    { id: 'video_capability', name: 'Capacidad de video', type: 'select', options: ['1080p', '4K', '6K', '8K', 'No video'] },
+    { id: 'lens_mount', name: 'Montura de lente', type: 'select', options: ['Canon EF', 'Canon RF', 'Nikon F', 'Nikon Z', 'Sony E', 'Micro 4/3', 'Fuji X', 'Lente fija'] },
+    { id: 'stabilization', name: 'Estabilización', type: 'select', options: ['En el cuerpo', 'En el lente', 'Híbrida', 'Electrónica', 'No'] },
+    { id: 'condition', name: 'Condición', type: 'select', options: ['Nueva', 'Usada - Excelente', 'Usada - Buena', 'Para repuestos'] }
+  ],
+
+  // Cámaras de acción
+  'electronics-cameras-action': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['GoPro', 'DJI', 'Insta360', 'Sony', 'Garmin', 'AKASO', 'YI', 'Otra'] },
+    { id: 'video_resolution', name: 'Resolución de video', type: 'select', options: ['1080p', '4K', '5.3K', '6K', '8K'] },
+    { id: 'frame_rate', name: 'Tasa de frames', type: 'select', options: ['30fps', '60fps', '120fps', '240fps', 'Variable'] },
+    { id: 'stabilization', name: 'Estabilización', type: 'select', options: ['Electrónica', 'Gimbal', 'Híbrida', 'No'] },
+    { id: 'waterproof', name: 'Resistencia al agua', type: 'select', options: ['IPX7', 'IPX8', '10m', '30m', '60m', 'No resistente'] },
+    { id: 'field_of_view', name: 'Campo de visión', type: 'select', options: ['Ultra gran angular', 'Gran angular', 'Estándar', 'Ajustable'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Pantalla táctil', 'Control por voz', 'Wi-Fi', 'Bluetooth', 'GPS', 'Live streaming'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Deportes extremos', 'Viajes', 'Underwater', 'Vlogging', 'Aventura', 'Profesional'] }
+  ],
+
+  // Cámaras de seguridad
+  'electronics-cameras-security': [
+    { id: 'camera_type', name: 'Tipo de cámara', type: 'select', options: ['Interior', 'Exterior', 'PTZ', 'Bullet', 'Dome', 'Oculta', 'Doorbell'] },
+    { id: 'resolution', name: 'Resolución', type: 'select', options: ['720p', '1080p', '4K', '5MP', '8MP'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['Wi-Fi', 'Ethernet', 'PoE', 'Inalámbrico', 'Cellular'] },
+    { id: 'power_source', name: 'Fuente de poder', type: 'select', options: ['Batería', 'Cable', 'PoE', 'Solar', 'Batería recargable'] },
+    { id: 'night_vision', name: 'Visión nocturna', type: 'select', options: ['Infrarrojo', 'Color nocturno', 'Spotlight', 'No'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['Cloud', 'Micro SD', 'NVR', 'Local', 'Híbrido'] },
+    { id: 'smart_features', name: 'Características inteligentes', type: 'tags', options: ['Detección de movimiento', 'Reconocimiento facial', 'Audio bidireccional', 'Alertas móviles', 'AI'] },
+    { id: 'weather_resistance', name: 'Resistencia climática', type: 'select', options: ['IP65', 'IP66', 'IP67', 'Solo interior'] }
+  ],
+
+  // Accesorios para cámaras
+  'electronics-cameras-accessories': [
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Lente', 'Trípode', 'Flash', 'Filtro', 'Bolsa/Case', 'Batería', 'Cargador', 'Memoria', 'Correa'] },
+    { id: 'camera_compatibility', name: 'Compatible con', type: 'tags', options: ['Canon', 'Nikon', 'Sony', 'Fujifilm', 'Universal', 'GoPro', 'DJI'] },
+    { id: 'lens_type', name: 'Tipo de lente', type: 'select', options: ['Gran angular', 'Teleobjetivo', 'Macro', 'Estándar', 'Fisheye', 'Zoom', 'Prime'] },
+    { id: 'focal_length', name: 'Distancia focal', type: 'select', options: ['Menos de 35mm', '35-85mm', '85-200mm', 'Más de 200mm', 'Zoom variable'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Aluminio', 'Carbono', 'Plástico', 'Cuero', 'Nylon', 'Metal'] },
+    { id: 'portability', name: 'Portabilidad', type: 'select', options: ['Ultra compacto', 'Compacto', 'Estándar', 'Profesional'] }
+  ],
+
+  // Dispositivos wearables (categoría general)
+  'electronics-wearables': [
+    { id: 'wearable_type', name: 'Tipo de wearable', type: 'select', options: ['Smartwatch', 'Fitness tracker', 'VR headset', 'AR glasses', 'Smart ring', 'Smart clothing'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'compatibility', name: 'Compatible con', type: 'tags', options: ['iOS', 'Android', 'Windows', 'Universal'] },
+    { id: 'health_tracking', name: 'Seguimiento de salud', type: 'tags', options: ['Ritmo cardíaco', 'Sueño', 'Pasos', 'Calorías', 'Estrés', 'Oxígeno', 'ECG'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['Menos de 1 día', '1-3 días', '3-7 días', '1-2 semanas', 'Más de 2 semanas'] },
+    { id: 'water_resistance', name: 'Resistencia al agua', type: 'select', options: ['IPX4', 'IPX7', '5ATM', '10ATM', 'No resistente'] }
+  ],
+
+  // Smartwatches
+  'electronics-wearables-smartwatches': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Huawei', 'Amazfit', 'Fossil', 'Suunto', 'Polar', 'Otra'] },
+    { id: 'operating_system', name: 'Sistema operativo', type: 'select', options: ['watchOS', 'Wear OS', 'Tizen', 'Fitbit OS', 'Garmin OS', 'Propietario'] },
+    { id: 'compatibility', name: 'Compatible con', type: 'select', options: ['iPhone', 'Android', 'Ambos', 'Universal'] },
+    { id: 'display_type', name: 'Tipo de pantalla', type: 'select', options: ['OLED', 'AMOLED', 'LCD', 'E-ink', 'Retina'] },
+    { id: 'case_size', name: 'Tamaño de caja', type: 'select', options: ['38mm', '40mm', '41mm', '42mm', '44mm', '45mm', '46mm', '49mm'] },
+    { id: 'health_features', name: 'Características de salud', type: 'tags', options: ['Ritmo cardíaco', 'ECG', 'Oxígeno en sangre', 'Sueño', 'Estrés', 'Ciclo menstrual', 'Caídas'] },
+    { id: 'fitness_features', name: 'Características fitness', type: 'tags', options: ['GPS', 'Múltiples deportes', 'Resistencia al agua', 'Altímetro', 'Brújula'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Bluetooth', 'Wi-Fi', 'Cellular', 'NFC', 'GPS'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['Menos de 1 día', '1-2 días', '3-5 días', '1-2 semanas', 'Más de 2 semanas'] }
+  ],
+
+  // Rastreadores de fitness
+  'electronics-wearables-fitness': [
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Fitbit', 'Garmin', 'Xiaomi', 'Huawei', 'Samsung', 'Polar', 'Suunto', 'Amazfit', 'Otra'] },
+    { id: 'tracker_type', name: 'Tipo de tracker', type: 'select', options: ['Pulsera básica', 'Pulsera avanzada', 'Smartwatch fitness', 'Clip', 'Ring'] },
+    { id: 'display', name: 'Pantalla', type: 'select', options: ['Sin pantalla', 'Básica', 'Color', 'Táctil', 'AMOLED'] },
+    { id: 'health_tracking', name: 'Seguimiento de salud', type: 'tags', options: ['Pasos', 'Calorías', 'Distancia', 'Ritmo cardíaco', 'Sueño', 'Estrés', 'Oxígeno'] },
+    { id: 'sports_modes', name: 'Modos deportivos', type: 'select', options: ['Básicos (5-10)', 'Múltiples (10-50)', 'Extensos (50+)', 'Automático'] },
+    { id: 'gps', name: 'GPS integrado', type: 'select', options: ['Sí', 'No', 'Conectado (usa teléfono)'] },
+    { id: 'water_resistance', name: 'Resistencia al agua', type: 'select', options: ['IPX7', '5ATM', '10ATM', 'Natación', 'No resistente'] },
+    { id: 'battery_life', name: 'Duración de batería', type: 'select', options: ['3-5 días', '5-7 días', '1-2 semanas', '2-4 semanas', 'Más de 1 mes'] }
+  ],
+
+  // Realidad virtual
+  'electronics-wearables-vr': [
+    { id: 'vr_type', name: 'Tipo de VR', type: 'select', options: ['Standalone', 'PC VR', 'Móvil VR', 'Console VR'] },
+    { id: 'brand', name: 'Marca', type: 'select', options: ['Meta (Oculus)', 'HTC', 'Sony', 'Pico', 'Valve', 'HP', 'Varjo', 'Otra'] },
+    { id: 'resolution', name: 'Resolución por ojo', type: 'select', options: ['1440x1700', '1832x1920', '2160x2160', '2880x1700', 'Más alta'] },
+    { id: 'refresh_rate', name: 'Tasa de refresco', type: 'select', options: ['72Hz', '90Hz', '120Hz', '144Hz', 'Variable'] },
+    { id: 'tracking', name: 'Seguimiento', type: 'select', options: ['3DOF', '6DOF', 'Inside-out', 'Outside-in', 'Hand tracking'] },
+    { id: 'platform', name: 'Plataforma', type: 'select', options: ['Meta Store', 'SteamVR', 'PlayStation VR', 'Standalone', 'PC requerida'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Gaming', 'Fitness', 'Educación', 'Trabajo', 'Entretenimiento', 'Social'] },
+    { id: 'ipd_range', name: 'Rango IPD', type: 'select', options: ['58-72mm', '56-74mm', 'Ajustable', 'Fijo'] }
+  ],
+
+  // Hogar inteligente (categoría general)
+  'electronics-smart-home': [
+    { id: 'device_type', name: 'Tipo de dispositivo', type: 'select', options: ['Asistente inteligente', 'Cámara seguridad', 'Iluminación', 'Termostato', 'Enchufe inteligente', 'Sensor', 'Hub'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'voice_assistant', name: 'Asistente de voz', type: 'tags', options: ['Alexa', 'Google Assistant', 'Siri', 'Bixby', 'No compatible'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Wi-Fi', 'Bluetooth', 'Zigbee', 'Z-Wave', 'Thread', 'Matter'] },
+    { id: 'app_control', name: 'Control por app', type: 'select', options: ['Sí', 'No'] },
+    { id: 'automation', name: 'Automatización', type: 'select', options: ['Básica', 'Avanzada', 'IA', 'No'] }
+  ],
+
+  // Asistentes inteligentes
+  'electronics-smart-home-assistants': [
+    { id: 'assistant_type', name: 'Tipo de asistente', type: 'select', options: ['Altavoz inteligente', 'Pantalla inteligente', 'Hub central', 'Portable'] },
+    { id: 'voice_assistant', name: 'Asistente de voz', type: 'select', options: ['Alexa', 'Google Assistant', 'Siri', 'Bixby'] },
+    { id: 'screen_size', name: 'Tamaño de pantalla', type: 'select', options: ['Sin pantalla', '5"', '7"', '8"', '10"', '15"'] },
+    { id: 'audio_quality', name: 'Calidad de audio', type: 'select', options: ['Básica', 'Buena', 'Premium', 'Hi-Fi'] },
+    { id: 'smart_home_hub', name: 'Hub integrado', type: 'select', options: ['Zigbee', 'Z-Wave', 'Thread', 'Matter', 'No'] },
+    { id: 'video_calling', name: 'Videollamadas', type: 'select', options: ['Sí', 'No'] },
+    { id: 'portability', name: 'Portabilidad', type: 'select', options: ['Portátil', 'Estacionario'] }
+  ],
+
+  // Seguridad del hogar
+  'electronics-smart-home-security': [
+    { id: 'security_type', name: 'Tipo de seguridad', type: 'select', options: ['Cámara', 'Sensor de movimiento', 'Sensor de puerta/ventana', 'Alarma', 'Timbre inteligente', 'Sistema completo'] },
+    { id: 'installation', name: 'Instalación', type: 'select', options: ['DIY', 'Profesional', 'Plug and play'] },
+    { id: 'monitoring', name: 'Monitoreo', type: 'select', options: ['Auto-monitoreo', 'Monitoreo profesional', 'Híbrido', 'No'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'tags', options: ['Wi-Fi', 'Cellular', 'Ethernet', 'Zigbee', 'Z-Wave'] },
+    { id: 'power_source', name: 'Fuente de poder', type: 'select', options: ['Batería', 'Cable', 'Batería + Cable', 'Solar'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['Cloud gratuito', 'Cloud pagado', 'Local', 'Híbrido'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Visión nocturna', 'Audio bidireccional', 'Detección IA', 'Alertas móviles', 'Sirena'] }
+  ],
+
+  // Iluminación inteligente
+  'electronics-smart-home-lighting': [
+    { id: 'light_type', name: 'Tipo de luz', type: 'select', options: ['Bombilla', 'Tira LED', 'Panel LED', 'Lámpara', 'Switch inteligente', 'Dimmer'] },
+    { id: 'bulb_type', name: 'Tipo de bombilla', type: 'select', options: ['LED', 'Smart LED', 'Color changing', 'Tunable white', 'Filamento'] },
+    { id: 'base_type', name: 'Tipo de base', type: 'select', options: ['E27', 'E14', 'GU10', 'B22', 'G9', 'No aplica'] },
+    { id: 'wattage', name: 'Potencia', type: 'select', options: ['Menos de 5W', '5-10W', '10-15W', '15-25W', 'Más de 25W'] },
+    { id: 'color_options', name: 'Opciones de color', type: 'select', options: ['Blanco cálido', 'Blanco frío', 'Tunable white', 'RGB', 'RGBW'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['Wi-Fi', 'Bluetooth', 'Zigbee', 'Z-Wave', 'Thread'] },
+    { id: 'voice_control', name: 'Control por voz', type: 'tags', options: ['Alexa', 'Google', 'Siri', 'No compatible'] },
+    { id: 'dimming', name: 'Regulable', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Control de clima
+  'electronics-smart-home-climate': [
+    { id: 'device_type', name: 'Tipo de dispositivo', type: 'select', options: ['Termostato inteligente', 'Sensor de temperatura', 'Humidificador', 'Deshumidificador', 'Purificador de aire', 'Ventilador inteligente'] },
+    { id: 'compatibility', name: 'Compatible con', type: 'tags', options: ['Alexa', 'Google', 'Apple HomeKit', 'SmartThings', 'Standalone'] },
+    { id: 'connectivity', name: 'Conectividad', type: 'select', options: ['Wi-Fi', 'Zigbee', 'Z-Wave', 'Thread', 'Bluetooth'] },
+    { id: 'power_source', name: 'Fuente de poder', type: 'select', options: ['Batería', 'Cable', 'C-wire', '24V', 'USB'] },
+    { id: 'coverage_area', name: 'Área de cobertura', type: 'select', options: ['Hasta 20m²', '20-50m²', '50-100m²', 'Más de 100m²'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Programación', 'Geofencing', 'Aprendizaje automático', 'Sensores múltiples', 'Control remoto'] },
+    { id: 'energy_saving', name: 'Ahorro de energía', type: 'select', options: ['Sí', 'No', 'Certificado Energy Star'] }
+  ],
+
+  // ===================================================
+  // HOGAR Y DECORACIÓN - METADATOS COMPLETOS
+  // ===================================================
+
+  // Hogar y decoración (categoría principal)
+  'home-garden': [
+    { id: 'room', name: 'Habitación', type: 'select', options: ['Sala', 'Dormitorio', 'Cocina', 'Comedor', 'Baño', 'Oficina', 'Jardín', 'Balcón', 'Entrada', 'Todas'] },
+    { id: 'style', name: 'Estilo decorativo', type: 'tags', options: ['Moderno', 'Minimalista', 'Industrial', 'Bohemio', 'Escandinavo', 'Rústico', 'Clásico', 'Vintage', 'Contemporáneo'] },
+    { id: 'material', name: 'Material principal', type: 'tags', options: ['Madera', 'Metal', 'Plástico', 'Vidrio', 'Cerámica', 'Tela', 'Mimbre', 'Piedra', 'Mármol'] },
+    { id: 'color_scheme', name: 'Esquema de color', type: 'tags', options: ['Neutro', 'Blanco', 'Negro', 'Madera natural', 'Colores vivos', 'Pasteles', 'Monocromático'] },
+    { id: 'size_category', name: 'Categoría de tamaño', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Extra grande', 'Ajustable'] },
+    { id: 'assembly_required', name: 'Requiere ensamblaje', type: 'select', options: ['No', 'Mínimo', 'Sí', 'Profesional'] }
+  ],
+
+  // Muebles (categoría general)
+  'home-furniture': [
+    { id: 'furniture_type', name: 'Tipo de mueble', type: 'select', options: ['Sofá', 'Silla', 'Mesa', 'Cama', 'Estantería', 'Armario', 'Cómoda', 'Escritorio', 'Banco'] },
+    { id: 'room', name: 'Habitación', type: 'select', options: ['Sala', 'Dormitorio', 'Comedor', 'Oficina', 'Cocina', 'Baño', 'Exterior', 'Múltiples'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera maciza', 'MDF', 'Metal', 'Plástico', 'Vidrio', 'Mimbre', 'Ratán', 'Tela', 'Cuero'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Clásico', 'Industrial', 'Rústico', 'Escandinavo', 'Minimalista', 'Vintage', 'Contemporáneo'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Blanco', 'Negro', 'Madera natural', 'Gris', 'Beige', 'Azul', 'Verde', 'Multicolor'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Extra grande', 'Personalizable'] },
+    { id: 'assembly', name: 'Ensamblaje', type: 'select', options: ['Pre-ensamblado', 'Ensamblaje fácil', 'Ensamblaje complejo', 'Instalación profesional'] }
+  ],
+
+  // Sala de estar
+  'home-furniture-living-room': [
+    { id: 'furniture_type', name: 'Tipo de mueble', type: 'select', options: ['Sofá', 'Sillón', 'Mesa de centro', 'Mesa lateral', 'Estantería', 'TV stand', 'Otomana', 'Librero'] },
+    { id: 'seating_capacity', name: 'Capacidad de asientos', type: 'select', options: ['1 persona', '2 personas', '3 personas', '4+ personas', 'No aplica'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Cuero', 'Tela', 'Microfibra', 'Lino', 'Terciopelo', 'Madera', 'Metal', 'Vidrio'] },
+    { id: 'style', name: 'Estilo', type: 'select', options: ['Moderno', 'Clásico', 'Industrial', 'Escandinavo', 'Bohemio', 'Mid-century', 'Tradicional'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Beige', 'Gris', 'Negro', 'Blanco', 'Azul', 'Verde', 'Marrón', 'Multicolor'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Reclinable', 'Convertible', 'Almacenamiento', 'Cojines removibles', 'Resistente a manchas'] }
+  ],
+
+  // Dormitorio
+  'home-furniture-bedroom': [
+    { id: 'furniture_type', name: 'Tipo de mueble', type: 'select', options: ['Cama', 'Colchón', 'Mesa de noche', 'Cómoda', 'Armario', 'Tocador', 'Banco', 'Espejo'] },
+    { id: 'bed_size', name: 'Tamaño de cama', type: 'select', options: ['Individual', 'Matrimonial', 'Queen', 'King', 'Super King', 'No aplica'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera', 'Metal', 'Tapizado', 'Cuero', 'Ratán', 'MDF', 'Mixto'] },
+    { id: 'style', name: 'Estilo', type: 'select', options: ['Moderno', 'Clásico', 'Rústico', 'Industrial', 'Romántico', 'Minimalista', 'Vintage'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Blanco', 'Negro', 'Madera natural', 'Gris', 'Beige', 'Azul', 'Rosa'] },
+    { id: 'storage', name: 'Con almacenamiento', type: 'select', options: ['Sí', 'No'] },
+    { id: 'headboard', name: 'Cabecero', type: 'select', options: ['Incluido', 'Opcional', 'No incluido', 'No aplica'] }
+  ],
+
+  // Comedor
+  'home-furniture-dining': [
+    { id: 'furniture_type', name: 'Tipo de mueble', type: 'select', options: ['Mesa de comedor', 'Silla de comedor', 'Banco', 'Aparador', 'Vitrina', 'Bar cart', 'Conjunto completo'] },
+    { id: 'seating_capacity', name: 'Capacidad', type: 'select', options: ['2 personas', '4 personas', '6 personas', '8 personas', '10+ personas', 'No aplica'] },
+    { id: 'table_shape', name: 'Forma de mesa', type: 'select', options: ['Rectangular', 'Redonda', 'Ovalada', 'Cuadrada', 'Extensible', 'No aplica'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera maciza', 'Vidrio', 'Mármol', 'Metal', 'MDF', 'Laminado', 'Mixto'] },
+    { id: 'style', name: 'Estilo', type: 'select', options: ['Moderno', 'Clásico', 'Industrial', 'Rústico', 'Escandinavo', 'Farmhouse', 'Contemporáneo'] },
+    { id: 'upholstery', name: 'Tapizado', type: 'select', options: ['Cuero', 'Tela', 'Vinilo', 'Sin tapizar', 'Cojín removible'] }
+  ],
+
+  // Oficina
+  'home-furniture-office': [
+    { id: 'furniture_type', name: 'Tipo de mueble', type: 'select', options: ['Escritorio', 'Silla de oficina', 'Estantería', 'Archivero', 'Mesa auxiliar', 'Lámpara de escritorio', 'Organizador'] },
+    { id: 'ergonomic', name: 'Ergonómico', type: 'select', options: ['Sí', 'No'] },
+    { id: 'adjustable', name: 'Ajustable', type: 'tags', options: ['Altura', 'Inclinación', 'Brazos', 'Respaldo', 'No ajustable'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera', 'Metal', 'Vidrio', 'Mesh', 'Cuero', 'Tela', 'Plástico'] },
+    { id: 'storage', name: 'Almacenamiento', type: 'select', options: ['Con cajones', 'Con estantes', 'Sin almacenamiento', 'Múltiple'] },
+    { id: 'mobility', name: 'Movilidad', type: 'select', options: ['Con ruedas', 'Fijo', 'Plegable'] },
+    { id: 'work_style', name: 'Estilo de trabajo', type: 'tags', options: ['Ejecutivo', 'Casual', 'Gaming', 'Creativo', 'Minimalista', 'Tradicional'] }
+  ],
+
+  // Almacenamiento
+  'home-furniture-storage': [
+    { id: 'storage_type', name: 'Tipo de almacenamiento', type: 'select', options: ['Estantería', 'Armario', 'Cómoda', 'Baúl', 'Organizador', 'Rack', 'Gabinete', 'Closet'] },
+    { id: 'room', name: 'Habitación', type: 'select', options: ['Dormitorio', 'Sala', 'Cocina', 'Baño', 'Oficina', 'Garaje', 'Sótano', 'Universal'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera', 'Metal', 'Plástico', 'Tela', 'Mimbre', 'MDF', 'Mixto'] },
+    { id: 'capacity', name: 'Capacidad', type: 'select', options: ['Pequeña', 'Mediana', 'Grande', 'Extra grande'] },
+    { id: 'doors_drawers', name: 'Puertas/Cajones', type: 'select', options: ['Abierto', 'Con puertas', 'Con cajones', 'Mixto'] },
+    { id: 'assembly', name: 'Ensamblaje', type: 'select', options: ['Pre-ensamblado', 'Fácil', 'Complejo'] },
+    { id: 'modular', name: 'Modular', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Muebles de exterior
+  'home-furniture-outdoor': [
+    { id: 'furniture_type', name: 'Tipo de mueble', type: 'select', options: ['Mesa de jardín', 'Silla de jardín', 'Tumbona', 'Sombrilla', 'Banco', 'Columpio', 'Conjunto de jardín', 'Macetero'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Teca', 'Aluminio', 'Hierro forjado', 'Ratán sintético', 'Plástico', 'Textilene', 'Acero inoxidable'] },
+    { id: 'weather_resistant', name: 'Resistente al clima', type: 'select', options: ['Sí', 'Tratamiento requerido', 'Solo interior cubierto', 'No'] },
+    { id: 'seating_capacity', name: 'Capacidad', type: 'select', options: ['1 persona', '2 personas', '4 personas', '6 personas', '8+ personas', 'No aplica'] },
+    { id: 'foldable', name: 'Plegable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'cushions_included', name: 'Cojines incluidos', type: 'select', options: ['Sí', 'Opcionales', 'No'] },
+    { id: 'maintenance', name: 'Mantenimiento', type: 'select', options: ['Bajo', 'Medio', 'Alto'] }
+  ],
+
+  // Decoración (categoría general)
+  'home-decor': [
+    { id: 'decor_type', name: 'Tipo de decoración', type: 'select', options: ['Arte de pared', 'Iluminación', 'Textiles', 'Plantas', 'Espejos', 'Velas', 'Figuras decorativas', 'Marcos'] },
+    { id: 'room', name: 'Habitación', type: 'select', options: ['Sala', 'Dormitorio', 'Cocina', 'Comedor', 'Baño', 'Oficina', 'Entrada', 'Todas'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Bohemio', 'Industrial', 'Escandinavo', 'Minimalista', 'Vintage', 'Rústico', 'Clásico'] },
+    { id: 'color_palette', name: 'Paleta de colores', type: 'tags', options: ['Neutros', 'Tierra', 'Pasteles', 'Vivos', 'Monocromático', 'Metálicos'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera', 'Metal', 'Cerámica', 'Vidrio', 'Tela', 'Papel', 'Plástico', 'Natural'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Extra grande'] }
+  ],
+
+  // Arte de pared
+  'home-decor-wall-art': [
+    { id: 'art_type', name: 'Tipo de arte', type: 'select', options: ['Cuadro', 'Póster', 'Canvas', 'Fotografía', 'Vinilo decorativo', 'Escultura de pared', 'Tapiz', 'Espejo decorativo'] },
+    { id: 'style', name: 'Estilo artístico', type: 'tags', options: ['Abstracto', 'Realista', 'Moderno', 'Vintage', 'Minimalista', 'Bohemio', 'Geométrico', 'Natural'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño (menos de 30cm)', 'Mediano (30-60cm)', 'Grande (60-100cm)', 'Extra grande (más de 100cm)'] },
+    { id: 'orientation', name: 'Orientación', type: 'select', options: ['Horizontal', 'Vertical', 'Cuadrado', 'Circular', 'Irregular'] },
+    { id: 'frame_included', name: 'Marco incluido', type: 'select', options: ['Sí', 'No', 'Opcional'] },
+    { id: 'color_scheme', name: 'Esquema de colores', type: 'tags', options: ['Blanco y negro', 'Colores cálidos', 'Colores fríos', 'Neutros', 'Vivos', 'Pasteles'] },
+    { id: 'room_suggestion', name: 'Habitación sugerida', type: 'tags', options: ['Sala', 'Dormitorio', 'Comedor', 'Oficina', 'Cocina', 'Baño', 'Pasillo'] }
+  ],
+
+  // Iluminación decorativa
+  'home-decor-lighting': [
+    { id: 'light_type', name: 'Tipo de iluminación', type: 'select', options: ['Lámpara de mesa', 'Lámpara de pie', 'Colgante', 'Aplique de pared', 'Candelabro', 'Guirnalda', 'Vela LED'] },
+    { id: 'bulb_type', name: 'Tipo de bombilla', type: 'select', options: ['LED', 'Incandescente', 'Halógena', 'Fluorescente', 'Vela', 'No incluida'] },
+    { id: 'light_color', name: 'Color de luz', type: 'select', options: ['Blanco cálido', 'Blanco frío', 'Blanco natural', 'Colores RGB', 'Amarillo', 'Regulable'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Industrial', 'Vintage', 'Bohemio', 'Escandinavo', 'Clásico', 'Minimalista'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Metal', 'Madera', 'Vidrio', 'Cerámica', 'Tela', 'Plástico', 'Cristal', 'Ratán'] },
+    { id: 'dimmable', name: 'Regulable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'room_suggestion', name: 'Habitación sugerida', type: 'tags', options: ['Sala', 'Dormitorio', 'Comedor', 'Oficina', 'Cocina', 'Baño'] }
+  ],
+
+  // Espejos
+  'home-decor-mirrors': [
+    { id: 'mirror_type', name: 'Tipo de espejo', type: 'select', options: ['De pared', 'De pie', 'De mesa', 'Decorativo', 'Funcional', 'Con iluminación'] },
+    { id: 'shape', name: 'Forma', type: 'select', options: ['Rectangular', 'Redondo', 'Ovalado', 'Cuadrado', 'Irregular', 'Geométrico'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño (menos de 40cm)', 'Mediano (40-80cm)', 'Grande (80-120cm)', 'Extra grande (más de 120cm)'] },
+    { id: 'frame_material', name: 'Material del marco', type: 'tags', options: ['Madera', 'Metal', 'Plástico', 'Sin marco', 'Dorado', 'Plateado', 'Negro'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Vintage', 'Barroco', 'Minimalista', 'Industrial', 'Bohemio', 'Clásico'] },
+    { id: 'room_suggestion', name: 'Habitación sugerida', type: 'tags', options: ['Baño', 'Dormitorio', 'Entrada', 'Sala', 'Comedor'] },
+    { id: 'mounting', name: 'Montaje', type: 'select', options: ['Colgante', 'Apoyo', 'Adhesivo', 'Atornillado'] }
+  ],
+
+  // Jarrones y floreros
+  'home-decor-vases': [
+    { id: 'vase_type', name: 'Tipo', type: 'select', options: ['Jarrón decorativo', 'Florero', 'Maceta decorativa', 'Centro de mesa', 'Jarrón de pie'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Cerámica', 'Vidrio', 'Metal', 'Madera', 'Plástico', 'Piedra', 'Cristal', 'Bambú'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño (menos de 20cm)', 'Mediano (20-40cm)', 'Grande (40-60cm)', 'Extra grande (más de 60cm)'] },
+    { id: 'shape', name: 'Forma', type: 'select', options: ['Cilíndrico', 'Cónico', 'Esférico', 'Cuadrado', 'Irregular', 'Geométrico'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Clásico', 'Minimalista', 'Bohemio', 'Industrial', 'Rústico', 'Elegante'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Blanco', 'Negro', 'Transparente', 'Dorado', 'Plateado', 'Azul', 'Verde', 'Multicolor'] },
+    { id: 'use', name: 'Uso', type: 'select', options: ['Solo decorativo', 'Para flores frescas', 'Para plantas', 'Centro de mesa', 'Múltiple'] }
+  ],
+
+  // Velas y aromaterapia
+  'home-decor-candles': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Vela perfumada', 'Vela decorativa', 'Difusor', 'Aceite esencial', 'Incienso', 'Candelabro', 'Portavelas'] },
+    { id: 'scent_family', name: 'Familia de aroma', type: 'tags', options: ['Floral', 'Frutal', 'Woody', 'Fresh', 'Oriental', 'Gourmand', 'Sin aroma'] },
+    { id: 'scent', name: 'Aroma específico', type: 'tags', options: ['Lavanda', 'Vainilla', 'Canela', 'Eucalipto', 'Limón', 'Rosa', 'Sándalo', 'Menta', 'Coco'] },
+    { id: 'wax_type', name: 'Tipo de cera', type: 'select', options: ['Soja', 'Parafina', 'Cera de abeja', 'Coco', 'Mixta', 'No aplica'] },
+    { id: 'burn_time', name: 'Tiempo de quemado', type: 'select', options: ['Menos de 10h', '10-25h', '25-50h', '50-80h', 'Más de 80h', 'No aplica'] },
+    { id: 'container', name: 'Contenedor', type: 'select', options: ['Vidrio', 'Metal', 'Cerámica', 'Sin contenedor', 'Reutilizable'] },
+    { id: 'room_suggestion', name: 'Habitación sugerida', type: 'tags', options: ['Sala', 'Dormitorio', 'Baño', 'Comedor', 'Oficina', 'Todas'] }
+  ],
+
+  // Cojines y textiles
+  'home-decor-cushions': [
+    { id: 'textile_type', name: 'Tipo de textil', type: 'select', options: ['Cojín decorativo', 'Funda de cojín', 'Manta decorativa', 'Cortina', 'Alfombra', 'Tapete', 'Mantel'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Algodón', 'Lino', 'Poliéster', 'Terciopelo', 'Seda', 'Lana', 'Microfibra', 'Yute'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño (30x30cm)', 'Mediano (45x45cm)', 'Grande (60x60cm)', 'Rectangular', 'Personalizado'] },
+    { id: 'pattern', name: 'Patrón', type: 'tags', options: ['Liso', 'Rayas', 'Geométrico', 'Floral', 'Abstracto', 'Animal print', 'Étnico', 'Texturizado'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Blanco', 'Beige', 'Gris', 'Negro', 'Azul', 'Verde', 'Rosa', 'Amarillo', 'Multicolor'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Bohemio', 'Escandinavo', 'Industrial', 'Clásico', 'Minimalista', 'Rústico'] },
+    { id: 'washable', name: 'Lavable', type: 'select', options: ['Lavable en máquina', 'Solo limpieza en seco', 'Lavado a mano', 'No lavable'] }
+  ],
+
+  // Cocina y comedor (categoría general)
+  'home-kitchen': [
+    { id: 'kitchen_category', name: 'Categoría de cocina', type: 'select', options: ['Electrodomésticos', 'Utensilios', 'Vajilla', 'Almacenamiento', 'Textiles', 'Decoración'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Acero inoxidable', 'Cerámica', 'Vidrio', 'Plástico', 'Madera', 'Silicona', 'Aluminio', 'Hierro fundido'] },
+    { id: 'dishwasher_safe', name: 'Apto para lavavajillas', type: 'select', options: ['Sí', 'No', 'Solo parte superior'] },
+    { id: 'microwave_safe', name: 'Apto para microondas', type: 'select', options: ['Sí', 'No'] },
+    { id: 'use_case', name: 'Uso', type: 'tags', options: ['Cocinar', 'Servir', 'Almacenar', 'Decorar', 'Hornear', 'Beber'] },
+    { id: 'capacity', name: 'Capacidad', type: 'select', options: ['Individual', '2-4 personas', '4-6 personas', '6+ personas', 'Familiar'] }
+  ],
+
+  // Electrodomésticos
+  'home-kitchen-appliances': [
+    { id: 'appliance_type', name: 'Tipo de electrodoméstico', type: 'select', options: ['Licuadora', 'Cafetera', 'Tostadora', 'Microondas', 'Freidora de aire', 'Batidora', 'Procesador', 'Plancha', 'Aspiradora'] },
+    { id: 'power', name: 'Potencia', type: 'select', options: ['Menos de 500W', '500-1000W', '1000-1500W', '1500-2000W', 'Más de 2000W'] },
+    { id: 'capacity', name: 'Capacidad', type: 'select', options: ['1-2 personas', '3-4 personas', '5-6 personas', 'Familiar (6+ personas)'] },
+    { id: 'features', name: 'Características', type: 'tags', options: ['Programable', 'Digital', 'Múltiples velocidades', 'Auto-apagado', 'Antiadherente', 'Desmontable'] },
+    { id: 'energy_efficiency', name: 'Eficiencia energética', type: 'select', options: ['A+++', 'A++', 'A+', 'A', 'B', 'C'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'warranty', name: 'Garantía', type: 'select', options: ['6 meses', '1 año', '2 años', '3 años', '5 años'] }
+  ],
+
+  // Utensilios de cocina
+  'home-kitchen-cookware': [
+    { id: 'cookware_type', name: 'Tipo de utensilio', type: 'select', options: ['Sartén', 'Olla', 'Cazuela', 'Wok', 'Parrilla', 'Molde para hornear', 'Cuchillos', 'Tabla de cortar', 'Set completo'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Acero inoxidable', 'Antiadherente', 'Hierro fundido', 'Aluminio', 'Cerámica', 'Cobre', 'Carbón', 'Silicona'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño (menos de 20cm)', 'Mediano (20-28cm)', 'Grande (28-35cm)', 'Extra grande (más de 35cm)'] },
+    { id: 'heat_source', name: 'Fuente de calor', type: 'tags', options: ['Gas', 'Eléctrico', 'Inducción', 'Horno', 'Microondas', 'Universal'] },
+    { id: 'dishwasher_safe', name: 'Apto para lavavajillas', type: 'select', options: ['Sí', 'No'] },
+    { id: 'oven_safe', name: 'Apto para horno', type: 'select', options: ['Sí', 'No', 'Hasta 180°C', 'Hasta 230°C', 'Más de 230°C'] },
+    { id: 'pieces', name: 'Número de piezas', type: 'select', options: ['1 pieza', '2-3 piezas', '4-6 piezas', '7-10 piezas', 'Más de 10 piezas'] }
+  ],
+
+  // Vajilla y cristalería
+  'home-kitchen-tableware': [
+    { id: 'tableware_type', name: 'Tipo de vajilla', type: 'select', options: ['Platos', 'Vasos', 'Copas', 'Tazas', 'Bowls', 'Cubiertos', 'Fuentes', 'Set completo'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Porcelana', 'Cerámica', 'Vidrio', 'Cristal', 'Melamina', 'Acero inoxidable', 'Madera', 'Bambú'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Moderno', 'Clásico', 'Elegante', 'Casual', 'Rústico', 'Minimalista', 'Vintage'] },
+    { id: 'color', name: 'Color', type: 'tags', options: ['Blanco', 'Negro', 'Transparente', 'Azul', 'Verde', 'Rosa', 'Dorado', 'Multicolor'] },
+    { id: 'occasion', name: 'Ocasión', type: 'tags', options: ['Diario', 'Formal', 'Fiestas', 'Exterior', 'Niños', 'Especial'] },
+    { id: 'dishwasher_safe', name: 'Apto para lavavajillas', type: 'select', options: ['Sí', 'No'] },
+    { id: 'microwave_safe', name: 'Apto para microondas', type: 'select', options: ['Sí', 'No'] },
+    { id: 'pieces', name: 'Número de piezas', type: 'select', options: ['1 pieza', '2-4 piezas', '6 piezas', '12 piezas', '16+ piezas'] }
+  ],
+
+  // Almacenamiento de cocina
+  'home-kitchen-storage': [
+    { id: 'storage_type', name: 'Tipo de almacenamiento', type: 'select', options: ['Contenedor hermético', 'Frasco', 'Canasta', 'Organizador de cajón', 'Estante', 'Despensa', 'Refrigerador'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Plástico', 'Vidrio', 'Acero inoxidable', 'Cerámica', 'Madera', 'Bambú', 'Silicona'] },
+    { id: 'capacity', name: 'Capacidad', type: 'select', options: ['Menos de 500ml', '500ml-1L', '1-2L', '2-5L', 'Más de 5L'] },
+    { id: 'airtight', name: 'Hermético', type: 'select', options: ['Sí', 'No'] },
+    { id: 'transparent', name: 'Transparente', type: 'select', options: ['Sí', 'No', 'Parcialmente'] },
+    { id: 'stackable', name: 'Apilable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'use_case', name: 'Uso recomendado', type: 'tags', options: ['Granos', 'Líquidos', 'Especias', 'Snacks', 'Refrigerador', 'Congelador', 'Despensa'] }
   ],
   // Ropa de abrigo (categoría general)
   'fashion-clothing-outerwear': [
@@ -2421,5 +3339,369 @@ export const META_FIELDS_BY_CATEGORY: Record<string, MetaField[]> = {
     { id: 'pregnancy_stage', name: 'Etapa', type: 'tags', options: ['Temprano', 'Medio', 'Tardío', 'Post-parto', 'Todo el embarazo'] },
     { id: 'features', name: 'Características', type: 'tags', options: ['Elástico', 'Transpirable', 'Cómodo', 'Suave', 'Ajustable', 'Versátil'] },
     { id: 'care', name: 'Cuidado', type: 'tags', options: ['Lavable en máquina', 'Planchar suave', 'Secado rápido', 'Fácil cuidado'] }
+  ],
+
+  // ===================================================
+  // PRODUCTOS PARA MASCOTAS - METADATOS COMPLETOS
+  // ===================================================
+
+  // Productos para mascotas (categoría principal)
+  'pets': [
+    { id: 'pet_type', name: 'Tipo de mascota', type: 'select', options: ['Perro', 'Gato', 'Ave', 'Pez', 'Roedor', 'Reptil', 'Otro'] },
+    { id: 'pet_size', name: 'Tamaño de mascota', type: 'select', options: ['Extra pequeño', 'Pequeño', 'Mediano', 'Grande', 'Extra grande'] },
+    { id: 'pet_age', name: 'Edad de mascota', type: 'select', options: ['Cachorro/Cría', 'Joven', 'Adulto', 'Senior', 'Todas las edades'] },
+    { id: 'product_category', name: 'Categoría de producto', type: 'select', options: ['Alimentación', 'Juguetes', 'Accesorios', 'Cuidado e higiene', 'Salud', 'Hábitat', 'Entrenamiento'] },
+    { id: 'brand', name: 'Marca', type: 'text' },
+    { id: 'indoor_outdoor', name: 'Uso', type: 'select', options: ['Interior', 'Exterior', 'Interior/Exterior'] }
+  ],
+
+  // Perros (categoría general)
+  'pets-dogs': [
+    { id: 'dog_size', name: 'Tamaño del perro', type: 'select', options: ['Toy (menos de 3kg)', 'Pequeño (3-10kg)', 'Mediano (10-25kg)', 'Grande (25-45kg)', 'Gigante (más de 45kg)'] },
+    { id: 'dog_age', name: 'Edad del perro', type: 'select', options: ['Cachorro (0-12 meses)', 'Joven (1-3 años)', 'Adulto (3-7 años)', 'Senior (7+ años)'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Comida', 'Premios', 'Juguetes', 'Correas y collares', 'Camas', 'Cuidado', 'Salud', 'Entrenamiento'] },
+    { id: 'activity_level', name: 'Nivel de actividad', type: 'select', options: ['Bajo', 'Moderado', 'Alto', 'Muy alto'] },
+    { id: 'breed_group', name: 'Grupo de raza', type: 'select', options: ['Toy', 'Terrier', 'Trabajador', 'Pastor', 'Sabueso', 'Deportivo', 'No deportivo', 'Mixto'] },
+    { id: 'special_needs', name: 'Necesidades especiales', type: 'tags', options: ['Piel sensible', 'Alergias', 'Digestión sensible', 'Control de peso', 'Articulaciones', 'Dental'] }
+  ],
+
+  // Comida para perros
+  'pets-dogs-food': [
+    { id: 'dog_size', name: 'Tamaño del perro', type: 'select', options: ['Toy', 'Pequeño', 'Mediano', 'Grande', 'Gigante', 'Todos los tamaños'] },
+    { id: 'dog_age', name: 'Edad del perro', type: 'select', options: ['Cachorro', 'Adulto', 'Senior', 'Todas las edades'] },
+    { id: 'food_type', name: 'Tipo de comida', type: 'select', options: ['Seco (croquetas)', 'Húmedo (latas)', 'Semi-húmedo', 'Crudo/BARF', 'Deshidratado'] },
+    { id: 'protein_source', name: 'Fuente de proteína', type: 'tags', options: ['Pollo', 'Res', 'Cordero', 'Pescado', 'Pavo', 'Cerdo', 'Venado', 'Pato', 'Vegetariano'] },
+    { id: 'grain_free', name: 'Sin cereales', type: 'select', options: ['Sí', 'No'] },
+    { id: 'special_diet', name: 'Dieta especial', type: 'tags', options: ['Hipoalergénico', 'Control de peso', 'Digestión sensible', 'Piel y pelaje', 'Articulaciones', 'Orgánico', 'Natural'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 1kg', '1-3kg', '3-7kg', '7-15kg', 'Más de 15kg'] },
+    { id: 'texture', name: 'Textura', type: 'select', options: ['Croquetas pequeñas', 'Croquetas medianas', 'Croquetas grandes', 'Paté', 'Trozos en salsa', 'Filetes'] }
+  ],
+
+  // Premios y snacks para perros
+  'pets-dogs-treats': [
+    { id: 'dog_size', name: 'Tamaño del perro', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Todos los tamaños'] },
+    { id: 'treat_type', name: 'Tipo de premio', type: 'select', options: ['Galletas', 'Huesos masticables', 'Snacks blandos', 'Premios dentales', 'Premios de entrenamiento', 'Jerky', 'Sticks'] },
+    { id: 'protein_source', name: 'Sabor/Proteína', type: 'tags', options: ['Pollo', 'Res', 'Cordero', 'Pescado', 'Pavo', 'Bacon', 'Hígado', 'Vegetales'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Entrenamiento', 'Salud dental', 'Recompensa', 'Ocupación', 'Digestión', 'Articulaciones', 'Piel y pelaje'] },
+    { id: 'texture', name: 'Textura', type: 'select', options: ['Crujiente', 'Blando', 'Masticable', 'Duro'] },
+    { id: 'natural', name: 'Natural/Orgánico', type: 'select', options: ['Natural', 'Orgánico', 'Convencional'] },
+    { id: 'grain_free', name: 'Sin cereales', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Juguetes para perros
+  'pets-dogs-toys': [
+    { id: 'dog_size', name: 'Tamaño del perro', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Extra grande'] },
+    { id: 'toy_type', name: 'Tipo de juguete', type: 'select', options: ['Peluche', 'Cuerda', 'Pelota', 'Frisbee', 'Hueso de juguete', 'Puzzle/Interactivo', 'Masticable', 'Squeaky'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Felpa', 'Caucho', 'Cuerda', 'Plástico', 'Nylon', 'Cuero', 'Madera', 'Natural'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Entretenimiento', 'Ejercicio', 'Masticación', 'Estimulación mental', 'Entrenamiento', 'Comfort', 'Dental'] },
+    { id: 'durability', name: 'Durabilidad', type: 'select', options: ['Suave (masticadores ligeros)', 'Moderada', 'Resistente (masticadores fuertes)', 'Extra resistente'] },
+    { id: 'interactive', name: 'Interactivo', type: 'select', options: ['Sí', 'No'] },
+    { id: 'sound', name: 'Sonido', type: 'select', options: ['Con sonido', 'Sin sonido', 'Crujiente'] }
+  ],
+
+  // Accesorios para perros
+  'pets-dogs-accessories': [
+    { id: 'dog_size', name: 'Tamaño del perro', type: 'select', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Collar', 'Correa', 'Arnés', 'Ropa', 'Cama', 'Transportadora', 'Platos', 'Bozal', 'Identificación'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Nylon', 'Cuero', 'Tela', 'Metal', 'Plástico', 'Caucho', 'Algodón', 'Poliéster'] },
+    { id: 'adjustable', name: 'Ajustable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'waterproof', name: 'Resistente al agua', type: 'select', options: ['Sí', 'No'] },
+    { id: 'reflective', name: 'Reflectivo', type: 'select', options: ['Sí', 'No'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Básico', 'Elegante', 'Deportivo', 'Casual', 'Decorativo', 'Funcional'] }
+  ],
+
+  // Cuidado e higiene para perros
+  'pets-dogs-grooming': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Champú', 'Acondicionador', 'Cepillo', 'Peine', 'Cortauñas', 'Limpieza dental', 'Toallitas', 'Desodorante'] },
+    { id: 'coat_type', name: 'Tipo de pelaje', type: 'select', options: ['Corto', 'Largo', 'Rizado', 'Doble capa', 'Sin pelo', 'Todos los tipos'] },
+    { id: 'skin_type', name: 'Tipo de piel', type: 'select', options: ['Normal', 'Sensible', 'Seca', 'Grasa', 'Con alergias'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Limpieza general', 'Anti-pulgas', 'Piel sensible', 'Brillo del pelaje', 'Desenredante', 'Antibacterial', 'Desodorante'] },
+    { id: 'natural', name: 'Fórmula', type: 'select', options: ['Natural', 'Orgánico', 'Hipoalergénico', 'Medicado', 'Convencional'] },
+    { id: 'scent', name: 'Aroma', type: 'tags', options: ['Sin aroma', 'Lavanda', 'Avena', 'Coco', 'Manzanilla', 'Cítrico', 'Menta'] }
+  ],
+
+  // Salud y bienestar para perros
+  'pets-dogs-health': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Suplemento', 'Vitamina', 'Medicamento', 'Primeros auxilios', 'Antipulgas', 'Desparasitante', 'Cuidado dental'] },
+    { id: 'health_focus', name: 'Enfoque de salud', type: 'tags', options: ['Articulaciones', 'Digestión', 'Piel y pelaje', 'Sistema inmune', 'Corazón', 'Ojos', 'Dental', 'Calming', 'Energía'] },
+    { id: 'form', name: 'Forma', type: 'select', options: ['Tabletas', 'Cápsulas', 'Líquido', 'Polvo', 'Masticable', 'Spray', 'Crema', 'Collar'] },
+    { id: 'age_group', name: 'Grupo de edad', type: 'select', options: ['Cachorro', 'Adulto', 'Senior', 'Todas las edades'] },
+    { id: 'natural', name: 'Tipo', type: 'select', options: ['Natural', 'Orgánico', 'Veterinario', 'Homeopático'] },
+    { id: 'prescription', name: 'Prescripción', type: 'select', options: ['Con receta', 'Sin receta'] }
+  ],
+
+  // Entrenamiento para perros
+  'pets-dogs-training': [
+    { id: 'training_type', name: 'Tipo de entrenamiento', type: 'select', options: ['Obediencia básica', 'Casa/baño', 'Caminar con correa', 'Socialización', 'Trucos', 'Comportamiento', 'Agilidad'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Clicker', 'Silbato', 'Correa de entrenamiento', 'Collar de entrenamiento', 'Premios', 'Juguete interactivo', 'Libro/Guía'] },
+    { id: 'age_group', name: 'Edad apropiada', type: 'select', options: ['Cachorro', 'Joven', 'Adulto', 'Todas las edades'] },
+    { id: 'difficulty', name: 'Nivel de dificultad', type: 'select', options: ['Principiante', 'Intermedio', 'Avanzado'] },
+    { id: 'method', name: 'Método', type: 'tags', options: ['Refuerzo positivo', 'Clicker training', 'Comando de voz', 'Señales manuales', 'Treat-based'] }
+  ],
+
+  // Gatos (categoría general)
+  'pets-cats': [
+    { id: 'cat_age', name: 'Edad del gato', type: 'select', options: ['Gatito (0-12 meses)', 'Joven (1-3 años)', 'Adulto (3-7 años)', 'Senior (7+ años)'] },
+    { id: 'cat_size', name: 'Tamaño del gato', type: 'select', options: ['Pequeño (menos de 3kg)', 'Mediano (3-5kg)', 'Grande (5-7kg)', 'Extra grande (más de 7kg)'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Comida', 'Premios', 'Juguetes', 'Arena', 'Accesorios', 'Cuidado', 'Salud', 'Rascadores'] },
+    { id: 'indoor_outdoor', name: 'Estilo de vida', type: 'select', options: ['Interior', 'Exterior', 'Interior/Exterior'] },
+    { id: 'activity_level', name: 'Nivel de actividad', type: 'select', options: ['Bajo', 'Moderado', 'Alto'] },
+    { id: 'special_needs', name: 'Necesidades especiales', type: 'tags', options: ['Piel sensible', 'Alergias', 'Digestión sensible', 'Control de peso', 'Bolas de pelo', 'Dental'] }
+  ],
+
+  // Comida para gatos
+  'pets-cats-food': [
+    { id: 'cat_age', name: 'Edad del gato', type: 'select', options: ['Gatito', 'Adulto', 'Senior', 'Todas las edades'] },
+    { id: 'food_type', name: 'Tipo de comida', type: 'select', options: ['Seco (croquetas)', 'Húmedo (latas)', 'Semi-húmedo', 'Crudo/BARF'] },
+    { id: 'protein_source', name: 'Fuente de proteína', type: 'tags', options: ['Pollo', 'Pescado', 'Res', 'Cordero', 'Pavo', 'Atún', 'Salmón', 'Pato', 'Conejo'] },
+    { id: 'grain_free', name: 'Sin cereales', type: 'select', options: ['Sí', 'No'] },
+    { id: 'special_diet', name: 'Dieta especial', type: 'tags', options: ['Hipoalergénico', 'Control de peso', 'Digestión sensible', 'Bolas de pelo', 'Urinario', 'Indoor', 'Orgánico'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 1kg', '1-3kg', '3-7kg', '7-15kg', 'Más de 15kg'] },
+    { id: 'texture', name: 'Textura', type: 'select', options: ['Croquetas pequeñas', 'Croquetas grandes', 'Paté', 'Trozos en salsa', 'Trozos en gelatina', 'Filetes'] }
+  ],
+
+  // Premios para gatos
+  'pets-cats-treats': [
+    { id: 'treat_type', name: 'Tipo de premio', type: 'select', options: ['Galletas crujientes', 'Snacks blandos', 'Premios dentales', 'Premios de entrenamiento', 'Hierba gatera', 'Lickables'] },
+    { id: 'protein_source', name: 'Sabor/Proteína', type: 'tags', options: ['Pollo', 'Pescado', 'Atún', 'Salmón', 'Res', 'Pavo', 'Hígado', 'Camarón'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Entrenamiento', 'Salud dental', 'Recompensa', 'Bolas de pelo', 'Digestión', 'Relajación', 'Urinario'] },
+    { id: 'texture', name: 'Textura', type: 'select', options: ['Crujiente', 'Blando', 'Cremoso', 'Lickable', 'Freeze-dried'] },
+    { id: 'natural', name: 'Natural/Orgánico', type: 'select', options: ['Natural', 'Orgánico', 'Convencional'] },
+    { id: 'grain_free', name: 'Sin cereales', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Juguetes para gatos
+  'pets-cats-toys': [
+    { id: 'toy_type', name: 'Tipo de juguete', type: 'select', options: ['Ratón de juguete', 'Varita con plumas', 'Pelota', 'Túnel', 'Puzzle/Interactivo', 'Catnip', 'Láser', 'Rascador'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Felpa', 'Plumas', 'Cuerda', 'Sisal', 'Cartón', 'Plástico', 'Caucho', 'Natural'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Caza/Instinto', 'Ejercicio', 'Estimulación mental', 'Rascado', 'Comfort', 'Entretenimiento', 'Interactivo'] },
+    { id: 'interactive', name: 'Interactivo', type: 'select', options: ['Sí', 'No'] },
+    { id: 'sound', name: 'Sonido', type: 'select', options: ['Con sonido', 'Sin sonido', 'Crujiente'] },
+    { id: 'catnip', name: 'Con hierba gatera', type: 'select', options: ['Sí', 'No'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño', 'Mediano', 'Grande'] }
+  ],
+
+  // Accesorios para gatos
+  'pets-cats-accessories': [
+    { id: 'accessory_type', name: 'Tipo de accesorio', type: 'select', options: ['Collar', 'Arnés', 'Correa', 'Cama', 'Transportadora', 'Platos', 'Fuente de agua', 'Rascador', 'Casa/Cueva'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Nylon', 'Cuero', 'Tela', 'Plástico', 'Cerámica', 'Acero inoxidable', 'Sisal', 'Cartón'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['XS', 'S', 'M', 'L', 'XL'] },
+    { id: 'adjustable', name: 'Ajustable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'washable', name: 'Lavable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'style', name: 'Estilo', type: 'tags', options: ['Básico', 'Elegante', 'Decorativo', 'Funcional', 'Moderno', 'Tradicional'] }
+  ],
+
+  // Cuidado e higiene para gatos
+  'pets-cats-grooming': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Champú', 'Cepillo', 'Peine', 'Cortauñas', 'Limpieza dental', 'Toallitas', 'Desodorante', 'Desenredante'] },
+    { id: 'coat_type', name: 'Tipo de pelaje', type: 'select', options: ['Corto', 'Largo', 'Sin pelo', 'Todos los tipos'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Limpieza general', 'Bolas de pelo', 'Piel sensible', 'Brillo del pelaje', 'Desenredante', 'Antibacterial', 'Desodorante'] },
+    { id: 'natural', name: 'Fórmula', type: 'select', options: ['Natural', 'Orgánico', 'Hipoalergénico', 'Convencional'] },
+    { id: 'scent', name: 'Aroma', type: 'tags', options: ['Sin aroma', 'Lavanda', 'Manzanilla', 'Neutro', 'Fresco'] }
+  ],
+
+  // Salud y bienestar para gatos
+  'pets-cats-health': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Suplemento', 'Vitamina', 'Medicamento', 'Primeros auxilios', 'Antipulgas', 'Desparasitante', 'Cuidado dental'] },
+    { id: 'health_focus', name: 'Enfoque de salud', type: 'tags', options: ['Urinario', 'Digestión', 'Bolas de pelo', 'Articulaciones', 'Piel y pelaje', 'Sistema inmune', 'Dental', 'Calming', 'Respiratorio'] },
+    { id: 'form', name: 'Forma', type: 'select', options: ['Tabletas', 'Cápsulas', 'Líquido', 'Polvo', 'Pasta', 'Spray', 'Collar'] },
+    { id: 'age_group', name: 'Grupo de edad', type: 'select', options: ['Gatito', 'Adulto', 'Senior', 'Todas las edades'] },
+    { id: 'natural', name: 'Tipo', type: 'select', options: ['Natural', 'Orgánico', 'Veterinario', 'Homeopático'] },
+    { id: 'prescription', name: 'Prescripción', type: 'select', options: ['Con receta', 'Sin receta'] }
+  ],
+
+  // Arena y bandejas para gatos
+  'pets-cats-litter': [
+    { id: 'litter_type', name: 'Tipo de arena', type: 'select', options: ['Arcilla', 'Aglomerante', 'Cristales de sílice', 'Natural/Biodegradable', 'Papel reciclado', 'Maíz', 'Madera'] },
+    { id: 'clumping', name: 'Aglomerante', type: 'select', options: ['Sí', 'No'] },
+    { id: 'scented', name: 'Con aroma', type: 'select', options: ['Sin aroma', 'Lavanda', 'Limón', 'Baby powder', 'Neutro'] },
+    { id: 'dust_free', name: 'Sin polvo', type: 'select', options: ['Sí', 'No', 'Bajo polvo'] },
+    { id: 'flushable', name: 'Biodegradable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 5kg', '5-10kg', '10-20kg', 'Más de 20kg'] },
+    { id: 'multi_cat', name: 'Para múltiples gatos', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Aves (categoría general)
+  'pets-birds': [
+    { id: 'bird_type', name: 'Tipo de ave', type: 'select', options: ['Canario', 'Periquito', 'Ninfa', 'Loro', 'Agapornis', 'Diamante', 'Jilguero', 'Otras aves pequeñas', 'Otras aves grandes'] },
+    { id: 'bird_size', name: 'Tamaño del ave', type: 'select', options: ['Muy pequeña', 'Pequeña', 'Mediana', 'Grande'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Comida', 'Semillas', 'Jaula', 'Accesorios', 'Juguetes', 'Cuidado', 'Salud'] },
+    { id: 'age_group', name: 'Edad', type: 'select', options: ['Polluelo', 'Juvenil', 'Adulto', 'Todas las edades'] }
+  ],
+
+  // Comida para aves
+  'pets-birds-food': [
+    { id: 'bird_type', name: 'Tipo de ave', type: 'select', options: ['Canario', 'Periquito', 'Ninfa', 'Loro', 'Agapornis', 'Aves pequeñas', 'Aves grandes', 'Todas las aves'] },
+    { id: 'food_type', name: 'Tipo de comida', type: 'select', options: ['Semillas mixtas', 'Pellets', 'Frutas deshidratadas', 'Verduras', 'Suplementos', 'Pasta de cría'] },
+    { id: 'age_group', name: 'Edad', type: 'select', options: ['Polluelo', 'Adulto', 'Todas las edades'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Mantenimiento', 'Cría', 'Muda', 'Canto', 'Color', 'Digestión'] },
+    { id: 'natural', name: 'Tipo', type: 'select', options: ['Natural', 'Orgánico', 'Convencional'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 500g', '500g-1kg', '1-3kg', 'Más de 3kg'] }
+  ],
+
+  // Jaulas y accesorios para aves
+  'pets-birds-cages': [
+    { id: 'bird_size', name: 'Tamaño del ave', type: 'select', options: ['Pequeña', 'Mediana', 'Grande'] },
+    { id: 'cage_type', name: 'Tipo de jaula', type: 'select', options: ['Jaula básica', 'Jaula de vuelo', 'Jaula de cría', 'Transportadora', 'Pajarera'] },
+    { id: 'material', name: 'Material', type: 'select', options: ['Acero inoxidable', 'Hierro pintado', 'Plástico', 'Madera'] },
+    { id: 'cage_size', name: 'Tamaño de jaula', type: 'select', options: ['Pequeña (30-40cm)', 'Mediana (40-60cm)', 'Grande (60-80cm)', 'Extra grande (más de 80cm)'] },
+    { id: 'accessories_included', name: 'Accesorios incluidos', type: 'tags', options: ['Perchas', 'Comederos', 'Bebederos', 'Juguetes', 'Nido', 'Bandeja'] }
+  ],
+
+  // Juguetes para aves
+  'pets-birds-toys': [
+    { id: 'bird_size', name: 'Tamaño del ave', type: 'select', options: ['Pequeña', 'Mediana', 'Grande'] },
+    { id: 'toy_type', name: 'Tipo de juguete', type: 'select', options: ['Columpio', 'Espejo', 'Campana', 'Escalera', 'Cuerda', 'Puzzle', 'Masticable', 'Forrajeo'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera', 'Cuerda', 'Metal', 'Plástico', 'Natural', 'Cuero', 'Papel'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Entretenimiento', 'Ejercicio', 'Estimulación mental', 'Masticación', 'Forrajeo', 'Socialización'] },
+    { id: 'interactive', name: 'Interactivo', type: 'select', options: ['Sí', 'No'] },
+    { id: 'sound', name: 'Con sonido', type: 'select', options: ['Sí', 'No'] }
+  ],
+
+  // Salud para aves
+  'pets-birds-health': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Suplemento vitamínico', 'Probiótico', 'Desparasitante', 'Antibiótico', 'Primeros auxilios', 'Limpieza'] },
+    { id: 'health_focus', name: 'Enfoque de salud', type: 'tags', options: ['Sistema inmune', 'Digestión', 'Plumas', 'Respiratorio', 'Reproducción', 'Muda', 'Estrés'] },
+    { id: 'form', name: 'Forma', type: 'select', options: ['Líquido', 'Polvo', 'Tabletas', 'Gotas', 'Spray'] },
+    { id: 'age_group', name: 'Edad', type: 'select', options: ['Polluelo', 'Adulto', 'Todas las edades'] },
+    { id: 'prescription', name: 'Prescripción', type: 'select', options: ['Con receta', 'Sin receta'] }
+  ],
+
+  // Peces (categoría general)
+  'pets-fish': [
+    { id: 'fish_type', name: 'Tipo de pez', type: 'select', options: ['Agua dulce tropical', 'Agua fría', 'Marino', 'Betta', 'Goldfish', 'Cíclidos', 'Tetras', 'Otros'] },
+    { id: 'tank_size', name: 'Tamaño del acuario', type: 'select', options: ['Nano (menos de 40L)', 'Pequeño (40-100L)', 'Mediano (100-300L)', 'Grande (más de 300L)'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Comida', 'Acuario', 'Filtro', 'Decoración', 'Plantas', 'Iluminación', 'Calentador', 'Químicos'] },
+    { id: 'experience_level', name: 'Nivel de experiencia', type: 'select', options: ['Principiante', 'Intermedio', 'Avanzado'] }
+  ],
+
+  // Comida para peces
+  'pets-fish-food': [
+    { id: 'fish_type', name: 'Tipo de pez', type: 'select', options: ['Tropical', 'Goldfish', 'Betta', 'Marino', 'Cíclidos', 'Todos los peces'] },
+    { id: 'food_type', name: 'Tipo de comida', type: 'select', options: ['Escamas', 'Gránulos', 'Tabletas', 'Comida viva', 'Congelada', 'Liofilizada'] },
+    { id: 'fish_size', name: 'Tamaño del pez', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Todos los tamaños'] },
+    { id: 'feeding_level', name: 'Nivel de alimentación', type: 'select', options: ['Superficie', 'Medio', 'Fondo', 'Todos los niveles'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Mantenimiento', 'Crecimiento', 'Color', 'Reproducción', 'Digestión'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 100g', '100-250g', '250-500g', 'Más de 500g'] }
+  ],
+
+  // Acuarios y decoración
+  'pets-fish-aquariums': [
+    { id: 'tank_type', name: 'Tipo de acuario', type: 'select', options: ['Agua dulce', 'Marino', 'Plantado', 'Biotopo', 'Comunitario'] },
+    { id: 'tank_size', name: 'Capacidad', type: 'select', options: ['Nano (20-40L)', 'Pequeño (40-100L)', 'Mediano (100-300L)', 'Grande (300-500L)', 'Extra grande (más de 500L)'] },
+    { id: 'shape', name: 'Forma', type: 'select', options: ['Rectangular', 'Cuadrado', 'Cilíndrico', 'Bow front', 'Esquinero'] },
+    { id: 'decoration_type', name: 'Tipo de decoración', type: 'select', options: ['Plantas artificiales', 'Rocas', 'Troncos', 'Cuevas', 'Castillos', 'Coral artificial', 'Sustrato'] },
+    { id: 'material', name: 'Material', type: 'select', options: ['Vidrio', 'Acrílico', 'Plástico', 'Cerámica', 'Resina', 'Natural'] }
+  ],
+
+  // Equipos y filtros
+  'pets-fish-equipment': [
+    { id: 'equipment_type', name: 'Tipo de equipo', type: 'select', options: ['Filtro', 'Bomba de aire', 'Calentador', 'Termómetro', 'Iluminación', 'UV esterilizador', 'Skimmer'] },
+    { id: 'tank_size', name: 'Para acuario de', type: 'select', options: ['Hasta 40L', '40-100L', '100-300L', '300-500L', 'Más de 500L'] },
+    { id: 'filter_type', name: 'Tipo de filtro', type: 'select', options: ['Interno', 'Externo', 'Cascada', 'Esponja', 'Canister', 'UV'] },
+    { id: 'power', name: 'Potencia', type: 'select', options: ['Baja (menos de 10W)', 'Media (10-25W)', 'Alta (25-50W)', 'Muy alta (más de 50W)'] },
+    { id: 'water_type', name: 'Tipo de agua', type: 'select', options: ['Dulce', 'Salada', 'Ambos'] }
+  ],
+
+  // Cuidado del agua
+  'pets-fish-care': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Acondicionador de agua', 'Bacterias beneficiosas', 'pH ajustador', 'Test kit', 'Limpiador de algas', 'Clarificador'] },
+    { id: 'water_type', name: 'Tipo de agua', type: 'select', options: ['Dulce', 'Marina', 'Ambos'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Ciclado', 'Mantenimiento', 'Emergencia', 'Clarificación', 'pH', 'Dureza', 'Cloro', 'Amoniaco'] },
+    { id: 'form', name: 'Forma', type: 'select', options: ['Líquido', 'Polvo', 'Tabletas', 'Test strips'] },
+    { id: 'tank_size', name: 'Para acuario de', type: 'select', options: ['Hasta 100L', '100-300L', 'Más de 300L', 'Todos los tamaños'] }
+  ],
+
+  // Animales pequeños (categoría general)
+  'pets-small-animals': [
+    { id: 'animal_type', name: 'Tipo de animal', type: 'select', options: ['Hámster', 'Conejo', 'Cobaya', 'Chinchilla', 'Hurón', 'Ratón', 'Rata', 'Jerbo', 'Degú'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Comida', 'Hábitat', 'Juguetes', 'Cama/Sustrato', 'Accesorios', 'Cuidado', 'Salud'] },
+    { id: 'age_group', name: 'Edad', type: 'select', options: ['Cría', 'Juvenil', 'Adulto', 'Todas las edades'] }
+  ],
+
+  // Comida para roedores
+  'pets-small-food': [
+    { id: 'animal_type', name: 'Tipo de animal', type: 'select', options: ['Hámster', 'Conejo', 'Cobaya', 'Chinchilla', 'Hurón', 'Todos los roedores'] },
+    { id: 'food_type', name: 'Tipo de comida', type: 'select', options: ['Pellets', 'Mezcla de semillas', 'Heno', 'Verduras deshidratadas', 'Premios', 'Suplementos'] },
+    { id: 'age_group', name: 'Edad', type: 'select', options: ['Cría', 'Adulto', 'Senior', 'Todas las edades'] },
+    { id: 'special_diet', name: 'Dieta especial', type: 'tags', options: ['Alto en fibra', 'Digestión sensible', 'Control de peso', 'Pelaje brillante', 'Dental'] },
+    { id: 'natural', name: 'Tipo', type: 'select', options: ['Natural', 'Orgánico', 'Convencional'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 500g', '500g-1kg', '1-3kg', 'Más de 3kg'] }
+  ],
+
+  // Jaulas y hábitats
+  'pets-small-cages': [
+    { id: 'animal_type', name: 'Para animal', type: 'select', options: ['Hámster', 'Conejo', 'Cobaya', 'Chinchilla', 'Hurón', 'Múltiples especies'] },
+    { id: 'cage_type', name: 'Tipo de hábitat', type: 'select', options: ['Jaula básica', 'Jaula con tubos', 'Terrario', 'Corral', 'Casa exterior'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño (30-50cm)', 'Mediano (50-80cm)', 'Grande (80-120cm)', 'Extra grande (más de 120cm)'] },
+    { id: 'material', name: 'Material', type: 'select', options: ['Metal', 'Plástico', 'Madera', 'Vidrio', 'Mixto'] },
+    { id: 'levels', name: 'Niveles', type: 'select', options: ['Un nivel', 'Dos niveles', 'Múltiples niveles'] },
+    { id: 'accessories_included', name: 'Accesorios incluidos', type: 'tags', options: ['Comedero', 'Bebedero', 'Casa', 'Rueda', 'Escaleras', 'Plataformas'] }
+  ],
+
+  // Juguetes y enriquecimiento
+  'pets-small-toys': [
+    { id: 'animal_type', name: 'Para animal', type: 'select', options: ['Hámster', 'Conejo', 'Cobaya', 'Chinchilla', 'Todos los roedores'] },
+    { id: 'toy_type', name: 'Tipo de juguete', type: 'select', options: ['Rueda de ejercicio', 'Túneles', 'Casitas', 'Juguetes masticables', 'Pelotas', 'Escaleras', 'Columpios'] },
+    { id: 'material', name: 'Material', type: 'tags', options: ['Madera', 'Plástico', 'Metal', 'Cuerda', 'Cartón', 'Natural', 'Willow'] },
+    { id: 'purpose', name: 'Propósito', type: 'tags', options: ['Ejercicio', 'Masticación', 'Escondite', 'Entretenimiento', 'Estimulación mental', 'Dental'] },
+    { id: 'size', name: 'Tamaño', type: 'select', options: ['Pequeño', 'Mediano', 'Grande'] }
+  ],
+
+  // Camas y sustratos
+  'pets-small-bedding': [
+    { id: 'animal_type', name: 'Para animal', type: 'select', options: ['Hámster', 'Conejo', 'Cobaya', 'Chinchilla', 'Todos los roedores'] },
+    { id: 'bedding_type', name: 'Tipo de cama', type: 'select', options: ['Virutas de madera', 'Papel reciclado', 'Maíz', 'Hemp', 'Paja', 'Pellets'] },
+    { id: 'absorbency', name: 'Absorción', type: 'select', options: ['Baja', 'Media', 'Alta', 'Extra alta'] },
+    { id: 'dust_free', name: 'Sin polvo', type: 'select', options: ['Sí', 'No'] },
+    { id: 'odor_control', name: 'Control de olor', type: 'select', options: ['Sí', 'No'] },
+    { id: 'biodegradable', name: 'Biodegradable', type: 'select', options: ['Sí', 'No'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Pequeño (menos de 10L)', 'Mediano (10-30L)', 'Grande (30-60L)', 'Extra grande (más de 60L)'] }
+  ],
+
+  // Reptiles (categoría general)
+  'pets-reptiles': [
+    { id: 'reptile_type', name: 'Tipo de reptil', type: 'select', options: ['Gecko', 'Iguana', 'Serpiente', 'Tortuga', 'Lagarto', 'Camaleón', 'Dragón barbudo', 'Otros'] },
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Comida', 'Terrario', 'Calefacción', 'Iluminación', 'Sustrato', 'Decoración', 'Cuidado', 'Salud'] },
+    { id: 'habitat_type', name: 'Tipo de hábitat', type: 'select', options: ['Desértico', 'Tropical', 'Templado', 'Acuático', 'Semi-acuático'] },
+    { id: 'experience_level', name: 'Nivel de experiencia', type: 'select', options: ['Principiante', 'Intermedio', 'Avanzado'] }
+  ],
+
+  // Comida para reptiles
+  'pets-reptiles-food': [
+    { id: 'reptile_type', name: 'Tipo de reptil', type: 'select', options: ['Gecko', 'Iguana', 'Serpiente', 'Tortuga terrestre', 'Tortuga acuática', 'Dragón barbudo', 'Todos los reptiles'] },
+    { id: 'food_type', name: 'Tipo de comida', type: 'select', options: ['Pellets', 'Comida viva', 'Congelada', 'Verduras deshidratadas', 'Frutas', 'Insectos', 'Suplementos'] },
+    { id: 'diet_type', name: 'Tipo de dieta', type: 'select', options: ['Herbívoro', 'Carnívoro', 'Omnívoro'] },
+    { id: 'age_group', name: 'Edad', type: 'select', options: ['Juvenil', 'Adulto', 'Todas las edades'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Menos de 250g', '250-500g', '500g-1kg', 'Más de 1kg'] }
+  ],
+
+  // Terrarios y decoración
+  'pets-reptiles-terrariums': [
+    { id: 'reptile_size', name: 'Tamaño del reptil', type: 'select', options: ['Pequeño', 'Mediano', 'Grande', 'Extra grande'] },
+    { id: 'terrarium_type', name: 'Tipo de terrario', type: 'select', options: ['Desértico', 'Tropical', 'Acuático', 'Semi-acuático', 'Básico'] },
+    { id: 'size', name: 'Tamaño del terrario', type: 'select', options: ['40x30cm', '60x40cm', '80x50cm', '100x60cm', 'Más grande'] },
+    { id: 'material', name: 'Material', type: 'select', options: ['Vidrio', 'Plástico', 'Madera', 'Mixto'] },
+    { id: 'decoration_type', name: 'Tipo de decoración', type: 'select', options: ['Rocas', 'Troncos', 'Plantas artificiales', 'Cuevas', 'Cascadas', 'Fondos'] },
+    { id: 'ventilation', name: 'Ventilación', type: 'select', options: ['Superior', 'Lateral', 'Mixta'] }
+  ],
+
+  // Calefacción e iluminación
+  'pets-reptiles-heating': [
+    { id: 'product_type', name: 'Tipo de producto', type: 'select', options: ['Lámpara calefactora', 'Manta térmica', 'Lámpara UV', 'Termostato', 'Termómetro/Higrómetro', 'Bombilla'] },
+    { id: 'wattage', name: 'Potencia', type: 'select', options: ['25W', '50W', '75W', '100W', '150W', 'Más de 150W'] },
+    { id: 'light_type', name: 'Tipo de luz', type: 'select', options: ['UVA', 'UVB', 'UVA/UVB', 'Calor', 'LED', 'Halógena'] },
+    { id: 'terrarium_size', name: 'Para terrario de', type: 'select', options: ['Pequeño (hasta 60cm)', 'Mediano (60-100cm)', 'Grande (más de 100cm)'] },
+    { id: 'day_night', name: 'Uso', type: 'select', options: ['Día', 'Noche', 'Día/Noche'] }
+  ],
+
+  // Sustratos y camas
+  'pets-reptiles-substrate': [
+    { id: 'reptile_type', name: 'Para reptil', type: 'select', options: ['Gecko', 'Iguana', 'Serpiente', 'Tortuga', 'Dragón barbudo', 'Todos los reptiles'] },
+    { id: 'substrate_type', name: 'Tipo de sustrato', type: 'select', options: ['Arena', 'Corteza', 'Musgo', 'Papel', 'Fibra de coco', 'Tierra', 'Gravilla'] },
+    { id: 'habitat_type', name: 'Tipo de hábitat', type: 'select', options: ['Desértico', 'Tropical', 'Templado', 'Acuático'] },
+    { id: 'humidity', name: 'Retención de humedad', type: 'select', options: ['Baja', 'Media', 'Alta'] },
+    { id: 'natural', name: 'Natural', type: 'select', options: ['Sí', 'No'] },
+    { id: 'package_size', name: 'Tamaño del empaque', type: 'select', options: ['Pequeño (menos de 5L)', 'Mediano (5-15L)', 'Grande (15-30L)', 'Extra grande (más de 30L)'] }
   ]
 } 

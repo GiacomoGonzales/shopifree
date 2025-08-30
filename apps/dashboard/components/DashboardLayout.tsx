@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useAuth } from '../lib/simple-auth-context'
+import { useStore } from '../lib/hooks/useStore'
 import PageLoadingState from './PageLoadingState'
 
 // Iconos para el menú
@@ -126,6 +127,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const t = useTranslations('navigation')
   const { user, userData, signOut } = useAuth()
+  const { store } = useStore()
 
   // Inicializar estados expandidos basándose en la URL actual para evitar efectos visuales
   const [settingsExpanded, setSettingsExpanded] = useState(() => {
@@ -674,19 +676,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Botón Visitar mi tienda */}
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    const { getUserStore } = await import('../lib/store')
-                    if (user?.uid) {
-                      const userStore = await getUserStore(user.uid)
-                      if (userStore?.subdomain) {
-                        window.open(`https://${userStore.subdomain}.shopifree.app`, '_blank')
-                      } else {
-                        console.error('No se encontró el subdominio de la tienda')
-                      }
-                    }
-                  } catch (error) {
-                    console.error('Error al obtener información de la tienda:', error)
+                onClick={(e) => {
+                  e.preventDefault()
+                  
+                  // Verificar que tenemos los datos de la tienda disponibles
+                  if (store?.subdomain) {
+                    // Abrir directamente la tienda - esto funciona en móviles
+                    window.open(`https://${store.subdomain}.shopifree.app`, '_blank')
+                  } else {
+                    // Si no hay datos de tienda disponibles, mostrar mensaje
+                    const message = currentLocale === 'es' 
+                      ? 'Cargando información de la tienda...' 
+                      : 'Loading store information...'
+                    alert(message)
+                    console.warn('Store data not available yet')
                   }
                 }}
                 className="bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 transition-colors duration-200"
