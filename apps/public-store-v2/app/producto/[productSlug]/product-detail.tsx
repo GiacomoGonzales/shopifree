@@ -802,45 +802,17 @@ ${productUrl}
 
               {/* Disponibilidad - SIEMPRE mostrar */}
               {(() => {
-                let isAvailable = false;
-                let statusText = '';
+                // Lógica simplificada de stock
+                const stockQty = (product as any).stockQuantity;
+                const trackStock = (product as any).trackStock;
                 
-                if (hasProductVariantsWithPricing()) {
-                  // Producto con variantes - verificar si alguna tiene stock
-                  let variantsData = null;
-                  if (product.tags && product.tags.variants) {
-                    variantsData = product.tags.variants;
-                  } else if ((product as any).variants) {
-                    variantsData = (product as any).variants;
-                  }
-                  
-                  if (variantsData) {
-                    let variants = [];
-                    try {
-                      variants = typeof variantsData === 'string' ? JSON.parse(variantsData) : variantsData;
-                    } catch (e) {
-                      variants = Array.isArray(variantsData) ? variantsData : [];
-                    }
-                    
-                    // Verificar si alguna variante tiene stock
-                    isAvailable = variants.some((variant: any) => variant.stock > 0);
-                    statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
-                  } else {
-                    // Si no hay variantes, mostrar como disponible
-                    isAvailable = true;
-                    statusText = 'En stock';
-                  }
-                } else {
-                  // Producto simple - si no tiene stockQuantity, mostrar como disponible
-                  const stockQty = (product as any).stockQuantity;
-                  if (stockQty !== undefined && stockQty !== null) {
-                    isAvailable = stockQty > 0;
-                    statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
-                  } else {
-                    // Producto sin gestión de stock = siempre disponible
-                    isAvailable = true;
-                    statusText = 'En stock';
-                  }
+                let isAvailable = true;
+                let statusText = 'En stock';
+                
+                // Solo verificar stock si trackStock está habilitado
+                if (trackStock === true && typeof stockQty === 'number') {
+                  isAvailable = stockQty > 0;
+                  statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
                 }
                 
                 return (

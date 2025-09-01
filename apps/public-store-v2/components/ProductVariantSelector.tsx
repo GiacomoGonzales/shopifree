@@ -22,12 +22,20 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
 
   // Extraer opciones de variantes de los metadatos del producto
   useEffect(() => {
-    if (!product.tags) return;
+    console.log('🔍 [ProductVariantSelector] Producto recibido:', product);
+    console.log('🔍 [ProductVariantSelector] Tags del producto:', product.tags);
+    
+    if (!product.tags) {
+      console.log('⚠️ [ProductVariantSelector] No hay tags en el producto');
+      return;
+    }
 
     const options: VariantOptions = {};
     
     // Buscar campos de variantes específicos
     Object.entries(product.tags).forEach(([key, value]) => {
+      console.log(`🔍 [ProductVariantSelector] Procesando campo: ${key} =`, value);
+      
       // Mapear nombres de campos comunes a nombres de variantes
       const variantFieldMap: { [key: string]: string } = {
         'color': 'Color',
@@ -43,12 +51,20 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
       if (displayName && value) {
         // Si es un array, usar directamente; si es string, convertir a array
         const values = Array.isArray(value) ? value : [value];
+        console.log(`🔍 [ProductVariantSelector] Valores para ${key}:`, values);
+        
         if (values.length > 1) { // Solo mostrar como variante si hay múltiples opciones
           options[key] = values; // Usar la clave original (size, color) no el displayName
+          console.log(`✅ [ProductVariantSelector] Agregada variante ${key} con ${values.length} opciones`);
+        } else {
+          console.log(`⚠️ [ProductVariantSelector] Campo ${key} tiene solo ${values.length} opción, no se muestra como variante`);
         }
+      } else {
+        console.log(`⚠️ [ProductVariantSelector] Campo ${key} no es una variante válida o no tiene displayName`);
       }
     });
 
+    console.log('🔍 [ProductVariantSelector] Opciones de variantes encontradas:', options);
     setVariantOptions(options);
 
     // No preseleccionar ninguna opción - el usuario debe elegir
@@ -69,8 +85,11 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
 
   // Si no hay variantes, no mostrar el selector
   if (Object.keys(variantOptions).length === 0) {
+    console.log('⚠️ [ProductVariantSelector] No hay opciones de variantes, no se muestra el selector');
     return null;
   }
+
+  console.log('✅ [ProductVariantSelector] Renderizando selector con opciones:', variantOptions);
 
   // Mapear claves a nombres mostrados
   const getDisplayName = (key: string) => {

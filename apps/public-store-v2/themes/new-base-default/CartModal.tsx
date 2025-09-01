@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
-import { useStoreLanguage } from '../../lib/store-language-context';
-import { formatSubtotalProducts } from '../../lib/store-texts';
 import { StoreBasicInfo } from '../../lib/store';
 import CheckoutModal from './CheckoutModal';
 
@@ -16,7 +14,6 @@ interface CartModalProps {
 
 export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
-    const { t, language } = useStoreLanguage();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     
     // Detectar si hay productos incompletos
@@ -120,7 +117,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 {/* Header del carrito */}
                 <div className="nbd-cart-header">
                     <h2 className="nbd-cart-title">
-                        {t('shoppingCart')}
+                        Carrito de Compras
                         {state.totalItems > 0 && (
                             <span className="nbd-cart-count">({state.totalItems})</span>
                         )}
@@ -147,13 +144,13 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                     <path d="M16 10c0 2.21-1.79 4-4 4s-4-1.79-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </div>
-                            <h3>{t('cartEmpty')}</h3>
-                            <p>{t('addProducts')}</p>
+                            <h3>Tu carrito está vacío</h3>
+                            <p>Agrega productos para comenzar a comprar</p>
                             <button 
                                 onClick={closeCart}
                                 className="nbd-btn nbd-btn--primary"
                             >
-                                {t('continueShopping')}
+                                Continuar Comprando
                             </button>
                         </div>
                     ) : (
@@ -258,7 +255,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                 {/* Resumen del total */}
                                 <div className="nbd-cart-summary">
                                     <div className="nbd-cart-subtotal">
-                                        <span>{formatSubtotalProducts(state.totalItems, language)}</span>
+                                        <span>Subtotal ({state.totalItems} productos)</span>
                                         <span className="nbd-cart-total-price">
                                             {formatPrice(state.totalPrice, state.items[0]?.currency || 'COP')}
                                         </span>
@@ -271,7 +268,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                         </div>
                                     ) : (
                                         <p className="nbd-cart-shipping-note">
-                                            {t('shippingCalculated')}
+                                            Envío calculado al finalizar
                                         </p>
                                     )}
                                 </div>
@@ -282,14 +279,14 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                         onClick={closeCart}
                                         className="nbd-btn nbd-btn--ghost nbd-cart-continue"
                                     >
-                                        {t('continueShopping')}
+                                        Continuar Comprando
                                     </button>
                                     <button 
                                         onClick={handleCheckout}
                                         className={`nbd-btn nbd-btn--primary nbd-cart-checkout ${hasIncompleteItems ? 'nbd-btn--disabled' : ''}`}
                                         disabled={hasIncompleteItems}
                                     >
-                                        {hasIncompleteItems ? 'Completa las opciones' : t('proceedToCheckout')}
+                                        {hasIncompleteItems ? 'Completa las opciones' : 'Proceder al Pago'}
                                     </button>
                                 </div>
                             </div>

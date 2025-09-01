@@ -82,6 +82,9 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   // Estado para variantes con precios específicos
   const [selectedPricingVariant, setSelectedPricingVariant] = useState<ProductVariant | null>(null);
 
+  // Estado para controlar la cantidad
+  const [quantity, setQuantity] = useState(1);
+
   // Hook del carrito
   const { addItem, openCart, state, removeItem } = useCart();
 
@@ -93,6 +96,13 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   // Función para manejar cambios de variantes con precios
   const handlePricingVariantChange = (variant: ProductVariant | null) => {
     setSelectedPricingVariant(variant);
+  };
+
+  // Función para manejar cambios de cantidad
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity >= 1 && newQuantity <= 99) {
+      setQuantity(newQuantity);
+    }
   };
 
   // Función para verificar si el producto tiene variantes con precios específicos
@@ -139,9 +149,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
       variantText = `\n📋 Variantes: ${variants}`;
     }
     
-    // Obtener cantidad
-    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
-    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+    // Usar el estado quantity
     
     const message = `¡Hola! 👋
 
@@ -223,9 +231,7 @@ ${productUrl}
       }
     }
     
-    // Obtener la cantidad del input
-    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
-    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+    // Usar el estado quantity
 
     // Crear información de variante basada en el tipo de selector usado
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
@@ -890,18 +896,8 @@ ${productUrl}
                     type="button" 
                     id="quantity-minus"
                     className="nbd-quantity-btn nbd-quantity-btn--minus"
-                    onClick={() => {
-                      const input = document.getElementById('quantity') as HTMLInputElement;
-                      const minusBtn = document.getElementById('quantity-minus') as HTMLButtonElement;
-                      if (input && parseInt(input.value) > 1) {
-                        const newValue = parseInt(input.value) - 1;
-                        input.value = newValue.toString();
-                        if (newValue === 1) {
-                          minusBtn.disabled = true;
-                        }
-                      }
-                    }}
-                    disabled
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    disabled={quantity <= 1}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M5 12H19"/>
@@ -912,36 +908,18 @@ ${productUrl}
                     type="number" 
                     min="1" 
                     max="99"
-                    defaultValue="1" 
+                    value={quantity}
                     className="nbd-quantity-input"
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      const minusBtn = document.getElementById('quantity-minus') as HTMLButtonElement;
-                      if (value <= 1) {
-                        e.target.value = "1";
-                        minusBtn.disabled = true;
-                      } else {
-                        minusBtn.disabled = false;
-                      }
-                      if (value > 99) {
-                        e.target.value = "99";
-                      }
+                      const value = parseInt(e.target.value) || 1;
+                      handleQuantityChange(value);
                     }}
                   />
                   <button 
                     type="button" 
                     className="nbd-quantity-btn nbd-quantity-btn--plus"
-                    onClick={() => {
-                      const input = document.getElementById('quantity') as HTMLInputElement;
-                      const minusBtn = document.getElementById('quantity-minus') as HTMLButtonElement;
-                      if (input && parseInt(input.value) < 99) {
-                        const newValue = parseInt(input.value) + 1;
-                        input.value = newValue.toString();
-                        if (newValue > 1) {
-                          minusBtn.disabled = false;
-                        }
-                      }
-                    }}
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                    disabled={quantity >= 99}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M12 5V19M5 12H19"/>

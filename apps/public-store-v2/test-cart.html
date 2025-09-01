@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Carrito</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .cart-info { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Test del Carrito</h1>
+    
+    <div class="test-section">
+        <h2>Estado del Carrito</h2>
+        <div id="cart-status" class="cart-info">Cargando...</div>
+        <button onclick="checkCartState()">Verificar Estado</button>
+        <button onclick="clearCart()">Limpiar Carrito</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Agregar Productos de Prueba</h2>
+        <button onclick="addTestProduct()">Agregar Producto de Prueba</button>
+        <button onclick="addTestProductWithVariant()">Agregar con Variante</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Local Storage</h2>
+        <div id="local-storage-info" class="cart-info">Cargando...</div>
+        <button onclick="checkLocalStorage()">Verificar Local Storage</button>
+    </div>
+
+    <script>
+        function checkCartState() {
+            const cartData = localStorage.getItem('shopifree-cart');
+            const statusDiv = document.getElementById('cart-status');
+            
+            if (cartData) {
+                try {
+                    const items = JSON.parse(cartData);
+                    statusDiv.innerHTML = `
+                        <strong>Carrito encontrado:</strong><br>
+                        Items: ${items.length}<br>
+                        Total items: ${items.reduce((sum, item) => sum + (item.quantity || 1), 0)}<br>
+                        <pre>${JSON.stringify(items, null, 2)}</pre>
+                    `;
+                } catch (e) {
+                    statusDiv.innerHTML = `<strong>Error al parsear carrito:</strong> ${e.message}`;
+                }
+            } else {
+                statusDiv.innerHTML = '<strong>No hay carrito en localStorage</strong>';
+            }
+        }
+        
+        function clearCart() {
+            localStorage.removeItem('shopifree-cart');
+            checkCartState();
+        }
+        
+        function addTestProduct() {
+            const testProduct = {
+                id: 'test-product-1',
+                productId: 'test-product-1',
+                name: 'Producto de Prueba',
+                price: 1000,
+                currency: 'COP',
+                image: 'https://via.placeholder.com/150',
+                slug: 'test-product',
+                quantity: 1,
+                incomplete: false
+            };
+            
+            const existingCart = localStorage.getItem('shopifree-cart');
+            let cartItems = existingCart ? JSON.parse(existingCart) : [];
+            
+            // Verificar si ya existe
+            const existingIndex = cartItems.findIndex(item => item.id === testProduct.id);
+            if (existingIndex >= 0) {
+                cartItems[existingIndex].quantity += 1;
+            } else {
+                cartItems.push(testProduct);
+            }
+            
+            localStorage.setItem('shopifree-cart', JSON.stringify(cartItems));
+            checkCartState();
+        }
+        
+        function addTestProductWithVariant() {
+            const testProduct = {
+                id: 'test-product-2-variant-red',
+                productId: 'test-product-2',
+                name: 'Producto con Variante',
+                price: 1500,
+                currency: 'COP',
+                image: 'https://via.placeholder.com/150',
+                slug: 'test-product-variant',
+                quantity: 1,
+                variant: {
+                    id: 'red',
+                    name: 'Color: Rojo',
+                    price: 1500
+                },
+                incomplete: false
+            };
+            
+            const existingCart = localStorage.getItem('shopifree-cart');
+            let cartItems = existingCart ? JSON.parse(existingCart) : [];
+            
+            // Verificar si ya existe
+            const existingIndex = cartItems.findIndex(item => item.id === testProduct.id);
+            if (existingIndex >= 0) {
+                cartItems[existingIndex].quantity += 1;
+            } else {
+                cartItems.push(testProduct);
+            }
+            
+            localStorage.setItem('shopifree-cart', JSON.stringify(cartItems));
+            checkCartState();
+        }
+        
+        function checkLocalStorage() {
+            const infoDiv = document.getElementById('local-storage-info');
+            const allKeys = Object.keys(localStorage);
+            const cartKeys = allKeys.filter(key => key.includes('cart') || key.includes('shopifree'));
+            
+            infoDiv.innerHTML = `
+                <strong>Claves relacionadas con carrito:</strong><br>
+                ${cartKeys.map(key => `${key}: ${localStorage.getItem(key)}`).join('<br>')}
+            `;
+        }
+        
+        // Cargar estado inicial
+        checkCartState();
+        checkLocalStorage();
+    </script>
+</body>
+</html>
+
