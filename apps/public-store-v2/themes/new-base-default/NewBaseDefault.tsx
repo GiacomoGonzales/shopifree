@@ -173,6 +173,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         window.location.pathname.split('/coleccion/')[1]?.split('/')[0] : null);
     const brandSlugFromUrl = brandSlug || (isOnBrandPage ? 
         window.location.pathname.split('/marca/')[1]?.split('/')[0] : null);
+    
+
 
     const [storeIdState, setStoreIdState] = useState<string | null>(null);
     const resolvedStoreId = storeId || storeIdState;
@@ -197,6 +199,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const [loadingCartButton, setLoadingCartButton] = useState<string | null>(null); // ID del producto que está siendo agregado
     const [filtersModalOpen, setFiltersModalOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+    const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
     const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
     
     // Estados para el carrusel
@@ -292,6 +295,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     
                     console.log("Categorías cargadas:", cats);
                     console.log("Categorías padre:", cats?.filter(c => !c.parentCategoryId));
+                    console.log("🔍 TODAS las categorías con parentCategoryId:");
+                    cats?.forEach(c => {
+                        console.log(`  - ${c.name} (${c.slug}): ID=${c.id}, parentCategoryId=${c.parentCategoryId || 'NULL'}`);
+                    });
                     console.log("Productos cargados:", items);
                     console.log("Productos con categoryId:", items.filter(p => p.categoryId));
                     
@@ -438,6 +445,58 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         [categories]
     );
 
+    // 🆕 Obtener subcategorías de la categoría actual
+    const currentCategorySubcategories = useMemo(() => {
+        console.log('🔍 Debugging subcategories detection:', {
+            isOnCategoryPage,
+            hasCategories: !!categories,
+            categorySlugFromUrl,
+            categoriesLength: categories?.length || 0
+        });
+        
+        if (!isOnCategoryPage || !categories || !categorySlugFromUrl) {
+            console.log('❌ Early return: missing requirements for subcategories');
+            return [];
+        }
+        
+        const currentCategory = categories.find(c => c.slug === categorySlugFromUrl);
+        console.log('🔍 Current category found:', currentCategory);
+        
+        if (!currentCategory) {
+            console.log('❌ No current category found with slug:', categorySlugFromUrl);
+            console.log('Available categories:', categories.map(c => ({ id: c.id, name: c.name, slug: c.slug })));
+            return [];
+        }
+        
+        // Encontrar subcategorías que pertenecen a esta categoría padre
+        console.log(`🔍 Looking for subcategories with parentCategoryId: "${currentCategory.id}"`);
+        console.log('🔍 All categories with their parentCategoryId:', 
+            categories.map(c => ({ 
+                id: c.id, 
+                name: c.name, 
+                slug: c.slug, 
+                parentCategoryId: c.parentCategoryId || 'null' 
+            })));
+            
+        console.log('🔍 Exact ID comparison:');
+        console.log('Current category ID:', JSON.stringify(currentCategory.id));
+        categories.forEach(c => {
+            if (c.parentCategoryId) {
+                console.log(`Category "${c.name}" has parentCategoryId:`, JSON.stringify(c.parentCategoryId));
+                console.log(`Does it match? ${c.parentCategoryId === currentCategory.id}`);
+            }
+        });
+        
+        const subcategories = categories.filter(c => c.parentCategoryId === currentCategory.id);
+        
+        console.log(`🔍 Subcategorías encontradas para "${currentCategory.name}" (ID: ${currentCategory.id}):`, 
+            subcategories.map(s => ({ id: s.id, name: s.name, slug: s.slug, parentCategoryId: s.parentCategoryId })));
+        
+
+        
+        return subcategories;
+    }, [categories, categorySlugFromUrl, isOnCategoryPage]);
+
     // Productos filtrados
     const filteredProducts = useMemo(() => {
         const hasProducts = Array.isArray(products) && products.length > 0;
@@ -522,30 +581,81 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             
             if (cat) {
                 const beforeFilter = base.length;
-                // Buscar productos que pertenezcan a esta categoría O a sus subcategorías
-                const subcategoryIds = categories?.filter(c => c.parentCategoryId === cat.id).map(c => c.id) || [];
-                const allCategoryIds = [cat.id, ...subcategoryIds];
                 
-                // También incluir búsqueda por slug para mayor compatibilidad
-                const allCategorySlugs = [cat.slug, ...categories?.filter(c => c.parentCategoryId === cat.id).map(c => c.slug) || []];
-                
-                base = base.filter(p => {
-                    // Buscar por ID de categoría (campo legacy)
-                    const matchesById = allCategoryIds.includes(p.categoryId || '');
-                    // Buscar por slug de categoría (por si el categoryId es en realidad un slug)
-                    const matchesBySlug = allCategorySlugs.includes(p.categoryId || '');
-                    // Buscar en selectedParentCategoryIds (campo correcto)
-                    const matchesByParentCategories = p.selectedParentCategoryIds?.some(catId => 
-                        allCategoryIds.includes(catId) || allCategorySlugs.includes(catId)
-                    ) || false;
+                // Si hay una subcategoría seleccionada, filtrar solo por ella
+                if (selectedSubcategory) {
+                    console.log(`🔍 Filtrando por subcategoría: ${selectedSubcategory}`);
+                    const subcategory = categories?.find(c => c.slug === selectedSubcategory);
+                    console.log('🔍 Subcategoría encontrada:', subcategory);
                     
-                    return matchesById || matchesBySlug || matchesByParentCategories;
-                });
-                
-                console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
-                console.log("IDs de categorías a buscar:", allCategoryIds);
-                console.log("Slugs de categorías a buscar:", allCategorySlugs);
-                console.log("Productos filtrados:", base.map(p => ({name: p.name, categoryId: p.categoryId, selectedParentCategoryIds: p.selectedParentCategoryIds})));
+                    if (subcategory) {
+                        console.log('🔍 Productos antes del filtro por subcategoría:', base.length);
+                        console.log('🔍 Productos con sus categoryIds:', base.map(p => ({
+                            name: p.name,
+                            categoryId: p.categoryId,
+                            selectedParentCategoryIds: p.selectedParentCategoryIds
+                        })));
+                        
+                        const filteredBySubcategory = base.filter(p => {
+                            const matchesById = p.categoryId === subcategory.id;
+                            const matchesBySlug = p.categoryId === subcategory.slug;
+                            const matchesByParentCategories = p.selectedParentCategoryIds?.includes(subcategory.id) || false;
+                            // 🔧 CORRECCIÓN: Verificar selectedSubcategoryIds
+                            const matchesBySubcategories = p.selectedSubcategoryIds?.includes(subcategory.id) || false;
+                            
+                            console.log(`🔍 Producto "${p.name}":`, {
+                                categoryId: p.categoryId,
+                                selectedParentCategoryIds: p.selectedParentCategoryIds,
+                                selectedSubcategoryIds: p.selectedSubcategoryIds,
+                                subcategoryId: subcategory.id,
+                                matchesById,
+                                matchesBySlug,
+                                matchesByParentCategories,
+                                matchesBySubcategories,
+                                finalMatch: matchesById || matchesBySlug || matchesByParentCategories || matchesBySubcategories
+                            });
+                            
+                            return matchesById || matchesBySlug || matchesByParentCategories || matchesBySubcategories;
+                        });
+                        
+                        console.log(`🔍 Productos específicos de subcategoría "${subcategory.name}": ${filteredBySubcategory.length}`);
+                        
+                        if (filteredBySubcategory.length > 0) {
+                            // Si hay productos específicos de la subcategoría, usar esos
+                            base = filteredBySubcategory;
+                            console.log(`✅ Usando productos específicos de subcategoría`);
+                        } else {
+                            // Si no hay productos específicos, mostrar productos de la categoría padre
+                            // que podrían pertenecer a esta subcategoría (fallback inteligente)
+                            console.log(`⚠️ No hay productos específicos de "${subcategory.name}", mostrando productos de categoría padre`);
+                            // Mantener todos los productos de la categoría padre
+                        }
+                    }
+                } else {
+                    // Buscar productos que pertenezcan a esta categoría O a sus subcategorías
+                    const subcategoryIds = categories?.filter(c => c.parentCategoryId === cat.id).map(c => c.id) || [];
+                    const allCategoryIds = [cat.id, ...subcategoryIds];
+                    
+                    // También incluir búsqueda por slug para mayor compatibilidad
+                    const allCategorySlugs = [cat.slug, ...categories?.filter(c => c.parentCategoryId === cat.id).map(c => c.slug) || []];
+                    
+                    base = base.filter(p => {
+                        // Buscar por ID de categoría (campo legacy)
+                        const matchesById = allCategoryIds.includes(p.categoryId || '');
+                        // Buscar por slug de categoría (por si el categoryId es en realidad un slug)
+                        const matchesBySlug = allCategorySlugs.includes(p.categoryId || '');
+                        // Buscar en selectedParentCategoryIds (campo correcto)
+                        const matchesByParentCategories = p.selectedParentCategoryIds?.some(catId => 
+                            allCategoryIds.includes(catId) || allCategorySlugs.includes(catId)
+                        ) || false;
+                        
+                        return matchesById || matchesBySlug || matchesByParentCategories;
+                    });
+                    
+                    console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
+                    console.log("IDs de categorías a buscar:", allCategoryIds);
+                    console.log("Slugs de categorías a buscar:", allCategorySlugs);
+                }
             } else {
                 console.log("❌ No se encontró la categoría con slug:", activeCategory);
             }
@@ -596,7 +706,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
 
         return base;
-    }, [products, categories, activeCategory, selectedFilters, isOnCollectionPage, currentCollection, isOnBrandPage, currentBrand]);
+    }, [products, categories, activeCategory, selectedFilters, selectedSubcategory, isOnCollectionPage, currentCollection, isOnBrandPage, currentBrand]);
 
     // Productos ordenados
     const sortedProducts = useMemo(() => {
@@ -866,6 +976,43 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 </div>
             )}
             
+            {/* Sección de subcategorías - Solo en páginas de categoría */}
+            {(() => {
+                console.log('🔍 Checking subcategories render conditions:', {
+                    isOnCategoryPage,
+                    hasCurrentCategory: !!currentCategory,
+                    subcategoriesCount: currentCategorySubcategories.length,
+                    shouldRender: isOnCategoryPage && currentCategory && currentCategorySubcategories.length > 0
+                });
+                
+                return isOnCategoryPage && currentCategory && currentCategorySubcategories.length > 0;
+            })() && (
+                <section className="nbd-subcategories-section">
+                    <div className="nbd-container">
+                        <div className="nbd-subcategories-grid">
+                            {/* Botón "Todas" para mostrar todos los productos */}
+                            <button
+                                onClick={() => setSelectedSubcategory(null)}
+                                className={`nbd-subcategory-button ${!selectedSubcategory ? 'nbd-subcategory-button--active' : ''}`}
+                            >
+                                <span className="nbd-subcategory-name">Todas</span>
+                            </button>
+                            
+                            {/* Botones de subcategorías */}
+                            {currentCategorySubcategories.map((subcategory) => (
+                                <button
+                                    key={subcategory.id}
+                                    onClick={() => setSelectedSubcategory(subcategory.slug)}
+                                    className={`nbd-subcategory-button ${selectedSubcategory === subcategory.slug ? 'nbd-subcategory-button--active' : ''}`}
+                                >
+                                    <span className="nbd-subcategory-name">{subcategory.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+            
             {/* Si estamos en una página de colección, mostrar header limpio */}
             {isOnCollectionPage && currentCollection && (
                 <div className="nbd-category-page-header">
@@ -1093,9 +1240,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                                             {category.description}
                                                         </p>
                                                     )}
-                                                    <p className="nbd-mosaic-count">
-                                                        {productCount} {productCount === 1 ? additionalText('product') : additionalText('products')}
-                                                    </p>
                                                 </div>
                                                 
                                                 <div className="nbd-mosaic-arrow">

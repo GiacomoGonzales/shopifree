@@ -4172,6 +4172,78 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 
 
+/* Sección de subcategorías */
+.nbd-subcategories-section {
+    padding: var(--nbd-space-xl) 0;
+    border-bottom: 1px solid var(--nbd-neutral-200);
+    background: linear-gradient(135deg, rgba(var(--nbd-primary-rgb), 0.02) 0%, rgba(var(--nbd-secondary-rgb), 0.02) 100%);
+}
+
+.nbd-subcategories-grid {
+    display: flex;
+    gap: var(--nbd-space-md);
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.nbd-subcategory-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--nbd-space-md) var(--nbd-space-xl);
+    border: 2px solid var(--nbd-neutral-300);
+    border-radius: var(--nbd-radius-xl);
+    background: white;
+    color: var(--nbd-neutral-700);
+    font-weight: 500;
+    font-size: var(--nbd-font-size-sm);
+    text-decoration: none;
+    transition: all var(--nbd-transition-base);
+    cursor: pointer;
+    min-height: 44px;
+    white-space: nowrap;
+}
+
+.nbd-subcategory-button:hover {
+    border-color: var(--nbd-primary);
+    background: rgba(var(--nbd-primary-rgb), 0.05);
+    color: var(--nbd-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--nbd-primary-rgb), 0.15);
+}
+
+.nbd-subcategory-button--active {
+    border-color: var(--nbd-primary);
+    background: var(--nbd-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--nbd-primary-rgb), 0.25);
+}
+
+.nbd-subcategory-button--active:hover {
+    background: var(--nbd-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.nbd-subcategory-name {
+    font-weight: inherit;
+}
+
+/* Responsive para subcategorías */
+@media (max-width: 768px) {
+    .nbd-subcategories-grid {
+        justify-content: flex-start;
+        gap: var(--nbd-space-sm);
+    }
+    
+    .nbd-subcategory-button {
+        padding: var(--nbd-space-sm) var(--nbd-space-lg);
+        font-size: var(--nbd-font-size-xs);
+        min-height: 40px;
+    }
+}
+
 /* Sección de filtros */
 .nbd-filters-section {
     padding: var(--nbd-space-2xl) 0;
