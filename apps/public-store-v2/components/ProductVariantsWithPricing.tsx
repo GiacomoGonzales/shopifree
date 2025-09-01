@@ -65,21 +65,30 @@ export default function ProductVariantsWithPricing({
       }
 
       // Normalizar y filtrar variantes válidas y disponibles
+      const trackStock = (product as any).trackStock;
       const normalizedVariants = parsedVariants.map(variant => {
+        // Calcular disponibilidad considerando trackStock del producto
+        let isAvailable = true; // Por defecto disponible
+        
+        // Solo verificar stock si trackStock está habilitado
+        if (trackStock === true) {
+          isAvailable = variant.isAvailable !== false && variant.stock !== 0;
+        }
+        
         // Si la variante tiene 'name' pero no 'value', usar 'name' como 'value'
         if (variant.name && !variant.value) {
           return {
             ...variant,
             value: variant.name,
             name: 'Variante', // Nombre genérico para el tipo de variante
-            isAvailable: variant.isAvailable !== false && variant.stock !== 0
+            isAvailable: isAvailable
           };
         }
         
         // Si ya tiene la estructura correcta, solo asegurar isAvailable
         return {
           ...variant,
-          isAvailable: variant.isAvailable !== false && variant.stock !== 0
+          isAvailable: isAvailable
         };
       });
       
@@ -150,7 +159,7 @@ export default function ProductVariantsWithPricing({
                 <div className="nbd-variant-option-price">
                   {formatPrice(variant.price, storeInfo?.currency || 'COP')}
                 </div>
-                {variant.stock === 0 && (
+                {!variant.isAvailable && (
                   <div className="nbd-variant-option-stock">
                     Sin stock
                   </div>

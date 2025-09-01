@@ -70,12 +70,42 @@ function transformToPublicProduct(raw: any): PublicProduct {
         tags: (() => {
             let tags = raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : {};
             
+            // Clean metadata values to remove prefixes like "metadata.values."
+            const cleanedTags: Record<string, any> = {};
+            Object.entries(tags).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    const cleanedValues = value.map(v => {
+                        if (typeof v === 'string' && v.startsWith('metadata.values.')) {
+                            const parts = v.split('.');
+                            return parts[parts.length - 1];
+                        }
+                        return v;
+                    }).filter(v => v && !v.includes('_options.') && !v.startsWith('metadata.'));
+                    
+                    if (cleanedValues.length > 0) {
+                        cleanedTags[key] = cleanedValues;
+                    }
+                } else if (typeof value === 'string') {
+                    if (value.startsWith('metadata.values.')) {
+                        const parts = value.split('.');
+                        const cleanedValue = parts[parts.length - 1];
+                        if (cleanedValue && !cleanedValue.includes('_options.') && !cleanedValue.startsWith('metadata.')) {
+                            cleanedTags[key] = cleanedValue;
+                        }
+                    } else if (!value.includes('_options.') && !value.startsWith('metadata.')) {
+                        cleanedTags[key] = value;
+                    }
+                } else {
+                    cleanedTags[key] = value;
+                }
+            });
+            
             // Si las variantes están en raw.variants (directamente en el documento), agregarlas a tags
             if (raw.variants && Array.isArray(raw.variants)) {
-                tags = { ...tags, variants: raw.variants };
+                cleanedTags.variants = raw.variants;
             }
             
-            return tags;
+            return cleanedTags;
         })(),
         createdAt: raw.createdAt?.toDate?.()?.toISOString() || raw.createdAt || undefined,
 	};

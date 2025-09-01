@@ -28,6 +28,24 @@ import {
   getStoreFilters
 } from '../../lib/store-filters'
 
+// Función para traducir opciones de filtros para mostrar en la UI
+async function translateFilterOptions(fieldId: string, options: string[], language: 'es' | 'en' | 'pt' = 'es'): Promise<string[]> {
+  try {
+    // Cargar las traducciones de metadatos del dashboard
+    const metadataMessages = await import(`../../messages/${language}/categories/metadata.json`)
+    const translations = metadataMessages.default
+    
+    return options.map(option => {
+      // Buscar la traducción de la opción usando la estructura: metadata.values.{fieldId}_options.{option}
+      const translatedOption = translations?.metadata?.values?.[`${fieldId}_options`]?.[option]
+      return translatedOption || option // Si no encuentra traducción, usar el original
+    })
+  } catch (error) {
+    console.log(`❌ Error translating options for field "${fieldId}":`, error)
+    return options // Fallback: devolver opciones originales
+  }
+}
+
 interface FilterManagerProps {
   onFiltersChange?: (filters: StoreFilterConfig[]) => void
 }
@@ -36,9 +54,10 @@ interface SortableFilterItemProps {
   filter: StoreFilterConfig
   onToggle: (filterId: string) => void
   saving: boolean
+  translatedOptions?: string[]
 }
 
-function SortableFilterItem({ filter, onToggle, saving }: SortableFilterItemProps) {
+function SortableFilterItem({ filter, onToggle, saving, translatedOptions }: SortableFilterItemProps) {
   const {
     attributes,
     listeners,
@@ -105,7 +124,7 @@ function SortableFilterItem({ filter, onToggle, saving }: SortableFilterItemProp
                  </span>
                </div>
               <p className="text-sm text-gray-500 mt-1 line-clamp-2 pr-8">
-                {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
+                {filter.options.length} opciones: {(translatedOptions || filter.options).slice(0, 3).join(', ')}
                 {filter.options.length > 3 && '...'}
               </p>
               <p className="text-xs text-gray-400 mt-1">
@@ -136,6 +155,7 @@ function SortableFilterItem({ filter, onToggle, saving }: SortableFilterItemProp
 export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
   const { store } = useStore()
   const [availableFilters, setAvailableFilters] = useState<StoreFilterConfig[]>([])
+  const [translatedOptions, setTranslatedOptions] = useState<Record<string, string[]>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -159,6 +179,19 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
     }
   }, [store?.id])
 
+  // Función para traducir opciones para mostrar en la UI del dashboard
+  const translateOptionsForDisplay = async (filters: StoreFilterConfig[]) => {
+    const storeLanguage = store?.advanced?.language || store?.language || 'es'
+    const newTranslatedOptions: Record<string, string[]> = {}
+    
+    for (const filter of filters) {
+      const translated = await translateFilterOptions(filter.id, filter.options, storeLanguage as 'es' | 'en' | 'pt')
+      newTranslatedOptions[filter.id] = translated
+    }
+    
+    setTranslatedOptions(newTranslatedOptions)
+  }
+
   const loadFilters = async () => {
     if (!store?.id) return
     
@@ -171,10 +204,16 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       
       if (savedFilters.length > 0) {
         setAvailableFilters(savedFilters)
+        
+        // Traducir opciones para mostrar en la UI
+        await translateOptionsForDisplay(savedFilters)
       } else {
         // If no saved filters, extract from products
         const extractedFilters = await extractFiltersFromProducts(store.id)
         setAvailableFilters(extractedFilters)
+        
+        // Traducir opciones para mostrar en la UI
+        await translateOptionsForDisplay(extractedFilters)
       }
     } catch (err) {
       console.error('Error loading filters:', err)
@@ -184,14 +223,17 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
     }
   }
 
-  const handleRefreshFilters = async () => {
+
+
+  // 🚀 Función combinada que actualiza filtros Y traduce todo
+  const handleUpdateFiltersAndTranslate = async () => {
     if (!store?.id) return
     
     try {
       setLoading(true)
       setError(null)
       
-      // Extract fresh filters from products
+      // Extract fresh filters from products (esto ya traduce nombres y opciones)
       const extractedFilters = await extractFiltersFromProducts(store.id)
       
       // Preserve visibility and order from existing filters
@@ -205,12 +247,12 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
             visible: existingFilter.visible,
             order: existingFilter.order
           }
-        }
-        // New filter - add at the end
-        const maxOrder = Math.max(...availableFilters.map(f => f.order), -1)
-        return {
-          ...newFilter,
-          order: maxOrder + 1 + index
+        } else {
+          return {
+            ...newFilter,
+            visible: true,
+            order: availableFilters.length + index
+          }
         }
       })
       
@@ -220,10 +262,13 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       setAvailableFilters(updatedFilters)
       await saveFilters(updatedFilters)
       
-      setSuccessMessage('Filtros actualizados desde los productos')
+      // Traducir opciones para mostrar en la UI
+      await translateOptionsForDisplay(updatedFilters)
+      
+      setSuccessMessage('Filtros actualizados y traducidos correctamente')
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      console.error('Error refreshing filters:', err)
+      console.error('Error updating and translating filters:', err)
       setError('Error al actualizar los filtros')
     } finally {
       setLoading(false)
@@ -363,17 +408,17 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
 
   return (
     <div>
-      {/* Header with refresh button */}
-      <div className="flex justify-end mb-6">
+      {/* Header with unified action button */}
+      <div className="flex justify-end space-x-3 mb-6">
         <button
-          onClick={handleRefreshFilters}
+          onClick={handleUpdateFiltersAndTranslate}
           disabled={loading}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50"
         >
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Actualizar desde productos
+          {loading ? 'Actualizando...' : 'Actualizar filtros'}
         </button>
       </div>
 
@@ -435,6 +480,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                       filter={filter}
                       onToggle={handleFilterToggle}
                       saving={saving}
+                      translatedOptions={translatedOptions[filter.id]}
                     />
                   ))}
                 </SortableContext>
@@ -472,7 +518,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                           </span>
                         </div>
                         <p className="text-sm text-gray-400 mt-1 line-clamp-2 pr-8">
-                          {filter.options.length} opciones: {filter.options.slice(0, 3).join(', ')}
+                          {filter.options.length} opciones: {(translatedOptions || filter.options).slice(0, 3).join(', ')}
                           {filter.options.length > 3 && '...'}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">

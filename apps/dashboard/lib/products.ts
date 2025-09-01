@@ -127,6 +127,13 @@ export const createProduct = async (storeId: string, productData: Omit<Product, 
     // Usar addDoc para generar automáticamente un ID
     const docRef = await addDoc(productsCollectionRef, cleanedProduct)
     
+    // Auto-update filters if the product has metadata
+    if (productData.metaFieldValues && Object.keys(productData.metaFieldValues).length > 0) {
+      // Import dynamically to avoid circular dependency
+      const { autoUpdateFiltersFromProduct } = await import('./store-filters')
+      await autoUpdateFiltersFromProduct(storeId, productData.metaFieldValues)
+    }
+    
     return { id: docRef.id, ...newProduct }
   } catch (error) {
     console.error('Error creating product:', error)
@@ -195,6 +202,13 @@ export const updateProduct = async (storeId: string, productId: string, data: Pa
       ...data,
       updatedAt: serverTimestamp()
     })
+    
+    // Auto-update filters if the product metadata was updated
+    if (data.metaFieldValues && Object.keys(data.metaFieldValues).length > 0) {
+      // Import dynamically to avoid circular dependency
+      const { autoUpdateFiltersFromProduct } = await import('./store-filters')
+      await autoUpdateFiltersFromProduct(storeId, data.metaFieldValues)
+    }
     
     return true
   } catch (error) {

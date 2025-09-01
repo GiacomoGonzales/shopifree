@@ -1,10 +1,10 @@
 "use client";
 
-import { StoreBasicInfo, StoreShippingConfig } from "../../lib/store";
+import { StoreBasicInfo } from "../../lib/store";
 import { Category } from "../../lib/categories";
 import { useStoreLanguage } from "../../lib/store-language-context";
 import StoreLocationMap from "../../components/StoreLocationMap";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 
 type Props = {
     storeInfo: StoreBasicInfo | null;
@@ -17,36 +17,24 @@ export default function Footer({ storeInfo, categories, storeSubdomain, storeId 
     const currentYear = new Date().getFullYear();
     const topCategories = Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : [];
     const { t } = useStoreLanguage();
-    const [shippingConfig, setShippingConfig] = useState<StoreShippingConfig | null>(null);
 
-    useEffect(() => {
-        const loadShippingConfig = async () => {
-            if (!storeId) return;
-            
-            try {
-                const { getStoreShippingConfig } = await import("../../lib/store");
-                const config = await getStoreShippingConfig(storeId);
-                setShippingConfig(config);
-            } catch (error) {
-                console.warn("Error loading shipping config:", error);
-            }
-        };
-
-        loadShippingConfig();
-    }, [storeId]);
-
-    // Memoizar la lógica de local físico para evitar re-renders
+    // Memoizar la lógica de local físico basada en la configuración de contacto
     const { hasPhysicalStore, storeLocation } = useMemo(() => {
-        const hasStore = shippingConfig?.storePickup?.enabled && 
-                        shippingConfig?.storePickup?.locations && 
-                        shippingConfig.storePickup.locations.length > 0;
+        const hasStore = storeInfo?.hasPhysicalLocation && 
+                        storeInfo?.location && 
+                        storeInfo.location.address.length > 0;
         
-        const location = hasStore && shippingConfig?.storePickup?.locations?.[0] 
-            ? shippingConfig.storePickup.locations[0]
+        const location = hasStore && storeInfo?.location 
+            ? {
+                name: storeInfo.storeName || "Nuestra tienda",
+                address: storeInfo.location.address,
+                lat: storeInfo.location.lat,
+                lng: storeInfo.location.lng
+              }
             : null;
 
         return { hasPhysicalStore: hasStore, storeLocation: location };
-    }, [shippingConfig?.storePickup?.enabled, shippingConfig?.storePickup?.locations]);
+    }, [storeInfo?.hasPhysicalLocation, storeInfo?.location, storeInfo?.storeName]);
 
     return (
         <footer className="nbd-footer">

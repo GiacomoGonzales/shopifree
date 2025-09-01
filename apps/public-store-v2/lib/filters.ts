@@ -1,19 +1,17 @@
 import { getFirebaseDb } from './firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-
-export interface FilterOption {
-    [key: string]: string; // Los valores dinámicos como "1": "Azul", "2": "Rojo", etc.
-}
+import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 
 export interface Filter {
     id: string;
     name: string;
     type: 'tags' | 'select';
-    options?: FilterOption;
+    options: string[]; // Array of option values
     order?: number;
     productCount?: number;
     visible?: boolean;
 }
+
+
 
 export async function getStoreFilters(storeId: string): Promise<Filter[]> {
     try {
@@ -28,7 +26,7 @@ export async function getStoreFilters(storeId: string): Promise<Filter[]> {
             const data = doc.data();
             
             // Solo incluir filtros visibles y que tengan opciones
-            if (data.visible && data.options && Object.keys(data.options).length > 0) {
+            if (data.visible && data.options && Array.isArray(data.options) && data.options.length > 0) {
                 filters.push({
                     id: doc.id,
                     name: data.name || doc.id,

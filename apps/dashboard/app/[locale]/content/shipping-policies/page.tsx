@@ -158,7 +158,7 @@ export default function ContentShippingPoliciesPage() {
                   href={`/${locale}/content/pages`}
                   className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
                 >
-                  {t('tabs.pages')}
+                  {t('tabs.shipping')}
                 </a>
                 <a
                   href={`/${locale}/content/filters`}

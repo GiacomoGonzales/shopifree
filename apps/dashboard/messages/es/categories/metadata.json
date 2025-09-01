@@ -1292,10 +1292,10 @@
       },
       "alcohol_content_options": {
         "Sin alcohol": "Sin alcohol",
-        "0.5-5%": "0.5-5%",
-        "5-12%": "5-12%",
-        "12-20%": "12-20%",
-        "20-40%": "20-40%",
+        "low_0_5_to_5_percent": "0.5-5%",
+        "medium_5_to_12_percent": "5-12%",
+        "high_12_to_20_percent": "12-20%",
+        "very_high_20_to_40_percent": "20-40%",
         "Más de 40%": "Más de 40%"
       },
       "spice_level_options": {

@@ -32,6 +32,12 @@ export type StoreBasicInfo = {
     emailStore?: string;
     phone?: string;
     address?: string;
+    hasPhysicalLocation?: boolean;
+    location?: {
+        address: string;
+        lat: number;
+        lng: number;
+    };
     language?: 'es' | 'en' | 'pt';
     theme?: string;
     primaryColor?: string;
@@ -124,6 +130,12 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             emailStore: data.emailStore || data.email || undefined,
             phone: data.phone || data.phoneNumber || undefined,
             address: data.address || data.direction || data.direccion || undefined,
+            hasPhysicalLocation: data.hasPhysicalLocation || false,
+            location: data.location ? {
+                address: data.location.address || "",
+                lat: data.location.lat || 0,
+                lng: data.location.lng || 0
+            } : undefined,
             language: (data?.advanced?.language === 'en' ? 'en' : 
                     data?.advanced?.language === 'pt' ? 'pt' : 
                     data?.advanced?.language === 'es' ? 'es' : undefined),

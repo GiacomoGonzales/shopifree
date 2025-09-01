@@ -5,6 +5,7 @@ import {
   collection, 
   where, 
   getDocs,
+  getDoc,
   serverTimestamp,
   updateDoc
 } from 'firebase/firestore'
@@ -297,6 +298,29 @@ export interface StoreWithId {
 }
 
 // Check if user has a store
+// Get store by ID
+export const getStore = async (storeId: string): Promise<StoreWithId | null> => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) {
+      console.warn('Firebase db not available')
+      return null
+    }
+    
+    const storeRef = doc(db, 'stores', storeId)
+    const storeDoc = await getDoc(storeRef)
+    
+    if (storeDoc.exists()) {
+      return { id: storeDoc.id, ...storeDoc.data() } as StoreWithId
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error getting store:', error)
+    return null
+  }
+}
+
 export const getUserStore = async (userId: string): Promise<StoreWithId | null> => {
   try {
     const db = getFirebaseDb()
