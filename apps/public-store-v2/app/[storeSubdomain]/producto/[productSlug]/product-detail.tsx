@@ -111,21 +111,70 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     
     // Buscar variantes en diferentes ubicaciones
     let hasVariants = false;
+    let variantSource = '';
+    let variantData = null;
     
     // 1. En tags.variants (ubicación esperada)
     if (product.tags && product.tags.variants) {
-      hasVariants = typeof product.tags.variants === 'string' || Array.isArray(product.tags.variants);
+      const variants = product.tags.variants;
+      // Verificar que no sea solo un string vacío o array vacío
+      if (typeof variants === 'string' && variants.trim() !== '') {
+        // Si es un string, verificar que tenga contenido real de variantes (JSON válido)
+        try {
+          const parsed = JSON.parse(variants);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            hasVariants = true;
+            variantData = parsed;
+          }
+        } catch {
+          // Si no es JSON válido, asumir que no tiene variantes reales
+          hasVariants = false;
+        }
+      } else if (Array.isArray(variants) && variants.length > 0) {
+        hasVariants = true;
+        variantData = variants;
+      }
+      if (hasVariants) variantSource = 'tags.variants';
     }
     // 2. Directamente en el producto
     else if ((product as any).variants) {
-      hasVariants = typeof (product as any).variants === 'string' || Array.isArray((product as any).variants);
+      const variants = (product as any).variants;
+      if (typeof variants === 'string' && variants.trim() !== '') {
+        try {
+          const parsed = JSON.parse(variants);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            hasVariants = true;
+            variantData = parsed;
+          }
+        } catch {
+          hasVariants = false;
+        }
+      } else if (Array.isArray(variants) && variants.length > 0) {
+        hasVariants = true;
+        variantData = variants;
+      }
+      if (hasVariants) variantSource = 'product.variants';
     }
     // 3. En metaFieldValues
     else if ((product as any).metaFieldValues && (product as any).metaFieldValues.variants) {
-      hasVariants = typeof (product as any).metaFieldValues.variants === 'string' || Array.isArray((product as any).metaFieldValues.variants);
+      const variants = (product as any).metaFieldValues.variants;
+      if (typeof variants === 'string' && variants.trim() !== '') {
+        try {
+          const parsed = JSON.parse(variants);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            hasVariants = true;
+            variantData = parsed;
+          }
+        } catch {
+          hasVariants = false;
+        }
+      } else if (Array.isArray(variants) && variants.length > 0) {
+        hasVariants = true;
+        variantData = variants;
+      }
+      if (hasVariants) variantSource = 'metaFieldValues.variants';
     }
     
-
     return hasVariants;
   };
 
@@ -231,8 +280,6 @@ ${productUrl}
       }
     }
     
-    // Usar el estado quantity
-
     // Crear información de variante basada en el tipo de selector usado
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let variantId = product.id;
