@@ -66,6 +66,7 @@ export default function ProductVariantsWithPricing({
 
       // Normalizar y filtrar variantes válidas y disponibles
       const trackStock = (product as any).trackStock;
+      
       const normalizedVariants = parsedVariants.map(variant => {
         // Calcular disponibilidad considerando trackStock del producto
         let isAvailable = true; // Por defecto disponible
@@ -103,27 +104,26 @@ export default function ProductVariantsWithPricing({
 
       setVariants(validVariants);
 
-      // Si no hay variante seleccionada y hay variantes disponibles, no seleccionar ninguna por defecto
+      // Seleccionar automáticamente la primera variante disponible si no hay ninguna seleccionada
       if (validVariants.length > 0 && !selectedVariant) {
-        setSelectedVariant(null);
+        const firstAvailableVariant = validVariants.find(variant => variant.isAvailable !== false) || validVariants[0];
+        setSelectedVariant(firstAvailableVariant);
+        onVariantChange(firstAvailableVariant);
       }
     } catch (error) {
       console.warn('Error parsing product variants:', error);
       setVariants([]);
     }
-  }, [product.tags, selectedVariant]);
-
-  // Notificar cambios al componente padre
-  useEffect(() => {
-    onVariantChange(selectedVariant);
-  }, [selectedVariant, onVariantChange]);
+  }, [product.tags]);
 
   const handleVariantSelect = (variant: ProductVariant) => {
     // Si se hace clic en la variante ya seleccionada, deseleccionarla
     if (selectedVariant?.id === variant.id) {
       setSelectedVariant(null);
+      onVariantChange(null);
     } else {
       setSelectedVariant(variant);
+      onVariantChange(variant);
     }
   };
 

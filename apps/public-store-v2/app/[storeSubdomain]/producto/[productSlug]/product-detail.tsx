@@ -231,116 +231,82 @@ ${productUrl}
     window.open(whatsappUrl, '_blank');
   };
 
-  // Función para agregar producto al carrito
+  // Función SIMPLIFICADA para agregar producto al carrito
   const handleAddToCart = () => {
-    if (!product) return;
-
-    // Verificar si el producto tiene variantes con precios específicos
-    if (hasProductVariantsWithPricing()) {
-      if (!selectedPricingVariant) {
-        alert('Por favor selecciona una variante del producto');
-        return;
-      }
-    } else {
-      // Verificar si el producto tiene variantes tradicionales disponibles y si todas están seleccionadas
-      const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
-      const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
-        const displayName = {
-          'color': 'Color',
-          'size': 'Talla',
-          'size_clothing': 'Talla',
-          'size_shoes': 'Talla de Calzado',
-          'material': 'Material',
-          'style': 'Estilo',
-          'clothing_style': 'Estilo'
-        }[key];
-        return displayName && Array.isArray(value) && value.length > 1;
-      }) : [];
-
-      // Verificar que todas las variantes estén seleccionadas
-      const missingVariants = availableVariants.filter(([key]) => {
-        const value = selectedVariant[key];
-        return !value || value === '' || value === 'Seleccionar';
-      });
-
-      if (missingVariants.length > 0) {
-        const missingNames = missingVariants.map(([key]) => {
-          return {
-            'color': 'Color',
-            'size': 'Talla',
-            'size_clothing': 'Talla',
-            'size_shoes': 'Talla de Calzado',
-            'material': 'Material',
-            'style': 'Estilo',
-            'clothing_style': 'Estilo'
-          }[key];
-        }).join(', ');
-        alert(`Por favor selecciona: ${missingNames}`);
-        return;
-      }
-    }
+    console.log('🛒 [SIMPLE] Iniciando handleAddToCart', { product: product?.name });
     
-    // Crear información de variante basada en el tipo de selector usado
-    let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
-    let variantId = product.id;
+    if (!product) {
+      console.log('❌ [SIMPLE] No hay producto');
+      return;
+    }
+
+    // Obtener cantidad (predeterminado: 1)
+    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
+    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+
+    // Lógica SIMPLE: Si hay variante con precio seleccionada, usarla; si no, usar producto base
     let finalPrice = product.price;
+    let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
+    let itemId = product.id;
 
     if (selectedPricingVariant) {
-      // Usar variante con precio específico
-      variantId = `${product.id}-${selectedPricingVariant.id}`;
+      // Caso 1: Variante con precio específico
+      console.log('✅ [SIMPLE] Usando variante con precio:', selectedPricingVariant);
       finalPrice = selectedPricingVariant.price;
-      
+      itemId = `${product.id}-${selectedPricingVariant.id}`;
       variantInfo = {
         id: selectedPricingVariant.id,
-        name: selectedPricingVariant.value || selectedPricingVariant.name,
+        name: selectedPricingVariant.value || selectedPricingVariant.name || 'Variante',
         price: selectedPricingVariant.price
       };
-    } else if (Object.keys(selectedVariant).length > 0) {
-      // Usar variantes tradicionales
-      const variantParts = Object.entries(selectedVariant).map(([key, value]) => `${key}:${value}`);
-      variantId = `${product.id}-${variantParts.join('-')}`;
-      
-      // Crear descripción de variantes para mostrar por separado
-      const variantDescription = Object.entries(selectedVariant)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(', ');
-
-      // Información de variante para el carrito
-      variantInfo = {
-        id: variantParts.join('-'),
-        name: variantDescription,
-        price: product.price // Usar el precio base del producto
-      };
-    }
-    
-    // Verificar si existe un item incompleto del mismo producto para reemplazarlo
-    const existingIncompleteItem = state.items.find(
-      item => item.productId === product.id && item.incomplete
-    );
-
-    if (existingIncompleteItem) {
-      // Eliminar el item incompleto antes de agregar el completo
-      removeItem(existingIncompleteItem.id);
+    } else {
+      // Caso 2: Producto sin variantes o variantes tradicionales (usar precio base)
+      console.log('✅ [SIMPLE] Usando producto base');
+      // Para variantes tradicionales, crear descripción simple si existen
+      if (Object.keys(selectedVariant).length > 0) {
+        const variantDesc = Object.entries(selectedVariant)
+          .map(([key, value]) => `${value}`)
+          .join(', ');
+        if (variantDesc) {
+          variantInfo = {
+            id: 'traditional',
+            name: variantDesc,
+            price: product.price
+          };
+          itemId = `${product.id}-traditional`;
+        }
+      }
     }
 
-    addItem({
-      id: variantId,
+    console.log('🛒 [SIMPLE] Agregando al carrito:', {
+      itemId,
       productId: product.id,
-      name: product.name, // Usar el nombre original del producto
-      price: finalPrice, // Usar el precio final (del producto o de la variante)
-      currency: storeInfo?.currency || 'COP',
-      image: product.image || '',
-      slug: product.slug || product.id,
-      variant: variantInfo,
-      incomplete: false // Siempre completo desde la página de producto
-    }, quantity);
-    
-    // Abrir el carrito automáticamente después de agregar el producto
-    openCart();
-    
-    // Feedback visual opcional
-    const variantText = variantInfo ? ` con variantes: ${variantInfo.name}` : '';
-    console.log(`Agregado al carrito: ${product.name}${variantText} (${quantity} unidades)`);
+      name: product.name,
+      price: finalPrice,
+      quantity,
+      variant: variantInfo
+    });
+
+    // Agregar al carrito (SIMPLE)
+    try {
+      addItem({
+        id: itemId,
+        productId: product.id,
+        name: product.name,
+        price: finalPrice,
+        currency: storeInfo?.currency || 'COP',
+        image: product.image || '',
+        slug: product.slug || product.id,
+        variant: variantInfo
+      }, quantity);
+
+      // Abrir carrito
+      openCart();
+      
+      console.log('✅ [SIMPLE] Producto agregado exitosamente al carrito');
+    } catch (error) {
+      console.error('❌ [SIMPLE] Error al agregar al carrito:', error);
+    }
   };
 
   useEffect(() => {
@@ -356,7 +322,7 @@ ${productUrl}
           console.log(`🔍 [ProductDetail] Resultado de getProduct:`, p);
           
 
-          
+
           if (!alive) return;
           setProduct(p);
           // cargar info base para header/footer y configuración de locale
@@ -837,11 +803,7 @@ ${productUrl}
             <p className="nbd-product-price">
                {formatPrice(selectedPricingVariant ? selectedPricingVariant.price : product.price, storeInfo?.currency)}
             </p>
-                  {selectedPricingVariant && selectedPricingVariant.price !== product.price && (
-                    <p className="nbd-product-base-price">
-                      Precio base: {formatPrice(product.price, storeInfo?.currency)}
-                    </p>
-                  )}
+
                   
                   {/* Información de stock - Solo mostrar si trackStock está habilitado */}
                   {!hasProductVariantsWithPricing() && product && (product as any).trackStock === true && (
@@ -989,16 +951,7 @@ ${productUrl}
                 <button 
                   className="nbd-btn nbd-btn--primary nbd-btn--cart"
                   onClick={handleAddToCart}
-                  disabled={Boolean(
-                    !product || 
-                    typeof product.price !== 'number' ||
-                    // Deshabilitar SOLO si gestiona stock Y no hay stock disponible
-                    (!hasProductVariantsWithPricing() && (product as any).trackStock === true && (product as any).stockQuantity <= 0) ||
-                    // Deshabilitar si hay variantes con precios pero ninguna seleccionada
-                    (hasProductVariantsWithPricing() && !selectedPricingVariant) ||
-                    // O si la variante seleccionada no está disponible (solo si gestiona stock)
-                    (hasProductVariantsWithPricing() && selectedPricingVariant && selectedPricingVariant.stock !== undefined && selectedPricingVariant.stock <= 0)
-                  )}
+                  disabled={!product}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
