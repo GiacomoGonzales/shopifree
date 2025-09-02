@@ -73,6 +73,18 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
 
         const activeZones = zones.filter(zone => zone.isActive && zone.coordinates.length > 0);
         
+        console.log(`[delivery-zones] ✅ Zonas cargadas para ${storeId}:`, {
+            total: zones.length,
+            activas: activeZones.length,
+            zonas: activeZones.map(z => ({
+                id: z.id,
+                name: z.name,
+                coordenadas: z.coordinates.length,
+                precioStandard: z.priceStandard,
+                precioExpress: z.priceExpress
+            }))
+        });
+        
         // Guardar en cache
         zonesCache[storeId] = {
             zones: activeZones,
@@ -126,12 +138,22 @@ export function findDeliveryZoneForCoordinates(
     coordinates: { lat: number; lng: number },
     zones: DeliveryZone[]
 ): DeliveryZone | null {
+    console.log('🔍 [findDeliveryZoneForCoordinates] Buscando zona para:', coordinates);
+    
     for (const zone of zones) {
+        console.log(`🔍 [findDeliveryZoneForCoordinates] Verificando zona "${zone.name}" con ${zone.coordinates.length} puntos`);
+        console.log(`🔍 [findDeliveryZoneForCoordinates] Coordenadas de zona:`, zone.coordinates);
+        
         const isInside = isPointInPolygon(coordinates, zone.coordinates);
+        console.log(`🔍 [findDeliveryZoneForCoordinates] ¿Está dentro de "${zone.name}"?`, isInside ? '✅ SÍ' : '❌ NO');
+        
         if (isInside) {
+            console.log(`🔍 [findDeliveryZoneForCoordinates] ✅ ENCONTRADA: Zona "${zone.name}"`);
             return zone;
         }
     }
+    
+    console.log('🔍 [findDeliveryZoneForCoordinates] ❌ No se encontró ninguna zona que contenga las coordenadas');
     return null;
 }
 
@@ -143,37 +165,89 @@ export function calculateShippingCost(
     zones: DeliveryZone[],
     shippingMethod: 'standard' | 'express' | 'pickup'
 ): number {
+    console.log('🚚 [calculateShippingCost] Iniciando cálculo:', {
+        coordinates,
+        zonesCount: zones.length,
+        shippingMethod
+    });
+
     // Si es recojo en tienda, no hay costo
     if (shippingMethod === 'pickup') {
+        console.log('🚚 [calculateShippingCost] Método pickup - costo: 0');
         return 0;
     }
 
     // Si no hay coordenadas, no hay costo
     if (!coordinates) {
+        console.log('🚚 [calculateShippingCost] Sin coordenadas - costo: 0');
         return 0;
     }
 
     // Si hay zonas configuradas, buscar la zona que contiene las coordenadas
     if (zones.length > 0) {
+        console.log('🚚 [calculateShippingCost] Buscando zona para coordenadas:', coordinates);
+        console.log('🚚 [calculateShippingCost] Zonas disponibles:', zones.map(z => ({
+            id: z.id,
+            name: z.name,
+            priceStandard: z.priceStandard,
+            priceExpress: z.priceExpress,
+            coordinatesCount: z.coordinates.length
+        })));
+
         const zone = findDeliveryZoneForCoordinates(coordinates, zones);
         
         if (zone) {
+            console.log('🚚 [calculateShippingCost] ✅ Zona encontrada:', zone.name);
             // Usar precio de la zona
             if (shippingMethod === 'express' && zone.priceExpress !== undefined && zone.priceExpress > 0) {
+                console.log('🚚 [calculateShippingCost] Usando precio express de zona:', zone.priceExpress);
                 return zone.priceExpress;
             } else if (shippingMethod === 'standard' && zone.priceStandard !== undefined && zone.priceStandard > 0) {
+                console.log('🚚 [calculateShippingCost] Usando precio estándar de zona:', zone.priceStandard);
                 return zone.priceStandard;
+            } else {
+                console.log('🚚 [calculateShippingCost] ⚠️ Zona encontrada pero sin precio válido');
+                return 0;
             }
+        } else {
+            console.log('🚚 [calculateShippingCost] ❌ Coordenadas fuera de zonas configuradas - costo: 0');
+            return 0;
         }
     }
 
-    // FALLBACK: Usar precio base para Lima (coordenadas válidas de Perú)
-    const isInLima = coordinates.lat >= -12.5 && coordinates.lat <= -11.5 && 
-                     coordinates.lng >= -77.5 && coordinates.lng <= -76.5;
-    
-    if (isInLima) {
-        return shippingMethod === 'express' ? 15 : 8;
-    } else {
-        return shippingMethod === 'express' ? 25 : 15;
-    }
+    // Si no hay zonas configuradas, costo es 0 (tienda sin configurar)
+    console.log('🚚 [calculateShippingCost] ❌ No hay zonas configuradas - costo: 0');
+    return 0;
+}
+
+/**
+ * Función de debugging para probar el cálculo de envío desde la consola del navegador
+ */
+export function debugShippingCalculation(
+    storeId: string,
+    coordinates: { lat: number; lng: number },
+    shippingMethod: 'standard' | 'express' | 'pickup' = 'standard'
+) {
+    return getStoreDeliveryZones(storeId).then(zones => {
+        console.log('=== 🚚 DEBUG SHIPPING CALCULATION ===');
+        console.log('Store ID:', storeId);
+        console.log('Coordinates:', coordinates);
+        console.log('Shipping Method:', shippingMethod);
+        console.log('Zones loaded:', zones);
+        
+        const cost = calculateShippingCost(coordinates, zones, shippingMethod);
+        const zone = findDeliveryZoneForCoordinates(coordinates, zones);
+        
+        console.log('=== 📊 RESULT ===');
+        console.log('Shipping Cost:', cost);
+        console.log('Zone Found:', zone ? zone.name : 'NONE');
+        console.log('===================');
+        
+        return { cost, zone, zones };
+    });
+}
+
+// Hacer la función disponible globalmente para debugging
+if (typeof window !== 'undefined') {
+    (window as any).debugShippingCalculation = debugShippingCalculation;
 }

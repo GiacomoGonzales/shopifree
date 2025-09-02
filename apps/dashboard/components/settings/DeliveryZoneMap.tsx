@@ -35,7 +35,7 @@ interface DeliveryZone {
 
 interface ZoneModalData {
   nombre: string
-  precio: number
+  precio: string
   estimatedTime: string
   color: string
 }
@@ -120,7 +120,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
   const [currentShape, setCurrentShape] = useState<google.maps.Polygon | google.maps.Circle | null>(null)
   const [modalData, setModalData] = useState<ZoneModalData>({
     nombre: '',
-    precio: 0,
+    precio: '',
     estimatedTime: '',
     color: '#2563eb'
   })
@@ -302,11 +302,21 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
         return
       }
 
+      // Validar precio
+      const precio = parseFloat(modalData.precio);
+      if (isNaN(precio) || precio < 0) {
+        alert('Por favor, ingresa un precio válido (mayor o igual a 0)');
+        return;
+      }
+
       let zoneData: any = {
         nombre: modalData.nombre.trim(),
-        precio: Number(modalData.precio),
+        name: modalData.nombre.trim(), // Compatibilidad con formato inglés
+        precio: precio,
+        priceStandard: precio, // Campo esperado por el sistema de cálculo
         color: modalData.color,
         createdAt: new Date().toISOString(),
+        isActive: true, // Por defecto activa
         ...(modalData.estimatedTime.trim() && { estimatedTime: modalData.estimatedTime.trim() })
       }
 
@@ -326,6 +336,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
 
         zoneData.tipo = 'poligono'
         zoneData.coordenadas = coordinates
+        zoneData.coordinates = coordinates // Compatibilidad con sistema de cálculo
         
         console.log('Polygon coordinates:', coordinates)
       } else if (currentShape instanceof google.maps.Circle) {
@@ -378,7 +389,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
 
       // Limpiar modal
       setIsModalOpen(false)
-      setModalData({ nombre: '', precio: 0, estimatedTime: '', color: '#2563eb' })
+      setModalData({ nombre: '', precio: '', estimatedTime: '', color: '#2563eb' })
       setCurrentShape(null)
       
       console.log('Zone saved successfully')
@@ -425,7 +436,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
     }
     setCurrentShape(null)
     setIsModalOpen(false)
-    setModalData({ nombre: '', precio: 0, estimatedTime: '', color: '#2563eb' })
+    setModalData({ nombre: '', precio: '', estimatedTime: '', color: '#2563eb' })
   }
 
   const onZoneClick = (zone: DeliveryZone) => {
@@ -772,8 +783,10 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
                   <input
                     type="number"
                     step="0.50"
+                    min="0"
                     value={modalData.precio}
-                    onChange={(e) => setModalData(prev => ({ ...prev, precio: Number(e.target.value) }))}
+                    onChange={(e) => setModalData(prev => ({ ...prev, precio: e.target.value }))}
+                    placeholder="0.00"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                   />
                 </div>
@@ -823,7 +836,7 @@ export default function DeliveryZoneMap({ isVisible = true }: DeliveryZoneMapPro
               <div className="mt-6 flex space-x-3">
                 <button
                   onClick={saveZone}
-                  disabled={!modalData.nombre.trim() || modalData.precio <= 0 || isNaN(Number(modalData.precio))}
+                  disabled={!modalData.nombre.trim() || !modalData.precio.trim() || Number(modalData.precio) <= 0 || isNaN(Number(modalData.precio))}
                   className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Guardar zona
