@@ -1,9 +1,6 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
-
 export default function HeroFeatures() {
-  const t = useTranslations('heroFeatures')
 
   return (
     <section className="bg-gray-50 py-20">

@@ -442,32 +442,87 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         };
     }, [filtersModalOpen]);
 
-    // 🎥 Force hero video autoplay
+    // 🎥 Force hero video autoplay - Enhanced for Safari iOS
     useEffect(() => {
         if (heroVideoRef.current && storeInfo?.heroMediaType === 'video') {
             const video = heroVideoRef.current;
             
-            // Try to play the video
-            const playPromise = video.play();
+            // iOS Safari specific setup
+            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        // Autoplay started successfully
-                        console.log('Hero video autoplay started successfully');
-                    })
-                    .catch((error) => {
-                        // Autoplay was prevented
-                        console.log('Hero video autoplay prevented:', error);
-                        // Try to play on user interaction
-                        const playOnInteraction = () => {
-                            video.play();
-                            document.removeEventListener('click', playOnInteraction);
-                            document.removeEventListener('touchstart', playOnInteraction);
-                        };
-                        document.addEventListener('click', playOnInteraction);
-                        document.addEventListener('touchstart', playOnInteraction);
+            if (isIOSSafari) {
+                // Force remove any webkit controls that might appear
+                video.style.webkitAppearance = 'none';
+                video.setAttribute('webkit-playsinline', 'true');
+                video.setAttribute('playsinline', 'true');
+                
+                // Hide overlay play button specifically for iOS
+                const style = document.createElement('style');
+                style.textContent = `
+                    video.nbd-hero-video::-webkit-media-controls-overlay-play-button {
+                        display: none !important;
+                        opacity: 0 !important;
+                        visibility: hidden !important;
+                        pointer-events: none !important;
+                        position: absolute !important;
+                        left: -9999px !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Try multiple approaches for iOS Safari
+                const attemptAutoplay = () => {
+                    video.load(); // Reload the video
+                    
+                    setTimeout(() => {
+                        const playPromise = video.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {
+                                // Silently fail for iOS Safari
+                                // The video will play on any user interaction
+                            });
+                        }
+                    }, 100);
+                };
+                
+                attemptAutoplay();
+                
+                // Fallback: Try to play on any user interaction
+                const playOnInteraction = () => {
+                    video.play();
+                    // Clean up listeners after first play
+                    ['touchstart', 'touchend', 'click', 'scroll', 'keydown'].forEach(event => {
+                        document.removeEventListener(event, playOnInteraction);
                     });
+                };
+                
+                // Add listeners for multiple interaction types
+                ['touchstart', 'touchend', 'click', 'scroll', 'keydown'].forEach(event => {
+                    document.addEventListener(event, playOnInteraction, { passive: true });
+                });
+                
+            } else {
+                // Standard autoplay for other browsers
+                const playPromise = video.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            console.log('Hero video autoplay started successfully');
+                        })
+                        .catch((error) => {
+                            console.log('Hero video autoplay prevented:', error);
+                            const playOnInteraction = () => {
+                                video.play();
+                                document.removeEventListener('click', playOnInteraction);
+                                document.removeEventListener('touchstart', playOnInteraction);
+                            };
+                            document.addEventListener('click', playOnInteraction);
+                            document.addEventListener('touchstart', playOnInteraction);
+                        });
+                }
             }
         }
     }, [storeInfo?.heroMediaType, storeInfo?.heroMediaUrl]);
@@ -1141,9 +1196,11 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                                     loop
                                                     muted
                                                     playsInline
+                                                    webkit-playsinline="true"
                                                     disablePictureInPicture
                                                     controls={false}
                                                     controlsList="nodownload nofullscreen noremoteplayback"
+                                                    preload="metadata"
                                                 />
                                             ) : (
                                                 <img

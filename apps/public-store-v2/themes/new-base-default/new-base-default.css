@@ -401,29 +401,86 @@
     transition: transform var(--nbd-transition-slow);
 }
 
-/* Hide video controls completely */
+/* Hide video controls completely - Safari iOS specific */
 .nbd-hero-video::-webkit-media-controls {
     display: none !important;
+    -webkit-appearance: none !important;
 }
 
 .nbd-hero-video::-webkit-media-controls-enclosure {
     display: none !important;
+    -webkit-appearance: none !important;
 }
 
 .nbd-hero-video::-webkit-media-controls-panel {
     display: none !important;
+    -webkit-appearance: none !important;
 }
 
 .nbd-hero-video::-webkit-media-controls-play-button {
     display: none !important;
+    -webkit-appearance: none !important;
 }
 
 .nbd-hero-video::-webkit-media-controls-overlay-play-button {
     display: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .nbd-hero-video::-webkit-media-controls-start-playback-button {
     display: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
+}
+
+/* Additional iOS Safari specific controls */
+.nbd-hero-video::-webkit-media-controls-timeline {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-current-time-display {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-mute-button {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-volume-slider {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-playback-target-availability-placeholder {
+    display: none !important;
+}
+
+/* Force remove all webkit media controls on iOS */
+@supports (-webkit-touch-callout: none) {
+    .nbd-hero-video {
+        -webkit-media-controls: none !important;
+        -webkit-media-controls-start-playback-button: none !important;
+        -webkit-appearance: none !important;
+    }
+    
+    .nbd-hero-video::-webkit-media-controls-overlay-play-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
 }
 
 /* Firefox */
