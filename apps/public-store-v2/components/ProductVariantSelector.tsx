@@ -30,15 +30,12 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
     
     // Buscar campos de variantes específicos
     Object.entries(product.tags).forEach(([key, value]) => {
-      // Mapear nombres de campos comunes a nombres de variantes
+      // Mapear nombres de campos comunes a nombres de variantes (solo color y talla por ahora)
       const variantFieldMap: { [key: string]: string } = {
         'color': 'Color',
         'size': 'Talla',
         'size_clothing': 'Talla',
-        'size_shoes': 'Talla de Calzado',
-        'material': 'Material',
-        'style': 'Estilo',
-        'clothing_style': 'Estilo'
+        'size_shoes': 'Talla de Calzado'
       };
 
       const displayName = variantFieldMap[key];
@@ -73,7 +70,7 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
   const handleVariantSelect = (variantName: string, value: string) => {
     setSelectedVariant(prev => ({
       ...prev,
-      [variantName]: value // Ahora variantName ya es la clave original (size, color)
+      [variantName]: value // Solo reemplaza el valor para esta variante específica
     }));
   };
 
@@ -82,16 +79,13 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
     return null;
   }
 
-  // Mapear claves a nombres mostrados
+  // Mapear claves a nombres mostrados (solo color y talla por ahora)
   const getDisplayName = (key: string) => {
     const map: { [key: string]: string } = {
       'color': 'Color',
       'size': 'Talla',
       'size_clothing': 'Talla',
-      'size_shoes': 'Talla de Calzado',
-      'material': 'Material',
-      'style': 'Estilo',
-      'clothing_style': 'Estilo'
+      'size_shoes': 'Talla de Calzado'
     };
     return map[key] || key;
   };
@@ -108,18 +102,21 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
             </span>
           </label>
           <div className="nbd-variant-options">
-            {values.map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={`nbd-variant-option ${
-                  selectedVariant[variantKey] === value ? 'nbd-variant-option--selected' : ''
-                }`}
-                onClick={() => handleVariantSelect(variantKey, value)}
-              >
-                {value}
-              </button>
-            ))}
+            {values.map((value) => {
+              const isSelected = selectedVariant[variantKey] === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  className={`nbd-variant-option ${isSelected ? 'nbd-variant-option--selected' : ''}`}
+                  onClick={() => handleVariantSelect(variantKey, value)}
+                  aria-pressed={isSelected}
+                  data-selected={isSelected}
+                >
+                  {value}
+                </button>
+              );
+            })}
           </div>
         </div>
       ))}

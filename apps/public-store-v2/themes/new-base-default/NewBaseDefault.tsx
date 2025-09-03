@@ -35,6 +35,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const { t, language } = useStoreLanguage();
     const { addItem, openCart, state: cartState } = useCart();
     
+    // 🎥 Ref for hero video autoplay
+    const heroVideoRef = useRef<HTMLVideoElement>(null);
+    
     // 🆕 Textos adicionales que faltan - Helper rápido
     const additionalText = (key: string) => {
         const texts: Record<string, Record<string, string>> = {
@@ -438,6 +441,36 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             document.body.style.overflow = 'unset';
         };
     }, [filtersModalOpen]);
+
+    // 🎥 Force hero video autoplay
+    useEffect(() => {
+        if (heroVideoRef.current && storeInfo?.heroMediaType === 'video') {
+            const video = heroVideoRef.current;
+            
+            // Try to play the video
+            const playPromise = video.play();
+            
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        // Autoplay started successfully
+                        console.log('Hero video autoplay started successfully');
+                    })
+                    .catch((error) => {
+                        // Autoplay was prevented
+                        console.log('Hero video autoplay prevented:', error);
+                        // Try to play on user interaction
+                        const playOnInteraction = () => {
+                            video.play();
+                            document.removeEventListener('click', playOnInteraction);
+                            document.removeEventListener('touchstart', playOnInteraction);
+                        };
+                        document.addEventListener('click', playOnInteraction);
+                        document.addEventListener('touchstart', playOnInteraction);
+                    });
+            }
+        }
+    }, [storeInfo?.heroMediaType, storeInfo?.heroMediaUrl]);
 
     // Categorías organizadas
     const topCategories = useMemo(() => 
@@ -1101,6 +1134,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                         <div className="nbd-hero-media">
                                             {heroMediaType === 'video' ? (
                                                 <video
+                                                    ref={heroVideoRef}
                                                     src={heroMediaUrl}
                                                     className="nbd-hero-video"
                                                     autoPlay
@@ -1108,7 +1142,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                                     muted
                                                     playsInline
                                                     disablePictureInPicture
-                                                    controlsList="nodownload"
+                                                    controls={false}
+                                                    controlsList="nodownload nofullscreen noremoteplayback"
                                                 />
                                             ) : (
                                                 <img

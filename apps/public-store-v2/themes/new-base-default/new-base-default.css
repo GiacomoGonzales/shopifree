@@ -401,6 +401,41 @@
     transition: transform var(--nbd-transition-slow);
 }
 
+/* Hide video controls completely */
+.nbd-hero-video::-webkit-media-controls {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-play-button {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+}
+
+.nbd-hero-video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+}
+
+/* Firefox */
+.nbd-hero-video::-moz-media-controls {
+    display: none !important;
+}
+
+/* Microsoft Edge */
+.nbd-hero-video::-ms-media-controls {
+    display: none !important;
+}
+
 /* Efectos hover - solo en imagen */
 .nbd-hero-image:hover .nbd-hero-img,
 .nbd-hero-media:hover .nbd-hero-img {
@@ -3343,11 +3378,15 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     background: var(--nbd-neutral-50);
 }
 
-/* Estados seleccionados - Los estilos se aplicarán via JavaScript */
+/* Estados seleccionados - Sin !important para permitir override por JavaScript */
 [data-theme="new-base-default"] .nbd-variant-option--selected,
-[data-theme="new-base-default"] .nbd-variant-option.nbd-variant-option--selected {
+[data-theme="new-base-default"] .nbd-variant-option.nbd-variant-option--selected,
+[data-theme="new-base-default"] .nbd-variant-option[data-selected="true"] {
     font-weight: 600;
-    /* Los colores se aplicarán dinámicamente via JavaScript */
+    border-color: var(--nbd-primary-600);
+    background: var(--nbd-primary-50);
+    color: var(--nbd-primary-900);
+    box-shadow: 0 0 0 1px var(--nbd-primary-200);
 }
 
 /* Estilos específicos para variantes con precios */

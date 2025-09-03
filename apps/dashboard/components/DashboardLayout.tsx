@@ -673,84 +673,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
-              {/* Botón Visitar mi tienda */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-                  
-                  // Verificar que tenemos los datos de la tienda disponibles
-                  if (store?.subdomain) {
-                    // Abrir directamente la tienda - esto funciona en móviles
-                    window.open(`https://${store.subdomain}.shopifree.app`, '_blank')
-                  } else {
-                    // Si no hay datos de tienda disponibles, mostrar mensaje
-                    const message = currentLocale === 'es' 
-                      ? 'Cargando información de la tienda...' 
-                      : 'Loading store information...'
-                    alert(message)
-                    console.warn('Store data not available yet')
-                  }
-                }}
-                className="bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 transition-colors duration-200"
-                title={currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
-              >
-                <MenuIcons.VisitStore />
-                <span className="ml-2 hidden sm:inline">
-                  {currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
-                </span>
-              </button>
-              
-              {/* Selector de idioma */}
-              <div className="relative ml-3">
-                <button
-                  type="button"
-                  className="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setUserDropdownOpen(false) // Cerrar dropdown de usuario
-                    setLanguageDropdownOpen(!languageDropdownOpen)
-                  }}
-                >
-                  <MenuIcons.Globe />
-                  <span className="ml-2 text-sm font-medium text-gray-700">
-                    {currentLocale.toUpperCase()}
-                  </span>
-                </button>
-
-                {languageDropdownOpen && (
-                  <div 
-                    className="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transform transition-transform duration-200 ease-out animate-in"
-                    style={{
-                      transformOrigin: 'top right',
-                      animation: 'dropdownOpen 0.2s ease-out forwards'
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="py-1">
-                      <button
-                        onClick={() => handleLanguageChange('es')}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          currentLocale === 'es' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        Español
-                      </button>
-                      <button
-                        onClick={() => handleLanguageChange('en')}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          currentLocale === 'en' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        English
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* Información del usuario */}
-              <div className="ml-3 relative">
+              <div className="relative">
                 {/* Versión móvil: dropdown con ícono */}
                 <div className="block lg:hidden">
                   <button
@@ -825,10 +749,88 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 
                 {/* Versión escritorio: texto completo */}
                 <div className="hidden lg:flex items-center">
-                  <span className="text-sm font-medium text-gray-700">
-                    {t('hello')}, {userData?.displayName || user?.displayName || 'Usuario'}
-                  </span>
+                  {userData?.displayName && (
+                    <span className="text-sm font-medium text-gray-700">
+                      {t('hello')}, {userData.displayName}
+                    </span>
+                  )}
                 </div>
+              </div>
+
+              {/* Botón Visitar mi tienda */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  
+                  // Verificar que tenemos los datos de la tienda disponibles
+                  if (store?.subdomain) {
+                    // Abrir directamente la tienda - esto funciona en móviles
+                    window.open(`https://${store.subdomain}.shopifree.app`, '_blank')
+                  } else {
+                    // Si no hay datos de tienda disponibles, mostrar mensaje
+                    const message = currentLocale === 'es' 
+                      ? 'Cargando información de la tienda...' 
+                      : 'Loading store information...'
+                    alert(message)
+                    console.warn('Store data not available yet')
+                  }
+                }}
+                className="ml-3 bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 transition-colors duration-200"
+                title={currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
+              >
+                <MenuIcons.VisitStore />
+                <span className="ml-2 hidden sm:inline">
+                  {currentLocale === 'es' ? 'Mi tienda' : 'My store'}
+                </span>
+              </button>
+              
+              {/* Selector de idioma */}
+              <div className="relative ml-3">
+                <button
+                  type="button"
+                  className="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setUserDropdownOpen(false) // Cerrar dropdown de usuario
+                    setLanguageDropdownOpen(!languageDropdownOpen)
+                  }}
+                >
+                  <MenuIcons.Globe />
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    {currentLocale.toUpperCase()}
+                  </span>
+                </button>
+
+                {languageDropdownOpen && (
+                  <div 
+                    className="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transform transition-transform duration-200 ease-out animate-in"
+                    style={{
+                      transformOrigin: 'top right',
+                      animation: 'dropdownOpen 0.2s ease-out forwards'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleLanguageChange('es')}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          currentLocale === 'es' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        Español
+                      </button>
+                      <button
+                        onClick={() => handleLanguageChange('en')}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          currentLocale === 'en' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        English
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

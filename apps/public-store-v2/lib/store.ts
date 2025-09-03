@@ -440,9 +440,17 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     setTimeout(applyDropdownColors, 500);
     setTimeout(observeDropdownClicks, 1000);
     
-    // SOLUCIÓN SIMPLE: Aplicar estilos a selectores de variantes con observer limpio
+    // SOLUCIÓN MEJORADA: Aplicar estilos a selectores de variantes con limpieza previa
     const applyVariantColors = () => {
-      // Aplicar a elementos existentes (EXCEPTO variantes con precios)
+      // PRIMERO: Limpiar TODOS los estilos inline de variantes (EXCEPTO variantes con precios)
+      const allVariants = document.querySelectorAll('.nbd-variant-option:not(.nbd-variant-option--pricing)') as NodeListOf<HTMLElement>;
+      allVariants.forEach(variant => {
+        variant.style.removeProperty('background-color');
+        variant.style.removeProperty('border-color');
+        variant.style.removeProperty('color');
+      });
+      
+      // SEGUNDO: Aplicar estilos solo a elementos seleccionados (EXCEPTO variantes con precios)
       const selectedVariants = document.querySelectorAll('.nbd-variant-option--selected:not(.nbd-variant-option--pricing)') as NodeListOf<HTMLElement>;
       selectedVariants.forEach(variant => {
         variant.style.setProperty('background-color', primaryColor, 'important');
@@ -450,12 +458,24 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
         variant.style.setProperty('color', 'white', 'important');
       });
       
-      // Observer simple solo para nuevas selecciones (EXCEPTO variantes con precios)
+      // Observer mejorado para nuevas selecciones (EXCEPTO variantes con precios)
       const handleVariantClick = (e: Event) => {
         const target = e.target as HTMLElement;
         if (target.classList.contains('nbd-variant-option') && !target.classList.contains('nbd-variant-option--pricing')) {
           // Pequeño delay para que la clase --selected se aplique primero
           setTimeout(() => {
+            // Limpiar TODOS los elementos de la misma variante
+            const parentGroup = target.closest('.nbd-variant-group');
+            if (parentGroup) {
+              const siblingVariants = parentGroup.querySelectorAll('.nbd-variant-option:not(.nbd-variant-option--pricing)') as NodeListOf<HTMLElement>;
+              siblingVariants.forEach(sibling => {
+                sibling.style.removeProperty('background-color');
+                sibling.style.removeProperty('border-color');
+                sibling.style.removeProperty('color');
+              });
+            }
+            
+            // Aplicar estilo solo al seleccionado
             if (target.classList.contains('nbd-variant-option--selected')) {
               target.style.setProperty('background-color', primaryColor, 'important');
               target.style.setProperty('border-color', primaryColor, 'important');
@@ -469,7 +489,7 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       // Remover listeners existentes y agregar uno nuevo
       document.removeEventListener('click', handleVariantClick);
       document.addEventListener('click', handleVariantClick);
-      console.log(`🎯 Variant click handler set up`);
+      console.log(`🎯 Improved variant click handler set up`);
     };
     
     // Aplicar inmediatamente y después de un delay

@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 
 export default function HeroFeatures() {
@@ -8,292 +7,194 @@ export default function HeroFeatures() {
 
   return (
     <section className="bg-gray-50 py-20">
-      <div className="container-landing">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 drop-shadow-sm">
-            {t('title')}
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            Crea tu sitio web en minutos
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {t('subtitle')}
+            Descubre las funcionalidades que harán de tu tienda online un éxito
           </p>
         </div>
 
-        {/* Mosaico Grid - Layout reorganizado */}
-        <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto">
+        {/* Modern Features Mosaic */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           
-          {/* Lado izquierdo: Carrusel de productos - Ocupa toda la altura */}
-          <div className="lg:w-1/2 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl p-8 lg:h-[500px] h-80 overflow-hidden relative shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="text-white mb-6 relative z-10">
-              <h3 className="text-2xl font-bold mb-2 drop-shadow-sm">{t('carousel.title')}</h3>
-              <p className="text-emerald-100 text-sm">{t('carousel.description')}</p>
-            </div>
-            
-            {/* Contenedor del carrusel */}
-            <div className="absolute bottom-6 left-6 right-6 h-48 overflow-hidden">
-              <div className="carousel-container flex animate-carousel-slide items-center h-full">
-                {/* Primera serie de imágenes */}
-                <div className="carousel-set flex space-x-8 min-w-full items-center px-4">
-                  <Image
-                    src="/images/demo/product1.PNG"
-                    alt="Producto 1"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3ET-Shirt%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-                  
-                  <Image
-                    src="/images/demo/product2.PNG"
-                    alt="Producto 2"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EShirts%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-
-                  <Image
-                    src="/images/demo/product3.PNG"
-                    alt="Producto 3"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EPizza%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-
-                  <Image
-                    src="/images/demo/product4.PNG"
-                    alt="Producto 4"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EWatch%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
+          {/* Feature 1 - Easy Setup */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-8 text-white relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
+            <div className="relative z-10">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
-
-                {/* Segunda serie de imágenes (duplicado para loop infinito) */}
-                <div className="carousel-set flex space-x-8 min-w-full items-center px-4">
-                  <Image
-                    src="/images/demo/product1.PNG"
-                    alt="Producto 1"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3ET-Shirt%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-                  
-                  <Image
-                    src="/images/demo/product2.PNG"
-                    alt="Producto 2"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EShirts%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-
-                  <Image
-                    src="/images/demo/product3.PNG"
-                    alt="Producto 3"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EPizza%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
-
-                  <Image
-                    src="/images/demo/product4.PNG"
-                    alt="Producto 4"
-                    width={160}
-                    height={160}
-                    className="w-36 h-36 object-contain rounded-xl shadow-2xl bg-white/10 backdrop-blur-sm p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='%23e5e7eb'%3E%3Crect width='160' height='160' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' fill='%236b7280' font-size='14'%3EWatch%3C/text%3E%3C/svg%3E";
-                    }}
-                  />
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Setup en 5 minutos</h3>
+                  <p className="text-emerald-100">Sin código, sin complicaciones</p>
+                </div>
+              </div>
+              
+              {/* Progress Bar Animation */}
+              <div className="bg-white/20 rounded-full h-2 mb-4 overflow-hidden">
+                <div className="h-full bg-white rounded-full animate-pulse" style={{width: '85%'}}></div>
+              </div>
+              
+              {/* Steps */}
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
+                  <span>Registra tu cuenta</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
+                  <span>Elige tu diseño</span>
+                </div>
+                <div className="flex items-center opacity-60">
+                  <div className="w-2 h-2 bg-white/50 rounded-full mr-3"></div>
+                  <span>¡Tu tienda está lista!</span>
                 </div>
               </div>
             </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
           </div>
 
-          {/* Lado derecho: Contenedores apilados */}
-          <div className="lg:w-1/2 flex flex-col gap-6">
+          {/* Feature 2 - Mobile Ready */}
+          <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-8 text-white relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
+            <div className="relative z-10">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a1 1 0 001-1V4a1 1 0 00-1-1H8a1 1 0 00-1 1v16a1 1 0 001 1z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Responsive</h3>
+              <p className="text-blue-100 text-sm mb-6">Perfecto en móviles y tablets</p>
+              
+              {/* Phone mockup */}
+              <div className="mx-auto w-20 h-32 bg-gray-800 rounded-xl p-1 relative">
+                <div className="w-full h-full bg-white rounded-lg overflow-hidden">
+                  <div className="bg-emerald-500 h-8 flex items-center justify-center">
+                    <div className="w-3 h-3 bg-white rounded-sm"></div>
+                  </div>
+                  <div className="p-2 space-y-1">
+                    <div className="bg-gray-200 h-1.5 rounded w-full"></div>
+                    <div className="bg-gray-200 h-1.5 rounded w-3/4"></div>
+                    <div className="bg-gray-200 h-1.5 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
             
-            {/* Fila superior: Dominio y Móvil */}
-            <div className="flex flex-col md:flex-row gap-6">
-              
-              {/* Dominio */}
-              <div className="md:w-1/2 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl p-6 h-60 relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="text-white mb-4 relative z-10">
-                  <h3 className="text-lg font-bold mb-2 drop-shadow-sm">{t('domain.title')}</h3>
-                  <p className="text-teal-100 text-sm">{t('domain.description')}</p>
-                </div>
-                
-                {/* Simulación del browser */}
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="bg-white rounded-lg p-3 shadow-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full mr-1"></div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    </div>
-                    <div className="bg-gray-100 rounded px-3 py-2">
-                      <span className="text-gray-500 text-xs">🔒 https://</span>
-                      <span className="typing-text text-teal-600 font-semibold text-sm">balidining</span>
-                      <span className="cursor animate-pulse text-sm">|</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
+          </div>
 
-              {/* Móvil Design */}
-              <div className="md:w-1/2 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 h-60 relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="text-white mb-4 relative z-10">
-                  <h3 className="text-lg font-bold mb-2 drop-shadow-sm">{t('mobile.title')}</h3>
-                  <p className="text-emerald-100 text-sm">{t('mobile.description')}</p>
-                </div>
-                
-                {/* Frame del móvil cortado */}
-                <div className="absolute bottom-0 right-4 w-20 h-28 overflow-hidden">
-                  <div className="w-20 h-40 bg-gray-900 rounded-xl p-1">
-                    <div className="w-full h-full bg-white rounded-lg overflow-hidden relative">
-                      {/* Notch */}
-                      <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-900 rounded-full"></div>
-                      
-                      {/* Contenido */}
-                      <div className="pt-3 px-1">
-                        <div className="text-center mb-1">
-                          <h4 className="text-xs font-bold text-gray-900">Take Burger</h4>
-                          <p className="text-xs text-gray-600">Ver mapa</p>
-                        </div>
-                        
-                        {/* Mapa */}
-                        <div className="bg-emerald-100 h-8 rounded relative">
-                          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                            <div className="w-1 h-1 bg-white rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* Feature 3 - Analytics */}
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-8 text-white relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
+            <div className="relative z-10">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
+                </svg>
               </div>
+              <h3 className="text-xl font-bold mb-2">Analytics</h3>
+              <p className="text-purple-100 text-sm mb-6">Reportes en tiempo real</p>
               
+              {/* Mini chart */}
+              <div className="flex items-end space-x-1 h-12">
+                <div className="w-2 bg-white/60 rounded-t" style={{height: '40%'}}></div>
+                <div className="w-2 bg-white/80 rounded-t" style={{height: '70%'}}></div>
+                <div className="w-2 bg-white rounded-t" style={{height: '100%'}}></div>
+                <div className="w-2 bg-white/80 rounded-t" style={{height: '60%'}}></div>
+                <div className="w-2 bg-white/60 rounded-t" style={{height: '85%'}}></div>
+              </div>
             </div>
+            
+            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
+          </div>
 
-            {/* Fila inferior: SEO */}
-            <div className="bg-gradient-to-br from-gray-600 to-gray-800 rounded-2xl p-6 h-56 relative shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="text-white mb-4 relative z-10">
-                <h3 className="text-xl font-bold mb-2 drop-shadow-sm">{t('seo.title')}</h3>
-                <p className="text-gray-300 text-sm">{t('seo.description')}</p>
+          {/* Feature 4 - No Commission */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-8 text-white relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">0% Comisiones</h3>
+                    <p className="text-orange-100">Mantén el 100% de tus ganancias</p>
+                  </div>
+                </div>
+                
+                <div className="text-sm opacity-90">
+                  <p>A diferencia de otras plataformas, no cobramos comisión por venta.</p>
+                </div>
               </div>
               
-              {/* Google Search Result */}
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="bg-white rounded-lg p-4 shadow-lg">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-blue-600 rounded-sm flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">B</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-blue-600 text-xs mb-1">balidining.me</div>
-                      <div className="text-blue-800 text-sm font-semibold hover:underline cursor-pointer truncate">
-                        Bali Dining | Take App
-                      </div>
-                      <div className="text-gray-600 text-xs mt-1 line-clamp-2">
-                        Category: Main Dish, Italian, Beverages, Digital, Restaurant Website • 
-                        Pizza: $16.00, Spaghetti: $12.00, Classic Burger: $30.00.
-                      </div>
-                    </div>
-                  </div>
+              {/* Money illustration */}
+              <div className="hidden md:block">
+                <div className="text-6xl font-bold opacity-20 transform rotate-12">
+                  100%
                 </div>
               </div>
             </div>
+            
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          </div>
 
+        </div>
+
+        {/* Additional features grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 max-w-4xl mx-auto">
+          
+          <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">SSL Gratis</h4>
+            <p className="text-sm text-gray-600">Seguridad incluida</p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">SEO Optimizado</h4>
+            <p className="text-sm text-gray-600">Mayor visibilidad</p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25A9.75 9.75 0 102.25 12 9.75 9.75 0 0012 2.25z" />
+              </svg>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Soporte 24/7</h4>
+            <p className="text-sm text-gray-600">Ayuda cuando la necesites</p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Sin Límites</h4>
+            <p className="text-sm text-gray-600">Productos ilimitados</p>
           </div>
 
         </div>
       </div>
-
-      {/* Estilos CSS */}
-      <style jsx>{`
-        .carousel-container {
-          animation: scrollUp 12s linear infinite;
-        }
-        
-        .carousel-set {
-          display: flex;
-          flex-direction: column;
-        }
-        
-        @keyframes scrollUp {
-          0% {
-            transform: translateY(100%);
-          }
-          100% {
-            transform: translateY(-100%);
-          }
-        }
-        
-        .typing-text {
-          animation: typing 4s infinite;
-          display: inline-block;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-        
-        @keyframes typing {
-          0% { 
-            width: 0; 
-            border-right: 2px solid transparent;
-          }
-          50% { 
-            width: 80px; 
-            border-right: 2px solid #0d9488;
-          }
-          100% { 
-            width: 80px; 
-            border-right: 2px solid transparent;
-          }
-        }
-        
-        .cursor {
-          animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </section>
   )
 }
