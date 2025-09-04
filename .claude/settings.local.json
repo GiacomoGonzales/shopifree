@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default\\components/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\components\\shared\\ProductSectionHeader/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
