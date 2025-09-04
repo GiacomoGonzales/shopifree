@@ -882,7 +882,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 currentCollection={currentCollection}
                 currentBrand={currentBrand}
                 buildUrl={buildUrl}
-                t={t}
+                t={t as (key: string) => string}
             />
 
             <NewBaseDefaultSubcategoriesSection
@@ -898,8 +898,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 <NewBaseDefaultHero 
                     storeInfo={storeInfo}
                     storeSubdomain={storeSubdomain}
-                    t={t}
-                    toCloudinarySquare={toCloudinarySquare}
+                    t={t as (key: string) => string}
+                    toCloudinarySquare={toCloudinarySquare as (url: string, size: number) => string}
                 />
             )}
 
@@ -916,10 +916,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 <NewBaseDefaultCategories
                     categories={categories || []}
                     products={products || []}
-                    activeCategory={activeCategory}
-                    t={t}
+                    activeCategory={activeCategory ?? undefined}
+                    t={t as (key: string) => string}
                     buildUrl={buildUrl}
-                    toCloudinarySquare={toCloudinarySquare}
+                    toCloudinarySquare={toCloudinarySquare as (url: string, size: number) => string}
                 />
             )}
 

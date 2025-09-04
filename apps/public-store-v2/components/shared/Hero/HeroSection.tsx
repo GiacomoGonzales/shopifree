@@ -28,7 +28,7 @@ export function HeroSection({
       const video = heroVideoRef.current
       
       // iOS Safari specific setup
-      const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+      const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
       
       if (isIOSSafari) {
         video.setAttribute('webkit-playsinline', 'true')
@@ -103,7 +103,7 @@ export function HeroSection({
                 )
               } else {
                 return (
-                  <div className="nbd-hero-placeholder">
+                  <div className="nbd-hero-placeholder flex items-center justify-center">
                     <div className="nbd-placeholder-grid">
                       <div className="nbd-placeholder-item"></div>
                       <div className="nbd-placeholder-item"></div>

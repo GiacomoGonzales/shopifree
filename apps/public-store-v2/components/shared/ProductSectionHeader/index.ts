@@ -1,0 +1,1 @@
+export { ProductSectionHeader } from './ProductSectionHeader'

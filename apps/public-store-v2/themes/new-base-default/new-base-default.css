@@ -512,9 +512,6 @@
     aspect-ratio: 1;
     border-radius: var(--nbd-radius-2xl);
     background: var(--nbd-neutral-100);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     border: 2px dashed var(--nbd-neutral-300);
 }
 

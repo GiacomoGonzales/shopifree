@@ -1,0 +1,1 @@
+export { SubcategoriesSection } from './SubcategoriesSection'
