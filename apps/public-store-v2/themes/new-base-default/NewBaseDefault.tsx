@@ -931,7 +931,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         isOnCollectionPage={isOnCollectionPage}
                         isOnBrandPage={isOnBrandPage}
                         activeCategory={activeCategory}
-                        categories={categories}
+                        categories={categories?.map(cat => ({ slug: cat.slug, name: cat.name })) || undefined}
                         t={t}
                     />
 
