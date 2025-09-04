@@ -932,7 +932,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         isOnBrandPage={isOnBrandPage}
                         activeCategory={activeCategory}
                         categories={categories?.map(cat => ({ slug: cat.slug, name: cat.name })) || undefined}
-                        t={t}
+                        t={t as (key: string) => string}
                     />
 
                     <NewBaseDefaultProductFilters
@@ -949,7 +949,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         clearAllFilters={clearAllFilters}
                         setMobileViewMode={setMobileViewMode}
                         getActiveFiltersCount={getActiveFiltersCount}
-                        t={t}
+                        t={t as (key: string) => string}
                         additionalText={additionalText}
                     />
 
@@ -978,7 +978,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
             {/* Sección de Newsletter */}
             {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
-                <NewBaseDefaultNewsletter additionalText={additionalText} t={t} />
+                <NewBaseDefaultNewsletter additionalText={additionalText} t={t as (key: string) => string} />
             )}
 
             {/* Sección de Marcas Carousel - Solo en home */}
