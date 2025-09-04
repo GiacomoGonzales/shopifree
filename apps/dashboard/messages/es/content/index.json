@@ -5,7 +5,9 @@
   "tabs": {
     "sections": "Secciones",
     "filters": "Filtros",
-    "shipping": "Políticas de envío"
+    "shipping": "Políticas de envío",
+    "terms": "Términos y condiciones",
+    "privacy": "Políticas de privacidad"
   },
   "pages": {
     "title": "Páginas Disponibles",

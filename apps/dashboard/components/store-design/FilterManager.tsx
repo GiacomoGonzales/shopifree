@@ -124,7 +124,7 @@ function SortableFilterItem({ filter, onToggle, saving, translatedOptions }: Sor
                  </span>
                </div>
               <p className="text-sm text-gray-500 mt-1 line-clamp-2 pr-8">
-                {filter.options.length} opciones: {(translatedOptions || filter.options).slice(0, 3).join(', ')}
+                {filter.options.length} opciones: {(Array.isArray(translatedOptions) ? translatedOptions : filter.options).slice(0, 3).join(', ')}
                 {filter.options.length > 3 && '...'}
               </p>
               <p className="text-xs text-gray-400 mt-1">
@@ -518,7 +518,7 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
                           </span>
                         </div>
                         <p className="text-sm text-gray-400 mt-1 line-clamp-2 pr-8">
-                          {filter.options.length} opciones: {(translatedOptions || filter.options).slice(0, 3).join(', ')}
+                          {filter.options.length} opciones: {(Array.isArray(translatedOptions) ? translatedOptions : filter.options).slice(0, 3).join(', ')}
                           {filter.options.length > 3 && '...'}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">

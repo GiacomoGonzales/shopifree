@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 
 interface ContentTabsProps {
-  currentTab: 'sections' | 'filters' | 'shipping'
+  currentTab: 'sections' | 'filters' | 'shipping' | 'terms' | 'privacy'
 }
 
 export function ContentTabs({ currentTab }: ContentTabsProps) {
@@ -51,6 +51,26 @@ export function ContentTabs({ currentTab }: ContentTabsProps) {
             }`}
           >
             {t('tabs.shipping')}
+          </a>
+          <a
+            href={`/${locale}/content/terms-conditions`}
+            className={`py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+              currentTab === 'terms'
+                ? 'border-gray-600 text-gray-800'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {t('tabs.terms')}
+          </a>
+          <a
+            href={`/${locale}/content/privacy-policy`}
+            className={`py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+              currentTab === 'privacy'
+                ? 'border-gray-600 text-gray-800'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {t('tabs.privacy')}
           </a>
         </nav>
       </div>

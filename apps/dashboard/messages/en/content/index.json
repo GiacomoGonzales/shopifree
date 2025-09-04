@@ -5,7 +5,9 @@
   "tabs": {
     "sections": "Sections",
     "filters": "Filters",
-    "shipping": "Shipping Policies"
+    "shipping": "Shipping Policies",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy"
   },
   "pages": {
     "title": "Available Pages",

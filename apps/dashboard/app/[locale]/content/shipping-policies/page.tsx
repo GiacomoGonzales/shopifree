@@ -7,6 +7,7 @@ import DashboardLayout from '../../../../components/DashboardLayout'
 import { useAuth } from '../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../lib/store'
 import LoadingAnimation from '../../../../components/LoadingAnimation'
+import { ContentTabs } from '../../../../components/content/ContentTabs'
 
 interface ShippingPoliciesData {
   generalInfo: string
@@ -142,39 +143,7 @@ export default function ContentShippingPoliciesPage() {
     <DashboardLayout>
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Navegación por pestañas */}
-          <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav 
-                className="flex space-x-8 overflow-x-auto px-4 sm:px-0 scrollbar-none" 
-                style={{
-                  scrollbarWidth: 'none', 
-                  msOverflowStyle: 'none',
-                  WebkitOverflowScrolling: 'touch'
-                }}
-                aria-label="Tabs"
-              >
-                <a
-                  href={`/${locale}/content/pages`}
-                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
-                >
-                  {t('tabs.shipping')}
-                </a>
-                <a
-                  href={`/${locale}/content/filters`}
-                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
-                >
-                  {t('tabs.filters')}
-                </a>
-                <a
-                  href={`/${locale}/content/shipping-policies`}
-                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-gray-600 text-gray-800"
-                >
-                  Políticas de envío
-                </a>
-              </nav>
-            </div>
-          </div>
+          <ContentTabs currentTab="shipping" />
 
           {/* Contenido */}
           <div className="space-y-6">

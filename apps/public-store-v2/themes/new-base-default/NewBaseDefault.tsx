@@ -8,6 +8,9 @@ import UnifiedLoading from "../../components/UnifiedLoading";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture, applyStoreColors } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, Category } from "../../lib/categories";
+import { NewBaseDefaultNewsletter } from "./components/NewBaseDefaultNewsletter";
+import { NewBaseDefaultHero } from "./components/NewBaseDefaultHero";
+import { AddToCartButton } from "../../components/shared";
 import { getStoreBrands, PublicBrand } from "../../lib/brands";
 import { getStoreFilters, Filter } from "../../lib/filters";
 import { getStoreCollections, PublicCollection, getCollectionBySlug } from "../../lib/collections";
@@ -35,8 +38,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const { t, language } = useStoreLanguage();
     const { addItem, openCart, state: cartState } = useCart();
     
-    // 🎥 Ref for hero video autoplay
-    const heroVideoRef = useRef<HTMLVideoElement>(null);
     
     // 🆕 Textos adicionales que faltan - Helper rápido
     const additionalText = (key: string) => {
@@ -442,90 +443,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         };
     }, [filtersModalOpen]);
 
-    // 🎥 Force hero video autoplay - Enhanced for Safari iOS
-    useEffect(() => {
-        if (heroVideoRef.current && storeInfo?.heroMediaType === 'video') {
-            const video = heroVideoRef.current;
-            
-            // iOS Safari specific setup
-            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            
-            if (isIOSSafari) {
-                // Force remove any webkit controls that might appear
-                video.style.webkitAppearance = 'none';
-                video.setAttribute('webkit-playsinline', 'true');
-                video.setAttribute('playsinline', 'true');
-                
-                // Hide overlay play button specifically for iOS
-                const style = document.createElement('style');
-                style.textContent = `
-                    video.nbd-hero-video::-webkit-media-controls-overlay-play-button {
-                        display: none !important;
-                        opacity: 0 !important;
-                        visibility: hidden !important;
-                        pointer-events: none !important;
-                        position: absolute !important;
-                        left: -9999px !important;
-                        width: 0 !important;
-                        height: 0 !important;
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                // Try multiple approaches for iOS Safari
-                const attemptAutoplay = () => {
-                    video.load(); // Reload the video
-                    
-                    setTimeout(() => {
-                        const playPromise = video.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(() => {
-                                // Silently fail for iOS Safari
-                                // The video will play on any user interaction
-                            });
-                        }
-                    }, 100);
-                };
-                
-                attemptAutoplay();
-                
-                // Fallback: Try to play on any user interaction
-                const playOnInteraction = () => {
-                    video.play();
-                    // Clean up listeners after first play
-                    ['touchstart', 'touchend', 'click', 'scroll', 'keydown'].forEach(event => {
-                        document.removeEventListener(event, playOnInteraction);
-                    });
-                };
-                
-                // Add listeners for multiple interaction types
-                ['touchstart', 'touchend', 'click', 'scroll', 'keydown'].forEach(event => {
-                    document.addEventListener(event, playOnInteraction, { passive: true });
-                });
-                
-            } else {
-                // Standard autoplay for other browsers
-                const playPromise = video.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => {
-                            console.log('Hero video autoplay started successfully');
-                        })
-                        .catch((error) => {
-                            console.log('Hero video autoplay prevented:', error);
-                            const playOnInteraction = () => {
-                                video.play();
-                                document.removeEventListener('click', playOnInteraction);
-                                document.removeEventListener('touchstart', playOnInteraction);
-                            };
-                            document.addEventListener('click', playOnInteraction);
-                            document.addEventListener('touchstart', playOnInteraction);
-                        });
-                }
-            }
-        }
-    }, [storeInfo?.heroMediaType, storeInfo?.heroMediaUrl]);
 
     // Categorías organizadas
     const topCategories = useMemo(() => 
@@ -1153,82 +1070,12 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             
             {/* Hero Section Moderno - Solo en home */}
             {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
-            <section className="nbd-hero">
-                <div className="nbd-hero-container">
-                    <div className="nbd-hero-content">
-                        <div className="nbd-hero-text">
-                            <h1 className="nbd-hero-title">
-                                {storeInfo?.storeName || storeSubdomain}
-                            </h1>
-                            {storeInfo?.description && (
-                                <p className="nbd-hero-description">
-                                    {storeInfo.description}
-                                </p>
-                            )}
-                            <div className="nbd-hero-actions">
-                                <a href="#productos" className="nbd-btn nbd-btn--primary">
-                                    <span>{t('exploreProducts')}</span>
-                                    <svg className="nbd-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                </a>
-                                <a href="#categorias" className="nbd-btn nbd-btn--secondary">
-                                    {t('viewCategories')}
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <div className="nbd-hero-visual">
-                            {(() => {
-                                // Priorizar nuevo formato de media, fallback a imagen legacy
-                                const heroMediaUrl = storeInfo?.heroMediaUrl || storeInfo?.heroImageUrl;
-                                const heroMediaType = storeInfo?.heroMediaType || (storeInfo?.heroImageUrl ? 'image' : null);
-                                
-                                if (heroMediaUrl) {
-                                    return (
-                                        <div className="nbd-hero-media">
-                                            {heroMediaType === 'video' ? (
-                                                <video
-                                                    ref={heroVideoRef}
-                                                    src={heroMediaUrl}
-                                                    className="nbd-hero-video"
-                                                    autoPlay
-                                                    loop
-                                                    muted
-                                                    playsInline
-                                                    webkit-playsinline="true"
-                                                    disablePictureInPicture
-                                                    controls={false}
-                                                    controlsList="nodownload nofullscreen noremoteplayback"
-                                                    preload="metadata"
-                                                />
-                                            ) : (
-                                                <img
-                                                    src={toCloudinarySquare(heroMediaUrl, 1200)}
-                                                    alt={storeInfo.storeName || 'Hero'}
-                                                    className="nbd-hero-img"
-                                                />
-                                            )}
-                                            <div className="nbd-hero-image-overlay"></div>
-                                        </div>
-                                    );
-                                } else {
-                                    return (
-                                        <div className="nbd-hero-placeholder">
-                                            <div className="nbd-placeholder-grid">
-                                                <div className="nbd-placeholder-item"></div>
-                                                <div className="nbd-placeholder-item"></div>
-                                                <div className="nbd-placeholder-item"></div>
-                                                <div className="nbd-placeholder-item"></div>
-                                            </div>
-                                        </div>
-                                    );
-                                }
-                            })()}
-                        </div>
-                    </div>
-                </div>
-            </section>
+                <NewBaseDefaultHero 
+                    storeInfo={storeInfo}
+                    storeSubdomain={storeSubdomain}
+                    t={t}
+                    toCloudinarySquare={toCloudinarySquare}
+                />
             )}
 
             {/* Sección de Colecciones - Solo en home */}
@@ -1540,19 +1387,15 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                                 )}
                                             </div>
                                             
-                                                                        <button 
-                                className={`nbd-add-to-cart ${loadingCartButton === product.id ? 'nbd-add-to-cart--loading' : ''}`}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleAddToCart(product);
-                                }}
-                                aria-label={`Agregar ${product.name} al carrito`}
-                                disabled={loadingCartButton === product.id}
-                            >
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                                                </svg>
-                                            </button>
+                                            <AddToCartButton
+                                                productId={product.id}
+                                                productName={product.name}
+                                                isLoading={loadingCartButton === product.id}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleAddToCart(product);
+                                                }}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -1648,75 +1491,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
             {/* Sección de Newsletter */}
             {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
-            <section className="nbd-newsletter">
-                <div className="nbd-container">
-                    <div className="nbd-newsletter-content">
-                        <div className="nbd-newsletter-text">
-                            <div className="nbd-newsletter-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                    <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </div>
-                            <h2 className="nbd-newsletter-title">
-                                {additionalText('newsletterTitle')}
-                            </h2>
-                            <p className="nbd-newsletter-description">
-                                {additionalText('newsletterDescription')}
-                            </p>
-                        </div>
-                        
-                        <div className="nbd-newsletter-form-wrapper">
-                            <form className="nbd-newsletter-form" onSubmit={(e) => {
-                                e.preventDefault();
-                                const form = e.target as HTMLFormElement;
-                                const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-                                
-                                if (email) {
-                                    // Simulación de suscripción exitosa
-                                    const button = form.querySelector('.nbd-newsletter-submit') as HTMLButtonElement;
-                                    const originalText = button.innerHTML;
-                                    button.innerHTML = `
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        <span>${additionalText('subscribed')}</span>
-                                    `;
-                                    button.disabled = true;
-                                    button.style.background = 'var(--nbd-success)';
-                                    
-                                    setTimeout(() => {
-                                        button.innerHTML = originalText;
-                                        button.disabled = false;
-                                        button.style.background = '';
-                                        form.reset();
-                                    }, 3000);
-                                }
-                            }}>
-                                <div className="nbd-newsletter-input-group">
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        placeholder={additionalText('emailPlaceholder')}
-                                        className="nbd-newsletter-input"
-                                        autoComplete="email"
-                                        required
-                                    />
-                                    <button type="submit" className="nbd-newsletter-submit">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                        <span>{t('subscribe')}</span>
-                                    </button>
-                                </div>
-                                <p className="nbd-newsletter-privacy">
-                                    {additionalText('privacyNotice')}
-                                </p>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                <NewBaseDefaultNewsletter additionalText={additionalText} t={t} />
             )}
 
             {/* Sección de Marcas Carousel - Solo en home */}
