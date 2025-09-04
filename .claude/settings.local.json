@@ -12,7 +12,20 @@
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
-      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)"
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default\\components/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default\\components/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)",
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\app\\producto\\[productSlug]/**)"
     ],
     "deny": [],
     "ask": []
