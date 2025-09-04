@@ -1,0 +1,62 @@
+/* =============================================================================
+   NBD Utilities - Patrones CSS reutilizables
+   ============================================================================= */
+
+/* Flexbox utilities - Los patrones más repetidos */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+
+/* Gap utilities usando variables existentes */
+.gap-xs { gap: var(--nbd-space-xs); }
+.gap-sm { gap: var(--nbd-space-sm); }
+.gap-md { gap: var(--nbd-space-md); }
+.gap-lg { gap: var(--nbd-space-lg); }
+.gap-xl { gap: var(--nbd-space-xl); }
+
+/* Wrap utilities */
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+/* Flex grow/shrink */
+.flex-1 { flex: 1; }
+.flex-grow { flex-grow: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+/* Width utilities comunes */
+.w-full { width: 100%; }
+.w-fit { width: fit-content; }
+.w-auto { width: auto; }
+
+/* Height utilities comunes */
+.h-full { height: 100%; }
+.h-fit { height: fit-content; }
+.h-auto { height: auto; }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Position utilities */
+.relative { position: relative; }
+.absolute { position: absolute; }
+
+/* Overflow utilities */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+
+/* Display utilities adicionales */
+.block { display: block; }
+.inline-block { display: inline-block; }
+.hidden { display: none; }
+
+/* Pointer events */
+.pointer-events-none { pointer-events: none; }
+.pointer-events-auto { pointer-events: auto; }
