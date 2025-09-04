@@ -963,10 +963,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         handleAddToCart={handleAddToCart}
                         loadMoreProducts={loadMoreProducts}
                         buildUrl={buildUrl}
-                        toCloudinarySquare={toCloudinarySquare}
+                        toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
                         formatPrice={formatPrice}
                         additionalText={additionalText}
-                        storeInfo={storeInfo}
+                        storeInfo={storeInfo || undefined}
                     />
                 </div>
             </section>
@@ -988,7 +988,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     isMobile={isMobile}
                     additionalText={additionalText}
                     buildUrl={buildUrl}
-                    toCloudinarySquare={toCloudinarySquare}
+                    toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
                 />
             )}
 
