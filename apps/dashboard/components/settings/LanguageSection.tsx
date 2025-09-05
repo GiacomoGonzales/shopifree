@@ -74,6 +74,7 @@ export default function LanguageSection({ store, onUpdate, saving }: LanguageSec
                   name="language"
                   value="es"
                   checked={currentLanguage === 'es'}
+                  onChange={() => handleLanguageChange('es')}
                   className="sr-only"
                   disabled={languageSaving}
                 />
@@ -108,6 +109,7 @@ export default function LanguageSection({ store, onUpdate, saving }: LanguageSec
                   name="language"
                   value="en"
                   checked={currentLanguage === 'en'}
+                  onChange={() => handleLanguageChange('en')}
                   className="sr-only"
                   disabled={languageSaving}
                 />
@@ -142,6 +144,7 @@ export default function LanguageSection({ store, onUpdate, saving }: LanguageSec
                   name="language"
                   value="pt"
                   checked={currentLanguage === 'pt'}
+                  onChange={() => handleLanguageChange('pt')}
                   className="sr-only"
                   disabled={languageSaving}
                 />

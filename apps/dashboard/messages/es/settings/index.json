@@ -139,8 +139,10 @@
       "verifying": "Verificando…",
       "verifyNow": "Verificar ahora",
       "cnameGuide": "Guía de Configuración DNS",
-      "cnameInstructions": "Agrega un registro CNAME en tu proveedor de DNS:",
-      "cnameRecord": "CNAME: www → shopifree.app"
+      "cnameInstructions": "Agrega estos registros DNS en tu proveedor de dominio:",
+      "aRecord": "Registro A (dominio raíz): @ → 216.198.79.1",
+      "cnameRecord": "Registro CNAME (www): www → cname-ssl.vercel-dns.com",
+      "instructions": "Configura estos registros DNS en tu proveedor, luego guarda el dominio aquí para conectarlo automáticamente."
     },
     "payments": {
       "title": "Pasarela de Pago",

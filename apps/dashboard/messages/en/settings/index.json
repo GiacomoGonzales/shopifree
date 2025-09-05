@@ -138,8 +138,10 @@
       "verifying": "Verifying…",
       "verifyNow": "Verify now",
       "cnameGuide": "DNS Configuration Guide",
-      "cnameInstructions": "Add a CNAME record in your DNS provider:",
-      "cnameRecord": "CNAME: www → shopifree.app"
+      "cnameInstructions": "Add these DNS records in your domain provider:",
+      "aRecord": "A Record (root domain): @ → 216.198.79.1",
+      "cnameRecord": "CNAME Record (www): www → cname-ssl.vercel-dns.com",
+      "instructions": "Configure these DNS records with your provider, then save the domain here to connect it automatically."
     },
     "payments": {
       "title": "Payment Gateway",

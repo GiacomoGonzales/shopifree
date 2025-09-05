@@ -126,6 +126,28 @@ export default function GeneralSettingsAdvancedPage() {
     if (!domain) return
     setDomainSaving(true)
     try {
+      // 1. Intentar agregar automáticamente a Vercel
+      console.log('🔄 Agregando dominio a Vercel automáticamente:', domain)
+      const vercelResponse = await fetch('/api/domain/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain })
+      })
+      
+      let vercelData = null
+      let vercelSuccess = false
+      
+      if (vercelResponse.ok) {
+        vercelData = await vercelResponse.json()
+        vercelSuccess = true
+        console.log('✅ Dominio agregado a Vercel:', vercelData)
+      } else {
+        const error = await vercelResponse.json()
+        console.log('⚠️ No se pudo agregar automáticamente a Vercel:', error.error)
+      }
+
+      // 2. Guardar en Firestore (siempre, independientemente del resultado de Vercel)
+      console.log('💾 Guardando dominio en Firestore:', domain)
       const db = getFirebaseDb()
       if (!db) return
       const ref = doc(db, 'stores', store.id, 'settings', 'domain')
@@ -133,8 +155,9 @@ export default function GeneralSettingsAdvancedPage() {
       if (domainDoc) {
         await updateDoc(ref, {
           customDomain: domain,
-          status: (domainDoc?.status as string) || 'connected',
-          updatedAt: nowTs
+          status: 'connected',
+          updatedAt: nowTs,
+          vercelData: vercelData?.data || domainDoc.vercelData || {}
         })
       } else {
         await setDoc(ref, {
@@ -143,7 +166,7 @@ export default function GeneralSettingsAdvancedPage() {
           ssl: false,
           createdAt: nowTs,
           updatedAt: nowTs,
-          vercelData: {
+          vercelData: vercelData?.data || {
             name: domain,
             apexName: domain,
             verified: false,
@@ -159,6 +182,15 @@ export default function GeneralSettingsAdvancedPage() {
       }
       const snap = await getDoc(ref)
       setDomainDoc(snap.exists() ? (snap.data() as any) : null)
+      
+      // Mensaje de éxito siempre positivo
+      setMessage('✅ Dominio guardado exitosamente!')
+      setTimeout(() => setMessage(null), 4000)
+      
+    } catch (error) {
+      console.error('❌ Error guardando dominio:', error)
+      setMessage(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+      setTimeout(() => setMessage(null), 5000)
     } finally {
       setDomainSaving(false)
     }
@@ -221,6 +253,63 @@ export default function GeneralSettingsAdvancedPage() {
     }
   }
 
+  // Loading state mientras cargan los datos
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <GeneralSettingsNav currentSection="advanced" />
+
+            <div className="max-w-4xl space-y-6">
+              {/* Loading skeleton para selector de idioma */}
+              <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+                <div className="px-6 py-6 space-y-6">
+                  <div className="animate-pulse">
+                    <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
+                    <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+                  </div>
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="animate-pulse flex items-center p-4 border rounded-lg">
+                        <div className="w-4 h-4 bg-gray-200 rounded-full mr-3"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-1/4 mb-1"></div>
+                          <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Loading skeleton para dominio personalizado */}
+              <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+                <div className="px-6 py-6 space-y-6">
+                  <div className="animate-pulse">
+                    <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
+                    <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+                  </div>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-1/6 mb-2"></div>
+                    <div className="h-10 bg-gray-100 rounded w-full"></div>
+                  </div>
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
+                    <div className="space-y-3">
+                      <div className="h-16 bg-gray-100 rounded"></div>
+                      <div className="h-16 bg-gray-100 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout>
       <div className="py-6">
@@ -264,20 +353,37 @@ export default function GeneralSettingsAdvancedPage() {
                     </p>
                   </div>
 
-                  {/* Guía de configuración DNS - Siempre visible */}
-                  <div className="md:col-span-2 bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <h4 className="text-sm font-medium text-blue-900 mb-3">{tAdv('customDomain.cnameGuide')}</h4>
-                    <p className="text-sm text-blue-800 mb-3">
+                  {/* Guía de configuración DNS */}
+                  <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">{tAdv('customDomain.cnameGuide')}</h4>
+                    <p className="text-sm text-gray-600 mb-4">
                       {tAdv('customDomain.cnameInstructions')}
                     </p>
-                    <div className="bg-white rounded-md p-3 border border-blue-200">
-                      <code className="text-sm font-mono text-gray-900">
-                        {tAdv('customDomain.cnameRecord')}
-                      </code>
+                    
+                    {/* Registro A */}
+                    <div className="bg-white rounded-md p-3 border border-gray-200 mb-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">
+                          {locale === 'es' ? 'Registro A (dominio raíz)' : 'A Record (root domain)'}
+                        </span>
+                        <code className="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-800">
+                          @ → 216.198.79.1
+                        </code>
+                      </div>
                     </div>
-                    <div className="mt-3 text-xs text-blue-700">
-                      <strong>{locale === 'es' ? 'Nota:' : 'Note:'}</strong> {locale === 'es' ? 'Después de configurar el registro DNS, usa el botón "Verificar ahora" para comprobar que el dominio esté funcionando correctamente.' : 'After configuring the DNS record, use the "Verify now" button to check that the domain is working correctly.'}
+                    
+                    {/* Registro CNAME */}
+                    <div className="bg-white rounded-md p-3 border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">
+                          {locale === 'es' ? 'Registro CNAME (www)' : 'CNAME Record (www)'}
+                        </span>
+                        <code className="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-800">
+                          www → cname-ssl.vercel-dns.com
+                        </code>
+                      </div>
                     </div>
+
                   </div>
 
                   {domainDoc && (
@@ -342,6 +448,16 @@ export default function GeneralSettingsAdvancedPage() {
 
               </div>
             </div>
+
+            {/* Mensaje de estado */}
+            {message && (
+              <div className={`rounded-md p-3 text-sm ${
+                message.includes('✅') ? 'bg-green-50 text-green-800 border border-green-200' 
+                : 'bg-red-50 text-red-800 border border-red-200'
+              }`}>
+                {message}
+              </div>
+            )}
 
             {/* Botones del dominio personalizado */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
