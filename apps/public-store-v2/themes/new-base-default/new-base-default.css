@@ -1913,6 +1913,19 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         gap: var(--nbd-space-xl);
     }
     
+    /* Fix: Asegurar que las imágenes ocupen todo el ancho en vista expandida móvil */
+    .nbd-mobile-expanded .nbd-product-image {
+        max-width: none;
+        width: 100%;
+    }
+    
+    /* Fix: Asegurar dimensiones exactas para imágenes en vista lista móvil */
+    .nbd-mobile-list .nbd-product-image {
+        max-width: 90px;
+        width: 90px;
+        height: 90px;
+    }
+    
     /* Vista grid - 2 columnas */
     .nbd-mobile-grid {
         grid-template-columns: 1fr 1fr;
