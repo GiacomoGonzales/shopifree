@@ -1004,7 +1004,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         setIsQuickViewOpen(false);
                         setQuickViewProduct(null);
                     }}
-                    storeInfo={storeInfo}
+                    storeInfo={storeInfo || undefined}
                 />
             )}
         </div>

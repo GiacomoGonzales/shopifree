@@ -211,7 +211,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
                     {getDisplayName(variantKey)}:
                   </label>
                   <div className="nbd-variant-options">
-                    {(options as string[]).map((option) => {
+                    {Array.isArray(options) ? options.map((option) => {
                       const isSelected = selectedVariants[variantKey] === option;
                       return (
                         <button
@@ -224,7 +224,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
                           {option}
                         </button>
                       );
-                    })}
+                    }) : null}
                   </div>
                 </div>
               );
