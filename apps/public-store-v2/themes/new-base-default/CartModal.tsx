@@ -277,7 +277,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                 <div className="nbd-cart-actions">
                                     <button 
                                         onClick={closeCart}
-                                        className="nbd-btn nbd-btn--ghost nbd-cart-continue"
+                                        className="nbd-btn nbd-btn--secondary"
                                     >
                                         Continuar Comprando
                                     </button>

@@ -31,6 +31,7 @@ import { useStoreLanguage } from "../../lib/store-language-context";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
+import ProductQuickView from "./components/ProductQuickView";
 
 type Props = {
     storeSubdomain: string;
@@ -209,6 +210,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
     const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
+    
+    // Estados para el modal de vista rápida de producto
+    const [quickViewProduct, setQuickViewProduct] = useState<PublicProduct | null>(null);
+    const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
     // Cargar textura de fondo configurada
     useEffect(() => {
@@ -814,51 +819,44 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         return Object.values(selectedFilters).reduce((sum, values) => sum + values.length, 0);
     };
 
-    // Función para agregar producto al carrito con efecto visual
+    // Función para agregar producto al carrito con modal de opciones
     const handleAddToCart = async (product: PublicProduct) => {
-        // Iniciar efecto visual en el botón
-        setLoadingCartButton(product.id);
-        
-        // Verificar si el producto tiene variantes disponibles
+        // Verificar si el producto tiene opciones obligatorias
         const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
         const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
             return variantFields.includes(key) && Array.isArray(value) && value.length > 1;
         }) : [];
         
-        const hasVariants = availableVariants.length > 0;
+        const hasRequiredOptions = availableVariants.length > 0;
 
-        // Crear información sobre qué variantes tiene disponibles
-        let missingVariants: string[] = [];
-        if (hasVariants) {
-            missingVariants = availableVariants.map(([key]) => {
-                const displayNames: { [k: string]: string } = {
-                    'color': 'color',
-                    'size': 'talla',
-                    'size_clothing': 'talla',
-                    'size_shoes': 'talla',
-                    'material': 'material',
-                    'style': 'estilo',
-                    'clothing_style': 'estilo'
-                };
-                return displayNames[key] || key;
-            });
+        if (hasRequiredOptions) {
+            // Producto tiene opciones obligatorias → abrir modal
+            console.log(`Producto con opciones obligatorias: ${product.name} - Abriendo modal`);
+            setQuickViewProduct(product);
+            setIsQuickViewOpen(true);
+            // No agregamos efecto de loading porque se abre el modal inmediatamente
+        } else {
+            // Producto sin opciones → agregar directamente al carrito
+            console.log(`Producto sin opciones: ${product.name} - Agregando directamente`);
+            setLoadingCartButton(product.id);
+            
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            addItem({
+                id: product.id,
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                currency: storeInfo?.currency || 'COP',
+                image: product.image || '',
+                slug: product.slug || product.id,
+                incomplete: false
+            }, 1);
+            
+            setLoadingCartButton(null);
+            openCart();
+            console.log(`Agregado al carrito: ${product.name}`);
         }
-
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        addItem({
-            id: product.id,
-            productId: product.id,
-            name: product.name,
-            price: product.price,
-            currency: storeInfo?.currency || 'COP',
-            image: product.image || '',
-            slug: product.slug || product.id,
-            incomplete: hasVariants,
-            missingVariants: hasVariants ? missingVariants : undefined
-        }, 1);
-        openCart();
-        console.log(`Agregado al carrito: ${product.name}${hasVariants ? ' (opciones pendientes)' : ''}`);
     };
     
     const hasMoreProducts = sortedProducts.length > productsToShow;
@@ -996,6 +994,19 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             
             {/* Modal del carrito */}
             <CartModal storeInfo={storeInfo} storeId={resolvedStoreId || undefined} />
+            
+            {/* Modal de vista rápida de producto */}
+            {quickViewProduct && (
+                <ProductQuickView
+                    product={quickViewProduct}
+                    isOpen={isQuickViewOpen}
+                    onClose={() => {
+                        setIsQuickViewOpen(false);
+                        setQuickViewProduct(null);
+                    }}
+                    storeInfo={storeInfo || undefined}
+                />
+            )}
         </div>
     );
 }
