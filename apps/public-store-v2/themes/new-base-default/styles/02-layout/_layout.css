@@ -1,0 +1,23 @@
+/* ===================================================
+   LAYOUT BASE - NEW BASE DEFAULT THEME
+   =================================================== */
+
+/* === THEME CONTAINER === */
+.nbd-theme {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* === MAIN CONTAINER === */
+.nbd-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--nbd-space-xl);
+}
+
+/* === RESPONSIVE LAYOUT === */
+@media (max-width: 768px) {
+    .nbd-container {
+        padding: 0 var(--nbd-space-lg);
+    }
+}

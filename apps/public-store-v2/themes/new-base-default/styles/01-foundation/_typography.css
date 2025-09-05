@@ -1,0 +1,71 @@
+/* ===================================================
+   TIPOGRAFÍA - NEW BASE DEFAULT THEME
+   =================================================== */
+
+/* === HERO TYPOGRAPHY === */
+.nbd-hero-title {
+    font-size: var(--nbd-font-size-6xl);
+    font-weight: 350;
+    line-height: 1.1;
+    color: var(--nbd-primary);
+    margin-bottom: var(--nbd-space-lg);
+    animation: nbd-slide-up 0.8s ease-out;
+}
+
+.nbd-hero-subtitle {
+    font-size: var(--nbd-font-size-xl);
+    color: var(--nbd-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--nbd-space-2xl);
+    animation: nbd-slide-up 0.8s ease-out 0.2s both;
+}
+
+/* === SECTION TYPOGRAPHY === */
+.nbd-section-header {
+    text-align: center;
+    margin-bottom: var(--nbd-space-2xl);
+}
+
+.nbd-section-title {
+    font-size: var(--nbd-font-size-4xl);
+    font-weight: 500;
+    color: var(--nbd-primary);
+    margin-bottom: var(--nbd-space-lg);
+    letter-spacing: -0.02em;
+}
+
+.nbd-section-subtitle {
+    font-size: var(--nbd-font-size-lg);
+    color: var(--nbd-secondary);
+    font-weight: 400;
+}
+
+/* === RESPONSIVE TYPOGRAPHY === */
+@media (max-width: 768px) {
+    .nbd-hero-title {
+        font-size: var(--nbd-font-size-4xl);
+    }
+    
+    .nbd-hero-subtitle {
+        font-size: var(--nbd-font-size-sm);
+        margin-bottom: var(--nbd-space-xl);
+        line-height: 1.4;
+    }
+    
+    .nbd-section-title {
+        font-size: var(--nbd-font-size-3xl);
+    }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 640px) {
+    .nbd-hero-title {
+        font-size: var(--nbd-text-4xl);
+        line-height: 1.2;
+    }
+    
+    .nbd-hero-subtitle {
+        font-size: var(--nbd-font-size-xs);
+        line-height: 1.4;
+    }
+}

@@ -47,6 +47,7 @@ export const SIMPLIFIED_CATEGORIES: CategoryNode[] = [
       { id: 'accesorios-gatos', name: 'Accesorios para Gatos', isLeaf: true },
       { id: 'juguetes-mascotas', name: 'Juguetes para Mascotas', isLeaf: true },
       { id: 'cuidado-higiene-mascotas', name: 'Cuidado e Higiene', isLeaf: true },
+      { id: 'medicamentos-mascotas', name: 'Medicamentos para Mascotas', isLeaf: true },
       { id: 'casas-camas-mascotas', name: 'Casas y Camas', isLeaf: true },
       { id: 'transportadores', name: 'Transportadores y Jaulas', isLeaf: true }
     ]
@@ -450,6 +451,65 @@ export const GLOBAL_METADATA: Record<string, MetaField> = {
     name: 'Tipo de Pelaje',
     type: 'select',
     options: ['Corto', 'Largo', 'Rizado', 'Doble capa', 'Sin pelo', 'Todos los tipos']
+  },
+
+  // ===================================================
+  // MEDICAMENTOS PARA MASCOTAS - METADATOS ESPECÍFICOS
+  // ===================================================
+
+  // Tipo de medicamento
+  'pet_medicine_type': {
+    id: 'pet_medicine_type',
+    name: 'Tipo de Medicamento',
+    type: 'select',
+    options: ['Antihistamínico', 'Antibiótico', 'Antiinflamatorio', 'Analgésico', 'Antiparasitario', 'Vitaminas/Suplementos', 'Digestivo', 'Dermatológico', 'Cardiovascular', 'Oftálmico', 'Ótico']
+  },
+
+  // Forma farmacéutica
+  'pet_medicine_form': {
+    id: 'pet_medicine_form',
+    name: 'Forma Farmacéutica',
+    type: 'select',
+    options: ['Tabletas', 'Cápsulas', 'Suspensión oral', 'Inyectable', 'Crema/Pomada', 'Gotas', 'Spray', 'Polvo', 'Parche', 'Gel']
+  },
+
+  // Vía de administración
+  'pet_medicine_route': {
+    id: 'pet_medicine_route',
+    name: 'Vía de Administración',
+    type: 'select',
+    options: ['Oral', 'Tópica', 'Intramuscular', 'Subcutánea', 'Intravenosa', 'Oftálmica', 'Ótica', 'Nasal', 'Rectal']
+  },
+
+  // Presentación del producto
+  'pet_medicine_presentation': {
+    id: 'pet_medicine_presentation',
+    name: 'Presentación',
+    type: 'select',
+    options: ['Blister x10', 'Blister x20', 'Frasco x30ml', 'Frasco x60ml', 'Tubo x15g', 'Tubo x30g', 'Ampolla x1ml', 'Ampolla x2ml', 'Caja x6 unidades', 'Caja x12 unidades']
+  },
+
+  // Principio activo
+  'pet_medicine_active_ingredient': {
+    id: 'pet_medicine_active_ingredient',
+    name: 'Principio Activo',
+    type: 'text'
+  },
+
+  // Condición que trata
+  'pet_medicine_condition': {
+    id: 'pet_medicine_condition',
+    name: 'Condición que Trata',
+    type: 'tags',
+    options: ['Alergias', 'Infecciones bacterianas', 'Infecciones parasitarias', 'Dolor', 'Inflamación', 'Problemas digestivos', 'Problemas de piel', 'Problemas oculares', 'Problemas de oído', 'Deficiencias nutricionales', 'Ansiedad/Estrés']
+  },
+
+  // Requiere prescripción veterinaria
+  'pet_medicine_prescription': {
+    id: 'pet_medicine_prescription',
+    name: 'Requiere Prescripción',
+    type: 'select',
+    options: ['Sí, prescripción veterinaria', 'No, venta libre', 'Suplemento nutricional']
   },
 
   // ===================================================
@@ -1373,6 +1433,7 @@ export const CATEGORY_METADATA_MAP: Record<string, string[]> = {
   'accesorios-gatos': ['pet_size', 'color', 'material', 'pet_accessory_type', 'pet_collar_size', 'pet_safety_features'],
   'juguetes-mascotas': ['pet_type', 'pet_size', 'color', 'pet_toy_material', 'pet_toy_type', 'pet_toy_durability'],
   'cuidado-higiene-mascotas': ['pet_type', 'pet_age', 'pet_grooming_type', 'pet_coat_type'],
+  'medicamentos-mascotas': ['pet_type', 'pet_size', 'pet_age', 'pet_medicine_type', 'pet_medicine_form', 'pet_medicine_route', 'pet_medicine_presentation', 'pet_medicine_active_ingredient', 'pet_medicine_condition', 'pet_medicine_prescription'],
   'casas-camas-mascotas': ['pet_type', 'pet_size', 'color', 'material', 'furniture_size'],
   'transportadores': ['pet_type', 'pet_size', 'material', 'pet_safety_features'],
 

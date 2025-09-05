@@ -1,0 +1,143 @@
+/* ===================================================
+   SISTEMA DE BOTONES SIMPLIFICADO - NEW BASE DEFAULT THEME
+   =================================================== */
+
+/* Botón base - ÚNICA DEFINICIÓN */
+.nbd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nbd-space-sm);
+    padding: var(--nbd-space-md) var(--nbd-space-xl);
+    border-radius: var(--nbd-radius-xl);
+    font-family: var(--nbd-font-family);
+    font-size: var(--nbd-font-size-base);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    min-height: 56px;
+    white-space: nowrap;
+    position: relative;
+    /* Móviles */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+/* === SOLO 3 TIPOS DE BOTONES === */
+
+/* 1. PRIMARIO - Para acciones principales */
+.nbd-btn--primary {
+    background: var(--nbd-primary, #3b82f6);
+    color: white;
+    border-color: var(--nbd-primary, #3b82f6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nbd-btn--primary:hover {
+    background: var(--nbd-secondary, #2563eb);
+    border-color: var(--nbd-secondary, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* 2. SECUNDARIO - Para acciones secundarias */
+.nbd-btn--secondary {
+    background: transparent;
+    color: var(--nbd-primary, #3b82f6);
+    border-color: var(--nbd-primary, #3b82f6);
+}
+
+.nbd-btn--secondary:hover {
+    background: var(--nbd-primary, #3b82f6);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* 3. GHOST - Para acciones sutiles */
+.nbd-btn--ghost {
+    background: transparent;
+    color: var(--nbd-neutral-600);
+    border-color: var(--nbd-neutral-300);
+}
+
+.nbd-btn--ghost:hover {
+    background: var(--nbd-neutral-100);
+    color: var(--nbd-primary, #3b82f6);
+    border-color: var(--nbd-neutral-400);
+    transform: translateY(-2px);
+}
+
+/* === CASOS ESPECIALES === */
+
+/* WhatsApp (mantener para checkout) */
+.nbd-btn--whatsapp {
+    background: #25D366 !important;
+    color: white !important;
+    border-color: #25D366 !important;
+}
+
+.nbd-btn--whatsapp:hover {
+    background: #128C7E !important;
+    border-color: #128C7E !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* === MODIFICADORES === */
+.nbd-btn--full { width: 100%; }
+.nbd-btn--flex { flex: 1; }
+
+/* === ANIMACIÓN DE ÍCONOS === */
+.nbd-btn-icon {
+    transition: transform 0.2s ease;
+}
+
+.nbd-btn:hover .nbd-btn-icon {
+    transform: translateX(2px);
+}
+
+/* === ESTADOS === */
+.nbd-btn:disabled,
+.nbd-btn--disabled {
+    background: var(--nbd-neutral-300) !important;
+    color: var(--nbd-neutral-500) !important;
+    border-color: var(--nbd-neutral-300) !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 0.6;
+}
+
+/* === LOADING === */
+.nbd-btn-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--nbd-space-sm);
+}
+
+.nbd-btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: nbd-spin 1s linear infinite;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .nbd-btn {
+        padding: var(--nbd-space-sm) var(--nbd-space-lg);
+        min-height: 48px;
+        font-size: var(--nbd-font-size-sm);
+    }
+    
+    .nbd-btn:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}
