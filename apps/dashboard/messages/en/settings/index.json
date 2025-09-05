@@ -136,7 +136,10 @@
       "save": "Save domain",
       "saving": "Saving…",
       "verifying": "Verifying…",
-      "verifyNow": "Verify now"
+      "verifyNow": "Verify now",
+      "cnameGuide": "DNS Configuration Guide",
+      "cnameInstructions": "Add a CNAME record in your DNS provider:",
+      "cnameRecord": "CNAME: www → shopifree.app"
     },
     "payments": {
       "title": "Payment Gateway",

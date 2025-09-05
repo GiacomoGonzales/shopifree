@@ -264,6 +264,22 @@ export default function GeneralSettingsAdvancedPage() {
                     </p>
                   </div>
 
+                  {/* Guía de configuración DNS - Siempre visible */}
+                  <div className="md:col-span-2 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="text-sm font-medium text-blue-900 mb-3">{tAdv('customDomain.cnameGuide')}</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      {tAdv('customDomain.cnameInstructions')}
+                    </p>
+                    <div className="bg-white rounded-md p-3 border border-blue-200">
+                      <code className="text-sm font-mono text-gray-900">
+                        {tAdv('customDomain.cnameRecord')}
+                      </code>
+                    </div>
+                    <div className="mt-3 text-xs text-blue-700">
+                      <strong>{locale === 'es' ? 'Nota:' : 'Note:'}</strong> {locale === 'es' ? 'Después de configurar el registro DNS, usa el botón "Verificar ahora" para comprobar que el dominio esté funcionando correctamente.' : 'After configuring the DNS record, use the "Verify now" button to check that the domain is working correctly.'}
+                    </div>
+                  </div>
+
                   {domainDoc && (
                     <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <h4 className="text-sm font-medium text-gray-900 mb-3">{tAdv('customDomain.statusTitle')}</h4>
