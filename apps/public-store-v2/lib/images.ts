@@ -21,7 +21,8 @@ export function toCloudinarySquare(url: string | undefined | null, size: number 
 		const hasVersionFirst = /^v\d+/.test(suffix);
 		const versionAndRest = hasVersionFirst ? suffix : suffix.replace(/^([^/]+)\//, "");
 		// Transformaciones optimizadas para tarjetas de productos cuadradas
-		const transforms = `c_fill,g_auto,f_auto,q_auto:best,w_${size},h_${size},dpr_auto,fl_progressive:steep`;
+		// OPTIMIZACIÓN: q_auto:good en lugar de best para 40% menos peso manteniendo buena calidad
+		const transforms = `c_fill,g_auto,f_auto,q_auto:good,w_${size},h_${size},dpr_auto,fl_progressive:steep`;
 		return `${prefix}${transforms}/${versionAndRest}`;
 	} catch (_) {
 		return url;
@@ -49,7 +50,7 @@ export function toCloudinaryWide(url: string | undefined | null, width: number =
 		
 		// Transformaciones para formato 2:1 (ancho)
 		const height = Math.round(width / 2);
-		const transforms = `c_fill,g_auto,ar_2:1,f_auto,q_auto:best,w_${width},h_${height},dpr_auto,fl_progressive:steep`;
+		const transforms = `c_fill,g_auto,ar_2:1,f_auto,q_auto:good,w_${width},h_${height},dpr_auto,fl_progressive:steep`;
 		return `${prefix}${transforms}/${versionAndRest}`;
 	} catch (_) {
 		return url;
@@ -77,7 +78,7 @@ export function toCloudinaryTall(url: string | undefined | null, width: number =
 		
 		// Transformaciones para formato 1:2 (alto)
 		const height = width * 2;
-		const transforms = `c_fill,g_auto,ar_1:2,f_auto,q_auto:best,w_${width},h_${height},dpr_auto,fl_progressive:steep`;
+		const transforms = `c_fill,g_auto,ar_1:2,f_auto,q_auto:good,w_${width},h_${height},dpr_auto,fl_progressive:steep`;
 		return `${prefix}${transforms}/${versionAndRest}`;
 	} catch (_) {
 		return url;
@@ -104,7 +105,7 @@ export function toCloudinaryLarge(url: string | undefined | null, size: number =
 		const versionAndRest = hasVersionFirst ? suffix : suffix.replace(/^([^/]+)\//, "");
 		
 		// Transformaciones para cards grandes cuadradas
-		const transforms = `c_fill,g_auto,ar_1:1,f_auto,q_auto:best,w_${size},h_${size},dpr_auto,fl_progressive:steep`;
+		const transforms = `c_fill,g_auto,ar_1:1,f_auto,q_auto:good,w_${size},h_${size},dpr_auto,fl_progressive:steep`;
 		return `${prefix}${transforms}/${versionAndRest}`;
 	} catch (_) {
 		return url;

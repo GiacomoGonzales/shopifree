@@ -261,6 +261,10 @@ export default async function StoreLocaleLayout({
             <link rel="preconnect" href="https://res.cloudinary.com" />
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />
             
+            {/* 🚀 OPTIMIZACIÓN: Preload de fuentes críticas - solo estas funcionan siempre */}
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            
             {/* Scripts de SEO y Analytics - estos no van en metadata */}
             <SEOScripts
                 storeSubdomain={subdomain}
