@@ -22,6 +22,7 @@ export async function getStoreIdBySubdomain(subdomain: string): Promise<string |
 }
 
 export type StoreBasicInfo = {
+    id?: string; // Agregar ID para facilitar el manejo
     storeName: string;
     description?: string;
     heroImageUrl?: string;
@@ -120,6 +121,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
         } : socialFromRoot;
 
         return {
+            id: storeId, // Incluir el ID
             storeName: data.storeName || data.name || "",
             description: data.description || data.slogan || "",
             heroImageUrl: data.heroImageUrl || data.headerImageUrl || data.logoUrl || undefined,
@@ -1060,4 +1062,45 @@ function lightenColor(color: string, amount: number): string {
   return color;
 }
 
+/**
+ * Get store info by subdomain
+ */
+export async function getStoreInfoBySubdomain(subdomain: string): Promise<StoreBasicInfo | null> {
+    try {
+        // Primero obtener el storeId por subdomain
+        const storeId = await getStoreIdBySubdomain(subdomain);
+        if (!storeId) return null;
+        
+        // Luego obtener la información básica de la tienda
+        return await getStoreBasicInfo(storeId);
+    } catch (e) {
+        console.warn("[public-store-v2] getStoreInfoBySubdomain fallo", e);
+        return null;
+    }
+}
+
+/**
+ * Get store info by custom domain
+ */
+export async function getStoreInfoByDomain(domain: string): Promise<StoreBasicInfo | null> {
+    try {
+        const db = getFirebaseDb();
+        if (!db) return null;
+        
+        const storesRef = collection(db, "stores");
+        const q = query(storesRef, where("customDomain", "==", domain));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) return null;
+        
+        const storeDoc = snap.docs[0];
+        const storeId = storeDoc.id;
+        
+        // Obtener la información básica de la tienda
+        return await getStoreBasicInfo(storeId);
+    } catch (e) {
+        console.warn("[public-store-v2] getStoreInfoByDomain fallo", e);
+        return null;
+    }
+}
 
