@@ -8,12 +8,14 @@ import DashboardLayout from '../../../components/DashboardLayout'
 import { 
   subscribeToStoreOrders, 
   updateOrderStatus, 
+  updateOrderPaymentStatus,
   formatOrderDate, 
   formatCurrency,
   generateWhatsAppMessage,
   generateWhatsAppURL,
   Order,
-  OrderItem
+  OrderItem,
+  PaymentStatus
 } from '../../../lib/orders'
 
 export default function OrdersPage() {
@@ -21,6 +23,13 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [updating, setUpdating] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [paymentFormData, setPaymentFormData] = useState({
+    paymentStatus: 'paid' as PaymentStatus,
+    paidAmount: '',
+    paymentReference: '',
+    paymentNotes: ''
+  })
   const [storeData, setStoreData] = useState<{ id: string; storeName: string; currency: string } | null>(null)
   
   const { user } = useAuth()
@@ -110,10 +119,97 @@ export default function OrdersPage() {
     window.open(url, '_blank')
   }
 
+  // 🆕 Manejar cambio de estado de pago (simple)
+  const handlePaymentStatusUpdate = async (orderId: string, newPaymentStatus: PaymentStatus) => {
+    if (!storeData) return
+
+    try {
+      setUpdating(true)
+      await updateOrderPaymentStatus(storeData.id, orderId, newPaymentStatus)
+      
+      // Actualizar el pedido localmente para feedback inmediato
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderId ? { ...order, paymentStatus: newPaymentStatus } : order
+        )
+      )
+
+      // Actualizar también el pedido seleccionado si es el mismo
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(prev => prev ? { ...prev, paymentStatus: newPaymentStatus } : null)
+      }
+    } catch (error) {
+      console.error('Error updating payment status:', error)
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  // 🆕 Abrir modal de pago avanzado
+  const openPaymentModal = (order: Order) => {
+    setPaymentFormData({
+      paymentStatus: 'paid',
+      paidAmount: order.total.toString(),
+      paymentReference: '',
+      paymentNotes: ''
+    })
+    setPaymentModalOpen(true)
+  }
+
+  // 🆕 Manejar actualización avanzada de pago
+  const handleAdvancedPaymentUpdate = async () => {
+    if (!selectedOrder || !storeData) return
+
+    try {
+      setUpdating(true)
+      
+      const paidAmount = parseFloat(paymentFormData.paidAmount) || 0
+      
+      await updateOrderPaymentStatus(
+        storeData.id, 
+        selectedOrder.id, 
+        paymentFormData.paymentStatus,
+        {
+          paidAmount,
+          paymentReference: paymentFormData.paymentReference,
+          paymentNotes: paymentFormData.paymentNotes,
+          processedBy: user?.email || 'Admin'
+        }
+      )
+      
+      // Actualizar localmente
+      const updatedOrder = {
+        ...selectedOrder,
+        paymentStatus: paymentFormData.paymentStatus,
+        paidAmount,
+        paymentReference: paymentFormData.paymentReference,
+        paymentNotes: paymentFormData.paymentNotes,
+        processedBy: user?.email || 'Admin',
+        paidAt: paymentFormData.paymentStatus === 'paid' ? new Date() : null
+      }
+      
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === selectedOrder.id ? updatedOrder : order
+        )
+      )
+      
+      setSelectedOrder(updatedOrder)
+      setPaymentModalOpen(false)
+      
+    } catch (error) {
+      console.error('Error updating payment:', error)
+      alert('Error al actualizar el pago. Por favor intenta de nuevo.')
+    } finally {
+      setUpdating(false)
+    }
+  }
+
   // Componente de estado con colores
   const StatusBadge = ({ status }: { status: Order['status'] }) => {
     const colorMap = {
       pending: 'bg-yellow-100 text-yellow-800',
+      whatsapp_sent: 'bg-green-100 text-green-800',
       confirmed: 'bg-gray-100 text-gray-800',
       preparing: 'bg-orange-100 text-orange-800',
       ready: 'bg-purple-100 text-purple-800',
@@ -247,6 +343,32 @@ export default function OrdersPage() {
                             <div className="text-sm text-gray-500">
                               {order.clientPhone}
                             </div>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {(order as any).checkoutMethod && (
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                  (order as any).checkoutMethod === 'whatsapp' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                  {t(`checkoutMethods.${(order as any).checkoutMethod}`)}
+                                </span>
+                              )}
+                              {(order as any).paymentStatus && (
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                  (order as any).paymentStatus === 'paid' 
+                                    ? 'bg-emerald-100 text-emerald-800' 
+                                    : (order as any).paymentStatus === 'pending'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : (order as any).paymentStatus === 'partial'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : (order as any).paymentStatus === 'failed'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {t(`paymentStatus.${(order as any).paymentStatus}`)}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {formatCurrency(order.total, storeData?.currency || 'USD')}
@@ -303,11 +425,75 @@ export default function OrdersPage() {
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div><strong>{t('details.name')}:</strong> {selectedOrder.clientName}</div>
                     <div><strong>{t('details.phone')}:</strong> {selectedOrder.clientPhone}</div>
+                    {(selectedOrder as any).email && (
+                      <div><strong>{t('details.email')}:</strong> {(selectedOrder as any).email}</div>
+                    )}
+                    {(selectedOrder as any).shippingMethod && (
+                      <div><strong>{t('details.shippingMethod')}:</strong> {t(`shippingMethods.${(selectedOrder as any).shippingMethod}`)}</div>
+                    )}
                     {selectedOrder.clientAddress && (
                       <div><strong>{t('details.address')}:</strong> {selectedOrder.clientAddress}</div>
                     )}
                     {selectedOrder.clientNotes && (
                       <div><strong>{t('details.notes')}:</strong> {selectedOrder.clientNotes}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 🆕 Información de Pago */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">💳 Información de Pago</h4>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span><strong>Estado del pago:</strong></span>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        (selectedOrder as any).paymentStatus === 'paid' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : (selectedOrder as any).paymentStatus === 'pending'
+                          ? 'bg-orange-100 text-orange-800'
+                          : (selectedOrder as any).paymentStatus === 'partial'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : (selectedOrder as any).paymentStatus === 'failed'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {(selectedOrder as any).paymentStatus 
+                          ? t(`paymentStatus.${(selectedOrder as any).paymentStatus}`)
+                          : 'Pendiente de pago'
+                        }
+                      </span>
+                    </div>
+                    
+                    {(selectedOrder as any).paymentType && (
+                      <div><strong>Tipo de pago:</strong> {t(`paymentTypes.${(selectedOrder as any).paymentType}`)}</div>
+                    )}
+                    
+                    <div className="flex justify-between">
+                      <span><strong>Monto total:</strong></span>
+                      <span>{formatCurrency(selectedOrder.total, storeData?.currency || 'USD')}</span>
+                    </div>
+                    
+                    {(selectedOrder as any).paidAmount !== undefined && (selectedOrder as any).paidAmount > 0 && (
+                      <div className="flex justify-between">
+                        <span><strong>Monto pagado:</strong></span>
+                        <span className="text-green-600">{formatCurrency((selectedOrder as any).paidAmount, storeData?.currency || 'USD')}</span>
+                      </div>
+                    )}
+                    
+                    {(selectedOrder as any).paymentReference && (
+                      <div><strong>Referencia:</strong> {(selectedOrder as any).paymentReference}</div>
+                    )}
+                    
+                    {(selectedOrder as any).paidAt && (
+                      <div><strong>Pagado el:</strong> {formatOrderDate((selectedOrder as any).paidAt)}</div>
+                    )}
+                    
+                    {(selectedOrder as any).paymentNotes && (
+                      <div><strong>Notas de pago:</strong> {(selectedOrder as any).paymentNotes}</div>
+                    )}
+                    
+                    {(selectedOrder as any).processedBy && (
+                      <div><strong>Procesado por:</strong> {(selectedOrder as any).processedBy}</div>
                     )}
                   </div>
                 </div>
@@ -367,6 +553,17 @@ export default function OrdersPage() {
                       <span>{t('details.shippingCost')}:</span>
                       <span>{formatCurrency(selectedOrder.shippingCost, storeData?.currency || 'USD')}</span>
                     </div>
+                    {(selectedOrder as any).discount && (selectedOrder as any).discount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>
+                          {t('details.discount')}
+                          {(selectedOrder as any).appliedCoupon?.code && (
+                            <span className="text-sm text-gray-500"> ({(selectedOrder as any).appliedCoupon.code})</span>
+                          )}:
+                        </span>
+                        <span>-{formatCurrency((selectedOrder as any).discount, storeData?.currency || 'USD')}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between font-bold text-lg border-t pt-2">
                       <span>{t('details.total')}:</span>
                       <span>{formatCurrency(selectedOrder.total, storeData?.currency || 'USD')}</span>
@@ -390,6 +587,7 @@ export default function OrdersPage() {
                         className="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
                       >
                         <option value="pending">{t('status.pending')}</option>
+                        <option value="whatsapp_sent">{t('status.whatsapp_sent')}</option>
                         <option value="confirmed">{t('status.confirmed')}</option>
                         <option value="preparing">{t('status.preparing')}</option>
                         <option value="ready">{t('status.ready')}</option>
@@ -401,6 +599,48 @@ export default function OrdersPage() {
                         <span className="text-sm text-gray-500">{t('details.updating')}</span>
                       )}
                     </div>
+
+                    {/* 🆕 Acciones de Pago Rápidas */}
+                    {(selectedOrder as any).paymentStatus && (selectedOrder as any).paymentStatus === 'pending' && (
+                      <div className="border-t pt-3">
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Acciones de pago rápidas:
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => handlePaymentStatusUpdate(selectedOrder.id, 'paid')}
+                            disabled={updating}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
+                          >
+                            ✅ {t('paymentActions.markAsPaid')}
+                          </button>
+                          
+                          <button
+                            onClick={() => handlePaymentStatusUpdate(selectedOrder.id, 'failed')}
+                            disabled={updating}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                          >
+                            ❌ {t('paymentActions.markAsFailed')}
+                          </button>
+                          
+                          <button
+                            onClick={() => handlePaymentStatusUpdate(selectedOrder.id, 'partial')}
+                            disabled={updating}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+                          >
+                            ⚠️ {t('paymentActions.markAsPartial')}
+                          </button>
+                          
+                          <button
+                            onClick={() => openPaymentModal(selectedOrder)}
+                            disabled={updating}
+                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                          >
+                            📝 Actualización detallada
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Botones de acción */}
                     <div className="flex flex-col sm:flex-row gap-3">
@@ -437,6 +677,128 @@ export default function OrdersPage() {
                   className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                 >
                   {t('details.close')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🆕 Modal de Actualización Avanzada de Pago */}
+      {paymentModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-medium text-gray-900">
+                  💳 Actualizar Pago - Pedido #{selectedOrder.id.slice(-8)}
+                </h3>
+                <button
+                  onClick={() => setPaymentModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Estado del Pago */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estado del pago
+                  </label>
+                  <select
+                    value={paymentFormData.paymentStatus}
+                    onChange={(e) => setPaymentFormData(prev => ({ 
+                      ...prev, 
+                      paymentStatus: e.target.value as PaymentStatus 
+                    }))}
+                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                  >
+                    <option value="paid">✅ Pagado</option>
+                    <option value="partial">⚠️ Pago parcial</option>
+                    <option value="pending">⏳ Pendiente</option>
+                    <option value="failed">❌ Fallido</option>
+                    <option value="refunded">↩️ Reembolsado</option>
+                  </select>
+                </div>
+
+                {/* Monto Pagado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Monto pagado ({storeData?.currency || 'USD'})
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={paymentFormData.paidAmount}
+                      onChange={(e) => setPaymentFormData(prev => ({ 
+                        ...prev, 
+                        paidAmount: e.target.value 
+                      }))}
+                      className="block w-full pl-3 pr-12 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                      placeholder="0.00"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">
+                        / {formatCurrency(selectedOrder.total, storeData?.currency || 'USD')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Referencia/Comprobante */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Referencia o número de comprobante
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentFormData.paymentReference}
+                    onChange={(e) => setPaymentFormData(prev => ({ 
+                      ...prev, 
+                      paymentReference: e.target.value 
+                    }))}
+                    className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                    placeholder="Ej: YAPE-123456, REF001, etc."
+                  />
+                </div>
+
+                {/* Notas */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Notas del pago
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={paymentFormData.paymentNotes}
+                    onChange={(e) => setPaymentFormData(prev => ({ 
+                      ...prev, 
+                      paymentNotes: e.target.value 
+                    }))}
+                    className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                    placeholder="Ej: Cliente pagó con Yape, comprobante enviado por WhatsApp..."
+                  />
+                </div>
+              </div>
+
+              {/* Botones */}
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={() => setPaymentModalOpen(false)}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAdvancedPaymentUpdate}
+                  disabled={updating}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50"
+                >
+                  {updating ? 'Actualizando...' : '💾 Guardar cambios'}
                 </button>
               </div>
             </div>

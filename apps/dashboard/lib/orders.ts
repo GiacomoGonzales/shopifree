@@ -11,6 +11,23 @@ export interface OrderItem {
   productId: string
 }
 
+// Tipos para el sistema de pagos
+export type PaymentStatus = 
+  | 'pending'           // Pendiente de pago
+  | 'paid'             // Pagado completamente  
+  | 'partial'          // Pago parcial
+  | 'failed'           // Pago fallido
+  | 'refunded'         // Reembolsado
+  | 'cancelled'        // Cancelado (sin pago)
+
+export type PaymentType =
+  | 'cash_on_delivery'  // Efectivo contra entrega
+  | 'card_on_delivery'  // Tarjeta contra entrega  
+  | 'mobile_transfer'   // Yape, Plin, etc.
+  | 'bank_transfer'     // Transferencia bancaria
+  | 'online'           // Pago online (futuro)
+  | 'mixed'            // Pago mixto
+
 export interface Order {
   id: string
   userId: string
@@ -27,6 +44,15 @@ export interface Order {
   paymentMethod: 'cash' | 'transfer' | 'card' | 'other'
   status: string
   storeId: string
+  
+  // 🆕 NUEVOS CAMPOS DE PAGO (opcionales para backward compatibility)
+  paymentStatus?: PaymentStatus
+  paymentType?: PaymentType
+  paidAmount?: number
+  paymentNotes?: string
+  paymentReference?: string
+  paidAt?: Date | null
+  processedBy?: string
 }
 
 // Obtener pedidos de una tienda en tiempo real
@@ -158,4 +184,75 @@ export const generateWhatsAppURL = (phone: string, message: string): string => {
   // Limpiar número de teléfono (quitar espacios, guiones, etc.)
   const cleanPhone = phone.replace(/[^\d+]/g, '')
   return `https://wa.me/${cleanPhone}?text=${message}`
+}
+
+// 🆕 FUNCIONES PARA MANEJO DE PAGOS
+
+// Mapear paymentMethod legacy a PaymentType nuevo
+export const mapLegacyPaymentMethod = (legacyMethod: string): PaymentType => {
+  switch (legacyMethod) {
+    case 'cash': return 'cash_on_delivery'
+    case 'card': return 'card_on_delivery' 
+    case 'transfer': return 'mobile_transfer'
+    default: return 'cash_on_delivery'
+  }
+}
+
+// Obtener estado de pago inicial basado en método
+export const getInitialPaymentStatus = (paymentType: PaymentType): PaymentStatus => {
+  switch (paymentType) {
+    case 'online':
+      return 'paid' // Pago online ya está procesado
+    case 'cash_on_delivery':
+    case 'card_on_delivery':
+    case 'mobile_transfer':
+    case 'bank_transfer':
+    case 'mixed':
+    default:
+      return 'pending' // Requiere confirmación manual
+  }
+}
+
+// Actualizar estado de pago de un pedido
+export const updateOrderPaymentStatus = async (
+  storeId: string,
+  orderId: string,
+  paymentStatus: PaymentStatus,
+  paymentData?: {
+    paidAmount?: number
+    paymentNotes?: string
+    paymentReference?: string
+    processedBy?: string
+  }
+): Promise<void> => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) {
+      throw new Error('Firebase not initialized')
+    }
+    
+    const orderRef = doc(db, 'stores', storeId, 'orders', orderId)
+    const updateData: any = {
+      paymentStatus,
+      updatedAt: new Date()
+    }
+
+    // Agregar timestamp de pago si se marca como pagado
+    if (paymentStatus === 'paid') {
+      updateData.paidAt = new Date()
+    }
+
+    // Agregar datos adicionales del pago si se proporcionan
+    if (paymentData) {
+      if (paymentData.paidAmount !== undefined) updateData.paidAmount = paymentData.paidAmount
+      if (paymentData.paymentNotes) updateData.paymentNotes = paymentData.paymentNotes
+      if (paymentData.paymentReference) updateData.paymentReference = paymentData.paymentReference
+      if (paymentData.processedBy) updateData.processedBy = paymentData.processedBy
+    }
+
+    await updateDoc(orderRef, updateData)
+  } catch (error) {
+    console.error('Error updating payment status:', error)
+    throw error
+  }
 } 

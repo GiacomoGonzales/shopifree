@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useCart, CartItem } from '../../lib/cart-context';
+import { createOrder, generateWhatsAppMessageWithId, OrderData } from '../../lib/orders';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
@@ -1068,39 +1069,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         
         setIsSubmitting(true);
         
-        // Verificar método de checkout
-        const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
-        
-        if (isWhatsAppCheckout) {
-            // Para WhatsApp: generar mensaje y abrir WhatsApp
-            const { message, phone } = generateWhatsAppMessage();
+        try {
+            // Verificar método de checkout
+            const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
             
-            if (phone) {
-                // Limpiar número de teléfono (quitar espacios, guiones, etc.)
-                const cleanPhone = phone.replace(/[^\d+]/g, '');
-                const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-                
-                // Abrir WhatsApp
-                window.open(whatsappUrl, '_blank');
-                
-                // Limpiar carrito después de un breve delay para que el usuario vea que se procesó
-                setTimeout(() => {
-                    clearCart();
-                    setIsSubmitting(false);
-                    onSuccess();
-                    onClose();
-                }, 1000);
-            } else {
-                // Si no hay teléfono configurado, mostrar error
-                alert('No se ha configurado un número de WhatsApp para esta tienda. Por favor contacta al administrador.');
-                setIsSubmitting(false);
-            }
-        } else {
-            // Para checkout tradicional: procesar normalmente
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Preparar payload completo del checkout
-            const checkoutPayload = {
+            // 🔥 NUEVO: Preparar datos del pedido (formato universal)
+            const orderData: OrderData = {
                 customer: {
                     email: formData.email,
                     fullName: formData.fullName,
@@ -1108,13 +1082,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 },
                 shipping: {
                     method: formData.shippingMethod,
-                    addressText: formData.addressText || formData.address,
-                    lat: formData.lat,
-                    lng: formData.lng,
-                    addressNormalized: formData.addressNormalized,
+                    address: formData.address,
                     city: formData.city,
-                    zipCode: formData.zipCode,
-                    cost: shipping
+                    cost: shipping,
+                    ...(selectedLocation && { pickupLocation: selectedLocation })
                 },
                 payment: {
                     method: formData.paymentMethod,
@@ -1122,19 +1093,97 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 },
                 items: state.items,
                 totals: { subtotal, shipping, total },
-                metadata: {
-                    storeId: storeId,
-                    currency: currency,
-                    timestamp: new Date().toISOString()
-                }
+                currency: currency,
+                checkoutMethod: isWhatsAppCheckout ? 'whatsapp' : 'traditional',
+                ...(isWhatsAppCheckout && { whatsappPhone: storeInfo?.socialMedia?.whatsapp || storeInfo?.phone }),
+                ...(discount > 0 && { discount, appliedCoupon: formData.appliedCoupon })
             };
             
-            console.log('Checkout tradicional:', checkoutPayload);
+            // 🔥 NUEVO: SIEMPRE guardar pedido en Firestore primero
+            console.log('[Checkout] Saving order to Firestore...', { method: orderData.checkoutMethod });
+            const orderDoc = await createOrder(storeId!, orderData);
+            const orderId = orderDoc?.id || null;
             
-            clearCart();
+            if (orderId) {
+                console.log('[Checkout] Order saved successfully:', orderId);
+            } else {
+                console.warn('[Checkout] Order not saved (Firebase unavailable), continuing with checkout...');
+            }
+            
+            // Procesar según el método de checkout
+            if (isWhatsAppCheckout) {
+                // Para WhatsApp: usar nueva función con ID del pedido
+                const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo);
+                
+                if (phone) {
+                    // Limpiar número de teléfono (quitar espacios, guiones, etc.)
+                    const cleanPhone = phone.replace(/[^\d+]/g, '');
+                    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                    
+                    // Abrir WhatsApp
+                    window.open(whatsappUrl, '_blank');
+                    
+                    // Limpiar carrito después de un breve delay para que el usuario vea que se procesó
+                    setTimeout(() => {
+                        clearCart();
+                        setIsSubmitting(false);
+                        onSuccess();
+                        onClose();
+                    }, 1000);
+                } else {
+                    // Si no hay teléfono configurado, mostrar error
+                    alert('No se ha configurado un número de WhatsApp para esta tienda. Por favor contacta al administrador.');
+                    setIsSubmitting(false);
+                }
+            } else {
+                // Para checkout tradicional: procesar normalmente
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 📝 MANTENER: Payload original para compatibilidad
+                const checkoutPayload = {
+                    customer: {
+                        email: formData.email,
+                        fullName: formData.fullName,
+                        phone: formData.phone
+                    },
+                    shipping: {
+                        method: formData.shippingMethod,
+                        addressText: formData.addressText || formData.address,
+                        lat: formData.lat,
+                        lng: formData.lng,
+                        addressNormalized: formData.addressNormalized,
+                        city: formData.city,
+                        zipCode: formData.zipCode,
+                        cost: shipping
+                    },
+                    payment: {
+                        method: formData.paymentMethod,
+                        notes: formData.notes
+                    },
+                    items: state.items,
+                    totals: { subtotal, shipping, total },
+                    metadata: {
+                        storeId: storeId,
+                        currency: currency,
+                        timestamp: new Date().toISOString(),
+                        // 🔥 NUEVO: Incluir ID del pedido guardado
+                        orderId: orderId
+                    }
+                };
+                
+                console.log('Checkout tradicional:', checkoutPayload);
+                
+                clearCart();
+                setIsSubmitting(false);
+                onSuccess();
+                onClose();
+            }
+            
+        } catch (error) {
+            console.error('[Checkout] Error durante el proceso:', error);
+            // 🛡️ SEGURIDAD: No romper el flujo si falla el guardado
+            alert('Hubo un problema al procesar el pedido. Tu pedido puede haberse guardado, por favor contacta a la tienda para confirmar.');
             setIsSubmitting(false);
-            onSuccess();
-            onClose();
         }
     };
 

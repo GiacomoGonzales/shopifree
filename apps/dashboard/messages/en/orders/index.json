@@ -15,6 +15,7 @@
   },
   "status": {
     "pending": "Pending",
+    "whatsapp_sent": "Sent via WhatsApp",
     "confirmed": "Confirmed",
     "preparing": "Preparing",
     "ready": "Ready",
@@ -38,8 +39,10 @@
     "customerInfo": "Customer information",
     "name": "Name",
     "phone": "Phone",
+    "email": "Email",
     "address": "Address",
     "notes": "Notes",
+    "shippingMethod": "Shipping method",
     "orderItems": "Order items",
     "product": "Product",
     "presentation": "Presentation",
@@ -48,6 +51,8 @@
     "orderSummary": "Order summary",
     "itemsSubtotal": "Items subtotal",
     "shippingCost": "Shipping cost",
+    "discount": "Discount",
+    "coupon": "Applied coupon",
     "total": "Total",
     "actions": "Actions",
     "updateStatus": "Update status",
@@ -67,6 +72,7 @@
   "filters": {
     "all": "All",
     "pending": "Pending",
+    "whatsapp_sent": "Via WhatsApp",
     "confirmed": "Confirmed",
     "preparing": "Preparing",
     "ready": "Ready",
@@ -82,5 +88,37 @@
     "statusUpdated": "Status updated successfully",
     "errorUpdating": "Error updating status",
     "orderNotFound": "Order not found"
+  },
+  "shippingMethods": {
+    "standard": "Standard shipping",
+    "express": "Express shipping",
+    "pickup": "Store pickup"
+  },
+  "checkoutMethods": {
+    "whatsapp": "WhatsApp",
+    "traditional": "Web"
+  },
+  "paymentStatus": {
+    "pending": "Payment pending",
+    "paid": "Paid",
+    "partial": "Partial payment", 
+    "failed": "Payment failed",
+    "refunded": "Refunded",
+    "cancelled": "Cancelled"
+  },
+  "paymentTypes": {
+    "cash_on_delivery": "Cash on delivery",
+    "card_on_delivery": "Card on delivery",
+    "mobile_transfer": "Mobile transfer",
+    "bank_transfer": "Bank transfer",
+    "online": "Online payment",
+    "mixed": "Mixed payment"
+  },
+  "paymentActions": {
+    "markAsPaid": "Mark as paid",
+    "markAsPartial": "Mark as partial payment",
+    "markAsFailed": "Mark as failed",
+    "addPaymentNote": "Add payment note",
+    "viewPaymentHistory": "View payment history"
   }
 } 

@@ -15,6 +15,7 @@
   },
   "status": {
     "pending": "Pendiente",
+    "whatsapp_sent": "Enviado por WhatsApp",
     "confirmed": "Confirmado",
     "preparing": "Preparando",
     "ready": "Listo",
@@ -38,8 +39,10 @@
     "customerInfo": "Información del cliente",
     "name": "Nombre",
     "phone": "Teléfono",
+    "email": "Email",
     "address": "Dirección",
     "notes": "Notas",
+    "shippingMethod": "Método de envío",
     "orderItems": "Productos del pedido",
     "product": "Producto",
     "presentation": "Presentación",
@@ -48,6 +51,8 @@
     "orderSummary": "Resumen del pedido",
     "itemsSubtotal": "Subtotal de productos",
     "shippingCost": "Costo de envío",
+    "discount": "Descuento",
+    "coupon": "Cupón aplicado",
     "total": "Total",
     "actions": "Acciones",
     "updateStatus": "Actualizar estado",
@@ -67,6 +72,7 @@
   "filters": {
     "all": "Todos",
     "pending": "Pendientes",
+    "whatsapp_sent": "Por WhatsApp",
     "confirmed": "Confirmados",
     "preparing": "Preparando",
     "ready": "Listos",
@@ -82,5 +88,37 @@
     "statusUpdated": "Estado actualizado correctamente",
     "errorUpdating": "Error al actualizar el estado",
     "orderNotFound": "Pedido no encontrado"
+  },
+  "shippingMethods": {
+    "standard": "Envío estándar",
+    "express": "Envío express",
+    "pickup": "Recojo en tienda"
+  },
+  "checkoutMethods": {
+    "whatsapp": "WhatsApp",
+    "traditional": "Web"
+  },
+  "paymentStatus": {
+    "pending": "Pendiente de pago",
+    "paid": "Pagado",
+    "partial": "Pago parcial", 
+    "failed": "Pago fallido",
+    "refunded": "Reembolsado",
+    "cancelled": "Cancelado"
+  },
+  "paymentTypes": {
+    "cash_on_delivery": "Efectivo contra entrega",
+    "card_on_delivery": "Tarjeta contra entrega",
+    "mobile_transfer": "Transferencia móvil",
+    "bank_transfer": "Transferencia bancaria",
+    "online": "Pago online",
+    "mixed": "Pago mixto"
+  },
+  "paymentActions": {
+    "markAsPaid": "Marcar como pagado",
+    "markAsPartial": "Marcar pago parcial",
+    "markAsFailed": "Marcar como fallido",
+    "addPaymentNote": "Agregar nota de pago",
+    "viewPaymentHistory": "Ver historial de pagos"
   }
 } 
