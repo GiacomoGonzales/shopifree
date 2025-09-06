@@ -82,9 +82,10 @@ interface CheckoutModalProps {
     onSuccess: () => void;
     storeInfo?: StoreBasicInfo | null;
     storeId?: string;
+    onShowConfirmation?: (orderData: OrderData) => void;
 }
 
-export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, storeId }: CheckoutModalProps) {
+export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, storeId, onShowConfirmation }: CheckoutModalProps) {
     
 
     const { state, clearCart } = useCart();
@@ -1072,6 +1073,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         try {
             // Verificar método de checkout
             const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
+            console.log('🔍 Método de checkout:', { 
+                checkoutConfig, 
+                method: checkoutConfig?.checkout?.method, 
+                isWhatsAppCheckout 
+            });
             
             // 🔥 NUEVO: Preparar datos del pedido (formato universal)
             const orderData: OrderData = {
@@ -1136,10 +1142,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     setIsSubmitting(false);
                 }
             } else {
-                // Para checkout tradicional: procesar normalmente
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // 📝 MANTENER: Payload original para compatibilidad
+                // Para checkout tradicional: mostrar modal de confirmación
                 const checkoutPayload = {
                     customer: {
                         email: formData.email,
@@ -1166,17 +1169,27 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         storeId: storeId,
                         currency: currency,
                         timestamp: new Date().toISOString(),
-                        // 🔥 NUEVO: Incluir ID del pedido guardado
                         orderId: orderId
                     }
                 };
                 
                 console.log('Checkout tradicional:', checkoutPayload);
                 
-                clearCart();
+                // Mostrar modal de confirmación
+                console.log('🚀 Mostrando modal de confirmación...');
                 setIsSubmitting(false);
-                onSuccess();
-                onClose();
+                
+                // Limpiar carrito y mostrar modal de confirmación
+                clearCart();
+                
+                // Llamar función para mostrar modal de confirmación
+                if (onShowConfirmation) {
+                    onShowConfirmation(checkoutPayload);
+                } else {
+                    // Fallback si no se pasa la función
+                    onSuccess();
+                    onClose();
+                }
             }
             
         } catch (error) {
@@ -1186,6 +1199,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             setIsSubmitting(false);
         }
     };
+
 
     if (!isOpen) return null;
 
@@ -1977,6 +1991,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     </div>
                 </div>
             </div>
+
         </>
     );
 }

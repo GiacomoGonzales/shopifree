@@ -6,6 +6,8 @@ import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { StoreBasicInfo } from '../../lib/store';
 import CheckoutModal from './CheckoutModal';
+import ConfirmationModal from './ConfirmationModal';
+import { OrderData } from '../../lib/orders';
 
 interface CartModalProps {
     storeInfo?: StoreBasicInfo | null;
@@ -15,6 +17,10 @@ interface CartModalProps {
 export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+    
+    // Estados para modal de confirmación
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [orderDataForConfirmation, setOrderDataForConfirmation] = useState<OrderData | null>(null);
     
     // Detectar si hay productos incompletos
     const hasIncompleteItems = state.items.some(item => item.incomplete);
@@ -105,6 +111,21 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
         // Aquí se podría mostrar un mensaje de éxito
         console.log('¡Pedido completado exitosamente!');
         closeCart();
+    };
+
+    // Función para mostrar modal de confirmación (llamada desde CheckoutModal)
+    const showConfirmationModalWithData = (orderData: OrderData) => {
+        console.log('📧 CartModal recibió datos para confirmación:', orderData);
+        setOrderDataForConfirmation(orderData);
+        setIsCheckoutOpen(false); // Cerrar checkout modal
+        setShowConfirmationModal(true); // Mostrar confirmation modal
+    };
+
+    // Función para manejar el cierre del modal de confirmación
+    const handleConfirmationModalClose = () => {
+        setShowConfirmationModal(false);
+        setOrderDataForConfirmation(null);
+        closeCart(); // Cerrar todo el cart modal
     };
 
     return (
@@ -302,6 +323,15 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 onSuccess={handleCheckoutSuccess}
                 storeInfo={storeInfo}
                 storeId={storeId}
+                onShowConfirmation={showConfirmationModalWithData}
+            />
+
+            {/* Modal de confirmación */}
+            <ConfirmationModal
+                isOpen={showConfirmationModal}
+                onClose={handleConfirmationModalClose}
+                orderData={orderDataForConfirmation}
+                storeInfo={storeInfo || undefined}
             />
         </>
     );
