@@ -61,9 +61,9 @@ export function orderDataToPreference(
   
   // Convertir items del carrito a formato MercadoPago
   const items = orderData.items.map(item => ({
-    title: `${item.name}${item.selectedVariant?.name ? ` - ${item.selectedVariant.name}` : ''}`,
+    title: `${item.name}${item.variant?.name ? ` - ${item.variant.name}` : ''}`,
     quantity: item.quantity,
-    unit_price: Math.round((item.currentPrice || item.price) * 100) / 100, // Asegurar máximo 2 decimales
+    unit_price: Math.round((item.variant?.price || item.price) * 100) / 100, // Asegurar máximo 2 decimales
     currency_id: orderData.currency || 'COP'
   }))
 
