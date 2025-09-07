@@ -1080,60 +1080,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         return { message, phone: whatsappPhone };
     };
 
-    const handleSubmit = async () => {
-        if (!validateStep(3)) return;
-        
+    // Función para continuar con checkout después de advertencia de stock
+    const continueCheckoutAfterWarning = async () => {
+        console.log('🚀 [Stock Warning] Continuando checkout después de advertencia...');
         setIsSubmitting(true);
-        
+        await processCheckoutFlow();
+    };
+
+    // Función que contiene la lógica principal de checkout
+    const processCheckoutFlow = async () => {
         try {
-            // 📊 STOCK VALIDATION con Feature Flag - Logging extendido (no afecta el flujo)
-            try {
-                console.log('📦 [Stock Validation] Iniciando validación con feature flags...');
-                
-                // Obtener configuración de stock para la tienda
-                const stockConfig = await getStoreStockConfig(storeId || '');
-                logStockConfig(storeId || 'unknown', stockConfig);
-                
-                // Verificar si debe ejecutarse la validación según feature flag
-                const shouldValidate = shouldValidateStock(stockConfig.validation || { enabled: false, blockOnUnavailable: false, logOnly: true, showWarnings: false });
-                
-                console.log('🎛️ [Stock Validation] Feature flag status:', {
-                    shouldValidate,
-                    config: stockConfig.validation
-                });
-                
-                // Ejecutar validación (actualmente siempre se ejecuta para logging)
-                const stockValidation = await validateCartStock(state.items);
-                logStockValidation(stockValidation);
-                
-                // Log adicional con información del feature flag
-                console.log('📊 [Stock Validation] Resultado detallado con config:', {
-                    totalItems: stockValidation.items.length,
-                    allAvailable: stockValidation.allAvailable,
-                    unavailableCount: stockValidation.unavailableItems.length,
-                    itemsWithStock: stockValidation.items.filter(item => item.manageStock).length,
-                    itemsWithoutStock: stockValidation.items.filter(item => !item.manageStock).length,
-                    // Nueva información de feature flags
-                    featureFlags: {
-                        validationEnabled: stockConfig.validation?.enabled,
-                        wouldBlock: stockConfig.validation?.blockOnUnavailable && !stockConfig.validation?.logOnly,
-                        wouldShowWarning: stockConfig.validation?.showWarnings,
-                        logOnly: stockConfig.validation?.logOnly
-                    }
-                });
-                
-                // FUTURO: Aquí es donde se agregará la lógica de bloqueo/advertencia
-                if (!stockValidation.allAvailable && shouldValidate) {
-                    console.log('🚧 [Stock Validation] Would block/warn (but not implemented yet):', {
-                        action: stockConfig.validation?.blockOnUnavailable ? 'BLOCK' : 'WARN',
-                        unavailableItems: stockValidation.unavailableItems.length
-                    });
-                }
-                
-            } catch (stockError) {
-                console.warn('⚠️ [Stock Validation] Error en validación (continuando normal):', stockError);
-            }
-            
             // Verificar método de checkout
             const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
             console.log('🔍 Método de checkout:', { 
@@ -1142,7 +1098,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 isWhatsAppCheckout 
             });
             
-            // 🔥 NUEVO: Preparar datos del pedido (formato universal)
+            // Preparar datos del pedido (formato universal)
             const orderData: OrderData = {
                 customer: {
                     email: formData.email,
@@ -1164,13 +1120,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 totals: { subtotal, shipping, total },
                 currency: currency,
                 checkoutMethod: isWhatsAppCheckout ? 'whatsapp' : 'traditional',
-                ...(isWhatsAppCheckout && { whatsappPhone: storeInfo?.socialMedia?.whatsapp || storeInfo?.phone }),
-                ...(discount > 0 && { discount, appliedCoupon: formData.appliedCoupon })
+                discount: discount,
+                ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
             };
-            
-            // 🔥 NUEVO: SIEMPRE guardar pedido en Firestore primero
+
             console.log('[Checkout] Saving order to Firestore...', { method: orderData.checkoutMethod });
-            const orderDoc = await createOrder(storeId!, orderData);
+
+            // Guardar pedido en Firestore
+            const orderDoc = await createOrder(storeId || '', orderData);
             const orderId = orderDoc?.id || null;
             
             if (orderId) {
@@ -1251,6 +1208,90 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             console.error('[Checkout] Error durante el proceso:', error);
             // 🛡️ SEGURIDAD: No romper el flujo si falla el guardado
             alert('Hubo un problema al procesar el pedido. Tu pedido puede haberse guardado, por favor contacta a la tienda para confirmar.');
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!validateStep(3)) return;
+        
+        setIsSubmitting(true);
+        
+        try {
+            // 📊 STOCK VALIDATION con Feature Flag - Logging extendido (no afecta el flujo)
+            try {
+                console.log('📦 [Stock Validation] Iniciando validación con feature flags...');
+                
+                // Obtener configuración de stock para la tienda
+                const stockConfig = await getStoreStockConfig(storeId || '');
+                logStockConfig(storeId || 'unknown', stockConfig);
+                
+                // Verificar si debe ejecutarse la validación según feature flag
+                const shouldValidate = shouldValidateStock(stockConfig.validation || { enabled: false, blockOnUnavailable: false, logOnly: true, showWarnings: false });
+                
+                console.log('🎛️ [Stock Validation] Feature flag status:', {
+                    shouldValidate,
+                    config: stockConfig.validation
+                });
+                
+                // Ejecutar validación (actualmente siempre se ejecuta para logging)
+                const stockValidation = await validateCartStock(state.items);
+                logStockValidation(stockValidation);
+                
+                // Log adicional con información del feature flag
+                console.log('📊 [Stock Validation] Resultado detallado con config:', {
+                    totalItems: stockValidation.items.length,
+                    allAvailable: stockValidation.allAvailable,
+                    unavailableCount: stockValidation.unavailableItems.length,
+                    itemsWithStock: stockValidation.items.filter(item => item.manageStock).length,
+                    itemsWithoutStock: stockValidation.items.filter(item => !item.manageStock).length,
+                    // Nueva información de feature flags
+                    featureFlags: {
+                        validationEnabled: stockConfig.validation?.enabled,
+                        wouldBlock: stockConfig.validation?.blockOnUnavailable && !stockConfig.validation?.logOnly,
+                        wouldShowWarning: stockConfig.validation?.showWarnings,
+                        logOnly: stockConfig.validation?.logOnly
+                    }
+                });
+                
+                // 🚀 NUEVA LÓGICA: Mostrar advertencias según feature flag
+                if (!stockValidation.allAvailable && shouldValidate) {
+                    const shouldWarn = shouldShowWarnings(stockConfig.validation || { enabled: false, blockOnUnavailable: false, logOnly: true, showWarnings: false });
+                    const shouldBlock = stockConfig.validation?.blockOnUnavailable && !stockConfig.validation?.logOnly;
+                    
+                    console.log('🚧 [Stock Validation] Acción a tomar:', {
+                        shouldWarn,
+                        shouldBlock,
+                        action: shouldBlock ? 'BLOCK' : shouldWarn ? 'WARN' : 'LOG_ONLY',
+                        unavailableItems: stockValidation.unavailableItems.length
+                    });
+                    
+                    // Si debe mostrar advertencias, mostrar modal y return early
+                    if (shouldWarn && stockValidation.unavailableItems.length > 0) {
+                        console.log('⚠️ [Stock Validation] Mostrando modal de advertencia');
+                        setStockWarningItems(stockValidation.unavailableItems);
+                        setShowStockWarning(true);
+                        setIsSubmitting(false); // Detener el loading
+                        return; // No continuar con el checkout hasta que el usuario decida
+                    }
+                    
+                    // Si debe bloquear completamente (futuro)
+                    if (shouldBlock) {
+                        console.log('🛑 [Stock Validation] Bloquearía checkout (no implementado aún)');
+                        // FUTURO: Implementar bloqueo total
+                    }
+                }
+                
+            } catch (stockError) {
+                console.warn('⚠️ [Stock Validation] Error en validación (continuando normal):', stockError);
+            }
+            
+            // Continuar con el flujo de checkout normal
+            await processCheckoutFlow();
+            
+        } catch (error) {
+            console.error('[Checkout] Error durante handleSubmit:', error);
+            alert('Hubo un problema al procesar el pedido. Por favor inténtalo de nuevo.');
             setIsSubmitting(false);
         }
     };
@@ -2055,9 +2096,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     setShowStockWarning(false);
                 }}
                 onContinue={() => {
-                    console.log('✅ [Stock Warning] Usuario decidió continuar');
+                    console.log('✅ [Stock Warning] Usuario decidió continuar con checkout');
                     setShowStockWarning(false);
-                    // FUTURO: Aquí continuará con el checkout real
+                    // Continuar con el checkout - llamar el resto de handleSubmit
+                    continueCheckoutAfterWarning();
                 }}
                 unavailableItems={stockWarningItems}
                 currency={currency}
