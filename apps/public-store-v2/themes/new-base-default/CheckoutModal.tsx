@@ -1340,7 +1340,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     const orderData: OrderData = {
                         items: state.items,
                         customer: {
-                            fullName: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'Cliente',
+                            fullName: formData.fullName || 'Cliente',
                             email: formData.email || '',
                             phone: formData.phone || ''
                         },
