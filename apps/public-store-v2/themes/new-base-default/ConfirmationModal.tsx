@@ -3,43 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { StoreBasicInfo } from '../../lib/store'
 import { formatPrice } from '../../lib/currency'
+import { OrderData } from '../../lib/orders'
 import jsPDF from 'jspdf'
-
-interface OrderData {
-  customer: {
-    fullName: string
-    email: string
-    phone: string
-  }
-  shipping: {
-    method: string
-    addressText?: string
-    cost: number
-  }
-  payment: {
-    method: string
-    notes?: string
-  }
-  items: Array<{
-    id: string
-    name: string
-    quantity: number
-    price: number
-    variant?: {
-      name: string
-      price: number
-    }
-  }>
-  totals: {
-    subtotal: number
-    shipping: number
-    total: number
-  }
-  metadata?: {
-    orderId?: string
-    currency?: string
-  }
-}
 
 interface ConfirmationModalProps {
   isOpen: boolean
@@ -72,8 +37,8 @@ export default function ConfirmationModal({
 
   if (!isOpen || !orderData) return null
 
-  const currency = orderData.metadata?.currency || storeInfo.currency || 'COP'
-  const orderId = orderData.metadata?.orderId
+  const currency = orderData.currency || storeInfo.currency || 'COP'
+  const orderId = Math.random().toString(36).substr(2, 9)
 
   // Función para volver a la tienda
   const goToHome = () => {
@@ -117,7 +82,7 @@ ${orderSummary}
 💰 *Total: ${formatPrice(orderData.totals.total, currency)}*
 
 📦 *Método de envío:* ${orderData.shipping.method}
-${orderData.shipping.addressText ? `📍 *Dirección:* ${orderData.shipping.addressText}` : ''}
+${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}` : ''}
 💳 *Método de pago:* ${orderData.payment.method}
 
 ¿Podrían confirmarme el estado de mi pedido?
@@ -206,7 +171,7 @@ ${orderData.shipping.addressText ? `📍 *Dirección:* ${orderData.shipping.addr
             }
           }
           img.onerror = () => resolve(false)
-          img.src = storeInfo.logoUrl
+          img.src = storeInfo.logoUrl!
         })
       } catch (e) {
         console.log('No se pudo cargar el logo, continuando sin él')
@@ -285,9 +250,9 @@ ${orderData.shipping.addressText ? `📍 *Dirección:* ${orderData.shipping.addr
     doc.setTextColor(0, 0, 0)
     let deliveryInfoY = yPosition + 13
     doc.text(`Método: ${orderData.shipping.method}`, rightColumnX + 2, deliveryInfoY)
-    if (orderData.shipping.addressText) {
+    if (orderData.shipping.address) {
       deliveryInfoY += 5
-      const addressLines = doc.splitTextToSize(orderData.shipping.addressText, columnWidth - 4)
+      const addressLines = doc.splitTextToSize(orderData.shipping.address, columnWidth - 4)
       doc.text(addressLines.slice(0, 3), rightColumnX + 2, deliveryInfoY) // Máximo 3 líneas
     }
 
@@ -765,9 +730,9 @@ ${orderData.shipping.addressText ? `📍 *Dirección:* ${orderData.shipping.addr
                     margin: '0'
                   }}>
                     <strong>Método de envío:</strong> {orderData.shipping.method}<br />
-                    {orderData.shipping.addressText && (
+                    {orderData.shipping.address && (
                       <>
-                        <strong>Dirección:</strong> {orderData.shipping.addressText}<br />
+                        <strong>Dirección:</strong> {orderData.shipping.address}<br />
                       </>
                     )}
                     <strong>Método de pago:</strong> {orderData.payment.method}

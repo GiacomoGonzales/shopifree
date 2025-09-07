@@ -327,12 +327,14 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
             />
 
             {/* Modal de confirmación */}
-            <ConfirmationModal
-                isOpen={showConfirmationModal}
-                onClose={handleConfirmationModalClose}
-                orderData={orderDataForConfirmation}
-                storeInfo={storeInfo || undefined}
-            />
+            {storeInfo && (
+                <ConfirmationModal
+                    isOpen={showConfirmationModal}
+                    onClose={handleConfirmationModalClose}
+                    orderData={orderDataForConfirmation}
+                    storeInfo={storeInfo}
+                />
+            )}
         </>
     );
 }

@@ -1151,7 +1151,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 }
             } else {
                 // Para checkout tradicional: mostrar modal de confirmación
-                const checkoutPayload = {
+                const checkoutPayload: OrderData = {
                     customer: {
                         email: formData.email,
                         fullName: formData.fullName,
@@ -1159,12 +1159,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     },
                     shipping: {
                         method: formData.shippingMethod,
-                        addressText: formData.addressText || formData.address,
-                        lat: formData.lat,
-                        lng: formData.lng,
-                        addressNormalized: formData.addressNormalized,
+                        address: formData.addressText || formData.address,
                         city: formData.city,
-                        zipCode: formData.zipCode,
                         cost: shipping
                     },
                     payment: {
@@ -1173,12 +1169,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     },
                     items: state.items,
                     totals: { subtotal, shipping, total },
-                    metadata: {
-                        storeId: storeId,
-                        currency: currency,
-                        timestamp: new Date().toISOString(),
-                        orderId: orderId
-                    }
+                    currency: currency,
+                    checkoutMethod: 'traditional'
                 };
                 
                 console.log('Checkout tradicional:', checkoutPayload);
