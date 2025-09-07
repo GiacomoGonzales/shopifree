@@ -49,6 +49,20 @@ export interface StockValidationConfig {
   blockOnUnavailable: boolean
   /** Solo registrar en logs sin afectar el flujo (para testing) */
   logOnly: boolean
+  /** Mostrar advertencias no bloqueantes al usuario */
+  showWarnings: boolean
+}
+
+/**
+ * Configuración avanzada de stock para StoreAdvancedConfig
+ */
+export interface StoreStockConfig {
+  /** Configuración de validación */
+  validation?: StockValidationConfig
+  /** Si debe reservar stock temporalmente durante checkout */
+  reserveStock?: boolean
+  /** Duración de reserva en minutos (default: 30) */
+  reserveDurationMinutes?: number
 }
 
 /**
