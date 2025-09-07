@@ -38,6 +38,12 @@ const paymentMethodsConfig = {
         name: 'Yape',
         description: 'Transferencia móvil Yape',
         imageUrl: '/paymentimages/yape.png'
+    },
+    'mercadopago': {
+        id: 'mercadopago',
+        name: 'Pago Online con MercadoPago',
+        description: 'Pago seguro con tarjetas, PSE, Nequi y más',
+        imageUrl: '/paymentimages/mercadopago.png'
     }
 };
 
@@ -64,7 +70,7 @@ interface CheckoutData {
     city: string;
     zipCode: string;
     shippingMethod: 'standard' | 'express' | 'pickup';
-    paymentMethod: 'cash' | 'transfer' | 'card';
+    paymentMethod: 'cash' | 'transfer' | 'card' | 'mercadopago';
     notes: string;
     // Nuevos campos para manejo avanzado de direcciones
     addressText: string; // Lo que escribió el usuario
