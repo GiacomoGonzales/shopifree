@@ -163,12 +163,27 @@ export async function createPreference(
     throw new Error(validation)
   }
   
+  // Verificar que las credenciales coincidan con el environment
+  const isTestToken = config.accessToken.startsWith('TEST-')
+  const isProductionToken = config.accessToken.startsWith('APP_USR-')
+  
   console.log('🔄 [MercadoPago] Creando preferencia REAL:', {
     environment: config.environment,
     items: preference.items.length,
     total: preference.items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0),
-    accessToken: config.accessToken.substring(0, 20) + '...'
+    accessToken: config.accessToken.substring(0, 20) + '...',
+    isTestToken,
+    isProductionToken,
+    credentialsMatch: (config.environment === 'sandbox' && isTestToken) || (config.environment === 'production' && isProductionToken)
   })
+  
+  // Advertencia si las credenciales no coinciden
+  if (config.environment === 'sandbox' && !isTestToken) {
+    console.warn('⚠️ [MercadoPago] ADVERTENCIA: Environment es sandbox pero el token parece de producción')
+  }
+  if (config.environment === 'production' && !isProductionToken) {
+    console.warn('⚠️ [MercadoPago] ADVERTENCIA: Environment es production pero el token parece de test')
+  }
   
   // Determinar URL de API según environment
   const apiUrl = config.environment === 'sandbox' 
@@ -180,7 +195,7 @@ export async function createPreference(
     const payload = {
       ...preference,
       // Configuraciones adicionales para mejorar la experiencia
-      back_url: {
+      back_urls: {
         success: `${window.location.origin}/checkout/success`,
         failure: `${window.location.origin}/checkout/failure`, 
         pending: `${window.location.origin}/checkout/pending`
