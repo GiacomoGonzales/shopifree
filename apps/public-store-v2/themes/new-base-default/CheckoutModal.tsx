@@ -189,6 +189,13 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             });
         }
         
+        // Si MercadoPago está configurado y los pagos online están habilitados, agregarlo
+        if (checkoutConfig?.payments?.mercadopago?.enabled && 
+            checkoutConfig?.payments?.acceptOnlinePayment &&
+            paymentMethodsConfig['mercadopago']) {
+            methods.push(paymentMethodsConfig['mercadopago']);
+        }
+        
         // Si no hay métodos configurados o como fallback, agregar transferencia bancaria
         if (methods.length === 0) {
             methods.push(defaultPaymentMethod);
