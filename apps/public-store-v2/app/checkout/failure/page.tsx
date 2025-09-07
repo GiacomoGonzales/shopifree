@@ -1,41 +1,40 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function CheckoutFailurePage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [paymentData, setPaymentData] = useState<any>(null);
 
     useEffect(() => {
-        // Capturar parámetros de MercadoPago
-        const paymentId = searchParams.get('payment_id');
-        const status = searchParams.get('status');
-        const external_reference = searchParams.get('external_reference');
-        const preference_id = searchParams.get('preference_id');
+        // Solo ejecutar del lado del cliente
+        if (typeof window !== 'undefined') {
+            // Capturar parámetros de MercadoPago
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentId = urlParams.get('payment_id');
+            const status = urlParams.get('status');
+            const external_reference = urlParams.get('external_reference');
+            const preference_id = urlParams.get('preference_id');
 
-        console.log('❌ [MercadoPago Failure] Parámetros recibidos:', {
-            paymentId,
-            status,
-            external_reference,
-            preference_id,
-            allParams: Object.fromEntries(searchParams.entries())
-        });
+            console.log('❌ [MercadoPago Failure] Parámetros recibidos:', {
+                paymentId,
+                status,
+                external_reference,
+                preference_id
+            });
 
-        setPaymentData({
-            paymentId,
-            status,
-            external_reference,
-            preference_id
-        });
+            setPaymentData({
+                paymentId,
+                status,
+                external_reference,
+                preference_id
+            });
 
-        // Aquí podrías hacer una llamada para actualizar el estado del pedido
-        // updateOrderStatus(external_reference, 'failed');
-        
-    }, [searchParams]);
+            // Aquí podrías hacer una llamada para actualizar el estado del pedido
+            // updateOrderStatus(external_reference, 'failed');
+        }
+    }, []);
 
     const handleRetry = () => {
         // Regresar al checkout para intentar de nuevo
