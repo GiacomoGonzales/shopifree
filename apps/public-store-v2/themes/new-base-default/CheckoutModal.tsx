@@ -15,7 +15,8 @@ import {
     findDeliveryZoneForCoordinates 
 } from '../../lib/delivery-zones';
 import { validateCartStock, logStockValidation } from '../../lib/stock-validation';
-import { getStoreStockConfig, logStockConfig, shouldValidateStock } from '../../lib/stock-config';
+import { getStoreStockConfig, logStockConfig, shouldValidateStock, shouldShowWarnings } from '../../lib/stock-config';
+import StockWarningModal from './StockWarningModal';
 
 // Definición de métodos de pago con imágenes
 const paymentMethodsConfig = {
@@ -111,6 +112,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [suggestedAddress, setSuggestedAddress] = useState<string>('');
     const [isOutsideCoverage, setIsOutsideCoverage] = useState(false);
     const [showAddressSuggestion, setShowAddressSuggestion] = useState(false);
+    
+    // Estado para modal de advertencia de stock (NO CONECTADO AÚN)
+    const [showStockWarning, setShowStockWarning] = useState(false);
+    const [stockWarningItems, setStockWarningItems] = useState([]);
     
     // Detectar si es dispositivo móvil
     const isMobile = () => {
@@ -2041,6 +2046,22 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     </div>
                 </div>
             </div>
+
+            {/* Modal de advertencia de stock - NO CONECTADO AÚN */}
+            <StockWarningModal
+                isOpen={showStockWarning}
+                onClose={() => {
+                    console.log('🔒 [Stock Warning] Modal cerrado por usuario');
+                    setShowStockWarning(false);
+                }}
+                onContinue={() => {
+                    console.log('✅ [Stock Warning] Usuario decidió continuar');
+                    setShowStockWarning(false);
+                    // FUTURO: Aquí continuará con el checkout real
+                }}
+                unavailableItems={stockWarningItems}
+                currency={currency}
+            />
 
         </>
     );
