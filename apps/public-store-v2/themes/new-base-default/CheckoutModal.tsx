@@ -1338,44 +1338,32 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     console.log('🔔 [MercadoPago] Preparando datos del pedido...');
                     
                     const orderData: OrderData = {
-                        storeId: storeId || '',
-                        items: state.items.map(item => ({
-                            id: item.id,
-                            name: item.name,
-                            price: item.currentPrice || item.price,
-                            quantity: item.quantity,
-                            variant: item.selectedVariant?.name,
-                            total: (item.currentPrice || item.price) * item.quantity
-                        })),
+                        items: state.items,
                         customer: {
                             fullName: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'Cliente',
                             email: formData.email || '',
-                            phone: formData.phone || '',
-                            address: {
-                                street: formData.address,
-                                city: formData.city,
-                                state: formData.state || '',
-                                postalCode: formData.postalCode || '',
-                                country: 'CO'
-                            }
+                            phone: formData.phone || ''
                         },
                         totals: {
                             subtotal,
                             shipping: shipping || 0,
-                            tax: 0,
-                            discount: discount || 0,
                             total: total || subtotal + (shipping || 0)
                         },
                         currency: 'COP',
-                        paymentMethod: 'mercadopago',
                         shipping: {
-                            method: formData.shippingMethod,
+                            method: formData.shippingMethod as 'standard' | 'express' | 'pickup',
                             address: formData.address,
                             city: formData.city,
                             cost: shipping || 0,
                             ...(selectedLocation && { pickupLocation: selectedLocation })
                         },
-                        notes: formData.notes
+                        payment: {
+                            method: 'mercadopago',
+                            notes: formData.notes
+                        },
+                        checkoutMethod: 'traditional' as const,
+                        discount: discount || 0,
+                        ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
                     };
                     
                     // Convertir a preferencia MercadoPago
