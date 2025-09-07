@@ -420,7 +420,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             const lng = userCoordinates?.lng || formData.lng;
             if (lat && lng) {
                 console.log('🗺️ [Auto Init] Initializing map automatically');
-                setTimeout(() => initializeMap(lat, lng), 100);
+                setTimeout(() => safeInitializeMap(lat, lng), 100);
             }
         }
     }, [userCoordinates, formData.lat, formData.lng, formData.address, isGoogleMapsLoaded, map]);
@@ -522,9 +522,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         marker.setPosition(newPosition);
                     } else if (isGoogleMapsLoaded) {
                         // Inicializar mapa automáticamente
-                        setTimeout(() => {
-                            initializeMap(lat, lng);
-                        }, 100);
+                        setTimeout(() => safeInitializeMap(lat, lng), 100);
                     }
                 } else {
                     console.error('Geocoding failed:', status);
@@ -625,16 +623,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 // Inicializar mapa automáticamente cuando obtenemos ubicación
                 if (isGoogleMapsLoaded) {
                     console.log('🗺️ [Geolocation] Auto-initializing map with user location');
-                    setTimeout(() => initializeMap(latitude, longitude), 200);
+                    setTimeout(() => safeInitializeMap(latitude, longitude), 200);
                 }
                 
                 // Si Google Maps está disponible, hacer reverse geocoding
                 if (isGoogleMapsLoaded) {
                     
                     // Inicializar el mapa después de un pequeño delay
-                    setTimeout(() => {
-                        initializeMap(latitude, longitude);
-                    }, 100);
+                    setTimeout(() => safeInitializeMap(latitude, longitude), 100);
                     
                     const geocoder = new window.google.maps.Geocoder();
                     geocoder.geocode(
@@ -681,9 +677,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 
                 // El mapa aparecerá automáticamente cuando detecte coordenadas
                 console.log('🗺️ [Location+Map] Coordinates saved, map will auto-show');
-                setTimeout(() => {
-                    initializeMap(latitude, longitude);
-                }, 100);
+                setTimeout(() => safeInitializeMap(latitude, longitude), 100);
             },
             (error) => {
                 setGettingLocation(false);
@@ -716,6 +710,20 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 break;
         }
         alert(message);
+    };
+
+    // Función auxiliar para verificar que mapRef esté disponible antes de inicializar
+    const safeInitializeMap = (lat: number, lng: number, maxRetries = 10) => {
+        const checkMapRef = (retries = 0) => {
+            if (mapRef.current) {
+                initializeMap(lat, lng);
+            } else if (retries < maxRetries) {
+                setTimeout(() => checkMapRef(retries + 1), 50);
+            } else {
+                console.warn('⚠️ Map container not available after maximum retries');
+            }
+        };
+        checkMapRef();
     };
 
     // Inicializar mapa con ubicación - Mejorado para móviles
@@ -757,8 +765,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 console.log('🔄 Attempting to load Google Maps for mobile...');
                 googleMapsLoader.loadForMobile().then(() => {
                     console.log('✅ Google Maps loaded for mobile, retrying map initialization...');
-                    if (window.google?.maps && mapRef.current) {
-                        initializeMap(lat, lng);
+                    if (window.google?.maps) {
+                        setTimeout(() => safeInitializeMap(lat, lng), 100);
                     }
                 }).catch(error => {
                     console.error('❌ Failed to load Google Maps for mobile:', error);
