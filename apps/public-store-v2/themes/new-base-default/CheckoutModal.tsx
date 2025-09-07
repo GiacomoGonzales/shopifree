@@ -15,6 +15,7 @@ import {
     findDeliveryZoneForCoordinates 
 } from '../../lib/delivery-zones';
 import { validateCartStock, logStockValidation } from '../../lib/stock-validation';
+import { getStoreStockConfig, logStockConfig, shouldValidateStock } from '../../lib/stock-config';
 
 // Definición de métodos de pago con imágenes
 const paymentMethodsConfig = {
@@ -1080,20 +1081,50 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         setIsSubmitting(true);
         
         try {
-            // 📊 STOCK VALIDATION - Logging silencioso (no afecta el flujo)
+            // 📊 STOCK VALIDATION con Feature Flag - Logging extendido (no afecta el flujo)
             try {
-                console.log('📦 [Stock Validation] Iniciando validación silenciosa...');
+                console.log('📦 [Stock Validation] Iniciando validación con feature flags...');
+                
+                // Obtener configuración de stock para la tienda
+                const stockConfig = await getStoreStockConfig(storeId || '');
+                logStockConfig(storeId || 'unknown', stockConfig);
+                
+                // Verificar si debe ejecutarse la validación según feature flag
+                const shouldValidate = shouldValidateStock(stockConfig.validation || { enabled: false, blockOnUnavailable: false, logOnly: true, showWarnings: false });
+                
+                console.log('🎛️ [Stock Validation] Feature flag status:', {
+                    shouldValidate,
+                    config: stockConfig.validation
+                });
+                
+                // Ejecutar validación (actualmente siempre se ejecuta para logging)
                 const stockValidation = await validateCartStock(state.items);
                 logStockValidation(stockValidation);
                 
-                // Log adicional para debugging
-                console.log('📊 [Stock Validation] Resultado detallado:', {
+                // Log adicional con información del feature flag
+                console.log('📊 [Stock Validation] Resultado detallado con config:', {
                     totalItems: stockValidation.items.length,
                     allAvailable: stockValidation.allAvailable,
                     unavailableCount: stockValidation.unavailableItems.length,
                     itemsWithStock: stockValidation.items.filter(item => item.manageStock).length,
-                    itemsWithoutStock: stockValidation.items.filter(item => !item.manageStock).length
+                    itemsWithoutStock: stockValidation.items.filter(item => !item.manageStock).length,
+                    // Nueva información de feature flags
+                    featureFlags: {
+                        validationEnabled: stockConfig.validation?.enabled,
+                        wouldBlock: stockConfig.validation?.blockOnUnavailable && !stockConfig.validation?.logOnly,
+                        wouldShowWarning: stockConfig.validation?.showWarnings,
+                        logOnly: stockConfig.validation?.logOnly
+                    }
                 });
+                
+                // FUTURO: Aquí es donde se agregará la lógica de bloqueo/advertencia
+                if (!stockValidation.allAvailable && shouldValidate) {
+                    console.log('🚧 [Stock Validation] Would block/warn (but not implemented yet):', {
+                        action: stockConfig.validation?.blockOnUnavailable ? 'BLOCK' : 'WARN',
+                        unavailableItems: stockValidation.unavailableItems.length
+                    });
+                }
+                
             } catch (stockError) {
                 console.warn('⚠️ [Stock Validation] Error en validación (continuando normal):', stockError);
             }
