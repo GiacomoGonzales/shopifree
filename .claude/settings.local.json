@@ -25,7 +25,10 @@
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\themes\\new-base-default/**)",
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2/**)",
-      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\app\\producto\\[productSlug]/**)"
+      "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\app\\producto\\[productSlug]/**)",
+      "Bash(git add:*)",
+      "Read(//c/Users/giaco/shopifree/apps/public-store-v2/themes/new-base-default/**)",
+      "Read(//c/Users/giaco/shopifree/apps/public-store-v2/**)"
     ],
     "deny": [],
     "ask": []
