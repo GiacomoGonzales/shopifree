@@ -14,6 +14,7 @@ import {
     DeliveryZone,
     findDeliveryZoneForCoordinates 
 } from '../../lib/delivery-zones';
+import { validateCartStock, logStockValidation } from '../../lib/stock-validation';
 
 // Definición de métodos de pago con imágenes
 const paymentMethodsConfig = {
@@ -1079,6 +1080,24 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         setIsSubmitting(true);
         
         try {
+            // 📊 STOCK VALIDATION - Logging silencioso (no afecta el flujo)
+            try {
+                console.log('📦 [Stock Validation] Iniciando validación silenciosa...');
+                const stockValidation = await validateCartStock(state.items);
+                logStockValidation(stockValidation);
+                
+                // Log adicional para debugging
+                console.log('📊 [Stock Validation] Resultado detallado:', {
+                    totalItems: stockValidation.items.length,
+                    allAvailable: stockValidation.allAvailable,
+                    unavailableCount: stockValidation.unavailableItems.length,
+                    itemsWithStock: stockValidation.items.filter(item => item.manageStock).length,
+                    itemsWithoutStock: stockValidation.items.filter(item => !item.manageStock).length
+                });
+            } catch (stockError) {
+                console.warn('⚠️ [Stock Validation] Error en validación (continuando normal):', stockError);
+            }
+            
             // Verificar método de checkout
             const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
             console.log('🔍 Método de checkout:', { 
