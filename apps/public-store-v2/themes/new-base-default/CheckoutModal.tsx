@@ -18,6 +18,7 @@ import { validateCartStock, logStockValidation } from '../../lib/stock-validatio
 import { getStoreStockConfig, logStockConfig, shouldValidateStock, shouldShowWarnings } from '../../lib/stock-config';
 import { StockValidationResult } from '../../lib/stock-types';
 import StockWarningModal from './StockWarningModal';
+import { orderDataToPreference, createPreference, validateMercadoPagoConfig, getInitPoint } from '../../lib/mercadopago';
 
 // Definición de métodos de pago con imágenes
 const paymentMethodsConfig = {
@@ -43,7 +44,7 @@ const paymentMethodsConfig = {
         id: 'mercadopago',
         name: 'Pago Online con MercadoPago',
         description: 'Pago seguro con tarjetas, PSE, Nequi y más',
-        imageUrl: '/paymentimages/mercadopago.png'
+        imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzAwOTlGRiIvPgo8cGF0aCBkPSJNMjAgMTBMMjAgMzBNMTAgMjBMMzAgMjAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjwvUz4K'
     }
 };
 
@@ -1312,11 +1313,103 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     environment: checkoutConfig?.payments?.mercadopago?.environment
                 });
                 
-                // FUTURO: Aquí irá la lógica de MercadoPago
-                console.log('🔔 [MercadoPago] Por ahora continuando con flujo normal...');
+                // 🚀 BIFURCACIÓN: No continuar con flujo normal, ir a MercadoPago
+                console.log('🔔 [MercadoPago] Iniciando flujo de pago MercadoPago (NO flujo normal)');
+                
+                // Validar configuración de MercadoPago
+                const mpConfig = checkoutConfig?.payments?.mercadopago;
+                if (!mpConfig) {
+                    console.error('🔔 [MercadoPago] Error: No hay configuración disponible');
+                    alert('Error: Configuración de MercadoPago no disponible');
+                    setIsSubmitting(false);
+                    return;
+                }
+                
+                const validation = validateMercadoPagoConfig(mpConfig);
+                if (validation !== true) {
+                    console.error('🔔 [MercadoPago] Error de configuración:', validation);
+                    alert(`Error de configuración MercadoPago: ${validation}`);
+                    setIsSubmitting(false);
+                    return;
+                }
+                
+                try {
+                    // Preparar datos del pedido para MercadoPago
+                    console.log('🔔 [MercadoPago] Preparando datos del pedido...');
+                    
+                    const orderData: OrderData = {
+                        storeId: storeId || '',
+                        items: state.items.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            price: item.currentPrice || item.price,
+                            quantity: item.quantity,
+                            variant: item.selectedVariant?.name,
+                            total: (item.currentPrice || item.price) * item.quantity
+                        })),
+                        customer: {
+                            fullName: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'Cliente',
+                            email: formData.email || '',
+                            phone: formData.phone || '',
+                            address: {
+                                street: formData.address,
+                                city: formData.city,
+                                state: formData.state || '',
+                                postalCode: formData.postalCode || '',
+                                country: 'CO'
+                            }
+                        },
+                        totals: {
+                            subtotal,
+                            shipping: shipping || 0,
+                            tax: 0,
+                            discount: discount || 0,
+                            total: total || subtotal + (shipping || 0)
+                        },
+                        currency: 'COP',
+                        paymentMethod: 'mercadopago',
+                        shipping: {
+                            method: formData.shippingMethod,
+                            address: formData.address,
+                            city: formData.city,
+                            cost: shipping || 0,
+                            ...(selectedLocation && { pickupLocation: selectedLocation })
+                        },
+                        notes: formData.notes
+                    };
+                    
+                    // Convertir a preferencia MercadoPago
+                    console.log('🔔 [MercadoPago] Convirtiendo a preferencia MercadoPago...');
+                    const preference = orderDataToPreference(orderData, mpConfig);
+                    
+                    // Crear preferencia en MercadoPago
+                    console.log('🔔 [MercadoPago] Creando preferencia en MercadoPago...');
+                    const preferenceResult = await createPreference(preference, mpConfig);
+                    
+                    // Obtener URL de inicialización
+                    const initUrl = getInitPoint(preferenceResult, mpConfig.environment);
+                    
+                    console.log('🔔 [MercadoPago] Preferencia creada exitosamente:', {
+                        preferenceId: preferenceResult.id,
+                        initUrl: initUrl.substring(0, 50) + '...',
+                        environment: mpConfig.environment
+                    });
+                    
+                    // Redireccionar a MercadoPago
+                    console.log('🔔 [MercadoPago] Redirigiendo a página de pago...');
+                    window.location.href = initUrl;
+                    
+                } catch (error) {
+                    console.error('🔔 [MercadoPago] Error al crear preferencia:', error);
+                    alert('Error al procesar el pago con MercadoPago. Por favor intenta de nuevo.');
+                    setIsSubmitting(false);
+                }
+                
+                return; // ← IMPORTANTE: NO continuar con processCheckoutFlow()
             }
             
-            // Continuar con el flujo de checkout normal
+            // Solo ejecutar flujo normal si NO es MercadoPago
+            console.log('💳 [Payment Method] Continuando con flujo tradicional...');
             await processCheckoutFlow();
             
         } catch (error) {

@@ -33,6 +33,10 @@ export interface MercadoPagoPreference {
   }
   auto_return?: 'approved' | 'all'
   external_reference?: string
+  notification_url?: string
+  statement_descriptor?: string
+  expires?: boolean
+  binary_mode?: boolean
 }
 
 /**
@@ -59,7 +63,7 @@ export function orderDataToPreference(
   const items = orderData.items.map(item => ({
     title: `${item.name}${item.variant ? ` - ${item.variant}` : ''}`,
     quantity: item.quantity,
-    unit_price: item.price,
+    unit_price: Math.round(item.price * 100) / 100, // Asegurar máximo 2 decimales
     currency_id: orderData.currency || 'COP'
   }))
 
@@ -68,18 +72,30 @@ export function orderDataToPreference(
     items.push({
       title: `Envío - ${orderData.shipping.method}`,
       quantity: 1,
-      unit_price: orderData.totals.shipping,
+      unit_price: Math.round(orderData.totals.shipping * 100) / 100, // Asegurar máximo 2 decimales
       currency_id: orderData.currency || 'COP'
     })
   }
 
   // Preparar información del pagador
-  const payer = {
-    name: orderData.customer.fullName,
-    email: orderData.customer.email,
-    phone: orderData.customer.phone ? {
-      number: orderData.customer.phone.replace(/[^\d]/g, '')
-    } : undefined
+  const payer: any = {}
+  
+  // Solo agregar campos si tienen valores válidos
+  if (orderData.customer.fullName?.trim()) {
+    payer.name = orderData.customer.fullName.trim()
+  }
+  
+  if (orderData.customer.email?.trim()) {
+    payer.email = orderData.customer.email.trim()
+  }
+  
+  if (orderData.customer.phone?.trim()) {
+    const cleanPhone = orderData.customer.phone.replace(/[^\d]/g, '')
+    if (cleanPhone.length >= 7) { // Mínimo 7 dígitos para ser válido
+      payer.phone = {
+        number: cleanPhone
+      }
+    }
   }
 
   return {
@@ -131,8 +147,7 @@ export function getInitPoint(
 }
 
 /**
- * Función placeholder para crear preferencia
- * En el siguiente paso implementaremos la lógica real con el SDK
+ * Crea una preferencia de pago real en MercadoPago
  * @param preference Preferencia a crear
  * @param config Configuración de MercadoPago
  * @returns Promise con el resultado
@@ -148,17 +163,89 @@ export async function createPreference(
     throw new Error(validation)
   }
   
-  console.log('🔄 [MercadoPago] Creando preferencia (placeholder):', {
+  console.log('🔄 [MercadoPago] Creando preferencia REAL:', {
     environment: config.environment,
     items: preference.items.length,
-    total: preference.items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
+    total: preference.items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0),
+    accessToken: config.accessToken.substring(0, 20) + '...'
   })
   
-  // Por ahora retornamos datos simulados
-  // En el siguiente paso implementaremos la llamada real
-  return {
-    id: `pref-${Date.now()}-${config.environment}`,
-    init_point: `https://www.mercadopago.com.co/checkout/v1/redirect?pref_id=test-${Date.now()}`,
-    sandbox_init_point: `https://sandbox.mercadopago.com.co/checkout/v1/redirect?pref_id=test-${Date.now()}`
+  // Determinar URL de API según environment
+  const apiUrl = config.environment === 'sandbox' 
+    ? 'https://api.mercadopago.com/checkout/preferences'  // Mismo endpoint para sandbox y production
+    : 'https://api.mercadopago.com/checkout/preferences'
+  
+  try {
+    // Preparar el payload para enviar
+    const payload = {
+      ...preference,
+      // Configuraciones adicionales para mejorar la experiencia
+      back_url: {
+        success: `${window.location.origin}/checkout/success`,
+        failure: `${window.location.origin}/checkout/failure`, 
+        pending: `${window.location.origin}/checkout/pending`
+      },
+      auto_return: 'approved',
+      ...(config.webhookUrl && { notification_url: config.webhookUrl }), // Solo si está configurado
+      statement_descriptor: 'Tienda Online', // Aparece en el estado de cuenta
+      expires: false, // La preferencia no expira
+      binary_mode: false // Permite pagos pendientes
+    };
+    
+    console.log('🔄 [MercadoPago] Payload completo a enviar:', JSON.stringify(payload, null, 2));
+    
+    // Llamada real a la API de MercadoPago
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${config.accessToken}`,
+        'Content-Type': 'application/json',
+        'X-Integrator-Id': 'dev_24c65fb163bf11ea96500242ac130004' // Opcional: ID de integrador
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
+      console.error('🔄 [MercadoPago] Error en API:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: apiUrl,
+        error: errorData,
+        fullResponse: errorData
+      })
+      
+      // Si hay detalles específicos del error, mostrarlos
+      if (errorData?.cause && Array.isArray(errorData.cause)) {
+        console.error('🔄 [MercadoPago] Detalles del error:', errorData.cause);
+      }
+      
+      throw new Error(`Error ${response.status}: ${errorData.message || errorData.error || response.statusText}`)
+    }
+
+    const result = await response.json()
+    
+    console.log('🔄 [MercadoPago] Preferencia creada exitosamente:', {
+      id: result.id,
+      client_id: result.client_id,
+      collector_id: result.collector_id,
+      init_point: result.init_point ? 'PRESENTE' : 'FALTANTE',
+      sandbox_init_point: result.sandbox_init_point ? 'PRESENTE' : 'FALTANTE'
+    })
+
+    return {
+      id: result.id,
+      init_point: result.init_point,
+      sandbox_init_point: result.sandbox_init_point
+    }
+
+  } catch (error) {
+    console.error('🔄 [MercadoPago] Error al crear preferencia:', error)
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Error de conexión. Verifica tu conexión a internet.')
+    }
+    
+    throw error
   }
 }
