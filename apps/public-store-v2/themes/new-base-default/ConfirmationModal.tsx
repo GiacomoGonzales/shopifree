@@ -435,49 +435,125 @@ ${orderData.shipping.addressText ? `📍 *Dirección:* ${orderData.shipping.addr
               <h2 className="nbd-modal-title">Procesando tu pedido</h2>
             </div>
             <div className="nbd-modal-body" style={{ textAlign: 'center', padding: 'var(--nbd-space-4xl)' }}>
-              <div className="nbd-loading-spinner">
-                <svg 
-                  width="64" 
-                  height="64" 
-                  viewBox="0 0 64 64" 
-                  fill="none"
-                  style={{ margin: '0 auto var(--nbd-space-xl)' }}
-                >
-                  <circle 
-                    cx="32" 
-                    cy="32" 
-                    r="28" 
-                    stroke="var(--nbd-neutral-200)" 
-                    strokeWidth="8"
-                  />
-                  <circle 
-                    cx="32" 
-                    cy="32" 
-                    r="28" 
-                    stroke="var(--nbd-primary)" 
-                    strokeWidth="8" 
-                    strokeLinecap="round"
-                    strokeDasharray="175"
-                    strokeDashoffset="175"
-                    style={{
-                      animation: 'nbd-loading-spin 1.5s ease-in-out infinite'
-                    }}
-                  />
-                </svg>
+              {/* Contenedor principal del loader */}
+              <div className="nbd-loading-container" style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px'
+              }}>
+                {/* Loader principal con múltiples elementos */}
+                <div className="nbd-advanced-loader" style={{
+                  position: 'relative',
+                  width: '80px',
+                  height: '80px',
+                  marginBottom: 'var(--nbd-space-xl)'
+                }}>
+                  {/* Círculo exterior pulsante */}
+                  <div className="nbd-pulse-ring" style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '80px',
+                    height: '80px',
+                    border: '2px solid var(--nbd-primary)',
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    opacity: 0.3,
+                    animation: 'nbd-pulse 2s ease-in-out infinite'
+                  }} />
+                  
+                  {/* Círculo medio rotante */}
+                  <div className="nbd-rotating-circle" style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '60px',
+                    height: '60px',
+                    border: '3px solid transparent',
+                    borderTop: '3px solid var(--nbd-primary)',
+                    borderRight: '3px solid var(--nbd-primary)',
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    animation: 'nbd-rotate 1.2s linear infinite'
+                  }} />
+                  
+                  {/* Círculo interior con gradiente */}
+                  <div className="nbd-gradient-circle" style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '40px',
+                    height: '40px',
+                    background: `conic-gradient(from 0deg, var(--nbd-primary), transparent, var(--nbd-primary))`,
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    animation: 'nbd-rotate-reverse 1.8s linear infinite'
+                  }} />
+                  
+                  {/* Centro con icono */}
+                  <div className="nbd-center-icon" style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '24px',
+                    height: '24px',
+                    backgroundColor: 'var(--nbd-primary)',
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'nbd-bounce 1s ease-in-out infinite alternate'
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                      <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Puntos de progreso animados */}
+                <div className="nbd-progress-dots" style={{
+                  display: 'flex',
+                  gap: 'var(--nbd-space-xs)',
+                  marginBottom: 'var(--nbd-space-lg)'
+                }}>
+                  {[0, 1, 2].map(i => (
+                    <div
+                      key={i}
+                      className={`nbd-dot nbd-dot-${i}`}
+                      style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: 'var(--nbd-primary)',
+                        borderRadius: '50%',
+                        animation: `nbd-dot-bounce 1.4s ease-in-out infinite`,
+                        animationDelay: `${i * 0.16}s`
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
+              
               <h3 style={{ 
                 fontSize: 'var(--nbd-font-size-lg)', 
                 fontWeight: '600', 
                 color: 'var(--nbd-primary)',
-                marginBottom: 'var(--nbd-space-sm)'
+                marginBottom: 'var(--nbd-space-sm)',
+                animation: 'nbd-fade-in-out 2s ease-in-out infinite'
               }}>
-                Enviando tu pedido...
+                Procesando tu pedido...
               </h3>
               <p style={{ 
                 color: 'var(--nbd-neutral-600)', 
-                fontSize: 'var(--nbd-font-size-base)'
+                fontSize: 'var(--nbd-font-size-base)',
+                maxWidth: '300px',
+                margin: '0 auto',
+                lineHeight: '1.5'
               }}>
-                Por favor espera mientras procesamos tu orden
+                Estamos preparando todo para ti, esto solo tomará unos segundos
               </p>
             </div>
           </>
@@ -798,32 +874,118 @@ ${orderData.shipping.addressText ? `📍 *Dirección:* ${orderData.shipping.addr
       </div>
 
       <style jsx>{`
-        @keyframes nbd-loading-spin {
+        /* Animación de pulso para el anillo exterior */
+        @keyframes nbd-pulse {
           0% {
-            stroke-dashoffset: 175;
-            transform: rotate(0deg);
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.3;
           }
           50% {
-            stroke-dashoffset: 50;
-            transform: rotate(180deg);
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 0.6;
           }
           100% {
-            stroke-dashoffset: 175;
-            transform: rotate(360deg);
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0;
           }
         }
 
+        /* Rotación suave para círculo medio */
+        @keyframes nbd-rotate {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+
+        /* Rotación inversa para círculo interior */
+        @keyframes nbd-rotate-reverse {
+          0% {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+        }
+
+        /* Bounce suave para el centro */
+        @keyframes nbd-bounce {
+          0% {
+            transform: translate(-50%, -50%) scale(1);
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1.05);
+          }
+        }
+
+        /* Animación de puntos de progreso */
+        @keyframes nbd-dot-bounce {
+          0%, 80%, 100% {
+            transform: scale(1);
+            opacity: 0.5;
+          }
+          40% {
+            transform: scale(1.3);
+            opacity: 1;
+          }
+        }
+
+        /* Fade in/out para texto */
+        @keyframes nbd-fade-in-out {
+          0%, 100% {
+            opacity: 0.8;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+
+        /* Animación de éxito existente mejorada */
         @keyframes nbd-success-bounce {
           0% {
             transform: scale(0);
             opacity: 0;
           }
           50% {
-            transform: scale(1.1);
+            transform: scale(1.15);
+            opacity: 0.8;
           }
           100% {
             transform: scale(1);
             opacity: 1;
+          }
+        }
+
+        /* Mejoras de performance */
+        .nbd-advanced-loader * {
+          will-change: transform, opacity;
+        }
+
+        .nbd-pulse-ring,
+        .nbd-rotating-circle,
+        .nbd-gradient-circle,
+        .nbd-center-icon {
+          backface-visibility: hidden;
+          transform-style: preserve-3d;
+        }
+
+        /* Soporte para reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .nbd-pulse-ring,
+          .nbd-rotating-circle,
+          .nbd-gradient-circle,
+          .nbd-center-icon,
+          .nbd-dot {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+          
+          h3[style*="nbd-fade-in-out"] {
+            animation: none !important;
+            opacity: 1 !important;
           }
         }
       `}</style>
