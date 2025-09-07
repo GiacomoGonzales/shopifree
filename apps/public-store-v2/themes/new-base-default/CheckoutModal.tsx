@@ -1300,6 +1300,22 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 console.warn('⚠️ [Stock Validation] Error en validación (continuando normal):', stockError);
             }
             
+            // 💳 DETECCIÓN DE MÉTODO DE PAGO (solo logging por ahora)
+            console.log('💳 [Payment Method] Método seleccionado:', formData.paymentMethod);
+            
+            if (formData.paymentMethod === 'mercadopago') {
+                console.log('🔔 [MercadoPago] Usuario seleccionó MercadoPago!');
+                console.log('🔔 [MercadoPago] Config disponible:', {
+                    enabled: checkoutConfig?.payments?.mercadopago?.enabled,
+                    publicKey: checkoutConfig?.payments?.mercadopago?.publicKey ? 'PRESENTE' : 'FALTANTE',
+                    accessToken: checkoutConfig?.payments?.mercadopago?.accessToken ? 'PRESENTE' : 'FALTANTE',
+                    environment: checkoutConfig?.payments?.mercadopago?.environment
+                });
+                
+                // FUTURO: Aquí irá la lógica de MercadoPago
+                console.log('🔔 [MercadoPago] Por ahora continuando con flujo normal...');
+            }
+            
             // Continuar con el flujo de checkout normal
             await processCheckoutFlow();
             
