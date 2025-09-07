@@ -64,10 +64,19 @@ export type StoreCheckoutConfig = {
     whatsappMessage?: string;
 };
 
+export type MercadoPagoConfig = {
+    enabled: boolean;
+    publicKey: string;
+    accessToken: string;
+    environment: 'sandbox' | 'production';
+    webhookUrl?: string;
+};
+
 export type StorePaymentsConfig = {
     acceptCashOnDelivery?: boolean;
     cashOnDeliveryMethods?: string[];
     acceptOnlinePayment?: boolean;
+    mercadopago?: MercadoPagoConfig;
 };
 
 export type StoreAdvancedConfig = {
@@ -332,7 +341,14 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
             payments: {
                 acceptCashOnDelivery: advanced.payments?.acceptCashOnDelivery || false,
                 cashOnDeliveryMethods: advanced.payments?.cashOnDeliveryMethods || [],
-                acceptOnlinePayment: advanced.payments?.acceptOnlinePayment || false
+                acceptOnlinePayment: advanced.payments?.acceptOnlinePayment || false,
+                mercadopago: advanced.payments?.mercadopago ? {
+                    enabled: advanced.payments.mercadopago.enabled || false,
+                    publicKey: advanced.payments.mercadopago.publicKey || '',
+                    accessToken: advanced.payments.mercadopago.accessToken || '',
+                    environment: advanced.payments.mercadopago.environment || 'sandbox',
+                    webhookUrl: advanced.payments.mercadopago.webhookUrl
+                } : undefined
             }
         } as StoreAdvancedConfig;
     } catch (e) {

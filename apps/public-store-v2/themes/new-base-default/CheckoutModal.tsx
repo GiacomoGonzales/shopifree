@@ -16,6 +16,7 @@ import {
 } from '../../lib/delivery-zones';
 import { validateCartStock, logStockValidation } from '../../lib/stock-validation';
 import { getStoreStockConfig, logStockConfig, shouldValidateStock, shouldShowWarnings } from '../../lib/stock-config';
+import { StockValidationResult } from '../../lib/stock-types';
 import StockWarningModal from './StockWarningModal';
 
 // Definición de métodos de pago con imágenes
@@ -115,7 +116,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     
     // Estado para modal de advertencia de stock (NO CONECTADO AÚN)
     const [showStockWarning, setShowStockWarning] = useState(false);
-    const [stockWarningItems, setStockWarningItems] = useState([]);
+    const [stockWarningItems, setStockWarningItems] = useState<StockValidationResult[]>([]);
     
     // Detectar si es dispositivo móvil
     const isMobile = () => {
