@@ -70,6 +70,7 @@ export type MercadoPagoConfig = {
     accessToken: string;
     environment: 'sandbox' | 'production';
     webhookUrl?: string;
+    connected?: boolean; // Estado de conexión del dashboard
 };
 
 export type StorePaymentsConfig = {
@@ -362,11 +363,13 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
                 mercadopago: advanced.payments?.provider === 'mercadopago' && 
                             advanced.payments?.publicKey && 
                             advanced.payments?.secretKey ? {
-                    enabled: advanced.payments?.connected || false,
+                    enabled: true, // Si tienes credenciales, está habilitado
                     publicKey: advanced.payments.publicKey,
                     accessToken: advanced.payments.secretKey, // Dashboard usa 'secretKey'
-                    environment: advanced.payments.publicKey.includes('test') ? 'sandbox' : 'production',
-                    webhookUrl: advanced.payments.webhookEndpoint
+                    environment: advanced.payments.publicKey.includes('test') || advanced.payments.publicKey.includes('TEST') 
+                               ? 'sandbox' : 'production',
+                    webhookUrl: advanced.payments.webhookEndpoint || undefined,
+                    connected: advanced.payments?.connected || false // Info adicional para dashboard
                 } : undefined
             }
         } as StoreAdvancedConfig;
