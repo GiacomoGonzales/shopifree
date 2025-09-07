@@ -333,6 +333,23 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
         // Obtener configuración avanzada
         const advanced = data.advanced || {};
         
+        // 🔍 DEBUGGING: Log de configuración completa
+        console.log(`🔧 [Store Config] Raw data for store ${storeId}:`, {
+            hasAdvanced: !!data.advanced,
+            hasPayments: !!advanced.payments,
+            paymentProvider: advanced.payments?.provider,
+            hasCredentials: !!(advanced.payments?.publicKey && advanced.payments?.secretKey),
+            isConnected: advanced.payments?.connected,
+            checkoutMethod: advanced.checkout?.method,
+            paymentData: {
+                provider: advanced.payments?.provider,
+                publicKey: advanced.payments?.publicKey ? advanced.payments.publicKey.substring(0, 20) + '...' : undefined,
+                secretKey: advanced.payments?.secretKey ? 'sk_***' : undefined,
+                webhookEndpoint: advanced.payments?.webhookEndpoint,
+                connected: advanced.payments?.connected
+            }
+        });
+        
         return {
             checkout: {
                 method: advanced.checkout?.method || 'whatsapp',
@@ -342,12 +359,14 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
                 acceptCashOnDelivery: advanced.payments?.acceptCashOnDelivery || false,
                 cashOnDeliveryMethods: advanced.payments?.cashOnDeliveryMethods || [],
                 acceptOnlinePayment: advanced.payments?.acceptOnlinePayment || false,
-                mercadopago: advanced.payments?.mercadopago ? {
-                    enabled: advanced.payments.mercadopago.enabled || false,
-                    publicKey: advanced.payments.mercadopago.publicKey || '',
-                    accessToken: advanced.payments.mercadopago.accessToken || '',
-                    environment: advanced.payments.mercadopago.environment || 'sandbox',
-                    webhookUrl: advanced.payments.mercadopago.webhookUrl
+                mercadopago: advanced.payments?.provider === 'mercadopago' && 
+                            advanced.payments?.publicKey && 
+                            advanced.payments?.secretKey ? {
+                    enabled: advanced.payments?.connected || false,
+                    publicKey: advanced.payments.publicKey,
+                    accessToken: advanced.payments.secretKey, // Dashboard usa 'secretKey'
+                    environment: advanced.payments.publicKey.includes('test') ? 'sandbox' : 'production',
+                    webhookUrl: advanced.payments.webhookEndpoint
                 } : undefined
             }
         } as StoreAdvancedConfig;
