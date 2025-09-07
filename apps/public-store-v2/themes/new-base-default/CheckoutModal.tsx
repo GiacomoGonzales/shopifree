@@ -43,7 +43,7 @@ const paymentMethodsConfig = {
     'mercadopago': {
         id: 'mercadopago',
         name: 'Pago Online con MercadoPago',
-        description: 'Pago seguro con tarjetas, PSE, Nequi y más',
+        description: 'Paga seguro con tarjetas, Yape, PagoEfectivo y más',
         imageUrl: '/paymentimages/mercadopago.png'
     }
 };
