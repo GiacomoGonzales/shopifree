@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -17,6 +17,8 @@ export default function HomePage() {
   const [email, setEmail] = useState('')
   const [currentPlan, setCurrentPlan] = useState(1) // Start with Premium plan (index 1)
   const [isAnnual, setIsAnnual] = useState(true) // Start with annual pricing as default
+  const [carouselPosition, setCarouselPosition] = useState(0)
+  const carouselRef = useRef<HTMLDivElement>(null)
 
   const dynamicPhrases = t.raw('dynamicPhrases') as string[]
   
@@ -216,6 +218,37 @@ export default function HomePage() {
       }, 300)
     }
   }, [currentPhraseIndex, dynamicPhrases])
+
+  // Seamless carousel effect with smooth animation
+  useEffect(() => {
+    let animationId: number
+    
+    const animate = () => {
+      if (!carouselRef.current) {
+        animationId = requestAnimationFrame(animate)
+        return
+      }
+      
+      const containerWidth = carouselRef.current.scrollWidth
+      const singleSetWidth = containerWidth / 2 // Since we have 2 sets of 9 images
+      
+      setCarouselPosition(prev => {
+        const newPosition = prev - 1.5 // Smooth movement speed
+        
+        // Reset when we've moved exactly one full set (9 images)
+        if (Math.abs(newPosition) >= singleSetWidth) {
+          return 0
+        }
+        return newPosition
+      })
+      
+      animationId = requestAnimationFrame(animate)
+    }
+    
+    animationId = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(animationId)
+  }, [])
 
   const renderAnimatedText = () => {
     if (!dynamicPhrases.length) return null
@@ -548,37 +581,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Integrations Section */}
-      <section className="bg-white py-16">
+      {/* Integrations Carousel */}
+      <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-light text-gray-900 mb-4">
               Intégrate con las mejores herramientas
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más para potenciar tu negocio
+            <p className="text-xl text-gray-600 mb-8">
+              Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más
             </p>
           </div>
           
-          {/* Infinite Auto Carousel */}
           <div className="overflow-hidden">
-            <div className="flex animate-scroll space-x-12 items-center">
-              {/* First set of logos */}
-              {Array.from({ length: 9 }, (_, i) => (
+            <div 
+              ref={carouselRef}
+              className="flex space-x-8 items-center"
+              style={{ 
+                transform: `translateX(${carouselPosition}px)`,
+                transition: carouselPosition === 0 ? 'none' : 'none'
+              }}
+            >
+              {/* Integration images - duplicated for seamless loop */}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num, index) => (
                 <img
-                  key={`set1-${i + 1}`}
-                  src={`/integraciones/integracion${i + 1}.png`}
-                  alt={`Integración ${i + 1}`}
-                  className="flex-shrink-0 max-h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
-                />
-              ))}
-              {/* Second set of logos (for infinite effect) */}
-              {Array.from({ length: 9 }, (_, i) => (
-                <img
-                  key={`set2-${i + 1}`}
-                  src={`/integraciones/integracion${i + 1}.png`}
-                  alt={`Integración ${i + 1}`}
-                  className="flex-shrink-0 max-h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
+                  key={index}
+                  src={`/integraciones/integracion${num}.png`}
+                  alt={`Integración ${num}`}
+                  className="flex-shrink-0 h-10 md:h-20 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300"
                 />
               ))}
             </div>
@@ -747,7 +777,7 @@ export default function HomePage() {
           }
         }
         
-        @keyframes scroll {
+        @keyframes scroll-fast {
           0% {
             transform: translateX(0);
           }
@@ -760,9 +790,6 @@ export default function HomePage() {
           animation: blob 7s infinite;
         }
         
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
-        }
         
         .animation-delay-2000 {
           animation-delay: 2s;
