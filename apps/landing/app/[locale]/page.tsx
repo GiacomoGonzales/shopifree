@@ -436,7 +436,7 @@ export default function HomePage() {
             {/* Bottom Section */}
             <div className="space-y-4 pb-8">
               <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
-                <Button variant="outline" size="default" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
+                <Button variant="secondary" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
                   {t('login')}
                 </Button>
               </a>
