@@ -1,64 +1,86 @@
 {
   "title": "Marketing",
-  "subtitle": "Promote your store",
-  "description": "Tools to promote your store, create campaigns and increase sales.",
+  "subtitle": "Attract, retain and recover customers with effective marketing tools",
+  "createCampaign": "Create Campaign",
+  "comingSoon": "Coming Soon",
+  "proPlan": "Pro Plan",
+  
+  "tabs": {
+    "attract": "Attract customers",
+    "maintain": "Retain customers", 
+    "recover": "Recover customers"
+  },
+
   "sections": {
-    "promotions": {
-      "title": "Promotions",
-      "description": "Create discounts and special offers",
-      "actions": {
-        "create": "Create Promotion",
-        "edit": "Edit Promotion",
-        "delete": "Delete Promotion"
-      }
+    "attract": {
+      "title": "Attract customers",
+      "description": "Discount coupons, promotions and campaigns to attract new buyers"
     },
-    "email": {
-      "title": "Email Marketing",
-      "description": "Send newsletters to your customers",
-      "actions": {
-        "createCampaign": "Create Campaign",
-        "sendNewsletter": "Send Newsletter",
-        "manageSubscribers": "Manage Subscribers"
-      }
+    "maintain": {
+      "title": "Retain customers", 
+      "description": "Email marketing and automations to build loyalty with your current customers"
     },
-    "social": {
-      "title": "Social Media",
-      "description": "Manage your social media presence",
-      "actions": {
-        "connect": "Connect Account",
-        "post": "Create Post",
-        "schedule": "Schedule Post"
-      }
-    },
-    "seo": {
-      "title": "SEO",
-      "description": "Optimize your store for search engines",
-      "actions": {
-        "analyze": "Analyze SEO",
-        "optimize": "Optimize Content",
-        "keywords": "Manage Keywords"
-      }
-    },
-    "analytics": {
-      "title": "Analytics",
-      "description": "Track your marketing performance",
-      "metrics": {
-        "visitors": "Visitors",
-        "conversions": "Conversions",
-        "revenue": "Revenue",
-        "engagement": "Engagement"
+    "recover": {
+      "title": "Recover customers",
+      "description": "Abandoned carts and segmentation to reconquer lost customers"
+    }
+  },
+
+  "coupons": {
+    "title": "Discount coupons",
+    "description": "Create coupons with specific conditions, percentage, fixed amount or free shipping",
+    "create": "Create coupon",
+    "empty": "You have no coupons created",
+    "emptyDescription": "Create your first discount coupon to attract more customers",
+    "list": {
+      "search": "Search coupons...",
+      "filterAll": "All statuses",
+      "filterActive": "Active",
+      "filterExpired": "Expired", 
+      "filterScheduled": "Scheduled",
+      "table": {
+        "coupon": "Coupon",
+        "code": "Code",
+        "discount": "Discount",
+        "status": "Status",
+        "validity": "Validity",
+        "uses": "Uses",
+        "actions": "Actions"
       }
     }
   },
-  "status": {
-    "active": "Active",
-    "inactive": "Inactive",
-    "scheduled": "Scheduled",
-    "draft": "Draft"
+
+  "promotions": {
+    "title": "Promotions and discounted prices",
+    "description": "Apply direct discounts to products, mark them as offers and schedule campaigns",
+    "create": "Create promotion",
+    "empty": "You have no active promotions",
+    "emptyDescription": "Create special promotions to increase sales"
   },
-  "messages": {
-    "comingSoon": "Marketing tools will help you promote your store and increase sales. Coming soon!",
-    "success": "Operation completed successfully",
-    "error": "An error occurred while processing your request"
+
+  "email": {
+    "title": "Email marketing",
+    "description": "Send manual or scheduled campaigns, segment customers and use templates",
+    "create": "Create campaign",
+    "empty": "You have no email campaigns",
+    "emptyDescription": "Start communicating with your customers via email"
+  },
+
+  "automation": {
+    "title": "Simple automations",
+    "description": "Automatic welcome, thank you and birthday emails"
+  },
+
+  "abandoned": {
+    "title": "Abandoned carts",
+    "description": "Recover customers who left products in their cart with automatic emails",
+    "configure": "Configure",
+    "empty": "No abandoned carts",
+    "emptyDescription": "Customers who abandoned their cart will appear here"
+  },
+
+  "segmentation": {
+    "title": "Customer segmentation",
+    "description": "Create dynamic lists of VIP customers, inactive customers or by behavior"
   }
 } 

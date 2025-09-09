@@ -1,64 +1,86 @@
 {
   "title": "Marketing",
-  "subtitle": "Promociona tu tienda",
-  "description": "Herramientas para promocionar tu tienda, crear campañas y aumentar las ventas.",
+  "subtitle": "Atrae, mantén y recupera clientes con herramientas de marketing efectivas",
+  "createCampaign": "Crear Campaña",
+  "comingSoon": "Próximamente",
+  "proPlan": "Plan Pro",
+  
+  "tabs": {
+    "attract": "Atraer clientes",
+    "maintain": "Mantener clientes", 
+    "recover": "Recuperar clientes"
+  },
+
   "sections": {
-    "promotions": {
-      "title": "Promociones",
-      "description": "Crea descuentos y ofertas especiales",
-      "actions": {
-        "create": "Crear Promoción",
-        "edit": "Editar Promoción",
-        "delete": "Eliminar Promoción"
-      }
+    "attract": {
+      "title": "Atraer clientes",
+      "description": "Cupones de descuento, promociones y campañas para atraer nuevos compradores"
     },
-    "email": {
-      "title": "Email Marketing",
-      "description": "Envía newsletters a tus clientes",
-      "actions": {
-        "createCampaign": "Crear Campaña",
-        "sendNewsletter": "Enviar Newsletter",
-        "manageSubscribers": "Gestionar Suscriptores"
-      }
+    "maintain": {
+      "title": "Mantener clientes",
+      "description": "Email marketing y automatizaciones para fidelizar a tus clientes actuales"
     },
-    "social": {
-      "title": "Redes Sociales",
-      "description": "Gestiona tu presencia en redes sociales",
-      "actions": {
-        "connect": "Conectar Cuenta",
-        "post": "Crear Publicación",
-        "schedule": "Programar Publicación"
-      }
-    },
-    "seo": {
-      "title": "SEO",
-      "description": "Optimiza tu tienda para motores de búsqueda",
-      "actions": {
-        "analyze": "Analizar SEO",
-        "optimize": "Optimizar Contenido",
-        "keywords": "Gestionar Palabras Clave"
-      }
-    },
-    "analytics": {
-      "title": "Analíticas",
-      "description": "Monitorea el rendimiento de tu marketing",
-      "metrics": {
-        "visitors": "Visitantes",
-        "conversions": "Conversiones",
-        "revenue": "Ingresos",
-        "engagement": "Interacción"
+    "recover": {
+      "title": "Recuperar clientes",
+      "description": "Carritos abandonados y segmentación para reconquistar clientes perdidos"
+    }
+  },
+
+  "coupons": {
+    "title": "Cupones de descuento",
+    "description": "Crear cupones con condiciones específicas, porcentaje, monto fijo o envío gratis",
+    "create": "Crear cupón",
+    "empty": "No tienes cupones creados",
+    "emptyDescription": "Crea tu primer cupón de descuento para atraer más clientes",
+    "list": {
+      "search": "Buscar cupones...",
+      "filterAll": "Todos los estados",
+      "filterActive": "Activos",
+      "filterExpired": "Expirados", 
+      "filterScheduled": "Programados",
+      "table": {
+        "coupon": "Cupón",
+        "code": "Código",
+        "discount": "Descuento",
+        "status": "Estado",
+        "validity": "Vigencia",
+        "uses": "Usos",
+        "actions": "Acciones"
       }
     }
   },
-  "status": {
-    "active": "Activo",
-    "inactive": "Inactivo",
-    "scheduled": "Programado",
-    "draft": "Borrador"
+
+  "promotions": {
+    "title": "Promociones y precios rebajados",
+    "description": "Aplicar descuentos directos a productos, marcarlos como ofertas y programar campañas",
+    "create": "Crear promoción",
+    "empty": "No tienes promociones activas",
+    "emptyDescription": "Crea promociones especiales para aumentar las ventas"
   },
-  "messages": {
-    "comingSoon": "Las herramientas de marketing te ayudarán a promocionar tu tienda y aumentar las ventas. ¡Próximamente disponibles!",
-    "success": "Operación completada exitosamente",
-    "error": "Ocurrió un error al procesar tu solicitud"
+
+  "email": {
+    "title": "Email marketing",
+    "description": "Enviar campañas manuales o programadas, segmentar clientes y usar plantillas",
+    "create": "Crear campaña",
+    "empty": "No tienes campañas de email",
+    "emptyDescription": "Comienza a comunicarte con tus clientes por email"
+  },
+
+  "automation": {
+    "title": "Automatizaciones simples",
+    "description": "Emails automáticos de bienvenida, agradecimiento y cumpleaños"
+  },
+
+  "abandoned": {
+    "title": "Carritos abandonados",
+    "description": "Recupera clientes que dejaron productos en su carrito con emails automáticos",
+    "configure": "Configurar",
+    "empty": "No hay carritos abandonados",
+    "emptyDescription": "Aquí aparecerán los clientes que abandonaron su carrito"
+  },
+
+  "segmentation": {
+    "title": "Segmentación de clientes",
+    "description": "Crear listas dinámicas de clientes VIP, inactivos o por comportamiento"
   }
 } 

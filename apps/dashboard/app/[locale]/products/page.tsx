@@ -127,13 +127,13 @@ export default function ProductsPage() {
 
   // Auto-cerrar toast después de 5 segundos
   useEffect(() => {
-    if (previewMessage) {
+    if (toast) {
       const timer = setTimeout(() => {
-        setPreviewMessage(null)
+        hideToast()
       }, 5000)
       return () => clearTimeout(timer)
     }
-  }, [previewMessage])
+  }, [toast, hideToast])
 
   // Función para obtener el nombre de la marca
   const getBrandName = (brandId?: string | null) => {
@@ -174,13 +174,13 @@ export default function ProductsPage() {
   const handlePreview = (product: ProductWithId) => {
     if (!store?.subdomain) {
       console.error('No subdomain available for preview')
-      setPreviewMessage({ message: t('messages.storeError'), type: 'error' })
+      showToast(t('messages.storeError'), 'error')
       return
     }
 
     // Solo productos activos pueden ser previsualizados
     if (product.status !== 'active') {
-      setPreviewMessage({ message: t('messages.previewError'), type: 'error' })
+      showToast(t('messages.previewError'), 'error')
       return
     }
 
@@ -197,7 +197,7 @@ export default function ProductsPage() {
     window.open(storeUrl, '_blank', 'noopener,noreferrer')
     
     // Mostrar mensaje de éxito
-    setPreviewMessage({ message: t('messages.previewSuccess'), type: 'success' })
+    showToast(t('messages.previewSuccess'), 'success')
   }
 
   // Función para eliminar producto
