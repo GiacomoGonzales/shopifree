@@ -9,49 +9,13 @@ import { CategoryWithId, getCategories, createCategory, updateCategory, deleteCa
 import { deleteImageFromCloudinary } from '../../../lib/cloudinary'
 import { useAuth } from '../../../lib/simple-auth-context'
 import { getUserStore } from '../../../lib/store'
-
-// Toast notification component
-function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose()
-    }, 5000)
-    return () => clearTimeout(timer)
-  }, [onClose])
-
-  return (
-    <div className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg border ${
-      type === 'success' 
-        ? 'bg-gray-50 text-gray-800 border-gray-200' 
-        : 'bg-red-50 text-red-800 border-red-200'
-    }`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {type === 'success' ? (
-            <svg className="w-5 h-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          )}
-          <span>{message}</span>
-        </div>
-        <button 
-          onClick={onClose}
-          className={`ml-4 ${type === 'success' ? 'text-gray-400 hover:text-gray-600' : 'text-red-400 hover:text-red-600'}`}
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  )
-}
+import { Toast } from '../../../components/shared/Toast'
+import { useToast } from '../../../lib/hooks/useToast'
 
 export default function CategoriesPage() {
   const t = useTranslations('categories')
   const { user } = useAuth()
+  const { toast, showToast, hideToast } = useToast()
   
   const [categories, setCategories] = useState<CategoryWithId[]>([])
   const [parentCategories, setParentCategories] = useState<CategoryWithId[]>([])
@@ -59,15 +23,6 @@ export default function CategoriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<CategoryWithId | null>(null)
   const [storeId, setStoreId] = useState<string>('')
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type })
-  }
-
-  const closeToast = () => {
-    setToast(null)
-  }
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -287,7 +242,7 @@ export default function CategoriesPage() {
         <Toast
           message={toast.message}
           type={toast.type}
-          onClose={closeToast}
+          onClose={hideToast}
         />
       )}
     </DashboardLayout>

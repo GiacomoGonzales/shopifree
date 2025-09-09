@@ -8,6 +8,8 @@ import ShippingNav from '../../../../../components/settings/ShippingNav'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../../lib/store'
 import LoadingAnimation from '../../../../../components/LoadingAnimation'
+import { Toast } from '../../../../../components/shared/Toast'
+import { useToast } from '../../../../../lib/hooks/useToast'
 
 interface ProductRestriction {
   id: string
@@ -68,7 +70,7 @@ export default function AdditionalRulesPage() {
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const { toast, showToast, hideToast } = useToast()
 
   const [formData, setFormData] = useState<AdditionalRulesData>({
     minimumOrderValue: 0,
@@ -228,12 +230,10 @@ export default function AdditionalRulesPage() {
         }
       })
       
-      setSaveMessage('Reglas adicionales guardadas exitosamente')
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast('Reglas adicionales guardadas exitosamente', 'success')
     } catch (error) {
       console.error('Error saving additional rules:', error)
-      setSaveMessage('Error al guardar las reglas. Inténtalo de nuevo.')
-      setTimeout(() => setSaveMessage(null), 5000)
+      showToast('Error al guardar las reglas. Inténtalo de nuevo.', 'error')
     } finally {
       setSaving(false)
     }
@@ -782,16 +782,6 @@ export default function AdditionalRulesPage() {
             </div>
           </div>
 
-          {/* Mensaje de estado */}
-          {saveMessage && (
-            <div className={`mt-6 p-3 rounded-md ${
-              saveMessage.includes('Error') 
-                ? 'bg-red-50 border border-red-200 text-red-700' 
-                : 'bg-green-50 border border-green-200 text-green-700'
-            }`}>
-              {saveMessage}
-            </div>
-          )}
 
           {/* Botón de guardar */}
           <div className="mt-8 flex justify-end">
@@ -805,6 +795,14 @@ export default function AdditionalRulesPage() {
           </div>
         </div>
       </div>
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </DashboardLayout>
   )
 } 

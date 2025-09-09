@@ -4,16 +4,18 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../lib/store'
+import { Toast } from '../shared/Toast'
+import { useToast } from '../../lib/hooks/useToast'
 
 export default function StoreInfoSection() {
   const { user } = useAuth()
   const t = useTranslations('settings')
   const tActions = useTranslations('settings.actions')
+  const { toast, showToast, hideToast } = useToast()
   
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [copySuccess, setCopySuccess] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -63,12 +65,10 @@ export default function StoreInfoSection() {
     try {
       await updateStore(store.id, formData)
       setStore(prev => prev ? { ...prev, ...formData } : null)
-      setSaveMessage(tActions('saved'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(tActions('saved'), 'success')
     } catch (error) {
       console.error('Error updating store:', error)
-      setSaveMessage(tActions('error'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(tActions('error'), 'error')
     } finally {
       setSaving(false)
     }
@@ -248,17 +248,8 @@ export default function StoreInfoSection() {
       </div>
 
       {/* Botón de guardar */}
-      <div className="flex justify-between items-center">
-        {saveMessage && (
-          <div className={`px-4 py-2 rounded-md text-sm font-medium ${
-            saveMessage === tActions('saved')
-              ? 'bg-gray-100 text-gray-800 border border-gray-300'
-              : 'bg-red-100 text-red-800 border border-red-200'
-          }`}>
-            {saveMessage}
-          </div>
-        )}
-        <div className="ml-auto">
+      <div className="flex justify-end items-center">
+        <div>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -272,6 +263,14 @@ export default function StoreInfoSection() {
           </button>
         </div>
       </div>
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </div>
   )
 } 

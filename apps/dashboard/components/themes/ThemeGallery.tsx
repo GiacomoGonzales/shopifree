@@ -4,16 +4,15 @@ import { useStore } from '../../lib/hooks/useStore'
 import { updateStoreField } from '../../lib/store'
 import { availableThemes, DEFAULT_THEME_ID, isValidTheme } from '../../lib/themes/themes-list'
 import ThemeCard from './ThemeCard'
+import { Toast } from '../shared/Toast'
+import { useToast } from '../../lib/hooks/useToast'
 
 export default function ThemeGallery() {
   const t = useTranslations('storeDesign')
   const { store } = useStore()
+  const { toast, showToast, hideToast } = useToast()
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEFAULT_THEME_ID)
   const [loadingThemeId, setLoadingThemeId] = useState<string | null>(null)
-  const [notification, setNotification] = useState<{
-    type: 'success' | 'error' | 'info'
-    message: string
-  } | null>(null)
 
   // Update selectedThemeId when store data loads
   useEffect(() => {
@@ -22,21 +21,17 @@ export default function ThemeGallery() {
     }
   }, [store?.theme])
 
-  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
-    setNotification({ type, message })
-    setTimeout(() => setNotification(null), 3000)
-  }
 
   const handleThemeSelect = async (themeId: string) => {
     // Evitar seleccionar el tema actual
     if (themeId === selectedThemeId) {
-      showNotification('info', t('notifications.alreadySelected'))
+      showToast(t('notifications.alreadySelected'), 'success')
       return
     }
 
     // Validaciones
     if (!store?.id) {
-      showNotification('error', t('notifications.storeNotFound'))
+      showToast(t('notifications.storeNotFound'), 'error')
       return
     }
 
@@ -45,7 +40,7 @@ export default function ThemeGallery() {
     }
 
     if (!isValidTheme(themeId)) {
-      showNotification('error', t('notifications.invalidTheme'))
+      showToast(t('notifications.invalidTheme'), 'error')
       return
     }
 
@@ -56,7 +51,7 @@ export default function ThemeGallery() {
       setSelectedThemeId(themeId)
 
       // Mostrar notificación de proceso
-      showNotification('info', t('notifications.applying'))
+      showToast(t('notifications.applying'), 'success')
 
       // Actualizar en Firestore
       await updateStoreField(store.id, 'theme', themeId)
@@ -66,7 +61,7 @@ export default function ThemeGallery() {
       const themeName = selectedTheme ? t(`sections.themes.themesList.${selectedTheme.translationKey}.name`) : 'el tema seleccionado'
 
       // Mostrar mensaje de éxito
-      showNotification('success', t('notifications.success', { themeName }))
+      showToast(t('notifications.success', { themeName }), 'success')
       
     } catch (error) {
       console.error('Error al actualizar el tema:', error)
@@ -74,7 +69,7 @@ export default function ThemeGallery() {
       // Revertir el estado local si hay error
       setSelectedThemeId(store?.theme || DEFAULT_THEME_ID)
       
-      showNotification('error', t('notifications.error'))
+      showToast(t('notifications.error'), 'error')
     } finally {
       setLoadingThemeId(null)
     }
@@ -88,18 +83,13 @@ export default function ThemeGallery() {
         <p className="mt-1 text-sm text-gray-500">{t('sections.themes.gallery.description')}</p>
       </div>
 
-      {/* Notificación */}
-      {notification && (
-        <div
-          className={`
-            p-4 rounded-md
-            ${notification.type === 'success' ? 'bg-green-50 text-green-700' :
-              notification.type === 'error' ? 'bg-red-50 text-red-700' :
-              'bg-blue-50 text-blue-700'}
-          `}
-        >
-          {notification.message}
-        </div>
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
       )}
 
       {/* Grid de temas */}

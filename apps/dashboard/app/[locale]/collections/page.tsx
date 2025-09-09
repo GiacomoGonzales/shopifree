@@ -10,26 +10,13 @@ import { ProductWithId, getProducts } from '../../../lib/products'
 import { deleteImageFromCloudinary } from '../../../lib/cloudinary'
 import { useAuth } from '../../../lib/simple-auth-context'
 import { getUserStore } from '../../../lib/store'
-
-// Toast notification component
-function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose()
-    }, 5000)
-    return () => clearTimeout(timer)
-  }, [onClose])
-
-  return (
-    <div className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
-      {message}
-    </div>
-  )
-}
+import { Toast } from '../../../components/shared/Toast'
+import { useToast } from '../../../lib/hooks/useToast'
 
 export default function CollectionsPage() {
   const t = useTranslations('collections')
   const { user } = useAuth()
+  const { toast, showToast, hideToast } = useToast()
   
   const [collections, setCollections] = useState<CollectionWithId[]>([])
   const [products, setProducts] = useState<ProductWithId[]>([])
@@ -37,15 +24,6 @@ export default function CollectionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCollection, setSelectedCollection] = useState<CollectionWithId | null>(null)
   const [storeId, setStoreId] = useState<string>('')
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type })
-  }
-
-  const closeToast = () => {
-    setToast(null)
-  }
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -275,7 +253,7 @@ export default function CollectionsPage() {
         <Toast
           message={toast.message}
           type={toast.type}
-          onClose={closeToast}
+          onClose={hideToast}
         />
       )}
     </DashboardLayout>

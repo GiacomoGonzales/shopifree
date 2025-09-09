@@ -7,6 +7,8 @@ import ShippingNav from '../../../../../components/settings/ShippingNav'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../../lib/store'
 import LoadingAnimation from '../../../../../components/LoadingAnimation'
+import { Toast } from '../../../../../components/shared/Toast'
+import { useToast } from '../../../../../lib/hooks/useToast'
 
 interface ShippingData {
   enabled: boolean
@@ -41,7 +43,7 @@ export default function ShippingStorePickupPage() {
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const { toast, showToast, hideToast } = useToast()
 
   const [shippingData, setShippingData] = useState<ShippingData>({
     enabled: true,
@@ -259,16 +261,10 @@ export default function ShippingStorePickupPage() {
         }
       })
       
-      setSaveMessage(tActions('saved'))
-      
-      // Limpiar mensaje después de 3 segundos
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(tActions('saved'), 'success')
     } catch (error) {
       console.error('Error saving shipping data:', error)
-      setSaveMessage('Error al guardar la configuración. Inténtalo de nuevo.')
-      
-      // Limpiar mensaje después de 5 segundos
-      setTimeout(() => setSaveMessage(null), 5000)
+      showToast('Error al guardar la configuración. Inténtalo de nuevo.', 'error')
     } finally {
       setSaving(false)
     }
@@ -504,16 +500,6 @@ export default function ShippingStorePickupPage() {
             </div>
           </div>
 
-          {/* Mensaje de estado */}
-          {saveMessage && (
-            <div className={`mt-4 p-3 rounded-md ${
-              saveMessage.includes('Error') 
-                ? 'bg-red-50 border border-red-200 text-red-700' 
-                : 'bg-green-50 border border-green-200 text-green-700'
-            }`}>
-              {saveMessage}
-            </div>
-          )}
 
           {/* Botón de guardar */}
           <div className="mt-6 flex justify-end">
@@ -527,6 +513,14 @@ export default function ShippingStorePickupPage() {
           </div>
         </div>
       </div>
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </DashboardLayout>
   )
 } 

@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl'
 import { useAuth } from '../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../lib/store'
 import PaymentMethodSelector from './PaymentMethodSelector'
+import { Toast } from '../shared/Toast'
+import { useToast } from '../../lib/hooks/useToast'
 
 const monedas = [
   { code: 'USD', symbol: '$', name: 'Dólar Americano' },
@@ -43,7 +45,7 @@ export default function SalesSection() {
   const [store, setStore] = useState<StoreWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const { toast, showToast, hideToast } = useToast()
 
   const [formData, setFormData] = useState({
     currency: 'USD',
@@ -195,12 +197,10 @@ export default function SalesSection() {
       
       await updateStore(store.id, updateData)
       setStore(prev => prev ? { ...prev, ...updateData } : null)
-      setSaveMessage(tActions('saved'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(tActions('saved'), 'success')
     } catch (error) {
       console.error('Error updating store:', error)
-      setSaveMessage(tActions('error'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(tActions('error'), 'error')
     } finally {
       setSaving(false)
     }
@@ -456,17 +456,8 @@ export default function SalesSection() {
       </div>
 
       {/* Botón de guardar */}
-      <div className="flex justify-between items-center">
-        {saveMessage && (
-          <div className={`px-4 py-2 rounded-md text-sm font-medium ${
-            saveMessage === tActions('saved')
-              ? 'bg-gray-100 text-gray-800 border border-gray-300'
-              : 'bg-red-100 text-red-800 border border-red-200'
-          }`}>
-            {saveMessage}
-          </div>
-        )}
-        <div className="ml-auto">
+      <div className="flex justify-end items-center">
+        <div>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -480,6 +471,14 @@ export default function SalesSection() {
           </button>
         </div>
       </div>
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </div>
   )
 } 

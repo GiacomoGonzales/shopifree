@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../../../components/DashboardLayout'
 import GeneralSettingsNav from '../../../../../components/settings/GeneralSettingsNav'
 import LanguageSection from '../../../../../components/settings/LanguageSection'
+import { Toast } from '../../../../../components/shared/Toast'
+import { useToast } from '../../../../../lib/hooks/useToast'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../../lib/store'
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
@@ -60,7 +62,7 @@ export default function GeneralSettingsAdvancedPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  const [message, setMessage] = useState<string | null>(null)
+  const { toast, showToast, hideToast } = useToast()
 
   // Estado para dominio personalizado
   const [domainLoading, setDomainLoading] = useState(true)
@@ -184,13 +186,11 @@ export default function GeneralSettingsAdvancedPage() {
       setDomainDoc(snap.exists() ? (snap.data() as any) : null)
       
       // Mensaje de éxito siempre positivo
-      setMessage('✅ Dominio guardado exitosamente!')
-      setTimeout(() => setMessage(null), 4000)
+      showToast('Dominio guardado exitosamente', 'success')
       
     } catch (error) {
       console.error('❌ Error guardando dominio:', error)
-      setMessage(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`)
-      setTimeout(() => setMessage(null), 5000)
+      showToast(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`, 'error')
     } finally {
       setDomainSaving(false)
     }
@@ -237,15 +237,13 @@ export default function GeneralSettingsAdvancedPage() {
         try {
           const wasUpdated = await updateCanonicalUrl(store.id, updatedDomainDoc.customDomain)
           if (wasUpdated) {
-            setMessage('✅ Dominio verificado y URL canónica actualizada automáticamente')
+            showToast('Dominio verificado y URL canónica actualizada automáticamente', 'success')
           } else {
-            setMessage('✅ Dominio verificado exitosamente')
+            showToast('Dominio verificado exitosamente', 'success')
           }
-          setTimeout(() => setMessage(null), 4000)
         } catch (error) {
           console.error('Error actualizando URL canónica:', error)
-          setMessage('✅ Dominio verificado (error al actualizar URL canónica)')
-          setTimeout(() => setMessage(null), 4000)
+          showToast('Dominio verificado (error al actualizar URL canónica)', 'success')
         }
       }
     } finally {
@@ -449,15 +447,6 @@ export default function GeneralSettingsAdvancedPage() {
               </div>
             </div>
 
-            {/* Mensaje de estado */}
-            {message && (
-              <div className={`rounded-md p-3 text-sm ${
-                message.includes('✅') ? 'bg-green-50 text-green-800 border border-green-200' 
-                : 'bg-red-50 text-red-800 border border-red-200'
-              }`}>
-                {message}
-              </div>
-            )}
 
             {/* Botones del dominio personalizado */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -488,6 +477,14 @@ export default function GeneralSettingsAdvancedPage() {
           </div>
         </div>
       </div>
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </DashboardLayout>
   )
 }

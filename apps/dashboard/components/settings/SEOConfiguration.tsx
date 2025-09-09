@@ -6,6 +6,8 @@ import { StoreWithId } from '../../lib/store'
 import { uploadImageToCloudinary, deleteImageFromCloudinary, validateImageFile, replaceImageInCloudinary } from '../../lib/cloudinary'
 import Image from 'next/image'
 import GSCIntegration from './GSCIntegration'
+import { Toast } from '../shared/Toast'
+import { useToast } from '../../lib/hooks/useToast'
 
 interface SEOData {
   // SEO básico
@@ -76,7 +78,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
   const [uploadingWhatsappImage, setUploadingWhatsappImage] = useState(false)
   const [uploadingFavicon, setUploadingFavicon] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const { toast, showToast, hideToast } = useToast()
   const [isDraggingOgImage, setIsDraggingOgImage] = useState(false)
   const [isDraggingWhatsappImage, setIsDraggingWhatsappImage] = useState(false)
   const [isDraggingFavicon, setIsDraggingFavicon] = useState(false)
@@ -164,8 +166,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
               }
             })
             
-            setSaveMessage('✅ URL canónica actualizada automáticamente con el dominio personalizado')
-            setTimeout(() => setSaveMessage(null), 4000)
+            showToast('URL canónica actualizada automáticamente con el dominio personalizado', 'success')
           }
         }
       } catch (error) {
@@ -264,8 +265,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         }
       })
       
-      setSaveMessage(t('messages.imageUploadSuccess'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(t('messages.imageUploadSuccess'), 'success')
       
     } catch (error) {
       console.error('Error uploading image:', error)
@@ -330,8 +330,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         }
       })
       
-      setSaveMessage(t('messages.whatsappImageUploadSuccess'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(t('messages.whatsappImageUploadSuccess'), 'success')
       
     } catch (error) {
       console.error('Error uploading WhatsApp image:', error)
@@ -484,15 +483,12 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
       })
       
       if (success) {
-        setSaveMessage(t('messages.saveSuccess'))
-        setTimeout(() => setSaveMessage(null), 3000)
+        showToast(t('messages.saveSuccess'), 'success')
       } else {
-        setSaveMessage(t('messages.saveError'))
-        setTimeout(() => setSaveMessage(null), 3000)
+        showToast(t('messages.saveError'), 'error')
       }
     } catch (error) {
-      setSaveMessage(t('messages.saveError'))
-      setTimeout(() => setSaveMessage(null), 3000)
+      showToast(t('messages.saveError'), 'error')
     }
   }
 
@@ -1174,13 +1170,6 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
 
       {/* Botón guardar */}
       <div className="flex justify-end space-x-3">
-        {saveMessage && (
-          <div className={`px-3 py-2 rounded text-sm ${
-            saveMessage.includes('exitosamente') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            {saveMessage}
-          </div>
-        )}
         <button
           onClick={handleSave}
           disabled={saving}
@@ -1189,6 +1178,14 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
           {saving ? t('actions.saving') : t('actions.save')}
         </button>
       </div>
+      
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </div>
   )
 } 
