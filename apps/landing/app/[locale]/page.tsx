@@ -16,6 +16,7 @@ export default function HomePage() {
   const [visibleWords, setVisibleWords] = useState<number>(0)
   const [email, setEmail] = useState('')
   const [currentPlan, setCurrentPlan] = useState(1) // Start with Premium plan (index 1)
+  const [isAnnual, setIsAnnual] = useState(true) // Start with annual pricing as default
 
   const dynamicPhrases = t.raw('dynamicPhrases') as string[]
   
@@ -43,28 +44,27 @@ export default function HomePage() {
       ],
       cta: t('pricing.startNowFree'),
       colors: {
-        badge: 'bg-emerald-500',
-        price: 'text-emerald-600',
-        border: 'border-emerald-500',
+        badge: 'bg-gray-600',
+        price: 'text-gray-800',
+        border: 'border-gray-300',
         button: 'bg-emerald-600 hover:bg-emerald-700',
         check: 'text-emerald-500'
       },
-      emoji: '🟢',
+      emoji: '💚',
       background: 'bg-white'
     },
     // Plan Premium (index 1) - Default
     {
       id: 'premium',
       name: t('pricing.premiumPlan'),
-      price: '$19',
-      period: t('pricing.perMonth'),
+      monthlyPrice: 19,
+      annualPrice: 99,
       description: t('pricing.premiumDescription'),
       includesFrom: t('pricing.freePlan'),
       features: [
         t('pricing.premiumFeatures.products50'),
         t('pricing.premiumFeatures.traditionalCheckout'),
         t('pricing.premiumFeatures.autoEmails'),
-        t('pricing.premiumFeatures.cartRecovery'),
         t('pricing.premiumFeatures.completeReports'),
         t('pricing.premiumFeatures.googleAnalytics'),
         t('pricing.premiumFeatures.searchConsole'),
@@ -73,27 +73,28 @@ export default function HomePage() {
       ],
       cta: t('pricing.growBusiness'),
       colors: {
-        badge: 'bg-blue-500',
-        price: 'text-blue-600',
-        border: 'border-blue-500',
-        button: 'bg-blue-600 hover:bg-blue-700',
-        check: 'text-blue-500'
+        badge: 'bg-gray-700',
+        price: 'text-gray-800',
+        border: 'border-gray-400',
+        button: 'bg-emerald-600 hover:bg-emerald-700',
+        check: 'text-emerald-500'
       },
-      emoji: '🔵',
-      background: 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50',
+      emoji: '💚',
+      background: 'bg-gray-50',
       isRecommended: true
     },
     // Plan Pro (index 2)
     {
       id: 'pro',
       name: t('pricing.proPlan'),
-      price: '$49',
-      period: t('pricing.perMonth'),
+      monthlyPrice: 49,
+      annualPrice: 399,
       description: t('pricing.proDescription'),
       includesFrom: t('pricing.premiumPlan'),
       features: [
         t('pricing.proFeatures.unlimitedProducts'),
         t('pricing.proFeatures.integratedPayments'),
+        t('pricing.premiumFeatures.cartRecovery'),
         t('pricing.proFeatures.customerSegmentation'),
         t('pricing.proFeatures.advancedMarketing'),
         t('pricing.proFeatures.exclusiveThemes'),
@@ -101,13 +102,13 @@ export default function HomePage() {
       ],
       cta: t('pricing.scaleUp'),
       colors: {
-        badge: 'bg-purple-500',
-        price: 'text-purple-600',
-        border: 'border-purple-500',
-        button: 'bg-purple-600 hover:bg-purple-700',
-        check: 'text-purple-500'
+        badge: 'bg-gray-800',
+        price: 'text-gray-800',
+        border: 'border-gray-500',
+        button: 'bg-emerald-600 hover:bg-emerald-700',
+        check: 'text-emerald-500'
       },
-      emoji: '🟣',
+      emoji: '💚',
       background: 'bg-white'
     }
   ]
@@ -131,6 +132,32 @@ export default function HomePage() {
 
   const goToPlan = (index: number) => {
     setCurrentPlan(index)
+  }
+
+  // Helper functions for pricing
+  const calculateDiscount = (monthlyPrice: number, annualPrice: number) => {
+    const yearlyPriceIfMonthly = monthlyPrice * 12
+    const discount = ((yearlyPriceIfMonthly - annualPrice) / yearlyPriceIfMonthly) * 100
+    return Math.round(discount)
+  }
+
+  const formatPrice = (plan: typeof pricingPlans[0]) => {
+    if (plan.id === 'free') return 'Gratis'
+    
+    if (isAnnual && plan.annualPrice) {
+      const monthlyEquivalent = (plan.annualPrice / 12).toFixed(2)
+      return `$${monthlyEquivalent}`
+    }
+    return `$${plan.monthlyPrice}`
+  }
+
+  const formatPeriod = (plan: typeof pricingPlans[0]) => {
+    if (plan.id === 'free') return t('pricing.freeForLife')
+    
+    if (isAnnual && plan.annualPrice) {
+      return t('pricing.perMonth')
+    }
+    return t('pricing.perMonth')
   }
 
   useEffect(() => {
@@ -213,17 +240,36 @@ export default function HomePage() {
 
   const renderPlanCard = (plan: typeof pricingPlans[0], isMobile = false) => {
     return (
-      <div className={`${plan.background} rounded-2xl ${isMobile ? 'shadow-lg' : plan.isRecommended ? 'shadow-xl' : 'shadow-lg'} ${isMobile ? 'p-8' : 'p-8'} relative border-2 ${plan.colors.border} ${plan.isRecommended && !isMobile ? 'transform md:scale-105 ring-2 ring-blue-200' : ''} w-full ${isMobile ? 'h-[750px]' : ''} flex flex-col`}>
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-          <span className={`${plan.colors.badge} text-white px-5 py-2 rounded-full ${isMobile ? 'text-base' : 'text-sm'} font-semibold whitespace-nowrap`}>
-            {plan.emoji} {plan.name}
+      <div className={`${plan.background} rounded-2xl ${isMobile ? 'shadow-lg' : plan.isRecommended ? 'shadow-xl' : 'shadow-lg'} ${isMobile ? 'p-8' : 'p-8'} relative border-2 ${plan.colors.border} ${plan.isRecommended && !isMobile ? 'transform md:scale-105 ring-2 ring-blue-200' : ''} w-full ${isMobile ? 'h-[750px]' : ''} flex flex-col text-left`}>
+        <div className="absolute -top-4 left-6 z-10">
+          <span className={`${plan.colors.badge} text-white px-5 py-2 rounded-full ${isMobile ? 'text-base' : 'text-sm'} font-medium whitespace-nowrap`}>
+            {plan.name}
           </span>
         </div>
-        <div className={`mt-6 ${isMobile ? 'mb-6' : 'mb-6'}`}>
-          <div className={`${isMobile ? 'text-4xl' : 'text-4xl'} font-bold ${plan.colors.price} mb-2`}>{plan.price}</div>
-          <div className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-600 font-medium`}>{plan.period}</div>
+        <div className={`mt-6 ${isMobile ? 'mb-6' : 'mb-6'} text-left`}>
+          <div className="flex items-baseline gap-2 mb-2 justify-start">
+            <div className={`${isMobile ? 'text-4xl' : 'text-4xl'} font-light ${plan.colors.price}`}>{formatPrice(plan)}</div>
+            {isAnnual && plan.annualPrice && plan.monthlyPrice && (
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                {calculateDiscount(plan.monthlyPrice, plan.annualPrice)}% OFF
+              </span>
+            )}
+          </div>
+          <div className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-600 font-medium text-left`}>
+            {formatPeriod(plan)}
+            {isAnnual && plan.annualPrice && plan.id !== 'free' && (
+              <span className="text-xs text-gray-500 block">
+                facturado anualmente
+              </span>
+            )}
+          </div>
+          {isAnnual && plan.annualPrice && plan.monthlyPrice && (
+            <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-500 line-through mt-1 text-left`}>
+              ${plan.monthlyPrice}/mes
+            </div>
+          )}
         </div>
-        <p className={`text-gray-600 ${isMobile ? 'mb-6 text-base' : 'mb-6'}`}>{plan.description}</p>
+        <p className={`text-gray-600 ${isMobile ? 'mb-6 text-base' : 'mb-6'} text-left`}>{plan.description}</p>
         
         {plan.includesFrom && (
           <div className={`${isMobile ? 'mb-6' : 'mb-4'}`}>
@@ -248,7 +294,7 @@ export default function HomePage() {
         
         <div className="mt-auto">
           <a href={`https://dashboard.shopifree.app/${locale}/register`}>
-            <Button className={`w-full ${plan.colors.button} text-white font-semibold ${isMobile ? 'py-4 text-base' : 'py-3'}`}>
+            <Button className={`w-full ${plan.colors.button} text-white font-medium ${isMobile ? 'py-4 text-base' : 'py-3'}`}>
               {plan.cta}
             </Button>
           </a>
@@ -363,24 +409,24 @@ export default function HomePage() {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex-1 space-y-8">
+            <nav className="flex-1 space-y-4">
               <Link 
                 href={`/${locale}#features`} 
-                className="block text-white text-xl font-light hover:text-emerald-400 py-3 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
+                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('nav.features')}
               </Link>
               <Link 
                 href={`/${locale}#pricing`} 
-                className="block text-white text-xl font-light hover:text-emerald-400 py-3 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
+                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('nav.pricing')}
               </Link>
               <Link 
                 href={`/${locale}/blog`} 
-                className="block text-white text-xl font-light hover:text-emerald-400 py-3 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
+                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('nav.blog')}
@@ -388,14 +434,16 @@ export default function HomePage() {
             </nav>
 
             {/* Bottom Section */}
-            <div className="space-y-6 pb-8">
+            <div className="space-y-4 pb-8">
               <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
-                <Button variant="secondary" size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white border-none text-lg py-4 transition-all duration-200 hover:scale-105">
+                <Button variant="outline" size="default" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
                   {t('login')}
                 </Button>
               </a>
-              <div className="flex justify-center">
-                <LanguageSelector />
+              <div className="flex justify-center pt-2">
+                <div className="scale-90">
+                  <LanguageSelector />
+                </div>
               </div>
             </div>
           </div>
@@ -403,7 +451,7 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <main className="relative min-h-screen overflow-hidden">
+      <main className="relative h-screen overflow-hidden">
         {/* Video Background */}
         <div className="absolute inset-0">
           <video
@@ -423,15 +471,15 @@ export default function HomePage() {
         <div className="relative h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-16 pb-8">
           {/* Text Content - Left aligned on mobile, centered on desktop */}
           <div className="text-left md:text-center max-w-6xl mx-auto w-full flex-1 flex flex-col justify-center">
-            <div className="h-[280px] min-[390px]:h-[330px] min-[414px]:h-[360px] sm:h-[380px] md:h-[300px] lg:h-[350px] flex items-center justify-start md:justify-center mb-4 min-[390px]:mb-6 min-[414px]:mb-10 sm:mb-12 md:mb-8">
+            <div className="h-[280px] min-[390px]:h-[330px] min-[414px]:h-[360px] sm:h-[380px] md:h-[250px] lg:h-[280px] xl:h-[300px] flex items-center justify-start md:justify-center mb-4 min-[390px]:mb-6 min-[414px]:mb-10 sm:mb-12 md:mb-6 lg:mb-8">
               <h1 className="text-4xl min-[390px]:text-5xl min-[414px]:text-6xl sm:text-7xl md:text-5xl lg:text-6xl xl:text-7xl font-thin text-white drop-shadow-xl leading-tight">
                 <span className="block">
                   {renderAnimatedText()}
                 </span>
               </h1>
             </div>
-            <div className="text-left md:text-center mb-6 min-[390px]:mb-8 min-[414px]:mb-12 sm:mb-16 md:mb-12">
-              <p className="text-lg min-[390px]:text-xl min-[414px]:text-xl sm:text-2xl md:text-xl lg:text-2xl text-white/90 max-w-4xl md:mx-auto drop-shadow-lg leading-relaxed">
+            <div className="text-left md:text-center mb-6 min-[390px]:mb-8 min-[414px]:mb-12 sm:mb-16 md:mb-8 lg:mb-10">
+              <p className="text-lg min-[390px]:text-xl min-[414px]:text-xl sm:text-2xl md:text-xl lg:text-2xl text-white/90 max-w-4xl md:mx-auto drop-shadow-lg leading-relaxed font-light">
                 {t('subtitle')}
               </p>
             </div>
@@ -444,7 +492,7 @@ export default function HomePage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('emailPlaceholder')}
                     required
-                    className="flex-1 px-4 xs:px-6 py-3 xs:py-4 bg-transparent text-white placeholder-white/70 border-none outline-none text-base xs:text-lg font-light"
+                    className="flex-1 px-4 xs:px-6 py-3 xs:py-4 bg-transparent text-white placeholder-white/70 border-none outline-none focus:outline-none focus:ring-0 focus:border-none rounded-xl transition-all duration-200 text-base xs:text-lg font-light hero-email-input"
                   />
                   <button
                     type="submit"
@@ -473,7 +521,7 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('feature1.title')}</h3>
+            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature1.title')}</h3>
             <p className="text-gray-600">{t('feature1.description')}</p>
           </div>
           
@@ -483,7 +531,7 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('feature2.title')}</h3>
+            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature2.title')}</h3>
             <p className="text-gray-600">{t('feature2.description')}</p>
           </div>
           
@@ -493,10 +541,48 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('feature3.title')}</h3>
+            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature3.title')}</h3>
             <p className="text-gray-600">{t('feature3.description')}</p>
           </div>
         </div>
+        </div>
+      </section>
+
+      {/* Integrations Section */}
+      <section className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-light text-gray-900 mb-4">
+              Intégrate con las mejores herramientas
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más para potenciar tu negocio
+            </p>
+          </div>
+          
+          {/* Infinite Auto Carousel */}
+          <div className="overflow-hidden">
+            <div className="flex animate-scroll space-x-12 items-center">
+              {/* First set of logos */}
+              {Array.from({ length: 9 }, (_, i) => (
+                <img
+                  key={`set1-${i + 1}`}
+                  src={`/integraciones/integracion${i + 1}.png`}
+                  alt={`Integración ${i + 1}`}
+                  className="flex-shrink-0 max-h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+              ))}
+              {/* Second set of logos (for infinite effect) */}
+              {Array.from({ length: 9 }, (_, i) => (
+                <img
+                  key={`set2-${i + 1}`}
+                  src={`/integraciones/integracion${i + 1}.png`}
+                  alt={`Integración ${i + 1}`}
+                  className="flex-shrink-0 max-h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -504,16 +590,51 @@ export default function HomePage() {
       <section id="pricing" className="bg-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-light text-gray-900 mb-4">
               {t('nav.pricing')}
             </h2>
-            <p className="text-xl text-gray-600 mb-16">
+            <p className="text-xl text-gray-600 mb-8">
               {t('pricing.subtitle')}
             </p>
+
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center mb-12">
+              <div className="bg-gray-100 rounded-full p-1 relative">
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => setIsAnnual(false)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                      !isAnnual
+                        ? 'bg-white text-gray-900 shadow-md'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Mensual
+                  </button>
+                  <button
+                    onClick={() => setIsAnnual(true)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 relative ${
+                      isAnnual
+                        ? 'bg-white text-gray-900 shadow-md'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Anual
+                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                      Ahorra 57%
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
             
             {/* Desktop View - Grid */}
             <div className="hidden md:grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {pricingPlans.map((plan) => renderPlanCard(plan))}
+              {pricingPlans.map((plan) => (
+                <div key={plan.id}>
+                  {renderPlanCard(plan)}
+                </div>
+              ))}
             </div>
 
             {/* Mobile View - Carousel */}
@@ -626,8 +747,21 @@ export default function HomePage() {
           }
         }
         
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        
         .animate-blob {
           animation: blob 7s infinite;
+        }
+        
+        .animate-scroll {
+          animation: scroll 30s linear infinite;
         }
         
         .animation-delay-2000 {
@@ -636,6 +770,22 @@ export default function HomePage() {
         
         .animation-delay-4000 {
           animation-delay: 4s;
+        }
+        
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .hero-email-input:focus {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          ring: none !important;
         }
       `}</style>
     </div>

@@ -55,7 +55,7 @@ export default function LanguageSelector() {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 text-white hover:text-emerald-400 hover:bg-white/20 rounded-lg transition-all duration-200 backdrop-blur-sm"
+        className="flex items-center space-x-2 px-3 py-2 text-white hover:text-emerald-400 hover:bg-white/20 rounded-lg transition-all duration-200 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30"
         aria-label="Select language"
       >
         <ReactCountryFlag
@@ -78,14 +78,14 @@ export default function LanguageSelector() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-0 sm:left-0 mt-1 w-20 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg shadow-lg z-50 py-1">
+        <div className="absolute top-full right-0 sm:left-0 mt-1 w-32 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg shadow-lg z-50 py-1">
           {languages.map((language) => (
             <button
               key={language.code}
               onClick={() => handleLanguageChange(language.code)}
-              className={`w-full flex items-center justify-center px-3 py-2 hover:bg-white/20 transition-colors duration-150 rounded-md mx-1 ${
+              className={`w-full flex items-center space-x-2 px-3 py-2 hover:bg-white/10 focus:bg-white/10 transition-colors duration-150 rounded-md mx-1 focus:outline-none ${
                 currentLocale === language.code 
-                  ? 'bg-white/30 ring-2 ring-emerald-400' 
+                  ? 'bg-white/15' 
                   : ''
               }`}
             >
@@ -93,10 +93,11 @@ export default function LanguageSelector() {
                 countryCode={language.countryCode}
                 svg
                 style={{
-                  width: '1.5em',
-                  height: '1.5em',
+                  width: '1.2em',
+                  height: '1.2em',
                 }}
               />
+              <span className="text-white text-xs font-medium">{language.name}</span>
             </button>
           ))}
         </div>

@@ -1,7 +1,7 @@
 {
   "home": {
     "title": "Crea tu tienda virtual con Shopifree",
-    "subtitle": "La plataforma más sencilla para crear y gestionar tu tienda online. Sin conocimientos técnicos, sin complicaciones.",
+    "subtitle": "Crea tu tienda online sin conocimientos técnicos.",
     "dynamicPhrases": [
       "Tu tienda puede conquistar el mundo digital.",
       "Tu marca puede ser reconocida en todas partes.",
@@ -50,7 +50,7 @@
         "zeroCommission": "0% de comisión por venta"
       },
       "premiumFeatures": {
-        "products50": "Hasta 50 productos",
+        "products50": "Hasta 99 productos",
         "traditionalCheckout": "Checkout tradicional",
         "autoEmails": "Envío de correos automáticos",
         "cartRecovery": "Recuperación de carritos abandonados",

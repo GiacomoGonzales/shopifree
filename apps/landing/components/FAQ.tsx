@@ -60,7 +60,7 @@ export default function FAQ() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left Column - Title */}
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
               Preguntas
               <br />
               Frecuentes
@@ -84,7 +84,7 @@ export default function FAQ() {
                       aria-expanded={isOpen}
                     >
                       <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold text-gray-900 pr-4">
+                        <h3 className="text-base font-normal text-gray-900 pr-4">
                           {item.question}
                         </h3>
                         <div className="flex-shrink-0">

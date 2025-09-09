@@ -1,7 +1,7 @@
 {
   "home": {
     "title": "Create your virtual store with Shopifree",
-    "subtitle": "The simplest platform to create and manage your online store. No technical knowledge, no complications.",
+    "subtitle": "Build your online store without technical knowledge.",
     "dynamicPhrases": [
       "Your store can conquer the digital world.",
       "Your brand can be recognized everywhere.",
@@ -50,7 +50,7 @@
         "zeroCommission": "0% commission per sale"
       },
       "premiumFeatures": {
-        "products50": "Up to 50 products",
+        "products50": "Up to 99 products",
         "traditionalCheckout": "Traditional checkout",
         "autoEmails": "Automated email sending",
         "cartRecovery": "Abandoned cart recovery",
