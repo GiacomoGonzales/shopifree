@@ -5,7 +5,6 @@ import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@shopifree/ui'
-import PhoneDemo from '../../components/PhoneDemo'
 import LanguageSelector from '../../components/LanguageSelector'
 import FAQ from '../../components/FAQ'
 
@@ -15,7 +14,6 @@ export default function HomePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
   const [visibleWords, setVisibleWords] = useState<number>(0)
-  const [isAnimating, setIsAnimating] = useState(false)
   const [email, setEmail] = useState('')
   const [currentPlan, setCurrentPlan] = useState(1) // Start with Premium plan (index 1)
 
@@ -142,7 +140,6 @@ export default function HomePage() {
       
       // Resetear a 0 palabras visibles al inicio
       setVisibleWords(0)
-      setIsAnimating(true)
       
       // Empezar la animación palabra por palabra después de un pequeño delay
       setTimeout(() => {
@@ -152,10 +149,6 @@ export default function HomePage() {
           }, index * 200)
         })
       }, 300) // Delay inicial más largo
-      
-      setTimeout(() => {
-        setIsAnimating(false)
-      }, words.length * 200 + 800)
     }
 
     // Solo ejecutar si tenemos las frases cargadas
@@ -178,15 +171,13 @@ export default function HomePage() {
 
       return () => clearInterval(interval)
     }
-  }, [dynamicPhrases])
+  }, [dynamicPhrases, currentPhraseIndex])
 
   // Efecto separado para cuando cambia el índice de frase
   useEffect(() => {
     if (dynamicPhrases.length > 0 && currentPhraseIndex !== 0) {
       const currentPhrase = dynamicPhrases[currentPhraseIndex]
       const words = currentPhrase.split(' ')
-      
-      setIsAnimating(true)
       
       // Animar palabras una por una
       setTimeout(() => {
@@ -196,10 +187,6 @@ export default function HomePage() {
           }, index * 200)
         })
       }, 300)
-      
-      setTimeout(() => {
-        setIsAnimating(false)
-      }, words.length * 200 + 800)
     }
   }, [currentPhraseIndex, dynamicPhrases])
 
@@ -538,7 +525,7 @@ export default function HomePage() {
                     className="flex transition-transform duration-300 ease-in-out"
                     style={{ transform: `translateX(-${currentPlan * 100}%)` }}
                   >
-                    {pricingPlans.map((plan, index) => (
+                    {pricingPlans.map((plan) => (
                       <div key={plan.id} className="w-full flex-shrink-0 px-2">
                         {renderPlanCard(plan, true)}
                       </div>
