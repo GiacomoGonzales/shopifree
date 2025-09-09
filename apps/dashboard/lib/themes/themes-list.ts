@@ -5,7 +5,7 @@ export const availableThemes: Theme[] = [
   {
     id: 'new-base-default',
     translationKey: 'baseDefault',
-    preview: '/themes/new-base-default/preview.svg',
+    preview: '/themes/new-base-default/preview.png',
     category: 'modern',
     recommended: true,
     colors: {
