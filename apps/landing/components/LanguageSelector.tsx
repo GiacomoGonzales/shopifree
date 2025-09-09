@@ -55,20 +55,19 @@ export default function LanguageSelector() {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-200 border border-gray-200 hover:border-gray-300"
+        className="flex items-center space-x-2 px-3 py-2 text-white hover:text-emerald-400 hover:bg-white/20 rounded-lg transition-all duration-200 backdrop-blur-sm"
         aria-label="Select language"
       >
         <ReactCountryFlag
           countryCode={currentLanguage.countryCode}
           svg
           style={{
-            width: '1.2em',
-            height: '1.2em',
+            width: '1.5em',
+            height: '1.5em',
           }}
         />
-        <span className="font-medium hidden sm:block">{currentLanguage.name}</span>
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform duration-200 drop-shadow-lg ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -79,31 +78,25 @@ export default function LanguageSelector() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-0 sm:left-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1">
+        <div className="absolute top-full right-0 sm:left-0 mt-1 w-20 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg shadow-lg z-50 py-1">
           {languages.map((language) => (
             <button
               key={language.code}
               onClick={() => handleLanguageChange(language.code)}
-              className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-150 ${
+              className={`w-full flex items-center justify-center px-3 py-2 hover:bg-white/20 transition-colors duration-150 rounded-md mx-1 ${
                 currentLocale === language.code 
-                  ? 'bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500' 
-                  : 'text-gray-700'
+                  ? 'bg-white/30 ring-2 ring-emerald-400' 
+                  : ''
               }`}
             >
               <ReactCountryFlag
                 countryCode={language.countryCode}
                 svg
                 style={{
-                  width: '1.2em',
-                  height: '1.2em',
+                  width: '1.5em',
+                  height: '1.5em',
                 }}
               />
-              <span className="font-medium">{language.name}</span>
-              {currentLocale === language.code && (
-                <svg className="w-4 h-4 ml-auto text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              )}
             </button>
           ))}
         </div>

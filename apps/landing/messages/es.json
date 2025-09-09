@@ -2,8 +2,80 @@
   "home": {
     "title": "Crea tu tienda virtual con Shopifree",
     "subtitle": "La plataforma más sencilla para crear y gestionar tu tienda online. Sin conocimientos técnicos, sin complicaciones.",
+    "dynamicPhrases": [
+      "Tu tienda puede conquistar el mundo digital.",
+      "Tu marca puede ser reconocida en todas partes.",
+      "Tu negocio puede vender sin límites.",
+      "Tu idea puede convertirse en un éxito real.",
+      "Tu pasión puede transformarse en tu mejor ingreso.",
+      "Tu negocio puede estar online hoy mismo."
+    ],
     "startFree": "Empieza gratis",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "startFreeButton": "Empezar gratis",
+    "emailDisclaimer": "Registrate gratis sin tarjetas de credito. Al introducir tu correo electrónico, aceptas recibir correos electrónicos de marketing de Shopifree.",
     "login": "Iniciar sesión",
+    "nav": {
+      "features": "Características",
+      "pricing": "Precios",
+      "blog": "Blog"
+    },
+    "pricing": {
+      "subtitle": "Precios simples y transparentes para tu tienda online",
+      "freePlan": "Plan Gratis",
+      "premiumPlan": "Plan Premium", 
+      "proPlan": "Plan Pro",
+      "freeForLife": "Gratis de por vida",
+      "perMonth": "/mes",
+      "freeDescription": "Ideal para comenzar sin riesgos.",
+      "premiumDescription": "Haz crecer tu negocio con más funciones.",
+      "proDescription": "El plan más completo para negocios que quieren escalar.",
+      "includesEverything": "Incluye todo lo del",
+      "plus": ", más:",
+      "startNowFree": "Empieza ahora gratis",
+      "growBusiness": "Haz crecer tu negocio",
+      "scaleUp": "Escala tu negocio",
+      "freeFeatures": {
+        "products12": "Hasta 12 productos",
+        "unlimitedSales": "Ventas ilimitadas", 
+        "whatsappSales": "Venta por WhatsApp",
+        "manualPayments": "Pagos manuales",
+        "freeSubdomain": "Subdominio gratuito",
+        "discountCoupons": "Cupones de descuento",
+        "basicReports": "Reportes básicos",
+        "advancedSeo": "SEO avanzado",
+        "unlimitedHosting": "Alojamiento web ilimitado",
+        "freeSSL": "Certificado SSL gratis",
+        "adminPanel": "Panel administrativo",
+        "zeroCommission": "0% de comisión por venta"
+      },
+      "premiumFeatures": {
+        "products50": "Hasta 50 productos",
+        "traditionalCheckout": "Checkout tradicional",
+        "autoEmails": "Envío de correos automáticos",
+        "cartRecovery": "Recuperación de carritos abandonados",
+        "completeReports": "Reportes completos",
+        "googleAnalytics": "Conexión con Google Analytics",
+        "searchConsole": "Conexión con Google Search Console",
+        "metaTikTokPixel": "Conexión con Meta Pixel y TikTok Pixel",
+        "customDomain": "Dominio personalizado"
+      },
+      "proFeatures": {
+        "unlimitedProducts": "Productos ilimitados",
+        "integratedPayments": "Pasarela de pago integrada",
+        "customerSegmentation": "Segmentación de clientes",
+        "advancedMarketing": "Marketing avanzado",
+        "exclusiveThemes": "Acceso a temas exclusivos",
+        "prioritySupport": "Soporte prioritario"
+      }
+    },
+    "blog": {
+      "title": "Blog",
+      "subtitle": "Tips, guías e insights para hacer crecer tu tienda online",
+      "comingSoon": "Próximamente",
+      "comingSoonDescription": "Estamos trabajando en crear contenido increíble para ti. ¡Mantente atento!",
+      "backToHome": "Volver al Inicio"
+    },
     "feature1": {
       "title": "Rápido y fácil",
       "description": "Configura tu tienda en minutos, sin necesidad de programar"
@@ -25,26 +97,6 @@
       "contact": "Contacto",
       "followUs": "Síguenos",
       "rights": "Todos los derechos reservados."
-    }
-  },
-  "heroFeatures": {
-    "title": "Crea tu sitio web en minutos",
-    "subtitle": "Descubre las funcionalidades que harán de tu tienda online un éxito",
-    "carousel": {
-      "title": "Hermosos catálogos de productos",
-      "description": "Organiza tus productos de manera atractiva"
-    },
-    "domain": {
-      "title": "Dominio propio",
-      "description": "Configura tu dominio personalizado fácilmente"
-    },
-    "mobile": {
-      "title": "Diseña tu sitio web",
-      "description": "Optimizado para móviles y fácil de usar"
-    },
-    "seo": {
-      "title": "Optimización para Motores de Búsqueda (SEO)",
-      "description": "Aparece en Google y atrae más clientes"
     }
   },
   "auth": {

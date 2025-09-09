@@ -2,8 +2,80 @@
   "home": {
     "title": "Create your virtual store with Shopifree",
     "subtitle": "The simplest platform to create and manage your online store. No technical knowledge, no complications.",
+    "dynamicPhrases": [
+      "Your store can conquer the digital world.",
+      "Your brand can be recognized everywhere.",
+      "Your business can sell without limits.",
+      "Your idea can become a real success.",
+      "Your passion can transform into your best income.",
+      "Your business can be online today."
+    ],
     "startFree": "Start for free",
+    "emailPlaceholder": "Enter your email address",
+    "startFreeButton": "Start for free",
+    "emailDisclaimer": "Register for free without credit cards. By entering your email address, you agree to receive marketing emails from Shopifree.",
     "login": "Sign in",
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "blog": "Blog"
+    },
+    "pricing": {
+      "subtitle": "Simple and transparent pricing for your online store",
+      "freePlan": "Free Plan",
+      "premiumPlan": "Premium Plan", 
+      "proPlan": "Pro Plan",
+      "freeForLife": "Free for life",
+      "perMonth": "/month",
+      "freeDescription": "Perfect for getting started without risks.",
+      "premiumDescription": "Grow your business with more features.",
+      "proDescription": "The most complete plan for scaling businesses.",
+      "includesEverything": "Includes everything from",
+      "plus": ", plus:",
+      "startNowFree": "Start now for free",
+      "growBusiness": "Grow your business",
+      "scaleUp": "Scale your business",
+      "freeFeatures": {
+        "products12": "Up to 12 products",
+        "unlimitedSales": "Unlimited sales", 
+        "whatsappSales": "WhatsApp sales",
+        "manualPayments": "Manual payments",
+        "freeSubdomain": "Free subdomain",
+        "discountCoupons": "Discount coupons",
+        "basicReports": "Basic reports",
+        "advancedSeo": "Advanced SEO",
+        "unlimitedHosting": "Unlimited web hosting",
+        "freeSSL": "Free SSL certificate",
+        "adminPanel": "Admin panel",
+        "zeroCommission": "0% commission per sale"
+      },
+      "premiumFeatures": {
+        "products50": "Up to 50 products",
+        "traditionalCheckout": "Traditional checkout",
+        "autoEmails": "Automated email sending",
+        "cartRecovery": "Abandoned cart recovery",
+        "completeReports": "Complete reports",
+        "googleAnalytics": "Google Analytics connection",
+        "searchConsole": "Google Search Console connection",
+        "metaTikTokPixel": "Meta Pixel and TikTok Pixel connection",
+        "customDomain": "Custom domain"
+      },
+      "proFeatures": {
+        "unlimitedProducts": "Unlimited products",
+        "integratedPayments": "Integrated payment gateway",
+        "customerSegmentation": "Customer segmentation",
+        "advancedMarketing": "Advanced marketing",
+        "exclusiveThemes": "Access to exclusive themes",
+        "prioritySupport": "Priority support"
+      }
+    },
+    "blog": {
+      "title": "Blog",
+      "subtitle": "Tips, guides and insights to grow your online store",
+      "comingSoon": "Coming Soon",
+      "comingSoonDescription": "We're working on creating amazing content for you. Stay tuned!",
+      "backToHome": "Back to Home"
+    },
     "feature1": {
       "title": "Fast and easy",
       "description": "Set up your store in minutes, no coding required"
@@ -25,26 +97,6 @@
       "contact": "Contact",
       "followUs": "Follow us",
       "rights": "All rights reserved."
-    }
-  },
-  "heroFeatures": {
-    "title": "Create your website in minutes",
-    "subtitle": "Discover the features that will make your online store a success",
-    "carousel": {
-      "title": "Beautiful product catalogs",
-      "description": "Organize your products in an attractive way"
-    },
-    "domain": {
-      "title": "Own domain",
-      "description": "Easily configure your custom domain"
-    },
-    "mobile": {
-      "title": "Design your website",
-      "description": "Mobile optimized and easy to use"
-    },
-    "seo": {
-      "title": "Search Engine Optimization (SEO)",
-      "description": "Appear on Google and attract more customers"
     }
   },
   "auth": {
