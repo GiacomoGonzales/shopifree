@@ -1,56 +1,98 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import DashboardLayout from '../../../../../components/DashboardLayout'
-
-// Mock data para desarrollo
-const mockCoupons = [
-  {
-    id: '1',
-    name: 'Black Friday 2024',
-    code: 'BLACKFRIDAY2024',
-    type: 'percentage',
-    value: 25,
-    status: 'active',
-    startDate: '2024-11-20',
-    endDate: '2024-11-30',
-    totalUses: 45,
-    maxUses: 100,
-    usesPerCustomer: 1
-  },
-  {
-    id: '2', 
-    name: 'Envío Gratis Diciembre',
-    code: 'FREESHIP2024',
-    type: 'free_shipping',
-    value: 0,
-    status: 'scheduled',
-    startDate: '2024-12-01',
-    endDate: '2024-12-31',
-    totalUses: 0,
-    maxUses: 200,
-    usesPerCustomer: 1
-  },
-  {
-    id: '3',
-    name: 'Descuento Fijo Clientes VIP',
-    code: 'VIP50',
-    type: 'fixed_amount',
-    value: 50,
-    status: 'expired',
-    startDate: '2024-10-01',
-    endDate: '2024-10-31',
-    totalUses: 28,
-    maxUses: 50,
-    usesPerCustomer: 2
-  }
-]
+import { getCoupons, Coupon, createCoupon, generateCouponCode } from '../../../../../lib/coupons'
+import { useAuth } from '../../../../../lib/simple-auth-context'
+import { getUserStore } from '../../../../../lib/store'
 
 export default function CouponsPage() {
   const t = useTranslations('marketing')
+  const { user } = useAuth()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [coupons, setCoupons] = useState<Coupon[]>([])
+  const [loading, setLoading] = useState(true)
+  const [creating, setCreating] = useState(false)
+  const [storeData, setStoreData] = useState<{ id: string; storeName: string } | null>(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    type: 'percentage' as 'percentage' | 'fixed_amount' | 'free_shipping',
+    value: 0,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    maxUses: 100,
+    usesPerCustomer: 1
+  })
+
+  useEffect(() => {
+    async function loadStoreAndCoupons() {
+      if (!user?.uid) {
+        setLoading(false)
+        return
+      }
+      
+      setLoading(true)
+      
+      try {
+        // Obtener datos de la tienda
+        const store = await getUserStore(user.uid)
+        if (!store) {
+          console.error('No store found for user')
+          setLoading(false)
+          return
+        }
+        
+        setStoreData(store)
+        
+        // Cargar cupones
+        const fetchedCoupons = await getCoupons(store.id)
+        setCoupons(fetchedCoupons)
+      } catch (error) {
+        console.error('Error loading store and coupons:', error)
+      }
+      
+      setLoading(false)
+    }
+
+    loadStoreAndCoupons()
+  }, [user?.uid])
+
+  const handleCreateCoupon = async () => {
+    if (!storeData?.id || creating) return
+
+    setCreating(true)
+    const success = await createCoupon(storeData.id, formData)
+    
+    if (success) {
+      // Recargar cupones
+      const updatedCoupons = await getCoupons(storeData.id)
+      setCoupons(updatedCoupons)
+      
+      // Resetear formulario
+      setFormData({
+        name: '',
+        code: '',
+        type: 'percentage',
+        value: 0,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        maxUses: 100,
+        usesPerCustomer: 1
+      })
+      
+      setShowCreateModal(false)
+    }
+    
+    setCreating(false)
+  }
+
+  const generateRandomCode = () => {
+    const code = generateCouponCode(formData.name)
+    setFormData(prev => ({ ...prev, code }))
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -177,7 +219,20 @@ export default function CouponsPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockCoupons.map((coupon) => (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                          Cargando cupones...
+                        </td>
+                      </tr>
+                    ) : coupons.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                          No tienes cupones creados. ¡Crea tu primer cupón!
+                        </td>
+                      </tr>
+                    ) : (
+                      coupons.map((coupon) => (
                       <tr key={coupon.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
@@ -219,7 +274,8 @@ export default function CouponsPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -243,15 +299,131 @@ export default function CouponsPage() {
                 </button>
               </div>
               
-              <div className="text-center py-8">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Formulario en construcción</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  El formulario de creación de cupones se implementará en la siguiente fase
-                </p>
-              </div>
+              <form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Nombre del cupón</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: Black Friday 2024"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Código del cupón</label>
+                  <div className="mt-1 flex">
+                    <input
+                      type="text"
+                      value={formData.code}
+                      onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                      className="block w-full border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="BLACKFRIDAY2024"
+                    />
+                    <button
+                      type="button"
+                      onClick={generateRandomCode}
+                      className="px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-sm text-gray-600 hover:bg-gray-100"
+                    >
+                      Generar
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Tipo de descuento</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="percentage">Porcentaje</option>
+                    <option value="fixed_amount">Monto fijo</option>
+                    <option value="free_shipping">Envío gratis</option>
+                  </select>
+                </div>
+
+                {formData.type !== 'free_shipping' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      {formData.type === 'percentage' ? 'Porcentaje (%)' : 'Monto fijo (S/)'}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.value}
+                      onChange={(e) => setFormData(prev => ({ ...prev, value: Number(e.target.value) }))}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder={formData.type === 'percentage' ? '25' : '50'}
+                      min="0"
+                      max={formData.type === 'percentage' ? '100' : undefined}
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Fecha inicio</label>
+                    <input
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Fecha fin</label>
+                    <input
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Usos máximos</label>
+                    <input
+                      type="number"
+                      value={formData.maxUses}
+                      onChange={(e) => setFormData(prev => ({ ...prev, maxUses: Number(e.target.value) }))}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Usos por cliente</label>
+                    <input
+                      type="number"
+                      value={formData.usesPerCustomer}
+                      onChange={(e) => setFormData(prev => ({ ...prev, usesPerCustomer: Number(e.target.value) }))}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="1"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    disabled={creating}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateCoupon}
+                    disabled={creating || !formData.name || !formData.code}
+                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {creating ? 'Creando...' : 'Crear cupón'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
