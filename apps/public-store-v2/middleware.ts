@@ -138,8 +138,12 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
       // Verificar dominio personalizado
       const domainQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`);
       
+      console.log(`🔍 [findSubdomainByCustomDomain] Domain query status for ${subdomain}: ${domainQuery.status}`);
+      
       if (domainQuery.ok) {
         const domainDoc = await domainQuery.json();
+        console.log(`📄 [findSubdomainByCustomDomain] Domain doc for ${subdomain}:`, JSON.stringify(domainDoc, null, 2));
+        
         const customDomain = domainDoc?.fields?.customDomain?.stringValue;
         const status = domainDoc?.fields?.status?.stringValue;
         
@@ -150,9 +154,11 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
             console.log(`✅ [findSubdomainByCustomDomain] Match found! ${hostname} → ${subdomain}`);
             return subdomain;
           }
+        } else {
+          console.log(`⚠️ [findSubdomainByCustomDomain] No customDomain field found for store ${subdomain}`);
         }
       } else {
-        console.log(`⚠️ [findSubdomainByCustomDomain] No domain settings found for store ${subdomain}`);
+        console.log(`❌ [findSubdomainByCustomDomain] Domain query failed for store ${subdomain}: ${domainQuery.status} ${domainQuery.statusText}`);
       }
     }
     
