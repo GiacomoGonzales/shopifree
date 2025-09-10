@@ -89,10 +89,15 @@ async function getCustomDomainCached(subdomain: string): Promise<string | null> 
 
 async function findSubdomainByCustomDomain(hostname: string): Promise<string | null> {
   try {
+    console.log(`🔍 [findSubdomainByCustomDomain] Searching for hostname: ${hostname}`);
+    
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
     const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
     
-    if (!projectId || !apiKey) return null;
+    if (!projectId || !apiKey) {
+      console.log(`❌ [findSubdomainByCustomDomain] Missing env vars: projectId=${!!projectId}, apiKey=${!!apiKey}`);
+      return null;
+    }
     
     // Buscar en todas las tiendas
     const storeQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`, {
@@ -105,10 +110,18 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
       })
     });
     
-    if (!storeQuery.ok) return null;
+    if (!storeQuery.ok) {
+      console.log(`❌ [findSubdomainByCustomDomain] Store query failed: ${storeQuery.status}`);
+      return null;
+    }
     
     const storeData = await storeQuery.json();
-    if (!Array.isArray(storeData)) return null;
+    if (!Array.isArray(storeData)) {
+      console.log(`❌ [findSubdomainByCustomDomain] Invalid store data format`);
+      return null;
+    }
+    
+    console.log(`📊 [findSubdomainByCustomDomain] Found ${storeData.length} stores to check`);
     
     // Para cada tienda, verificar su dominio personalizado
     for (const row of storeData) {
@@ -120,22 +133,33 @@ async function findSubdomainByCustomDomain(hostname: string): Promise<string | n
       
       if (!subdomain) continue;
       
+      console.log(`🔍 [findSubdomainByCustomDomain] Checking store ${subdomain} (${storeId})`);
+      
       // Verificar dominio personalizado
       const domainQuery = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/stores/${storeId}/settings/domain?key=${apiKey}`);
       
       if (domainQuery.ok) {
         const domainDoc = await domainQuery.json();
         const customDomain = domainDoc?.fields?.customDomain?.stringValue;
+        const status = domainDoc?.fields?.status?.stringValue;
         
-        if (customDomain && customDomain.toLowerCase() === hostname.toLowerCase()) {
-          return subdomain;
+        if (customDomain) {
+          console.log(`🔍 [findSubdomainByCustomDomain] Found domain ${customDomain} (status: ${status}) for ${subdomain}`);
+          
+          if (status === 'connected' && customDomain.toLowerCase() === hostname.toLowerCase()) {
+            console.log(`✅ [findSubdomainByCustomDomain] Match found! ${hostname} → ${subdomain}`);
+            return subdomain;
+          }
         }
+      } else {
+        console.log(`⚠️ [findSubdomainByCustomDomain] No domain settings found for store ${subdomain}`);
       }
     }
     
+    console.log(`❌ [findSubdomainByCustomDomain] No match found for ${hostname}`);
     return null;
   } catch (error) {
-    console.error('Error finding subdomain by custom domain:', error);
+    console.error('❌ [findSubdomainByCustomDomain] Error:', error);
     return null;
   }
 }
@@ -361,13 +385,19 @@ export async function middleware(req: NextRequest) {
   if (host.endsWith('.shopifree.app') && host !== 'shopifree.app') {
     // Es un subdominio de Shopifree
     storeSubdomain = host.split('.')[0];
+    console.log(`🏪 [Middleware] Shopifree subdomain detected: ${storeSubdomain}`);
   } else if (!host.endsWith('.localhost') && host !== 'localhost') {
     // Podría ser un dominio personalizado
+    console.log(`🔍 [Middleware] Checking for custom domain: ${host}`);
     storeSubdomain = await findSubdomainByCustomDomain(host);
+    console.log(`🔍 [Middleware] Custom domain lookup result: ${storeSubdomain || 'not found'}`);
+  } else {
+    console.log(`🏠 [Middleware] Localhost or ignored domain: ${host}`);
   }
   
   // Si no es una tienda, continuar sin procesar
   if (!storeSubdomain) {
+    console.log(`❌ [Middleware] No store found for host: ${host}, continuing without processing`);
     return NextResponse.next();
   }
   
