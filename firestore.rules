@@ -126,6 +126,15 @@ service cloud.firestore {
         allow update, delete: if isAuthenticated() && 
                                 request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
+      
+      // Reglas para configuración de dominios (necesario para middleware de routing)
+      match /settings/domain {
+        // Permitir lectura pública para que el middleware pueda resolver dominios personalizados
+        allow read: if true;
+        // Solo el dueño puede escribir configuración de dominio
+        allow write: if isAuthenticated() && 
+                      request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
     }
   }
 }
