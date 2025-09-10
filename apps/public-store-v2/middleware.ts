@@ -278,6 +278,9 @@ export async function middleware(req: NextRequest) {
   const host = req.headers.get('host') || '';
   const protocol = req.headers.get('x-forwarded-proto') || nextUrl.protocol.slice(0, -1);
   
+  // DEBUG: Log every request to understand what's happening
+  console.log(`🚀 [MIDDLEWARE] ${protocol}://${host}${nextUrl.pathname} - UA: ${req.headers.get('user-agent')?.slice(0, 50)}`);
+  
   // Skip middleware para archivos estáticos, API routes, dashboard, sitemap y robots
   if (nextUrl.pathname.startsWith('/_next') || 
       nextUrl.pathname.startsWith('/api') ||
