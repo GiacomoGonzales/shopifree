@@ -31,14 +31,37 @@ export default function SimpleVariantSelector({ product, onVariantChange }: Simp
   const [selectedVariant, setSelectedVariant] = useState<SimpleVariant | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string>('#007bff');
 
-  // Obtener color primario dinámico
+  // Obtener color primario dinámico con retry para producción
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return;
+
+    const getPrimaryColor = () => {
       const color = getComputedStyle(document.documentElement).getPropertyValue('--nbd-primary');
-      if (color) {
+      if (color && color.trim() && color.trim() !== '') {
         setPrimaryColor(color.trim());
         console.log('🎨 [SimpleVariantSelector] Color primario obtenido:', color.trim());
+        return true;
       }
+      return false;
+    };
+
+    // Intentar inmediatamente
+    if (!getPrimaryColor()) {
+      // Si no funciona, reintentar cada 100ms hasta 3 segundos
+      let attempts = 0;
+      const maxAttempts = 30;
+      
+      const intervalId = setInterval(() => {
+        attempts++;
+        if (getPrimaryColor() || attempts >= maxAttempts) {
+          clearInterval(intervalId);
+          if (attempts >= maxAttempts) {
+            console.warn('🎨 [SimpleVariantSelector] No se pudo obtener color primario, usando fallback');
+          }
+        }
+      }, 100);
+
+      return () => clearInterval(intervalId);
     }
   }, []);
 
