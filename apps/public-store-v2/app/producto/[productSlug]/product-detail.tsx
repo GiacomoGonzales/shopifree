@@ -9,8 +9,7 @@ import Layout from '../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../lib/store';
 import { getStoreCategories, Category } from '../../../lib/categories';
 import { useCart } from '../../../lib/cart-context';
-import ProductVariantSelector from '../../../components/ProductVariantSelector';
-import ProductVariantsWithPricing, { ProductVariant } from '../../../components/ProductVariantsWithPricing';
+import SimpleVariantSelector from '../../../components/SimpleVariantSelector';
 import UnifiedLoading from '../../../components/UnifiedLoading';
 
 // Helper function para optimizar URLs de video de Cloudinary
@@ -76,95 +75,32 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Estado para variantes seleccionadas (selector tradicional)
-  const [selectedVariant, setSelectedVariant] = useState<{ [key: string]: string }>({});
-  
-  // Estado para variantes con precios específicos
-  const [selectedPricingVariant, setSelectedPricingVariant] = useState<ProductVariant | null>(null);
+  // Estado para la variante seleccionada
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   // Hook del carrito
   const { addItem, openCart, state, removeItem } = useCart();
 
-  // Función para manejar cambios de variantes tradicionales
-  const handleVariantChange = (variant: { [key: string]: string }) => {
+  // Función para manejar cambios de variantes
+  const handleVariantChange = (variant: any) => {
+    console.log('🔄 [ProductDetail] Variante cambiada:', variant);
     setSelectedVariant(variant);
   };
 
-  // Función para manejar cambios de variantes con precios
-  const handlePricingVariantChange = (variant: ProductVariant | null) => {
-    setSelectedPricingVariant(variant);
-  };
-
-  // Función para verificar si el producto tiene variantes con precios específicos
-  const hasProductVariantsWithPricing = () => {
-    if (!product) return false;
-    
-    // Buscar variantes en diferentes ubicaciones y verificar que contengan datos reales
-    let variantsData = null;
-    
-    // 1. En tags.variants (ubicación esperada)
-    if (product.tags && product.tags.variants) {
-      variantsData = product.tags.variants;
-    }
-    // 2. Directamente en el producto
-    else if ((product as any).variants) {
-      variantsData = (product as any).variants;
-    }
-    // 3. En metaFieldValues
-    else if ((product as any).metaFieldValues && (product as any).metaFieldValues.variants) {
-      variantsData = (product as any).metaFieldValues.variants;
-    }
-    
-    if (!variantsData) return false;
-    
-    // Validar que los datos contengan variantes reales
-    try {
-      let parsedVariants = variantsData;
-      
-      // Si es string, intentar parsearlo
-      if (typeof variantsData === 'string') {
-        if (variantsData.trim() === '' || variantsData === '[]' || variantsData === '{}') {
-          return false;
-        }
-        try {
-          parsedVariants = JSON.parse(variantsData);
-        } catch {
-          return false;
-        }
-      }
-      
-      // Verificar que sea un array con elementos válidos
-      if (!Array.isArray(parsedVariants) || parsedVariants.length === 0) {
-        return false;
-      }
-      
-      // Verificar que al menos una variante tenga id, nombre/valor y precio
-      return parsedVariants.some(variant => 
-        variant && 
-        variant.id && 
-        (variant.name || variant.value) && 
-        typeof variant.price === 'number'
-      );
-    } catch {
-      return false;
-    }
-  };
 
   // Función para generar mensaje de WhatsApp
   const generateWhatsAppMessage = () => {
     if (!product || !storeInfo) return '';
     
     const productUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const price = selectedPricingVariant ? selectedPricingVariant.price : product.price;
+    const price = selectedVariant ? selectedVariant.price : product.price;
     const currency = storeInfo.currency || 'COP';
     const formattedPrice = formatPrice(price, currency);
     
     // Obtener información de variantes seleccionadas
     let variantText = '';
-    if (selectedPricingVariant) {
-      variantText = `\n📋 Variante: ${selectedPricingVariant.value || selectedPricingVariant.name}`;
-    } else if (Object.keys(selectedVariant).length > 0) {
-      const variants = Object.entries(selectedVariant)
+    if (selectedVariant && selectedVariant.attributes) {
+      const variants = Object.entries(selectedVariant.attributes)
         .map(([key, value]) => `${key}: ${value}`)
         .join(', ');
       variantText = `\n📋 Variantes: ${variants}`;
@@ -218,38 +154,27 @@ ${productUrl}
     const quantityInput = document.getElementById('quantity') as HTMLInputElement;
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
-    // Lógica SIMPLE: Si hay variante con precio seleccionada, usarla; si no, usar producto base
+    // Usar variante seleccionada o producto base
     let finalPrice = product.price;
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let itemId = product.id;
 
-    if (selectedPricingVariant) {
-      // Caso 1: Variante con precio específico
-      console.log('✅ [SIMPLE] Usando variante con precio:', selectedPricingVariant);
-      finalPrice = selectedPricingVariant.price;
-      itemId = `${product.id}-${selectedPricingVariant.id}`;
+    if (selectedVariant) {
+      console.log('✅ [SIMPLE] Usando variante seleccionada:', selectedVariant);
+      finalPrice = selectedVariant.price;
+      itemId = `${product.id}-${selectedVariant.id}`;
+      
+      const variantDesc = Object.entries(selectedVariant.attributes || {})
+        .map(([key, value]) => `${value}`)
+        .join(', ');
+        
       variantInfo = {
-        id: selectedPricingVariant.id,
-        name: selectedPricingVariant.value || selectedPricingVariant.name || 'Variante',
-        price: selectedPricingVariant.price
+        id: selectedVariant.id,
+        name: variantDesc || selectedVariant.name || 'Variante',
+        price: selectedVariant.price
       };
     } else {
-      // Caso 2: Producto sin variantes o variantes tradicionales (usar precio base)
-      console.log('✅ [SIMPLE] Usando producto base');
-      // Para variantes tradicionales, crear descripción simple si existen
-      if (Object.keys(selectedVariant).length > 0) {
-        const variantDesc = Object.entries(selectedVariant)
-          .map(([key, value]) => `${value}`)
-          .join(', ');
-        if (variantDesc) {
-          variantInfo = {
-            id: 'traditional',
-            name: variantDesc,
-            price: product.price
-          };
-          itemId = `${product.id}-traditional`;
-        }
-      }
+      console.log('✅ [SIMPLE] Usando producto base sin variantes');
     }
 
     console.log('🛒 [SIMPLE] Agregando al carrito:', {
@@ -291,9 +216,7 @@ ${productUrl}
         if (!alive) return;
         setStoreId(id);
         if (id) {
-          console.log(`🔍 [ProductDetail] Buscando producto con slug: "${productSlug}" en store: ${id}`);
           const p = await getProduct(id, productSlug);
-          console.log(`🔍 [ProductDetail] Resultado de getProduct:`, p);
           if (!alive) return;
           setProduct(p);
           // cargar info base para header/footer y configuración de locale
@@ -768,21 +691,33 @@ ${productUrl}
                     </div>
                   ) : null}
             <p className="nbd-product-price">
-               {formatPrice(selectedPricingVariant ? selectedPricingVariant.price : product.price, storeInfo?.currency)}
+               {formatPrice(selectedVariant ? selectedVariant.price : product.price, storeInfo?.currency)}
             </p>
 
                   
-                  {/* Información de stock - Solo mostrar si trackStock está habilitado */}
-                  {!hasProductVariantsWithPricing() && product && (product as any).trackStock === true && (
+                  {/* Información de stock */}
+                  {product && (product as any).trackStock === true && (
                     <div className="nbd-stock-info">
-                      {(product as any).stockQuantity > 0 ? (
-                        <p className="nbd-stock-available">
-                          ✅ {(product as any).stockQuantity} en stock
-                        </p>
+                      {selectedVariant ? (
+                        selectedVariant.stock > 0 ? (
+                          <p className="nbd-stock-available">
+                            ✅ {selectedVariant.stock} en stock
+                          </p>
+                        ) : (
+                          <p className="nbd-stock-unavailable">
+                            ❌ Sin stock
+                          </p>
+                        )
                       ) : (
-                        <p className="nbd-stock-unavailable">
-                          ❌ Sin stock
-                        </p>
+                        (product as any).stockQuantity > 0 ? (
+                          <p className="nbd-stock-available">
+                            ✅ {(product as any).stockQuantity} en stock
+                          </p>
+                        ) : (
+                          <p className="nbd-stock-unavailable">
+                            ❌ Sin stock
+                          </p>
+                        )
                       )}
                     </div>
                   )}
@@ -791,15 +726,19 @@ ${productUrl}
 
               {/* Disponibilidad - SIEMPRE mostrar */}
               {(() => {
-                // Lógica simplificada de stock
-                const stockQty = (product as any).stockQuantity;
                 const trackStock = (product as any).trackStock;
                 
                 let isAvailable = true;
                 let statusText = 'En stock';
                 
-                // Solo verificar stock si trackStock está habilitado
-                if (trackStock === true && typeof stockQty === 'number') {
+                // Si hay variante seleccionada y trackStock está habilitado
+                if (selectedVariant && trackStock === true) {
+                  isAvailable = selectedVariant.isAvailable && selectedVariant.stock > 0;
+                  statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
+                } 
+                // Si no hay variante pero trackStock está habilitado
+                else if (trackStock === true) {
+                  const stockQty = (product as any).stockQuantity || 0;
                   isAvailable = stockQty > 0;
                   statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
                 }
@@ -823,18 +762,10 @@ ${productUrl}
           ) : null}
 
               {/* Selector de variantes */}
-              {hasProductVariantsWithPricing() ? (
-                <ProductVariantsWithPricing 
-                  product={product}
-                  storeInfo={storeInfo || undefined}
-                  onVariantChange={handlePricingVariantChange}
-                />
-              ) : (
-                <ProductVariantSelector 
-                  product={product}
-                  onVariantChange={handleVariantChange}
-                />
-              )}
+              <SimpleVariantSelector 
+                product={product}
+                onVariantChange={handleVariantChange}
+              />
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">

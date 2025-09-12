@@ -9,8 +9,8 @@ import Layout from '../../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../../lib/store';
 import { getStoreCategories, Category } from '../../../../lib/categories';
 import { useCart } from '../../../../lib/cart-context';
-import ProductVariantSelector from '../../../../components/ProductVariantSelector';
-import ProductVariantsWithPricing, { ProductVariant } from '../../../../components/ProductVariantsWithPricing';
+import ProductMetadata from '../../../../components/ProductMetadata';
+import SimpleVariantSelector from '../../../../components/SimpleVariantSelector';
 import UnifiedLoading from '../../../../components/UnifiedLoading';
 
 // Helper function para optimizar URLs de video de Cloudinary
@@ -76,11 +76,8 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Estado para variantes seleccionadas (selector tradicional)
-  const [selectedVariant, setSelectedVariant] = useState<{ [key: string]: string }>({});
-  
-  // Estado para variantes con precios específicos
-  const [selectedPricingVariant, setSelectedPricingVariant] = useState<ProductVariant | null>(null);
+  // Estado para variantes con precios específicos (única lógica de variantes)
+  const [selectedPricingVariant, setSelectedPricingVariant] = useState<any>(null);
 
   // Estado para controlar la cantidad
   const [quantity, setQuantity] = useState(1);
@@ -88,13 +85,8 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   // Hook del carrito
   const { addItem, openCart, state, removeItem } = useCart();
 
-  // Función para manejar cambios de variantes tradicionales
-  const handleVariantChange = (variant: { [key: string]: string }) => {
-    setSelectedVariant(variant);
-  };
-
-  // Función para manejar cambios de variantes con precios
-  const handlePricingVariantChange = (variant: ProductVariant | null) => {
+  // Función para manejar cambios de variantes
+  const handlePricingVariantChange = (variant: any) => {
     setSelectedPricingVariant(variant);
   };
 
@@ -105,77 +97,41 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     }
   };
 
-  // Función para verificar si el producto tiene variantes con precios específicos
-  const hasProductVariantsWithPricing = () => {
+  // Función simplificada para verificar si el producto tiene variantes reales
+  const hasProductVariants = () => {
     if (!product) return false;
     
-    // Buscar variantes en diferentes ubicaciones
-    let hasVariants = false;
-    let variantSource = '';
-    let variantData = null;
+    // Buscar variantes en ubicaciones específicas
+    let variantsData = null;
     
     // 1. En tags.variants (ubicación esperada)
     if (product.tags && product.tags.variants) {
-      const variants = product.tags.variants;
-      // Verificar que no sea solo un string vacío o array vacío
-      if (typeof variants === 'string' && variants.trim() !== '') {
-        // Si es un string, verificar que tenga contenido real de variantes (JSON válido)
-        try {
-          const parsed = JSON.parse(variants);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            hasVariants = true;
-            variantData = parsed;
-          }
-        } catch {
-          // Si no es JSON válido, asumir que no tiene variantes reales
-          hasVariants = false;
-        }
-      } else if (Array.isArray(variants) && variants.length > 0) {
-        hasVariants = true;
-        variantData = variants;
-      }
-      if (hasVariants) variantSource = 'tags.variants';
+      variantsData = product.tags.variants;
     }
     // 2. Directamente en el producto
     else if ((product as any).variants) {
-      const variants = (product as any).variants;
-      if (typeof variants === 'string' && variants.trim() !== '') {
-        try {
-          const parsed = JSON.parse(variants);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            hasVariants = true;
-            variantData = parsed;
-          }
-        } catch {
-          hasVariants = false;
-        }
-      } else if (Array.isArray(variants) && variants.length > 0) {
-        hasVariants = true;
-        variantData = variants;
-      }
-      if (hasVariants) variantSource = 'product.variants';
+      variantsData = (product as any).variants;
     }
     // 3. En metaFieldValues
     else if ((product as any).metaFieldValues && (product as any).metaFieldValues.variants) {
-      const variants = (product as any).metaFieldValues.variants;
-      if (typeof variants === 'string' && variants.trim() !== '') {
-        try {
-          const parsed = JSON.parse(variants);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            hasVariants = true;
-            variantData = parsed;
-          }
-        } catch {
-          hasVariants = false;
-        }
-      } else if (Array.isArray(variants) && variants.length > 0) {
-        hasVariants = true;
-        variantData = variants;
-      }
-      if (hasVariants) variantSource = 'metaFieldValues.variants';
+      variantsData = (product as any).metaFieldValues.variants;
     }
     
-    return hasVariants;
+    if (!variantsData) return false;
+    
+    // Verificar que sea contenido válido
+    try {
+      if (typeof variantsData === 'string' && variantsData.trim() !== '') {
+        const parsed = JSON.parse(variantsData);
+        return Array.isArray(parsed) && parsed.length > 0;
+      } else if (Array.isArray(variantsData)) {
+        return variantsData.length > 0;
+      }
+    } catch {
+      return false;
+    }
+    
+    return false;
   };
 
   // Función para generar mensaje de WhatsApp
@@ -191,11 +147,6 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     let variantText = '';
     if (selectedPricingVariant) {
       variantText = `\n📋 Variante: ${selectedPricingVariant.value || selectedPricingVariant.name}`;
-    } else if (Object.keys(selectedVariant).length > 0) {
-      const variants = Object.entries(selectedVariant)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(', ');
-      variantText = `\n📋 Variantes: ${variants}`;
     }
     
     // Usar el estado quantity
@@ -260,22 +211,8 @@ ${productUrl}
         price: selectedPricingVariant.price
       };
     } else {
-      // Caso 2: Producto sin variantes o variantes tradicionales (usar precio base)
+      // Caso 2: Producto sin variantes (usar precio base)
       console.log('✅ [SIMPLE] Usando producto base');
-      // Para variantes tradicionales, crear descripción simple si existen
-      if (Object.keys(selectedVariant).length > 0) {
-        const variantDesc = Object.entries(selectedVariant)
-          .map(([key, value]) => `${value}`)
-          .join(', ');
-        if (variantDesc) {
-          variantInfo = {
-            id: 'traditional',
-            name: variantDesc,
-            price: product.price
-          };
-          itemId = `${product.id}-traditional`;
-        }
-      }
     }
 
     console.log('🛒 [SIMPLE] Agregando al carrito:', {
@@ -806,7 +743,7 @@ ${productUrl}
 
                   
                   {/* Información de stock - Solo mostrar si trackStock está habilitado */}
-                  {!hasProductVariantsWithPricing() && product && (product as any).trackStock === true && (
+                  {!hasProductVariants() && product && (product as any).trackStock === true && (
                     <div className="nbd-stock-info">
                       {(product as any).stockQuantity > 0 ? (
                         <p className="nbd-stock-available">
@@ -827,7 +764,7 @@ ${productUrl}
                 let isAvailable = false;
                 let statusText = '';
                 
-                if (hasProductVariantsWithPricing()) {
+                if (hasProductVariants()) {
                   // Producto con variantes - verificar trackStock primero
                   const trackStock = (product as any).trackStock;
                   
@@ -891,19 +828,17 @@ ${productUrl}
                 </div>
           ) : null}
 
+              {/* Metadatos descriptivos */}
+              <ProductMetadata product={product} />
+
               {/* Selector de variantes */}
-              {hasProductVariantsWithPricing() ? (
-                <ProductVariantsWithPricing 
-                  product={product}
-                  storeInfo={storeInfo || undefined}
-                  onVariantChange={handlePricingVariantChange}
-                />
-              ) : (
-                <ProductVariantSelector 
-                  product={product}
-                  onVariantChange={handleVariantChange}
-                />
-              )}
+              <SimpleVariantSelector 
+                product={product}
+                onVariantChange={(variant) => {
+                  console.log('🔄 [ProductDetail] Nueva variante seleccionada:', variant);
+                  // Aquí puedes manejar el cambio de variante si necesitas
+                }}
+              />
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">
@@ -973,8 +908,7 @@ ${productUrl}
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.488"/>
                     </svg>
-                    <span className="nbd-whatsapp-text-full">Comprar por WhatsApp</span>
-                    <span className="nbd-whatsapp-text-short">WhatsApp</span>
+                    <span>Comprar por WhatsApp</span>
                   </button>
                   <button 
                     className="nbd-btn nbd-btn--outline nbd-btn--secondary"
