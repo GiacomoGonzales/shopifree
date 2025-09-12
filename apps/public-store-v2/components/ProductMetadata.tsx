@@ -27,12 +27,12 @@ const METADATA_DISPLAY_NAMES: Record<string, string> = {
 
 export default function ProductMetadata({ product }: ProductMetadataProps) {
   // Si no hay metadatos, no mostrar nada
-  if (!product.metadata || Object.keys(product.metadata).length === 0) {
+  if (!(product as any).metadata || Object.keys((product as any).metadata).length === 0) {
     return null;
   }
 
   // Filtrar y formatear metadatos válidos
-  const validMetadata = Object.entries(product.metadata).filter(([key, value]) => {
+  const validMetadata = Object.entries((product as any).metadata).filter(([key, value]) => {
     // Excluir campos vacíos o que no sean informativos
     if (!value || (Array.isArray(value) && value.length === 0)) return false;
     if (key === 'variants') return false; // Las variantes se muestran por separado
