@@ -28,6 +28,10 @@ interface ProductVariant {
   name: string
   price: number
   stock: number
+  // Nuevos campos para variantes avanzadas
+  attributes?: Record<string, string>  // ej: { color: "Rojo", talla: "S" }
+  available?: boolean                   // si esta combinación está disponible
+  sku?: string                         // SKU opcional para esta variante
 }
 
 interface MediaFile {
@@ -94,11 +98,26 @@ export default function CreateProductPage() {
   
   // Estados para manejo de stock
   const [trackStock, setTrackStock] = useState(false)
-  const [stockQuantity, setStockQuantity] = useState('')
+  const [stockQuantity, setStockQuantity] = useState(0)
   const [requiresShipping, setRequiresShipping] = useState(true)
   const [weight, setWeight] = useState('')
   const [hasVariants, setHasVariants] = useState(false)
   const [variants, setVariants] = useState<ProductVariant[]>([])
+  
+  // Estados para el configurador de variaciones estilo RedireDi
+  const [variationType1, setVariationType1] = useState('')
+  const [variationType1Custom, setVariationType1Custom] = useState('')
+  const [variationType1Options, setVariationType1Options] = useState<string[]>([])
+  const [hasSecondVariation, setHasSecondVariation] = useState(false)
+  const [variationType2, setVariationType2] = useState('')
+  const [variationType2Custom, setVariationType2Custom] = useState('')
+  const [variationType2Options, setVariationType2Options] = useState<string[]>([])
+  const [variationInputValue1, setVariationInputValue1] = useState('')
+  const [variationInputValue2, setVariationInputValue2] = useState('')
+  
+  // Refs para mantener el foco en los inputs
+  const inputRefs1 = useRef<(HTMLInputElement | null)[]>([])
+  const inputRefs2 = useRef<(HTMLInputElement | null)[]>([])
   const [categoryPath, setCategoryPath] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState('')
   const [metaFieldValues, setMetaFieldValues] = useState<Record<string, string | string[]>>({})
@@ -188,6 +207,13 @@ export default function CreateProductPage() {
 
     loadSubcategories()
   }, [store?.id, selectedParentCategoryIds])
+
+  // Efecto para actualizar la disponibilidad de metadatos cuando cambien
+  useEffect(() => {
+    // Este efecto se ejecuta cuando cambian los metaFieldValues
+    // Solo actualiza la UI, no modifica automáticamente los atributos
+    // para evitar sobrescribir cambios del usuario
+  }, [metaFieldValues])
 
   // Funciones para manejar selección múltiple
   const handleParentCategoryToggle = (categoryId: string) => {
@@ -283,14 +309,88 @@ export default function CreateProductPage() {
     setVariants(prev => [...prev, newVariant])
   }
 
-  const updateVariant = (id: string, field: keyof ProductVariant, value: string | number) => {
+  const updateVariant = (id: string, field: keyof ProductVariant, value: string | number | boolean) => {
     setVariants(prev => prev.map(v => 
       v.id === id ? { ...v, [field]: value } : v
     ))
   }
 
+  // Función para alternar disponibilidad de una variante
+  const toggleVariantAvailability = (id: string) => {
+    setVariants(prev => prev.map(v => 
+      v.id === id ? { ...v, available: !v.available } : v
+    ))
+  }
+
   const removeVariant = (id: string) => {
     setVariants(prev => prev.filter(v => v.id !== id))
+  }
+
+  // Función para generar matriz de combinaciones estilo RedireDi
+  const generateVariantMatrix = () => {
+    // Guardar la posición actual del scroll
+    const currentScrollY = window.scrollY
+    
+    // Filtrar opciones que tienen contenido
+    const validOptions1 = variationType1Options.filter(opt => opt.trim() !== '')
+    const validOptions2 = hasSecondVariation ? variationType2Options.filter(opt => opt.trim() !== '') : []
+    
+    if (validOptions1.length === 0) return
+
+    // Limpiar variantes existentes
+    setVariants([])
+    
+    const newVariants: ProductVariant[] = []
+    
+    if (hasSecondVariation && validOptions2.length > 0) {
+      // Generar combinaciones de dos tipos
+      validOptions1.forEach((option1, index1) => {
+        validOptions2.forEach((option2, index2) => {
+          const variantId = `variant-${Date.now()}-${index1}-${index2}`
+          const type1Name = variationType1 === 'otro' ? variationType1Custom : variationType1
+          const type2Name = variationType2 === 'otro' ? variationType2Custom : variationType2
+          
+          newVariants.push({
+            id: variantId,
+            name: `${option1} - ${option2}`,
+            attributes: {
+              [type1Name]: option1,
+              [type2Name]: option2
+            },
+            price: parseFloat(price) || 0, // Precio base del producto
+            stock: 0,
+            available: true,
+            sku: `${option1.slice(0, 3).toUpperCase()}-${option2.slice(0, 3).toUpperCase()}`
+          })
+        })
+      })
+    } else {
+      // Generar variantes de un solo tipo
+      validOptions1.forEach((option1, index1) => {
+        const variantId = `variant-${Date.now()}-${index1}`
+        const type1Name = variationType1 === 'otro' ? variationType1Custom : variationType1
+        
+        newVariants.push({
+          id: variantId,
+          name: option1,
+          attributes: {
+            [type1Name]: option1
+          },
+          price: parseFloat(price) || 0, // Precio base del producto
+          stock: 0,
+          available: true,
+          sku: option1.slice(0, 6).toUpperCase().replace(/[^A-Z0-9]/g, '')
+        })
+      })
+    }
+    
+    console.log('✅ Matriz generada:', newVariants.length, 'variantes')
+    setVariants(newVariants)
+    
+    // Restaurar la posición del scroll después de que se rendericen las variantes
+    setTimeout(() => {
+      window.scrollTo(0, currentScrollY)
+    }, 10)
   }
 
   // Funciones para manejar opciones personalizadas
@@ -536,7 +636,7 @@ export default function CreateProductPage() {
         
         // Variantes
         hasVariants,
-        variants: hasVariants ? variants : [],
+        variants: hasVariants ? variants : [], // Guardar todas las variantes creadas
         
         // Envío
         requiresShipping,
@@ -821,37 +921,6 @@ export default function CreateProductPage() {
                   </label>
                 </div>
 
-                {/* Manejo de Stock */}
-                <div className="mt-4 space-y-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={trackStock}
-                      onChange={(e) => setTrackStock(e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Gestionar inventario</span>
-                  </label>
-                  
-                  {trackStock && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Cantidad en stock
-                      </label>
-                      <input
-                        type="number"
-                        value={stockQuantity}
-                        onChange={(e) => setStockQuantity(e.target.value)}
-                        placeholder="0"
-                        min="0"
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Si no gestionas inventario, el producto siempre aparecerá disponible
-                      </p>
-                    </div>
-                  )}
-                </div>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
@@ -997,7 +1066,10 @@ export default function CreateProductPage() {
                   {/* Metacampos dinámicos */}
                   {selectedCategory && getMetaFieldsForCategory().length > 0 && (
                     <div className="mt-6">
-                      <h3 className="text-md font-medium text-gray-900 mb-3">Características del producto</h3>
+                      <h3 className="text-md font-medium text-gray-900 mb-3">Características del producto (información descriptiva)</h3>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Estas características aparecerán como información del producto, no como opciones seleccionables.
+                      </p>
                       <div className="space-y-4">
                         {getMetaFieldsForCategory().map(field => (
                           <div key={field.id}>
@@ -1165,91 +1237,654 @@ export default function CreateProductPage() {
                 </div>
               </Card>
 
-              {/* 5. Variantes */}
+              {/* 5. Inventario y Variantes */}
               <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">{t('variants.title')}</h2>
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Inventario y variaciones</h2>
+                  <p className="text-sm text-gray-500">
+                    Configura el stock y las variaciones de tu producto
+                  </p>
+                </div>
+
+                {/* Primera pregunta: Rastrear inventario */}
+                <div className="mb-6">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={hasVariants}
-                      onChange={(e) => setHasVariants(e.target.checked)}
-                      className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                      checked={trackStock}
+                      onChange={(e) => setTrackStock(e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{t('variants.hasVariants')}</span>
+                    <span className="ml-2 text-sm font-medium text-gray-900">Rastrear inventario de este producto</span>
                   </label>
+                  <p className="text-xs text-gray-500 mt-1">Si no está activado, el producto siempre aparecerá como disponible</p>
                 </div>
 
-                {hasVariants && (
-                  <div className="space-y-4">
-                    <Button onClick={addVariant} variant="secondary" size="sm">
-                      {t('variants.addOption')}
-                    </Button>
+                {/* Pregunta principal tipo RedireDi */}
+                <div className="mb-6">
+                  <h3 className="text-md font-medium text-gray-900 mb-4">¿Este producto tiene variaciones?</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="hasVariations"
+                        value="no"
+                        checked={!hasVariants}
+                        onChange={() => setHasVariants(false)}
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                      />
+                      <div className="ml-3">
+                        <span className="text-sm font-medium text-gray-900">No, es un producto simple</span>
+                        <p className="text-sm text-gray-500">Solo necesita precio y stock general</p>
+                      </div>
+                    </label>
                     
-                    {variants.length > 0 && (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Variante
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Precio ({currencyName})
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Stock
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Acciones
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {variants.map(variant => (
-                              <tr key={variant.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="hasVariations"
+                        value="yes"
+                        checked={hasVariants}
+                        onChange={() => setHasVariants(true)}
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                      />
+                      <div className="ml-3">
+                        <span className="text-sm font-medium text-gray-900">Sí, tiene variaciones</span>
+                        <p className="text-sm text-gray-500">Diferentes colores, tallas, pesos, etc.</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Bifurcación: Stock simple vs Configurador de variantes */}
+                {!hasVariants ? (
+                  /* STOCK SIMPLE - Producto sin variaciones */
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">Existencias del producto</h4>
+                    {!trackStock && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800">
+                          ⚠️ El rastreo de inventario está desactivado. El producto siempre aparecerá como disponible.
+                        </p>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Stock disponible</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={stockQuantity}
+                          onChange={(e) => setStockQuantity(parseInt(e.target.value) || 0)}
+                          className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500 ${!trackStock ? 'bg-gray-100 text-gray-400' : ''}`}
+                          placeholder="0"
+                          disabled={!trackStock}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : variants.length > 0 ? (
+                  /* Mensaje simple cuando ya se generó la matriz */
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-green-800">
+                        ✅ Matriz generada. Configura precios y stock abajo.
+                      </span>
+                      <Button
+                        onClick={() => {
+                          setVariants([])
+                          setVariationType1('')
+                          setVariationType1Options([])
+                          setVariationType2('')
+                          setVariationType2Options([])
+                          setHasSecondVariation(false)
+                        }}
+                        variant="secondary"
+                        size="sm"
+                        className="text-green-700 border-green-300"
+                      >
+                        Reconfigurar
+                      </Button>
+                    </div>
+                  </div>
+                ) : hasVariants ? (
+                  /* CONFIGURADOR DE VARIANTES estilo RedireDi */
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
+                    <h4 className="text-md font-medium text-blue-900">Configurador de variaciones</h4>
+                    {!trackStock && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800">
+                          ⚠️ El rastreo de inventario está desactivado. Los campos de stock estarán bloqueados.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Paso 1: Tipo principal de variación */}
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Paso 1: Selecciona el tipo principal de variación
+                      </label>
+                      <div className="flex flex-wrap gap-3">
+                        {/* Pastilla Color */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariationType1('color')
+                            setVariationType1Custom('')
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            variationType1 === 'color'
+                              ? 'bg-blue-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Color
+                        </button>
+                        
+                        {/* Pastilla Talla */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariationType1('talla')
+                            setVariationType1Custom('')
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            variationType1 === 'talla'
+                              ? 'bg-blue-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Talla
+                        </button>
+                        
+                        {/* Pastilla Otro */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (variationType1 !== 'otro') {
+                              setVariationType1('otro')
+                              setVariationType1Custom('')
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            variationType1 === 'otro'
+                              ? 'bg-blue-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Otro
+                        </button>
+                      </div>
+                      
+                      {/* Input para tipo personalizado */}
+                      {variationType1 === 'otro' && (
+                        <div className="mt-3">
+                          <input
+                            type="text"
+                            value={variationType1Custom}
+                            onChange={(e) => setVariationType1Custom(e.target.value)}
+                            placeholder="Escribe el nombre del tipo (ej: Peso, Material, Capacidad)"
+                            className="block w-full px-3 py-2 border border-blue-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Paso 2: Opciones del tipo principal */}
+                    {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && (
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Paso 2: Define las opciones de {variationType1 === 'otro' ? variationType1Custom : variationType1}
+                        </label>
+                        <div className="space-y-2">
+                          {variationType1Options.map((option, index) => (
+                            <div key={index} className="flex gap-2 items-center">
+                              <input
+                                ref={(el) => inputRefs1.current[index] = el}
+                                type="text"
+                                value={option}
+                                onChange={(e) => {
+                                  const newOptions = [...variationType1Options]
+                                  newOptions[index] = e.target.value
+                                  setVariationType1Options(newOptions)
+                                  // Mantener el foco después del cambio
+                                  setTimeout(() => {
+                                    inputRefs1.current[index]?.focus()
+                                  }, 0)
+                                }}
+                                placeholder="Ej: Rojo"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                              />
+                              {variationType1Options.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newOptions = variationType1Options.filter((_, i) => i !== index)
+                                    setVariationType1Options(newOptions)
+                                  }}
+                                  className="px-2 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                  title="Eliminar opción"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          
+                          {variationType1Options.length === 0 && (
+                            <div className="flex gap-2 items-center">
+                              <input
+                                ref={(el) => inputRefs1.current[0] = el}
+                                type="text"
+                                value=""
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    setVariationType1Options([e.target.value])
+                                    // Mantener el foco en el nuevo input
+                                    setTimeout(() => {
+                                      inputRefs1.current[0]?.focus()
+                                    }, 0)
+                                  }
+                                }}
+                                placeholder="Ej: Rojo"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                              />
+                            </div>
+                          )}
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVariationType1Options([...variationType1Options, ''])
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Agregar otra opción
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Paso 3: Pregunta por segundo tipo */}
+                    {variationType1 && variationType1Options.filter(opt => opt.trim() !== '').length > 0 && (
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Paso 3: ¿Tiene un segundo tipo de variación?
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="hasSecondVariation"
+                              checked={!hasSecondVariation}
+                              onChange={() => {
+                                setHasSecondVariation(false)
+                                setVariationType2('')
+                                setVariationType2Options([])
+                                setVariationInputValue2('')
+                              }}
+                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">No, solo {variationType1 === 'otro' ? variationType1Custom : variationType1}</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="hasSecondVariation"
+                              checked={hasSecondVariation}
+                              onChange={() => setHasSecondVariation(true)}
+                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Sí, agregar segundo tipo</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Paso 4: Segundo tipo de variación */}
+                    {hasSecondVariation && (
+                      <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Paso 4: Selecciona el segundo tipo
+                          </label>
+                          <div className="flex flex-wrap gap-3">
+                            {/* Pastilla Color - deshabilitada si ya está seleccionada */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVariationType2('color')
+                                setVariationType2Custom('')
+                              }}
+                              disabled={variationType1 === 'color'}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                variationType1 === 'color'
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : variationType2 === 'color'
+                                    ? 'bg-green-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Color {variationType1 === 'color' && '(ya seleccionado)'}
+                            </button>
+                            
+                            {/* Pastilla Talla - deshabilitada si ya está seleccionada */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVariationType2('talla')
+                                setVariationType2Custom('')
+                              }}
+                              disabled={variationType1 === 'talla'}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                variationType1 === 'talla'
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : variationType2 === 'talla'
+                                    ? 'bg-green-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Talla {variationType1 === 'talla' && '(ya seleccionado)'}
+                            </button>
+                            
+                            {/* Pastilla Otro - deshabilitada si ya está seleccionada */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (variationType1 !== 'otro' && variationType2 !== 'otro') {
+                                  setVariationType2('otro')
+                                  setVariationType2Custom('')
+                                }
+                              }}
+                              disabled={variationType1 === 'otro'}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                variationType1 === 'otro'
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : variationType2 === 'otro'
+                                    ? 'bg-green-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Otro {variationType1 === 'otro' && '(ya seleccionado)'}
+                            </button>
+                          </div>
+                          
+                          {/* Input para segundo tipo personalizado */}
+                          {variationType2 === 'otro' && (
+                            <div className="mt-3">
+                              <input
+                                type="text"
+                                value={variationType2Custom}
+                                onChange={(e) => setVariationType2Custom(e.target.value)}
+                                placeholder="Escribe el nombre del segundo tipo (ej: Material, Capacidad)"
+                                className="block w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500 bg-green-50"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && (
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Define las opciones de {variationType2 === 'otro' ? variationType2Custom : variationType2}
+                            </label>
+                            <div className="space-y-2">
+                              {variationType2Options.map((option, index) => (
+                                <div key={index} className="flex gap-2 items-center">
                                   <input
+                                    ref={(el) => inputRefs2.current[index] = el}
                                     type="text"
-                                    value={variant.name}
-                                    onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Talla 38"
+                                    value={option}
+                                    onChange={(e) => {
+                                      const newOptions = [...variationType2Options]
+                                      newOptions[index] = e.target.value
+                                      setVariationType2Options(newOptions)
+                                      // Mantener el foco después del cambio
+                                      setTimeout(() => {
+                                        inputRefs2.current[index]?.focus()
+                                      }, 0)
+                                    }}
+                                    placeholder="Ej: S"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
                                   />
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                      <span className="text-gray-500 text-sm">{currencySymbol}</span>
+                                  {variationType2Options.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newOptions = variationType2Options.filter((_, i) => i !== index)
+                                        setVariationType2Options(newOptions)
+                                      }}
+                                      className="px-2 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                      title="Eliminar opción"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                      </svg>
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                              
+                              {variationType2Options.length === 0 && (
+                                <div className="flex gap-2 items-center">
+                                  <input
+                                    ref={(el) => inputRefs2.current[0] = el}
+                                    type="text"
+                                    value=""
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        setVariationType2Options([e.target.value])
+                                        // Mantener el foco en el nuevo input
+                                        setTimeout(() => {
+                                          inputRefs2.current[0]?.focus()
+                                        }, 0)
+                                      }
+                                    }}
+                                    placeholder="Ej: S"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                  />
+                                </div>
+                              )}
+                              
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVariationType2Options([...variationType2Options, ''])
+                                }}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Agregar otra opción
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Paso 5: Botón para generar matriz */}
+                    {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && 
+                     variationType1Options.filter(opt => opt.trim() !== '').length > 0 && 
+                     (!hasSecondVariation || 
+                      (((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && 
+                       variationType2Options.filter(opt => opt.trim() !== '').length > 0)) && (
+                      <div className="pt-4 border-t border-gray-200">
+                        <Button 
+                          onClick={generateVariantMatrix}
+                          className="w-full"
+                        >
+                          Paso 5: Generar matriz de variaciones 
+                          ({hasSecondVariation ? 
+                            variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length : 
+                            variationType1Options.filter(opt => opt.trim() !== '').length} combinaciones)
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                
+                {/* Tabla de variantes existente (ahora solo se muestra si hay variantes) */}
+                {hasVariants && variants.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Variantes ({variants.length})
+                      </h4>
+                      {!trackStock && (
+                        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                          <p className="text-sm text-yellow-800">
+                            ⚠️ El rastreo de inventario está desactivado. Los campos de stock están bloqueados.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Tabla de variantes */}
+                    {variants.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-md font-medium text-gray-900">
+                            Configurar Variantes ({variants.filter(v => v.available !== false).length} activas)
+                          </h3>
+                          <div className="text-xs text-gray-500">
+                            Desmarca las que no quieres ofrecer
+                          </div>
+                        </div>
+                        
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                {/* Checkbox de disponibilidad simplificado */}
+                                <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  <div className="flex items-center justify-center">
+                                    <span className="sr-only">Activa</span>
+                                    ✓
+                                  </div>
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Variante
+                                </th>
+                                <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Precio ({currencyName})
+                                </th>
+                                <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Stock
+                                </th>
+                                <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  <span className="sr-only">Acciones</span>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {variants.map(variant => (
+                                <tr key={variant.id} className={variant.available === false ? 'bg-gray-50 opacity-60' : ''}>
+                                  {/* Checkbox para activar/desactivar variante */}
+                                  <td className="px-3 py-3 text-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={variant.available !== false}
+                                      onChange={() => toggleVariantAvailability(variant.id)}
+                                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                      title={variant.available !== false ? "Variante activa" : "Variante inactiva"}
+                                    />
+                                  </td>
+                                  
+                                  {/* Nombre de variante */}
+                                  <td className="px-4 py-3">
+                                    <div className="space-y-1">
+                                      <input
+                                        type="text"
+                                        value={variant.name}
+                                        onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                        placeholder="Ej: Talla S, Color Rojo"
+                                      />
+                                      {/* Mostrar atributos de la combinación */}
+                                      {variant.attributes && Object.keys(variant.attributes).length > 0 && (
+                                        <div className="flex flex-wrap gap-1">
+                                          {Object.entries(variant.attributes).map(([key, value]) => (
+                                            <span key={key} className="inline-block bg-blue-100 text-blue-700 rounded px-1.5 py-0.5 text-xs font-medium">
+                                              {key}: {value}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
                                     </div>
+                                  </td>
+                                  
+                                  {/* Precio */}
+                                  <td className="px-4 py-3">
+                                    <div className="relative">
+                                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span className="text-gray-500 text-xs">{currencySymbol}</span>
+                                      </div>
+                                      <input
+                                        type="number"
+                                        value={variant.price === 0 ? '' : variant.price}
+                                        onChange={(e) => {
+                                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                                          updateVariant(variant.id, 'price', value)
+                                        }}
+                                        onFocus={(e) => {
+                                          if (e.target.value === '0') {
+                                            e.target.select()
+                                          }
+                                        }}
+                                        className="block w-full pl-8 pr-2 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                        min="0"
+                                        step="0.01"
+                                        disabled={variant.available === false}
+                                        placeholder="0.00"
+                                      />
+                                    </div>
+                                  </td>
+                                  
+                                  {/* Stock */}
+                                  <td className="px-4 py-3">
                                     <input
                                       type="number"
-                                      value={variant.price}
-                                      onChange={(e) => updateVariant(variant.id, 'price', parseFloat(e.target.value))}
-                                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm"
+                                      value={variant.stock === 0 ? '' : variant.stock}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
+                                        updateVariant(variant.id, 'stock', value)
+                                      }}
+                                      onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                          e.target.select()
+                                        }
+                                      }}
+                                      className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500 ${(!trackStock || variant.available === false) ? 'bg-gray-100 text-gray-400' : ''}`}
+                                      min="0"
+                                      disabled={!trackStock || variant.available === false}
+                                      placeholder="0"
                                     />
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <input
-                                    type="number"
-                                    value={variant.stock}
-                                    onChange={(e) => updateVariant(variant.id, 'stock', parseInt(e.target.value))}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                  />
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <button
-                                    onClick={() => removeVariant(variant.id)}
-                                    className="text-red-600 hover:text-red-900 text-sm"
-                                  >
-                                    Eliminar
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                  </td>
+                                  
+                                  {/* Acciones */}
+                                  <td className="px-3 py-3 text-center">
+                                    <button
+                                      onClick={() => removeVariant(variant.id)}
+                                      className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
+                                      title="Eliminar variante"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                      </svg>
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     )}
                   </div>

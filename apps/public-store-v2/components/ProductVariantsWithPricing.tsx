@@ -30,7 +30,7 @@ export default function ProductVariantsWithPricing({
 
   // Extraer variantes del producto
   useEffect(() => {
-    // Buscar variantes en diferentes ubicaciones posibles
+    // Buscar variantes en ubicaciones específicas
     let variantsData = null;
     
     // 1. Buscar en product.tags.variants (ubicación esperada)
@@ -46,7 +46,11 @@ export default function ProductVariantsWithPricing({
       variantsData = (product as any).metaFieldValues.variants;
     }
     
+    // Si no hay variantes reales, limpiar estado y salir
     if (!variantsData) {
+      setVariants([]);
+      setSelectedVariant(null);
+      onVariantChange(null);
       return;
     }
 
@@ -113,8 +117,10 @@ export default function ProductVariantsWithPricing({
     } catch (error) {
       console.warn('Error parsing product variants:', error);
       setVariants([]);
+      setSelectedVariant(null);
+      onVariantChange(null);
     }
-  }, [product.tags]);
+  }, [product.tags, onVariantChange]);
 
   const handleVariantSelect = (variant: ProductVariant) => {
     // Si se hace clic en la variante ya seleccionada, deseleccionarla

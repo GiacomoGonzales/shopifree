@@ -11,44 +11,131 @@ interface SelectedVariant {
   [key: string]: string;
 }
 
+export interface FoundVariant {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  isAvailable: boolean;
+  attributes: Record<string, string>;
+}
+
 interface ProductVariantSelectorProps {
   product: PublicProduct;
-  onVariantChange: (selectedVariant: SelectedVariant) => void;
+  onVariantChange: (selectedVariant: SelectedVariant, foundVariant?: FoundVariant) => void;
 }
 
 export default function ProductVariantSelector({ product, onVariantChange }: ProductVariantSelectorProps) {
+  console.log('🚀 [ProductVariantSelector] COMPONENTE INICIADO con producto:', product?.name, product?.id);
+  
   const [selectedVariant, setSelectedVariant] = useState<SelectedVariant>({});
   const [variantOptions, setVariantOptions] = useState<VariantOptions>({});
+  const [allVariants, setAllVariants] = useState<any[]>([]);
 
-  // Extraer opciones de variantes de los metadatos del producto
+  // Función para encontrar la variante específica basada en la selección
+  const findMatchingVariant = (selectedAttributes: SelectedVariant): FoundVariant | undefined => {
+    if (!allVariants.length || !Object.keys(selectedAttributes).length) return undefined;
+
+    // Buscar variante que coincida exactamente con todos los atributos seleccionados
+    const matchingVariant = allVariants.find(variant => {
+      if (!variant.attributes) return false;
+      
+      // Verificar que todos los atributos seleccionados coincidan
+      return Object.entries(selectedAttributes).every(([key, value]) => {
+        return variant.attributes[key] === value;
+      });
+    });
+
+    if (matchingVariant) {
+      const trackStock = (product as any).trackStock;
+      let isAvailable = true;
+      
+      // Solo verificar disponibilidad si el producto rastrea stock
+      if (trackStock === true) {
+        isAvailable = matchingVariant.isAvailable !== false && matchingVariant.stock > 0;
+      }
+
+      return {
+        id: matchingVariant.id,
+        name: matchingVariant.name,
+        price: matchingVariant.price,
+        stock: matchingVariant.stock || 0,
+        isAvailable,
+        attributes: matchingVariant.attributes
+      };
+    }
+
+    return undefined;
+  };
+
+  // Extraer opciones de variantes SOLO de variantes reales (no metadatos)
   useEffect(() => {
-    if (!product.tags) {
+    const options: VariantOptions = {};
+    
+    // Buscar variantes en ubicaciones específicas del producto
+    let variantsData = null;
+    
+    // 1. Buscar en product.tags.variants (ubicación esperada)
+    if (product.tags && product.tags.variants) {
+      variantsData = product.tags.variants;
+    }
+    // 2. Buscar directamente en el producto (por si está mal mapeado)
+    else if ((product as any).variants) {
+      variantsData = (product as any).variants;
+    }
+    // 3. Buscar en metaFieldValues directamente (por si no se procesó bien)
+    else if ((product as any).metaFieldValues && (product as any).metaFieldValues.variants) {
+      variantsData = (product as any).metaFieldValues.variants;
+    }
+    
+    // Si no hay variantes reales, no mostrar nada (eliminamos fallback de metadatos)
+    if (!variantsData) {
+      setVariantOptions({});
+      setSelectedVariant({});
       return;
     }
 
-    const options: VariantOptions = {};
-    
-    // Buscar campos de variantes específicos
-    Object.entries(product.tags).forEach(([key, value]) => {
-      // Mapear nombres de campos comunes a nombres de variantes (solo color y talla por ahora)
-      const variantFieldMap: { [key: string]: string } = {
-        'color': 'Color',
-        'size': 'Talla',
-        'size_clothing': 'Talla',
-        'size_shoes': 'Talla de Calzado'
-      };
+    // Procesar variantes reales del producto para extraer opciones independientes
+    try {
+      let parsedVariants: any[] = [];
 
-      const displayName = variantFieldMap[key];
-      if (displayName && value) {
-        // Si es un array, usar directamente; si es string, convertir a array
-        const values = Array.isArray(value) ? value : [value];
-        
-        if (values.length > 1) { // Solo mostrar como variante si hay múltiples opciones
-          options[key] = values; // Usar la clave original (size, color) no el displayName
+      if (typeof variantsData === 'string') {
+        try {
+          parsedVariants = JSON.parse(variantsData);
+        } catch (error) {
+          parsedVariants = [];
         }
+      } else if (Array.isArray(variantsData)) {
+        parsedVariants = variantsData;
       }
-    });
 
+      // Guardar todas las variantes para buscar combinaciones específicas
+      setAllVariants(parsedVariants);
+      console.log('🔍 Variantes encontradas:', parsedVariants);
+
+      // Extraer todos los atributos únicos de las variantes
+      parsedVariants.forEach(variant => {
+        console.log('🔍 Procesando variante:', variant);
+        if (variant.attributes) {
+          Object.entries(variant.attributes).forEach(([attributeKey, attributeValue]) => {
+            if (!options[attributeKey]) {
+              options[attributeKey] = [];
+            }
+            
+            // Solo agregar el valor si no existe ya
+            if (!options[attributeKey].includes(attributeValue as string)) {
+              options[attributeKey].push(attributeValue as string);
+            }
+          });
+        }
+      });
+
+    } catch (error) {
+      console.error('Error procesando variantes:', error);
+    console.log('Datos de variantes que causaron error:', variantsData);
+    }
+
+    console.log('🎯 Opciones extraídas:', options);
     setVariantOptions(options);
 
     // Seleccionar automáticamente la primera opción de cada variante
@@ -64,8 +151,9 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
 
   // Notificar cambios al componente padre
   useEffect(() => {
-    onVariantChange(selectedVariant);
-  }, [selectedVariant, onVariantChange]);
+    const foundVariant = findMatchingVariant(selectedVariant);
+    onVariantChange(selectedVariant, foundVariant);
+  }, [selectedVariant, onVariantChange, allVariants]);
 
   const handleVariantSelect = (variantName: string, value: string) => {
     setSelectedVariant(prev => ({
@@ -79,15 +167,22 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
     return null;
   }
 
-  // Mapear claves a nombres mostrados (solo color y talla por ahora)
+  // Mapear claves a nombres mostrados
   const getDisplayName = (key: string) => {
     const map: { [key: string]: string } = {
       'color': 'Color',
       'size': 'Talla',
       'size_clothing': 'Talla',
-      'size_shoes': 'Talla de Calzado'
+      'size_shoes': 'Talla de Calzado',
+      'talla': 'Talla',
+      'material': 'Material',
+      'estilo': 'Estilo',
+      'peso': 'Peso',
+      'capacidad': 'Capacidad'
     };
-    return map[key] || key;
+    
+    // Capitalizar primera letra si no está en el mapa
+    return map[key.toLowerCase()] || key.charAt(0).toUpperCase() + key.slice(1);
   };
 
   return (

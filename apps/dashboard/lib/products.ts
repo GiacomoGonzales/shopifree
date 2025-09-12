@@ -58,6 +58,10 @@ export interface Product {
   hasVariants: boolean
   variants: ProductVariant[]
   
+  // Stock
+  trackStock: boolean
+  stockQuantity?: number | null
+  
   // Envío
   requiresShipping: boolean
   weight?: number | null

@@ -20,7 +20,8 @@ export type PublicProduct = {
     selectedSubcategoryIds?: string[];
     brand?: string;
     selectedBrandId?: string;
-    tags?: Record<string, string>;
+    tags?: Record<string, any>;        // Solo para variantes reales
+    metadata?: Record<string, any>;    // Para metadatos descriptivos (color, material, etc.)
     createdAt?: string;
 };
 
@@ -70,11 +71,26 @@ function transformToPublicProduct(raw: any): PublicProduct {
         brand: typeof raw.brand === 'string' ? raw.brand : undefined,
         selectedBrandId: typeof raw.selectedBrandId === 'string' ? raw.selectedBrandId : undefined,
         tags: (() => {
-            let tags = raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : {};
+            const tags: Record<string, any> = {};
+            
+            // Solo agregar variantes reales si existen
+            if (raw.variants && Array.isArray(raw.variants) && raw.variants.length > 0) {
+                tags.variants = raw.variants;
+            }
+            
+            return tags;
+        })(),
+        
+        // Separar metadatos descriptivos de las variantes de compra
+        metadata: (() => {
+            let metaValues = raw.metaFieldValues && typeof raw.metaFieldValues === 'object' ? raw.metaFieldValues : {};
             
             // Clean metadata values to remove prefixes like "metadata.values."
-            const cleanedTags: Record<string, any> = {};
-            Object.entries(tags).forEach(([key, value]) => {
+            const cleanedMetadata: Record<string, any> = {};
+            Object.entries(metaValues).forEach(([key, value]) => {
+                // Saltar variantes - esas van en tags.variants
+                if (key === 'variants') return;
+                
                 if (Array.isArray(value)) {
                     const cleanedValues = value.map(v => {
                         if (typeof v === 'string' && v.startsWith('metadata.values.')) {
@@ -85,29 +101,24 @@ function transformToPublicProduct(raw: any): PublicProduct {
                     }).filter(v => v && !v.includes('_options.') && !v.startsWith('metadata.'));
                     
                     if (cleanedValues.length > 0) {
-                        cleanedTags[key] = cleanedValues;
+                        cleanedMetadata[key] = cleanedValues;
                     }
                 } else if (typeof value === 'string') {
                     if (value.startsWith('metadata.values.')) {
                         const parts = value.split('.');
                         const cleanedValue = parts[parts.length - 1];
                         if (cleanedValue && !cleanedValue.includes('_options.') && !cleanedValue.startsWith('metadata.')) {
-                            cleanedTags[key] = cleanedValue;
+                            cleanedMetadata[key] = cleanedValue;
                         }
                     } else if (!value.includes('_options.') && !value.startsWith('metadata.')) {
-                        cleanedTags[key] = value;
+                        cleanedMetadata[key] = value;
                     }
                 } else {
-                    cleanedTags[key] = value;
+                    cleanedMetadata[key] = value;
                 }
             });
             
-            // Si las variantes están en raw.variants (directamente en el documento), agregarlas a tags
-            if (raw.variants && Array.isArray(raw.variants)) {
-                cleanedTags.variants = raw.variants;
-            }
-            
-            return cleanedTags;
+            return cleanedMetadata;
         })(),
         createdAt: raw.createdAt?.toDate?.()?.toISOString() || raw.createdAt || undefined,
 	};

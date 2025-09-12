@@ -18,6 +18,10 @@ interface ProductVariant {
   name: string
   price: number
   stock: number
+  // Nuevos campos para variantes avanzadas
+  attributes?: Record<string, string>  // ej: { color: "Rojo", talla: "S" }
+  available?: boolean                   // si esta combinación está disponible
+  sku?: string                         // SKU opcional para esta variante
 }
 
 interface MediaFile {
@@ -65,6 +69,25 @@ export default function EditProductPage() {
   const [weight, setWeight] = useState('')
   const [hasVariants, setHasVariants] = useState(false)
   const [variants, setVariants] = useState<ProductVariant[]>([])
+  
+  // Estados para configurador RedireDi
+  const [variationType1, setVariationType1] = useState('')
+  const [variationType1Custom, setVariationType1Custom] = useState('')
+  const [variationType1Options, setVariationType1Options] = useState<string[]>([])
+  const [hasSecondVariation, setHasSecondVariation] = useState(false)
+  const [variationType2, setVariationType2] = useState('')
+  const [variationType2Custom, setVariationType2Custom] = useState('')
+  const [variationType2Options, setVariationType2Options] = useState<string[]>([])
+  const inputRefs1 = useRef<(HTMLInputElement | null)[]>([])
+  const inputRefs2 = useRef<(HTMLInputElement | null)[]>([])
+  
+  // Estados para variantes avanzadas (atributos) - DEPRECATED
+  const [useAdvancedVariants, setUseAdvancedVariants] = useState(false)
+  const [variantAttributes, setVariantAttributes] = useState<Array<{ name: string; values: string[] }>>([])
+  const [showAttributeInput, setShowAttributeInput] = useState(false)
+  const [newAttributeName, setNewAttributeName] = useState('')
+  const [attributeInputValues, setAttributeInputValues] = useState<Record<number, string>>({})
+  
   const [selectedCategory, setSelectedCategory] = useState('')
   const [metaFieldValues, setMetaFieldValues] = useState<Record<string, string | string[]>>({})
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
@@ -110,6 +133,10 @@ export default function EditProductPage() {
         setWeight(productData.weight?.toString() || '')
         setHasVariants(productData.hasVariants)
         setVariants(productData.variants || [])
+        
+        // Cargar campos de variantes avanzadas si existen
+        setUseAdvancedVariants(productData.useAdvancedVariants || false)
+        setVariantAttributes(productData.variantAttributes || [])
         setSelectedCategory(productData.selectedCategory || '')
         setSelectedParentCategoryIds(productData.selectedParentCategoryIds || [])
         setSelectedSubcategoryIds(productData.selectedSubcategoryIds || [])
@@ -120,6 +147,11 @@ export default function EditProductPage() {
         setCountryOrigin(productData.countryOrigin || '')
         setHarmonizedCode(productData.harmonizedCode || '')
         setStatus(productData.status)
+        
+        // Inicializar variationType1Options si no existe
+        if (variationType1Options.length === 0) {
+          setVariationType1Options(['', ''])
+        }
         
         // Convertir mediaFiles
         const convertedMediaFiles: MediaFile[] = productData.mediaFiles.map(file => ({
@@ -306,14 +338,244 @@ export default function EditProductPage() {
     setVariants(prev => [...prev, newVariant])
   }
 
-  const updateVariant = (id: string, field: keyof ProductVariant, value: string | number) => {
+  const updateVariant = (id: string, field: keyof ProductVariant, value: string | number | boolean) => {
     setVariants(prev => prev.map(v => 
       v.id === id ? { ...v, [field]: value } : v
     ))
   }
 
+  // Función para alternar disponibilidad de una variante
+  const toggleVariantAvailability = (id: string) => {
+    setVariants(prev => prev.map(v => 
+      v.id === id ? { ...v, available: !v.available } : v
+    ))
+  }
+
   const removeVariant = (id: string) => {
     setVariants(prev => prev.filter(v => v.id !== id))
+  }
+
+  // Función para generar matriz de combinaciones estilo RedireDi
+  const generateVariantMatrix = () => {
+    // Guardar la posición actual del scroll
+    const currentScrollY = window.scrollY
+    
+    // Filtrar opciones que tienen contenido
+    const validOptions1 = variationType1Options.filter(opt => opt.trim() !== '')
+    const validOptions2 = hasSecondVariation ? variationType2Options.filter(opt => opt.trim() !== '') : []
+    
+    if (validOptions1.length === 0) return
+
+    // Limpiar variantes existentes
+    setVariants([])
+    
+    const newVariants: ProductVariant[] = []
+    
+    if (hasSecondVariation && validOptions2.length > 0) {
+      // Generar combinaciones de dos tipos
+      validOptions1.forEach((option1, index1) => {
+        validOptions2.forEach((option2, index2) => {
+          const variantId = `variant-${Date.now()}-${index1}-${index2}`
+          const type1Name = variationType1 === 'otro' ? variationType1Custom : variationType1
+          const type2Name = variationType2 === 'otro' ? variationType2Custom : variationType2
+          
+          newVariants.push({
+            id: variantId,
+            name: `${option1} - ${option2}`,
+            attributes: {
+              [type1Name]: option1,
+              [type2Name]: option2
+            },
+            price: parseFloat(price) || 0, // Precio base del producto
+            stock: 0,
+            available: true,
+            sku: `${option1.slice(0, 3).toUpperCase()}-${option2.slice(0, 3).toUpperCase()}`
+          })
+        })
+      })
+    } else {
+      // Generar variantes de un solo tipo
+      validOptions1.forEach((option1, index1) => {
+        const variantId = `variant-${Date.now()}-${index1}`
+        const type1Name = variationType1 === 'otro' ? variationType1Custom : variationType1
+        
+        newVariants.push({
+          id: variantId,
+          name: option1,
+          attributes: {
+            [type1Name]: option1
+          },
+          price: parseFloat(price) || 0, // Precio base del producto
+          stock: 0,
+          available: true,
+          sku: option1.slice(0, 6).toUpperCase().replace(/[^A-Z0-9]/g, '')
+        })
+      })
+    }
+    
+    console.log('✅ Matriz generada:', newVariants.length, 'variantes')
+    setVariants(newVariants)
+    
+    // Restaurar la posición del scroll después de que se rendericen las variantes
+    setTimeout(() => {
+      window.scrollTo(0, currentScrollY)
+    }, 10)
+  }
+
+  // Funciones para manejar atributos de variantes
+  const addVariantAttribute = () => {
+    if (newAttributeName.trim()) {
+      const newAttribute = {
+        name: newAttributeName.trim(),
+        values: []
+      }
+      const newIndex = variantAttributes.length
+      setVariantAttributes(prev => [...prev, newAttribute])
+      
+      // Inicializar el estado del input para este nuevo atributo
+      setAttributeInputValues(prev => ({
+        ...prev,
+        [newIndex]: ''
+      }))
+      
+      setNewAttributeName('')
+      setShowAttributeInput(false)
+    }
+  }
+
+  const updateAttributeValues = (attributeIndex: number, values: string[]) => {
+    setVariantAttributes(prev => prev.map((attr, index) => 
+      index === attributeIndex ? { ...attr, values } : attr
+    ))
+  }
+
+  const updateAttributeInputValue = (attributeIndex: number, inputValue: string) => {
+    setAttributeInputValues(prev => ({
+      ...prev,
+      [attributeIndex]: inputValue
+    }))
+    
+    // Procesar los valores si contiene comas
+    const values = inputValue.split(',').map(v => v.trim()).filter(v => v !== '')
+    updateAttributeValues(attributeIndex, values)
+  }
+
+  const removeVariantAttribute = (attributeIndex: number) => {
+    setVariantAttributes(prev => prev.filter((_, index) => index !== attributeIndex))
+    // Limpiar el estado del input también
+    setAttributeInputValues(prev => {
+      const newValues = { ...prev }
+      delete newValues[attributeIndex]
+      return newValues
+    })
+  }
+
+  // Función para obtener metadatos disponibles que pueden usarse como atributos de variantes
+  const getAvailableMetadataForVariants = () => {
+    const variantCompatibleFields = ['color', 'size_clothing', 'size_shoes', 'size', 'material', 'style']
+    const availableMetadata: Array<{ id: string; name: string; values: string[] }> = []
+
+    // Revisar metaFieldValues actuales
+    Object.entries(metaFieldValues).forEach(([fieldId, fieldValue]) => {
+      if (variantCompatibleFields.includes(fieldId) && fieldValue) {
+        const values = Array.isArray(fieldValue) ? fieldValue : [fieldValue]
+        if (values.length > 1) { // Solo si hay múltiples opciones para hacer variantes
+          // Necesitamos obtener el nombre del field, por ahora usaremos el ID
+          availableMetadata.push({
+            id: fieldId,
+            name: fieldId.charAt(0).toUpperCase() + fieldId.slice(1).replace('_', ' '), // Capitalize
+            values: values.filter(v => v.trim() !== '')
+          })
+        }
+      }
+    })
+
+    return availableMetadata
+  }
+
+  // Función para importar metadatos como atributos de variantes
+  const importMetadataAsAttribute = (metadataId: string) => {
+    const metadata = getAvailableMetadataForVariants().find(m => m.id === metadataId)
+    if (metadata) {
+      // Verificar que no existe ya este atributo
+      const existingAttribute = variantAttributes.find(attr => 
+        attr.name.toLowerCase() === metadata.name.toLowerCase()
+      )
+      
+      if (!existingAttribute) {
+        const newAttribute = {
+          name: metadata.name,
+          values: metadata.values
+        }
+        const newIndex = variantAttributes.length
+        setVariantAttributes(prev => [...prev, newAttribute])
+        
+        // Inicializar el estado del input para este atributo
+        setAttributeInputValues(prev => ({
+          ...prev,
+          [newIndex]: metadata.values.join(', ')
+        }))
+      }
+    }
+  }
+
+  // Función para importar todos los metadatos disponibles
+  const importAllAvailableMetadata = () => {
+    const availableMetadata = getAvailableMetadataForVariants()
+    availableMetadata.forEach(metadata => {
+      importMetadataAsAttribute(metadata.id)
+    })
+  }
+
+  // Función para generar todas las combinaciones posibles de atributos
+  const generateVariantCombinations = () => {
+    if (variantAttributes.length === 0) return []
+
+    // Función recursiva para generar producto cartesiano
+    const cartesianProduct = (arrays: string[][]): string[][] => {
+      return arrays.reduce((acc, curr) => 
+        acc.flatMap(x => curr.map(y => [...x, y])),
+        [[]] as string[][]
+      )
+    }
+
+    // Obtener solo arrays de valores
+    const attributeValues = variantAttributes.map(attr => attr.values)
+    const combinations = cartesianProduct(attributeValues)
+
+    // Convertir combinaciones a variantes
+    return combinations.map((combination, index) => {
+      // Crear objeto de atributos
+      const attributes: Record<string, string> = {}
+      combination.forEach((value, attrIndex) => {
+        const attributeName = variantAttributes[attrIndex].name.toLowerCase()
+        attributes[attributeName] = value
+      })
+
+      // Crear nombre descriptivo
+      const displayName = combination.join(' - ')
+
+      // Generar SKU automático
+      const skuSuffix = combination.map(val => 
+        val.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, '')
+      ).join('-')
+
+      return {
+        id: `generated-${index}`,
+        name: displayName,
+        attributes: attributes,
+        price: parseFloat(price) || 0, // Usar precio base del producto
+        stock: 0,
+        available: true, // Por defecto disponible
+        sku: skuSuffix
+      }
+    })
+  }
+
+  // Función para aplicar las combinaciones generadas a las variantes
+  const generateVariantsFromAttributes = () => {
+    const generatedVariants = generateVariantCombinations()
+    setVariants(generatedVariants)
   }
 
   const handleSave = async () => {
@@ -361,7 +623,11 @@ export default function EditProductPage() {
         
         // Variantes
         hasVariants,
-        variants: hasVariants ? variants : [],
+        variants: hasVariants ? variants.filter(v => v.available !== false) : [], // Solo guardar variantes disponibles
+        
+        // Nuevos campos para variantes avanzadas
+        useAdvancedVariants: hasVariants ? useAdvancedVariants : false,
+        variantAttributes: hasVariants && useAdvancedVariants ? variantAttributes : [],
         
         // Envío
         requiresShipping,
@@ -733,85 +999,395 @@ export default function EditProductPage() {
                 </div>
               </Card>
 
-              {/* 4. Variantes */}
+              {/* 4. Inventario y variaciones */}
               <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Variantes</h2>
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Inventario y variaciones</h2>
+                  <p className="text-sm text-gray-500">
+                    Configura el stock y las variaciones de tu producto
+                  </p>
+                </div>
+
+                {/* Primera pregunta: Rastrear inventario */}
+                <div className="mb-6">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={hasVariants}
-                      onChange={(e) => setHasVariants(e.target.checked)}
-                      className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                      checked={trackStock}
+                      onChange={(e) => setTrackStock(e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Este producto tiene variantes</span>
+                    <span className="ml-2 text-sm font-medium text-gray-900">Rastrear inventario de este producto</span>
                   </label>
+                  <p className="text-xs text-gray-500 mt-1">Si no está activado, el producto siempre aparecerá como disponible</p>
                 </div>
 
-                {hasVariants && (
-                  <div className="space-y-4">
-                    <Button onClick={addVariant} variant="secondary" size="sm">
-                      + Agregar otra opción
-                    </Button>
+                {/* Pregunta principal tipo RedireDi */}
+                <div className="mb-6">
+                  <h3 className="text-md font-medium text-gray-900 mb-4">¿Este producto tiene variaciones?</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="hasVariations"
+                        value="no"
+                        checked={!hasVariants}
+                        onChange={() => setHasVariants(false)}
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                      />
+                      <div className="ml-3">
+                        <span className="text-sm font-medium text-gray-900">No, es un producto simple</span>
+                        <p className="text-sm text-gray-500">Solo necesita precio y stock general</p>
+                      </div>
+                    </label>
                     
+                    <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="hasVariations"
+                        value="yes"
+                        checked={hasVariants}
+                        onChange={() => setHasVariants(true)}
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                      />
+                      <div className="ml-3">
+                        <span className="text-sm font-medium text-gray-900">Sí, tiene variaciones</span>
+                        <p className="text-sm text-gray-500">Diferentes colores, tallas, pesos, etc.</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Bifurcación: Stock simple vs Configurador de variantes */}
+                {!hasVariants ? (
+                  /* STOCK SIMPLE - Producto sin variaciones */
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">Existencias del producto</h4>
+                    {!trackStock && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800">
+                          ⚠️ El rastreo de inventario está desactivado. El producto siempre aparecerá como disponible.
+                        </p>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Stock disponible</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={stockQuantity}
+                          onChange={(e) => setStockQuantity(parseInt(e.target.value) || 0)}
+                          className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500 ${!trackStock ? 'bg-gray-100 text-gray-400' : ''}`}
+                          placeholder="0"
+                          disabled={!trackStock}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : variants.length > 0 ? (
+                  /* Mensaje simple cuando ya se generó la matriz */
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-green-800">
+                        ✅ Matriz generada. Configura precios y stock abajo.
+                      </span>
+                      <Button
+                        onClick={() => {
+                          setVariants([])
+                          setVariationType1('')
+                          setVariationType1Options([])
+                          setVariationType2('')
+                          setVariationType2Options([])
+                          setHasSecondVariation(false)
+                        }}
+                        variant="secondary"
+                        size="sm"
+                        className="text-green-700 border-green-300"
+                      >
+                        Reconfigurar
+                      </Button>
+                    </div>
+                  </div>
+                ) : hasVariants ? (
+                  /* CONFIGURADOR DE VARIANTES estilo RedireDi */
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
+                    <h4 className="text-md font-medium text-blue-900">Configurador de variaciones</h4>
+                    {!trackStock && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <p className="text-sm text-yellow-800">
+                          ⚠️ El rastreo de inventario está desactivado. Los campos de stock estarán bloqueados.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Paso 1: Tipo principal de variación */}
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Paso 1: Selecciona el tipo principal de variación
+                      </label>
+                      <div className="flex flex-wrap gap-3">
+                        {/* Pastilla Color */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariationType1('color')
+                            setVariationType1Custom('')
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            variationType1 === 'color'
+                              ? 'bg-blue-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Color
+                        </button>
+                        
+                        {/* Pastilla Talla */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariationType1('talla')
+                            setVariationType1Custom('')
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            variationType1 === 'talla'
+                              ? 'bg-blue-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Talla
+                        </button>
+                        
+                        {/* Pastilla Otro */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (variationType1 !== 'otro') {
+                              setVariationType1('otro')
+                              setVariationType1Custom('')
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            variationType1 === 'otro'
+                              ? 'bg-blue-500 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Otro
+                        </button>
+                      </div>
+                      
+                      {/* Input para tipo personalizado */}
+                      {variationType1 === 'otro' && (
+                        <div className="mt-3">
+                          <input
+                            type="text"
+                            value={variationType1Custom}
+                            onChange={(e) => setVariationType1Custom(e.target.value)}
+                            placeholder="Escribe el nombre del tipo (ej: Peso, Material, Capacidad)"
+                            className="block w-full px-3 py-2 border border-blue-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Paso 2: Opciones del tipo principal */}
+                    {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && (
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Paso 2: Define las opciones de {variationType1 === 'otro' ? variationType1Custom : variationType1}
+                        </label>
+                        <div className="space-y-2">
+                          {variationType1Options.map((option, index) => (
+                            <div key={index} className="flex gap-2 items-center">
+                              <input
+                                ref={(el) => inputRefs1.current[index] = el}
+                                type="text"
+                                value={option}
+                                onChange={(e) => {
+                                  const newOptions = [...variationType1Options]
+                                  newOptions[index] = e.target.value
+                                  setVariationType1Options(newOptions)
+                                  // Mantener el foco después del cambio
+                                  setTimeout(() => {
+                                    inputRefs1.current[index]?.focus()
+                                  }, 0)
+                                }}
+                                placeholder="Ej: Rojo"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                              />
+                              {variationType1Options.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newOptions = variationType1Options.filter((_, i) => i !== index)
+                                    setVariationType1Options(newOptions)
+                                  }}
+                                  className="px-2 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                  title="Eliminar opción"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          
+                          {/* Botón para agregar más opciones */}
+                          <button
+                            type="button"
+                            onClick={() => setVariationType1Options([...variationType1Options, ''])}
+                            className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-md text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
+                          >
+                            + Agregar opción
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Botón generar matriz */}
+                    {variationType1Options.filter(opt => opt.trim() !== '').length > 0 && 
+                     (!hasSecondVariation || 
+                      (((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && 
+                       variationType2Options.filter(opt => opt.trim() !== '').length > 0)) && (
+                      <div className="pt-4 border-t border-gray-200">
+                        <Button 
+                          onClick={generateVariantMatrix}
+                          className="w-full"
+                        >
+                          Generar matriz de variaciones 
+                          ({hasSecondVariation ? 
+                            variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length : 
+                            variationType1Options.filter(opt => opt.trim() !== '').length} combinaciones)
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                
+                {/* Tabla de variantes existente (ahora solo se muestra si hay variantes) */}
+                {hasVariants && variants.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Variantes ({variants.length})
+                      </h4>
+                      {!trackStock && (
+                        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                          <p className="text-sm text-yellow-800">
+                            ⚠️ El rastreo de inventario está desactivado. Los campos de stock están bloqueados.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Tabla de variantes */}
                     {variants.length > 0 && (
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Variante
                               </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Precio ({currencyName})
                               </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Stock
                               </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Acciones
+                              <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <span className="sr-only">Acciones</span>
                               </th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {variants.map(variant => (
-                              <tr key={variant.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <input
-                                    type="text"
-                                    value={variant.name}
-                                    onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Talla 38"
-                                  />
+                              <tr key={variant.id} className={variant.available === false ? 'bg-gray-50 opacity-60' : ''}>
+                                {/* Nombre de variante */}
+                                <td className="px-4 py-3">
+                                  {variant.attributes ? (
+                                    <div>
+                                      <div className="text-sm font-medium text-gray-900 mb-1">{variant.name}</div>
+                                      <div className="flex flex-wrap gap-1">
+                                        {Object.entries(variant.attributes).map(([key, value]) => (
+                                          <span key={key} className="inline-block bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-medium">
+                                            {value}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      value={variant.name}
+                                      onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
+                                      className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                      placeholder="Ej: Talla S, Color Rojo, 20kg"
+                                    />
+                                  )}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                
+                                {/* Precio */}
+                                <td className="px-4 py-3">
                                   <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                      <span className="text-gray-500 text-sm">{currencySymbol}</span>
+                                      <span className="text-gray-500 text-xs">{currencySymbol}</span>
                                     </div>
                                     <input
                                       type="number"
-                                      value={variant.price}
-                                      onChange={(e) => updateVariant(variant.id, 'price', parseFloat(e.target.value))}
-                                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm"
+                                      value={variant.price === 0 ? '' : variant.price}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                                        updateVariant(variant.id, 'price', value)
+                                      }}
+                                      onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                          e.target.select()
+                                        }
+                                      }}
+                                      className="block w-full pl-8 pr-2 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                      min="0"
+                                      step="0.01"
+                                      disabled={variant.available === false}
+                                      placeholder="0.00"
                                     />
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                
+                                {/* Stock */}
+                                <td className="px-4 py-3">
                                   <input
                                     type="number"
-                                    value={variant.stock}
-                                    onChange={(e) => updateVariant(variant.id, 'stock', parseInt(e.target.value))}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    value={variant.stock === 0 ? '' : variant.stock}
+                                    onChange={(e) => {
+                                      const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
+                                      updateVariant(variant.id, 'stock', value)
+                                    }}
+                                    onFocus={(e) => {
+                                      if (e.target.value === '0') {
+                                        e.target.select()
+                                      }
+                                    }}
+                                    className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500 ${(!trackStock || variant.available === false) ? 'bg-gray-100 text-gray-400' : ''}`}
+                                    min="0"
+                                    disabled={!trackStock || variant.available === false}
+                                    placeholder="0"
                                   />
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                
+                                {/* Acciones */}
+                                <td className="px-3 py-3 text-center">
                                   <button
                                     onClick={() => removeVariant(variant.id)}
-                                    className="text-red-600 hover:text-red-900 text-sm"
+                                    className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
+                                    title="Eliminar variante"
                                   >
-                                    Eliminar
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
                                   </button>
                                 </td>
                               </tr>
@@ -823,7 +1399,7 @@ export default function EditProductPage() {
                   </div>
                 )}
               </Card>
-
+              
               {/* 5. SEO */}
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Optimización para motores de búsqueda</h2>
@@ -919,104 +1495,52 @@ export default function EditProductPage() {
                     )}
                   </div>
 
-                  {/* Subcategorías - Solo si hay categorías seleccionadas */}
-                  {selectedParentCategoryIds.length > 0 && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Subcategorías ({selectedSubcategoryIds.length} seleccionadas)
-                      </label>
-                      {loadingSubcategories ? (
-                        <p className="text-sm text-gray-500">Cargando subcategorías...</p>
-                      ) : (
-                        <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
-                          {dynamicSubcategories.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-2">
-                              {selectedParentCategoryIds.length === 0 
-                                ? 'Selecciona una categoría primero' 
-                                : 'Las categorías seleccionadas no tienen subcategorías'
-                              }
-                            </p>
-                          ) : (
-                            dynamicSubcategories.map(subcategory => (
-                              <label key={subcategory.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedSubcategoryIds.includes(subcategory.id)}
-                                  onChange={() => handleSubcategoryToggle(subcategory.id)}
-                                  className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                                />
-                                <span className="text-sm text-gray-700">{subcategory.name}</span>
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
+                  {/* Marcas */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Marca</label>
-                    <select
-                      value={selectedBrandId}
-                      onChange={(e) => setSelectedBrandId(e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                      disabled={loadingBrands}
-                    >
-                      <option value="">Seleccionar marca</option>
-                      {brands.map(brand => (
-                        <option key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </option>
-                      ))}
-                    </select>
-                    {loadingBrands && (
-                      <p className="mt-1 text-sm text-gray-500">Cargando marcas...</p>
+                    {loadingBrands ? (
+                      <p className="text-sm text-gray-500">Cargando marcas...</p>
+                    ) : (
+                      <select
+                        value={selectedBrandId}
+                        onChange={(e) => setSelectedBrandId(e.target.value)}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                      >
+                        <option value="">Sin marca</option>
+                        {brands.map(brand => (
+                          <option key={brand.id} value={brand.id}>{brand.name}</option>
+                        ))}
+                      </select>
                     )}
                   </div>
                 </div>
               </Card>
             </div>
           </div>
-
-          {/* Botón de guardar fijo */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 mt-8">
-            {/* Mostrar errores de guardado */}
+          
+          {/* Botón de guardar */}
+          <div className="mt-8 flex justify-end">
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                </div>
+              <div className="mr-4 text-sm text-red-600">
+                {error}
               </div>
             )}
-            
-            <div className="flex justify-end space-x-3">
-              <Button variant="secondary" onClick={() => router.back()} disabled={saving}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Guardando...
-                  </>
-                ) : (
-                  'Guardar cambios'
-                )}
-              </Button>
-            </div>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Guardando...
+                </>
+              ) : (
+                'Guardar cambios'
+              )}
+            </Button>
           </div>
         </div>
       </div>
     </DashboardLayout>
   )
-} 
+}

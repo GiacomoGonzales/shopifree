@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
@@ -30,6 +30,10 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [stockModalOpen, setStockModalOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithId | null>(null)
+  const menuRefs = useRef<{[key: string]: HTMLDivElement | null}>({})
   
   // Estados para filtros y paginación
   const [searchQuery, setSearchQuery] = useState('')
@@ -165,10 +169,63 @@ export default function ProductsPage() {
     return names
   }
 
+  // Función para obtener indicador de stock
+  const getStockIndicator = (product: ProductWithId) => {
+    if (!product.trackStock) {
+      return { text: 'Sin rastreo', color: 'text-gray-400', icon: '⚪' }
+    }
+
+    if (product.hasVariants && product.variants.length > 0) {
+      const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
+      const activeVariants = product.variants.filter(variant => variant.stock > 0).length
+      
+      if (totalStock === 0) {
+        return { text: 'Agotado', color: 'text-red-500', icon: '🔴' }
+      } else if (totalStock < 10) {
+        return { text: `${activeVariants}/${product.variants.length}`, color: 'text-yellow-500', icon: '🟡' }
+      } else {
+        return { text: `${activeVariants}/${product.variants.length}`, color: 'text-green-500', icon: '🟢' }
+      }
+    } else {
+      const stock = product.stockQuantity || 0
+      if (stock === 0) {
+        return { text: 'Agotado', color: 'text-red-500', icon: '🔴' }
+      } else if (stock < 10) {
+        return { text: `${stock}`, color: 'text-yellow-500', icon: '🟡' }
+      } else {
+        return { text: `${stock}`, color: 'text-green-500', icon: '🟢' }
+      }
+    }
+  }
+
   // Función para editar producto
   const handleEdit = (productId: string) => {
     router.push(`/products/${productId}/edit`)
   }
+
+  // Función para abrir/cerrar menú contextual
+  const toggleMenu = (productId: string) => {
+    setOpenMenuId(openMenuId === productId ? null : productId)
+  }
+
+  // Función para manejar actualización de stock
+  const handleUpdateStock = (product: ProductWithId) => {
+    setOpenMenuId(null) // Cerrar menú
+    setSelectedProduct(product)
+    setStockModalOpen(true)
+  }
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openMenuId && menuRefs.current[openMenuId] && !menuRefs.current[openMenuId]?.contains(event.target as Node)) {
+        setOpenMenuId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openMenuId])
 
   // Función para vista previa del producto en la tienda
   const handlePreview = (product: ProductWithId) => {
@@ -598,6 +655,14 @@ export default function ProductsPage() {
                                           S/ {product.comparePrice.toFixed(2)}
                                         </span>
                                       )}
+                                      {(() => {
+                                        const stockInfo = getStockIndicator(product)
+                                        return (
+                                          <span className={`ml-2 text-xs ${stockInfo.color}`} title={`Stock: ${stockInfo.text}`}>
+                                            📦 {stockInfo.text}
+                                          </span>
+                                        )
+                                      })()}
                                     </div>
                                   </div>
                                 </div>
@@ -646,51 +711,84 @@ export default function ProductsPage() {
                                 )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div className="flex items-center justify-end space-x-2">
+                                <div className="relative" ref={(el) => menuRefs.current[product.id] = el}>
                                   <button 
-                                    onClick={() => handlePreview(product)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                                    title={t('actions.preview')}
+                                    onClick={() => toggleMenu(product.id)}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
+                                    title="Acciones"
                                   >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                                     </svg>
                                   </button>
-                                  <button 
-                                    onClick={() => handleEdit(product.id)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                                    title={t('actions.edit')}
-                                  >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                  </button>
-                                  <button 
-                                    onClick={() => {
-                                      if (window.confirm(t('actions.confirmDelete'))) {
-                                        handleDelete(product.id)
-                                      }
-                                    }}
-                                    disabled={deleting === product.id}
-                                    className={`transition-colors ${
-                                      deleting === product.id 
-                                        ? 'text-gray-400 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-red-600'
-                                    }`}
-                                    title={t('actions.delete')}
-                                  >
-                                    {deleting === product.id ? (
-                                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                      </svg>
-                                    ) : (
-                                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                      </svg>
-                                    )}
-                                  </button>
+                                  
+                                  {openMenuId === product.id && (
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                                      <div className="py-1">
+                                        <button
+                                          onClick={() => {
+                                            handleEdit(product.id)
+                                            setOpenMenuId(null)
+                                          }}
+                                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                          <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                          Editar producto
+                                        </button>
+                                        
+                                        <button
+                                          onClick={() => handleUpdateStock(product)}
+                                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                          <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                          </svg>
+                                          Actualizar existencias
+                                        </button>
+                                        
+                                        <button
+                                          onClick={() => {
+                                            handlePreview(product)
+                                            setOpenMenuId(null)
+                                          }}
+                                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                          <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                          </svg>
+                                          Ver en catálogo
+                                        </button>
+                                        
+                                        <hr className="my-1" />
+                                        
+                                        <button
+                                          onClick={() => {
+                                            if (window.confirm(t('actions.confirmDelete'))) {
+                                              handleDelete(product.id)
+                                            }
+                                            setOpenMenuId(null)
+                                          }}
+                                          disabled={deleting === product.id}
+                                          className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                                        >
+                                          {deleting === product.id ? (
+                                            <svg className="animate-spin h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24">
+                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                          ) : (
+                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                          )}
+                                          Eliminar producto
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -758,6 +856,14 @@ export default function ProductsPage() {
                                           S/ {product.comparePrice.toFixed(2)}
                                         </p>
                                       )}
+                                      {(() => {
+                                        const stockInfo = getStockIndicator(product)
+                                        return (
+                                          <span className={`text-xs ${stockInfo.color}`} title={`Stock: ${stockInfo.text}`}>
+                                            📦 {stockInfo.text}
+                                          </span>
+                                        )
+                                      })()}
                                     </div>
                                   </div>
                                   
@@ -867,6 +973,231 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de actualización de stock */}
+      {stockModalOpen && selectedProduct && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setStockModalOpen(false)}
+          />
+          
+          {/* Modal content - slide up from bottom */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-xl transform transition-transform duration-300 ease-out">
+            <div className="max-w-4xl mx-auto max-h-[80vh] overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {selectedProduct.hasVariants && selectedProduct.variants.length > 0 
+                      ? 'Existencias por variación' 
+                      : 'Actualizar existencias'
+                    }
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">{selectedProduct.name}</p>
+                </div>
+                <button
+                  onClick={() => setStockModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                {!selectedProduct.trackStock ? (
+                  /* Producto sin rastreo de inventario */
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Sin rastreo de inventario</h4>
+                    <p className="text-gray-500">
+                      Este producto no tiene habilitado el rastreo de inventario. 
+                      Para gestionar existencias, primero activa el rastreo en la configuración del producto.
+                    </p>
+                  </div>
+                ) : selectedProduct.hasVariants && selectedProduct.variants.length > 0 ? (
+                  /* Tabla de variantes */
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-blue-800">
+                          Total: {selectedProduct.variants.reduce((sum, v) => sum + v.stock, 0)} unidades
+                        </span>
+                        <span className="text-sm text-blue-800">
+                          Activas: {selectedProduct.variants.filter(v => v.stock > 0).length}/{selectedProduct.variants.length} variantes
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Variante
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Existencias
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Estado
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {selectedProduct.variants.map((variant, index) => (
+                            <tr key={variant.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 h-10 w-10">
+                                    {selectedProduct.mediaFiles && selectedProduct.mediaFiles.length > 0 ? (
+                                      <img
+                                        className="h-10 w-10 rounded-md object-cover border border-gray-200"
+                                        src={selectedProduct.mediaFiles[0]?.url}
+                                        alt={variant.name}
+                                      />
+                                    ) : (
+                                      <div className="h-10 w-10 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center">
+                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">{variant.name}</div>
+                                    <div className="text-sm text-gray-500">S/ {variant.price.toFixed(2)}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  defaultValue={variant.stock}
+                                  className="block w-24 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                                  onChange={(e) => {
+                                    // TODO: Manejar cambio de stock
+                                    console.log(`Variant ${variant.id} stock changed to:`, e.target.value)
+                                  }}
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  variant.stock > 10 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : variant.stock > 0
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {variant.stock > 10 ? 'En stock' : variant.stock > 0 ? 'Poco stock' : 'Agotado'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  /* Producto simple sin variantes */
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                      <div className="flex items-center mb-4">
+                        <div className="flex-shrink-0 h-16 w-16">
+                          {selectedProduct.mediaFiles && selectedProduct.mediaFiles.length > 0 ? (
+                            <img
+                              className="h-16 w-16 rounded-lg object-cover border border-gray-200"
+                              src={selectedProduct.mediaFiles[0]?.url}
+                              alt={selectedProduct.name}
+                            />
+                          ) : (
+                            <div className="h-16 w-16 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+                              <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4 flex-1">
+                          <h4 className="text-lg font-medium text-gray-900">{selectedProduct.name}</h4>
+                          <p className="text-gray-500">S/ {selectedProduct.price.toFixed(2)}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Stock disponible
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            defaultValue={selectedProduct.stockQuantity || 0}
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                            onChange={(e) => {
+                              // TODO: Manejar cambio de stock
+                              console.log('Stock changed to:', e.target.value)
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <div className="w-full">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Estado actual
+                            </label>
+                            <div className={`inline-flex px-3 py-2 text-sm font-semibold rounded-md ${
+                              (selectedProduct.stockQuantity || 0) > 10 
+                                ? 'bg-green-100 text-green-800' 
+                                : (selectedProduct.stockQuantity || 0) > 0
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {(selectedProduct.stockQuantity || 0) > 10 ? 'En stock' : 
+                               (selectedProduct.stockQuantity || 0) > 0 ? 'Poco stock' : 'Agotado'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              {selectedProduct.trackStock && (
+                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end space-x-3">
+                  <button
+                    onClick={() => setStockModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => {
+                      // TODO: Implementar actualización de stock
+                      console.log('Actualizando existencias...')
+                      setStockModalOpen(false)
+                      showToast('Existencias actualizadas correctamente', 'success')
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Actualizar existencias
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast notification */}
       {toast && (
