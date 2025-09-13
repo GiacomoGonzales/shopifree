@@ -72,20 +72,15 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
   const { language } = useStoreLanguage();
   const [metadataLabels, setMetadataLabels] = useState<Record<string, string>>({});
 
-  // Si no hay metadatos, no mostrar nada
-  if (!(product as any).metadata || Object.keys((product as any).metadata).length === 0) {
-    return null;
-  }
-
-  // Filtrar y formatear metadatos válidos
-  const validMetadata = Object.entries((product as any).metadata).filter(([key, value]) => {
-    // Excluir campos vacíos o que no sean informativos
-    if (!value || (Array.isArray(value) && value.length === 0)) return false;
-    if (key === 'variants') return false; // Las variantes se muestran por separado
-    return true;
-  });
-
-  if (validMetadata.length === 0) return null;
+  // Filtrar y formatear metadatos válidos - DEBE estar antes del useEffect
+  const validMetadata = (product as any).metadata
+    ? Object.entries((product as any).metadata).filter(([key, value]) => {
+        // Excluir campos vacíos o que no sean informativos
+        if (!value || (Array.isArray(value) && value.length === 0)) return false;
+        if (key === 'variants') return false; // Las variantes se muestran por separado
+        return true;
+      })
+    : [];
 
   // Cargar etiquetas de metadatos desde filtros
   useEffect(() => {
@@ -109,6 +104,13 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
       loadMetadataLabels();
     }
   }, [storeId, product]);
+
+  // Early returns DESPUÉS de todos los hooks
+  if (!(product as any).metadata || Object.keys((product as any).metadata).length === 0) {
+    return null;
+  }
+
+  if (validMetadata.length === 0) return null;
 
   const formatValue = (value: any): string => {
     if (Array.isArray(value)) {
