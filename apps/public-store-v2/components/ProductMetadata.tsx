@@ -1,31 +1,77 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { PublicProduct } from '../lib/products';
+import { useStoreLanguage } from '../lib/store-language-context';
+import { getMetadataDisplayName } from '../lib/filters';
 
 interface ProductMetadataProps {
   product: PublicProduct;
+  storeId: string;
 }
 
-// Mapeo de metadatos a nombres legibles
-const METADATA_DISPLAY_NAMES: Record<string, string> = {
-  'color': 'Color',
-  'size': 'Talla',
-  'size_clothing': 'Talla',
-  'size_shoes': 'Talla de Calzado',
-  'material': 'Material',
-  'style': 'Estilo',
-  'season': 'Temporada',
-  'brand': 'Marca',
-  'weight': 'Peso',
-  'capacity': 'Capacidad',
-  'tech_brand': 'Marca',
-  'screen_size': 'Tamaño de Pantalla',
-  'storage': 'Almacenamiento',
-  'ram': 'Memoria RAM',
-  'processor': 'Procesador'
-};
+// Mapeo de metadatos por idioma
+const METADATA_DISPLAY_NAMES = {
+  es: {
+    'color': 'Color',
+    'size': 'Talla',
+    'size_clothing': 'Talla',
+    'size_shoes': 'Talla de Calzado',
+    'material': 'Material',
+    'style': 'Estilo',
+    'clothing_style': 'Estilo de ropa',
+    'season': 'Temporada',
+    'brand': 'Marca',
+    'weight': 'Peso',
+    'capacity': 'Capacidad',
+    'tech_brand': 'Marca',
+    'screen_size': 'Tamaño de Pantalla',
+    'storage': 'Almacenamiento',
+    'ram': 'Memoria RAM',
+    'processor': 'Procesador'
+  },
+  en: {
+    'color': 'Color',
+    'size': 'Size',
+    'size_clothing': 'Size',
+    'size_shoes': 'Shoe Size',
+    'material': 'Material',
+    'style': 'Style',
+    'clothing_style': 'Clothing Style',
+    'season': 'Season',
+    'brand': 'Brand',
+    'weight': 'Weight',
+    'capacity': 'Capacity',
+    'tech_brand': 'Brand',
+    'screen_size': 'Screen Size',
+    'storage': 'Storage',
+    'ram': 'RAM Memory',
+    'processor': 'Processor'
+  },
+  pt: {
+    'color': 'Cor',
+    'size': 'Tamanho',
+    'size_clothing': 'Tamanho',
+    'size_shoes': 'Tamanho do Calçado',
+    'material': 'Material',
+    'style': 'Estilo',
+    'clothing_style': 'Estilo de Roupa',
+    'season': 'Temporada',
+    'brand': 'Marca',
+    'weight': 'Peso',
+    'capacity': 'Capacidade',
+    'tech_brand': 'Marca',
+    'screen_size': 'Tamanho da Tela',
+    'storage': 'Armazenamento',
+    'ram': 'Memória RAM',
+    'processor': 'Processador'
+  }
+} as const;
 
-export default function ProductMetadata({ product }: ProductMetadataProps) {
+export default function ProductMetadata({ product, storeId }: ProductMetadataProps) {
+  const { language } = useStoreLanguage();
+  const [metadataLabels, setMetadataLabels] = useState<Record<string, string>>({});
+
   // Si no hay metadatos, no mostrar nada
   if (!(product as any).metadata || Object.keys((product as any).metadata).length === 0) {
     return null;
@@ -41,6 +87,29 @@ export default function ProductMetadata({ product }: ProductMetadataProps) {
 
   if (validMetadata.length === 0) return null;
 
+  // Cargar etiquetas de metadatos desde filtros
+  useEffect(() => {
+    const loadMetadataLabels = async () => {
+      const labels: Record<string, string> = {};
+
+      for (const [key] of validMetadata) {
+        try {
+          labels[key] = await getMetadataDisplayName(storeId, key);
+        } catch (e) {
+          console.warn(`Error loading label for ${key}:`, e);
+          // Fallback
+          labels[key] = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+        }
+      }
+
+      setMetadataLabels(labels);
+    };
+
+    if (validMetadata.length > 0 && storeId) {
+      loadMetadataLabels();
+    }
+  }, [storeId, product]);
+
   const formatValue = (value: any): string => {
     if (Array.isArray(value)) {
       return value.join(', ');
@@ -49,7 +118,8 @@ export default function ProductMetadata({ product }: ProductMetadataProps) {
   };
 
   const getDisplayName = (key: string): string => {
-    return METADATA_DISPLAY_NAMES[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+    // Usar etiquetas cargadas desde filtros, con fallback a formato básico
+    return metadataLabels[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
   };
 
   return (

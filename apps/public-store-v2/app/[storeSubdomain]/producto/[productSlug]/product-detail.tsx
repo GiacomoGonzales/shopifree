@@ -838,7 +838,7 @@ ${productUrl}
           ) : null}
 
               {/* Metadatos descriptivos */}
-              <ProductMetadata product={product} />
+              <ProductMetadata product={product} storeId={storeId || ''} />
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">

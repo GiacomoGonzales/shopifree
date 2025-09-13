@@ -1,4 +1,34 @@
 /**
+ * Genera una imagen placeholder muy pequeña y borrosa para progressive loading
+ * - Tamaño muy pequeño: 20x20px
+ * - Calidad muy baja: q_auto:low
+ * - Blur extremo: e_blur:800
+ * - Formato optimizado: f_auto
+ */
+export function toCloudinaryBlurPlaceholder(url: string | undefined | null): string | undefined {
+	if (!url || typeof url !== "string") return undefined;
+	try {
+		const isCloudinary = url.includes("res.cloudinary.com") && url.includes("/upload/");
+		if (!isCloudinary) return url;
+
+		const marker = "/upload/";
+		const idx = url.indexOf(marker);
+		if (idx === -1) return url;
+
+		const prefix = url.slice(0, idx + marker.length);
+		const suffix = url.slice(idx + marker.length);
+		const hasVersionFirst = /^v\d+/.test(suffix);
+		const versionAndRest = hasVersionFirst ? suffix : suffix.replace(/^([^/]+)\//, "");
+
+		// Transformaciones para placeholder blur: muy pequeño, baja calidad, muy borroso
+		const transforms = `c_fill,g_auto,f_auto,q_auto:low,w_20,h_20,e_blur:800`;
+		return `${prefix}${transforms}/${versionAndRest}`;
+	} catch (_) {
+		return url;
+	}
+}
+
+/**
  * Si la URL es de Cloudinary, inserta transformaciones para generar una miniatura cuadrada nítida.
  * - Recorta rellenando el marco: c_fill,g_auto
  * - Formato y calidad automáticos: f_auto,q_auto:good

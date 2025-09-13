@@ -2890,6 +2890,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     flex-shrink: 0;
     width: 200px;
     height: 200px;
+    aspect-ratio: 1 / 1; /* Forzar aspecto cuadrado */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2904,7 +2905,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-brand-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Cambiar de cover a contain para mantener aspecto original */
     border-radius: var(--nbd-radius-2xl);
     transition: all var(--nbd-transition-slow);
     /* Mostrar siempre en color */
@@ -3016,7 +3017,10 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         width: calc(100vw - 120px); /* 1 marca centrada con espacios laterales */
         max-width: 200px; /* Máximo para pantallas más grandes */
         min-width: 180px; /* Mínimo para asegurar buen tamaño */
-        height: 150px;
+        height: calc(100vw - 120px); /* Mismo cálculo que width para mantener cuadrado */
+        max-height: 200px; /* Mismo límite que max-width */
+        min-height: 180px; /* Mismo límite que min-width */
+        aspect-ratio: 1 / 1; /* Reforzar aspecto cuadrado en móvil */
         margin: var(--nbd-space-xs) 0;
         flex-shrink: 0; /* Evitar que se compriman durante el scroll */
     }
@@ -3080,7 +3084,10 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         width: calc(100vw - 100px); /* 1 marca centrada con espacios laterales */
         max-width: 160px; /* Máximo ajustado para pantallas pequeñas */
         min-width: 140px; /* Mínimo ajustado */
-        height: 120px;
+        height: calc(100vw - 100px); /* Mismo cálculo que width para mantener cuadrado */
+        max-height: 160px; /* Mismo límite que max-width */
+        min-height: 140px; /* Mismo límite que min-width */
+        aspect-ratio: 1 / 1; /* Reforzar aspecto cuadrado en móviles pequeños */
         margin: var(--nbd-space-xs) 0;
         flex-shrink: 0; /* Evitar que se compriman durante el scroll */
     }
@@ -7589,4 +7596,83 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         padding: var(--nbd-space-sm) var(--nbd-space-md);
         font-size: var(--nbd-font-size-sm);
     }
+}
+
+/* ===================================================
+   PROGRESSIVE IMAGE LOADING
+   =================================================== */
+
+.progressive-image {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--nbd-neutral-100);
+}
+
+.progressive-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(4px) saturate(1.2); /* Blur adicional y saturación para mejor efecto */
+    transform: scale(1.1); /* Escalar ligeramente para ocultar bordes borrosos */
+    transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    opacity: 1;
+    z-index: 1;
+}
+
+.progressive-image-placeholder--hidden {
+    opacity: 0;
+}
+
+.progressive-image-main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    opacity: 0;
+    z-index: 2;
+}
+
+.progressive-image-main--loaded {
+    opacity: 1;
+}
+
+.progressive-image-fallback {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--nbd-neutral-100);
+    color: var(--nbd-neutral-500);
+    z-index: 3;
+}
+
+/* Optimización para reducir repaints durante la transición */
+.progressive-image-placeholder,
+.progressive-image-main {
+    will-change: opacity;
+}
+
+/* Variante para productos - mantiene aspect ratio */
+.progressive-image--product {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--nbd-radius-lg);
+}
+
+/* Variante para marcas - mantiene aspect ratio cuadrado */
+.progressive-image--brand {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--nbd-radius-2xl);
 }

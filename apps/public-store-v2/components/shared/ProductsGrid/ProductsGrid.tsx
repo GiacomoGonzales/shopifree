@@ -1,5 +1,6 @@
 import { PublicProduct } from '../../../lib/products'
 import { AddToCartButton } from '../AddToCartButton'
+import { ProgressiveImage } from '../ProgressiveImage'
 
 export type ViewMode = 'expanded' | 'grid' | 'list'
 
@@ -59,51 +60,30 @@ export function ProductsGrid({
               <div className="nbd-product-image">
                 {(() => {
                   const imageUrl = product.image || product.mediaFiles?.[0]?.url;
-                  
-                  if (!imageUrl) return null;
-                  
-                  // Generar diferentes tamaños optimizados para móvil y retina
-                  const src600 = toCloudinarySquare(imageUrl, 600);   // Para móvil normal
-                  const src800 = toCloudinarySquare(imageUrl, 800);   // Para móvil retina
-                  const src1200 = toCloudinarySquare(imageUrl, 1200); // Para tablet retina
-                  const src1600 = toCloudinarySquare(imageUrl, 1600); // Para desktop retina
-                  
+
+                  if (!imageUrl) {
+                    return (
+                      <div className="nbd-product-placeholder w-full h-full flex flex-col items-center justify-center gap-sm">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                          <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
+                      </div>
+                    );
+                  }
+
+                  const src800 = toCloudinarySquare(imageUrl, 800);
+
                   return (
-                    <img
-                      src={src800}
-                      srcSet={`${src600} 600w, ${src800} 800w, ${src1200} 1200w, ${src1600} 1600w`}
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    <ProgressiveImage
+                      src={src800 || imageUrl}
                       alt={product.name}
-                      className="nbd-product-img"
-                      loading="lazy"
-                      decoding="async"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const placeholder = e.currentTarget.parentElement?.querySelector('.nbd-product-placeholder-hidden');
-                        if (placeholder) {
-                          (placeholder as HTMLElement).style.display = 'flex';
-                        }
-                      }}
+                      className="progressive-image--product"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                   );
                 })()}
-                
-                <div className="nbd-product-placeholder nbd-product-placeholder-hidden w-full h-full flex flex-col items-center justify-center gap-sm" style={{ display: 'none' }}>
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
-                </div>
-                
-                {!product.image && !product.mediaFiles?.[0]?.url && (
-                  <div className="nbd-product-placeholder w-full h-full flex flex-col items-center justify-center gap-sm">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                      <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
-                  </div>
-                )}
-                
+
                 {product.comparePrice && product.comparePrice > product.price && (
                   <div className="nbd-product-badge">
                     {additionalText('offer')}
