@@ -121,7 +121,15 @@ export default function SimpleVariantSelector({ product, onVariantChange }: Simp
       }
     });
 
+    console.log('🎯 [SimpleVariantSelector] Variantes parseadas:', parsedVariants);
     console.log('🎯 [SimpleVariantSelector] Atributos extraídos:', attributes);
+    console.log('🎯 [SimpleVariantSelector] Cantidad de atributos únicos:', Object.keys(attributes).length);
+    
+    // Debug específico para productos con una sola variante
+    if (parsedVariants.length === 1) {
+      console.log('🔍 [SINGLE VARIANT DEBUG] Producto con una sola variante:', parsedVariants[0]);
+      console.log('🔍 [SINGLE VARIANT DEBUG] Atributos de la variante:', parsedVariants[0].attributes);
+    }
     
     setVariants(parsedVariants);
     setAvailableAttributes(attributes);

@@ -820,6 +820,15 @@ ${productUrl}
                 );
               })()}
 
+              {/* Selector de variantes */}
+              <SimpleVariantSelector 
+                product={product}
+                onVariantChange={(variant) => {
+                  console.log('🔄 [ProductDetail] Nueva variante seleccionada:', variant);
+                  setSelectedPricingVariant(variant);
+                }}
+              />
+
               {/* Descripción */}
           {product.description ? (
                 <div className="nbd-product-description">
@@ -830,15 +839,6 @@ ${productUrl}
 
               {/* Metadatos descriptivos */}
               <ProductMetadata product={product} />
-
-              {/* Selector de variantes */}
-              <SimpleVariantSelector 
-                product={product}
-                onVariantChange={(variant) => {
-                  console.log('🔄 [ProductDetail] Nueva variante seleccionada:', variant);
-                  // Aquí puedes manejar el cambio de variante si necesitas
-                }}
-              />
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">

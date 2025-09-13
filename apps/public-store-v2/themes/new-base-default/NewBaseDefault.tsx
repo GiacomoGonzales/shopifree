@@ -8,7 +8,7 @@ import "./utilities.css";
 import UnifiedLoading from "../../components/UnifiedLoading";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture, applyStoreColors } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
-import { getStoreCategories, Category } from "../../lib/categories";
+import { getStoreCategories, getStoreParentCategories, getCategorySubcategories, Category } from "../../lib/categories";
 import { NewBaseDefaultNewsletter } from "./components/NewBaseDefaultNewsletter";
 import { NewBaseDefaultHero } from "./components/NewBaseDefaultHero";
 import { AddToCartButton } from "../../components/shared";
@@ -210,6 +210,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
     const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
+    const [loadingSubcategories, setLoadingSubcategories] = useState<boolean>(false);
     
     // Estados para el modal de vista rápida de producto
     const [quickViewProduct, setQuickViewProduct] = useState<PublicProduct | null>(null);
@@ -281,10 +282,14 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 if (!alive) return;
                 setStoreIdState(id);
                 if (id) {
+                    // Usar función optimizada si estamos en home page, función completa si estamos en página de categoría
+                    const isOnHomePage = !categorySlug && !collectionSlug && !brandSlug;
+                    const categoryLoadFunction = isOnHomePage ? getStoreParentCategories : getStoreCategories;
+                    
                     const [items, info, cats, brandList, filterList, collectionsList] = await Promise.all([
                         getStoreProducts(id),
                         getStoreBasicInfo(id),
-                        getStoreCategories(id),
+                        categoryLoadFunction(id),
                         getStoreBrands(id),
                         getStoreFilters(id),
                         getStoreCollections(id)
@@ -370,6 +375,44 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             setCurrentBrand(null);
         }
     }, [brandSlugFromUrl, resolvedStoreId]);
+
+    // Cargar subcategorías dinámicamente cuando se accede a una página de categoría
+    useEffect(() => {
+        if (isOnCategoryPage && categorySlugFromUrl && resolvedStoreId && categories) {
+            const currentCategory = categories.find(c => c.slug === categorySlugFromUrl);
+            if (currentCategory && !categories.some(c => c.parentCategoryId === currentCategory.id)) {
+                // Solo cargar si no tenemos subcategorías ya cargadas para esta categoría
+                let alive = true;
+                setLoadingSubcategories(true);
+                
+                (async () => {
+                    try {
+                        const subcategories = await getCategorySubcategories(resolvedStoreId, currentCategory.id);
+                        if (!alive) return;
+                        
+                        if (subcategories.length > 0) {
+                            // Agregar las subcategorías al estado de categorías
+                            setCategories(prev => {
+                                if (!prev) return prev;
+                                // Verificar que no estén ya agregadas
+                                const existingSubcategoryIds = prev.filter(c => c.parentCategoryId === currentCategory.id).map(c => c.id);
+                                const newSubcategories = subcategories.filter(sub => !existingSubcategoryIds.includes(sub.id));
+                                return [...prev, ...newSubcategories];
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error loading subcategories:', error);
+                    } finally {
+                        if (alive) setLoadingSubcategories(false);
+                    }
+                })();
+                
+                return () => {
+                    alive = false;
+                };
+            }
+        }
+    }, [isOnCategoryPage, categorySlugFromUrl, resolvedStoreId, categories]);
 
     // Resetear paginación cuando cambie la categoría activa
     useEffect(() => {
@@ -821,17 +864,47 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
     // Función para agregar producto al carrito con modal de opciones
     const handleAddToCart = async (product: PublicProduct) => {
-        // Verificar si el producto tiene opciones obligatorias
-        const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
-        const availableVariants = product.tags ? Object.entries(product.tags).filter(([key, value]) => {
-            return variantFields.includes(key) && Array.isArray(value) && value.length > 1;
-        }) : [];
+        // Verificar si el producto tiene variantes reales (mismo sistema que SimpleVariantSelector)
+        let variantsData = null;
         
-        const hasRequiredOptions = availableVariants.length > 0;
+        // Buscar variantes en diferentes ubicaciones (igual que SimpleVariantSelector)
+        if (product.tags && product.tags.variants) {
+            variantsData = product.tags.variants;
+        } else if ((product as any).variants) {
+            variantsData = (product as any).variants;
+        } else if ((product as any).metaFieldValues?.variants) {
+            variantsData = (product as any).metaFieldValues.variants;
+        }
 
-        if (hasRequiredOptions) {
-            // Producto tiene opciones obligatorias → abrir modal
-            console.log(`Producto con opciones obligatorias: ${product.name} - Abriendo modal`);
+        let hasVariants = false;
+        let variantsCount = 0;
+
+        if (variantsData) {
+            try {
+                let parsedVariants = [];
+                if (typeof variantsData === 'string') {
+                    parsedVariants = JSON.parse(variantsData);
+                } else if (Array.isArray(variantsData)) {
+                    parsedVariants = variantsData;
+                }
+                
+                hasVariants = parsedVariants.length > 0;
+                variantsCount = parsedVariants.length;
+            } catch (error) {
+                console.error('Error parseando variantes:', error);
+            }
+        }
+        
+        console.log(`🛒 Product "${product.name}" variants analysis:`, {
+            hasVariantsData: !!variantsData,
+            variantsCount,
+            hasVariants,
+            action: hasVariants ? 'OPEN_QUICKVIEW' : 'ADD_DIRECT'
+        });
+
+        if (hasVariants) {
+            // Producto tiene variantes → abrir modal quickview
+            console.log(`Producto con variantes: ${product.name} - Abriendo modal`);
             setQuickViewProduct(product);
             setIsQuickViewOpen(true);
             // No agregamos efecto de loading porque se abre el modal inmediatamente

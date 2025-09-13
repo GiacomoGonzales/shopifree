@@ -5,6 +5,7 @@ import { PublicProduct } from '../../../lib/products';
 import { useCart } from '../../../lib/cart-context';
 import { toCloudinarySquare } from '../../../lib/images';
 import { formatPrice } from '../../../lib/currency';
+import SimpleVariantSelector from '../../../components/SimpleVariantSelector';
 
 interface ProductQuickViewProps {
   product: PublicProduct;
@@ -17,13 +18,13 @@ interface ProductQuickViewProps {
 
 export default function ProductQuickView({ product, isOpen, onClose, storeInfo }: ProductQuickViewProps) {
   const { addItem, openCart } = useCart();
-  const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: string }>({});
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Reset variants when modal opens with new product
   useEffect(() => {
     if (isOpen) {
-      setSelectedVariants({});
+      setSelectedVariant(null);
     }
   }, [isOpen, product.id]);
 
@@ -46,23 +47,44 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
     };
   }, [isOpen, onClose]);
 
-  const handleVariantChange = (variantKey: string, value: string) => {
-    setSelectedVariants(prev => ({
-      ...prev,
-      [variantKey]: value
-    }));
+  const handleVariantChange = (variant: any) => {
+    console.log('🔄 [ProductQuickView] Variante seleccionada:', variant);
+    setSelectedVariant(variant);
   };
 
-  const getRequiredVariants = () => {
-    const variantFields = ['color', 'size', 'size_clothing', 'size_shoes', 'material', 'style', 'clothing_style'];
-    return product.tags ? Object.entries(product.tags).filter(([key, value]) => {
-      return variantFields.includes(key) && Array.isArray(value) && value.length > 1;
-    }) : [];
+  const hasVariants = () => {
+    // Verificar si el producto tiene variantes reales (mismo sistema que SimpleVariantSelector)
+    let variantsData = null;
+    
+    if (product.tags && product.tags.variants) {
+      variantsData = product.tags.variants;
+    } else if ((product as any).variants) {
+      variantsData = (product as any).variants;
+    } else if ((product as any).metaFieldValues?.variants) {
+      variantsData = (product as any).metaFieldValues.variants;
+    }
+
+    if (!variantsData) return false;
+
+    try {
+      let parsedVariants = [];
+      if (typeof variantsData === 'string') {
+        parsedVariants = JSON.parse(variantsData);
+      } else if (Array.isArray(variantsData)) {
+        parsedVariants = variantsData;
+      }
+      return parsedVariants.length > 0;
+    } catch (error) {
+      return false;
+    }
   };
 
   const isReadyToAdd = () => {
-    const requiredVariants = getRequiredVariants();
-    return requiredVariants.every(([key]) => selectedVariants[key]);
+    // Si el producto no tiene variantes, siempre está listo
+    if (!hasVariants()) return true;
+    
+    // Si tiene variantes, debe tener una seleccionada
+    return selectedVariant !== null;
   };
 
   // Función para limpiar HTML de la descripción
@@ -90,44 +112,46 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
       // Add delay for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Crear descripción de variantes como en la página de producto
+      // Usar el mismo formato que la página de producto
       let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
+      let itemId = product.id;
       
-      if (Object.keys(selectedVariants).length > 0) {
-        const variantDesc = Object.entries(selectedVariants)
-          .map(([key, value]) => `${value}`)
-          .join(', ');
-        if (variantDesc) {
-          variantInfo = {
-            id: 'traditional',
-            name: variantDesc,
-            price: product.price
-          };
-        }
+      if (selectedVariant) {
+        // Formato completo de variante con atributos
+        const attributeNames = Object.values(selectedVariant.attributes || {}).join(', ');
+        variantInfo = {
+          id: selectedVariant.id,
+          name: attributeNames,
+          price: selectedVariant.price || product.price
+        };
+        itemId = `${product.id}-${selectedVariant.id}`;
       }
 
       addItem({
-        id: variantInfo ? `${product.id}-traditional` : product.id,
+        id: itemId,
         productId: product.id,
         name: product.name,
-        price: product.price,
+        price: selectedVariant?.price || product.price,
         currency: storeInfo?.currency || 'COP',
         image: product.image || '',
         slug: product.slug || product.id,
-        variant: variantInfo // Usar el mismo formato que la página de producto
+        variant: variantInfo,
+        incomplete: false
       }, 1);
 
       onClose(); // Cerrar el modal de producto
       openCart(); // Abrir el carrito inmediatamente
-      console.log(`Agregado al carrito: ${product.name} con variantes:`, selectedVariants);
+      console.log(`✅ [ProductQuickView] Agregado al carrito: ${product.name}`, {
+        selectedVariant,
+        variantInfo,
+        finalPrice: selectedVariant?.price || product.price
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
-
-  const requiredVariants = getRequiredVariants();
 
   return (
     <>
@@ -177,7 +201,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
           <div className="nbd-product-info-section">
             <h3 className="nbd-product-title">{product.name}</h3>
             <div className="nbd-product-price-large">
-              {formatPrice(product.price, storeInfo?.currency)}
+              {formatPrice(selectedVariant?.price || product.price, storeInfo?.currency)}
             </div>
             
             {/* Descripción limpia del producto */}
@@ -188,47 +212,12 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
             )}
           </div>
 
-          {/* Selectores de variantes */}
+          {/* Selector de variantes usando SimpleVariantSelector */}
           <div className="nbd-product-variants-section">
-            {requiredVariants.map(([variantKey, options]) => {
-              // Mapear nombres de campos a nombres mostrados
-              const getDisplayName = (key: string) => {
-                const map: { [key: string]: string } = {
-                  'color': 'Color',
-                  'size': 'Talla',
-                  'size_clothing': 'Talla',
-                  'size_shoes': 'Talla de Calzado',
-                  'material': 'Material',
-                  'style': 'Estilo',
-                  'clothing_style': 'Estilo'
-                };
-                return map[key] || key;
-              };
-
-              return (
-                <div key={variantKey} className="nbd-variant-group">
-                  <label className="nbd-variant-label">
-                    {getDisplayName(variantKey)}:
-                  </label>
-                  <div className="nbd-variant-options">
-                    {Array.isArray(options) ? options.map((option) => {
-                      const isSelected = selectedVariants[variantKey] === option;
-                      return (
-                        <button
-                          key={option}
-                          type="button"
-                          className={`nbd-variant-option ${isSelected ? 'nbd-variant-option--selected' : ''}`}
-                          onClick={() => handleVariantChange(variantKey, option)}
-                          aria-pressed={isSelected}
-                        >
-                          {option}
-                        </button>
-                      );
-                    }) : null}
-                  </div>
-                </div>
-              );
-            })}
+            <SimpleVariantSelector 
+              product={product}
+              onVariantChange={handleVariantChange}
+            />
           </div>
         </div>
 
@@ -256,7 +245,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                Agregar al carrito
+                Agregar al carrito • {formatPrice(selectedVariant?.price || product.price, storeInfo?.currency)}
               </>
             )}
           </button>

@@ -753,6 +753,12 @@ ${productUrl}
                 );
               })()}
 
+              {/* Selector de variantes */}
+              <SimpleVariantSelector 
+                product={product}
+                onVariantChange={handleVariantChange}
+              />
+
               {/* Descripción */}
           {product.description ? (
                 <div className="nbd-product-description">
@@ -760,12 +766,6 @@ ${productUrl}
                   <div dangerouslySetInnerHTML={{ __html: product.description }} />
                 </div>
           ) : null}
-
-              {/* Selector de variantes */}
-              <SimpleVariantSelector 
-                product={product}
-                onVariantChange={handleVariantChange}
-              />
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">

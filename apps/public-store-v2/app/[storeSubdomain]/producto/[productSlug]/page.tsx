@@ -6,6 +6,7 @@ import { getProduct } from '../../../../lib/products';
 import { generateAllImageVariants } from '../../../../lib/image-optimization';
 import { getCanonicalHost } from '../../../../lib/canonical-resolver';
 import { formatPrice } from '../../../../lib/currency';
+import { getStoreMetadata } from '../../../../server-only/store-metadata';
 import UnifiedLoading from '../../../../components/UnifiedLoading';
 
 export default function ProductoPage({ params }: { params: { productSlug: string; storeSubdomain: string } }) {
@@ -26,9 +27,10 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
     // Obtener idioma principal de la tienda
     const effectiveLocale = await getStorePrimaryLocale(storeId) || 'es';
     
-    const [product, storeInfo] = await Promise.all([
+    const [product, storeInfo, seoData] = await Promise.all([
       getProduct(storeId, params.productSlug),
-      getStoreBasicInfo(storeId)
+      getStoreBasicInfo(storeId),
+      getStoreMetadata(params.storeSubdomain)
     ]);
     
     if (!product) return { title: 'Producto' };
@@ -97,8 +99,15 @@ export async function generateMetadata({ params }: { params: { productSlug: stri
         canonical: productUrl
       },
 
-      // Iconos de la tienda para mejor branding
-      icons: {
+      // Iconos de la tienda para mejor branding - usar favicon de SEO, no logo de header
+      icons: seoData?.favicon ? {
+        icon: [
+          { url: seoData.favicon, sizes: '32x32', type: 'image/png' },
+          { url: seoData.favicon, sizes: '16x16', type: 'image/png' }
+        ],
+        shortcut: seoData.favicon,
+        apple: imageVariants.appleTouchIcon
+      } : {
         icon: storeInfo?.logoUrl || '/favicon.ico',
         apple: imageVariants.appleTouchIcon,
         other: [
