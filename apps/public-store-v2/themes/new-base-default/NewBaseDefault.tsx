@@ -676,10 +676,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                             base = filteredBySubcategory;
                             console.log(`✅ Usando productos específicos de subcategoría`);
                         } else {
-                            // Si no hay productos específicos, mostrar productos de la categoría padre
-                            // que podrían pertenecer a esta subcategoría (fallback inteligente)
-                            console.log(`⚠️ No hay productos específicos de "${subcategory.name}", mostrando productos de categoría padre`);
-                            // Mantener todos los productos de la categoría padre
+                            // 🔧 CORRECCIÓN: Si no hay productos en la subcategoría, mostrar lista vacía
+                            // NO mostrar todos los productos de la tienda
+                            console.log(`⚠️ No hay productos específicos de "${subcategory.name}", mostrando lista vacía`);
+                            base = []; // Lista vacía en lugar de mantener todos los productos
                         }
                     }
                 } else {
@@ -717,15 +717,17 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         if (Object.keys(selectedFilters).length > 0) {
             console.log("=== APPLYING FILTERS ===");
             console.log("Selected filters:", selectedFilters);
+            console.log("First product metadata example:", base[0]?.metadata);
             console.log("First product tags example:", base[0]?.tags);
             
             base = base.filter(product => {
                 const productMatches = Object.entries(selectedFilters).every(([filterKey, selectedValues]) => {
                     if (!selectedValues || selectedValues.length === 0) return true;
                     
-                    // Los filtros están en el campo 'tags' del producto (que ahora mapea a metaFieldValues)
-                    const productTags = product.tags || {};
-                    const productFilterValue = productTags[filterKey];
+                    // 🔧 CORRECCIÓN: Los filtros descriptivos están en 'metadata', no en 'tags'
+                    // tags = solo variantes reales, metadata = metadatos descriptivos (color, material, etc.)
+                    const productMetadata = product.metadata || {};
+                    const productFilterValue = productMetadata[filterKey];
                     
                     console.log(`Product ${product.name}:`);
                     console.log(`  Filter ${filterKey}: productValue="${productFilterValue}", selectedValues:`, selectedValues);
