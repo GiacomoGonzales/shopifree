@@ -25,7 +25,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
 
   // Hook de promociones - obtiene el precio original del producto o variante seleccionada
   const originalPrice = selectedVariant ? selectedVariant.price : product.price;
-  const promotionsData = usePromotions(storeId, product.id || '', originalPrice);
+  const promotionsData = usePromotions(storeId || null, product.id || '', originalPrice);
 
   // Reset variants when modal opens with new product
   useEffect(() => {
