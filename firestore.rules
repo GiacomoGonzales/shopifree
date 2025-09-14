@@ -150,9 +150,19 @@ service cloud.firestore {
       match /coupons/{couponId} {
         // Lectura pública para validación de cupones
         allow read: if true;
-        
+
         // Solo el dueño de la tienda puede crear, actualizar y eliminar cupones
-        allow create, update, delete: if isAuthenticated() && 
+        allow create, update, delete: if isAuthenticated() &&
+                                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
+
+      // Reglas para promociones directas
+      match /promotions/{promotionId} {
+        // Lectura pública para aplicar promociones en la tienda
+        allow read: if true;
+
+        // Solo el dueño de la tienda puede crear, actualizar y eliminar promociones
+        allow create, update, delete: if isAuthenticated() &&
                                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
       

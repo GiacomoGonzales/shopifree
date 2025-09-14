@@ -1,13 +1,52 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '../../../../components/DashboardLayout'
+import { useAuth } from '../../../../lib/simple-auth-context'
+import { getUserStore } from '../../../../lib/store'
+import { getCoupons } from '../../../../lib/coupons'
+import { getPromotions } from '../../../../lib/promotions'
 
 export default function AttractCustomersPage() {
   const t = useTranslations('marketing')
   const router = useRouter()
+  const { user } = useAuth()
+
+  const [loading, setLoading] = useState(true)
+  const [coupons, setCoupons] = useState<any[]>([])
+  const [promotions, setPromotions] = useState<any[]>([])
+  const [storeId, setStoreId] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadData()
+  }, [user])
+
+  const loadData = async () => {
+    if (!user?.uid) return
+
+    try {
+      const store = await getUserStore(user.uid)
+      if (store) {
+        setStoreId(store.id)
+
+        // Cargar cupones y promociones en paralelo
+        const [storeCoupons, storePromotions] = await Promise.all([
+          getCoupons(store.id),
+          getPromotions(store.id)
+        ])
+
+        setCoupons(storeCoupons)
+        setPromotions(storePromotions)
+      }
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <DashboardLayout>
@@ -64,13 +103,58 @@ export default function AttractCustomersPage() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="text-center py-8">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">{t('coupons.empty')}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{t('coupons.emptyDescription')}</p>
-                  </div>
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="mt-2 text-sm text-gray-500">Cargando cupones...</p>
+                    </div>
+                  ) : coupons.length === 0 ? (
+                    <div className="text-center py-8">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">{t('coupons.empty')}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{t('coupons.emptyDescription')}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-sm text-gray-600">
+                          {coupons.length} cupón{coupons.length !== 1 ? 'es' : ''} activo{coupons.length !== 1 ? 's' : ''}
+                        </p>
+                        <Link
+                          href="/marketing/attract/coupons"
+                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Ver todos →
+                        </Link>
+                      </div>
+                      <div className="space-y-3">
+                        {coupons.slice(0, 3).map((coupon) => (
+                          <div key={coupon.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="flex items-center">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-3">
+                                  {coupon.code}
+                                </span>
+                                <span className="text-sm font-medium text-gray-900">{coupon.name}</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-gray-900">
+                                {coupon.type === 'percentage' ? `${coupon.value}%` :
+                                 coupon.type === 'fixed_amount' ? `$${coupon.value}` :
+                                 'Envío gratis'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {coupon.totalUses || 0} usos
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -89,19 +173,76 @@ export default function AttractCustomersPage() {
                         <p className="text-sm text-gray-500">{t('promotions.description')}</p>
                       </div>
                     </div>
-                    <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+                    <button
+                      onClick={() => router.push('/marketing/attract/promotions')}
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+                    >
                       {t('promotions.create')}
                     </button>
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="text-center py-8">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">{t('promotions.empty')}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{t('promotions.emptyDescription')}</p>
-                  </div>
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                      <p className="mt-2 text-sm text-gray-500">Cargando promociones...</p>
+                    </div>
+                  ) : promotions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">{t('promotions.empty')}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{t('promotions.emptyDescription')}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-sm text-gray-600">
+                          {promotions.length} promoción{promotions.length !== 1 ? 'es' : ''} activa{promotions.length !== 1 ? 's' : ''}
+                        </p>
+                        <Link
+                          href="/marketing/attract/promotions"
+                          className="text-sm text-green-600 hover:text-green-800 font-medium"
+                        >
+                          Ver todos →
+                        </Link>
+                      </div>
+                      <div className="space-y-3">
+                        {promotions.slice(0, 3).map((promotion) => (
+                          <div key={promotion.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="flex items-center">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mr-3 ${
+                                  promotion.status === 'active' ? 'bg-green-100 text-green-800' :
+                                  promotion.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                                  promotion.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {promotion.status === 'active' ? 'Activa' :
+                                   promotion.status === 'paused' ? 'Pausada' :
+                                   promotion.status === 'scheduled' ? 'Programada' :
+                                   'Expirada'}
+                                </span>
+                                <span className="text-sm font-medium text-gray-900">{promotion.name}</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-gray-900">
+                                {promotion.type === 'percentage' ? `${promotion.discountValue}%` :
+                                 promotion.type === 'price_discount' ? `$${promotion.discountValue}` :
+                                 `${promotion.discountValue} gratis`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {promotion.targetType === 'all_products' ? 'Todos los productos' :
+                                 `${promotion.targetIds.length} producto${promotion.targetIds.length !== 1 ? 's' : ''}`}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

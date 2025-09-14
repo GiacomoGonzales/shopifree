@@ -58,7 +58,6 @@ export default function EditProductPage() {
   const [loadingCategories, setLoadingCategories] = useState(false)
   const [loadingSubcategories, setLoadingSubcategories] = useState(false)
   const [price, setPrice] = useState('')
-  const [comparePrice, setComparePrice] = useState('')
   const [cost, setCost] = useState('')
   const [chargeTaxes, setChargeTaxes] = useState(false)
   
@@ -122,7 +121,6 @@ export default function EditProductPage() {
         setDescription(productData.description)
         setSelectedBrandId(productData.selectedBrandId || '')
         setPrice(productData.price.toString())
-        setComparePrice(productData.comparePrice?.toString() || '')
         setCost(productData.cost?.toString() || '')
         setChargeTaxes(productData.chargeTaxes)
         
@@ -606,7 +604,6 @@ export default function EditProductPage() {
         
         // Precios
         price: parseFloat(price) || 0,
-        comparePrice: comparePrice ? parseFloat(comparePrice) : null,
         cost: cost ? parseFloat(cost) : null,
         chargeTaxes,
         
@@ -899,23 +896,6 @@ export default function EditProductPage() {
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         placeholder={currency === 'PEN' ? '100.00' : currency === 'USD' ? '25.00' : '100.00'}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Precio de comparación ({currencyName})
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="text-gray-500 sm:text-sm">{currencySymbol}</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={comparePrice}
-                        onChange={(e) => setComparePrice(e.target.value)}
-                        placeholder={currency === 'PEN' ? '120.00' : currency === 'USD' ? '30.00' : '120.00'}
                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                       />
                     </div>
