@@ -6,6 +6,7 @@ import { useCart } from '../../../lib/cart-context';
 import { toCloudinarySquare } from '../../../lib/images';
 import { formatPrice } from '../../../lib/currency';
 import SimpleVariantSelector from '../../../components/SimpleVariantSelector';
+import { usePromotions } from '../../../lib/hooks/usePromotions';
 
 interface ProductQuickViewProps {
   product: PublicProduct;
@@ -14,12 +15,17 @@ interface ProductQuickViewProps {
   storeInfo?: {
     currency?: string;
   };
+  storeId?: string | null;
 }
 
-export default function ProductQuickView({ product, isOpen, onClose, storeInfo }: ProductQuickViewProps) {
+export default function ProductQuickView({ product, isOpen, onClose, storeInfo, storeId }: ProductQuickViewProps) {
   const { addItem, openCart } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Hook de promociones - obtiene el precio original del producto o variante seleccionada
+  const originalPrice = selectedVariant ? selectedVariant.price : product.price;
+  const promotionsData = usePromotions(storeId, product.id, originalPrice);
 
   // Reset variants when modal opens with new product
   useEffect(() => {
@@ -122,7 +128,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
         variantInfo = {
           id: selectedVariant.id,
           name: attributeNames,
-          price: selectedVariant.price || product.price
+          price: promotionsData.finalPrice || (selectedVariant.price || product.price)
         };
         itemId = `${product.id}-${selectedVariant.id}`;
       }
@@ -131,7 +137,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
         id: itemId,
         productId: product.id,
         name: product.name,
-        price: selectedVariant?.price || product.price,
+        price: promotionsData.finalPrice || (selectedVariant?.price || product.price),
         currency: storeInfo?.currency || 'COP',
         image: product.image || '',
         slug: product.slug || product.id,
@@ -201,7 +207,18 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
           <div className="nbd-product-info-section">
             <h3 className="nbd-product-title">{product.name}</h3>
             <div className="nbd-product-price-large">
-              {formatPrice(selectedVariant?.price || product.price, storeInfo?.currency)}
+              {promotionsData.discount > 0 ? (
+                <>
+                  <span style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '8px' }}>
+                    {formatPrice(promotionsData.originalPrice, storeInfo?.currency)}
+                  </span>
+                  <span style={{ color: '#dc2626', fontWeight: 'bold' }}>
+                    {formatPrice(promotionsData.finalPrice, storeInfo?.currency)}
+                  </span>
+                </>
+              ) : (
+                formatPrice(promotionsData.finalPrice || (selectedVariant?.price || product.price), storeInfo?.currency)
+              )}
             </div>
             
             {/* Descripción limpia del producto */}
@@ -245,7 +262,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo }
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                Agregar al carrito • {formatPrice(selectedVariant?.price || product.price, storeInfo?.currency)}
+                Agregar al carrito • {formatPrice(promotionsData.finalPrice || (selectedVariant?.price || product.price), storeInfo?.currency)}
               </>
             )}
           </button>

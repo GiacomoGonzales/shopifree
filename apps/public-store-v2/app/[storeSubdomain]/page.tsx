@@ -43,9 +43,15 @@ export default async function StorePage({ params }: { params: { storeSubdomain: 
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
                         {storeData?.description || 'Descubre nuestros productos exclusivos con la mejor calidad y atención personalizada.'}
                     </p>
-                    <div className="inline-flex items-center gap-2 text-sm text-gray-500">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-                        Cargando productos...
+                    {/* Products preview skeleton */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-4xl mx-auto">
+                        {[1,2,3,4].map(i => (
+                            <div key={i} className="bg-white border rounded-lg p-3 animate-pulse">
+                                <div className="bg-gray-200 rounded aspect-square mb-2"></div>
+                                <div className="h-3 bg-gray-200 rounded mb-1"></div>
+                                <div className="h-3 bg-gray-200 rounded w-12"></div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </main>

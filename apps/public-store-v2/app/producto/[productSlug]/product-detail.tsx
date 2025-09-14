@@ -11,6 +11,7 @@ import { getStoreCategories, Category } from '../../../lib/categories';
 import { useCart } from '../../../lib/cart-context';
 import SimpleVariantSelector from '../../../components/SimpleVariantSelector';
 import UnifiedLoading from '../../../components/UnifiedLoading';
+import { usePromotions } from '../../../lib/hooks/usePromotions';
 
 // Helper function para optimizar URLs de video de Cloudinary
 function optimizeCloudinaryVideo(url: string): string {
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
+  console.log('🚀 [ProductDetail] INICIO DEL COMPONENTE');
   const [storeId, setStoreId] = useState<string | null>(null);
 
   // Función para detectar si estamos en un dominio personalizado
@@ -80,6 +82,117 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
 
   // Hook del carrito
   const { addItem, openCart, state, removeItem } = useCart();
+  console.log('🎯 [ProductDetail] Después de useCart, antes de usePromotions');
+
+  // Hook de promociones - COMENTADO TEMPORALMENTE PARA DEBUGGING
+  console.log('🔍 [ProductDetail] ANTES del hook usePromotions');
+  const originalPrice = selectedVariant ? selectedVariant.price : product?.price || 0;
+  console.log('📊 [ProductDetail] Parámetros para hook:', { storeId, productId: product?.id, originalPrice });
+
+  // COMENTADO TEMPORALMENTE
+  /*
+  let promotionsDataFromHook;
+  try {
+    promotionsDataFromHook = usePromotions(storeId, product?.id, originalPrice);
+    console.log('✅ [ProductDetail] Hook usePromotions ejecutado correctamente');
+  } catch (error) {
+    console.error('❌ [ProductDetail] Error en hook usePromotions:', error);
+    promotionsDataFromHook = { originalPrice: 0, finalPrice: 0, discount: 0, hasDiscountBadge: false };
+  }
+  */
+
+  // Fallback temporal
+  const promotionsDataFromHook = { originalPrice: 0, finalPrice: 0, discount: 0, hasDiscountBadge: false };
+  console.log('✅ [ProductDetail] Hook usePromotions COMENTADO - usando fallback');
+
+  // Estado para promociones (TEMPORAL - para comparar)
+  const [promotionsData, setPromotionsData] = useState({
+    originalPrice: 0,
+    finalPrice: 0,
+    discount: 0,
+    hasDiscountBadge: false,
+    appliedPromotion: undefined as any
+  });
+
+  // useEffect para cargar datos promocionales cuando storeId y product estén disponibles
+  useEffect(() => {
+    console.log('🔄 [ProductDetail] useEffect triggered:', {
+      storeId: !!storeId,
+      productId: product?.id,
+      selectedVariantPrice: selectedVariant?.price
+    });
+
+    if (storeId && product?.id) {
+      const originalPrice = selectedVariant ? selectedVariant.price : product.price;
+      console.log('🚀 [ProductDetail] Loading promotions for:', {
+        storeId,
+        productId: product.id,
+        originalPrice
+      });
+
+      // Cargar promociones de manera asíncrona
+      const loadPromotions = async () => {
+        try {
+          const { getActivePromotionsForProduct, calculateDiscountedPrice, hasPromotionBadge } = await import('../../../lib/promotions');
+
+          const activePromotions = await getActivePromotionsForProduct(storeId, product.id);
+          console.log('📊 [ProductDetail] Active promotions found:', activePromotions);
+
+          if (activePromotions.length > 0) {
+            const discountResult = calculateDiscountedPrice(originalPrice, activePromotions);
+            const showBadge = hasPromotionBadge(activePromotions);
+
+            const promotionResult = {
+              originalPrice,
+              finalPrice: discountResult.finalPrice,
+              discount: discountResult.discount,
+              hasDiscountBadge: showBadge,
+              appliedPromotion: discountResult.appliedPromotion
+            };
+
+            console.log('✅ [ProductDetail] Promotion result:', promotionResult);
+            setPromotionsData(promotionResult);
+          } else {
+            // No hay promociones, usar precio original
+            setPromotionsData({
+              originalPrice,
+              finalPrice: originalPrice,
+              discount: 0,
+              hasDiscountBadge: false,
+              appliedPromotion: undefined
+            });
+          }
+        } catch (error) {
+          console.error('❌ [ProductDetail] Error loading promotions:', error);
+          // Fallback to original price
+          setPromotionsData({
+            originalPrice,
+            finalPrice: originalPrice,
+            discount: 0,
+            hasDiscountBadge: false,
+            appliedPromotion: undefined
+          });
+        }
+      };
+
+      loadPromotions();
+    }
+  }, [storeId, product?.id, selectedVariant]);
+
+  // Debug para página de producto
+  console.log('🏪 [ProductDetail] Store info:', { storeId, productId: product?.id, productName: product?.name });
+  console.log('💰 [ProductDetail] Price info MANUAL:', { promotionsData });
+  console.log('🎯 [ProductDetail] Price info HOOK:', { promotionsDataFromHook });
+  console.log('⚖️ [ProductDetail] COMPARISON:', {
+    manual: promotionsData,
+    hook: promotionsDataFromHook,
+    areEqual: JSON.stringify(promotionsData) === JSON.stringify(promotionsDataFromHook)
+  });
+  console.log('⏱️ [ProductDetail] Timing check:', {
+    hasStoreId: !!storeId,
+    hasProduct: !!product,
+    readyForPromotions: !!(storeId && product?.id)
+  });
 
   // Función para manejar cambios de variantes
   const handleVariantChange = (variant: any) => {
@@ -93,7 +206,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     if (!product || !storeInfo) return '';
     
     const productUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const price = selectedVariant ? selectedVariant.price : product.price;
+    const price = promotionsData.finalPrice || (selectedVariant ? selectedVariant.price : product.price);
     const currency = storeInfo.currency || 'COP';
     const formattedPrice = formatPrice(price, currency);
     
@@ -154,28 +267,34 @@ ${productUrl}
     const quantityInput = document.getElementById('quantity') as HTMLInputElement;
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
-    // Usar variante seleccionada o producto base
-    let finalPrice = product.price;
+    // Usar precios promocionales si están disponibles, sino usar precios base
+    let finalPrice = promotionsData.finalPrice || (selectedVariant ? selectedVariant.price : product.price);
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let itemId = product.id;
 
     if (selectedVariant) {
       console.log('✅ [SIMPLE] Usando variante seleccionada:', selectedVariant);
-      finalPrice = selectedVariant.price;
       itemId = `${product.id}-${selectedVariant.id}`;
-      
+
       const variantDesc = Object.entries(selectedVariant.attributes || {})
         .map(([key, value]) => `${value}`)
         .join(', ');
-        
+
       variantInfo = {
         id: selectedVariant.id,
         name: variantDesc || selectedVariant.name || 'Variante',
-        price: selectedVariant.price
+        price: finalPrice // Usar precio promocional si está disponible
       };
     } else {
       console.log('✅ [SIMPLE] Usando producto base sin variantes');
     }
+
+    console.log('💰 [SIMPLE] Pricing details:', {
+      hasPromotion: promotionsData.discount > 0,
+      originalPrice: promotionsData.originalPrice,
+      finalPrice,
+      discount: promotionsData.discount
+    });
 
     console.log('🛒 [SIMPLE] Agregando al carrito:', {
       itemId,
@@ -680,19 +799,29 @@ ${productUrl}
 
           {typeof product.price === 'number' ? (
                 <div className="nbd-product-pricing">
-                  {product.comparePrice && product.comparePrice > product.price ? (
+                  {/* Mostrar promoción activa si existe */}
+                  {promotionsData.discount > 0 && promotionsData.appliedPromotion && (
                     <div className="nbd-price-comparison">
                       <span className="nbd-price-original">
-                        {formatPrice(product.comparePrice, storeInfo?.currency)}
+                        {formatPrice(promotionsData.originalPrice, storeInfo?.currency)}
                       </span>
                       <span className="nbd-price-discount">
-                        -{Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
+                        -{promotionsData.appliedPromotion.type === 'percentage' ?
+                          `${promotionsData.appliedPromotion.discountValue}%` :
+                          formatPrice(promotionsData.discount, storeInfo?.currency)}
                       </span>
                     </div>
-                  ) : null}
+                  )}
             <p className="nbd-product-price">
-               {formatPrice(selectedVariant ? selectedVariant.price : product.price, storeInfo?.currency)}
+               {formatPrice(promotionsData.finalPrice || (selectedVariant ? selectedVariant.price : product.price), storeInfo?.currency)}
             </p>
+
+            {/* Mostrar badge de promoción si está habilitado */}
+            {promotionsData.hasDiscountBadge && promotionsData.appliedPromotion && (
+              <div className="nbd-promotion-badge">
+                🎉 {promotionsData.appliedPromotion.name}
+              </div>
+            )}
 
                   
                   {/* Información de stock */}

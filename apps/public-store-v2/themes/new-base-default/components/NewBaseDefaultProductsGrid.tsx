@@ -8,21 +8,22 @@ interface NewBaseDefaultProductsGridProps {
   loadingCartButton: string | null
   productsToShow: number
   hasMoreProducts: boolean
-  
+
   // Event handlers
   handleAddToCart: (product: PublicProduct) => Promise<void>
   loadMoreProducts: () => void
-  
+
   // Utils
   buildUrl: (path: string) => string
   toCloudinarySquare: (url: string, size: number) => string
   formatPrice: (price: number, currency?: string) => string
   additionalText: (key: string) => string
-  
+
   // Store info
   storeInfo?: {
     currency?: string
   }
+  storeId?: string | null
 }
 
 export function NewBaseDefaultProductsGrid({
@@ -38,7 +39,8 @@ export function NewBaseDefaultProductsGrid({
   toCloudinarySquare,
   formatPrice,
   additionalText,
-  storeInfo
+  storeInfo,
+  storeId
 }: NewBaseDefaultProductsGridProps) {
   return (
     <ProductsGrid
@@ -55,6 +57,7 @@ export function NewBaseDefaultProductsGrid({
       formatPrice={formatPrice}
       additionalText={additionalText}
       storeInfo={storeInfo}
+      storeId={storeId}
     />
   )
 }

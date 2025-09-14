@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PublicProduct } from '../lib/products';
+import { useStoreLanguage } from '../lib/store-language-context';
 
 interface VariantAttribute {
   name: string;
@@ -30,6 +31,25 @@ export default function SimpleVariantSelector({ product, onVariantChange }: Simp
   const [availableAttributes, setAvailableAttributes] = useState<Record<string, string[]>>({});
   const [selectedVariant, setSelectedVariant] = useState<SimpleVariant | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string>('#007bff');
+
+  // Hook de idioma para traducciones
+  const { language } = useStoreLanguage();
+
+  // Helper para textos adicionales
+  const additionalText = (key: string) => {
+    const texts: Record<string, Record<string, string>> = {
+      es: {
+        'selectOptions': 'Selecciona las opciones:'
+      },
+      en: {
+        'selectOptions': 'Select options:'
+      },
+      pt: {
+        'selectOptions': 'Selecione as opções:'
+      }
+    };
+    return texts[language]?.[key] || texts['es']?.[key] || key;
+  };
 
   // Obtener color primario dinámico con retry para producción
   useEffect(() => {
@@ -203,7 +223,7 @@ export default function SimpleVariantSelector({ product, onVariantChange }: Simp
   return (
     <div className="simple-variant-selector">
         <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: '600' }}>
-          Selecciona las opciones:
+          {additionalText('selectOptions')}
         </h3>
       
       {Object.entries(availableAttributes).map(([attributeName, values]) => (

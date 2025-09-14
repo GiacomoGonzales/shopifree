@@ -72,6 +72,22 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
   const { language } = useStoreLanguage();
   const [metadataLabels, setMetadataLabels] = useState<Record<string, string>>({});
 
+  // Helper para textos adicionales
+  const additionalText = (key: string) => {
+    const texts: Record<string, Record<string, string>> = {
+      es: {
+        'characteristics': 'Características'
+      },
+      en: {
+        'characteristics': 'Characteristics'
+      },
+      pt: {
+        'characteristics': 'Características'
+      }
+    };
+    return texts[language]?.[key] || texts['es']?.[key] || key;
+  };
+
   // Filtrar y formatear metadatos válidos - DEBE estar antes del useEffect
   const validMetadata = (product as any).metadata
     ? Object.entries((product as any).metadata).filter(([key, value]) => {
@@ -126,7 +142,7 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
 
   return (
     <div className="nbd-product-metadata">
-      <h3>Características</h3>
+      <h3>{additionalText('characteristics')}</h3>
       <div className="nbd-metadata-table-container">
         <table className="nbd-metadata-table">
           <tbody>

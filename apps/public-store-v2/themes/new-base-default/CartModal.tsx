@@ -8,6 +8,7 @@ import { StoreBasicInfo } from '../../lib/store';
 import CheckoutModal from './CheckoutModal';
 import ConfirmationModal from './ConfirmationModal';
 import { OrderData } from '../../lib/orders';
+import { useStoreLanguage } from '../../lib/store-language-context';
 
 interface CartModalProps {
     storeInfo?: StoreBasicInfo | null;
@@ -17,17 +18,78 @@ interface CartModalProps {
 export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-    
+
     // Estados para modal de confirmación
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [orderDataForConfirmation, setOrderDataForConfirmation] = useState<OrderData | null>(null);
+
+    // Hook de idioma para traducciones
+    const { language } = useStoreLanguage();
+
+    // Helper para textos adicionales
+    const additionalText = (key: string) => {
+        const texts: Record<string, Record<string, string>> = {
+            es: {
+                'shoppingCart': 'Carrito de Compras',
+                'close': 'Cerrar carrito',
+                'emptyCart': 'Tu carrito está vacío',
+                'addProducts': 'Agrega productos para comenzar a comprar',
+                'reduceQuantity': 'Reducir cantidad',
+                'increaseQuantity': 'Aumentar cantidad',
+                'removeProduct': 'Eliminar producto',
+                'subtotal': 'Subtotal',
+                'products': 'productos',
+                'incompleteProducts': 'Algunos productos necesitan opciones completas',
+                'proceedToCheckout': 'Proceder al Pago',
+                'options': 'opciones',
+                'completeThe': 'Completa las',
+                'continueShopping': 'Continuar Comprando',
+                'shippingCalculated': 'Envío calculado al finalizar'
+            },
+            en: {
+                'shoppingCart': 'Shopping Cart',
+                'close': 'Close cart',
+                'emptyCart': 'Your cart is empty',
+                'addProducts': 'Add products to start shopping',
+                'reduceQuantity': 'Reduce quantity',
+                'increaseQuantity': 'Increase quantity',
+                'removeProduct': 'Remove product',
+                'subtotal': 'Subtotal',
+                'products': 'products',
+                'incompleteProducts': 'Some products need complete options',
+                'proceedToCheckout': 'Proceed to Checkout',
+                'options': 'options',
+                'completeThe': 'Complete the',
+                'continueShopping': 'Continue Shopping',
+                'shippingCalculated': 'Shipping calculated at checkout'
+            },
+            pt: {
+                'shoppingCart': 'Carrinho de Compras',
+                'close': 'Fechar carrinho',
+                'emptyCart': 'Seu carrinho está vazio',
+                'addProducts': 'Adicione produtos para começar a comprar',
+                'reduceQuantity': 'Reduzir quantidade',
+                'increaseQuantity': 'Aumentar quantidade',
+                'removeProduct': 'Remover produto',
+                'subtotal': 'Subtotal',
+                'products': 'produtos',
+                'incompleteProducts': 'Alguns produtos precisam de opções completas',
+                'proceedToCheckout': 'Proceder ao Pagamento',
+                'options': 'opções',
+                'completeThe': 'Complete as',
+                'continueShopping': 'Continuar Comprando',
+                'shippingCalculated': 'Frete calculado no checkout'
+            }
+        };
+        return texts[language]?.[key] || texts['es']?.[key] || key;
+    };
     
     // Detectar si hay productos incompletos
     const hasIncompleteItems = state.items.some(item => item.incomplete);
 
     // Función para obtener las opciones faltantes de un producto
     const getMissingOptions = (item: CartItem) => {
-        return item.missingVariants || ['opciones'];
+        return item.missingVariants || [additionalText('options')];
     };
 
     // 🚀 NUEVA FUNCIÓN: Construir URLs de producto sin prefijo de idioma
@@ -138,7 +200,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 {/* Header del carrito */}
                 <div className="nbd-cart-header">
                     <h2 className="nbd-cart-title">
-                        Carrito de Compras
+                        {additionalText('shoppingCart')}
                         {state.totalItems > 0 && (
                             <span className="nbd-cart-count">({state.totalItems})</span>
                         )}
@@ -146,7 +208,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                     <button 
                         onClick={closeCart}
                         className="nbd-cart-close"
-                        aria-label="Cerrar carrito"
+                        aria-label={additionalText('close')}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -165,13 +227,13 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                     <path d="M16 10c0 2.21-1.79 4-4 4s-4-1.79-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </div>
-                            <h3>Tu carrito está vacío</h3>
-                            <p>Agrega productos para comenzar a comprar</p>
+                            <h3>{additionalText('emptyCart')}</h3>
+                            <p>{additionalText('addProducts')}</p>
                             <button 
                                 onClick={closeCart}
                                 className="nbd-btn nbd-btn--primary"
                             >
-                                Continuar Comprando
+                                {additionalText('continueShopping')}
                             </button>
                         </div>
                     ) : (
@@ -231,7 +293,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                                     onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                                                     className="nbd-quantity-btn"
                                                     disabled={item.quantity <= 1}
-                                                    aria-label="Reducir cantidad"
+                                                    aria-label={additionalText('reduceQuantity')}
                                                 >
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -241,7 +303,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                                 <button 
                                                     onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                                                     className="nbd-quantity-btn"
-                                                    aria-label="Aumentar cantidad"
+                                                    aria-label={additionalText('increaseQuantity')}
                                                 >
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -259,7 +321,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                         <button 
                                             onClick={() => removeItem(item.id)}
                                             className="nbd-remove-item"
-                                            aria-label="Eliminar producto"
+                                            aria-label={additionalText('removeProduct')}
                                         >
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                 <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -276,7 +338,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                 {/* Resumen del total */}
                                 <div className="nbd-cart-summary">
                                     <div className="nbd-cart-subtotal">
-                                        <span>Subtotal ({state.totalItems} productos)</span>
+                                        <span>{additionalText('subtotal')} ({state.totalItems} {additionalText('products')})</span>
                                         <span className="nbd-cart-total-price">
                                             {formatPrice(state.totalPrice, state.items[0]?.currency || 'COP')}
                                         </span>
@@ -284,12 +346,12 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                     {hasIncompleteItems ? (
                                         <div className="nbd-cart-incomplete-warning">
                                             <p className="nbd-incomplete-warning-text">
-                                                ⚠ Algunos productos necesitan opciones completas
+                                                ⚠ {additionalText('incompleteProducts')}
                                             </p>
                                         </div>
                                     ) : (
                                         <p className="nbd-cart-shipping-note">
-                                            Envío calculado al finalizar
+                                            {additionalText('shippingCalculated')}
                                         </p>
                                     )}
                                 </div>
@@ -300,14 +362,14 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                         onClick={closeCart}
                                         className="nbd-btn nbd-btn--secondary"
                                     >
-                                        Continuar Comprando
+                                        {additionalText('continueShopping')}
                                     </button>
                                     <button 
                                         onClick={handleCheckout}
                                         className={`nbd-btn nbd-btn--primary nbd-cart-checkout ${hasIncompleteItems ? 'nbd-btn--disabled' : ''}`}
                                         disabled={hasIncompleteItems}
                                     >
-                                        {hasIncompleteItems ? 'Completa las opciones' : 'Proceder al Pago'}
+                                        {hasIncompleteItems ? `${additionalText('completeThe')} ${additionalText('options')}` : additionalText('proceedToCheckout')}
                                     </button>
                                 </div>
                             </div>

@@ -12,6 +12,9 @@ import { useCart } from '../../../../lib/cart-context';
 import ProductMetadata from '../../../../components/ProductMetadata';
 import SimpleVariantSelector from '../../../../components/SimpleVariantSelector';
 import UnifiedLoading from '../../../../components/UnifiedLoading';
+import SimpleLoadingSpinner from '../../../../components/SimpleLoadingSpinner';
+import { usePromotions } from '../../../../lib/hooks/usePromotions';
+import { useStoreLanguage } from '../../../../lib/store-language-context';
 
 // Helper function para optimizar URLs de video de Cloudinary
 function optimizeCloudinaryVideo(url: string): string {
@@ -85,6 +88,62 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   // Hook del carrito
   const { addItem, openCart, state, removeItem } = useCart();
 
+  // Hook de promociones - igual que en ProductsGrid y ProductQuickView
+  const originalPrice = selectedPricingVariant ? selectedPricingVariant.price : product?.price || 0;
+  const promotionsData = usePromotions(storeId, product?.id, originalPrice);
+
+  // Hook de idioma para traducciones
+  const { language } = useStoreLanguage();
+
+  // Helper para textos adicionales
+  const additionalText = (key: string) => {
+    const texts: Record<string, Record<string, string>> = {
+      es: {
+        'home': 'Inicio',
+        'description': 'Descripción',
+        'quantity': 'Cantidad',
+        'addToCart': 'Agregar al carrito',
+        'buyWhatsApp': 'Comprar por WhatsApp',
+        'whatsApp': 'WhatsApp',
+        'share': 'Compartir',
+        'inStock': 'En stock',
+        'outOfStock': 'Sin stock temporalmente',
+        'noImage': 'Sin imagen',
+        'whatsappNotConfigured': 'El número de WhatsApp no está configurado para esta tienda',
+        'linkCopied': 'Enlace copiado al portapapeles'
+      },
+      en: {
+        'home': 'Home',
+        'description': 'Description',
+        'quantity': 'Quantity',
+        'addToCart': 'Add to Cart',
+        'buyWhatsApp': 'Buy via WhatsApp',
+        'whatsApp': 'WhatsApp',
+        'share': 'Share',
+        'inStock': 'In stock',
+        'outOfStock': 'Temporarily out of stock',
+        'noImage': 'No image',
+        'whatsappNotConfigured': 'WhatsApp number is not configured for this store',
+        'linkCopied': 'Link copied to clipboard'
+      },
+      pt: {
+        'home': 'Início',
+        'description': 'Descrição',
+        'quantity': 'Quantidade',
+        'addToCart': 'Adicionar ao Carrinho',
+        'buyWhatsApp': 'Comprar via WhatsApp',
+        'whatsApp': 'WhatsApp',
+        'share': 'Compartilhar',
+        'inStock': 'Em estoque',
+        'outOfStock': 'Temporariamente fora de estoque',
+        'noImage': 'Sem imagem',
+        'whatsappNotConfigured': 'Número do WhatsApp não está configurado para esta loja',
+        'linkCopied': 'Link copiado para área de transferência'
+      }
+    };
+    return texts[language]?.[key] || texts['es']?.[key] || key;
+  };
+
   // Función para manejar cambios de variantes
   const handlePricingVariantChange = (variant: any) => {
     setSelectedPricingVariant(variant);
@@ -157,7 +216,7 @@ Estoy interesado/a en este producto de ${storeInfo.storeName}:
 
 🛍️ *${product.name}*
 💰 Precio: ${formattedPrice}${variantText}
-📦 Cantidad: ${quantity}
+📦 ${additionalText('quantity')}: ${quantity}
 
 ${productUrl}
 
@@ -171,7 +230,7 @@ ${productUrl}
   // Función para abrir WhatsApp
   const handleWhatsAppClick = () => {
     if (!storeInfo?.phone) {
-      alert('El número de WhatsApp no está configurado para esta tienda');
+      alert(additionalText('whatsappNotConfigured'));
       return;
     }
     
@@ -195,20 +254,20 @@ ${productUrl}
     const quantityInput = document.getElementById('quantity') as HTMLInputElement;
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
-    // Lógica SIMPLE: Si hay variante con precio seleccionada, usarla; si no, usar producto base
-    let finalPrice = product.price;
+    // Usar precios promocionales si están disponibles, sino usar precios base
+    let finalPrice = promotionsData.finalPrice || product.price;
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let itemId = product.id;
 
     if (selectedPricingVariant) {
-      // Caso 1: Variante con precio específico
+      // Caso 1: Variante con precio específico - usar precio promocional si está disponible
       console.log('✅ [SIMPLE] Usando variante con precio:', selectedPricingVariant);
-      finalPrice = selectedPricingVariant.price;
+      finalPrice = promotionsData.finalPrice || selectedPricingVariant.price;
       itemId = `${product.id}-${selectedPricingVariant.id}`;
       variantInfo = {
         id: selectedPricingVariant.id,
         name: selectedPricingVariant.value || selectedPricingVariant.name || 'Variante',
-        price: selectedPricingVariant.price
+        price: finalPrice // Usar el precio final (con promoción si existe)
       };
     } else {
       // Caso 2: Producto sin variantes (usar precio base)
@@ -298,7 +357,7 @@ ${productUrl}
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: buildAbsoluteUrl('/') },
+      { '@type': 'ListItem', position: 1, name: additionalText('home'), item: buildAbsoluteUrl('/') },
       { '@type': 'ListItem', position: 2, name: 'Catálogo', item: buildAbsoluteUrl('/catalogo') },
       { '@type': 'ListItem', position: 3, name: product.name, item: buildAbsoluteUrl(`/producto/${encodeURIComponent(product.slug || product.id)}`) }
     ]
@@ -321,7 +380,36 @@ ${productUrl}
   } : null;
 
   if (loading) {
-    return <UnifiedLoading storeInfo={storeInfo} />;
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Header skeleton */}
+        <div className="border-b border-gray-100 p-4">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div className="h-8 bg-gray-200 rounded w-32 animate-pulse"></div>
+            <div className="flex gap-4">
+              <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Product skeleton */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-gray-200 rounded-lg animate-pulse aspect-square"></div>
+            <div className="space-y-6">
+              <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+              </div>
+              <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!product) {
@@ -496,7 +584,7 @@ ${productUrl}
             <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Inicio
+          {additionalText('home')}
         </a>
         <span className="nbd-breadcrumbs-sep">/</span>
         
@@ -727,19 +815,33 @@ ${productUrl}
 
           {typeof product.price === 'number' ? (
                 <div className="nbd-product-pricing">
-                  {product.comparePrice && product.comparePrice > product.price ? (
+                  {/* Mostrar promoción activa si existe */}
+                  {promotionsData.discount > 0 && promotionsData.appliedPromotion && (
                     <div className="nbd-price-comparison">
                       <span className="nbd-price-original">
-                        {formatPrice(product.comparePrice, storeInfo?.currency)}
+                        {formatPrice(promotionsData.originalPrice, storeInfo?.currency)}
                       </span>
                       <span className="nbd-price-discount">
-                        -{Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
+                        -{promotionsData.appliedPromotion.type === 'percentage' ?
+                          `${promotionsData.appliedPromotion.discountValue}%` :
+                          formatPrice(promotionsData.discount, storeInfo?.currency)}
                       </span>
                     </div>
-                  ) : null}
+                  )}
             <p className="nbd-product-price">
-               {formatPrice(selectedPricingVariant ? selectedPricingVariant.price : product.price, storeInfo?.currency)}
+               {formatPrice(promotionsData.finalPrice || (selectedPricingVariant ? selectedPricingVariant.price : product.price), storeInfo?.currency)}
             </p>
+
+            {/* Mostrar badge de promoción si está habilitado */}
+            {promotionsData.hasDiscountBadge && promotionsData.appliedPromotion && (
+              <div className="nbd-promotion-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                  <line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+                {promotionsData.appliedPromotion.name}
+              </div>
+            )}
 
                   
                   {/* Información de stock - Solo mostrar si trackStock está habilitado */}
@@ -747,11 +849,11 @@ ${productUrl}
                     <div className="nbd-stock-info">
                       {(product as any).stockQuantity > 0 ? (
                         <p className="nbd-stock-available">
-                          ✅ {(product as any).stockQuantity} en stock
+                          ✅ {(product as any).stockQuantity} {additionalText('inStock')}
                         </p>
                       ) : (
                         <p className="nbd-stock-unavailable">
-                          ❌ Sin stock
+                          ❌ {additionalText('outOfStock')}
                         </p>
                       )}
                     </div>
@@ -770,7 +872,7 @@ ${productUrl}
                   
                   // Por defecto disponible
                   isAvailable = true;
-                  statusText = 'En stock';
+                  statusText = additionalText('inStock');
                   
                   // Solo verificar stock de variantes si trackStock está habilitado
                   if (trackStock === true) {
@@ -791,7 +893,7 @@ ${productUrl}
                       
                       // Verificar si alguna variante tiene stock
                       isAvailable = variants.some((variant: any) => variant.stock > 0);
-                      statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
+                      statusText = isAvailable ? additionalText('inStock') : additionalText('outOfStock');
                     }
                   }
                 } else {
@@ -801,12 +903,12 @@ ${productUrl}
                   
                   // Por defecto disponible
                   isAvailable = true;
-                  statusText = 'En stock';
+                  statusText = additionalText('inStock');
                   
                   // Solo verificar stock si trackStock está habilitado
                   if (trackStock === true && typeof stockQty === 'number') {
                     isAvailable = stockQty > 0;
-                    statusText = isAvailable ? 'En stock' : 'Sin stock temporalmente';
+                    statusText = isAvailable ? additionalText('inStock') : additionalText('outOfStock');
                   }
                 }
                 
@@ -832,7 +934,7 @@ ${productUrl}
               {/* Descripción */}
           {product.description ? (
                 <div className="nbd-product-description">
-                  <h3>Descripción</h3>
+                  <h3>{additionalText('description')}</h3>
                   <div dangerouslySetInnerHTML={{ __html: product.description }} />
                 </div>
           ) : null}
@@ -842,7 +944,7 @@ ${productUrl}
 
               {/* Selector de cantidad */}
               <div className="nbd-quantity-selector">
-                <label htmlFor="quantity" className="nbd-quantity-label">Cantidad:</label>
+                <label htmlFor="quantity" className="nbd-quantity-label">{additionalText('quantity')}:</label>
                 <div className="nbd-quantity-controls">
                   <button 
                     type="button" 
@@ -891,7 +993,7 @@ ${productUrl}
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17A2 2 0 0 1 15 19H9A2 2 0 0 1 7 17V13M17 13H7"/>
                   </svg>
-                  Agregar al carrito
+                  {additionalText('addToCart')}
                 </button>
                 
                 {/* Botones secundarios */}
@@ -908,7 +1010,7 @@ ${productUrl}
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.488"/>
                     </svg>
-                    <span>Comprar por WhatsApp</span>
+                    <span>{additionalText('buyWhatsApp')}</span>
                   </button>
                   <button 
                     className="nbd-btn nbd-btn--outline nbd-btn--secondary"
@@ -922,7 +1024,7 @@ ${productUrl}
                       } else {
                         // Fallback para navegadores que no soportan Web Share API
                         navigator.clipboard.writeText(window.location.href);
-                        alert('Enlace copiado al portapapeles');
+                        alert(additionalText('linkCopied'));
                       }
                     }}
                   >
@@ -931,7 +1033,7 @@ ${productUrl}
                       <path d="M16 6L12 2L8 6"/>
                       <path d="M12 2V15"/>
                     </svg>
-                    Compartir
+                    {additionalText('share')}
                   </button>
                 </div>
               </div>
