@@ -49,7 +49,7 @@ export function ProductsGrid({
   // Componente interno para cada producto con promociones
   function ProductCard({ product }: { product: PublicProduct }) {
     console.log('🏪 ProductCard - storeId and product:', { storeId, productId: product.id, productName: product.name });
-    const promotionData = usePromotions(storeId, product.id, product.price);
+    const promotionData = usePromotions(storeId, product.id || '', product.price);
 
     // Usar solo sistema de promociones, eliminar comparePrice obsoleto
     const hasPromotion = promotionData.discount > 0;

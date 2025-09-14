@@ -90,7 +90,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
 
   // Hook de promociones - igual que en ProductsGrid y ProductQuickView
   const originalPrice = selectedPricingVariant ? selectedPricingVariant.price : product?.price || 0;
-  const promotionsData = usePromotions(storeId || '', product?.id, originalPrice);
+  const promotionsData = usePromotions(storeId || '', product?.id || '', originalPrice);
 
   // Hook de idioma para traducciones
   const { language } = useStoreLanguage();

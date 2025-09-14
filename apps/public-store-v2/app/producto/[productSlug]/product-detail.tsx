@@ -93,7 +93,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   /*
   let promotionsDataFromHook;
   try {
-    promotionsDataFromHook = usePromotions(storeId, product?.id, originalPrice);
+    promotionsDataFromHook = usePromotions(storeId, product?.id || '', originalPrice);
     console.log('✅ [ProductDetail] Hook usePromotions ejecutado correctamente');
   } catch (error) {
     console.error('❌ [ProductDetail] Error en hook usePromotions:', error);
