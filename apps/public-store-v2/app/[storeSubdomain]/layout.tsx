@@ -74,7 +74,7 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     // Generar imágenes optimizadas para diferentes plataformas
     // Usar el logo de la tienda para Apple Touch Icon si está disponible
     const iconSource = data?.logoUrl || ogImage;
-    const imageVariants = generateAllImageVariants(ogImage, data?.whatsappImage);
+    const imageVariants = generateAllImageVariants(ogImage);
     const appleIconVariant = iconSource !== ogImage ? generateAllImageVariants(iconSource).appleTouchIcon : imageVariants.appleTouchIcon;
     
     // Construir objeto de metadata completo
@@ -197,7 +197,6 @@ export async function generateMetadata({ params }: { params: { storeSubdomain: s
     console.log(`🔍 [SEO] Metadata generada para ${subdomain}:`, {
         title,
         hasCustomOG: !!data?.ogImage,
-        hasWhatsAppImage: !!data?.whatsappImage,
         // ❌ REMOVIDO: keywords debug - ya no usamos keywords
         // hasKeywords: !!keywords,
         hasCanonical: !!data?.canonicalUrl,

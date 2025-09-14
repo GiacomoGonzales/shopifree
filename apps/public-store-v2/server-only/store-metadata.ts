@@ -9,7 +9,6 @@ type StoreMetadata = {
 	ogTitle?: string;
 	ogDescription?: string;
 	ogImage?: string;
-	whatsappImage?: string;
 	favicon?: string;
 	robots?: string;
 	canonicalUrl?: string;
@@ -104,7 +103,6 @@ export async function getStoreMetadata(subdomain: string): Promise<StoreMetadata
 			// Imágenes
 			image: seoData.ogImage || storeData.logoUrl || "/default-og.png",
 			ogImage: seoData.ogImage,
-			whatsappImage: seoData.whatsappImage,
 			favicon: seoData.favicon,
 			
 			// SEO avanzado

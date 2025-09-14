@@ -51,21 +51,12 @@
     },
     "ogImage": {
       "label": "Imagen para Redes Sociales",
-      "description": "Esta imagen se mostrará cuando compartas tu tienda en redes sociales",
+      "description": "Esta imagen se mostrará cuando compartas tu tienda en redes sociales. Se optimiza automáticamente para WhatsApp (400x400px) usando Cloudinary.",
       "dropzone": "Arrastra una imagen aquí o haz clic para seleccionar",
       "uploading": "Subiendo imagen...",
       "change": "Cambiar imagen",
       "remove": "Eliminar imagen",
       "hint": "Tamaño recomendado: 1200x630px • Formatos: JPG, PNG"
-    },
-    "whatsappImage": {
-      "label": "Imagen para WhatsApp",
-      "description": "Imagen optimizada específicamente para WhatsApp (400x400px, máx. 400KB)",
-      "dropzone": "Arrastra una imagen aquí o haz clic para seleccionar",
-      "uploading": "Subiendo imagen...",
-      "change": "Cambiar imagen",
-      "remove": "Eliminar imagen",
-      "hint": "Tamaño recomendado: 400x400px • Formatos: JPG, PNG • Máx. 400KB"
     },
     "favicon": {
       "label": "Favicon",
@@ -198,7 +189,6 @@
     "saveSuccess": "Configuración SEO guardada correctamente",
     "saveError": "Error al guardar la configuración SEO",
     "imageUploadSuccess": "Imagen subida correctamente",
-    "whatsappImageUploadSuccess": "Imagen de WhatsApp subida correctamente",
     "imageUploadError": "Error al subir la imagen",
     "invalidFormat": "Formato de archivo no válido",
     "fileTooLarge": "El archivo es demasiado grande",
