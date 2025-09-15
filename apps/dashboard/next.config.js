@@ -1,5 +1,35 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    // Only apply CSP in production or if explicitly enabled
+    if (process.env.NODE_ENV !== 'production' && !process.env.ENABLE_CSP) {
+      return [];
+    }
+
+    return [
+      {
+        // Apply CSP to all routes in production
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://res.cloudinary.com https://api.cloudinary.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://api.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com",
+              "frame-src 'self'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'"
+            ].join('; ')
+          },
+        ],
+      },
+    ];
+  },
   eslint: {
     // Durante el build, no fallar por warnings de ESLint
     ignoreDuringBuilds: true,
