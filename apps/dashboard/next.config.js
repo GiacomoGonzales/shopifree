@@ -1,25 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
-    // Only apply CSP in production or if explicitly enabled
-    if (process.env.NODE_ENV !== 'production' && !process.env.ENABLE_CSP) {
-      return [];
-    }
-
     return [
       {
-        // Apply CSP to all routes in production
+        // Apply CSP with unsafe-eval to fix development issues
         source: '/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://res.cloudinary.com https://api.cloudinary.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://res.cloudinary.com https://api.cloudinary.com https://vercel.live",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com",
+              "connect-src 'self' https://api.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://vercel.live",
               "frame-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",

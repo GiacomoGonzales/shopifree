@@ -244,6 +244,7 @@ export default function LocaleLayout({
         <head>
           <title>Dashboard - Shopifree</title>
           <meta name="description" content="Manage your online store" />
+          <meta httpEquiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline'; object-src 'none';" />
         </head>
         <body>
           <div style={{ 
@@ -291,6 +292,7 @@ export default function LocaleLayout({
       <head>
         <title>Dashboard - Shopifree</title>
         <meta name="description" content="Manage your online store" />
+        <meta httpEquiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline'; object-src 'none';" />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
