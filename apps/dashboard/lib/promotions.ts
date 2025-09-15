@@ -11,6 +11,7 @@ export interface Promotion {
   status: 'active' | 'paused' | 'expired' | 'scheduled';
   startDate: string; // ISO date string
   endDate: string; // ISO date string
+  noExpiration?: boolean; // Promoción sin fecha de expiración
 
   // Productos afectados
   targetType: 'all_products' | 'specific_products' | 'categories' | 'brands';
@@ -36,6 +37,7 @@ export interface CreatePromotionData {
   discountValue: number;
   startDate: string;
   endDate: string;
+  noExpiration?: boolean;
   targetType: 'all_products' | 'specific_products' | 'categories' | 'brands';
   targetIds: string[];
   priority: number;
@@ -69,6 +71,9 @@ export async function getPromotions(storeId: string): Promise<Promotion[]> {
       if (status === 'active' || status === 'scheduled') {
         if (now < data.startDate) {
           status = 'scheduled';
+        } else if (data.noExpiration) {
+          // Si no expira, solo puede estar activa (después de la fecha de inicio)
+          status = 'active';
         } else if (now > data.endDate) {
           status = 'expired';
         } else {
@@ -85,6 +90,7 @@ export async function getPromotions(storeId: string): Promise<Promotion[]> {
         status,
         startDate: data.startDate,
         endDate: data.endDate,
+        noExpiration: data.noExpiration || false,
         targetType: data.targetType,
         targetIds: data.targetIds || [],
         priority: data.priority || 0,
@@ -118,6 +124,9 @@ export async function createPromotion(storeId: string, promotionData: CreateProm
     let status = 'active';
     if (now < promotionData.startDate) {
       status = 'scheduled';
+    } else if (promotionData.noExpiration) {
+      // Si no expira, solo puede estar activa (después de la fecha de inicio)
+      status = 'active';
     } else if (now > promotionData.endDate) {
       status = 'expired';
     }
@@ -160,6 +169,28 @@ export async function updatePromotion(storeId: string, promotionId: string, upda
 
   } catch (error) {
     console.error('[Promotions] Error updating promotion:', error);
+    throw error;
+  }
+}
+
+/**
+ * Actualizar el estado de una promoción
+ */
+export async function updatePromotionStatus(storeId: string, promotionId: string, status: 'active' | 'paused' | 'expired' | 'scheduled'): Promise<void> {
+  const db = getFirebaseDb();
+  if (!db) throw new Error('Firebase not initialized');
+
+  try {
+    const docRef = doc(db, 'stores', storeId, 'promotions', promotionId);
+    await updateDoc(docRef, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('[Promotions] Updated promotion status:', promotionId, 'to', status);
+
+  } catch (error) {
+    console.error('[Promotions] Error updating promotion status:', error);
     throw error;
   }
 }

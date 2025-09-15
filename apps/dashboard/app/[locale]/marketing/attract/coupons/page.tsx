@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import DashboardLayout from '../../../../../components/DashboardLayout'
-import { getCoupons, Coupon, createCoupon, generateCouponCode } from '../../../../../lib/coupons'
+import { getCoupons, Coupon, createCoupon, generateCouponCode, updateCouponStatus, deleteCoupon, updateCoupon, calculateCouponStatus } from '../../../../../lib/coupons'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore } from '../../../../../lib/store'
 
@@ -16,6 +16,12 @@ export default function CouponsPage() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [storeData, setStoreData] = useState<{ id: string; storeName: string } | null>(null)
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null)
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [searchFilter, setSearchFilter] = useState<string>('')
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -24,7 +30,8 @@ export default function CouponsPage() {
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     maxUses: 100,
-    usesPerCustomer: 1
+    usesPerCustomer: 1,
+    noExpiration: false
   })
 
   useEffect(() => {
@@ -33,9 +40,9 @@ export default function CouponsPage() {
         setLoading(false)
         return
       }
-      
+
       setLoading(true)
-      
+
       try {
         // Obtener datos de la tienda
         const store = await getUserStore(user.uid)
@@ -44,33 +51,72 @@ export default function CouponsPage() {
           setLoading(false)
           return
         }
-        
+
         setStoreData(store)
-        
+
         // Cargar cupones
         const fetchedCoupons = await getCoupons(store.id)
-        setCoupons(fetchedCoupons)
+
+        // Actualizar estados automáticamente basándose en fechas
+        const updatedCoupons = fetchedCoupons.map(coupon => {
+          const autoStatus = calculateCouponStatus(coupon.startDate, coupon.endDate, coupon.status, coupon.noExpiration)
+          if (autoStatus !== coupon.status && coupon.status !== 'paused') {
+            // Solo actualizar si no está pausado manualmente
+            updateCouponStatus(store.id, coupon.id, autoStatus)
+            return { ...coupon, status: autoStatus }
+          }
+          return coupon
+        })
+
+        setCoupons(updatedCoupons)
       } catch (error) {
         console.error('Error loading store and coupons:', error)
       }
-      
+
       setLoading(false)
     }
 
     loadStoreAndCoupons()
   }, [user?.uid])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownOpen) {
+        setDropdownOpen(null)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [dropdownOpen])
+
   const handleCreateCoupon = async () => {
     if (!storeData?.id || creating) return
 
     setCreating(true)
-    const success = await createCoupon(storeData.id, formData)
-    
+
+    let success: boolean
+
+    // Preparar datos del cupón
+    const couponData = {
+      ...formData,
+      // Si no expira, usar una fecha muy lejana o null
+      endDate: formData.noExpiration ? '2099-12-31' : formData.endDate
+    }
+
+    if (editingCoupon) {
+      // Actualizar cupón existente
+      success = await updateCoupon(storeData.id, editingCoupon.id, couponData)
+    } else {
+      // Crear nuevo cupón
+      success = await createCoupon(storeData.id, couponData)
+    }
+
     if (success) {
       // Recargar cupones
       const updatedCoupons = await getCoupons(storeData.id)
       setCoupons(updatedCoupons)
-      
+
       // Resetear formulario
       setFormData({
         name: '',
@@ -80,12 +126,14 @@ export default function CouponsPage() {
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         maxUses: 100,
-        usesPerCustomer: 1
+        usesPerCustomer: 1,
+        noExpiration: false
       })
-      
+
       setShowCreateModal(false)
+      setEditingCoupon(null)
     }
-    
+
     setCreating(false)
   }
 
@@ -94,9 +142,94 @@ export default function CouponsPage() {
     setFormData(prev => ({ ...prev, code }))
   }
 
+  const handlePauseCoupon = async (couponId: string) => {
+    if (!storeData?.id) return
+
+    const coupon = coupons.find(c => c.id === couponId)
+    if (!coupon) return
+
+    let newStatus: 'active' | 'paused' | 'expired' | 'scheduled'
+
+    if (coupon.status === 'paused') {
+      // Si está pausado, reactivar (pero verificar si no ha expirado por fecha)
+      newStatus = calculateCouponStatus(coupon.startDate, coupon.endDate, undefined, coupon.noExpiration)
+    } else {
+      // Si está activo, programado o expirado, pausar
+      newStatus = 'paused'
+    }
+
+    const success = await updateCouponStatus(storeData.id, couponId, newStatus)
+
+    if (success) {
+      // Actualizar la lista local
+      setCoupons(prevCoupons =>
+        prevCoupons.map(c =>
+          c.id === couponId ? { ...c, status: newStatus } : c
+        )
+      )
+    }
+
+    setDropdownOpen(null)
+  }
+
+  const handleEditCoupon = (couponId: string) => {
+    const coupon = coupons.find(c => c.id === couponId)
+    if (!coupon) return
+
+    setEditingCoupon(coupon)
+    setFormData({
+      name: coupon.name,
+      code: coupon.code,
+      type: coupon.type,
+      value: coupon.value,
+      startDate: coupon.startDate,
+      endDate: coupon.endDate,
+      maxUses: coupon.maxUses,
+      usesPerCustomer: coupon.usesPerCustomer,
+      noExpiration: coupon.noExpiration || false
+    })
+    setShowCreateModal(true)
+    setDropdownOpen(null)
+  }
+
+  const handleDeleteCoupon = (couponId: string) => {
+    setShowDeleteConfirm(couponId)
+    setDropdownOpen(null)
+  }
+
+  const confirmDeleteCoupon = async () => {
+    if (!storeData?.id || !showDeleteConfirm) return
+
+    const success = await deleteCoupon(storeData.id, showDeleteConfirm)
+
+    if (success) {
+      // Remover de la lista local
+      setCoupons(prevCoupons =>
+        prevCoupons.filter(c => c.id !== showDeleteConfirm)
+      )
+    }
+
+    setShowDeleteConfirm(null)
+  }
+
+  const toggleDropdown = (couponId: string, event: React.MouseEvent) => {
+    if (dropdownOpen === couponId) {
+      setDropdownOpen(null)
+      setDropdownPosition(null)
+    } else {
+      const rect = event.currentTarget.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 2,
+        right: window.innerWidth - rect.right + window.scrollX - 4
+      })
+      setDropdownOpen(couponId)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800'
+      case 'paused': return 'bg-yellow-100 text-yellow-800'
       case 'expired': return 'bg-red-100 text-red-800'
       case 'scheduled': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
@@ -106,6 +239,7 @@ export default function CouponsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'active': return 'Activo'
+      case 'paused': return 'Pausado'
       case 'expired': return 'Expirado'
       case 'scheduled': return 'Programado'
       default: return 'Desconocido'
@@ -120,6 +254,19 @@ export default function CouponsPage() {
       default: return '-'
     }
   }
+
+  // Función para filtrar cupones
+  const filteredCoupons = coupons.filter(coupon => {
+    // Filtro por estado
+    const matchesStatus = statusFilter === '' || coupon.status === statusFilter
+
+    // Filtro por búsqueda (nombre o código)
+    const matchesSearch = searchFilter === '' ||
+      coupon.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      coupon.code.toLowerCase().includes(searchFilter.toLowerCase())
+
+    return matchesStatus && matchesSearch
+  })
 
   return (
     <DashboardLayout>
@@ -173,24 +320,60 @@ export default function CouponsPage() {
                     </div>
                     <input
                       type="text"
+                      value={searchFilter}
+                      onChange={(e) => setSearchFilter(e.target.value)}
                       className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Buscar cupones..."
                     />
                   </div>
 
                   {/* Filtro por estado */}
-                  <select className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
                     <option value="">Todos los estados</option>
                     <option value="active">Activos</option>
+                    <option value="paused">Pausados</option>
                     <option value="expired">Expirados</option>
                     <option value="scheduled">Programados</option>
                   </select>
+
+                  {/* Botón limpiar filtros */}
+                  {(statusFilter || searchFilter) && (
+                    <button
+                      onClick={() => {
+                        setStatusFilter('')
+                        setSearchFilter('')
+                      }}
+                      className="px-3 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300"
+                    >
+                      Limpiar filtros
+                    </button>
+                  )}
+                </div>
+
+                {/* Contador de resultados */}
+                <div className="mt-3 text-sm text-gray-600">
+                  {loading ? (
+                    "Cargando..."
+                  ) : (
+                    <>
+                      Mostrando {filteredCoupons.length} de {coupons.length} cupones
+                      {(statusFilter || searchFilter) && (
+                        <span className="ml-2 text-gray-500">
+                          (filtrados)
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Tabla de cupones */}
-            <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+            <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden relative">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -225,14 +408,17 @@ export default function CouponsPage() {
                           Cargando cupones...
                         </td>
                       </tr>
-                    ) : coupons.length === 0 ? (
+                    ) : filteredCoupons.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                          No tienes cupones creados. ¡Crea tu primer cupón!
+                          {coupons.length === 0
+                            ? "No tienes cupones creados. ¡Crea tu primer cupón!"
+                            : "No se encontraron cupones que coincidan con los filtros seleccionados."
+                          }
                         </td>
                       </tr>
                     ) : (
-                      coupons.map((coupon) => (
+                      filteredCoupons.map((coupon) => (
                       <tr key={coupon.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
@@ -254,23 +440,28 @@ export default function CouponsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div>{coupon.startDate}</div>
-                          <div>{coupon.endDate}</div>
+                          <div>
+                            {coupon.noExpiration ? (
+                              <span className="text-blue-600 font-medium">Sin expiración</span>
+                            ) : (
+                              coupon.endDate
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {coupon.totalUses} / {coupon.maxUses}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex items-center justify-end space-x-2">
-                            <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <div className="relative">
+                            <button
+                              onClick={(e) => toggleDropdown(coupon.id, e)}
+                              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                               </svg>
                             </button>
-                            <button className="text-gray-400 hover:text-red-600 transition-colors">
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+
                           </div>
                         </td>
                       </tr>
@@ -283,14 +474,71 @@ export default function CouponsPage() {
           </div>
         </div>
 
+        {/* Dropdown menu */}
+        {dropdownOpen && dropdownPosition && (
+          <div
+            className="fixed w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+            style={{
+              top: dropdownPosition.top,
+              right: dropdownPosition.right
+            }}
+          >
+            <div className="py-1">
+              <button
+                onClick={() => handlePauseCoupon(dropdownOpen)}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+{coupons.find(c => c.id === dropdownOpen)?.status === 'paused' ? 'Activar' : 'Pausar'}
+              </button>
+              <button
+                onClick={() => handleEditCoupon(dropdownOpen)}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar
+              </button>
+              <button
+                onClick={() => handleDeleteCoupon(dropdownOpen)}
+                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Modal básico de creación (placeholder) */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Crear nuevo cupón</h3>
-                <button 
-                  onClick={() => setShowCreateModal(false)}
+                <h3 className="text-lg font-medium text-gray-900">
+                  {editingCoupon ? 'Editar cupón' : 'Crear nuevo cupón'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false)
+                    setEditingCoupon(null)
+                    setFormData({
+                      name: '',
+                      code: '',
+                      type: 'percentage',
+                      value: 0,
+                      startDate: new Date().toISOString().split('T')[0],
+                      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      maxUses: 100,
+                      usesPerCustomer: 1,
+                      noExpiration: false
+                    })
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,8 +626,26 @@ export default function CouponsPage() {
                       value={formData.endDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={formData.noExpiration}
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.noExpiration}
+                      onChange={(e) => setFormData(prev => ({ ...prev, noExpiration: e.target.checked }))}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Sin fecha de expiración (cupón permanente)
+                    </span>
+                  </label>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Si activas esta opción, el cupón no expirará automáticamente
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -408,7 +674,21 @@ export default function CouponsPage() {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setEditingCoupon(null)
+                      setFormData({
+                        name: '',
+                        code: '',
+                        type: 'percentage',
+                        value: 0,
+                        startDate: new Date().toISOString().split('T')[0],
+                        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        maxUses: 100,
+                        usesPerCustomer: 1,
+                        noExpiration: false
+                      })
+                    }}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                     disabled={creating}
                   >
@@ -420,10 +700,43 @@ export default function CouponsPage() {
                     disabled={creating || !formData.name || !formData.code}
                     className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {creating ? 'Creando...' : 'Crear cupón'}
+                    {creating ? (editingCoupon ? 'Actualizando...' : 'Creando...') : (editingCoupon ? 'Actualizar cupón' : 'Crear cupón')}
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmación de eliminación */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                  <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Eliminar cupón</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  ¿Estás seguro de que quieres eliminar este cupón? Esta acción no se puede deshacer.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowDeleteConfirm(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={confirmDeleteCoupon}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

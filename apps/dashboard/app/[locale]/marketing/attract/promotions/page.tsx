@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import DashboardLayout from '../../../../../components/DashboardLayout'
-import { getPromotions, Promotion, createPromotion, CreatePromotionData } from '../../../../../lib/promotions'
+import { getPromotions, Promotion, createPromotion, CreatePromotionData, updatePromotionStatus, deletePromotion, updatePromotion } from '../../../../../lib/promotions'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore } from '../../../../../lib/store'
 import { getProducts } from '../../../../../lib/products'
@@ -30,6 +30,14 @@ export default function PromotionsPage() {
   const [storeCurrency, setStoreCurrency] = useState('USD')
   const [productSearch, setProductSearch] = useState('')
   const [displayedProductsCount, setDisplayedProductsCount] = useState(20)
+
+  // Estados para filtros y dropdown
+  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [searchFilter, setSearchFilter] = useState<string>('')
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null)
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [formData, setFormData] = useState<CreatePromotionData>({
     name: '',
     description: '',
@@ -37,6 +45,7 @@ export default function PromotionsPage() {
     discountValue: 0,
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    noExpiration: false,
     targetType: 'all_products',
     targetIds: [],
     priority: 1,
@@ -58,6 +67,19 @@ export default function PromotionsPage() {
   // Productos a mostrar (con límite para rendimiento)
   const productsToShow = filteredProducts.slice(0, displayedProductsCount)
 
+  // Función para filtrar promociones
+  const filteredPromotions = promotions.filter(promotion => {
+    // Filtro por estado
+    const matchesStatus = statusFilter === '' || promotion.status === statusFilter
+
+    // Filtro por búsqueda (nombre o descripción)
+    const matchesSearch = searchFilter === '' ||
+      promotion.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      (promotion.description && promotion.description.toLowerCase().includes(searchFilter.toLowerCase()))
+
+    return matchesStatus && matchesSearch
+  })
+
   // Función para cargar más productos
   const loadMoreProducts = () => {
     setDisplayedProductsCount(prev => prev + 20)
@@ -73,6 +95,17 @@ export default function PromotionsPage() {
   useEffect(() => {
     loadStoreAndPromotions()
   }, [user])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownOpen) {
+        setDropdownOpen(null)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [dropdownOpen])
 
   const loadStoreAndPromotions = async () => {
     if (!user?.uid) return
@@ -107,9 +140,24 @@ export default function PromotionsPage() {
 
     setCreating(true)
     try {
-      await createPromotion(storeData.id, formData)
+      // Preparar datos de la promoción
+      const promotionData = {
+        ...formData,
+        // Si no expira, usar una fecha muy lejana
+        endDate: formData.noExpiration ? '2099-12-31' : formData.endDate
+      }
+
+      if (editingPromotion) {
+        // Actualizar promoción existente
+        await updatePromotion(storeData.id, editingPromotion.id, promotionData)
+      } else {
+        // Crear nueva promoción
+        await createPromotion(storeData.id, promotionData)
+      }
+
       await loadStoreAndPromotions() // Recargar lista
       setShowCreateModal(false)
+      setEditingPromotion(null)
 
       // Reset form
       setFormData({
@@ -119,17 +167,102 @@ export default function PromotionsPage() {
         discountValue: 0,
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        noExpiration: false,
         targetType: 'all_products',
         targetIds: [],
         priority: 1,
         showBadge: true
       })
     } catch (error) {
-      console.error('Error creating promotion:', error)
-      alert('Error al crear la promoción. Por favor intenta de nuevo.')
+      console.error('Error creating/updating promotion:', error)
+      alert(`Error al ${editingPromotion ? 'actualizar' : 'crear'} la promoción. Por favor intenta de nuevo.`)
     } finally {
       setCreating(false)
     }
+  }
+
+  const toggleDropdown = (promotionId: string, event: React.MouseEvent) => {
+    if (dropdownOpen === promotionId) {
+      setDropdownOpen(null)
+      setDropdownPosition(null)
+    } else {
+      const rect = event.currentTarget.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 2,
+        right: window.innerWidth - rect.right + window.scrollX - 4
+      })
+      setDropdownOpen(promotionId)
+    }
+  }
+
+  const handlePausePromotion = async (promotionId: string) => {
+    if (!storeData?.id) return
+
+    const promotion = promotions.find(p => p.id === promotionId)
+    if (!promotion) return
+
+    const newStatus = promotion.status === 'paused' ? 'active' : 'paused'
+
+    try {
+      await updatePromotionStatus(storeData.id, promotionId, newStatus)
+
+      // Actualizar la lista local
+      setPromotions(prevPromotions =>
+        prevPromotions.map(p =>
+          p.id === promotionId ? { ...p, status: newStatus } : p
+        )
+      )
+    } catch (error) {
+      console.error('Error updating promotion status:', error)
+      alert('Error al actualizar el estado de la promoción.')
+    }
+
+    setDropdownOpen(null)
+  }
+
+  const handleEditPromotion = (promotionId: string) => {
+    const promotion = promotions.find(p => p.id === promotionId)
+    if (!promotion) return
+
+    setEditingPromotion(promotion)
+    setFormData({
+      name: promotion.name,
+      description: promotion.description || '',
+      type: promotion.type,
+      discountValue: promotion.discountValue,
+      startDate: promotion.startDate,
+      endDate: promotion.endDate,
+      noExpiration: promotion.noExpiration || false,
+      targetType: promotion.targetType,
+      targetIds: promotion.targetIds,
+      priority: promotion.priority,
+      showBadge: promotion.showBadge
+    })
+    setShowCreateModal(true)
+    setDropdownOpen(null)
+  }
+
+  const handleDeletePromotion = (promotionId: string) => {
+    setShowDeleteConfirm(promotionId)
+    setDropdownOpen(null)
+  }
+
+  const confirmDeletePromotion = async () => {
+    if (!storeData?.id || !showDeleteConfirm) return
+
+    try {
+      await deletePromotion(storeData.id, showDeleteConfirm)
+
+      // Remover de la lista local
+      setPromotions(prevPromotions =>
+        prevPromotions.filter(p => p.id !== showDeleteConfirm)
+      )
+    } catch (error) {
+      console.error('Error deleting promotion:', error)
+      alert('Error al eliminar la promoción.')
+    }
+
+    setShowDeleteConfirm(null)
   }
 
   const getStatusBadge = (status: string) => {
@@ -163,7 +296,7 @@ export default function PromotionsPage() {
       case 'percentage':
         return `${value}% descuento`
       case 'price_discount':
-        return `$${value} de descuento`
+        return `${currencySymbols[storeCurrency] || '$'}${value} de descuento`
       default:
         return `${value}`
     }
@@ -208,7 +341,87 @@ export default function PromotionsPage() {
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6 lg:px-8 pb-8">
+            {/* Botón crear promoción */}
+            <div className="mb-6 flex justify-end">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-gray-900 hover:bg-gray-800"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Nueva promoción
+              </button>
+            </div>
+
+            {/* Filtros y controles */}
+            {promotions.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="px-4 sm:px-6 py-4">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    {/* Barra de búsqueda */}
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        value={searchFilter}
+                        onChange={(e) => setSearchFilter(e.target.value)}
+                        className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Buscar promociones..."
+                      />
+                    </div>
+
+                    {/* Filtro por estado */}
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Todos los estados</option>
+                      <option value="active">Activas</option>
+                      <option value="paused">Pausadas</option>
+                      <option value="expired">Expiradas</option>
+                      <option value="scheduled">Programadas</option>
+                    </select>
+
+                    {/* Botón limpiar filtros */}
+                    {(statusFilter || searchFilter) && (
+                      <button
+                        onClick={() => {
+                          setStatusFilter('')
+                          setSearchFilter('')
+                        }}
+                        className="px-3 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300"
+                      >
+                        Limpiar filtros
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Contador de resultados */}
+                  <div className="mt-3 text-sm text-gray-600">
+                    {loading ? (
+                      "Cargando..."
+                    ) : (
+                      <>
+                        Mostrando {filteredPromotions.length} de {promotions.length} promociones
+                        {(statusFilter || searchFilter) && (
+                          <span className="ml-2 text-gray-500">
+                            (filtradas)
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Lista de promociones */}
             {promotions.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
@@ -231,30 +444,46 @@ export default function PromotionsPage() {
                   </div>
                 </div>
               </div>
+            ) : filteredPromotions.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                <div className="text-center">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">Sin resultados</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    No se encontraron promociones que coincidan con los filtros seleccionados.
+                  </p>
+                </div>
+              </div>
             ) : (
-              <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Promoción
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Descuento
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Estado
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Vigencia
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aplicable a
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {promotions.map((promotion) => (
+              <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden relative">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Promoción
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Descuento
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estado
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Vigencia
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Aplicable a
+                        </th>
+                        <th className="relative px-6 py-3">
+                          <span className="sr-only">Acciones</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredPromotions.map((promotion) => (
                       <tr key={promotion.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
@@ -281,7 +510,13 @@ export default function PromotionsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div>
                             <div>Desde: {new Date(promotion.startDate).toLocaleDateString()}</div>
-                            <div>Hasta: {new Date(promotion.endDate).toLocaleDateString()}</div>
+                            <div>
+                              {promotion.noExpiration ? (
+                                <span className="text-blue-600 font-medium">Sin expiración</span>
+                              ) : (
+                                `Hasta: ${new Date(promotion.endDate).toLocaleDateString()}`
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -289,14 +524,101 @@ export default function PromotionsPage() {
                            promotion.targetType === 'specific_products' ? `${promotion.targetIds.length} productos` :
                            promotion.targetType}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="relative">
+                            <button
+                              onClick={(e) => toggleDropdown(promotion.id, e)}
+                              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Dropdown menu */}
+        {dropdownOpen && dropdownPosition && (
+          <div
+            className="fixed w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+            style={{
+              top: dropdownPosition.top,
+              right: dropdownPosition.right
+            }}
+          >
+            <div className="py-1">
+              <button
+                onClick={() => handlePausePromotion(dropdownOpen)}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {promotions.find(p => p.id === dropdownOpen)?.status === 'paused' ? 'Activar' : 'Pausar'}
+              </button>
+              <button
+                onClick={() => handleEditPromotion(dropdownOpen)}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar
+              </button>
+              <button
+                onClick={() => handleDeletePromotion(dropdownOpen)}
+                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmación de eliminación */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                  <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Eliminar promoción</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  ¿Estás seguro de que quieres eliminar esta promoción? Esta acción no se puede deshacer.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowDeleteConfirm(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={confirmDeletePromotion}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal de crear promoción */}
@@ -307,9 +629,14 @@ export default function PromotionsPage() {
             <div className="bg-white min-h-full">
               <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Nueva Promoción</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {editingPromotion ? 'Editar Promoción' : 'Nueva Promoción'}
+                  </h3>
                   <button
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setEditingPromotion(null)
+                    }}
                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
                   >
                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -343,13 +670,13 @@ export default function PromotionsPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="percentage">Porcentaje (%)</option>
-                    <option value="price_discount">Monto fijo ($)</option>
+                    <option value="price_discount">Monto fijo ({currencySymbols[storeCurrency] || '$'})</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Valor del descuento
+                    {formData.type === 'percentage' ? 'Porcentaje (%)' : `Monto fijo (${currencySymbols[storeCurrency] || '$'})`}
                   </label>
                   <input
                     type="number"
@@ -505,8 +832,26 @@ export default function PromotionsPage() {
                       value={formData.endDate}
                       onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={formData.noExpiration}
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.noExpiration}
+                      onChange={(e) => setFormData({ ...formData, noExpiration: e.target.checked })}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Sin fecha de expiración (promoción permanente)
+                    </span>
+                  </label>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Si activas esta opción, la promoción no expirará automáticamente
+                  </p>
                 </div>
 
                 <div className="flex items-center">
@@ -525,7 +870,10 @@ export default function PromotionsPage() {
                 <div className="flex space-x-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setEditingPromotion(null)
+                    }}
                     className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     Cancelar
@@ -535,7 +883,7 @@ export default function PromotionsPage() {
                     disabled={creating}
                     className="flex-1 px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {creating ? 'Creando...' : 'Crear Promoción'}
+                    {creating ? (editingPromotion ? 'Actualizando...' : 'Creando...') : (editingPromotion ? 'Actualizar Promoción' : 'Crear Promoción')}
                   </button>
                 </div>
               </form>
@@ -544,17 +892,22 @@ export default function PromotionsPage() {
 
           {/* Desktop: Modal grande centrado */}
           <div className="hidden sm:flex min-h-screen items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden">
-              <div className="flex flex-col h-full">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              <div className="flex flex-col max-h-[90vh]">
                 {/* Header fijo */}
                 <div className="flex-shrink-0 px-8 py-4 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">Nueva Promoción</h3>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {editingPromotion ? 'Editar Promoción' : 'Nueva Promoción'}
+                      </h3>
                       <p className="text-sm text-gray-600 mt-1">Configura descuentos para productos específicos o toda la tienda</p>
                     </div>
                     <button
-                      onClick={() => setShowCreateModal(false)}
+                      onClick={() => {
+                      setShowCreateModal(false)
+                      setEditingPromotion(null)
+                    }}
                       className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -566,10 +919,10 @@ export default function PromotionsPage() {
 
                 {/* Contenido scrolleable */}
                 <div className="flex-1 overflow-y-auto">
-                  <form onSubmit={handleCreatePromotion} className="p-6 pb-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <form id="promotion-form" onSubmit={handleCreatePromotion} className="p-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {/* Columna izquierda: Información básica */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Nombre de la promoción
@@ -608,13 +961,13 @@ export default function PromotionsPage() {
                               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
                               <option value="percentage">Porcentaje (%)</option>
-                              <option value="price_discount">Monto fijo ($)</option>
+                              <option value="price_discount">Monto fijo ({currencySymbols[storeCurrency] || '$'})</option>
                             </select>
                           </div>
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Valor del descuento
+                              {formData.type === 'percentage' ? 'Porcentaje (%)' : `Monto fijo (${currencySymbols[storeCurrency] || '$'})`}
                             </label>
                             <input
                               type="number"
@@ -652,8 +1005,26 @@ export default function PromotionsPage() {
                               value={formData.endDate}
                               onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              disabled={formData.noExpiration}
                             />
                           </div>
+                        </div>
+
+                        <div>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={formData.noExpiration}
+                              onChange={(e) => setFormData({ ...formData, noExpiration: e.target.checked })}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <span className="ml-3 text-sm text-gray-700">
+                              Sin fecha de expiración (promoción permanente)
+                            </span>
+                          </label>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Si activas esta opción, la promoción no expirará automáticamente
+                          </p>
                         </div>
 
                         <div className="flex items-center">
@@ -671,7 +1042,7 @@ export default function PromotionsPage() {
                       </div>
 
                       {/* Columna derecha: Selección de productos */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Aplicar a
@@ -820,34 +1191,41 @@ export default function PromotionsPage() {
                       </div>
                     </div>
 
-                    {/* Footer fijo con botones */}
-                    <div className="flex justify-end space-x-4 mt-6 pt-4 pb-4 border-t border-gray-200">
-                      <button
-                        type="button"
-                        onClick={() => setShowCreateModal(false)}
-                        className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={creating}
-                        className="px-8 py-3 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {creating ? (
-                          <span className="flex items-center">
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Creando...
-                          </span>
-                        ) : (
-                          'Crear Promoción'
-                        )}
-                      </button>
-                    </div>
                   </form>
+                </div>
+
+                {/* Footer fijo con botones */}
+                <div className="flex-shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
+                  <div className="flex justify-end space-x-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateModal(false)
+                        setEditingPromotion(null)
+                      }}
+                      className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      form="promotion-form"
+                      disabled={creating}
+                      className="px-8 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {creating ? (
+                        <span className="flex items-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Creando...
+                        </span>
+                      ) : (
+                        editingPromotion ? 'Actualizar Promoción' : 'Crear Promoción'
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

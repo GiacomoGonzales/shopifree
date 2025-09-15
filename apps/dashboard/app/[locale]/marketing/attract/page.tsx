@@ -68,16 +68,10 @@ export default function AttractCustomersPage() {
                 <h1 className="text-2xl font-light text-gray-900">{t('sections.attract.title')}</h1>
                 <p className="mt-1 text-sm text-gray-600">{t('sections.attract.description')}</p>
               </div>
-              <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800">
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {t('createCampaign')}
-              </button>
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6 lg:px-8 pb-8">
             <div className="space-y-6">
               {/* Cupones de descuento */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">

@@ -8,12 +8,13 @@ export interface Coupon {
   code: string;
   type: 'percentage' | 'fixed_amount' | 'free_shipping';
   value: number; // Porcentaje (25), monto fijo (50) o 0 para envío gratis
-  status: 'active' | 'expired' | 'scheduled';
+  status: 'active' | 'paused' | 'expired' | 'scheduled';
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   totalUses: number;
   maxUses: number;
   usesPerCustomer: number;
+  noExpiration?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -27,6 +28,7 @@ export interface CreateCouponData {
   endDate: string;
   maxUses: number;
   usesPerCustomer: number;
+  noExpiration?: boolean;
 }
 
 /**
@@ -138,6 +140,111 @@ export async function couponCodeExists(storeId: string, code: string): Promise<b
   } catch (error) {
     console.error('[Coupons] Error checking coupon code:', error);
     return false;
+  }
+}
+
+/**
+ * Actualizar el estado de un cupón (pausar/activar)
+ */
+export async function updateCouponStatus(storeId: string, couponId: string, status: 'active' | 'paused' | 'expired' | 'scheduled'): Promise<boolean> {
+  const db = getFirebaseDb();
+  if (!db) {
+    console.warn('[Coupons] Firebase not initialized');
+    return false;
+  }
+
+  try {
+    console.log('[Coupons] Updating coupon status:', { storeId, couponId, status });
+
+    const couponRef = doc(db, 'stores', storeId, 'coupons', couponId);
+    await updateDoc(couponRef, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('[Coupons] Coupon status updated successfully');
+    return true;
+  } catch (error) {
+    console.error('[Coupons] Error updating coupon status:', error);
+    return false;
+  }
+}
+
+/**
+ * Actualizar un cupón
+ */
+export async function updateCoupon(storeId: string, couponId: string, couponData: Partial<CreateCouponData>): Promise<boolean> {
+  const db = getFirebaseDb();
+  if (!db) {
+    console.warn('[Coupons] Firebase not initialized');
+    return false;
+  }
+
+  try {
+    console.log('[Coupons] Updating coupon:', { storeId, couponId, couponData });
+
+    const couponRef = doc(db, 'stores', storeId, 'coupons', couponId);
+    await updateDoc(couponRef, {
+      ...couponData,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('[Coupons] Coupon updated successfully');
+    return true;
+  } catch (error) {
+    console.error('[Coupons] Error updating coupon:', error);
+    return false;
+  }
+}
+
+/**
+ * Eliminar un cupón
+ */
+export async function deleteCoupon(storeId: string, couponId: string): Promise<boolean> {
+  const db = getFirebaseDb();
+  if (!db) {
+    console.warn('[Coupons] Firebase not initialized');
+    return false;
+  }
+
+  try {
+    console.log('[Coupons] Deleting coupon:', { storeId, couponId });
+
+    const couponRef = doc(db, 'stores', storeId, 'coupons', couponId);
+    await deleteDoc(couponRef);
+
+    console.log('[Coupons] Coupon deleted successfully');
+    return true;
+  } catch (error) {
+    console.error('[Coupons] Error deleting coupon:', error);
+    return false;
+  }
+}
+
+/**
+ * Calcular el estado automático de un cupón basado en fechas
+ */
+export function calculateCouponStatus(startDate: string, endDate: string, currentStatus?: string, noExpiration?: boolean): 'active' | 'expired' | 'scheduled' {
+  const now = new Date();
+  const start = new Date(startDate);
+
+  // Si está pausado manualmente, mantener ese estado no debería cambiar automáticamente
+  if (currentStatus === 'paused') {
+    return 'paused' as any; // Mantener pausado
+  }
+
+  if (now < start) {
+    return 'scheduled';
+  } else if (noExpiration) {
+    // Si no expira, solo puede estar activo (después de la fecha de inicio)
+    return 'active';
+  } else {
+    const end = new Date(endDate);
+    if (now > end) {
+      return 'expired';
+    } else {
+      return 'active';
+    }
   }
 }
 
