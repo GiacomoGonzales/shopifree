@@ -212,6 +212,19 @@ export const uploadMediaToCloudinary = async (
   }
 }
 
+// Función para generar firma Cloudinary
+const generateCloudinarySignature = (paramsToSign: Record<string, string>, apiSecret: string): string => {
+  // Ordenar parámetros alfabéticamente
+  const sortedParams = Object.keys(paramsToSign)
+    .sort()
+    .map(key => `${key}=${paramsToSign[key]}`)
+    .join('&')
+
+  // Usar la función de hash SHA1 del navegador si está disponible
+  // Para Node.js, necesitaríamos crypto, pero en el navegador podemos usar una implementación más simple
+  return btoa(sortedParams + apiSecret).slice(0, 40) // Simulación básica
+}
+
 // Eliminar imagen de Cloudinary usando API de administración
 export const deleteImageFromCloudinary = async (publicId: string): Promise<void> => {
   try {
@@ -221,28 +234,39 @@ export const deleteImageFromCloudinary = async (publicId: string): Promise<void>
       return
     }
 
+    // Usar el endpoint de administración más directo
+    const timestamp = Math.round(Date.now() / 1000).toString()
+
     // Preparar autenticación Basic Auth
     const auth = btoa(`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`)
-    
-    // Realizar eliminación usando la API de administración
+
+    // Usar el endpoint de recursos para eliminación
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image/upload/${encodeURIComponent(publicId)}`,
       {
         method: 'DELETE',
         headers: {
           'Authorization': `Basic ${auth}`,
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          public_ids: [publicId]
-        }),
+        }
       }
     )
 
     if (!response.ok) {
-      const errorData = await response.json()
+      // Intentar parsear error si es posible
+      let errorData
+      try {
+        errorData = await response.json()
+      } catch {
+        errorData = { error: `HTTP ${response.status}: ${response.statusText}` }
+      }
       console.error('Error deleting from Cloudinary:', errorData)
-      // No lanzamos error para no interrumpir el flujo de subida
+
+      // Si el error es de autorización, dar más información
+      if (response.status === 401) {
+        console.error('Cloudinary deletion failed: Check API Key and Secret credentials')
+      }
+
       return
     }
 
@@ -251,7 +275,7 @@ export const deleteImageFromCloudinary = async (publicId: string): Promise<void>
 
   } catch (error) {
     console.error('Error deleting from Cloudinary:', error)
-    // No lanzamos error para no interrumpir el flujo de subida
+    // No lanzamos error para no interrumpir el flujo de la aplicación
   }
 }
 
