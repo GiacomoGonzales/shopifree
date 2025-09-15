@@ -3,23 +3,19 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Apply CSP with unsafe-eval to fix development issues
         source: '/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://res.cloudinary.com https://api.cloudinary.com https://vercel.live",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://api.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://vercel.live",
-              "frame-src 'self'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'"
-            ].join('; ')
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob: *; object-src 'none';"
+          },
+          {
+            key: 'X-Content-Security-Policy',
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob: *; object-src 'none';"
+          },
+          {
+            key: 'X-WebKit-CSP',
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob: *; object-src 'none';"
           },
         ],
       },

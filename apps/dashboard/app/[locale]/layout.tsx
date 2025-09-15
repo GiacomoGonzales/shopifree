@@ -244,6 +244,22 @@ export default function LocaleLayout({
         <head>
           <title>Dashboard - Shopifree</title>
           <meta name="description" content="Manage your online store" />
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              // Override any CSP restrictions immediately
+              if (typeof window !== 'undefined') {
+                // Remove existing CSP meta tags
+                const cspMetas = document.querySelectorAll('meta[http-equiv*="Content-Security"], meta[http-equiv*="CSP"]');
+                cspMetas.forEach(meta => meta.remove());
+
+                // Add permissive CSP
+                const meta = document.createElement('meta');
+                meta.httpEquiv = 'Content-Security-Policy';
+                meta.content = "script-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob: *; object-src 'none';";
+                document.head.appendChild(meta);
+              }
+            `
+          }} />
         </head>
         <body>
           <div style={{ 
@@ -291,6 +307,22 @@ export default function LocaleLayout({
       <head>
         <title>Dashboard - Shopifree</title>
         <meta name="description" content="Manage your online store" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Override any CSP restrictions immediately
+            if (typeof window !== 'undefined') {
+              // Remove existing CSP meta tags
+              const cspMetas = document.querySelectorAll('meta[http-equiv*="Content-Security"], meta[http-equiv*="CSP"]');
+              cspMetas.forEach(meta => meta.remove());
+
+              // Add permissive CSP
+              const meta = document.createElement('meta');
+              meta.httpEquiv = 'Content-Security-Policy';
+              meta.content = "script-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob: *; object-src 'none';";
+              document.head.appendChild(meta);
+            }
+          `
+        }} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
