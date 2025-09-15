@@ -5,6 +5,22 @@ import { PublicProduct } from '../lib/products';
 import { useStoreLanguage } from '../lib/store-language-context';
 import { getMetadataDisplayName } from '../lib/filters';
 
+// Translation function for metadata values
+async function translateMetadataValue(fieldId: string, value: string, language: string = 'es'): Promise<string> {
+  try {
+    // Load metadata translations for the current language
+    const metadataMessages = await import(`../messages/${language}/categories/metadata.json`);
+    const translations = metadataMessages.default;
+
+    // Look for translation using: metadata.values.{fieldId}_options.{value}
+    const translatedValue = translations?.metadata?.values?.[`${fieldId}_options`]?.[value];
+    return translatedValue || value; // Fallback to original if no translation found
+  } catch (error) {
+    console.log(`❌ Error translating value "${value}" for field "${fieldId}":`, error);
+    return value; // Fallback: return original value
+  }
+}
+
 interface ProductMetadataProps {
   product: PublicProduct;
   storeId: string;
@@ -71,6 +87,7 @@ const METADATA_DISPLAY_NAMES = {
 export default function ProductMetadata({ product, storeId }: ProductMetadataProps) {
   const { language } = useStoreLanguage();
   const [metadataLabels, setMetadataLabels] = useState<Record<string, string>>({});
+  const [translatedValues, setTranslatedValues] = useState<Record<string, Record<string, string>>>({});
 
   // Helper para textos adicionales
   const additionalText = (key: string) => {
@@ -98,14 +115,31 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
       })
     : [];
 
-  // Cargar etiquetas de metadatos desde filtros
+  // Cargar etiquetas de metadatos desde filtros y traducir valores
   useEffect(() => {
-    const loadMetadataLabels = async () => {
+    const loadMetadataLabelsAndValues = async () => {
       const labels: Record<string, string> = {};
+      const values: Record<string, Record<string, string>> = {};
 
-      for (const [key] of validMetadata) {
+      for (const [key, value] of validMetadata) {
         try {
+          // Load field label translation
           labels[key] = await getMetadataDisplayName(storeId, key);
+
+          // Load value translations for this field
+          values[key] = {};
+
+          const valuesToTranslate = Array.isArray(value) ? value : [value];
+          for (const val of valuesToTranslate) {
+            const strVal = String(val);
+            try {
+              const translatedVal = await translateMetadataValue(key, strVal, language);
+              values[key][strVal] = translatedVal;
+            } catch (e) {
+              console.warn(`Error translating value "${strVal}" for field "${key}":`, e);
+              values[key][strVal] = strVal; // Fallback to original
+            }
+          }
         } catch (e) {
           console.warn(`Error loading label for ${key}:`, e);
           // Fallback
@@ -114,12 +148,13 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
       }
 
       setMetadataLabels(labels);
+      setTranslatedValues(values);
     };
 
     if (validMetadata.length > 0 && storeId) {
-      loadMetadataLabels();
+      loadMetadataLabelsAndValues();
     }
-  }, [storeId, product]);
+  }, [storeId, product, language]); // Add language to dependencies
 
   // Early returns DESPUÉS de todos los hooks
   if (!(product as any).metadata || Object.keys((product as any).metadata).length === 0) {
@@ -128,11 +163,18 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
 
   if (validMetadata.length === 0) return null;
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: any, fieldKey: string): string => {
     if (Array.isArray(value)) {
-      return value.join(', ');
+      // For arrays, translate each value and join
+      return value.map(v => getTranslatedValue(String(v), fieldKey)).join(', ');
     }
-    return String(value);
+    return getTranslatedValue(String(value), fieldKey);
+  };
+
+  const getTranslatedValue = (value: string, fieldKey: string): string => {
+    // Use translated values from state if available
+    const translatedValue = translatedValues[fieldKey]?.[value];
+    return translatedValue || value; // Fallback to original if no translation
   };
 
   const getDisplayName = (key: string): string => {
@@ -149,7 +191,7 @@ export default function ProductMetadata({ product, storeId }: ProductMetadataPro
             {validMetadata.map(([key, value]) => (
               <tr key={key} className="nbd-metadata-row">
                 <td className="nbd-metadata-label">{getDisplayName(key)}</td>
-                <td className="nbd-metadata-value">{formatValue(value)}</td>
+                <td className="nbd-metadata-value">{formatValue(value, key)}</td>
               </tr>
             ))}
           </tbody>
