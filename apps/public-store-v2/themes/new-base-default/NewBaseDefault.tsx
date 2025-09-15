@@ -914,9 +914,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             // Producto sin opciones → agregar directamente al carrito
             console.log(`Producto sin opciones: ${product.name} - Agregando directamente`);
             setLoadingCartButton(product.id);
-            
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
+
             addItem({
                 id: product.id,
                 productId: product.id,
@@ -927,7 +925,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 slug: product.slug || product.id,
                 incomplete: false
             }, 1);
-            
+
             setLoadingCartButton(null);
             openCart();
             console.log(`Agregado al carrito: ${product.name}`);

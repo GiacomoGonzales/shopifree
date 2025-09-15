@@ -1163,15 +1163,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             if (isWhatsAppCheckout) {
                 // Para WhatsApp: usar nueva función con ID del pedido
                 const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo);
-                
+
                 if (phone) {
                     // Limpiar número de teléfono (quitar espacios, guiones, etc.)
                     const cleanPhone = phone.replace(/[^\d+]/g, '');
                     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-                    
+
+                    console.log('[WhatsApp] Redirecting to:', whatsappUrl);
+
                     // Abrir WhatsApp
                     window.open(whatsappUrl, '_blank');
-                    
+
                     // Limpiar carrito después de un breve delay para que el usuario vea que se procesó
                     setTimeout(() => {
                         clearCart();
@@ -1181,7 +1183,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     }, 1000);
                 } else {
                     // Si no hay teléfono configurado, mostrar error
-                    alert('No se ha configurado un número de WhatsApp para esta tienda. Por favor contacta al administrador.');
+                    console.error('[WhatsApp] No phone number configured:', { storeInfo, phone });
+                    alert('⚠️ Error: No se ha configurado un número de WhatsApp para esta tienda.\n\nPor favor contacta al administrador para completar la configuración.');
                     setIsSubmitting(false);
                 }
             } else {
