@@ -563,8 +563,9 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
                 src={seoData.ogImage}
                 alt="Open Graph preview"
                 fill
+                sizes="(max-width: 768px) 100vw, 400px"
                 className="object-cover"
-                onLoad={() => console.log('OG Image loaded successfully:', seoData.ogImage)}
+                onLoad={() => {}}
                 onError={(e) => console.error('Error loading OG image:', seoData.ogImage, e)}
               />
             </div>
@@ -654,6 +655,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
                 src={seoData.ogImage}
                 alt="Social preview"
                 fill
+                sizes="(max-width: 768px) 100vw, 512px"
                 className="object-cover"
               />
             </div>
@@ -691,6 +693,7 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
                 src={seoData.favicon}
                 alt="Favicon preview"
                 fill
+                sizes="32px"
                 className="object-cover"
               />
             </div>
