@@ -13,7 +13,7 @@ interface ProductsGridProps {
   hasMoreProducts: boolean
 
   // Event handlers
-  handleAddToCart: (product: PublicProduct) => Promise<void>
+  handleAddToCart: (product: PublicProduct, finalPrice?: number) => Promise<void>
   loadMoreProducts: () => void
 
   // Utils
@@ -48,7 +48,6 @@ export function ProductsGrid({
 
   // Componente interno para cada producto con promociones
   function ProductCard({ product }: { product: PublicProduct }) {
-    console.log('🏪 ProductCard - storeId and product:', { storeId, productId: product.id, productName: product.name });
     const promotionData = usePromotions(storeId || null, product.id || '', product.price);
 
     // Usar solo sistema de promociones, eliminar comparePrice obsoleto
@@ -101,6 +100,16 @@ export function ProductsGrid({
               {additionalText('offer')}
             </div>
           )}
+
+          <AddToCartButton
+            productId={product.id}
+            productName={product.name}
+            isLoading={loadingCartButton === product.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddToCart(product, finalPrice);
+            }}
+          />
         </div>
 
         <div className="nbd-product-content">
@@ -117,16 +126,6 @@ export function ProductsGrid({
                 <span className="nbd-price-current">{formatPrice(finalPrice, storeInfo?.currency)}</span>
               )}
             </div>
-
-            <AddToCartButton
-              productId={product.id}
-              productName={product.name}
-              isLoading={loadingCartButton === product.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(product);
-              }}
-            />
           </div>
         </div>
       </div>

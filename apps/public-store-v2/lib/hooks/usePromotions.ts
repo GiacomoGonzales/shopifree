@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { getActivePromotionsForProduct, calculateDiscountedPrice, hasPromotionBadge, Promotion } from '../promotions';
 
 interface PromotionData {
@@ -7,7 +7,12 @@ interface PromotionData {
   discount: number;
   hasDiscountBadge: boolean;
   appliedPromotion?: Promotion;
+  isLoading: boolean;
 }
+
+// Cache para evitar llamadas duplicadas
+const promotionsCache = new Map<string, { data: Promotion[]; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 /**
  * Hook para manejar promociones de productos de manera eficiente
@@ -15,29 +20,42 @@ interface PromotionData {
 export function usePromotions(storeId: string | null, productId: string, originalPrice: number): PromotionData {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
 
   useEffect(() => {
-    console.log('🔍 usePromotions - Parameters:', { storeId, productId, originalPrice });
-
     if (!storeId || !productId) {
-      console.log('❌ usePromotions - Missing storeId or productId');
+      return;
+    }
+
+    const cacheKey = `${storeId}-${productId}`;
+    const cached = promotionsCache.get(cacheKey);
+    const now = Date.now();
+
+    // Verificar cache válido
+    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+      setPromotions(cached.data);
+      return;
+    }
+
+    // Evitar llamadas duplicadas si ya está cargando
+    if (loadingRef.current) {
       return;
     }
 
     let isMounted = true;
+    loadingRef.current = true;
     setLoading(true);
-
-    console.log('📡 usePromotions - Fetching promotions for:', { storeId, productId });
 
     getActivePromotionsForProduct(storeId, productId)
       .then((result) => {
-        console.log('✅ usePromotions - Promotions received:', result);
         if (isMounted) {
           setPromotions(result);
+          // Actualizar cache
+          promotionsCache.set(cacheKey, { data: result, timestamp: now });
         }
       })
       .catch((error) => {
-        console.error('❌ usePromotions - Error loading promotions:', error);
+        console.error('Error loading promotions:', error);
         if (isMounted) {
           setPromotions([]);
         }
@@ -45,31 +63,28 @@ export function usePromotions(storeId: string | null, productId: string, origina
       .finally(() => {
         if (isMounted) {
           setLoading(false);
+          loadingRef.current = false;
         }
       });
 
     return () => {
       isMounted = false;
+      loadingRef.current = false;
     };
   }, [storeId, productId]);
 
   const promotionData = useMemo(() => {
-    console.log('💰 usePromotions - Calculating prices:', { originalPrice, promotions });
-
     const { finalPrice, discount, appliedPromotion } = calculateDiscountedPrice(originalPrice, promotions);
 
-    const result = {
+    return {
       originalPrice,
       finalPrice,
       discount,
       hasDiscountBadge: hasPromotionBadge(promotions),
-      appliedPromotion
+      appliedPromotion,
+      isLoading: loading
     };
-
-    console.log('💰 usePromotions - Price calculation result:', result);
-
-    return result;
-  }, [originalPrice, promotions]);
+  }, [originalPrice, promotions, loading]);
 
   return promotionData;
 }

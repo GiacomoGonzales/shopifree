@@ -865,7 +865,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     };
 
     // Función para agregar producto al carrito con modal de opciones
-    const handleAddToCart = async (product: PublicProduct) => {
+    const handleAddToCart = async (product: PublicProduct, finalPrice?: number) => {
         // Verificar si el producto tiene variantes reales (mismo sistema que SimpleVariantSelector)
         let variantsData = null;
         
@@ -915,11 +915,14 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             console.log(`Producto sin opciones: ${product.name} - Agregando directamente`);
             setLoadingCartButton(product.id);
 
+            // Usar el precio ya calculado desde ProductCard o precio original como fallback
+            const priceToUse = finalPrice || product.price;
+
             addItem({
                 id: product.id,
                 productId: product.id,
                 name: product.name,
-                price: product.price,
+                price: priceToUse,
                 currency: storeInfo?.currency || 'COP',
                 image: product.image || '',
                 slug: product.slug || product.id,
@@ -928,7 +931,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
             setLoadingCartButton(null);
             openCart();
-            console.log(`Agregado al carrito: ${product.name}`);
+            console.log(`Agregado al carrito: ${product.name} con precio ${priceToUse}`);
         }
     };
     

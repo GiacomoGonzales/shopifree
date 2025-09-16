@@ -93,20 +93,16 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
     return selectedVariant !== null;
   };
 
-  // Función para limpiar HTML de la descripción
-  const cleanDescription = (description: string) => {
+  // Función para sanitizar HTML básicamente (mantener formato pero remover elementos peligrosos)
+  const sanitizeDescription = (description: string) => {
     if (!description) return '';
-    
-    // Remover etiquetas HTML básicas y convertir entidades
+
+    // Permitir etiquetas de formato básico pero remover scripts y otros elementos peligrosos
     return description
-      .replace(/<[^>]*>/g, '') // Remover todas las etiquetas HTML
-      .replace(/&nbsp;/g, ' ') // Convertir espacios no rompibles
-      .replace(/&amp;/g, '&') // Convertir ampersands
-      .replace(/&lt;/g, '<') // Convertir menor que
-      .replace(/&gt;/g, '>') // Convertir mayor que
-      .replace(/&quot;/g, '"') // Convertir comillas
-      .replace(/&#39;/g, "'") // Convertir apostrofes
-      .trim(); // Remover espacios extra
+      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remover scripts
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '') // Remover iframes
+      .replace(/javascript:/gi, '') // Remover javascript:
+      .replace(/on\w+="[^"]*"/gi, ''); // Remover eventos onclick, onload, etc.
   };
 
   const handleAddToCart = async () => {
@@ -221,10 +217,10 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
               )}
             </div>
             
-            {/* Descripción limpia del producto */}
+            {/* Descripción con formato rico del producto */}
             {product.description && (
               <div className="nbd-product-description">
-                <p>{cleanDescription(product.description)}</p>
+                <div dangerouslySetInnerHTML={{ __html: sanitizeDescription(product.description) }} />
               </div>
             )}
           </div>

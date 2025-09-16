@@ -1933,14 +1933,19 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
     
     .nbd-mobile-grid .nbd-product-content {
-        padding: var(--nbd-space-sm);
+        padding: var(--nbd-space-sm) var(--nbd-space-sm) var(--nbd-space-xs) var(--nbd-space-sm);
     }
     
     .nbd-mobile-grid .nbd-product-name {
-        font-size: var(--nbd-font-size-xs);
+        font-size: var(--nbd-font-size-sm);
         line-height: 1.3;
         margin-bottom: var(--nbd-space-xs);
         font-weight: var(--nbd-font-medium);
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        height: calc(1.3em * 2);
     }
     
     .nbd-mobile-grid .nbd-product-footer {
@@ -1948,13 +1953,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
     
     .nbd-mobile-grid .nbd-product-price {
-        flex-direction: column;
         align-items: flex-start;
         gap: var(--nbd-space-xs);
     }
     
     .nbd-mobile-grid .nbd-price-current {
-        font-size: var(--nbd-font-size-sm);
+        font-size: var(--nbd-font-size-base);
         font-weight: var(--nbd-font-semibold);
     }
     
@@ -1970,6 +1974,11 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     .nbd-mobile-grid .nbd-add-to-cart svg {
         width: 14px;
         height: 14px;
+    }
+
+    /* Eliminar altura mínima en móvil para que sea más compacto */
+    .nbd-mobile-grid .nbd-product-card {
+        min-height: auto;
     }
     
     /* Vista lista - horizontal */
@@ -2090,6 +2099,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     transition: all var(--nbd-transition-base);
     position: relative;
     group: card;
+    min-height: 320px;
 }
 
 .nbd-product-card:hover {
@@ -2181,6 +2191,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    height: calc(1.4em * 2);
 }
 
 /* Estilos para desktop - texto más delgado y pequeño en tarjetas de productos */
@@ -2202,7 +2213,18 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-product-price {
     display: flex;
     align-items: baseline;
-    gap: var(--nbd-space-sm);
+    gap: var(--nbd-space-md);
+    transition: all 0.2s ease;
+}
+
+/* Estados de carga para evitar parpadeo */
+.nbd-price-loading {
+    opacity: 0.8;
+}
+
+.nbd-badge-loading {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
 }
 
 .nbd-price-current {
@@ -2245,6 +2267,14 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón + flotante sobre la imagen */
+.nbd-product-image .nbd-add-to-cart {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 10;
 }
 
 .nbd-add-to-cart:hover {
@@ -7437,6 +7467,58 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     line-height: 1.6;
     margin: 0;
     font-size: var(--nbd-font-size-sm);
+}
+
+/* Estilos para contenido HTML rico en descripción */
+.nbd-product-description strong,
+.nbd-product-description b {
+    font-weight: 700;
+    color: var(--nbd-primary);
+}
+
+.nbd-product-description em,
+.nbd-product-description i {
+    font-style: italic;
+}
+
+.nbd-product-description u {
+    text-decoration: underline;
+}
+
+.nbd-product-description ul,
+.nbd-product-description ol {
+    margin: var(--nbd-space-sm) 0;
+    padding-left: var(--nbd-space-lg);
+}
+
+.nbd-product-description li {
+    margin-bottom: var(--nbd-space-xs);
+    color: var(--nbd-neutral-600);
+}
+
+.nbd-product-description h1,
+.nbd-product-description h2,
+.nbd-product-description h3,
+.nbd-product-description h4,
+.nbd-product-description h5,
+.nbd-product-description h6 {
+    font-weight: 600;
+    color: var(--nbd-primary);
+    margin: var(--nbd-space-md) 0 var(--nbd-space-sm) 0;
+}
+
+.nbd-product-description a {
+    color: var(--nbd-primary);
+    text-decoration: underline;
+}
+
+.nbd-product-description br {
+    line-height: 1.6;
+}
+
+/* Soporte para colores de texto comunes */
+.nbd-product-description [style*="color"] {
+    /* Mantener colores inline del editor */
 }
 
 /* Sección de variantes */
