@@ -379,9 +379,47 @@ export const paginateProducts = (products: ProductWithId[], page: number, itemsP
   }
 }
 
+// Actualizar stock de un producto
+export const updateProductStock = async (
+  storeId: string,
+  productId: string,
+  stockData: { stockQuantity?: number; variants?: ProductVariant[] }
+) => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) {
+      throw new Error('Firebase db not available')
+    }
+
+    const productRef = doc(db, 'stores', storeId, 'products', productId)
+
+    // Preparar datos de actualización
+    const updateData: Partial<Product> = {
+      updatedAt: serverTimestamp()
+    }
+
+    // Si es un producto con variantes
+    if (stockData.variants) {
+      updateData.variants = stockData.variants
+    }
+
+    // Si es un producto simple
+    if (stockData.stockQuantity !== undefined) {
+      updateData.stockQuantity = stockData.stockQuantity
+    }
+
+    await updateDoc(productRef, updateData)
+
+    return true
+  } catch (error) {
+    console.error('Error updating product stock:', error)
+    throw error
+  }
+}
+
 // Función principal para obtener productos filtrados y paginados
 export const getFilteredProducts = async (
-  storeId: string, 
+  storeId: string,
   filters: ProductFilters,
   page: number = 1,
   itemsPerPage: number = 15
@@ -389,24 +427,24 @@ export const getFilteredProducts = async (
   try {
     // Obtener todos los productos
     let products = await getProducts(storeId)
-    
+
     // Aplicar filtros
     if (filters.searchQuery) {
       products = filterProductsBySearch(products, filters.searchQuery)
     }
-    
+
     if (filters.status && filters.status !== 'all') {
       products = filterProductsByStatus(products, filters.status)
     }
-    
+
     // Aplicar ordenación
     if (filters.sortBy) {
       products = sortProducts(products, filters.sortBy)
     }
-    
+
     // Paginar
     const paginationResult = paginateProducts(products, page, itemsPerPage)
-    
+
     return paginationResult
   } catch (error) {
     console.error('Error getting filtered products:', error)

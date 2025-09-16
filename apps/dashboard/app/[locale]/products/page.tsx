@@ -7,12 +7,14 @@ import DashboardLayout from '../../../components/DashboardLayout'
 import { useStore } from '../../../lib/hooks/useStore'
 import { Toast } from '../../../components/shared/Toast'
 import { useToast } from '../../../lib/hooks/useToast'
-import { 
-  getFilteredProducts, 
-  deleteProduct, 
-  type ProductWithId, 
+import {
+  getFilteredProducts,
+  deleteProduct,
+  updateProductStock,
+  type ProductWithId,
   type ProductFilters,
-  type SortOption 
+  type SortOption,
+  type ProductVariant
 } from '../../../lib/products'
 import { getBrands, type BrandWithId } from '../../../lib/brands'
 import { getParentCategories, getSubcategories, type CategoryWithId } from '../../../lib/categories'
@@ -33,6 +35,11 @@ export default function ProductsPage() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [stockModalOpen, setStockModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<ProductWithId | null>(null)
+  const [stockChanges, setStockChanges] = useState<{
+    stockQuantity?: number
+    variants?: { [variantId: string]: number }
+  }>({})
+  const [updating, setUpdating] = useState(false)
   const menuRefs = useRef<{[key: string]: HTMLDivElement | null}>({})
   
   // Estados para filtros y paginación
@@ -212,7 +219,58 @@ export default function ProductsPage() {
   const handleUpdateStock = (product: ProductWithId) => {
     setOpenMenuId(null) // Cerrar menú
     setSelectedProduct(product)
+
+    // Inicializar los cambios de stock con los valores actuales
+    if (product.hasVariants && product.variants.length > 0) {
+      const variantsStock: { [variantId: string]: number } = {}
+      product.variants.forEach(variant => {
+        variantsStock[variant.id] = variant.stock
+      })
+      setStockChanges({ variants: variantsStock })
+    } else {
+      setStockChanges({ stockQuantity: product.stockQuantity || 0 })
+    }
+
     setStockModalOpen(true)
+  }
+
+  // Función para actualizar stock
+  const handleSaveStock = async () => {
+    if (!selectedProduct || !store?.id) return
+
+    try {
+      setUpdating(true)
+
+      if (selectedProduct.hasVariants && selectedProduct.variants.length > 0) {
+        // Actualizar variantes
+        const updatedVariants: ProductVariant[] = selectedProduct.variants.map(variant => ({
+          ...variant,
+          stock: stockChanges.variants?.[variant.id] ?? variant.stock
+        }))
+
+        await updateProductStock(store.id, selectedProduct.id, { variants: updatedVariants })
+      } else {
+        // Actualizar producto simple
+        await updateProductStock(store.id, selectedProduct.id, {
+          stockQuantity: stockChanges.stockQuantity
+        })
+      }
+
+      // Recargar productos
+      const result = await getFilteredProducts(store.id, filters, currentPage, itemsPerPage)
+      setPaginatedProducts(result.paginatedProducts)
+      setTotalPages(result.totalPages)
+      setTotalItems(result.totalItems)
+
+      setStockModalOpen(false)
+      setStockChanges({})
+      showToast('Existencias actualizadas correctamente', 'success')
+    } catch (error) {
+      console.error('Error actualizando existencias:', error)
+      showToast('Error al actualizar existencias', 'error')
+    } finally {
+      setUpdating(false)
+    }
   }
 
   // Cerrar menú al hacer clic fuera
@@ -1029,10 +1087,16 @@ export default function ProductsPage() {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-blue-800">
-                          Total: {selectedProduct.variants.reduce((sum, v) => sum + v.stock, 0)} unidades
+                          Total: {selectedProduct.variants.reduce((sum, v) => {
+                            const currentStock = stockChanges.variants?.[v.id] ?? v.stock
+                            return sum + currentStock
+                          }, 0)} unidades
                         </span>
                         <span className="text-sm text-blue-800">
-                          Activas: {selectedProduct.variants.filter(v => v.stock > 0).length}/{selectedProduct.variants.length} variantes
+                          Activas: {selectedProduct.variants.filter(v => {
+                            const currentStock = stockChanges.variants?.[v.id] ?? v.stock
+                            return currentStock > 0
+                          }).length}/{selectedProduct.variants.length} variantes
                         </span>
                       </div>
                     </div>
@@ -1082,24 +1146,35 @@ export default function ProductsPage() {
                                 <input
                                   type="number"
                                   min="0"
-                                  defaultValue={variant.stock}
+                                  value={stockChanges.variants?.[variant.id] ?? variant.stock}
                                   className="block w-24 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
                                   onChange={(e) => {
-                                    // TODO: Manejar cambio de stock
-                                    console.log(`Variant ${variant.id} stock changed to:`, e.target.value)
+                                    const newStock = parseInt(e.target.value) || 0
+                                    setStockChanges(prev => ({
+                                      ...prev,
+                                      variants: {
+                                        ...prev.variants,
+                                        [variant.id]: newStock
+                                      }
+                                    }))
                                   }}
                                 />
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  variant.stock > 10 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : variant.stock > 0
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
-                                  {variant.stock > 10 ? 'En stock' : variant.stock > 0 ? 'Poco stock' : 'Agotado'}
-                                </span>
+                                {(() => {
+                                  const currentStock = stockChanges.variants?.[variant.id] ?? variant.stock
+                                  return (
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      currentStock > 10
+                                        ? 'bg-green-100 text-green-800'
+                                        : currentStock > 0
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {currentStock > 10 ? 'En stock' : currentStock > 0 ? 'Poco stock' : 'Agotado'}
+                                    </span>
+                                  )
+                                })()}
                               </td>
                             </tr>
                           ))}
@@ -1141,11 +1216,14 @@ export default function ProductsPage() {
                           <input
                             type="number"
                             min="0"
-                            defaultValue={selectedProduct.stockQuantity || 0}
+                            value={stockChanges.stockQuantity ?? selectedProduct.stockQuantity ?? 0}
                             className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
                             onChange={(e) => {
-                              // TODO: Manejar cambio de stock
-                              console.log('Stock changed to:', e.target.value)
+                              const newStock = parseInt(e.target.value) || 0
+                              setStockChanges(prev => ({
+                                ...prev,
+                                stockQuantity: newStock
+                              }))
                             }}
                           />
                         </div>
@@ -1154,16 +1232,20 @@ export default function ProductsPage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Estado actual
                             </label>
-                            <div className={`inline-flex px-3 py-2 text-sm font-semibold rounded-md ${
-                              (selectedProduct.stockQuantity || 0) > 10 
-                                ? 'bg-green-100 text-green-800' 
-                                : (selectedProduct.stockQuantity || 0) > 0
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {(selectedProduct.stockQuantity || 0) > 10 ? 'En stock' : 
-                               (selectedProduct.stockQuantity || 0) > 0 ? 'Poco stock' : 'Agotado'}
-                            </div>
+                            {(() => {
+                              const currentStock = stockChanges.stockQuantity ?? selectedProduct.stockQuantity ?? 0
+                              return (
+                                <div className={`inline-flex px-3 py-2 text-sm font-semibold rounded-md ${
+                                  currentStock > 10
+                                    ? 'bg-green-100 text-green-800'
+                                    : currentStock > 0
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {currentStock > 10 ? 'En stock' : currentStock > 0 ? 'Poco stock' : 'Agotado'}
+                                </div>
+                              )
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -1182,15 +1264,21 @@ export default function ProductsPage() {
                     Cancelar
                   </button>
                   <button
-                    onClick={() => {
-                      // TODO: Implementar actualización de stock
-                      console.log('Actualizando existencias...')
-                      setStockModalOpen(false)
-                      showToast('Existencias actualizadas correctamente', 'success')
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    onClick={handleSaveStock}
+                    disabled={updating}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Actualizar existencias
+                    {updating ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Actualizando...
+                      </>
+                    ) : (
+                      'Actualizar existencias'
+                    )}
                   </button>
                 </div>
               )}
