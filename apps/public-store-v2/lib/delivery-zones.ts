@@ -9,6 +9,7 @@ export interface DeliveryZone {
     }>;
     priceStandard?: number;
     priceExpress?: number;
+    estimatedTime?: string;
     isActive?: boolean;
 }
 
@@ -68,6 +69,7 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
                 coordinates,
                 priceStandard,
                 priceExpress,
+                estimatedTime: data.estimatedTime || data.tiempoEstimado || 'Tiempo por calcular',
                 isActive: data.isActive !== false // Default true
             });
         });
@@ -82,7 +84,8 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
                 name: z.name,
                 coordenadas: z.coordinates.length,
                 precioStandard: z.priceStandard,
-                precioExpress: z.priceExpress
+                precioExpress: z.priceExpress,
+                tiempoEstimado: z.estimatedTime
             }))
         });
         

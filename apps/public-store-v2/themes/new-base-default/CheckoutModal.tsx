@@ -366,7 +366,13 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
     // Calcular y actualizar costo de envío
     useEffect(() => {
+        console.log('🔄 [useEffect Debug] Executing shipping calculation useEffect');
+        console.log('🔄 [useEffect Debug] formData.shippingMethod:', formData.shippingMethod);
+        console.log('🔄 [useEffect Debug] userCoordinates:', userCoordinates);
+        console.log('🔄 [useEffect Debug] deliveryZones.length:', deliveryZones.length);
+
         if (formData.shippingMethod === 'pickup') {
+            console.log('🔄 [useEffect Debug] Pickup method, setting cost to 0');
             setShippingCost(0);
             return;
         }
@@ -390,6 +396,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
             // Mostrar notificación cuando se encuentra una zona de reparto (con o sin costo)
             const zone = findDeliveryZoneForCoordinates(userCoordinates, deliveryZones);
+            console.log('🔍 [Notification Debug] userCoordinates:', userCoordinates);
+            console.log('🔍 [Notification Debug] deliveryZones:', deliveryZones);
+            console.log('🔍 [Notification Debug] zone found:', zone);
+            console.log('🔍 [Notification Debug] calculatedShipping:', calculatedShipping);
+
             if (zone) {
                 const coordinatesKey = `${userCoordinates.lat},${userCoordinates.lng}`;
 
@@ -400,33 +411,51 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     coordinates: coordinatesKey
                 };
 
+                console.log('🔍 [Notification Debug] currentCalculation:', currentCalculation);
+                console.log('🔍 [Notification Debug] lastShippingCalculation:', lastShippingCalculation);
+
                 const hasChanged = !lastShippingCalculation ||
                     lastShippingCalculation.cost !== currentCalculation.cost ||
                     lastShippingCalculation.method !== currentCalculation.method ||
                     lastShippingCalculation.coordinates !== currentCalculation.coordinates;
 
+                console.log('🔍 [Notification Debug] hasChanged:', hasChanged);
+
                 if (hasChanged) {
                     let estimatedTime = 'Tiempo por calcular';
                     if (formData.shippingMethod === 'express' && shippingConfig?.localDelivery?.express?.estimatedTime) {
                         estimatedTime = shippingConfig.localDelivery.express.estimatedTime;
-                    } else if (formData.shippingMethod === 'standard' && zone) {
-                        // Aquí podrías agregar tiempo específico por zona si lo implementas en el futuro
-                        estimatedTime = 'Tiempo por calcular';
+                    } else if (formData.shippingMethod === 'standard' && zone?.estimatedTime) {
+                        // Usar el tiempo estimado específico de la zona encontrada
+                        estimatedTime = zone.estimatedTime;
+                    } else if (formData.shippingMethod === 'standard' && shippingConfig?.localDelivery?.estimatedTime) {
+                        // Fallback al tiempo general de la configuración
+                        estimatedTime = shippingConfig.localDelivery.estimatedTime;
                     }
 
-                    setShippingNotificationData({
+                    console.log('🚀 [Notification Debug] SHOWING NOTIFICATION!');
+                    console.log('🕒 [Notification Debug] Estimated time used:', estimatedTime);
+                    console.log('🕒 [Notification Debug] Zone estimated time:', zone?.estimatedTime);
+                    console.log('🕒 [Notification Debug] Config estimated time:', shippingConfig?.localDelivery?.estimatedTime);
+                    const notificationData = {
                         cost: calculatedShipping,
                         method: formData.shippingMethod as 'standard' | 'express',
                         estimatedTime,
                         zoneName: zone?.name
-                    });
+                    };
+                    console.log('🚀 [Notification Debug] notificationData:', notificationData);
+
+                    setShippingNotificationData(notificationData);
                     setShowShippingNotification(true);
                     setLastShippingCalculation(currentCalculation);
 
-                    // Auto-ocultar después de 6 segundos (más tiempo para leer el costo)
+                    console.log('🚀 [Notification Debug] showShippingNotification set to TRUE');
+
+                    // Auto-ocultar después de 10 segundos (más tiempo para leer el costo)
                     setTimeout(() => {
+                        console.log('🚀 [Notification Debug] Auto-hiding notification');
                         setShowShippingNotification(false);
-                    }, 6000);
+                    }, 10000);
                 }
             }
             
@@ -1244,8 +1273,13 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     // Limpiar número de teléfono (quitar espacios, guiones, etc.)
                     const cleanPhone = phone.replace(/[^\d+]/g, '');
                     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                    const whatsappScheme = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
 
-                    console.log('[WhatsApp] Redirecting to:', whatsappUrl);
+                    console.log('[WhatsApp] URLs prepared:', {
+                        whatsappUrl,
+                        whatsappScheme,
+                        message: message.substring(0, 100) + '...'
+                    });
 
                     // Detectar dispositivo móvil para optimizar la apertura de WhatsApp
                     const isMobileDevice = isMobile();
@@ -1256,54 +1290,56 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         isMobileDevice,
                         isAndroid,
                         isIOS,
-                        userAgent: navigator.userAgent
+                        userAgent: navigator.userAgent,
+                        whatsappUrl,
+                        cleanPhone,
+                        windowWidth: window.innerWidth
                     });
 
                     if (isMobileDevice) {
-                        // En móviles, usar location.href para mejor integración con la app
+                        // En móviles, usar método simplificado y directo
                         console.log('[WhatsApp] Opening on mobile device');
 
-                        try {
-                            // Método principal: redirección directa
-                            window.location.href = whatsappUrl;
+                        // Intentar abrir WhatsApp con múltiples métodos
+                        const attemptWhatsAppOpen = async () => {
+                            try {
+                                if (isIOS) {
+                                    console.log('[WhatsApp] iOS - Trying whatsapp:// scheme first');
+                                    // Intentar esquema nativo primero
+                                    window.location.href = whatsappScheme;
 
-                            // Para iOS, agregar método de fallback más robusto
-                            if (isIOS) {
-                                console.log('[WhatsApp] Applying iOS-specific optimizations');
+                                    // Fallback después de 1 segundo
+                                    setTimeout(() => {
+                                        console.log('[WhatsApp] iOS - Fallback to wa.me');
+                                        window.open(whatsappUrl, '_top');
+                                    }, 1000);
+                                } else if (isAndroid) {
+                                    console.log('[WhatsApp] Android - Trying wa.me directly');
+                                    window.location.href = whatsappUrl;
+                                } else {
+                                    console.log('[WhatsApp] Other mobile - Trying whatsapp:// scheme');
+                                    window.location.href = whatsappScheme;
 
-                                // Intentar abrir con un esquema personalizado después de un delay
-                                setTimeout(() => {
-                                    // Crear un enlace invisible y hacer click
-                                    const tempLink = document.createElement('a');
-                                    tempLink.href = whatsappUrl;
-                                    tempLink.style.display = 'none';
-                                    tempLink.target = '_self'; // Usar _self en iOS para mejor integración
-                                    document.body.appendChild(tempLink);
-                                    tempLink.click();
-                                    document.body.removeChild(tempLink);
-                                }, 50);
+                                    // Fallback después de 1 segundo
+                                    setTimeout(() => {
+                                        console.log('[WhatsApp] Other mobile - Fallback to wa.me');
+                                        window.location.href = whatsappUrl;
+                                    }, 1000);
+                                }
+                            } catch (error) {
+                                console.error('[WhatsApp] Primary method failed:', error);
+                                // Último fallback: crear enlace invisible
+                                const tempLink = document.createElement('a');
+                                tempLink.href = whatsappUrl;
+                                tempLink.target = '_blank';
+                                tempLink.rel = 'noopener noreferrer';
+                                document.body.appendChild(tempLink);
+                                tempLink.click();
+                                document.body.removeChild(tempLink);
                             }
+                        };
 
-                            // Para Android, verificar si WhatsApp está disponible
-                            if (isAndroid) {
-                                console.log('[WhatsApp] Applying Android-specific optimizations');
-
-                                // Usar intent de Android si es posible
-                                const androidIntent = `intent://send/?text=${encodeURIComponent(message)}&phone=${cleanPhone}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
-
-                                setTimeout(() => {
-                                    try {
-                                        window.location.href = androidIntent;
-                                    } catch (e) {
-                                        console.log('[WhatsApp] Android intent failed, using web fallback');
-                                    }
-                                }, 100);
-                            }
-                        } catch (error) {
-                            console.error('[WhatsApp] Error opening on mobile:', error);
-                            // Fallback: intentar window.open
-                            window.open(whatsappUrl, '_blank');
-                        }
+                        attemptWhatsAppOpen();
                     } else {
                         // En desktop, usar window.open para abrir en nueva pestaña
                         console.log('[WhatsApp] Opening on desktop device');
@@ -1624,6 +1660,57 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         </svg>
                     </button>
                 </div>
+
+                {/* Notificación de envío dentro del modal */}
+                {showShippingNotification && shippingNotificationData && (
+                    <div
+                        className={`absolute top-4 left-1/2 transform -translate-x-1/2 ${
+                            shippingNotificationData.cost > 0
+                                ? 'bg-slate-600'
+                                : 'bg-slate-500'
+                        } text-white px-5 py-4 rounded-lg shadow-lg z-50 transition-all duration-500 ease-in-out`}
+                        style={{
+                            animation: showShippingNotification ? 'fadeInDown 0.5s ease-out' : 'fadeOutUp 0.3s ease-in',
+                            maxWidth: '90%',
+                            minWidth: '280px'
+                        }}
+                    >
+                        <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 mt-0.5">
+                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-medium">
+                                        {shippingNotificationData.cost > 0
+                                            ? `Envío: ${formatPrice(shippingNotificationData.cost, currency)} agregado`
+                                            : 'Zona de envío encontrada'
+                                        }
+                                    </h4>
+                                    <button
+                                        onClick={() => setShowShippingNotification(false)}
+                                        className="text-white/80 hover:text-white ml-2"
+                                    >
+                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="mt-2 text-xs text-white/90">
+                                    {shippingNotificationData.cost > 0 ? (
+                                        <span>{formatPrice(shippingNotificationData.cost, currency)} • {
+                                            shippingNotificationData.method === 'express' ? 'Express' : 'Estándar'
+                                        } • {shippingNotificationData.estimatedTime}</span>
+                                    ) : (
+                                        <span>Envío gratuito • {shippingNotificationData.estimatedTime}</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Content */}
                 <div className="nbd-checkout-content">
@@ -2407,72 +2494,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 currency={currency}
             />
 
-            {/* Notificación de envío calculado */}
-            {showShippingNotification && shippingNotificationData && (
-                <div
-                    className={`fixed top-4 right-4 ${
-                        shippingNotificationData.cost > 0
-                            ? 'bg-blue-600'
-                            : 'bg-green-600'
-                    } text-white px-6 py-4 rounded-lg shadow-lg z-[9999] transform transition-all duration-300 ease-in-out`}
-                    style={{
-                        animation: showShippingNotification ? 'slideInRight 0.3s ease-out' : 'slideOutRight 0.3s ease-in',
-                        maxWidth: '400px',
-                        minWidth: '300px'
-                    }}
-                >
-                    <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 mt-0.5">
-                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-medium">
-                                    {shippingNotificationData.cost > 0
-                                        ? `📦 Envío: $${shippingNotificationData.cost.toLocaleString()} agregado`
-                                        : '📦 Zona de envío encontrada'
-                                    }
-                                </h4>
-                                <button
-                                    onClick={() => setShowShippingNotification(false)}
-                                    className="text-white/80 hover:text-white"
-                                >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div className="mt-1 text-sm text-white/90 space-y-1">
-                                {shippingNotificationData.cost > 0 ? (
-                                    <>
-                                        <p><strong>💰 Costo de envío:</strong> ${shippingNotificationData.cost.toLocaleString()}</p>
-                                        <p><strong>🚚 Método:</strong> {
-                                            shippingNotificationData.method === 'express' ? 'Envío Express' : 'Envío Estándar'
-                                        }</p>
-                                        <p><strong>⏰ Tiempo estimado:</strong> {shippingNotificationData.estimatedTime}</p>
-                                        {shippingNotificationData.zoneName && (
-                                            <p><strong>📍 Zona:</strong> {shippingNotificationData.zoneName}</p>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        <p><strong>🎉 ¡Envío gratuito!</strong></p>
-                                        <p><strong>🚚 Método:</strong> {
-                                            shippingNotificationData.method === 'express' ? 'Envío Express' : 'Envío Estándar'
-                                        }</p>
-                                        <p><strong>⏰ Tiempo estimado:</strong> {shippingNotificationData.estimatedTime}</p>
-                                        {shippingNotificationData.zoneName && (
-                                            <p><strong>📍 Zona:</strong> {shippingNotificationData.zoneName}</p>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <style jsx>{`
                 @keyframes slideInRight {
@@ -2493,6 +2514,28 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     }
                     to {
                         transform: translateX(100%);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes fadeInDown {
+                    from {
+                        transform: translate(-50%, -20px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translate(-50%, 0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes fadeOutUp {
+                    from {
+                        transform: translate(-50%, 0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translate(-50%, -20px);
                         opacity: 0;
                     }
                 }
