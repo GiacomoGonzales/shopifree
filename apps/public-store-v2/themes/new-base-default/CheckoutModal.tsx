@@ -450,12 +450,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     setLastShippingCalculation(currentCalculation);
 
                     console.log('🚀 [Notification Debug] showShippingNotification set to TRUE');
-
-                    // Auto-ocultar después de 10 segundos (más tiempo para leer el costo)
-                    setTimeout(() => {
-                        console.log('🚀 [Notification Debug] Auto-hiding notification');
-                        setShowShippingNotification(false);
-                    }, 10000);
                 }
             }
             
@@ -1661,53 +1655,65 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     </button>
                 </div>
 
-                {/* Notificación de envío dentro del modal */}
+                {/* Notificación de envío - Modal pequeño y elegante */}
                 {showShippingNotification && shippingNotificationData && (
-                    <div
-                        className={`absolute top-4 left-1/2 transform -translate-x-1/2 ${
-                            shippingNotificationData.cost > 0
-                                ? 'bg-slate-600'
-                                : 'bg-slate-500'
-                        } text-white px-5 py-4 rounded-lg shadow-lg z-50 transition-all duration-500 ease-in-out`}
-                        style={{
-                            animation: showShippingNotification ? 'fadeInDown 0.5s ease-out' : 'fadeOutUp 0.3s ease-in',
-                            maxWidth: '90%',
-                            minWidth: '280px'
-                        }}
-                    >
-                        <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0 mt-0.5">
-                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        maxWidth: '320px',
+                        width: '90%',
+                        zIndex: 10000,
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                        overflow: 'hidden'
+                    }}>
+                        <div className="nbd-modal-header">
+                            <div className="flex items-center space-x-2">
+                                <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
                                 </svg>
+                                <h3 className="nbd-modal-title" style={{ fontSize: '16px' }}>
+                                    {shippingNotificationData.cost > 0 ? 'Envío Calculado' : 'Zona Encontrada'}
+                                </h3>
                             </div>
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="text-sm font-medium">
+                        </div>
+
+                        <div className="nbd-modal-body" style={{ padding: '16px' }}>
+                            <div className="space-y-2">
+                                {shippingNotificationData.zoneName && (
+                                    <div className="flex justify-between text-sm">
+                                        <span>Zona:</span>
+                                        <span className="font-medium text-right">{shippingNotificationData.zoneName}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-sm">
+                                    <span>Costo:</span>
+                                    <span className="font-medium text-right">
                                         {shippingNotificationData.cost > 0
-                                            ? `Envío: ${formatPrice(shippingNotificationData.cost, currency)} agregado`
-                                            : 'Zona de envío encontrada'
+                                            ? formatPrice(shippingNotificationData.cost, currency)
+                                            : 'Gratis'
                                         }
-                                    </h4>
-                                    <button
-                                        onClick={() => setShowShippingNotification(false)}
-                                        className="text-white/80 hover:text-white ml-2"
-                                    >
-                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
+                                    </span>
                                 </div>
-                                <div className="mt-2 text-xs text-white/90">
-                                    {shippingNotificationData.cost > 0 ? (
-                                        <span>{formatPrice(shippingNotificationData.cost, currency)} • {
-                                            shippingNotificationData.method === 'express' ? 'Express' : 'Estándar'
-                                        } • {shippingNotificationData.estimatedTime}</span>
-                                    ) : (
-                                        <span>Envío gratuito • {shippingNotificationData.estimatedTime}</span>
-                                    )}
+                                <div className="flex justify-between text-sm">
+                                    <span>Tiempo:</span>
+                                    <span className="font-medium text-right">{shippingNotificationData.estimatedTime}</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="nbd-modal-footer">
+                            <button
+                                onClick={() => setShowShippingNotification(false)}
+                                className="nbd-btn nbd-btn--primary"
+                                style={{ padding: '8px 16px', fontSize: '14px' }}
+                            >
+                                OK
+                            </button>
                         </div>
                     </div>
                 )}
@@ -2315,7 +2321,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                         <div className="nbd-summary-item-image">
                                             {item.image ? (
                                                 <img 
-                                                    src={toCloudinarySquare(item.image, 60)} 
+                                                    src={toCloudinarySquare(item.image, 100)} 
                                                     alt={item.name}
                                                     loading="lazy"
                                                 />

@@ -3219,13 +3219,6 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 }
 
-/* Específico para iPhone SE */
-@media (max-width: 375px) and (max-height: 667px) {
-    .nbd-hero {
-        padding-top: 100px !important;
-    }
-}
-
 /* Continuar con estilos generales de móvil */
 @media (max-width: 768px) {
     .nbd-section-title {
