@@ -328,7 +328,7 @@ export default function ShippingLocalDeliveryPage() {
                                 </span>
                               </div>
                               <p className="mt-1 text-xs text-gray-500">
-                                Ejemplo: Si el envío estándar cuesta $5.000 y el multiplicador es 1.5, el envío express costará $7.500
+                                Ejemplo: Si el envío estándar cuesta $10 y el multiplicador es 1.5, el envío express costará $15
                               </p>
                             </div>
                           </div>
@@ -340,7 +340,7 @@ export default function ShippingLocalDeliveryPage() {
                                 type="radio"
                                 name="expressMethod"
                                 checked={shippingData.localDelivery.express.fixedSurcharge > 0}
-                                onChange={() => updateShippingData('localDelivery.express.fixedSurcharge', 2000)}
+                                onChange={() => updateShippingData('localDelivery.express.fixedSurcharge', 5)}
                                 className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300"
                               />
                               <span className="ml-2 text-sm font-medium text-gray-700">
@@ -354,7 +354,7 @@ export default function ShippingLocalDeliveryPage() {
                                 <input
                                   type="number"
                                   min="0"
-                                  step="500"
+                                  step="1"
                                   value={shippingData.localDelivery.express.fixedSurcharge}
                                   onChange={(e) => updateShippingData('localDelivery.express.fixedSurcharge', parseInt(e.target.value) || 0)}
                                   className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
@@ -365,32 +365,13 @@ export default function ShippingLocalDeliveryPage() {
                                 </span>
                               </div>
                               <p className="mt-1 text-xs text-gray-500">
-                                Ejemplo: Si el envío estándar cuesta $5.000 y el recargo es $2.000, el envío express costará $7.000
+                                Ejemplo: Si el envío estándar cuesta $10 y el recargo es $5, el envío express costará $15
                               </p>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Previsualización del cálculo */}
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                        <h5 className="text-sm font-medium text-gray-900 mb-2">Previsualización del cálculo</h5>
-                        <div className="text-sm text-gray-700 space-y-1">
-                          <p>• Envío estándar: $5.000 (ejemplo)</p>
-                          <p>• Envío express: ${
-                            shippingData.localDelivery.express.fixedSurcharge > 0
-                              ? (5000 + shippingData.localDelivery.express.fixedSurcharge).toLocaleString()
-                              : (5000 * shippingData.localDelivery.express.priceMultiplier).toLocaleString()
-                          }</p>
-                          <p className="text-xs text-gray-500">
-                            Método actual: {
-                              shippingData.localDelivery.express.fixedSurcharge > 0
-                                ? `Recargo fijo de $${shippingData.localDelivery.express.fixedSurcharge.toLocaleString()}`
-                                : `Multiplicador de ${shippingData.localDelivery.express.priceMultiplier}x`
-                            }
-                          </p>
-                        </div>
-                      </div>
                     </>
                   )}
                 </div>
