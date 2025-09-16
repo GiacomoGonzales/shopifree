@@ -1137,12 +1137,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     // Paso 1: Crear o actualizar cliente con datos básicos
                     if (storeId && formData.email && formData.fullName && formData.phone) {
                         console.log('👤 [CheckoutModal] Creating/updating customer step 1');
+
+                        // Obtener moneda de los items del carrito (tomar la primera)
+                        const cartCurrency = state.items.length > 0 ? state.items[0].currency : 'PEN';
+
                         const newCustomerId = await createOrUpdateCustomerStep1(
                             storeId,
                             formData.email,
                             formData.fullName,
                             formData.phone,
-                            state.currency || 'PEN',
+                            cartCurrency,
                             state.items,
                             state.totalPrice
                         );
