@@ -388,9 +388,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             );
             setShippingCost(calculatedShipping);
 
-            // Mostrar notificación solo si hay costo de envío y cambió
-            if (calculatedShipping > 0) {
-                const zone = findDeliveryZoneForCoordinates(userCoordinates, deliveryZones);
+            // Mostrar notificación cuando se encuentra una zona de reparto (con o sin costo)
+            const zone = findDeliveryZoneForCoordinates(userCoordinates, deliveryZones);
+            if (zone) {
                 const coordinatesKey = `${userCoordinates.lat},${userCoordinates.lng}`;
 
                 // Solo mostrar si cambió el costo, método o ubicación
@@ -423,10 +423,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     setShowShippingNotification(true);
                     setLastShippingCalculation(currentCalculation);
 
-                    // Auto-ocultar después de 4 segundos
+                    // Auto-ocultar después de 6 segundos (más tiempo para leer el costo)
                     setTimeout(() => {
                         setShowShippingNotification(false);
-                    }, 4000);
+                    }, 6000);
                 }
             }
             
@@ -2410,7 +2410,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             {/* Notificación de envío calculado */}
             {showShippingNotification && shippingNotificationData && (
                 <div
-                    className="fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-[9999] transform transition-all duration-300 ease-in-out"
+                    className={`fixed top-4 right-4 ${
+                        shippingNotificationData.cost > 0
+                            ? 'bg-blue-600'
+                            : 'bg-green-600'
+                    } text-white px-6 py-4 rounded-lg shadow-lg z-[9999] transform transition-all duration-300 ease-in-out`}
                     style={{
                         animation: showShippingNotification ? 'slideInRight 0.3s ease-out' : 'slideOutRight 0.3s ease-in',
                         maxWidth: '400px',
@@ -2426,7 +2430,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
                                 <h4 className="text-sm font-medium">
-                                    ✅ Costo de envío calculado
+                                    {shippingNotificationData.cost > 0
+                                        ? `📦 Envío: $${shippingNotificationData.cost.toLocaleString()} agregado`
+                                        : '📦 Zona de envío encontrada'
+                                    }
                                 </h4>
                                 <button
                                     onClick={() => setShowShippingNotification(false)}
@@ -2438,13 +2445,28 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                 </button>
                             </div>
                             <div className="mt-1 text-sm text-white/90 space-y-1">
-                                <p><strong>Costo:</strong> ${shippingNotificationData.cost.toLocaleString()}</p>
-                                <p><strong>Método:</strong> {
-                                    shippingNotificationData.method === 'express' ? 'Envío Express' : 'Envío Estándar'
-                                }</p>
-                                <p><strong>Tiempo estimado:</strong> {shippingNotificationData.estimatedTime}</p>
-                                {shippingNotificationData.zoneName && (
-                                    <p><strong>Zona:</strong> {shippingNotificationData.zoneName}</p>
+                                {shippingNotificationData.cost > 0 ? (
+                                    <>
+                                        <p><strong>💰 Costo de envío:</strong> ${shippingNotificationData.cost.toLocaleString()}</p>
+                                        <p><strong>🚚 Método:</strong> {
+                                            shippingNotificationData.method === 'express' ? 'Envío Express' : 'Envío Estándar'
+                                        }</p>
+                                        <p><strong>⏰ Tiempo estimado:</strong> {shippingNotificationData.estimatedTime}</p>
+                                        {shippingNotificationData.zoneName && (
+                                            <p><strong>📍 Zona:</strong> {shippingNotificationData.zoneName}</p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <p><strong>🎉 ¡Envío gratuito!</strong></p>
+                                        <p><strong>🚚 Método:</strong> {
+                                            shippingNotificationData.method === 'express' ? 'Envío Express' : 'Envío Estándar'
+                                        }</p>
+                                        <p><strong>⏰ Tiempo estimado:</strong> {shippingNotificationData.estimatedTime}</p>
+                                        {shippingNotificationData.zoneName && (
+                                            <p><strong>📍 Zona:</strong> {shippingNotificationData.zoneName}</p>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
