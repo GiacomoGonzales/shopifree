@@ -3,6 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart, CartItem } from '../../lib/cart-context';
 import { createOrder, generateWhatsAppMessageWithId, OrderData } from '../../lib/orders';
+import {
+    loadCustomerFromLocalStorage,
+    createOrUpdateCustomerStep1,
+    updateCustomerStep2,
+    updateCustomerStep3
+} from '../../lib/customers';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
@@ -144,6 +150,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Estado para validación de cupones
     const [validatingCoupon, setValidatingCoupon] = useState(false);
     const [couponError, setCouponError] = useState<string>('');
+
+    // 🆕 Estado para cliente progresivo
+    const [customerId, setCustomerId] = useState<string | null>(null);
     
     // Estado del formulario de checkout
     const [formData, setFormData] = useState<CheckoutData>({
@@ -296,13 +305,25 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     useEffect(() => {
         if (isOpen && storeId) {
             console.log('🚚 [CheckoutModal] Loading configs for store:', storeId);
-            
+
+            // 🆕 CARGAR DATOS DEL CLIENTE DESDE LOCALSTORAGE
+            const savedCustomerData = loadCustomerFromLocalStorage();
+            if (savedCustomerData) {
+                console.log('👤 [CheckoutModal] Loading saved customer data from localStorage');
+                setFormData(prev => ({
+                    ...prev,
+                    email: savedCustomerData.email,
+                    fullName: savedCustomerData.fullName,
+                    phone: savedCustomerData.phone
+                }));
+            }
+
             // Cargar configuración de envío
             getStoreShippingConfig(storeId).then(config => {
                 console.log('🚚 [CheckoutModal] Raw shipping config:', config);
                 setShippingConfig(config);
                 console.log('🚚 [CheckoutModal] Store pickup enabled?', config?.storePickup?.enabled);
-                
+
                 // Auto-seleccionar primera sucursal por defecto
                 const locations = config?.storePickup?.locations || [];
                 if (locations.length > 0) {
@@ -1106,10 +1127,71 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     };
 
-    const nextStep = () => {
-        if (validateStep(currentStep) && currentStep < 3) {
+    const nextStep = async () => {
+        if (!validateStep(currentStep) || currentStep >= 3) return;
+
+        try {
+            // 🆕 REGISTRAR/ACTUALIZAR CLIENTE PROGRESIVAMENTE
+            switch (currentStep) {
+                case 1:
+                    // Paso 1: Crear o actualizar cliente con datos básicos
+                    if (storeId && formData.email && formData.fullName && formData.phone) {
+                        console.log('👤 [CheckoutModal] Creating/updating customer step 1');
+                        const newCustomerId = await createOrUpdateCustomerStep1(
+                            storeId,
+                            formData.email,
+                            formData.fullName,
+                            formData.phone,
+                            state.currency || 'PEN',
+                            state.items,
+                            state.totalPrice
+                        );
+                        if (newCustomerId) {
+                            setCustomerId(newCustomerId);
+                            console.log('👤 [CheckoutModal] Customer ID set:', newCustomerId);
+                        }
+                    }
+                    break;
+
+                case 2:
+                    // Paso 2: Actualizar cliente con información de envío
+                    if (customerId && storeId) {
+                        console.log('👤 [CheckoutModal] Updating customer step 2');
+                        const shippingData = {
+                            address: formData.address,
+                            city: formData.city,
+                            zipCode: formData.zipCode,
+                            lat: formData.lat,
+                            lng: formData.lng,
+                            method: formData.shippingMethod
+                        };
+                        await updateCustomerStep2(storeId, customerId, shippingData);
+                    }
+                    break;
+
+                case 3:
+                    // Paso 3: Actualizar cliente con información de pago
+                    if (customerId && storeId) {
+                        console.log('👤 [CheckoutModal] Updating customer step 3');
+                        const paymentData = {
+                            paymentMethod: formData.paymentMethod,
+                            preferredPickupLocation: selectedLocation?.name,
+                            notes: formData.notes
+                        };
+                        await updateCustomerStep3(storeId, customerId, paymentData);
+                    }
+                    break;
+            }
+
+            // Avanzar al siguiente paso
             setCurrentStep(currentStep + 1);
             // Scroll to top en móviles después de cambiar de paso
+            setTimeout(() => scrollToTopOnMobile(), 100);
+
+        } catch (error) {
+            console.error('[CheckoutModal] Error updating customer in step', currentStep, error);
+            // No bloquear el flujo de checkout por errores de cliente
+            setCurrentStep(currentStep + 1);
             setTimeout(() => scrollToTopOnMobile(), 100);
         }
     };
@@ -1227,6 +1309,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     fullName: formData.fullName,
                     phone: formData.phone
                 },
+                ...(customerId && { customerId }),
                 shipping: {
                     method: formData.shippingMethod,
                     address: formData.address,
@@ -1381,6 +1464,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         fullName: formData.fullName,
                         phone: formData.phone
                     },
+                    ...(customerId && { customerId }),
                     shipping: {
                         method: formData.shippingMethod,
                         address: formData.addressText || formData.address,
@@ -1541,6 +1625,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             email: formData.email || '',
                             phone: formData.phone || ''
                         },
+                        ...(customerId && { customerId }),
                         totals: {
                             subtotal,
                             shipping: shipping || 0,

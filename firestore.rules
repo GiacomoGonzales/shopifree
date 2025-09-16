@@ -59,11 +59,18 @@ service cloud.firestore {
       
       // Reglas para clientes de la tienda
       match /customers/{customerId} {
-        // Los clientes pueden leer y escribir su propia información
-        allow read, write: if isAuthenticated() && 
+        // 🆕 PERMITIR CREACIÓN PÚBLICA DE CLIENTES (para checkout sin registro)
+        allow create: if true;
+
+        // 🆕 PERMITIR LECTURA Y ACTUALIZACIÓN POR EMAIL/TELÉFONO (para búsqueda por identificadores)
+        allow read, update: if true;
+
+        // Los clientes autenticados pueden leer y escribir su propia información
+        allow read, write: if isAuthenticated() &&
                             request.auth.uid == customerId;
+
         // El dueño de la tienda puede leer y escribir todos los clientes
-        allow read, write: if isAuthenticated() && 
+        allow read, write: if isAuthenticated() &&
                             request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
       

@@ -2,6 +2,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 import { CartItem } from './cart-context';
 import { formatPrice } from './currency';
+import { finalizeCustomerOrder, saveCustomerToLocalStorage } from './customers';
 
 // Tipos compatibles con el dashboard existente
 export interface OrderData {
@@ -10,6 +11,7 @@ export interface OrderData {
     fullName: string;
     phone: string;
   };
+  customerId?: string; // 🆕 ID del cliente para órdenes progresivas
   shipping: {
     method: 'standard' | 'express' | 'pickup';
     address?: string;
@@ -44,8 +46,24 @@ export async function createOrder(storeId: string, orderData: OrderData) {
     console.warn('[Orders] Firebase not initialized, skipping order creation');
     return null;
   }
-  
+
   try {
+    // 🆕 FINALIZAR CLIENTE PROGRESIVO (si ya tiene customerId) o proceso legacy
+    let customerId = orderData.customerId;
+
+    if (customerId) {
+      // Cliente ya fue creado progresivamente, solo finalizar orden
+      console.log('[Orders] Finalizing progressive customer order:', customerId);
+      await finalizeCustomerOrder(storeId, customerId, orderData.totals.total, orderData.currency);
+    }
+
+    // 🆕 GUARDAR DATOS EN LOCALSTORAGE PARA PRÓXIMAS VISITAS
+    saveCustomerToLocalStorage(
+      orderData.customer.email,
+      orderData.customer.fullName,
+      orderData.customer.phone
+    );
+
     const ordersRef = collection(db, 'stores', storeId, 'orders');
     
     // Formato EXACTO que espera el dashboard
@@ -94,6 +112,7 @@ export async function createOrder(storeId: string, orderData: OrderData) {
       // Metadata requerida por dashboard
       storeId: storeId,
       userId: '', // No hay usuario autenticado en tienda pública
+      customerId: customerId || '', // 🆕 ID del cliente automático
       
       // Timestamps (formato Firestore)
       createdAt: serverTimestamp(),
