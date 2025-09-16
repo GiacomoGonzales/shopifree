@@ -240,9 +240,9 @@
     
     .nbd-hero-visual {
         order: 1;
-        margin-top: var(--nbd-space-xl);
+        margin-top: 0; /* Eliminar margen superior */
         margin-bottom: 0;
-        max-height: 70vh;
+        max-height: 60vh; /* Reducir altura máxima */
         overflow: visible;
         padding-bottom: 0;
     }
@@ -260,8 +260,8 @@
     }
     
     .nbd-hero-placeholder {
-        height: 60vh;
-        max-height: 400px;
+        height: 50vh; /* Reducir altura del placeholder */
+        max-height: 300px; /* Reducir altura máxima */
         border-radius: var(--nbd-radius-2xl);
         margin-bottom: 0;
     }
@@ -704,7 +704,7 @@
    CATEGORÍAS MOSAICO INTELIGENTE
    =================================================== */
 .nbd-categories-mosaic {
-    padding: var(--nbd-space-2xl) 0;
+    padding: var(--nbd-space-lg) 0 var(--nbd-space-2xl) 0; /* Reducir padding superior */
     position: relative;
     overflow: hidden;
     scroll-margin-top: var(--nbd-header-height);
@@ -1293,7 +1293,7 @@
 }
 
 .nbd-newsletter-form {
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     border-radius: var(--nbd-radius-2xl);
     padding: var(--nbd-space-2xl);
     box-shadow: var(--nbd-shadow-xl);
@@ -2255,7 +2255,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-add-to-cart {
     width: 36px;
     height: 36px;
-    background: var(--nbd-primary);
+    background: #1a1a1a;
     color: var(--nbd-neutral-0);
     border: none;
     border-radius: 50%;
@@ -2278,7 +2278,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-add-to-cart:hover {
-    background: var(--nbd-neutral-800);
+    background: #2d2d2d;
     transform: scale(1.08);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -2698,7 +2698,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
    FOOTER MODERNO
    =================================================== */
 .nbd-footer {
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     color: var(--nbd-neutral-300);
     margin-top: var(--nbd-space-xl);
 }
@@ -3138,8 +3138,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
    =================================================== */
 @media (max-width: 768px) {
     .nbd-hero {
-        min-height: 85vh;
-        padding-top: var(--nbd-space-2xl); /* Menos separación en móvil */
+        min-height: 70vh; /* Reducir altura mínima */
+        padding-top: var(--nbd-space-sm); /* Mucho menos separación en móvil */
     }
     
     .nbd-hero-container {
@@ -3147,7 +3147,75 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
     
     .nbd-hero-content {
-        padding: var(--nbd-space-2xl) 0;
+        padding: var(--nbd-space-sm) 0; /* Reducir padding superior e inferior */
+    }
+
+    /* Ocultar texto de hero en móvil - solo mostrar imagen */
+    .nbd-hero-title,
+    .nbd-hero-description {
+        display: none;
+    }
+
+    /* Mantener el contenedor de texto pero hacerlo invisible */
+    .nbd-hero-text {
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        /* No usar height: 0 para mantener los botones visibles */
+        position: relative;
+        order: 2; /* Mantener el orden */
+    }
+
+    /* Posicionar los botones relativos al contenedor hero principal */
+    .nbd-hero-actions {
+        position: absolute;
+        left: var(--nbd-space-lg);
+        right: var(--nbd-space-lg);
+        bottom: calc(-1 * (var(--nbd-space-2xl) + 60px)); /* Más cerca del hero */
+        z-index: 1000;
+        background: transparent !important;
+        padding: 0;
+        margin: 0;
+        width: auto;
+        /* Hacer que ocupen todo el ancho disponible */
+        display: flex !important;
+        flex-direction: column !important;
+        gap: var(--nbd-space-lg) !important;
+    }
+
+    /* Asegurar que los botones ocupen todo el ancho */
+    .nbd-hero-actions .nbd-btn {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    /* El contenedor padre debe tener position relative */
+    .nbd-hero {
+        position: relative;
+        overflow: visible; /* Permitir que los botones salgan */
+        background: transparent !important;
+    }
+
+    /* Asegurar que TODO el contenido de hero sea transparente */
+    .nbd-hero-content {
+        background: transparent !important;
+    }
+
+    .nbd-hero-container {
+        background: transparent !important;
+    }
+
+    /* Reducir el padding del contenido de hero al ocultar texto */
+    .nbd-hero-content {
+        padding: var(--nbd-space-lg) 0;
+        /* Reducir padding inferior para dar espacio a botones */
+        padding-bottom: 0;
+    }
+
+    /* Dar espacio entre hero y siguiente sección */
+    .nbd-hero {
+        margin-bottom: var(--nbd-space-4xl);
     }
     
     .nbd-section-title {
@@ -3167,7 +3235,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     .nbd-categories,
     .nbd-categories-mosaic {
-        padding: var(--nbd-space-2xl) 0 var(--nbd-space-lg) 0;
+        padding: var(--nbd-space-md) 0 var(--nbd-space-lg) 0; /* Reducir aún más padding superior en móvil */
         scroll-margin-top: var(--nbd-header-height);
     }
     
@@ -6666,7 +6734,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
    COLECCIONES MOSAICO DINÁMICO
    =================================================== */
 .nbd-collections-mosaic {
-    padding: var(--nbd-space-2xl) 0;
+    padding: var(--nbd-space-2xl) 0 var(--nbd-space-lg) 0; /* Reducir padding inferior */
     position: relative;
     overflow: hidden;
     scroll-margin-top: var(--nbd-header-height);
@@ -6954,7 +7022,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Mobile - Carrusel horizontal */
 @media (max-width: 640px) {
     .nbd-collections-mosaic {
-        padding: var(--nbd-space-xl) 0;
+        padding: var(--nbd-space-xl) 0 var(--nbd-space-md) 0; /* Reducir padding inferior en móvil */
     }
     
     .nbd-collections-grid {
