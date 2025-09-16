@@ -273,6 +273,12 @@ export type StoreLocalDeliveryConfig = {
     enabled?: boolean;
     allowGPS?: boolean;
     noCoverageMessage?: string;
+    express?: {
+        enabled: boolean;
+        priceMultiplier?: number;
+        fixedSurcharge?: number;
+        estimatedTime?: string;
+    };
 };
 
 export type StoreShippingConfig = {
@@ -306,7 +312,13 @@ export async function getStoreShippingConfig(storeId: string): Promise<StoreShip
             localDelivery: {
                 enabled: shippingConfig.localDelivery?.enabled || false,
                 allowGPS: shippingConfig.localDelivery?.allowGPS || false,
-                noCoverageMessage: shippingConfig.localDelivery?.noCoverageMessage || "Lo sentimos, no hacemos entregas en tu zona"
+                noCoverageMessage: shippingConfig.localDelivery?.noCoverageMessage || "Lo sentimos, no hacemos entregas en tu zona",
+                express: shippingConfig.localDelivery?.express || {
+                    enabled: false,
+                    priceMultiplier: 1.5,
+                    fixedSurcharge: 0,
+                    estimatedTime: '1-2 días hábiles'
+                }
             }
         } as StoreShippingConfig;
     } catch (e) {
