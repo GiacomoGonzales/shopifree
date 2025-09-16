@@ -59,7 +59,8 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
 
             // Soporte para formato alternativo de precios
             const priceStandard = data.priceStandard || data.precio || 0;
-            const priceExpress = data.priceExpress || data.precioExpress || (data.precio ? data.precio * 1.5 : 0);
+            // No calcular priceExpress automáticamente, dejar que lo haga la configuración del dashboard
+            const priceExpress = data.priceExpress || data.precioExpress || 0;
 
             zones.push({
                 id: doc.id,
@@ -210,11 +211,8 @@ export function calculateShippingCost(
             if (shippingMethod === 'express') {
                 console.log('🚚 [calculateShippingCost] Calculando precio express...');
 
-                // Si hay precio express específico en la zona, usarlo
-                if (zone.priceExpress !== undefined && zone.priceExpress > 0) {
-                    console.log('🚚 [calculateShippingCost] Usando precio express específico de zona:', zone.priceExpress);
-                    return zone.priceExpress;
-                }
+                // NOTA: Se eliminó la lógica de precio express por zona
+                // Ahora siempre usa la configuración global del dashboard para consistency
 
                 // Si no hay configuración express, no permitir express
                 if (!expressConfig?.enabled) {
@@ -222,7 +220,8 @@ export function calculateShippingCost(
                     return basePrice;
                 }
 
-                // Calcular precio express según configuración
+                // Calcular precio express según configuración del dashboard
+                console.log('🚚 [calculateShippingCost] Usando configuración del dashboard:', expressConfig);
                 let expressPrice = basePrice;
 
                 if (expressConfig.fixedSurcharge && expressConfig.fixedSurcharge > 0) {
