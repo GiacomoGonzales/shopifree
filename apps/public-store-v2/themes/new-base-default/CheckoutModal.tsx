@@ -122,6 +122,20 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [suggestedAddress, setSuggestedAddress] = useState<string>('');
     const [isOutsideCoverage, setIsOutsideCoverage] = useState(false);
     const [showAddressSuggestion, setShowAddressSuggestion] = useState(false);
+
+    // Estado para notificación de envío calculado
+    const [showShippingNotification, setShowShippingNotification] = useState(false);
+    const [shippingNotificationData, setShippingNotificationData] = useState<{
+        cost: number;
+        method: 'standard' | 'express';
+        estimatedTime: string;
+        zoneName?: string;
+    } | null>(null);
+    const [lastShippingCalculation, setLastShippingCalculation] = useState<{
+        cost: number;
+        method: string;
+        coordinates: string;
+    } | null>(null);
     
     // Estado para modal de advertencia de stock (NO CONECTADO AÚN)
     const [showStockWarning, setShowStockWarning] = useState(false);
@@ -373,6 +387,48 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 expressConfig
             );
             setShippingCost(calculatedShipping);
+
+            // Mostrar notificación solo si hay costo de envío y cambió
+            if (calculatedShipping > 0) {
+                const zone = findDeliveryZoneForCoordinates(userCoordinates, deliveryZones);
+                const coordinatesKey = `${userCoordinates.lat},${userCoordinates.lng}`;
+
+                // Solo mostrar si cambió el costo, método o ubicación
+                const currentCalculation = {
+                    cost: calculatedShipping,
+                    method: formData.shippingMethod,
+                    coordinates: coordinatesKey
+                };
+
+                const hasChanged = !lastShippingCalculation ||
+                    lastShippingCalculation.cost !== currentCalculation.cost ||
+                    lastShippingCalculation.method !== currentCalculation.method ||
+                    lastShippingCalculation.coordinates !== currentCalculation.coordinates;
+
+                if (hasChanged) {
+                    let estimatedTime = 'Tiempo por calcular';
+                    if (formData.shippingMethod === 'express' && shippingConfig?.localDelivery?.express?.estimatedTime) {
+                        estimatedTime = shippingConfig.localDelivery.express.estimatedTime;
+                    } else if (formData.shippingMethod === 'standard' && zone) {
+                        // Aquí podrías agregar tiempo específico por zona si lo implementas en el futuro
+                        estimatedTime = 'Tiempo por calcular';
+                    }
+
+                    setShippingNotificationData({
+                        cost: calculatedShipping,
+                        method: formData.shippingMethod as 'standard' | 'express',
+                        estimatedTime,
+                        zoneName: zone?.name
+                    });
+                    setShowShippingNotification(true);
+                    setLastShippingCalculation(currentCalculation);
+
+                    // Auto-ocultar después de 4 segundos
+                    setTimeout(() => {
+                        setShowShippingNotification(false);
+                    }, 4000);
+                }
+            }
             
             // Verificar si está fuera de cobertura cuando hay zonas configuradas
             if (deliveryZones.length > 0) {
@@ -2350,6 +2406,75 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 unavailableItems={stockWarningItems}
                 currency={currency}
             />
+
+            {/* Notificación de envío calculado */}
+            {showShippingNotification && shippingNotificationData && (
+                <div
+                    className="fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-[9999] transform transition-all duration-300 ease-in-out"
+                    style={{
+                        animation: showShippingNotification ? 'slideInRight 0.3s ease-out' : 'slideOutRight 0.3s ease-in',
+                        maxWidth: '400px',
+                        minWidth: '300px'
+                    }}
+                >
+                    <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium">
+                                    ✅ Costo de envío calculado
+                                </h4>
+                                <button
+                                    onClick={() => setShowShippingNotification(false)}
+                                    className="text-white/80 hover:text-white"
+                                >
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="mt-1 text-sm text-white/90 space-y-1">
+                                <p><strong>Costo:</strong> ${shippingNotificationData.cost.toLocaleString()}</p>
+                                <p><strong>Método:</strong> {
+                                    shippingNotificationData.method === 'express' ? 'Envío Express' : 'Envío Estándar'
+                                }</p>
+                                <p><strong>Tiempo estimado:</strong> {shippingNotificationData.estimatedTime}</p>
+                                {shippingNotificationData.zoneName && (
+                                    <p><strong>Zona:</strong> {shippingNotificationData.zoneName}</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style jsx>{`
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes slideOutRight {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                }
+            `}</style>
 
         </>
     );
