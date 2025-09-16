@@ -189,7 +189,10 @@ export default function ShippingNationalShippingPage() {
       await updateStore(store.id, {
         advanced: {
           ...store?.advanced,
-          shipping: shippingData as any
+          shipping: {
+            ...store?.advanced?.shipping,
+            ...shippingData
+          }
         }
       })
       

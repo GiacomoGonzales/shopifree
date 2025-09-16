@@ -257,7 +257,10 @@ export default function ShippingStorePickupPage() {
       await updateStore(store.id, {
         advanced: {
           ...store?.advanced,
-          shipping: shippingData as any
+          shipping: {
+            ...store?.advanced?.shipping,
+            ...shippingData
+          }
         }
       })
       
