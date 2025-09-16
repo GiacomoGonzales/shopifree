@@ -33,6 +33,12 @@ interface ShippingData {
     }>
     allowGPS?: boolean
     noCoverageMessage?: string
+    express: {
+      enabled: boolean
+      priceMultiplier?: number
+      fixedSurcharge?: number
+      estimatedTime?: string
+    }
   }
 }
 
@@ -59,7 +65,13 @@ export default function ShippingLocalDeliveryPage() {
       enabled: false,
       zones: [],
       allowGPS: true,
-      noCoverageMessage: 'Lo sentimos, no hacemos entregas en tu zona'
+      noCoverageMessage: 'Lo sentimos, no hacemos entregas en tu zona',
+      express: {
+        enabled: false,
+        priceMultiplier: 1.5,
+        fixedSurcharge: 0,
+        estimatedTime: '1-2 días hábiles'
+      }
     }
   })
 
@@ -87,7 +99,13 @@ export default function ShippingLocalDeliveryPage() {
                 enabled: existingShipping.localDelivery?.enabled ?? false,
                 zones: existingShipping.localDelivery?.zones ?? [],
                 allowGPS: existingShipping.localDelivery?.allowGPS ?? true,
-                noCoverageMessage: existingShipping.localDelivery?.noCoverageMessage ?? 'Lo sentimos, no hacemos entregas en tu zona'
+                noCoverageMessage: existingShipping.localDelivery?.noCoverageMessage ?? 'Lo sentimos, no hacemos entregas en tu zona',
+                express: {
+                  enabled: existingShipping.localDelivery?.express?.enabled ?? false,
+                  priceMultiplier: existingShipping.localDelivery?.express?.priceMultiplier ?? 1.5,
+                  fixedSurcharge: existingShipping.localDelivery?.express?.fixedSurcharge ?? 0,
+                  estimatedTime: existingShipping.localDelivery?.express?.estimatedTime ?? '1-2 días hábiles'
+                }
               }
             })
           }
@@ -226,6 +244,158 @@ export default function ShippingLocalDeliveryPage() {
                 )}
               </div>
             </div>
+
+            {/* Configuración de Envío Express */}
+            {shippingData.modes.localDelivery && (
+              <div className="bg-white shadow rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Configuración de Envío Express</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  El envío express permite a los clientes recibir sus pedidos más rápido por un costo adicional.
+                </p>
+
+                <div className="space-y-6">
+                  {/* Habilitar envío express */}
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={shippingData.localDelivery.express.enabled}
+                        onChange={(e) => updateShippingData('localDelivery.express.enabled', e.target.checked)}
+                        className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Activar envío express</span>
+                    </label>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Los clientes podrán elegir entre envío estándar y envío express durante el checkout.
+                    </p>
+                  </div>
+
+                  {shippingData.localDelivery.express.enabled && (
+                    <>
+                      {/* Tiempo estimado */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Tiempo estimado de entrega express
+                        </label>
+                        <input
+                          type="text"
+                          value={shippingData.localDelivery.express.estimatedTime}
+                          onChange={(e) => updateShippingData('localDelivery.express.estimatedTime', e.target.value)}
+                          placeholder="1-2 días hábiles"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                        />
+                        <p className="mt-1 text-sm text-gray-500">
+                          Este tiempo se mostrará a los clientes en el checkout.
+                        </p>
+                      </div>
+
+                      {/* Método de cálculo de precio */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          Cómo calcular el precio del envío express
+                        </label>
+
+                        <div className="space-y-4">
+                          {/* Multiplicador */}
+                          <div className="border border-gray-200 rounded-lg p-4">
+                            <label className="flex items-center mb-3">
+                              <input
+                                type="radio"
+                                name="expressMethod"
+                                checked={shippingData.localDelivery.express.fixedSurcharge === 0}
+                                onChange={() => updateShippingData('localDelivery.express.fixedSurcharge', 0)}
+                                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300"
+                              />
+                              <span className="ml-2 text-sm font-medium text-gray-700">
+                                Multiplicador del precio estándar
+                              </span>
+                            </label>
+
+                            <div className="ml-6">
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="5"
+                                  step="0.1"
+                                  value={shippingData.localDelivery.express.priceMultiplier}
+                                  onChange={(e) => updateShippingData('localDelivery.express.priceMultiplier', parseFloat(e.target.value) || 1.5)}
+                                  className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                                  disabled={shippingData.localDelivery.express.fixedSurcharge > 0}
+                                />
+                                <span className="text-sm text-gray-500">
+                                  × precio de envío estándar
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs text-gray-500">
+                                Ejemplo: Si el envío estándar cuesta $5.000 y el multiplicador es 1.5, el envío express costará $7.500
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Recargo fijo */}
+                          <div className="border border-gray-200 rounded-lg p-4">
+                            <label className="flex items-center mb-3">
+                              <input
+                                type="radio"
+                                name="expressMethod"
+                                checked={shippingData.localDelivery.express.fixedSurcharge > 0}
+                                onChange={() => updateShippingData('localDelivery.express.fixedSurcharge', 2000)}
+                                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300"
+                              />
+                              <span className="ml-2 text-sm font-medium text-gray-700">
+                                Recargo fijo sobre el precio estándar
+                              </span>
+                            </label>
+
+                            <div className="ml-6">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-500">$</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="500"
+                                  value={shippingData.localDelivery.express.fixedSurcharge}
+                                  onChange={(e) => updateShippingData('localDelivery.express.fixedSurcharge', parseInt(e.target.value) || 0)}
+                                  className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
+                                  disabled={shippingData.localDelivery.express.fixedSurcharge === 0}
+                                />
+                                <span className="text-sm text-gray-500">
+                                  adicionales al envío estándar
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs text-gray-500">
+                                Ejemplo: Si el envío estándar cuesta $5.000 y el recargo es $2.000, el envío express costará $7.000
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Previsualización del cálculo */}
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h5 className="text-sm font-medium text-gray-900 mb-2">Previsualización del cálculo</h5>
+                        <div className="text-sm text-gray-700 space-y-1">
+                          <p>• Envío estándar: $5.000 (ejemplo)</p>
+                          <p>• Envío express: ${
+                            shippingData.localDelivery.express.fixedSurcharge > 0
+                              ? (5000 + shippingData.localDelivery.express.fixedSurcharge).toLocaleString()
+                              : (5000 * shippingData.localDelivery.express.priceMultiplier).toLocaleString()
+                          }</p>
+                          <p className="text-xs text-gray-500">
+                            Método actual: {
+                              shippingData.localDelivery.express.fixedSurcharge > 0
+                                ? `Recargo fijo de $${shippingData.localDelivery.express.fixedSurcharge.toLocaleString()}`
+                                : `Multiplicador de ${shippingData.localDelivery.express.priceMultiplier}x`
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Mapa de zonas */}
             {shippingData.modes.localDelivery && (

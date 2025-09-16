@@ -331,6 +331,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     }, [shippingConfig, formData.shippingMethod]);
 
+    // Si express está deshabilitado y el usuario lo tenía seleccionado, cambiar a standard
+    useEffect(() => {
+        if (shippingConfig && formData.shippingMethod === 'express' && !shippingConfig.localDelivery?.express?.enabled) {
+            console.log('🚚 [CheckoutModal] Express disabled, switching to standard shipping');
+            setFormData(prev => ({ ...prev, shippingMethod: 'standard' }));
+        }
+    }, [shippingConfig, formData.shippingMethod]);
+
     // Cuando el usuario selecciona pickup, auto-seleccionar primera sucursal si no hay ninguna seleccionada
     useEffect(() => {
         if (formData.shippingMethod === 'pickup' && shippingConfig?.storePickup?.locations && !selectedLocation) {
@@ -351,7 +359,19 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
         // Calcular costo si hay coordenadas (con o sin zonas configuradas)
         if (userCoordinates) {
-            const calculatedShipping = calculateShippingCost(userCoordinates, deliveryZones, formData.shippingMethod);
+            // Obtener configuración de express
+            const expressConfig = shippingConfig?.localDelivery?.express ? {
+                enabled: shippingConfig.localDelivery.express.enabled,
+                priceMultiplier: shippingConfig.localDelivery.express.priceMultiplier,
+                fixedSurcharge: shippingConfig.localDelivery.express.fixedSurcharge
+            } : undefined;
+
+            const calculatedShipping = calculateShippingCost(
+                userCoordinates,
+                deliveryZones,
+                formData.shippingMethod,
+                expressConfig
+            );
             setShippingCost(calculatedShipping);
             
             // Verificar si está fuera de cobertura cuando hay zonas configuradas
@@ -378,7 +398,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             setShippingCost(0);
             setIsOutsideCoverage(false);
         }
-    }, [userCoordinates, deliveryZones, formData.shippingMethod]);
+    }, [userCoordinates, deliveryZones, formData.shippingMethod, shippingConfig]);
 
     // Reset al abrir/cerrar
     useEffect(() => {
@@ -1636,22 +1656,26 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 </div>
                                             </div>
                                         </label>
-                                        <label className={`nbd-method-option ${formData.shippingMethod === 'express' ? 'selected' : ''}`}>
-                                            <input
-                                                type="radio"
-                                                name="shipping"
-                                                value="express"
-                                                checked={formData.shippingMethod === 'express'}
-                                                onChange={(e) => handleInputChange('shippingMethod', e.target.value as any)}
-                                            />
-                                            <div className="nbd-method-content">
-                                                <div className="nbd-method-info">
-                                                    <span className="nbd-method-name">{t('expressShipping')}</span>
-                                                    <span className="nbd-method-desc">{t('businessDays1to2')}</span>
+                                        {/* Envío express - solo si está habilitado */}
+                                        {shippingConfig?.localDelivery?.express?.enabled && (
+                                            <label className={`nbd-method-option ${formData.shippingMethod === 'express' ? 'selected' : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="shipping"
+                                                    value="express"
+                                                    checked={formData.shippingMethod === 'express'}
+                                                    onChange={(e) => handleInputChange('shippingMethod', e.target.value as any)}
+                                                />
+                                                <div className="nbd-method-content">
+                                                    <div className="nbd-method-info">
+                                                        <span className="nbd-method-name">{t('expressShipping')}</span>
+                                                        <span className="nbd-method-desc">
+                                                            {shippingConfig.localDelivery.express.estimatedTime || t('businessDays1to2')}
+                                                        </span>
+                                                    </div>
                                                 </div>
-
-                                            </div>
-                                        </label>
+                                            </label>
+                                        )}
                                     </div>
                                 </div>
 

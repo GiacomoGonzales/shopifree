@@ -163,7 +163,12 @@ export function findDeliveryZoneForCoordinates(
 export function calculateShippingCost(
     coordinates: { lat: number; lng: number } | null,
     zones: DeliveryZone[],
-    shippingMethod: 'standard' | 'express' | 'pickup'
+    shippingMethod: 'standard' | 'express' | 'pickup',
+    expressConfig?: {
+        enabled: boolean;
+        priceMultiplier?: number;
+        fixedSurcharge?: number;
+    }
 ): number {
     console.log('🚚 [calculateShippingCost] Iniciando cálculo:', {
         coordinates,
@@ -198,13 +203,50 @@ export function calculateShippingCost(
         
         if (zone) {
             console.log('🚚 [calculateShippingCost] ✅ Zona encontrada:', zone.name);
-            // Usar precio de la zona
-            if (shippingMethod === 'express' && zone.priceExpress !== undefined && zone.priceExpress > 0) {
-                console.log('🚚 [calculateShippingCost] Usando precio express de zona:', zone.priceExpress);
-                return zone.priceExpress;
-            } else if (shippingMethod === 'standard' && zone.priceStandard !== undefined && zone.priceStandard > 0) {
-                console.log('🚚 [calculateShippingCost] Usando precio estándar de zona:', zone.priceStandard);
-                return zone.priceStandard;
+
+            // Obtener precio base (estándar)
+            const basePrice = zone.priceStandard || 0;
+
+            if (shippingMethod === 'express') {
+                console.log('🚚 [calculateShippingCost] Calculando precio express...');
+
+                // Si hay precio express específico en la zona, usarlo
+                if (zone.priceExpress !== undefined && zone.priceExpress > 0) {
+                    console.log('🚚 [calculateShippingCost] Usando precio express específico de zona:', zone.priceExpress);
+                    return zone.priceExpress;
+                }
+
+                // Si no hay configuración express, no permitir express
+                if (!expressConfig?.enabled) {
+                    console.log('🚚 [calculateShippingCost] Express no habilitado, usando precio estándar');
+                    return basePrice;
+                }
+
+                // Calcular precio express según configuración
+                let expressPrice = basePrice;
+
+                if (expressConfig.fixedSurcharge && expressConfig.fixedSurcharge > 0) {
+                    // Usar recargo fijo
+                    expressPrice = basePrice + expressConfig.fixedSurcharge;
+                    console.log('🚚 [calculateShippingCost] Usando recargo fijo:', {
+                        basePrice,
+                        surcharge: expressConfig.fixedSurcharge,
+                        expressPrice
+                    });
+                } else if (expressConfig.priceMultiplier && expressConfig.priceMultiplier > 0) {
+                    // Usar multiplicador
+                    expressPrice = basePrice * expressConfig.priceMultiplier;
+                    console.log('🚚 [calculateShippingCost] Usando multiplicador:', {
+                        basePrice,
+                        multiplier: expressConfig.priceMultiplier,
+                        expressPrice
+                    });
+                }
+
+                return Math.round(expressPrice);
+            } else if (shippingMethod === 'standard') {
+                console.log('🚚 [calculateShippingCost] Usando precio estándar de zona:', basePrice);
+                return basePrice;
             } else {
                 console.log('🚚 [calculateShippingCost] ⚠️ Zona encontrada pero sin precio válido');
                 return 0;
@@ -226,7 +268,12 @@ export function calculateShippingCost(
 export function debugShippingCalculation(
     storeId: string,
     coordinates: { lat: number; lng: number },
-    shippingMethod: 'standard' | 'express' | 'pickup' = 'standard'
+    shippingMethod: 'standard' | 'express' | 'pickup' = 'standard',
+    expressConfig?: {
+        enabled: boolean;
+        priceMultiplier?: number;
+        fixedSurcharge?: number;
+    }
 ) {
     return getStoreDeliveryZones(storeId).then(zones => {
         console.log('=== 🚚 DEBUG SHIPPING CALCULATION ===');
@@ -235,7 +282,7 @@ export function debugShippingCalculation(
         console.log('Shipping Method:', shippingMethod);
         console.log('Zones loaded:', zones);
         
-        const cost = calculateShippingCost(coordinates, zones, shippingMethod);
+        const cost = calculateShippingCost(coordinates, zones, shippingMethod, expressConfig);
         const zone = findDeliveryZoneForCoordinates(coordinates, zones);
         
         console.log('=== 📊 RESULT ===');
