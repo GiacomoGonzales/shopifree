@@ -1636,7 +1636,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 <div className="nbd-method-content">
                                                     <div className="nbd-method-info">
                                                         <span className="nbd-method-name">{t('pickupInStore')}</span>
-                                                        <span className="nbd-method-desc">{t('availableToday')}</span>
+                                                        <span className="nbd-method-desc">
+                                                            {selectedLocation?.preparationTime || 'Tiempo por calcular'}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </label>
@@ -1652,7 +1654,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
                                                     <span className="nbd-method-name">{t('homeDelivery')}</span>
-                                                    <span className="nbd-method-desc">{t('businessDays3to5')}</span>
+                                                    <span className="nbd-method-desc">Tiempo por calcular</span>
                                                 </div>
                                             </div>
                                         </label>
