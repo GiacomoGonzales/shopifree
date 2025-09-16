@@ -273,6 +273,7 @@ export type StoreLocalDeliveryConfig = {
     enabled?: boolean;
     allowGPS?: boolean;
     noCoverageMessage?: string;
+    estimatedTime?: string;
     express?: {
         enabled: boolean;
         priceMultiplier?: number;
