@@ -1,6 +1,7 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 import { CartItem } from './cart-context';
+import { formatPrice } from './currency';
 
 // Tipos compatibles con el dashboard existente
 export interface OrderData {
@@ -155,7 +156,7 @@ export function generateWhatsAppMessageWithId(
     if (item.variant) {
       message += ` (${item.variant.name})`;
     }
-    message += `\n   Cantidad: ${item.quantity} x $${(item.variant?.price || item.price).toFixed(2)} = $${itemTotal.toFixed(2)}\n`;
+    message += `\n   Cantidad: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
   });
   
   // Agregar información del cliente
@@ -182,14 +183,14 @@ export function generateWhatsAppMessageWithId(
   
   // Agregar totales
   message += `\n💰 *RESUMEN:*\n`;
-  message += `Subtotal: $${orderData.totals.subtotal.toFixed(2)}\n`;
-  message += `Envío: $${orderData.totals.shipping.toFixed(2)}\n`;
-  
+  message += `Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
+  message += `Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
+
   if (orderData.discount && orderData.discount > 0) {
-    message += `Descuento: -$${orderData.discount.toFixed(2)}\n`;
+    message += `Descuento: -${formatPrice(orderData.discount, orderData.currency)}\n`;
   }
-  
-  message += `*Total: $${orderData.totals.total.toFixed(2)}*\n`;
+
+  message += `*Total: ${formatPrice(orderData.totals.total, orderData.currency)}*\n`;
   
   // Agregar notas si las hay
   if (orderData.payment.notes?.trim()) {
