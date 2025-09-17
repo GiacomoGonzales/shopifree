@@ -41,11 +41,19 @@ export interface OrderData {
  * Formato compatible con dashboard existente en apps/dashboard/lib/orders.ts
  */
 export async function createOrder(storeId: string, orderData: OrderData) {
+  console.log('[Orders] Attempting to create order for store:', storeId);
+  console.log('[Orders] Order data:', JSON.stringify(orderData, null, 2));
+
   const db = getFirebaseDb();
   if (!db) {
-    console.warn('[Orders] Firebase not initialized, skipping order creation');
+    console.error('[Orders] Firebase not initialized! Environment variables:');
+    console.error('- API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+    console.error('- AUTH_DOMAIN:', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ? 'SET' : 'MISSING');
+    console.error('- PROJECT_ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? 'SET' : 'MISSING');
     return null;
   }
+
+  console.log('[Orders] Firebase initialized successfully');
 
   try {
     // 🆕 FINALIZAR CLIENTE PROGRESIVO (si ya tiene customerId) o proceso legacy
@@ -65,7 +73,8 @@ export async function createOrder(storeId: string, orderData: OrderData) {
     );
 
     const ordersRef = collection(db, 'stores', storeId, 'orders');
-    
+    console.log('[Orders] Orders collection reference created:', ordersRef);
+
     // Formato EXACTO que espera el dashboard
     const newOrder = {
       // Información del cliente (nombres compatibles)
@@ -127,7 +136,7 @@ export async function createOrder(storeId: string, orderData: OrderData) {
       // Solo para WhatsApp
       ...(orderData.checkoutMethod === 'whatsapp' && {
         whatsappSentAt: serverTimestamp(),
-        whatsappPhone: orderData.whatsappPhone
+        ...(orderData.whatsappPhone && { whatsappPhone: orderData.whatsappPhone })
       }),
       
       // Descuentos (si aplica)
@@ -137,13 +146,26 @@ export async function createOrder(storeId: string, orderData: OrderData) {
       })
     };
     
-    console.log('[Orders] Creating order:', { storeId, checkoutMethod: orderData.checkoutMethod });
+    console.log('[Orders] Creating order with data:', {
+      storeId,
+      checkoutMethod: orderData.checkoutMethod,
+      newOrderKeys: Object.keys(newOrder),
+      newOrderSize: JSON.stringify(newOrder).length
+    });
+
     const docRef = await addDoc(ordersRef, newOrder);
-    console.log('[Orders] Order created successfully:', docRef.id);
-    
+    console.log('[Orders] ✅ Order created successfully! Doc ID:', docRef.id);
+    console.log('[Orders] ✅ Order path: stores/' + storeId + '/orders/' + docRef.id);
+
     return docRef;
   } catch (error) {
-    console.error('[Orders] Error creating order:', error);
+    console.error('[Orders] ❌ Error creating order:', error);
+    console.error('[Orders] ❌ Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     // NO lanzar error para no romper el flujo del checkout
     return null;
   }
@@ -153,22 +175,22 @@ export async function createOrder(storeId: string, orderData: OrderData) {
  * Generar mensaje de WhatsApp con ID del pedido
  */
 export function generateWhatsAppMessageWithId(
-  orderData: OrderData, 
+  orderData: OrderData,
   orderId: string | null,
   storeInfo: any
 ): { message: string; phone: string | null } {
   const storeName = storeInfo?.storeName || 'Tienda';
   const whatsappPhone = storeInfo?.socialMedia?.whatsapp || storeInfo?.phone;
-  
-  let message = `¡Hola! Me interesa realizar un pedido desde ${storeName}:\n\n`;
-  
+
+  let message = `Hola! Me interesa realizar un pedido desde ${storeName}:\n\n`;
+
   // Agregar ID del pedido si existe
   if (orderId) {
-    message += `🆔 *PEDIDO #${orderId.slice(-6).toUpperCase()}*\n\n`;
+    message += `PEDIDO #${orderId.slice(-6).toUpperCase()}\n\n`;
   }
-  
-  // Agregar productos
-  message += `📦 *PRODUCTOS:*\n`;
+
+  // Agregar productos (sin emojis problemáticos)
+  message += `PRODUCTOS:\n`;
   orderData.items.forEach((item, index) => {
     const itemTotal = (item.variant?.price || item.price) * item.quantity;
     message += `${index + 1}. ${item.name}`;
@@ -177,31 +199,31 @@ export function generateWhatsAppMessageWithId(
     }
     message += `\n   Cantidad: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
   });
-  
+
   // Agregar información del cliente
-  message += `\n👤 *DATOS DEL CLIENTE:*\n`;
+  message += `\nDATOS DEL CLIENTE:\n`;
   message += `Nombre: ${orderData.customer.fullName}\n`;
   message += `Email: ${orderData.customer.email}\n`;
-  message += `Teléfono: ${orderData.customer.phone}\n`;
-  
+  message += `Telefono: ${orderData.customer.phone}\n`;
+
   // Agregar información de envío
-  message += `\n🚚 *ENVÍO:*\n`;
+  message += `\nENVIO:\n`;
   if (orderData.shipping.method === 'pickup') {
-    message += `Método: Recojo en tienda\n`;
+    message += `Metodo: Recojo en tienda\n`;
   } else {
-    const methodName = orderData.shipping.method === 'express' ? 'Envío express' : 'Envío estándar';
-    message += `Método: ${methodName}\n`;
+    const methodName = orderData.shipping.method === 'express' ? 'Envio express' : 'Envio estandar';
+    message += `Metodo: ${methodName}\n`;
     if (orderData.shipping.address) {
-      message += `Dirección: ${orderData.shipping.address}\n`;
+      message += `Direccion: ${orderData.shipping.address}\n`;
     }
   }
-  
+
   // Agregar información de pago
-  message += `\n💳 *PAGO:*\n`;
-  message += `Método: ${orderData.payment.method}\n`;
-  
+  message += `\nPAGO:\n`;
+  message += `Metodo: ${orderData.payment.method}\n`;
+
   // Agregar totales
-  message += `\n💰 *RESUMEN:*\n`;
+  message += `\nRESUMEN:\n`;
   message += `Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
   message += `Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
 

@@ -565,7 +565,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               className="focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md transition-all duration-200 hover:scale-105"
             >
               <Image 
-                src="/logo-primary.svg" 
+                src="/logo-primary.png" 
                 alt="Shopifree Logo" 
                 width={280} 
                 height={80}
@@ -611,7 +611,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               className="focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md transition-all duration-200 hover:scale-105"
             >
               <Image 
-                src="/logo-primary.svg" 
+                src="/logo-primary.png" 
                 alt="Shopifree Logo" 
                 width={280} 
                 height={80}

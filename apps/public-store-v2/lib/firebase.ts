@@ -11,11 +11,20 @@ const firebaseConfig = {
 };
 
 function hasValidConfig(): boolean {
-	return Boolean(
+	const isValid = Boolean(
 		firebaseConfig.apiKey &&
 		firebaseConfig.authDomain &&
 		firebaseConfig.projectId
 	);
+
+	console.log('[Firebase] Config validation:', {
+		apiKey: firebaseConfig.apiKey ? 'SET' : 'MISSING',
+		authDomain: firebaseConfig.authDomain ? 'SET' : 'MISSING',
+		projectId: firebaseConfig.projectId ? 'SET' : 'MISSING',
+		isValid
+	});
+
+	return isValid;
 }
 
 let app: FirebaseApp | null = null;

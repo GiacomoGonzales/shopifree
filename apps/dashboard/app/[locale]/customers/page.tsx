@@ -30,8 +30,15 @@ interface CustomerCardProps {
 
 // Helper function to safely get customer initials
 function getCustomerInitials(customer: CustomerWithId): string {
-  const name = customer.displayName || customer.email || 'U'
+  const name = customer.displayName || extractNameFromEmail(customer.email) || 'U'
   return name.charAt(0).toUpperCase()
+}
+
+// Helper function to extract name from email
+function extractNameFromEmail(email: string): string {
+  if (!email) return 'Cliente'
+  const name = email.split('@')[0]
+  return name.charAt(0).toUpperCase() + name.slice(1)
 }
 
 function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurrency, t }: CustomerCardProps) {
@@ -94,7 +101,7 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-medium text-gray-900 truncate">
-                {customer.displayName || customer.email || 'Cliente sin nombre'}
+                {customer.displayName || extractNameFromEmail(customer.email) || 'Cliente sin nombre'}
               </h3>
               <p className="text-sm text-gray-500 truncate">
                 {customer.email}
@@ -226,7 +233,7 @@ export default function CustomersPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [totalItems, setTotalItems] = useState(0)
   
-  const itemsPerPage = 15
+  const itemsPerPage = 10
 
   // Crear objeto de filtros
   const filters: CustomerFilters = useMemo(() => ({
@@ -469,7 +476,7 @@ export default function CustomersPage() {
                     onClick={() => setCurrentPage(page)}
                     className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
                       page === currentPage
-                        ? 'z-10 bg-indigo-600 text-white focus-visible:outline-2 focus-visible:outline-indigo-600'
+                        ? 'z-10 bg-gray-900 text-white'
                         : 'text-gray-900'
                     }`}
                   >
@@ -548,7 +555,7 @@ export default function CustomersPage() {
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6 lg:px-8 pb-8">
             {/* Controles de búsqueda y filtros */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4">
               <div className="px-4 sm:px-6 py-4">
@@ -729,7 +736,7 @@ export default function CustomersPage() {
                                   </div>
                                   <div className="ml-4">
                                     <div className="text-sm font-medium text-gray-900">
-                                      {customer.displayName || customer.email || 'Cliente sin nombre'}
+                                      {customer.displayName || extractNameFromEmail(customer.email) || 'Cliente sin nombre'}
                                     </div>
                                   </div>
                                 </div>

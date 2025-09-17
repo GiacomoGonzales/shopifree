@@ -101,11 +101,12 @@ export async function createCustomer(
 
     const newCustomer = {
       ...customerData,
+      displayName: customerData.fullName, // Mapear fullName a displayName para el dashboard
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
 
-    console.log('[Customers] Creating new customer:', { email: customerData.email });
+    console.log('🔍 [Customers] Final customer object to save in Firestore:', newCustomer);
     const docRef = await addDoc(customersRef, newCustomer);
     console.log('[Customers] Customer created successfully:', docRef.id);
 
@@ -157,6 +158,12 @@ export async function createOrUpdateCustomerStep1(
   cartItems: any[] = [],
   cartSubtotal: number = 0
 ): Promise<string | null> {
+  console.log('🔍 [Customers] createOrUpdateCustomerStep1 called with:', {
+    email,
+    fullName,
+    phone,
+    currency
+  });
   try {
     // Buscar cliente existente
     let customer = await findExistingCustomer(storeId, email, phone);
@@ -166,9 +173,10 @@ export async function createOrUpdateCustomerStep1(
       console.log('[Customers] Updating existing customer step 1:', customer.id);
       const customerRef = doc(getFirebaseDb()!, 'stores', storeId, 'customers', customer.id!);
 
-      await updateDoc(customerRef, {
+      const updateData = {
         email,
         fullName,
+        displayName: fullName, // Mapear fullName a displayName para el dashboard
         phone,
         checkoutStepReached: 1,
         lastActiveAt: serverTimestamp(),
@@ -182,17 +190,22 @@ export async function createOrUpdateCustomerStep1(
           reminderCount: 0
         },
         updatedAt: serverTimestamp()
-      });
+      };
+
+      console.log('🔍 [Customers] Updating existing customer with data:', updateData);
+      await updateDoc(customerRef, updateData);
 
       return customer.id!;
     } else {
       // Cliente nuevo, crear con datos básicos
       console.log('[Customers] Creating new customer step 1');
-      const customerId = await createCustomer(storeId, {
+
+      const newCustomerData = {
         email,
         fullName,
         phone,
         totalOrders: 0, // Aún no ha completado orden
+        orderCount: 0,  // Campo para el dashboard
         totalSpent: 0,
         currency,
         checkoutStepReached: 1,
@@ -205,7 +218,10 @@ export async function createOrUpdateCustomerStep1(
           emailSent: false,
           reminderCount: 0
         }
-      });
+      };
+
+      console.log('🔍 [Customers] Creating new customer with data:', newCustomerData);
+      const customerId = await createCustomer(storeId, newCustomerData);
       return customerId;
     }
   } catch (error) {
@@ -296,6 +312,7 @@ export async function finalizeCustomerOrder(
 
     await updateDoc(customerRef, {
       totalOrders: increment(1),
+      orderCount: increment(1), // Campo que espera el dashboard
       totalSpent: increment(orderTotal),
       currency: currency,
       lastOrderAt: serverTimestamp(),

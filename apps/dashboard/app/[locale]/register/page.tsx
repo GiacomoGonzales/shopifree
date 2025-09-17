@@ -114,7 +114,7 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
         {/* Logo/Brand */}
         <div className="mb-12">
           <img 
-            src="/logo-primary.svg" 
+            src="/logo-primary.png" 
             alt="Shopifree" 
             className="h-10"
           />

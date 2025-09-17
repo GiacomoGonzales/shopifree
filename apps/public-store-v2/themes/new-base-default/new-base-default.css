@@ -7048,7 +7048,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     .nbd-collection-card {
         flex: 0 0 280px;
-        height: 200px;
+        height: 250px;
         /* Resetear grid para mobile */
         grid-column: unset !important;
         grid-row: unset !important;

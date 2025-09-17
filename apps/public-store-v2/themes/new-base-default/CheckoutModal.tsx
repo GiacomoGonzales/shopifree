@@ -175,11 +175,22 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         appliedCoupon: null
     });
     
-    // Detectar si es dispositivo móvil
+    // Detectar si es dispositivo móvil (mejorado para WhatsApp)
     const isMobile = () => {
         if (typeof window === 'undefined') return false;
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               window.innerWidth <= 768;
+
+        // Detectar por User Agent (más confiable para WhatsApp)
+        const userAgent = navigator.userAgent;
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(userAgent);
+
+        // Detectar por tamaño de pantalla
+        const isMobileScreen = window.innerWidth <= 768;
+
+        // Detectar si tiene funcionalidad táctil
+        const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // Combinación de criterios para mayor precisión
+        return isMobileUA || (isMobileScreen && hasTouchScreen);
     };
 
     // Función para formatear nombres de días
@@ -1329,14 +1340,31 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 totals: { subtotal, shipping, total },
                 currency: currency,
                 checkoutMethod: isWhatsAppCheckout ? 'whatsapp' : 'traditional',
+                whatsappPhone: storeInfo?.socialMedia?.whatsapp || storeInfo?.phone || null,
                 discount: discount,
                 ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
             };
 
-            console.log('[Checkout] Saving order to Firestore...', { method: orderData.checkoutMethod });
+            console.log('[Checkout] Saving order to Firestore...', {
+                method: orderData.checkoutMethod,
+                storeId: storeId,
+                storeIdType: typeof storeId,
+                storeIdLength: storeId?.length,
+                finalStoreId: storeId || 'EMPTY_STORE_ID'
+            });
+
+            // Validar que tenemos un storeId válido
+            if (!storeId || storeId.trim() === '') {
+                console.error('[Checkout] ❌ CRITICAL: No valid storeId provided!');
+                console.error('[Checkout] ❌ StoreId value:', storeId);
+                console.error('[Checkout] ❌ Cannot save order without storeId');
+                alert('Error: No se pudo identificar la tienda. Por favor recarga la página e intenta de nuevo.');
+                setIsSubmitting(false);
+                return;
+            }
 
             // Guardar pedido en Firestore
-            const orderDoc = await createOrder(storeId || '', orderData);
+            const orderDoc = await createOrder(storeId, orderData);
             const orderId = orderDoc?.id || null;
             
             if (orderId) {
@@ -1351,8 +1379,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo);
 
                 if (phone) {
-                    // Limpiar número de teléfono (quitar espacios, guiones, etc.)
-                    const cleanPhone = phone.replace(/[^\d+]/g, '');
+                    // Limpiar número de teléfono y asegurar formato correcto para WhatsApp
+                    let cleanPhone = phone.replace(/[^\d+]/g, ''); // Quitar espacios, guiones, etc.
+
+                    // Si empieza con +, quitarlo para WhatsApp
+                    if (cleanPhone.startsWith('+')) {
+                        cleanPhone = cleanPhone.substring(1);
+                    }
+
                     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
                     const whatsappScheme = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
 
@@ -1378,49 +1412,34 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     });
 
                     if (isMobileDevice) {
-                        // En móviles, usar método simplificado y directo
+                        // En móviles, crear enlace directo para evitar problemas de user gesture
                         console.log('[WhatsApp] Opening on mobile device');
 
-                        // Intentar abrir WhatsApp con múltiples métodos
-                        const attemptWhatsAppOpen = async () => {
-                            try {
-                                if (isIOS) {
-                                    console.log('[WhatsApp] iOS - Trying whatsapp:// scheme first');
-                                    // Intentar esquema nativo primero
-                                    window.location.href = whatsappScheme;
+                        // Crear enlace temporal y hacer click inmediatamente
+                        const mobileLink = document.createElement('a');
 
-                                    // Fallback después de 1 segundo
-                                    setTimeout(() => {
-                                        console.log('[WhatsApp] iOS - Fallback to wa.me');
-                                        window.open(whatsappUrl, '_top');
-                                    }, 1000);
-                                } else if (isAndroid) {
-                                    console.log('[WhatsApp] Android - Trying wa.me directly');
-                                    window.location.href = whatsappUrl;
-                                } else {
-                                    console.log('[WhatsApp] Other mobile - Trying whatsapp:// scheme');
-                                    window.location.href = whatsappScheme;
+                        if (isIOS) {
+                            console.log('[WhatsApp] iOS - Using wa.me URL (más confiable)');
+                            // Para iOS, usar wa.me directamente es más confiable
+                            mobileLink.href = whatsappUrl;
+                        } else if (isAndroid) {
+                            console.log('[WhatsApp] Android - Using wa.me URL');
+                            mobileLink.href = whatsappUrl;
+                        } else {
+                            console.log('[WhatsApp] Other mobile - Using wa.me URL');
+                            mobileLink.href = whatsappUrl;
+                        }
 
-                                    // Fallback después de 1 segundo
-                                    setTimeout(() => {
-                                        console.log('[WhatsApp] Other mobile - Fallback to wa.me');
-                                        window.location.href = whatsappUrl;
-                                    }, 1000);
-                                }
-                            } catch (error) {
-                                console.error('[WhatsApp] Primary method failed:', error);
-                                // Último fallback: crear enlace invisible
-                                const tempLink = document.createElement('a');
-                                tempLink.href = whatsappUrl;
-                                tempLink.target = '_blank';
-                                tempLink.rel = 'noopener noreferrer';
-                                document.body.appendChild(tempLink);
-                                tempLink.click();
-                                document.body.removeChild(tempLink);
-                            }
-                        };
+                        // Configurar enlace para nueva ventana/app
+                        mobileLink.target = '_blank';
+                        mobileLink.rel = 'noopener noreferrer';
 
-                        attemptWhatsAppOpen();
+                        // Agregar temporalmente al DOM y hacer click
+                        document.body.appendChild(mobileLink);
+                        mobileLink.click();
+                        document.body.removeChild(mobileLink);
+
+                        console.log('[WhatsApp] Mobile link clicked successfully');
                     } else {
                         // En desktop, usar window.open para abrir en nueva pestaña
                         console.log('[WhatsApp] Opening on desktop device');
