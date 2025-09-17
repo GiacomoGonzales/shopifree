@@ -26,6 +26,7 @@ import { StockValidationResult } from '../../lib/stock-types';
 import StockWarningModal from './StockWarningModal';
 import { orderDataToPreference, createPreference, validateMercadoPagoConfig, getInitPoint } from '../../lib/mercadopago';
 import { validateCoupon, applyCouponDiscount, CouponValidationResult } from '../../lib/coupons';
+import { useToast } from '../../components/ui/Toast';
 
 // Definición de métodos de pago con imágenes
 const paymentMethodsConfig = {
@@ -146,6 +147,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Estado para modal de advertencia de stock (NO CONECTADO AÚN)
     const [showStockWarning, setShowStockWarning] = useState(false);
     const [stockWarningItems, setStockWarningItems] = useState<StockValidationResult[]>([]);
+
+    // Toast notifications
+    const { showToast } = useToast();
     
     // Estado para validación de cupones
     const [validatingCoupon, setValidatingCoupon] = useState(false);
@@ -687,7 +691,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     }
                 } else {
                     console.error('Geocoding failed:', status);
-                    alert('No se pudo encontrar la dirección. Por favor verifica que esté correcta.');
+                    showToast({
+                        type: 'error',
+                        title: 'Dirección no encontrada',
+                        message: 'Por favor verifica que la dirección esté correcta.'
+                    });
                 }
             }
         );
@@ -707,13 +715,21 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Función para obtener ubicación del usuario
     const getUserLocation = () => {
         if (!navigator.geolocation) {
-            alert('Tu navegador no soporta geolocalización. Por favor ingresa tu dirección manualmente.');
+            showToast({
+                type: 'warning',
+                title: 'Geolocalización no disponible',
+                message: 'Por favor ingresa tu dirección manualmente.'
+            });
             return;
         }
 
         // Verificar si estamos en HTTPS (requerido para geolocalización en producción)
         if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-            alert('La geolocalización requiere conexión HTTPS. Por favor ingresa tu dirección manualmente.');
+            showToast({
+                type: 'warning',
+                title: 'Conexión HTTPS requerida',
+                message: 'La geolocalización requiere conexión segura. Por favor ingresa tu dirección manualmente.'
+            });
             return;
         }
 
@@ -808,7 +824,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         }
                     );
                 } else {
-                    alert('¡Ubicación confirmada! El costo de envío se ha actualizado.');
+                    showToast({
+                        type: 'success',
+                        title: 'Ubicación confirmada',
+                        message: 'El costo de envío se ha actualizado correctamente.'
+                    });
                 }
             },
             (error) => {

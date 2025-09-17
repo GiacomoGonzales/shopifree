@@ -85,7 +85,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                     setEffectiveLocale('es');
                 }
             } catch (error) {
-                console.error('Error loading theme:', error);
+                // Error loading theme, using default
                 if (alive) {
                     setTheme('new-base-default');
                     setEffectiveLocale('es');
@@ -118,12 +118,12 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                     storeId={storeId}
                 />
             );
-        // TODO: Agregar más casos aquí conforme se creen nuevos temas
+        // Additional themes will be added here as they are created
         // case 'otro-tema':
         //     return <OtroTema storeSubdomain={storeSubdomain} categorySlug={categorySlug} />;
         default:
             // Por ahora, solo tenemos new-base-default disponible
-            console.log(`Using new-base-default theme (requested: "${themeToRender}")`);
+            // Using new-base-default theme as fallback
             return (
                 <NewBaseDefault 
                     storeSubdomain={storeSubdomain} 
