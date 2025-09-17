@@ -1340,7 +1340,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 totals: { subtotal, shipping, total },
                 currency: currency,
                 checkoutMethod: isWhatsAppCheckout ? 'whatsapp' : 'traditional',
-                whatsappPhone: storeInfo?.socialMedia?.whatsapp || storeInfo?.phone || null,
+                whatsappPhone: storeInfo?.socialMedia?.whatsapp || storeInfo?.phone || undefined,
                 discount: discount,
                 ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
             };
