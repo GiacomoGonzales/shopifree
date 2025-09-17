@@ -161,10 +161,10 @@ export async function createOrder(storeId: string, orderData: OrderData) {
   } catch (error) {
     console.error('[Orders] ❌ Error creating order:', error);
     console.error('[Orders] ❌ Error details:', {
-      name: error.name,
-      message: error.message,
-      code: error.code,
-      stack: error.stack
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code || 'Unknown',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
     });
     // NO lanzar error para no romper el flujo del checkout
     return null;
