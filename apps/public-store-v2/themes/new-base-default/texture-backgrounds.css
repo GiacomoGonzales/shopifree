@@ -236,7 +236,7 @@
   padding: 0;
 }
 
-/* Controles de productos con efecto glassmorphism */
+/* Controles de productos sin efecto glassmorphism */
 .texture-subtle-dots .nbd-product-controls,
 .texture-geometric-grid .nbd-product-controls,
 .texture-organic-waves .nbd-product-controls,
@@ -248,11 +248,66 @@
 .texture-asymmetric-waves .nbd-product-controls,
 .texture-scattered-leaves .nbd-product-controls,
 .texture-paper-texture .nbd-product-controls {
-  background: var(--nbd-bg-overlay-strong);
-  backdrop-filter: blur(4px);
-  border-radius: var(--nbd-radius-xl);
-  padding: var(--nbd-space-lg);
-  margin: var(--nbd-space-2xl) 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  padding: 0;
+  margin: var(--nbd-space-sm) 0;
+}
+
+/* Botones individuales sin glassmorphism cuando hay texturas */
+.texture-subtle-dots .nbd-control-btn,
+.texture-geometric-grid .nbd-control-btn,
+.texture-organic-waves .nbd-control-btn,
+.texture-diagonal-lines .nbd-control-btn,
+.texture-fabric-weave .nbd-control-btn,
+.texture-hexagon-pattern .nbd-control-btn,
+.texture-noise-texture .nbd-control-btn,
+.texture-floating-bubbles .nbd-control-btn,
+.texture-asymmetric-waves .nbd-control-btn,
+.texture-scattered-leaves .nbd-control-btn,
+.texture-paper-texture .nbd-control-btn {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.texture-subtle-dots .nbd-control-btn:hover,
+.texture-geometric-grid .nbd-control-btn:hover,
+.texture-organic-waves .nbd-control-btn:hover,
+.texture-diagonal-lines .nbd-control-btn:hover,
+.texture-fabric-weave .nbd-control-btn:hover,
+.texture-hexagon-pattern .nbd-control-btn:hover,
+.texture-noise-texture .nbd-control-btn:hover,
+.texture-floating-bubbles .nbd-control-btn:hover,
+.texture-asymmetric-waves .nbd-control-btn:hover,
+.texture-scattered-leaves .nbd-control-btn:hover,
+.texture-paper-texture .nbd-control-btn:hover {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Botón de ordenar específicamente cuando hay texturas */
+.texture-subtle-dots .nbd-sort-dropdown .nbd-control-btn,
+.texture-geometric-grid .nbd-sort-dropdown .nbd-control-btn,
+.texture-organic-waves .nbd-sort-dropdown .nbd-control-btn,
+.texture-diagonal-lines .nbd-sort-dropdown .nbd-control-btn,
+.texture-fabric-weave .nbd-sort-dropdown .nbd-control-btn,
+.texture-hexagon-pattern .nbd-sort-dropdown .nbd-control-btn,
+.texture-noise-texture .nbd-sort-dropdown .nbd-control-btn,
+.texture-floating-bubbles .nbd-sort-dropdown .nbd-control-btn,
+.texture-asymmetric-waves .nbd-sort-dropdown .nbd-control-btn,
+.texture-scattered-leaves .nbd-sort-dropdown .nbd-control-btn,
+.texture-paper-texture .nbd-sort-dropdown .nbd-control-btn {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Grid de productos optimizado para móvil con texturas */
