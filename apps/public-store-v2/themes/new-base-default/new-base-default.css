@@ -3258,11 +3258,22 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 @media (max-width: 768px) {
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
-        padding-top: var(--nbd-space-2xl); /* Reducir padding superior para compensar falta de texto */
-        margin-top: var(--nbd-space-4xl); /* Aumentar separación del header significativamente para móviles reales */
+        padding-top: calc(var(--nbd-header-height) + var(--nbd-space-2xl)); /* Espacio para header fijo + padding extra */
+        margin-top: var(--nbd-space-4xl); /* Margen adicional para separación visible */
+        top: var(--nbd-space-xl); /* Posición adicional desde arriba */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
+        /* Forzar separación en dispositivos móviles reales */
+        transform: translateY(var(--nbd-space-lg));
+    }
+
+    /* Estrategia adicional para dispositivos móviles reales con viewport dinámico */
+    @supports (-webkit-touch-callout: none) {
+        .nbd-hero {
+            margin-top: calc(var(--nbd-space-4xl) + var(--nbd-space-2xl)) !important;
+            padding-top: calc(var(--nbd-header-height) + var(--nbd-space-3xl)) !important;
+        }
     }
 
     .nbd-hero-container {
