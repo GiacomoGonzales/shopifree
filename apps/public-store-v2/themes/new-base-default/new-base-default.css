@@ -3265,6 +3265,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
         padding-top: var(--nbd-space-2xl); /* Reducir padding superior para compensar falta de texto */
+        margin-top: var(--nbd-space-md); /* Separar ligeramente del header */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
@@ -3304,15 +3305,15 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     /* Ajustar la imagen hero para ocupar todo el espacio disponible */
     .nbd-hero-visual {
         order: 1;
-        width: calc(100% - 2 * var(--nbd-space-md)); /* Ocupar todo el ancho menos márgenes mínimos */
-        margin: var(--nbd-space-md) var(--nbd-space-md) var(--nbd-space-lg) var(--nbd-space-md); /* Márgenes mínimos iguales arriba y lados */
+        width: 100%; /* Ocupar todo el ancho del contenedor padre */
+        margin: 0 0 var(--nbd-space-lg) 0; /* Solo margen inferior, sin márgenes laterales */
     }
 
     /* Posicionar los botones relativos al contenedor hero principal */
     .nbd-hero-actions {
         position: absolute;
-        left: var(--nbd-space-lg);
-        right: var(--nbd-space-lg);
+        left: 0;
+        right: 0;
         bottom: calc(-1 * (var(--nbd-space-xl) + 50px)); /* Más cerca de la hero, más lejos de colecciones */
         z-index: 1000;
         background: transparent !important;
@@ -3399,6 +3400,13 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     .nbd-footer-container {
         padding: var(--nbd-space-4xl) var(--nbd-space-lg) 0;
+    }
+}
+
+/* Pantallas muy pequeñas - iPhone SE y similares */
+@media (max-width: 375px) {
+    .nbd-hero {
+        margin-top: var(--nbd-space-lg); /* Margen superior adicional para pantallas pequeñas */
     }
 }
 
