@@ -156,6 +156,38 @@ export interface StoreTexts {
   locationUnavailable: string;
   locationTimeout: string;
   locationError: string;
+
+  // Textos de modales de confirmación y carga
+  sending: string;
+  processingPayment: string;
+  loadingMapMobile: string;
+  zoneFound: string;
+
+  // Textos del modal de confirmación de pedido
+  processingOrder: string;
+  processingOrderEllipsis: string;
+  preparingEverything: string;
+  orderSuccessful: string;
+  thankYouPurchase: string;
+  orderReceivedProcessing: string;
+  backToStore: string;
+  contactWhatsApp: string;
+  downloadPDF: string;
+  orderNumber: string;
+  customerInformation: string;
+  deliveryInformation: string;
+  name: string;
+  address: string;
+  notes: string;
+  whatsappNotConfigured: string;
+  closeModal: string;
+
+  // Métodos de pago
+  paymentMethodCash: string;
+  paymentMethodCard: string;
+  paymentMethodTransfer: string;
+  paymentMethodBankTransfer: string;
+  paymentMethodYape: string;
 }
 
 const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
@@ -309,7 +341,39 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     locationPermissionDenied: 'Debes permitir el acceso a la ubicación para usar esta función. Revisa la configuración de tu navegador.',
     locationUnavailable: 'La información de ubicación no está disponible. Por favor ingresa tu dirección manualmente.',
     locationTimeout: 'Se agotó el tiempo para obtener la ubicación. Intenta de nuevo o ingresa tu dirección manualmente.',
-    locationError: 'Ocurrió un error al obtener la ubicación. Por favor ingresa tu dirección manualmente.'
+    locationError: 'Ocurrió un error al obtener la ubicación. Por favor ingresa tu dirección manualmente.',
+
+    // Textos de modales de confirmación y carga
+    sending: 'Enviando...',
+    processingPayment: 'Procesando pago...',
+    loadingMapMobile: '🔄 Cargando mapa para móvil...',
+    zoneFound: 'Zona Encontrada',
+
+    // Textos del modal de confirmación de pedido
+    processingOrder: 'Procesando tu pedido',
+    processingOrderEllipsis: 'Procesando tu pedido...',
+    preparingEverything: 'Estamos preparando todo para ti, esto solo tomará unos segundos',
+    orderSuccessful: '¡Pedido realizado con éxito!',
+    thankYouPurchase: '¡Gracias por tu compra!',
+    orderReceivedProcessing: 'Tu pedido ha sido recibido y está siendo procesado',
+    backToStore: 'Volver a la tienda',
+    contactWhatsApp: 'Contactar por WhatsApp',
+    downloadPDF: 'Descargar PDF',
+    orderNumber: 'Número de pedido:',
+    customerInformation: 'Información del cliente',
+    deliveryInformation: 'Información de entrega',
+    name: 'Nombre',
+    address: 'Dirección',
+    notes: 'Notas',
+    whatsappNotConfigured: 'El número de WhatsApp no está configurado para esta tienda',
+    closeModal: 'Cerrar modal',
+
+    // Métodos de pago
+    paymentMethodCash: 'Efectivo',
+    paymentMethodCard: 'Tarjeta al repartidor',
+    paymentMethodTransfer: 'Transferencia',
+    paymentMethodBankTransfer: 'Transferencia bancaria',
+    paymentMethodYape: 'Yape'
   },
   
   en: {
@@ -462,7 +526,39 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     locationPermissionDenied: 'You must allow location access to use this feature. Check your browser settings.',
     locationUnavailable: 'Location information is not available. Please enter your address manually.',
     locationTimeout: 'Timeout getting location. Try again or enter your address manually.',
-    locationError: 'An error occurred getting location. Please enter your address manually.'
+    locationError: 'An error occurred getting location. Please enter your address manually.',
+
+    // Textos de modales de confirmación y carga
+    sending: 'Sending...',
+    processingPayment: 'Processing payment...',
+    loadingMapMobile: '🔄 Loading mobile map...',
+    zoneFound: 'Zone Found',
+
+    // Textos del modal de confirmación de pedido
+    processingOrder: 'Processing your order',
+    processingOrderEllipsis: 'Processing your order...',
+    preparingEverything: 'We are preparing everything for you, this will only take a few seconds',
+    orderSuccessful: 'Order placed successfully!',
+    thankYouPurchase: 'Thank you for your purchase!',
+    orderReceivedProcessing: 'Your order has been received and is being processed',
+    backToStore: 'Back to store',
+    contactWhatsApp: 'Contact via WhatsApp',
+    downloadPDF: 'Download PDF',
+    orderNumber: 'Order number:',
+    customerInformation: 'Customer information',
+    deliveryInformation: 'Delivery information',
+    name: 'Name',
+    address: 'Address',
+    notes: 'Notes',
+    whatsappNotConfigured: 'WhatsApp number is not configured for this store',
+    closeModal: 'Close modal',
+
+    // Métodos de pago
+    paymentMethodCash: 'Cash',
+    paymentMethodCard: 'Card on delivery',
+    paymentMethodTransfer: 'Transfer',
+    paymentMethodBankTransfer: 'Bank transfer',
+    paymentMethodYape: 'Yape'
   },
   
   pt: {
@@ -615,9 +711,68 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     locationPermissionDenied: 'Você deve permitir acesso à localização para usar esta função. Verifique as configurações do seu navegador.',
     locationUnavailable: 'As informações de localização não estão disponíveis. Digite seu endereço manualmente.',
     locationTimeout: 'Tempo limite para obter localização. Tente novamente ou digite seu endereço manualmente.',
-    locationError: 'Ocorreu um erro ao obter a localização. Digite seu endereço manualmente.'
+    locationError: 'Ocorreu um erro ao obter a localização. Digite seu endereço manualmente.',
+
+    // Textos de modales de confirmación y carga
+    sending: 'Enviando...',
+    processingPayment: 'Processando pagamento...',
+    loadingMapMobile: '🔄 Carregando mapa para celular...',
+    zoneFound: 'Zona Encontrada',
+
+    // Textos del modal de confirmación de pedido
+    processingOrder: 'Processando seu pedido',
+    processingOrderEllipsis: 'Processando seu pedido...',
+    preparingEverything: 'Estamos preparando tudo para você, isso levará apenas alguns segundos',
+    orderSuccessful: 'Pedido realizado com sucesso!',
+    thankYouPurchase: 'Obrigado pela sua compra!',
+    orderReceivedProcessing: 'Seu pedido foi recebido e está sendo processado',
+    backToStore: 'Voltar à loja',
+    contactWhatsApp: 'Contatar via WhatsApp',
+    downloadPDF: 'Baixar PDF',
+    orderNumber: 'Número do pedido:',
+    customerInformation: 'Informações do cliente',
+    deliveryInformation: 'Informações de entrega',
+    name: 'Nome',
+    address: 'Endereço',
+    notes: 'Notas',
+    whatsappNotConfigured: 'O número do WhatsApp não está configurado para esta loja',
+    closeModal: 'Fechar modal',
+
+    // Métodos de pago
+    paymentMethodCash: 'Dinheiro',
+    paymentMethodCard: 'Cartão na entrega',
+    paymentMethodTransfer: 'Transferência',
+    paymentMethodBankTransfer: 'Transferência bancária',
+    paymentMethodYape: 'Yape'
   }
 };
+
+/**
+ * Mapea los códigos de métodos de pago a las claves de traducción
+ */
+export const PAYMENT_METHOD_KEYS = {
+  cash: 'paymentMethodCash',
+  card: 'paymentMethodCard',
+  transfer: 'paymentMethodTransfer',
+  bank_transfer: 'paymentMethodBankTransfer',
+  yape: 'paymentMethodYape',
+  // Variaciones que pueden aparecer
+  efectivo: 'paymentMethodCash',
+  tarjeta: 'paymentMethodCard',
+  transferencia_bancaria: 'paymentMethodBankTransfer'
+} as const;
+
+/**
+ * Obtiene el nombre traducido de un método de pago
+ */
+export function getPaymentMethodName(paymentCode: string, texts: StoreTexts): string {
+  const key = PAYMENT_METHOD_KEYS[paymentCode as keyof typeof PAYMENT_METHOD_KEYS];
+  if (key && texts[key as keyof StoreTexts]) {
+    return texts[key as keyof StoreTexts] as string;
+  }
+  // Fallback: capitalizar el código
+  return paymentCode.charAt(0).toUpperCase() + paymentCode.slice(1);
+}
 
 /**
  * Obtiene los textos de UI según el idioma configurado en la tienda

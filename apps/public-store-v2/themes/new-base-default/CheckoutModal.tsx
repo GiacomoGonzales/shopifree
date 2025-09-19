@@ -12,6 +12,7 @@ import {
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
+import { getPaymentMethodName } from '../../lib/store-texts';
 import { StoreBasicInfo, getStoreShippingConfig, StoreShippingConfig, StorePickupLocation, getStoreCheckoutConfig, StoreAdvancedConfig } from '../../lib/store';
 import { googleMapsLoader } from '../../lib/google-maps';
 import { 
@@ -47,6 +48,12 @@ const paymentMethodsConfig = {
         name: 'Yape',
         description: 'Transferencia móvil Yape',
         imageUrl: '/paymentimages/yape.png'
+    },
+    'transferencia_bancaria': {
+        id: 'bank_transfer',
+        name: 'Transferencia bancaria',
+        description: 'Transferencia directa a cuenta bancaria',
+        imageUrl: '/paymentimages/bank-transfer.png'
     },
     'mercadopago': {
         id: 'mercadopago',
@@ -109,7 +116,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     
 
     const { state, clearCart } = useCart();
-    const { t } = useStoreLanguage();
+    const { t, texts } = useStoreLanguage();
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shippingConfig, setShippingConfig] = useState<StoreShippingConfig | null>(null);
@@ -157,6 +164,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
     // 🆕 Estado para cliente progresivo
     const [customerId, setCustomerId] = useState<string | null>(null);
+
+    // 🆕 Estado para loading del botón SIGUIENTE
+    const [isNextStepLoading, setIsNextStepLoading] = useState(false);
     
     // Estado del formulario de checkout
     const [formData, setFormData] = useState<CheckoutData>({
@@ -222,23 +232,31 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Función para obtener métodos de pago disponibles basados en la configuración
     const getAvailablePaymentMethods = () => {
         const methods = [];
-        
+
         // Si está habilitado el pago contra entrega, agregar métodos configurados
         if (checkoutConfig?.payments?.acceptCashOnDelivery && checkoutConfig?.payments?.cashOnDeliveryMethods) {
             checkoutConfig.payments.cashOnDeliveryMethods.forEach(methodId => {
-                if (paymentMethodsConfig[methodId as keyof typeof paymentMethodsConfig]) {
-                    methods.push(paymentMethodsConfig[methodId as keyof typeof paymentMethodsConfig]);
+                const baseMethod = paymentMethodsConfig[methodId as keyof typeof paymentMethodsConfig];
+                if (baseMethod) {
+                    // Crear método con nombre traducido
+                    const translatedMethod = {
+                        ...baseMethod,
+                        name: getPaymentMethodName(baseMethod.id, texts)
+                    };
+                    methods.push(translatedMethod);
                 }
             });
         }
-        
+
         // Si MercadoPago está configurado y los pagos online están habilitados, agregarlo
-        if (checkoutConfig?.payments?.mercadopago?.enabled && 
+        if (checkoutConfig?.payments?.mercadopago?.enabled &&
             checkoutConfig?.payments?.acceptOnlinePayment &&
             paymentMethodsConfig['mercadopago']) {
-            methods.push(paymentMethodsConfig['mercadopago']);
+            const baseMethod = paymentMethodsConfig['mercadopago'];
+            // MercadoPago mantiene su nombre original por ser una marca
+            methods.push(baseMethod);
         }
-        
+
         // Si no hay métodos configurados o como fallback, agregar transferencia bancaria
         if (methods.length === 0) {
             methods.push(defaultPaymentMethod);
@@ -1159,7 +1177,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     };
 
     const nextStep = async () => {
-        if (!validateStep(currentStep) || currentStep >= 3) return;
+        if (!validateStep(currentStep) || currentStep >= 3 || isNextStepLoading) return;
+
+        setIsNextStepLoading(true);
 
         try {
             // 🆕 REGISTRAR/ACTUALIZAR CLIENTE PROGRESIVAMENTE
@@ -1228,6 +1248,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             // No bloquear el flujo de checkout por errores de cliente
             setCurrentStep(currentStep + 1);
             setTimeout(() => scrollToTopOnMobile(), 100);
+        } finally {
+            setIsNextStepLoading(false);
         }
     };
 
@@ -1282,7 +1304,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         // Agregar información de pago
         message += `\n💳 *PAGO:*\n`;
         const selectedMethod = getAvailablePaymentMethods().find(method => method.id === formData.paymentMethod);
-        const paymentMethodName = selectedMethod?.name || formData.paymentMethod;
+        const paymentMethodName = selectedMethod?.name || getPaymentMethodName(formData.paymentMethod, texts);
         message += `Método: ${paymentMethodName}\n`;
         
         // Agregar totales
@@ -1797,7 +1819,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         borderRadius: '12px',
                         border: '1px solid #e5e7eb',
                         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        animation: 'nbd-modal-bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }}>
                         <div className="nbd-modal-header">
                             <div className="flex items-center space-x-2">
@@ -1805,7 +1828,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                                 <h3 className="nbd-modal-title" style={{ fontSize: '16px' }}>
-                                    {shippingNotificationData.cost > 0 ? 'Envío Calculado' : 'Zona Encontrada'}
+                                    {shippingNotificationData.cost > 0 ? t('shippingCalculated') : t('zoneFound')}
                                 </h3>
                             </div>
                         </div>
@@ -2223,7 +2246,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                         {isMobileDevice && !isGoogleMapsLoaded && (
                                                             <div className="nbd-mobile-map-status">
                                                                 <small style={{ color: '#666', fontSize: '12px' }}>
-                                                                    🔄 Cargando mapa para móvil...
+                                                                    {t('loadingMapMobile')}
                                                                 </small>
                                                             </div>
                                                         )}
@@ -2550,13 +2573,27 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         )}
                         <div className="nbd-checkout-actions-right">
                             {currentStep < 3 ? (
-                                <button 
+                                <button
                                     onClick={nextStep}
-                                    disabled={!validateStep(currentStep)}
-                                    className={`nbd-btn nbd-btn--primary ${!validateStep(currentStep) ? 'nbd-btn--disabled' : ''}`}
+                                    disabled={!validateStep(currentStep) || isNextStepLoading}
+                                    className={`nbd-btn nbd-btn--primary ${(!validateStep(currentStep) || isNextStepLoading) ? 'nbd-btn--disabled' : ''}`}
                                     style={{ touchAction: 'manipulation' }}
                                 >
-                                    {t('next')} →
+                                    {isNextStepLoading ? (
+                                        <span className="nbd-btn-loading">
+                                            <svg className="nbd-btn-spinner" width="18" height="18" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="32" strokeDashoffset="32">
+                                                    <animate attributeName="stroke-dasharray" dur="2s" values="0 32;16 16;0 32;0 32" repeatCount="indefinite"/>
+                                                    <animate attributeName="stroke-dashoffset" dur="2s" values="0;-16;-32;-32" repeatCount="indefinite"/>
+                                                </circle>
+                                            </svg>
+                                            Procesando...
+                                        </span>
+                                    ) : (
+                                        <>
+                                            {t('next')} →
+                                        </>
+                                    )}
                                 </button>
                             ) : (
                                 (() => {
@@ -2580,8 +2617,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             {isSubmitting ? (
                                                 <>
                                                     <div className="nbd-loading-spinner"></div>
-                                                    {isWhatsAppCheckout ? 'Enviando...' : 
-                                                     formData.paymentMethod === 'mercadopago' ? 'Procesando pago...' : 
+                                                    {isWhatsAppCheckout ? t('sending') :
+                                                     formData.paymentMethod === 'mercadopago' ? t('processingPayment') :
                                                      t('processing')}
                                                 </>
                                             ) : (
@@ -2671,6 +2708,25 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     to {
                         transform: translate(-50%, -20px);
                         opacity: 0;
+                    }
+                }
+
+                /* Animación bounce suave para modal de envío */
+                @keyframes nbd-modal-bounce-in {
+                    0% {
+                        opacity: 0;
+                        transform: translate(-50%, -50%) scale(0.7);
+                    }
+                    60% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1.02);
+                    }
+                    80% {
+                        transform: translate(-50%, -50%) scale(0.98);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1);
                     }
                 }
             `}</style>

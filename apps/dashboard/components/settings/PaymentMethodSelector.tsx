@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 
 
 // Componente Switch reutilizable
@@ -48,26 +50,6 @@ interface PaymentMethodSelectorProps {
   checkoutMethod?: 'whatsapp' | 'traditional'
 }
 
-const paymentMethods = [
-  {
-    id: 'efectivo',
-    name: 'Efectivo',
-    icon: '/images/payment/cash.png',
-    description: 'Pago en efectivo al repartidor'
-  },
-  {
-    id: 'tarjeta',
-    name: 'Tarjeta al repartidor',
-    icon: '/images/payment/card.png',
-    description: 'POS móvil para tarjetas'
-  },
-  {
-    id: 'yape',
-    name: 'Yape',
-    icon: '/images/payment/yape.png',
-    description: 'Transferencia móvil Yape'
-  }
-]
 
 const Icons = {
   CreditCard: () => (
@@ -88,6 +70,35 @@ const Icons = {
 }
 
 export default function PaymentMethodSelector({ settings, onSettingsChange, checkoutMethod = 'whatsapp' }: PaymentMethodSelectorProps) {
+  const t = useTranslations('settings.paymentMethods')
+
+  // Métodos de pago con traducciones dinámicas
+  const paymentMethodsTranslated = [
+    {
+      id: 'efectivo',
+      name: t('methods.cash'),
+      icon: '/images/payment/cash.png',
+      description: t('methods.cashDescription')
+    },
+    {
+      id: 'tarjeta',
+      name: t('methods.card'),
+      icon: '/images/payment/card.png',
+      description: t('methods.cardDescription')
+    },
+    {
+      id: 'yape',
+      name: t('methods.yape'),
+      icon: '/images/payment/yape.png',
+      description: t('methods.yapeDescription')
+    },
+    {
+      id: 'transferencia_bancaria',
+      name: t('methods.bankTransfer'),
+      icon: '/images/payment/bank-transfer.png',
+      description: t('methods.bankTransferDescription')
+    }
+  ]
   const handleCashOnDeliveryToggle = (enabled: boolean) => {
     onSettingsChange({
       ...settings,
@@ -124,8 +135,8 @@ export default function PaymentMethodSelector({ settings, onSettingsChange, chec
               <Icons.Truck />
             </div>
             <div>
-              <h4 className="text-sm font-medium text-gray-900">Pago contra entrega</h4>
-              <p className="text-xs text-gray-500">El cliente paga al recibir el producto (compatible con WhatsApp y checkout tradicional)</p>
+              <h4 className="text-sm font-medium text-gray-900">{t('cashOnDelivery.title')}</h4>
+              <p className="text-xs text-gray-500">{t('cashOnDelivery.description')}</p>
             </div>
           </div>
           <Switch
@@ -138,9 +149,9 @@ export default function PaymentMethodSelector({ settings, onSettingsChange, chec
         {/* Opciones de pago contra entrega */}
         {settings.acceptCashOnDelivery && (
           <div className="ml-14 space-y-3">
-            <p className="text-xs text-gray-600 mb-3">Selecciona los métodos de pago que aceptas:</p>
+            <p className="text-xs text-gray-600 mb-3">{t('cashOnDelivery.selectMethods')}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {paymentMethods.map((method) => (
+              {paymentMethodsTranslated.map((method) => (
                 <label
                   key={method.id}
                   className={`relative flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
@@ -190,8 +201,8 @@ export default function PaymentMethodSelector({ settings, onSettingsChange, chec
                 <Icons.Globe />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-gray-900">Aceptar pagos online</h4>
-                <p className="text-xs text-gray-500">Procesar pagos mediante pasarela de pago</p>
+                <h4 className="text-sm font-medium text-gray-900">{t('onlinePayment.title')}</h4>
+                <p className="text-xs text-gray-500">{t('onlinePayment.description')}</p>
               </div>
             </div>
             <Switch
@@ -204,7 +215,7 @@ export default function PaymentMethodSelector({ settings, onSettingsChange, chec
           {settings.acceptOnlinePayment && (
             <div className="ml-14 mt-3">
               <p className="text-xs text-gray-600">
-                Configure su pasarela de pago en la sección "Pasarela de Pago" más abajo
+                {t('onlinePayment.configureGateway')}
               </p>
             </div>
           )}

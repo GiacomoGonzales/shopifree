@@ -70,6 +70,30 @@
     "traditionalCheckoutDescription": "Carrito de compras integrado (Próximamente)",
     "checkoutMethodSaved": "Método de venta guardado correctamente"
   },
+  "paymentMethods": {
+    "title": "Métodos de pago aceptados",
+    "description": "Configure los métodos de pago que acepta su tienda",
+    "cashOnDelivery": {
+      "title": "Pago contra entrega",
+      "description": "El cliente paga al recibir el producto (compatible con WhatsApp y checkout tradicional)",
+      "selectMethods": "Selecciona los métodos de pago que aceptas:"
+    },
+    "onlinePayment": {
+      "title": "Aceptar pagos online",
+      "description": "Procesar pagos mediante pasarela de pago",
+      "configureGateway": "Configure su pasarela de pago en la sección \"Pasarela de Pago\" más abajo"
+    },
+    "methods": {
+      "cash": "Efectivo",
+      "cashDescription": "Pago en efectivo al repartidor",
+      "card": "Tarjeta al repartidor",
+      "cardDescription": "POS móvil para tarjetas",
+      "yape": "Yape",
+      "yapeDescription": "Transferencia móvil Yape",
+      "bankTransfer": "Transferencia bancaria",
+      "bankTransferDescription": "Transferencia directa a cuenta bancaria"
+    }
+  },
   "socialMedia": {
     "title": "Redes Sociales",
     "subtitle": "Conecta tus redes sociales para que los clientes puedan encontrarte",

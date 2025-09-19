@@ -70,6 +70,30 @@
     "traditionalCheckoutDescription": "Integrated shopping cart (Coming soon)",
     "checkoutMethodSaved": "Checkout method saved successfully"
   },
+  "paymentMethods": {
+    "title": "Accepted Payment Methods",
+    "description": "Configure the payment methods your store accepts",
+    "cashOnDelivery": {
+      "title": "Cash on Delivery",
+      "description": "Customer pays when receiving the product (compatible with WhatsApp and traditional checkout)",
+      "selectMethods": "Select the payment methods you accept:"
+    },
+    "onlinePayment": {
+      "title": "Accept online payments",
+      "description": "Process payments through payment gateway",
+      "configureGateway": "Configure your payment gateway in the \"Payment Gateway\" section below"
+    },
+    "methods": {
+      "cash": "Cash",
+      "cashDescription": "Cash payment to delivery person",
+      "card": "Card to delivery person",
+      "cardDescription": "Mobile POS for cards",
+      "yape": "Yape",
+      "yapeDescription": "Yape mobile transfer",
+      "bankTransfer": "Bank transfer",
+      "bankTransferDescription": "Direct transfer to bank account"
+    }
+  },
   "socialMedia": {
     "title": "Social Media",
     "subtitle": "Connect your social networks so customers can find you",

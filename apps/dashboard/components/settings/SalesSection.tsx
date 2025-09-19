@@ -319,9 +319,9 @@ export default function SalesSection() {
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-6 space-y-6">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Métodos de pago aceptados</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('paymentMethods.title')}</h3>
             <p className="mt-1 text-sm text-gray-600">
-              Configure los métodos de pago que acepta su tienda
+              {t('paymentMethods.description')}
             </p>
           </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { StoreBasicInfo } from '../../lib/store'
 import { formatPrice } from '../../lib/currency'
 import { OrderData } from '../../lib/orders'
+import { useStoreLanguage } from '../../lib/store-language-context'
 import jsPDF from 'jspdf'
 
 interface ConfirmationModalProps {
@@ -19,6 +20,7 @@ export default function ConfirmationModal({
   orderData, 
   storeInfo 
 }: ConfirmationModalProps) {
+  const { t } = useStoreLanguage()
   const [currentStep, setCurrentStep] = useState<'loading' | 'success'>('loading')
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function ConfirmationModal({
   // Función para contactar por WhatsApp
   const contactWhatsApp = () => {
     if (!storeInfo?.phone) {
-      alert('El número de WhatsApp no está configurado para esta tienda')
+      alert(t('whatsappNotConfigured'))
       return
     }
 
@@ -397,7 +399,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
         {currentStep === 'loading' && (
           <>
             <div className="nbd-modal-header">
-              <h2 className="nbd-modal-title">Procesando tu pedido</h2>
+              <h2 className="nbd-modal-title">{t('processingOrder')}</h2>
             </div>
             <div className="nbd-modal-body" style={{ textAlign: 'center', padding: 'var(--nbd-space-4xl)' }}>
               {/* Contenedor principal del loader */}
@@ -502,23 +504,23 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                 </div>
               </div>
               
-              <h3 style={{ 
-                fontSize: 'var(--nbd-font-size-lg)', 
-                fontWeight: '600', 
+              <h3 style={{
+                fontSize: 'var(--nbd-font-size-lg)',
+                fontWeight: '600',
                 color: 'var(--nbd-primary)',
                 marginBottom: 'var(--nbd-space-sm)',
                 animation: 'nbd-fade-in-out 2s ease-in-out infinite'
               }}>
-                Procesando tu pedido...
+                {t('processingOrderEllipsis')}
               </h3>
-              <p style={{ 
-                color: 'var(--nbd-neutral-600)', 
+              <p style={{
+                color: 'var(--nbd-neutral-600)',
                 fontSize: 'var(--nbd-font-size-base)',
                 maxWidth: '300px',
                 margin: '0 auto',
                 lineHeight: '1.5'
               }}>
-                Estamos preparando todo para ti, esto solo tomará unos segundos
+                {t('preparingEverything')}
               </p>
             </div>
           </>
@@ -528,12 +530,12 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
           <>
             <div className="nbd-modal-header">
               <h2 className="nbd-modal-title" style={{ color: 'var(--nbd-success)' }}>
-                ¡Pedido realizado con éxito!
+                {t('orderSuccessful')}
               </h2>
               <button
                 onClick={onClose}
                 className="nbd-modal-close"
-                aria-label="Cerrar modal"
+                aria-label={t('closeModal')}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -565,13 +567,13 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                   color: 'var(--nbd-primary)',
                   marginBottom: 'var(--nbd-space-sm)'
                 }}>
-                  ¡Gracias por tu compra!
+                  {t('thankYouPurchase')}
                 </h3>
                 <p style={{ 
                   color: 'var(--nbd-neutral-600)', 
                   fontSize: 'var(--nbd-font-size-base)'
                 }}>
-                  Tu pedido ha sido recibido y está siendo procesado
+                  {t('orderReceivedProcessing')}
                 </p>
               </div>
 
@@ -589,7 +591,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                       color: 'var(--nbd-neutral-600)',
                       marginBottom: 'var(--nbd-space-xs)'
                     }}>
-                      Número de pedido:
+                      {t('orderNumber')}:
                     </p>
                     <p style={{ 
                       fontSize: 'var(--nbd-font-size-lg)', 
@@ -608,7 +610,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                     color: 'var(--nbd-primary)',
                     marginBottom: 'var(--nbd-space-sm)'
                   }}>
-                    Productos:
+                    {t('products')}:
                   </h4>
                   {orderData.items.map((item, index) => (
                     <div key={index} style={{
@@ -638,7 +640,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                           fontSize: 'var(--nbd-font-size-xs)', 
                           color: 'var(--nbd-neutral-600)'
                         }}>
-                          Cantidad: {item.quantity}
+                          {t('quantity')}: {item.quantity}
                         </p>
                       </div>
                       <p style={{ 
@@ -654,11 +656,11 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
 
                 <div style={{ borderTop: '2px solid var(--nbd-neutral-200)', paddingTop: 'var(--nbd-space-lg)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--nbd-space-sm)' }}>
-                    <span style={{ color: 'var(--nbd-neutral-600)' }}>Subtotal:</span>
+                    <span style={{ color: 'var(--nbd-neutral-600)' }}>{t('subtotal')}:</span>
                     <span>{formatPrice(orderData.totals.subtotal, currency)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--nbd-space-sm)' }}>
-                    <span style={{ color: 'var(--nbd-neutral-600)' }}>Envío:</span>
+                    <span style={{ color: 'var(--nbd-neutral-600)' }}>{t('shipping')}:</span>
                     <span>{formatPrice(orderData.totals.shipping, currency)}</span>
                   </div>
                   <div style={{ 
@@ -668,7 +670,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                     fontWeight: '700',
                     color: 'var(--nbd-primary)'
                   }}>
-                    <span>Total:</span>
+                    <span>{t('total')}:</span>
                     <span>{formatPrice(orderData.totals.total, currency)}</span>
                   </div>
                 </div>
@@ -688,7 +690,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                     color: 'var(--nbd-primary)',
                     marginBottom: 'var(--nbd-space-sm)'
                   }}>
-                    Información del cliente:
+                    {t('customerInformation')}:
                   </h4>
                   <p style={{ 
                     fontSize: 'var(--nbd-font-size-sm)', 
@@ -696,15 +698,15 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                     lineHeight: '1.6',
                     margin: '0'
                   }}>
-                    <strong>Nombre:</strong> {orderData.customer.fullName}<br />
+                    <strong>{t('name')}:</strong> {orderData.customer.fullName}<br />
                     {orderData.customer.email && (
                       <>
-                        <strong>Email:</strong> {orderData.customer.email}<br />
+                        <strong>{t('email')}:</strong> {orderData.customer.email}<br />
                       </>
                     )}
                     {orderData.customer.phone && (
                       <>
-                        <strong>Teléfono:</strong> {orderData.customer.phone}
+                        <strong>{t('phone')}:</strong> {orderData.customer.phone}
                       </>
                     )}
                   </p>
@@ -721,7 +723,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                     color: 'var(--nbd-primary)',
                     marginBottom: 'var(--nbd-space-sm)'
                   }}>
-                    Información de entrega:
+                    {t('deliveryInformation')}:
                   </h4>
                   <p style={{ 
                     fontSize: 'var(--nbd-font-size-sm)', 
@@ -729,17 +731,17 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                     lineHeight: '1.6',
                     margin: '0'
                   }}>
-                    <strong>Método de envío:</strong> {orderData.shipping.method}<br />
+                    <strong>{t('shippingMethod')}:</strong> {orderData.shipping.method}<br />
                     {orderData.shipping.address && (
                       <>
-                        <strong>Dirección:</strong> {orderData.shipping.address}<br />
+                        <strong>{t('address')}:</strong> {orderData.shipping.address}<br />
                       </>
                     )}
-                    <strong>Método de pago:</strong> {orderData.payment.method}
+                    <strong>{t('paymentMethod')}:</strong> {orderData.payment.method}
                     {orderData.payment.notes && (
                       <>
                         <br />
-                        <strong>Notas:</strong> {orderData.payment.notes}
+                        <strong>{t('notes')}:</strong> {orderData.payment.notes}
                       </>
                     )}
                   </p>
@@ -775,7 +777,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Descargar PDF
+                {t('downloadPDF')}
               </button>
               
               {/* Botones existentes */}
@@ -806,7 +808,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
-                  Volver a la tienda
+                  {t('backToStore')}
                 </button>
                 <button
                   onClick={contactWhatsApp}
@@ -830,7 +832,7 @@ ${orderData.shipping.address ? `📍 *Dirección:* ${orderData.shipping.address}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                   </svg>
-                  Contactar por WhatsApp
+                  {t('contactWhatsApp')}
                 </button>
               </div>
             </div>
