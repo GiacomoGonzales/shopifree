@@ -236,6 +236,23 @@
   padding: 0 0 0 var(--nbd-space-lg); /* Mantener padding-left para alineación con página */
 }
 
+/* Excepción: alinear título de productos con tarjetas en móvil con texturas */
+@media (max-width: 768px) {
+  .texture-subtle-dots .nbd-products .nbd-section-header,
+  .texture-geometric-grid .nbd-products .nbd-section-header,
+  .texture-organic-waves .nbd-products .nbd-section-header,
+  .texture-diagonal-lines .nbd-products .nbd-section-header,
+  .texture-fabric-weave .nbd-products .nbd-section-header,
+  .texture-hexagon-pattern .nbd-products .nbd-section-header,
+  .texture-noise-texture .nbd-products .nbd-section-header,
+  .texture-floating-bubbles .nbd-products .nbd-section-header,
+  .texture-asymmetric-waves .nbd-products .nbd-section-header,
+  .texture-scattered-leaves .nbd-products .nbd-section-header,
+  .texture-paper-texture .nbd-products .nbd-section-header {
+    padding-left: 0; /* Alinear directamente con las tarjetas de productos */
+  }
+}
+
 /* Controles de productos sin efecto glassmorphism */
 .texture-subtle-dots .nbd-product-controls,
 .texture-geometric-grid .nbd-product-controls,
