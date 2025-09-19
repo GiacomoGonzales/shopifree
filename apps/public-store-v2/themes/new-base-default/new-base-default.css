@@ -3258,20 +3258,20 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 @media (max-width: 768px) {
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
-        padding-top: calc(var(--nbd-header-height) + var(--nbd-space-md)); /* Espacio para header fijo + separación mínima */
-        margin-top: var(--nbd-space-lg); /* Margen sutil para separación */
+        padding-top: calc(var(--nbd-header-height) + var(--nbd-space-sm)); /* Reducido 50%: md → sm */
+        margin-top: var(--nbd-space-md); /* Reducido 50%: lg → md */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
-        /* Separación mínima pero visible en dispositivos móviles reales */
-        transform: translateY(8px);
+        /* Reducido 50%: 8px → 4px */
+        transform: translateY(4px);
     }
 
-    /* Estrategia específica para dispositivos iOS/Safari reales - separación moderada */
+    /* Estrategia específica para dispositivos iOS/Safari reales - valores reducidos 50% */
     @supports (-webkit-touch-callout: none) {
         .nbd-hero {
-            margin-top: var(--nbd-space-xl) !important;
-            padding-top: calc(var(--nbd-header-height) + var(--nbd-space-lg)) !important;
+            margin-top: var(--nbd-space-lg) !important; /* Reducido 50%: xl → lg */
+            padding-top: calc(var(--nbd-header-height) + var(--nbd-space-md)) !important; /* Reducido 50%: lg → md */
         }
     }
 
