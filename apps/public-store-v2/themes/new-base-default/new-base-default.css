@@ -196,6 +196,23 @@
     padding-top: var(--nbd-space-lg); /* Reducir separación del header en pantallas grandes */
 }
 
+/* Desktop - ajustar hero para encajar en una vista */
+@media (min-width: 1024px) {
+    .nbd-hero {
+        min-height: calc(100vh - var(--nbd-header-height));
+        align-items: center;
+        padding-top: calc(var(--nbd-space-xl) + 8px);
+        justify-content: center;
+    }
+
+    .nbd-hero-container {
+        display: flex;
+        align-items: center;
+        min-height: calc(100vh - var(--nbd-header-height) - var(--nbd-space-2xl) - 8px);
+    }
+
+}
+
 .nbd-hero::before {
     content: '';
     position: absolute;
@@ -307,7 +324,7 @@
 
 @media (max-width: 768px) {
     .nbd-hero-title {
-        font-size: var(--nbd-font-size-4xl);
+        font-size: var(--nbd-font-size-2xl);
     }
     
     .nbd-hero-description {
@@ -683,7 +700,7 @@
    =================================================== */
 .nbd-section-header {
     text-align: center;
-    margin-bottom: var(--nbd-space-2xl);
+    margin-bottom: var(--nbd-space-lg);
 }
 
 .nbd-section-title {
@@ -704,7 +721,7 @@
    CATEGORÍAS MOSAICO INTELIGENTE
    =================================================== */
 .nbd-categories-mosaic {
-    padding: var(--nbd-space-lg) 0 var(--nbd-space-2xl) 0; /* Reducir padding superior */
+    padding: var(--nbd-space-md) 0 var(--nbd-space-lg) 0; /* Espaciado más compacto */
     position: relative;
     overflow: hidden;
     scroll-margin-top: var(--nbd-header-height);
@@ -1054,7 +1071,7 @@
     
     .nbd-mosaic-grid {
         display: block;
-        margin-bottom: var(--nbd-space-2xl);
+        margin-bottom: 0; /* Sin separación vertical en móvil */
     }
     
     .nbd-mosaic-3,
@@ -1067,7 +1084,7 @@
         overflow-y: hidden;
         scroll-behavior: smooth;
         gap: var(--nbd-space-md);
-        padding: 0 var(--nbd-space-xl) var(--nbd-space-md);
+        padding: var(--nbd-space-md) var(--nbd-space-lg) var(--nbd-space-md) 0;
         /* Ocultar scrollbar pero mantener funcionalidad */
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
@@ -1271,7 +1288,7 @@
 
 @media (max-width: 768px) {
     .nbd-newsletter-title {
-        font-size: var(--nbd-font-size-3xl);
+        font-size: var(--nbd-font-size-xl);
     }
 }
 
@@ -1416,7 +1433,7 @@
    PRODUCTOS MODERNOS
    =================================================== */
 .nbd-products {
-    padding: var(--nbd-space-2xl) 0;
+    padding: var(--nbd-space-lg) 0;
     scroll-margin-top: var(--nbd-header-height);
 }
 
@@ -1424,16 +1441,16 @@
 .nbd-product-controls {
     display: flex;
     gap: var(--nbd-space-md);
-    margin: var(--nbd-space-2xl) 0;
+    margin: var(--nbd-space-lg) 0;
     justify-content: flex-end;
     position: relative;
-    z-index: 100; /* Asegurar que esté sobre las tarjetas de producto */
+    z-index: 10; /* Reducido para evitar problemas de rendering */
 }
 
 /* Reducir separación de controles en móvil y tablet */
 @media (max-width: 768px) {
     .nbd-product-controls {
-        margin: var(--nbd-space-sm) 0; /* Mucho menos separación: 8px arriba y abajo */
+        margin: 0 0 var(--nbd-space-sm) 0; /* Solo margen inferior en tablet */
     }
 }
 
@@ -1442,8 +1459,8 @@
     align-items: center;
     gap: var(--nbd-space-sm);
     padding: var(--nbd-space-sm) var(--nbd-space-md);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
+    background: transparent;
+    backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--nbd-primary);
     font-size: var(--nbd-text-sm);
@@ -1452,20 +1469,20 @@
     transition: all var(--nbd-transition-base);
     white-space: nowrap;
     border-radius: var(--nbd-radius-lg);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 .nbd-control-btn:hover {
     color: var(--nbd-primary);
-    background: rgba(255, 255, 255, 0.2);
+    background: transparent;
     border-color: rgba(255, 255, 255, 0.3);
     transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 .nbd-control-btn:active {
     transform: scale(0.98);
-    background: rgba(255, 255, 255, 0.15);
+    background: transparent;
 }
 
 .nbd-control-btn svg {
@@ -1474,35 +1491,35 @@
 
 .nbd-control-btn--active {
     color: var(--nbd-primary);
-    background: rgba(255, 255, 255, 0.25);
+    background: transparent;
     border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
 }
 
 /* Dropdown de ordenamiento */
 .nbd-sort-dropdown {
     position: relative;
-    z-index: 10000; /* Asegurar que el contenedor también tenga z-index alto */
+    z-index: 20; /* Reducido para evitar problemas de rendering */
 }
 
-/* Botón de ordenar con fondo blanco sólido */
+/* Botón de ordenar transparente para consistencia */
 .nbd-sort-dropdown .nbd-control-btn {
-    background: var(--nbd-neutral-0) !important;
-    border: 1px solid var(--nbd-neutral-300) !important;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important;
 }
 
 .nbd-sort-dropdown .nbd-control-btn:hover {
-    background: var(--nbd-neutral-50) !important;
-    border-color: var(--nbd-neutral-400) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: none !important;
 }
 
 .nbd-sort-dropdown .nbd-control-btn:active,
 .nbd-sort-dropdown .nbd-control-btn--active {
-    background: var(--nbd-neutral-100) !important;
-    border-color: var(--nbd-neutral-400) !important;
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .nbd-dropdown-arrow {
@@ -1517,12 +1534,12 @@
 .nbd-dropdown-menu {
     position: absolute;
     top: calc(100% + var(--nbd-space-xs));
-    right: 0;
+    left: 0;
     background: var(--nbd-neutral-0);
     border: 1px solid var(--nbd-neutral-200);
     border-radius: var(--nbd-radius-lg);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    z-index: 10001; /* Z-index muy alto para estar sobre todo */
+    z-index: 30; /* Reducido para evitar problemas de rendering */
     min-width: 200px;
     padding: var(--nbd-space-sm);
     animation: nbd-dropdown-fade-in 0.15s ease-out;
@@ -1612,11 +1629,56 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 }
 
+/* Desktop - botones con forma */
+@media (min-width: 641px) {
+    .nbd-control-btn {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .nbd-control-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .nbd-control-btn:active {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .nbd-control-btn--active {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Botón de ordenar en desktop con fondo */
+    .nbd-sort-dropdown .nbd-control-btn {
+        background: var(--nbd-neutral-0) !important;
+        border: 1px solid var(--nbd-neutral-300) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .nbd-sort-dropdown .nbd-control-btn:hover {
+        background: var(--nbd-neutral-50) !important;
+        border-color: var(--nbd-neutral-400) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .nbd-sort-dropdown .nbd-control-btn:active,
+    .nbd-sort-dropdown .nbd-control-btn--active {
+        background: var(--nbd-neutral-100) !important;
+        border-color: var(--nbd-neutral-400) !important;
+    }
+}
+
 @media (max-width: 640px) {
     .nbd-product-controls {
         gap: var(--nbd-space-sm);
-        margin: var(--nbd-space-sm) 0; /* Reducir margen para menos separación */
-        justify-content: center;
+        margin: 0 0 var(--nbd-space-sm) 0; /* Solo margen inferior, sin margen superior */
+        justify-content: flex-end;
     }
     
     .nbd-control-btn span {
@@ -1637,8 +1699,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     /* Ajustes del dropdown en móvil */
     .nbd-dropdown-menu {
-        right: auto;
-        left: 0;
+        left: auto;
+        right: 0;
         min-width: 180px;
     }
     
@@ -2096,16 +2158,19 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     border: 1px solid var(--nbd-neutral-200);
     border-radius: var(--nbd-radius-xl);
     overflow: hidden;
-    transition: all var(--nbd-transition-base);
+    transition: box-shadow var(--nbd-transition-base), border-color var(--nbd-transition-base);
     position: relative;
     group: card;
     min-height: 320px;
+    will-change: transform;
+    transform: translateZ(0); /* Forzar aceleración por hardware */
 }
 
 .nbd-product-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--nbd-shadow-xl);
     border-color: var(--nbd-neutral-300);
+    transition: transform var(--nbd-transition-base), box-shadow var(--nbd-transition-base), border-color var(--nbd-transition-base);
 }
 
 .nbd-product-image {
@@ -2136,6 +2201,16 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     transform: translateZ(0);
     /* Optimizar interpolación */
     -ms-interpolation-mode: bicubic;
+    /* Prevenir parpadeo blanco durante interacciones */
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    /* Evitar que la imagen pierda contenido durante reflows */
+    contain: layout style paint;
+    /* Optimizar cambios de estado */
+    will-change: transform;
+    /* Forzar aceleración de hardware específica para imágenes */
+    -webkit-filter: blur(0);
+    filter: blur(0);
 }
 
 .nbd-product-card:hover .nbd-product-img {
@@ -2891,7 +2966,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
    CARRUSEL DE MARCAS
    =================================================== */
 .nbd-brands-carousel {
-    padding: var(--nbd-space-2xl) var(--nbd-space-xl);
+    padding: var(--nbd-space-md) var(--nbd-space-xl);
     overflow: hidden;
 }
 
@@ -3012,7 +3087,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Responsive para móvil */
 @media (max-width: 768px) {
     .nbd-brands-carousel {
-        padding: var(--nbd-space-2xl) var(--nbd-space-lg);
+        padding: var(--nbd-space-md) var(--nbd-space-lg);
     }
     
     .nbd-brands-container {
@@ -3138,16 +3213,24 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
    =================================================== */
 @media (max-width: 768px) {
     .nbd-hero {
-        min-height: 70vh; /* Reducir altura mínima */
-        padding-top: var(--nbd-space-3xl); /* Aún más espacio para separación ideal del header */
+        min-height: 60vh; /* Reducir más la altura al no tener texto */
+        padding-top: var(--nbd-space-2xl); /* Reducir padding superior para compensar falta de texto */
+        display: flex;
+        align-items: center; /* Centrar verticalmente el contenido */
+        justify-content: center;
     }
 
     .nbd-hero-container {
         padding: 0 var(--nbd-space-lg);
+        width: 100%;
     }
-    
+
     .nbd-hero-content {
-        padding: var(--nbd-space-sm) 0; /* Reducir padding superior e inferior */
+        padding: 0; /* Sin padding para que la imagen se centre mejor */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
     /* Ocultar texto de hero en móvil - solo mostrar imagen */
@@ -3161,9 +3244,18 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         background: transparent !important;
         padding: 0 !important;
         margin: 0 !important;
-        /* No usar height: 0 para mantener los botones visibles */
         position: relative;
         order: 2; /* Mantener el orden */
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Ajustar la imagen hero para ocupar todo el espacio disponible */
+    .nbd-hero-visual {
+        order: 1;
+        width: calc(100% - 2 * var(--nbd-space-md)); /* Ocupar todo el ancho menos márgenes mínimos */
+        margin: var(--nbd-space-md) var(--nbd-space-md) var(--nbd-space-lg) var(--nbd-space-md); /* Márgenes mínimos iguales arriba y lados */
     }
 
     /* Posicionar los botones relativos al contenedor hero principal */
@@ -3190,6 +3282,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         margin: 0 !important;
     }
 
+
     /* El contenedor padre debe tener position relative */
     .nbd-hero {
         position: relative;
@@ -3215,20 +3308,19 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
     /* Dar espacio entre hero y siguiente sección */
     .nbd-hero {
-        margin-bottom: var(--nbd-space-4xl);
+        margin-bottom: calc(var(--nbd-space-4xl) + 20px);
     }
 }
 
 /* Continuar con estilos generales de móvil */
 @media (max-width: 768px) {
     .nbd-section-title {
-        font-size: var(--nbd-font-size-3xl);
+        font-size: var(--nbd-font-size-xl);
     }
     
     .nbd-section-header {
         text-align: left;
-        margin-top: 0;
-        margin-bottom: var(--nbd-space-xl);
+        margin: 0; /* Sin separación vertical en móvil */
     }
     
     /* Excepción: mantener centrado en carrusel de marcas */
@@ -3238,12 +3330,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     .nbd-categories,
     .nbd-categories-mosaic {
-        padding: var(--nbd-space-md) 0 var(--nbd-space-lg) 0; /* Reducir aún más padding superior en móvil */
+        padding: var(--nbd-space-md) 0; /* Padding pequeño arriba y abajo para separar del titulo anterior y siguiente */
         scroll-margin-top: var(--nbd-header-height);
     }
-    
+
     .nbd-products {
-        padding: var(--nbd-space-lg) 0 var(--nbd-space-2xl) 0;
+        padding: 0; /* Sin separación vertical en móvil */
     }
     
     .nbd-header-container {
@@ -3751,8 +3843,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 /* Breadcrumbs modernos */
 .nbd-breadcrumbs {
-    background: var(--nbd-neutral-50);
-    border-bottom: 1px solid var(--nbd-neutral-200);
+    background: transparent;
+    border-bottom: none;
     padding: var(--nbd-space-lg) 0;
 }
 
@@ -4346,7 +4438,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-category-page-header {
     padding: var(--nbd-space-3xl) 0 var(--nbd-space-sm);
     margin-top: 72px; /* Altura del header fixed */
-    background: var(--nbd-neutral-0);
+    background: transparent;
 }
 
 @media (max-width: 768px) {
@@ -4366,7 +4458,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 @media (max-width: 768px) {
     .nbd-category-title {
-        font-size: var(--nbd-font-size-3xl);
+        font-size: var(--nbd-font-size-xl);
     }
 }
 
@@ -4783,8 +4875,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     align-items: center;
     gap: var(--nbd-space-md);
     padding: var(--nbd-space-lg);
-    border-bottom: 1px solid var(--nbd-neutral-200);
-    background: var(--nbd-neutral-0);
+    border-bottom: none;
+    background: transparent;
 }
 
 .nbd-search-input-container {
@@ -6108,8 +6200,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 .nbd-map-header {
     padding: var(--nbd-space-lg);
-    background: var(--nbd-neutral-0);
-    border-bottom: 1px solid var(--nbd-neutral-200);
+    background: transparent;
+    border-bottom: none;
     position: relative;
 }
 
@@ -6184,8 +6276,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     
     .nbd-map-header {
         padding: var(--nbd-space-md);
-        background: var(--nbd-neutral-0) !important;
-        border-bottom: 1px solid var(--nbd-neutral-200);
+        background: transparent !important;
+        border-bottom: none;
         position: relative;
     }
     
@@ -6737,7 +6829,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
    COLECCIONES MOSAICO DINÁMICO
    =================================================== */
 .nbd-collections-mosaic {
-    padding: var(--nbd-space-2xl) 0 var(--nbd-space-lg) 0; /* Reducir padding inferior */
+    padding: var(--nbd-space-lg) 0 var(--nbd-space-md) 0; /* Espaciado más compacto */
     position: relative;
     overflow: hidden;
     scroll-margin-top: var(--nbd-header-height);
@@ -7025,7 +7117,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Mobile - Carrusel horizontal */
 @media (max-width: 640px) {
     .nbd-collections-mosaic {
-        padding: var(--nbd-space-xl) 0 var(--nbd-space-md) 0; /* Reducir padding inferior en móvil */
+        padding: var(--nbd-space-md) 0; /* Padding pequeño arriba y abajo para separar del titulo anterior y siguiente */
     }
     
     .nbd-collections-grid {
@@ -7034,8 +7126,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         overflow-y: hidden;
         scroll-behavior: smooth;
         gap: var(--nbd-space-md);
-        padding: 0 var(--nbd-space-lg) var(--nbd-space-md);
-        margin-bottom: var(--nbd-space-2xl);
+        padding: var(--nbd-space-md) var(--nbd-space-lg) var(--nbd-space-md) 0;
+        margin-bottom: 0; /* Sin separación vertical en móvil */
         /* Ocultar scrollbar pero mantener funcionalidad */
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
