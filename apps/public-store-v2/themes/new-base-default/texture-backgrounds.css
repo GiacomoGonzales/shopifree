@@ -233,7 +233,7 @@
   background: transparent;
   backdrop-filter: none;
   border-radius: 0;
-  padding: 0;
+  padding: 0 0 0 var(--nbd-space-lg); /* Mantener padding-left para alineación con página */
 }
 
 /* Controles de productos sin efecto glassmorphism */
