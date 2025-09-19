@@ -3258,20 +3258,20 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 @media (max-width: 768px) {
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
-        padding-top: calc(var(--nbd-header-height) + 2px); /* Reducido 50% en píxeles: 4px → 2px */
-        margin-top: 4px; /* Reducido 50% en píxeles: 8px → 4px */
+        padding-top: var(--nbd-header-height); /* Reducido 4px más: +2px → +0px */
+        margin-top: 2px; /* Reducido 4px más: 4px → 0px, pero mínimo 2px para visibilidad */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
-        /* Reducido 50% en píxeles: 2px → 1px */
-        transform: translateY(1px);
+        /* Reducido 4px más: 1px → 0px (eliminar transform) */
+        transform: none;
     }
 
-    /* Estrategia específica para dispositivos iOS/Safari reales - reducido 50% en píxeles */
+    /* Estrategia específica para dispositivos iOS/Safari reales - reducido 4px más */
     @supports (-webkit-touch-callout: none) {
         .nbd-hero {
-            margin-top: 6px !important; /* Reducido 50% en píxeles: 12px → 6px */
-            padding-top: calc(var(--nbd-header-height) + 4px) !important; /* Reducido 50% en píxeles: 8px → 4px */
+            margin-top: 3px !important; /* Reducido 4px más: 6px → 2px, ajustado a 3px */
+            padding-top: calc(var(--nbd-header-height) + 1px) !important; /* Reducido 4px más: +4px → +0px, ajustado a +1px */
         }
     }
 
