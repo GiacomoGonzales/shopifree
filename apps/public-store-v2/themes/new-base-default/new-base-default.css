@@ -3258,20 +3258,20 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 @media (max-width: 768px) {
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
-        padding-top: calc(var(--nbd-header-height) + var(--nbd-space-xs)); /* Reducido otro 50%: sm → xs */
-        margin-top: var(--nbd-space-sm); /* Reducido otro 50%: md → sm */
+        padding-top: calc(var(--nbd-header-height) + 2px); /* Reducido 50% en píxeles: 4px → 2px */
+        margin-top: 4px; /* Reducido 50% en píxeles: 8px → 4px */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
-        /* Reducido otro 50%: 4px → 2px */
-        transform: translateY(2px);
+        /* Reducido 50% en píxeles: 2px → 1px */
+        transform: translateY(1px);
     }
 
-    /* Estrategia específica para dispositivos iOS/Safari reales - reducido otro 50% */
+    /* Estrategia específica para dispositivos iOS/Safari reales - reducido 50% en píxeles */
     @supports (-webkit-touch-callout: none) {
         .nbd-hero {
-            margin-top: var(--nbd-space-md) !important; /* Reducido otro 50%: lg → md */
-            padding-top: calc(var(--nbd-header-height) + var(--nbd-space-sm)) !important; /* Reducido otro 50%: md → sm */
+            margin-top: 6px !important; /* Reducido 50% en píxeles: 12px → 6px */
+            padding-top: calc(var(--nbd-header-height) + 4px) !important; /* Reducido 50% en píxeles: 8px → 4px */
         }
     }
 
