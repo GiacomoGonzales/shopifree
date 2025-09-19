@@ -3258,21 +3258,20 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 @media (max-width: 768px) {
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
-        padding-top: calc(var(--nbd-header-height) + var(--nbd-space-2xl)); /* Espacio para header fijo + padding extra */
-        margin-top: var(--nbd-space-4xl); /* Margen adicional para separación visible */
-        top: var(--nbd-space-xl); /* Posición adicional desde arriba */
+        padding-top: calc(var(--nbd-header-height) + var(--nbd-space-md)); /* Espacio para header fijo + separación mínima */
+        margin-top: var(--nbd-space-lg); /* Margen sutil para separación */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
-        /* Forzar separación en dispositivos móviles reales */
-        transform: translateY(var(--nbd-space-lg));
+        /* Separación mínima pero visible en dispositivos móviles reales */
+        transform: translateY(8px);
     }
 
-    /* Estrategia adicional para dispositivos móviles reales con viewport dinámico */
+    /* Estrategia específica para dispositivos iOS/Safari reales - separación moderada */
     @supports (-webkit-touch-callout: none) {
         .nbd-hero {
-            margin-top: calc(var(--nbd-space-4xl) + var(--nbd-space-2xl)) !important;
-            padding-top: calc(var(--nbd-header-height) + var(--nbd-space-3xl)) !important;
+            margin-top: var(--nbd-space-xl) !important;
+            padding-top: calc(var(--nbd-header-height) + var(--nbd-space-lg)) !important;
         }
     }
 
