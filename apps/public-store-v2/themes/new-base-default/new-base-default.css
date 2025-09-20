@@ -7316,6 +7316,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         background: linear-gradient(
             135deg,
             rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
             rgba(0, 0, 0, 0.5) 100%
         ) !important;
     }
@@ -7340,6 +7341,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         background: linear-gradient(
             135deg,
             rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
             rgba(0, 0, 0, 0.5) 100%
         ) !important;
     }
@@ -7363,6 +7365,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         background: linear-gradient(
             135deg,
             rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
             rgba(0, 0, 0, 0.5) 100%
         ) !important;
     }
@@ -7394,6 +7397,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
             background: linear-gradient(
                 135deg,
                 rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.1) 50%,
                 rgba(0, 0, 0, 0.5) 100%
             ) !important;
         }
