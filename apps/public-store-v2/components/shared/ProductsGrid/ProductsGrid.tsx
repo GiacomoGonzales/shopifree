@@ -85,7 +85,7 @@ export function ProductsGrid({
               <img
                 src={src800 || imageUrl}
                 alt={product.name}
-                className="nbd-product-image w-full h-full object-cover rounded-lg"
+                className="nbd-product-img"
                 loading="lazy"
                 decoding="async"
                 sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"

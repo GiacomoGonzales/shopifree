@@ -2050,12 +2050,17 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         max-width: none;
         width: 100%;
     }
+
+    .nbd-mobile-expanded .nbd-product-img {
+        opacity: 1 !important;
+        transition: none !important;
+    }
     
     /* Fix: Asegurar dimensiones exactas para imágenes en vista lista móvil */
     .nbd-mobile-list .nbd-product-image {
-        max-width: 90px;
-        width: 90px;
-        height: 90px;
+        max-width: 110px;
+        width: 110px;
+        height: 100%;
     }
     
     /* Vista grid - 2 columnas */
@@ -2087,6 +2092,11 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     .nbd-mobile-grid .nbd-product-price {
         align-items: flex-start;
         gap: var(--nbd-space-xs);
+    }
+
+    .nbd-mobile-grid .nbd-product-img {
+        opacity: 1 !important;
+        transition: none !important;
     }
     
     .nbd-mobile-grid .nbd-price-current {
@@ -2123,21 +2133,26 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         display: flex;
         flex-direction: row;
         align-items: stretch;
-        padding: var(--nbd-space-sm);
-        gap: var(--nbd-space-md);
+        padding: 0;
+        gap: 0;
         height: auto;
-        min-height: 100px;
+        min-height: 120px;
         overflow: hidden;
     }
     
     .nbd-mobile-list .nbd-product-image {
         flex-shrink: 0;
-        width: 90px;
-        height: 90px;
-        align-self: center;
+        width: 110px;
+        height: 100%;
+        align-self: stretch;
         margin: 0;
         border-radius: var(--nbd-radius-lg);
         overflow: hidden;
+    }
+
+    .nbd-mobile-list .nbd-product-img {
+        opacity: 1 !important;
+        transition: none !important;
     }
     
     .nbd-mobile-list .nbd-product-content {
@@ -2145,9 +2160,9 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         min-width: 0;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
         gap: var(--nbd-space-xs);
-        padding: var(--nbd-space-xs) 0;
+        padding: var(--nbd-space-sm) var(--nbd-space-sm) var(--nbd-space-sm) var(--nbd-space-md);
     }
     
     .nbd-mobile-list .nbd-product-name {
