@@ -51,6 +51,8 @@ const ProductImage = memo(({
          prevProps.productName === nextProps.productName;
 });
 
+ProductImage.displayName = 'ProductImage';
+
 interface ProductsGridProps {
   displayedProducts: PublicProduct[]
   filteredProducts: PublicProduct[]
