@@ -18,7 +18,7 @@
 /* === RESPONSIVE LAYOUT === */
 @media (max-width: 768px) {
     .nbd-container {
-        padding: 0 var(--nbd-space-lg);
+        padding: 0 var(--nbd-space-md);
         margin: 0 auto;
         max-width: 100%;
     }
