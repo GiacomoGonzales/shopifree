@@ -5,6 +5,7 @@ import { PublicProduct } from '../../lib/products';
 import { StoreBasicInfo } from '../../lib/store';
 import { formatPrice } from '../../lib/currency';
 import { useStoreLanguage } from '../../lib/store-language-context';
+import { usePromotions } from '../../lib/hooks/usePromotions';
 
 interface SearchComponentProps {
     products: PublicProduct[];
@@ -13,15 +14,17 @@ interface SearchComponentProps {
     isCustomDomain?: boolean;
     storeSubdomain?: string;
     storeInfo?: StoreBasicInfo | null;
+    storeId?: string | null;
 }
 
-export default function SearchComponent({ 
-    products, 
-    isOpen, 
-    onClose, 
-    isCustomDomain = false, 
+export default function SearchComponent({
+    products,
+    isOpen,
+    onClose,
+    isCustomDomain = false,
     storeSubdomain = '',
-    storeInfo = null
+    storeInfo = null,
+    storeId = null
 }: SearchComponentProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobile, setIsMobile] = useState(false);
@@ -105,11 +108,75 @@ export default function SearchComponent({
     // Función para construir URL del producto
     const getProductUrl = (productSlug: string) => {
         if (isCustomDomain) {
+            // Dominio personalizado: URL directa
             return `/producto/${productSlug}`;
         }
-        return `/${storeSubdomain}/producto/${productSlug}`;
+
+        // Verificar si estamos en localhost (desarrollo) o producción
+        const isLocalhost = typeof window !== 'undefined' &&
+            (window.location.hostname === 'localhost' || window.location.hostname.includes('localhost'));
+
+        if (isLocalhost) {
+            // En localhost: necesitamos /subdominio/producto/...
+            return `/${storeSubdomain}/producto/${productSlug}`;
+        } else {
+            // En producción con subdominio: URL directa (el subdominio ya identifica la tienda)
+            return `/producto/${productSlug}`;
+        }
     };
 
+    // Componente interno para cada producto con promociones
+    function SearchResultItem({ product }: { product: PublicProduct }) {
+        const promotionData = usePromotions(storeId || null, product.id || '', product.price);
+
+        // Usar solo sistema de promociones, eliminar comparePrice obsoleto
+        const hasPromotion = promotionData.discount > 0;
+        const finalPrice = hasPromotion ? promotionData.finalPrice : product.price;
+        const originalPrice = product.price;
+
+        return (
+            <a
+                key={product.id}
+                href={getProductUrl(product.slug || product.id)}
+                className="nbd-search-result-item"
+                onClick={onClose}
+            >
+                <div className="nbd-search-result-image">
+                    {product.image ? (
+                        <img
+                            src={product.image}
+                            alt={product.name}
+                            loading="lazy"
+                        />
+                    ) : (
+                        <div className="nbd-search-result-placeholder">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5"/>
+                                <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="currentColor" strokeWidth="1.5"/>
+                            </svg>
+                        </div>
+                    )}
+                </div>
+                <div className="nbd-search-result-info">
+                    <h4 className="nbd-search-result-name">{product.name}</h4>
+                    {product.brand && (
+                        <p className="nbd-search-result-brand">{product.brand}</p>
+                    )}
+                    <div className="nbd-search-result-price">
+                        {hasPromotion && (
+                            <span className="nbd-search-result-compare-price">
+                                {formatPrice(originalPrice, storeInfo?.currency)}
+                            </span>
+                        )}
+                        <span className="nbd-search-result-current-price">
+                            {formatPrice(finalPrice, storeInfo?.currency)}
+                        </span>
+                    </div>
+                </div>
+            </a>
+        );
+    }
 
 
     if (!isOpen) return null;
@@ -188,46 +255,7 @@ export default function SearchComponent({
                         </div>
                         <div className="nbd-search-results">
                             {searchResults.map((product) => (
-                                <a
-                                    key={product.id}
-                                    href={getProductUrl(product.slug || product.id)}
-                                    className="nbd-search-result-item"
-                                    onClick={onClose}
-                                >
-                                    <div className="nbd-search-result-image">
-                                        {product.image ? (
-                                            <img
-                                                src={product.image}
-                                                alt={product.name}
-                                                loading="lazy"
-                                            />
-                                        ) : (
-                                            <div className="nbd-search-result-placeholder">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5"/>
-                                                    <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
-                                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="currentColor" strokeWidth="1.5"/>
-                                                </svg>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="nbd-search-result-info">
-                                        <h4 className="nbd-search-result-name">{product.name}</h4>
-                                        {product.brand && (
-                                            <p className="nbd-search-result-brand">{product.brand}</p>
-                                        )}
-                                        <div className="nbd-search-result-price">
-                                            {product.comparePrice && product.comparePrice > product.price && (
-                                                <span className="nbd-search-result-compare-price">
-                                                    {formatPrice(product.comparePrice, storeInfo?.currency)}
-                                                </span>
-                                            )}
-                                            <span className="nbd-search-result-current-price">
-                                                {formatPrice(product.price, storeInfo?.currency)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </a>
+                                <SearchResultItem key={product.id} product={product} />
                             ))}
                         </div>
                     </>

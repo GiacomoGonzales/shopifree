@@ -28,6 +28,8 @@
     "cash_on_delivery": "Pago contra entrega",
     "card": "Tarjeta",
     "transfer": "Transferencia",
+    "yape": "Pago con Yape",
+    "bank_transfer": "Transferencia bancaria",
     "paypal": "PayPal",
     "stripe": "Stripe",
     "mercadopago": "MercadoPago",

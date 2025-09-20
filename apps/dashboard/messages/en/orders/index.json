@@ -28,6 +28,8 @@
     "cash_on_delivery": "Cash on Delivery",
     "card": "Card",
     "transfer": "Transfer",
+    "yape": "Yape Payment",
+    "bank_transfer": "Bank Transfer",
     "paypal": "PayPal",
     "stripe": "Stripe",
     "mercadopago": "MercadoPago",

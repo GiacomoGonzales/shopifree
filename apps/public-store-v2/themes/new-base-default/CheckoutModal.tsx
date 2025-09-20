@@ -12,7 +12,7 @@ import {
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
 import { useStoreLanguage } from '../../lib/store-language-context';
-import { getPaymentMethodName } from '../../lib/store-texts';
+import { getPaymentMethodName, getPaymentMethodDescription } from '../../lib/store-texts';
 import { StoreBasicInfo, getStoreShippingConfig, StoreShippingConfig, StorePickupLocation, getStoreCheckoutConfig, StoreAdvancedConfig } from '../../lib/store';
 import { googleMapsLoader } from '../../lib/google-maps';
 import { 
@@ -44,8 +44,8 @@ const paymentMethodsConfig = {
         imageUrl: '/paymentimages/tarjeta.png'
     },
     'yape': {
-        id: 'transfer',
-        name: 'Yape',
+        id: 'yape',
+        name: 'Pago con Yape',
         description: 'Transferencia móvil Yape',
         imageUrl: '/paymentimages/yape.png'
     },
@@ -238,10 +238,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             checkoutConfig.payments.cashOnDeliveryMethods.forEach(methodId => {
                 const baseMethod = paymentMethodsConfig[methodId as keyof typeof paymentMethodsConfig];
                 if (baseMethod) {
-                    // Crear método con nombre traducido
+                    // Crear método con nombre y descripción traducidos
                     const translatedMethod = {
                         ...baseMethod,
-                        name: getPaymentMethodName(baseMethod.id, texts)
+                        name: getPaymentMethodName(baseMethod.id, texts),
+                        description: getPaymentMethodDescription(baseMethod.id, texts)
                     };
                     methods.push(translatedMethod);
                 }

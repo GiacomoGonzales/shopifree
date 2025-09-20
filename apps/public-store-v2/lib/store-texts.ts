@@ -369,11 +369,20 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     closeModal: 'Cerrar modal',
 
     // Métodos de pago
-    paymentMethodCash: 'Efectivo',
+    paymentMethodCash: 'Pago en efectivo',
     paymentMethodCard: 'Tarjeta al repartidor',
     paymentMethodTransfer: 'Transferencia',
     paymentMethodBankTransfer: 'Transferencia bancaria',
-    paymentMethodYape: 'Yape'
+    paymentMethodYape: 'Pago con Yape',
+    paymentMethodMercadopago: 'Pago Online con MercadoPago',
+
+    // Descripciones de métodos de pago
+    paymentMethodCashDesc: 'Efectivo contra entrega',
+    paymentMethodCardDesc: 'POS móvil para tarjetas',
+    paymentMethodTransferDesc: 'Transferencia móvil',
+    paymentMethodBankTransferDesc: 'Transferencia directa a cuenta bancaria',
+    paymentMethodYapeDesc: 'Transferencia móvil Yape',
+    paymentMethodMercadopagoDesc: 'Paga seguro con tarjetas, Yape, PagoEfectivo y más'
   },
   
   en: {
@@ -558,7 +567,16 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     paymentMethodCard: 'Card on delivery',
     paymentMethodTransfer: 'Transfer',
     paymentMethodBankTransfer: 'Bank transfer',
-    paymentMethodYape: 'Yape'
+    paymentMethodYape: 'Yape',
+    paymentMethodMercadopago: 'Online Payment with MercadoPago',
+
+    // Descripciones de métodos de pago
+    paymentMethodCashDesc: 'Cash on delivery',
+    paymentMethodCardDesc: 'Mobile POS for cards',
+    paymentMethodTransferDesc: 'Mobile transfer',
+    paymentMethodBankTransferDesc: 'Direct bank account transfer',
+    paymentMethodYapeDesc: 'Yape mobile transfer',
+    paymentMethodMercadopagoDesc: 'Pay securely with cards, Yape, PagoEfectivo and more'
   },
   
   pt: {
@@ -743,7 +761,16 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     paymentMethodCard: 'Cartão na entrega',
     paymentMethodTransfer: 'Transferência',
     paymentMethodBankTransfer: 'Transferência bancária',
-    paymentMethodYape: 'Yape'
+    paymentMethodYape: 'Yape',
+    paymentMethodMercadopago: 'Pagamento Online com MercadoPago',
+
+    // Descripciones de métodos de pago
+    paymentMethodCashDesc: 'Dinheiro na entrega',
+    paymentMethodCardDesc: 'POS móvel para cartões',
+    paymentMethodTransferDesc: 'Transferência móvel',
+    paymentMethodBankTransferDesc: 'Transferência direta para conta bancária',
+    paymentMethodYapeDesc: 'Transferência móvel Yape',
+    paymentMethodMercadopagoDesc: 'Pague com segurança com cartões, Yape, PagoEfectivo e mais'
   }
 };
 
@@ -756,10 +783,24 @@ export const PAYMENT_METHOD_KEYS = {
   transfer: 'paymentMethodTransfer',
   bank_transfer: 'paymentMethodBankTransfer',
   yape: 'paymentMethodYape',
+  mercadopago: 'paymentMethodMercadopago',
   // Variaciones que pueden aparecer
   efectivo: 'paymentMethodCash',
   tarjeta: 'paymentMethodCard',
   transferencia_bancaria: 'paymentMethodBankTransfer'
+} as const;
+
+export const PAYMENT_METHOD_DESC_KEYS = {
+  cash: 'paymentMethodCashDesc',
+  card: 'paymentMethodCardDesc',
+  transfer: 'paymentMethodTransferDesc',
+  bank_transfer: 'paymentMethodBankTransferDesc',
+  yape: 'paymentMethodYapeDesc',
+  mercadopago: 'paymentMethodMercadopagoDesc',
+  // Variaciones que pueden aparecer
+  efectivo: 'paymentMethodCashDesc',
+  tarjeta: 'paymentMethodCardDesc',
+  transferencia_bancaria: 'paymentMethodBankTransferDesc'
 } as const;
 
 /**
@@ -772,6 +813,18 @@ export function getPaymentMethodName(paymentCode: string, texts: StoreTexts): st
   }
   // Fallback: capitalizar el código
   return paymentCode.charAt(0).toUpperCase() + paymentCode.slice(1);
+}
+
+/**
+ * Obtiene la descripción traducida de un método de pago
+ */
+export function getPaymentMethodDescription(paymentCode: string, texts: StoreTexts): string {
+  const key = PAYMENT_METHOD_DESC_KEYS[paymentCode as keyof typeof PAYMENT_METHOD_DESC_KEYS];
+  if (key && texts[key as keyof StoreTexts]) {
+    return texts[key as keyof StoreTexts] as string;
+  }
+  // Fallback: descripción genérica
+  return texts.paymentMethod || 'Payment method';
 }
 
 /**

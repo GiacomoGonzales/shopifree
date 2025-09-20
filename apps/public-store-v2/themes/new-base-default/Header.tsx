@@ -210,6 +210,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                 isCustomDomain={isCustomDomain()}
                 storeSubdomain={storeSubdomain}
                 storeInfo={storeInfo}
+                storeId={storeInfo?.id || null}
             />
         </>
     );

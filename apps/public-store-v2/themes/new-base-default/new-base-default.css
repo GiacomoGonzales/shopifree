@@ -1165,14 +1165,32 @@
     }
     
     /* Desactivar efectos hover en móvil para productos */
+    .nbd-product-card {
+        /* Deshabilitar hover completamente en dispositivos táctiles */
+        touch-action: manipulation;
+    }
+
     .nbd-product-card:hover {
         transform: none !important;
         box-shadow: var(--nbd-shadow-lg) !important;
         border-color: var(--nbd-neutral-200) !important;
     }
-    
+
     .nbd-product-card:hover .nbd-product-img {
         transform: none !important;
+    }
+
+    /* Media query específica para dispositivos táctiles para eliminar hover completamente */
+    @media (hover: none) and (pointer: coarse) {
+        .nbd-product-card:hover {
+            transform: none !important;
+            box-shadow: var(--nbd-shadow-lg) !important;
+            border-color: var(--nbd-neutral-200) !important;
+        }
+
+        .nbd-product-card:hover .nbd-product-img {
+            transform: none !important;
+        }
     }
 }
 
@@ -1188,19 +1206,43 @@
     }
     
     /* Reforzar desactivación de hover en pantallas muy pequeñas */
+    .nbd-mosaic-card,
+    .nbd-product-card {
+        /* Optimizar comportamiento táctil en pantallas pequeñas */
+        touch-action: manipulation;
+    }
+
     .nbd-mosaic-card:hover {
         transform: none !important;
         box-shadow: var(--nbd-shadow-lg) !important;
     }
-    
+
     .nbd-product-card:hover {
         transform: none !important;
         box-shadow: var(--nbd-shadow-lg) !important;
     }
-    
+
     .nbd-mosaic-card:hover .nbd-mosaic-image,
     .nbd-product-card:hover .nbd-product-img {
         transform: none !important;
+    }
+
+    /* Media query específica para dispositivos táctiles en pantallas pequeñas */
+    @media (hover: none) and (pointer: coarse) {
+        .nbd-mosaic-card:hover {
+            transform: none !important;
+            box-shadow: var(--nbd-shadow-lg) !important;
+        }
+
+        .nbd-product-card:hover {
+            transform: none !important;
+            box-shadow: var(--nbd-shadow-lg) !important;
+        }
+
+        .nbd-mosaic-card:hover .nbd-mosaic-image,
+        .nbd-product-card:hover .nbd-product-img {
+            transform: none !important;
+        }
     }
 }
 
@@ -7251,16 +7293,22 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         right: var(--nbd-space-lg);
     }
     
-    /* Eliminar efectos hover en móvil para experiencia más limpia */
+    /* Eliminar todos los efectos hover en móvil para experiencia más limpia durante scroll */
+    .nbd-collection-card {
+        /* Deshabilitar hover completamente en dispositivos táctiles */
+        pointer-events: auto;
+        touch-action: manipulation;
+    }
+
     .nbd-collection-card:hover {
         transform: none !important;
         box-shadow: var(--nbd-shadow-sm) !important;
     }
-    
+
     .nbd-collection-card:hover .nbd-collection-image {
         transform: none !important;
     }
-    
+
     .nbd-collection-card:hover .nbd-collection-overlay {
         background: linear-gradient(
             135deg,
@@ -7268,10 +7316,35 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
             rgba(0, 0, 0, 0.5) 100%
         ) !important;
     }
-    
+
     .nbd-collection-card:hover .nbd-collection-arrow {
         opacity: 0 !important;
         transform: translateX(10px) !important;
+    }
+
+    /* Media query específica para dispositivos táctiles para eliminar hover completamente */
+    @media (hover: none) and (pointer: coarse) {
+        .nbd-collection-card:hover {
+            transform: none !important;
+            box-shadow: var(--nbd-shadow-sm) !important;
+        }
+
+        .nbd-collection-card:hover .nbd-collection-image {
+            transform: none !important;
+        }
+
+        .nbd-collection-card:hover .nbd-collection-overlay {
+            background: linear-gradient(
+                135deg,
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.5) 100%
+            ) !important;
+        }
+
+        .nbd-collection-card:hover .nbd-collection-arrow {
+            opacity: 0 !important;
+            transform: translateX(10px) !important;
+        }
     }
     
     /* Efecto focus más sutil para móvil */
