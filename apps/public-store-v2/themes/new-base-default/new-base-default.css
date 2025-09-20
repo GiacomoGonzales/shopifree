@@ -2326,6 +2326,32 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     transform: scale(1.1);
 }
 
+/* Eliminar hover y focus en dispositivos móviles para prevenir parpadeo */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+    .nbd-product-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+        border-color: var(--nbd-neutral-200) !important;
+        transition: none !important;
+    }
+
+    .nbd-product-card:hover .nbd-product-img {
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .nbd-product-card:focus {
+        transform: none !important;
+        box-shadow: none !important;
+        border-color: var(--nbd-neutral-200) !important;
+        outline: none !important;
+    }
+
+    .nbd-product-card:focus .nbd-product-img {
+        transform: none !important;
+    }
+}
+
 .nbd-product-placeholder {
     color: var(--nbd-neutral-400);
     background: var(--nbd-neutral-100);
