@@ -1,8 +1,55 @@
 import { PublicProduct } from '../../../lib/products'
 import { AddToCartButton } from '../AddToCartButton'
 import { usePromotions } from '../../../lib/hooks/usePromotions'
+import { memo } from 'react'
 
 export type ViewMode = 'expanded' | 'grid' | 'list'
+
+// Componente memoizado para imágenes que evita re-renders innecesarios
+const ProductImage = memo(({
+  imageUrl,
+  productName,
+  toCloudinarySquare,
+  additionalText
+}: {
+  imageUrl: string | undefined
+  productName: string
+  toCloudinarySquare: (url: string, size: number) => string
+  additionalText: (key: string) => string
+}) => {
+  if (!imageUrl) {
+    return (
+      <div className="nbd-product-placeholder w-full h-full flex flex-col items-center justify-center gap-sm">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+          <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
+      </div>
+    );
+  }
+
+  const src800 = toCloudinarySquare(imageUrl, 800);
+
+  return (
+    <img
+      src={src800 || imageUrl}
+      alt={productName}
+      className="nbd-product-img"
+      loading="lazy"
+      decoding="async"
+      sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+      style={{
+        opacity: 1,
+        transition: 'none',
+        willChange: 'auto'
+      }}
+    />
+  );
+}, (prevProps, nextProps) => {
+  // Solo re-renderizar si la imagen URL cambia
+  return prevProps.imageUrl === nextProps.imageUrl &&
+         prevProps.productName === nextProps.productName;
+});
 
 interface ProductsGridProps {
   displayedProducts: PublicProduct[]
@@ -65,41 +112,12 @@ export function ProductsGrid({
         style={{ cursor: 'pointer' }}
       >
         <div className="nbd-product-image">
-          {(() => {
-            const imageUrl = product.image || product.mediaFiles?.[0]?.url;
-
-            if (!imageUrl) {
-              return (
-                <div className="nbd-product-placeholder w-full h-full flex flex-col items-center justify-center gap-sm">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 16L4 18C4 19.1046 4.89543 20 6 20L18 20C19.1046 20 20 19.1046 20 18L20 16M16 12L12 16M12 16L8 12M12 16L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="nbd-placeholder-text">{additionalText('noImage')}</span>
-                </div>
-              );
-            }
-
-            const src800 = toCloudinarySquare(imageUrl, 800);
-
-            return (
-              <img
-                src={src800 || imageUrl}
-                alt={product.name}
-                className="nbd-product-img"
-                loading="lazy"
-                decoding="async"
-                sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                onLoad={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  img.style.opacity = '1';
-                }}
-                style={{
-                  opacity: 1,
-                  transition: 'opacity 0.2s ease-in-out'
-                }}
-              />
-            );
-          })()}
+          <ProductImage
+            imageUrl={product.image || product.mediaFiles?.[0]?.url}
+            productName={product.name}
+            toCloudinarySquare={toCloudinarySquare}
+            additionalText={additionalText}
+          />
 
           {showBadge && (
             <div className="nbd-product-badge">
