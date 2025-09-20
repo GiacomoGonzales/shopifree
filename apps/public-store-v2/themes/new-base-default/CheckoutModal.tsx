@@ -551,14 +551,24 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
     // Cargar zonas de entrega cuando se abre el modal
     useEffect(() => {
+        console.log('[CheckoutModal] 🔄 useEffect de carga de zonas:', {
+            isOpen,
+            storeId,
+            deliveryZonesLength: deliveryZones.length,
+            loadingZones,
+            shouldLoad: isOpen && storeId && deliveryZones.length === 0 && !loadingZones
+        });
+
         if (isOpen && storeId && deliveryZones.length === 0 && !loadingZones) {
+            console.log('[CheckoutModal] 🚀 Iniciando carga de zonas para storeId:', storeId);
             setLoadingZones(true);
             getStoreDeliveryZones(storeId)
                 .then((zones) => {
+                    console.log('[CheckoutModal] ✅ Zonas recibidas:', zones);
                     setDeliveryZones(zones);
                 })
                 .catch((error) => {
-                    console.error('[CheckoutModal] Error cargando zonas de entrega:', error);
+                    console.error('[CheckoutModal] ❌ Error cargando zonas de entrega:', error);
                 })
                 .finally(() => {
                     setLoadingZones(false);

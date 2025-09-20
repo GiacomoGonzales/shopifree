@@ -3,10 +3,14 @@ import { getFirebaseDb } from './firebase';
 export interface DeliveryZone {
     id: string;
     name: string;
+    type?: 'polygon' | 'circle'; // Tipo de zona
     coordinates: Array<{
         lat: number;
         lng: number;
     }>;
+    // Para zonas circulares
+    center?: { lat: number; lng: number };
+    radius?: number;
     priceStandard?: number;
     priceExpress?: number;
     estimatedTime?: string;
@@ -21,6 +25,8 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
  * Obtiene las zonas de entrega de una tienda desde Firestore
  */
 export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZone[]> {
+    console.log(`[delivery-zones] 🔄 Iniciando carga de zonas para storeId: ${storeId}`);
+
     // Verificar cache
     const cached = zonesCache[storeId];
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -37,23 +43,41 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
 
         const { collection, getDocs } = await import('firebase/firestore');
         const deliveryZonesRef = collection(db, 'stores', storeId, 'deliveryZones');
+        console.log(`[delivery-zones] 🔍 Consultando Firestore: stores/${storeId}/deliveryZones`);
         const snapshot = await getDocs(deliveryZonesRef);
+        console.log(`[delivery-zones] 📊 Documentos encontrados: ${snapshot.size}`);
 
         const zones: DeliveryZone[] = [];
         snapshot.forEach((doc) => {
             const data = doc.data();
             
-            // Transformar coordenadas desde el formato de Firestore (soporte para 'coordenadas' y 'coordinates')
+            // Transformar coordenadas desde el formato de Firestore
             const coordinates = [];
             const coordsData = data.coordinates || data.coordenadas; // Soporte para ambos formatos
-            
-            if (coordsData && Array.isArray(coordsData)) {
-                for (const coord of coordsData) {
-                    if (coord.lat !== undefined && coord.lng !== undefined) {
-                        coordinates.push({
-                            lat: typeof coord.lat === 'number' ? coord.lat : parseFloat(coord.lat),
-                            lng: typeof coord.lng === 'number' ? coord.lng : parseFloat(coord.lng)
-                        });
+            const zoneType = data.tipo || data.type || 'polygon'; // Detectar tipo de zona
+
+            let center = null;
+            let radius = null;
+
+            if (zoneType === 'circulo' || zoneType === 'circle') {
+                // Zona circular: extraer center y radius
+                if (coordsData && coordsData.center && coordsData.radius) {
+                    center = {
+                        lat: typeof coordsData.center.lat === 'number' ? coordsData.center.lat : parseFloat(coordsData.center.lat),
+                        lng: typeof coordsData.center.lng === 'number' ? coordsData.center.lng : parseFloat(coordsData.center.lng)
+                    };
+                    radius = typeof coordsData.radius === 'number' ? coordsData.radius : parseFloat(coordsData.radius);
+                }
+            } else {
+                // Zona poligonal: extraer array de coordenadas
+                if (coordsData && Array.isArray(coordsData)) {
+                    for (const coord of coordsData) {
+                        if (coord.lat !== undefined && coord.lng !== undefined) {
+                            coordinates.push({
+                                lat: typeof coord.lat === 'number' ? coord.lat : parseFloat(coord.lat),
+                                lng: typeof coord.lng === 'number' ? coord.lng : parseFloat(coord.lng)
+                            });
+                        }
                     }
                 }
             }
@@ -66,7 +90,10 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
             zones.push({
                 id: doc.id,
                 name: data.name || data.nombre || 'Zona sin nombre',
+                type: zoneType === 'circulo' ? 'circle' : 'polygon',
                 coordinates,
+                center,
+                radius,
                 priceStandard,
                 priceExpress,
                 estimatedTime: data.estimatedTime || data.tiempoEstimado || 'Tiempo por calcular',
@@ -74,7 +101,17 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
             });
         });
 
-        const activeZones = zones.filter(zone => zone.isActive && zone.coordinates.length > 0);
+        const activeZones = zones.filter(zone => {
+            if (!zone.isActive) return false;
+
+            // Para círculos, verificar que tengan center y radius válidos
+            if (zone.type === 'circle') {
+                return zone.center && zone.radius && zone.radius > 0;
+            }
+
+            // Para polígonos, verificar que tengan al menos 3 coordenadas
+            return zone.coordinates.length >= 3;
+        });
         
         console.log(`[delivery-zones] ✅ Zonas cargadas para ${storeId}:`, {
             total: zones.length,
@@ -101,6 +138,30 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
         console.error('[delivery-zones] Error al obtener zonas de entrega:', error);
         return [];
     }
+}
+
+/**
+ * Verifica si un punto está dentro de un círculo
+ */
+export function isPointInCircle(
+    point: { lat: number; lng: number },
+    center: { lat: number; lng: number },
+    radius: number
+): boolean {
+    // Calcular distancia usando la fórmula de Haversine (más precisa para coordenadas geográficas)
+    const R = 6371000; // Radio de la Tierra en metros
+    const lat1Rad = point.lat * Math.PI / 180;
+    const lat2Rad = center.lat * Math.PI / 180;
+    const deltaLatRad = (center.lat - point.lat) * Math.PI / 180;
+    const deltaLngRad = (center.lng - point.lng) * Math.PI / 180;
+
+    const a = Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
+              Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+              Math.sin(deltaLngRad / 2) * Math.sin(deltaLngRad / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance <= radius;
 }
 
 /**
@@ -143,20 +204,31 @@ export function findDeliveryZoneForCoordinates(
     zones: DeliveryZone[]
 ): DeliveryZone | null {
     console.log('🔍 [findDeliveryZoneForCoordinates] Buscando zona para:', coordinates);
-    
+
     for (const zone of zones) {
-        console.log(`🔍 [findDeliveryZoneForCoordinates] Verificando zona "${zone.name}" con ${zone.coordinates.length} puntos`);
-        console.log(`🔍 [findDeliveryZoneForCoordinates] Coordenadas de zona:`, zone.coordinates);
-        
-        const isInside = isPointInPolygon(coordinates, zone.coordinates);
+        console.log(`🔍 [findDeliveryZoneForCoordinates] Verificando zona "${zone.name}" tipo: ${zone.type || 'polygon'}`);
+
+        let isInside = false;
+
+        if (zone.type === 'circle' && zone.center && zone.radius) {
+            // Zona circular
+            console.log(`🔍 [findDeliveryZoneForCoordinates] Verificando círculo con centro:`, zone.center, 'radio:', zone.radius);
+            isInside = isPointInCircle(coordinates, zone.center, zone.radius);
+        } else {
+            // Zona poligonal (por defecto)
+            console.log(`🔍 [findDeliveryZoneForCoordinates] Verificando polígono con ${zone.coordinates.length} puntos`);
+            console.log(`🔍 [findDeliveryZoneForCoordinates] Coordenadas de zona:`, zone.coordinates);
+            isInside = isPointInPolygon(coordinates, zone.coordinates);
+        }
+
         console.log(`🔍 [findDeliveryZoneForCoordinates] ¿Está dentro de "${zone.name}"?`, isInside ? '✅ SÍ' : '❌ NO');
-        
+
         if (isInside) {
             console.log(`🔍 [findDeliveryZoneForCoordinates] ✅ ENCONTRADA: Zona "${zone.name}"`);
             return zone;
         }
     }
-    
+
     console.log('🔍 [findDeliveryZoneForCoordinates] ❌ No se encontró ninguna zona que contenga las coordenadas');
     return null;
 }

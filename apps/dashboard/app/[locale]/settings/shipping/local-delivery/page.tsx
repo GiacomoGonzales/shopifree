@@ -21,16 +21,6 @@ interface ShippingData {
   }
   localDelivery: {
     enabled: boolean
-    zones: Array<{
-      id: string
-      name: string
-      type: 'polygon' | 'radius'
-      coordinates?: Array<{ lat: number; lng: number }>
-      center?: { lat: number; lng: number }
-      radius?: number
-      price: number
-      estimatedTime?: string
-    }>
     allowGPS?: boolean
     noCoverageMessage?: string
     express: {
@@ -63,7 +53,6 @@ export default function ShippingLocalDeliveryPage() {
     },
     localDelivery: {
       enabled: false,
-      zones: [],
       allowGPS: true,
       noCoverageMessage: 'Lo sentimos, no hacemos entregas en tu zona',
       express: {
@@ -97,7 +86,6 @@ export default function ShippingLocalDeliveryPage() {
               },
               localDelivery: {
                 enabled: existingShipping.localDelivery?.enabled ?? false,
-                zones: existingShipping.localDelivery?.zones ?? [],
                 allowGPS: existingShipping.localDelivery?.allowGPS ?? true,
                 noCoverageMessage: existingShipping.localDelivery?.noCoverageMessage ?? 'Lo sentimos, no hacemos entregas en tu zona',
                 express: {
@@ -201,15 +189,19 @@ export default function ShippingLocalDeliveryPage() {
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={shippingData.modes.localDelivery}
-                      onChange={(e) => updateShippingData('modes.localDelivery', e.target.checked)}
+                      checked={shippingData.localDelivery.enabled}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked
+                        updateShippingData('localDelivery.enabled', isChecked)
+                        updateShippingData('modes.localDelivery', isChecked)
+                      }}
                       className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">Activar envío local</span>
                   </label>
                 </div>
 
-                {shippingData.modes.localDelivery && (
+                {shippingData.localDelivery.enabled && (
                   <>
                     {/* Permitir GPS del cliente */}
                     <div>
@@ -249,7 +241,7 @@ export default function ShippingLocalDeliveryPage() {
             </div>
 
             {/* Configuración de Envío Express */}
-            {shippingData.modes.localDelivery && (
+            {shippingData.localDelivery.enabled && (
               <div className="bg-white shadow rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Configuración de Envío Express</h3>
                 <p className="text-sm text-gray-600 mb-6">
@@ -382,7 +374,7 @@ export default function ShippingLocalDeliveryPage() {
             )}
 
             {/* Mapa de zonas */}
-            {shippingData.modes.localDelivery && (
+            {shippingData.localDelivery.enabled && (
               <div className="bg-white shadow rounded-lg p-6">
                 <div className="mb-6">
                   <h4 className="text-lg font-medium text-gray-900 mb-2">Mapa de Zonas de Entrega</h4>
@@ -392,15 +384,15 @@ export default function ShippingLocalDeliveryPage() {
                 </div>
 
                 {/* Componente del mapa */}
-                <DeliveryZoneMap 
+                <DeliveryZoneMap
                   key={`delivery-zone-map-${user?.uid || 'anonymous'}`}
-                  isVisible={shippingData.modes.localDelivery}
+                  isVisible={shippingData.localDelivery.enabled}
                 />
               </div>
             )}
 
             {/* Información adicional */}
-            {shippingData.modes.localDelivery && (
+            {shippingData.localDelivery.enabled && (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                 <h4 className="text-base font-medium text-gray-900 mb-3">Información importante</h4>
                 <div className="space-y-2 text-sm text-gray-700">

@@ -19,7 +19,7 @@ export interface StoreTexts {
   total: string;
   subtotal: string;
   subtotalProducts: string; // "Subtotal (N productos)"
-  shippingCalculated: string; // "Los gastos de envío se calcularán en el checkout"
+  shippingCalculated: string;
   continueShopping: string;
   proceedToCheckout: string;
   checkout: string;
@@ -207,7 +207,7 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     total: 'Total',
     subtotal: 'Subtotal',
     subtotalProducts: 'Subtotal ({count} producto{plural})',
-    shippingCalculated: 'Los gastos de envío se calcularán en el checkout',
+    shippingCalculated: 'Costo de envío calculado',
     continueShopping: 'Seguir comprando',
     proceedToCheckout: 'Proceder al checkout',
     checkout: 'Finalizar compra',
@@ -392,7 +392,7 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     total: 'Total',
     subtotal: 'Subtotal',
     subtotalProducts: 'Subtotal ({count} item{plural})',
-    shippingCalculated: 'Shipping costs will be calculated at checkout',
+    shippingCalculated: 'Shipping cost calculated',
     continueShopping: 'Continue Shopping',
     proceedToCheckout: 'Proceed to Checkout',
     checkout: 'Checkout',
@@ -577,7 +577,7 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     total: 'Total',
     subtotal: 'Subtotal',
     subtotalProducts: 'Subtotal ({count} produto{plural})',
-    shippingCalculated: 'Os custos de envio serão calculados no checkout',
+    shippingCalculated: 'Custo de envio calculado',
     continueShopping: 'Continuar comprando',
     proceedToCheckout: 'Proceder ao checkout',
     checkout: 'Finalizar compra',
