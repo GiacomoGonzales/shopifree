@@ -188,6 +188,15 @@ export interface StoreTexts {
   paymentMethodTransfer: string;
   paymentMethodBankTransfer: string;
   paymentMethodYape: string;
+  paymentMethodMercadopago: string;
+
+  // Descripciones de métodos de pago
+  paymentMethodCashDesc: string;
+  paymentMethodCardDesc: string;
+  paymentMethodTransferDesc: string;
+  paymentMethodBankTransferDesc: string;
+  paymentMethodYapeDesc: string;
+  paymentMethodMercadopagoDesc: string;
 }
 
 const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
