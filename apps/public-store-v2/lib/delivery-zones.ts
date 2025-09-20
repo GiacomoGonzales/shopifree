@@ -56,8 +56,8 @@ export async function getStoreDeliveryZones(storeId: string): Promise<DeliveryZo
             const coordsData = data.coordinates || data.coordenadas; // Soporte para ambos formatos
             const zoneType = data.tipo || data.type || 'polygon'; // Detectar tipo de zona
 
-            let center = null;
-            let radius = null;
+            let center: { lat: number; lng: number } | undefined = undefined;
+            let radius: number | undefined = undefined;
 
             if (zoneType === 'circulo' || zoneType === 'circle') {
                 // Zona circular: extraer center y radius
