@@ -85,12 +85,18 @@ export function ProductsGrid({
               <img
                 src={src800 || imageUrl}
                 alt={product.name}
-                className="nbd-product-image w-full h-full object-cover rounded-lg transition-opacity duration-200"
+                className="nbd-product-image w-full h-full object-cover rounded-lg"
                 loading="lazy"
                 decoding="async"
                 sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                onLoad={(e) => (e.target as HTMLImageElement).style.opacity = '1'}
-                style={{ opacity: 0 }}
+                onLoad={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  img.style.opacity = '1';
+                }}
+                style={{
+                  opacity: 1,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}
               />
             );
           })()}
