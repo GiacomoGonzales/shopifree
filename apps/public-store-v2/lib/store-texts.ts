@@ -129,6 +129,8 @@ export interface StoreTexts {
   yourLocation: string;
   useMyLocation: string;
   confirmOrder: string;
+  sendViaWhatsApp: string;
+  goToPayment: string;
   discount: string;
   discountCode: string;
   discountPlaceholder: string;
@@ -324,6 +326,8 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     yourLocation: 'Tu ubicación',
     useMyLocation: 'Usar mi ubicación',
     confirmOrder: 'Confirmar pedido',
+    sendViaWhatsApp: 'Enviar por WhatsApp',
+    goToPayment: 'Ir al pago',
     discount: 'Descuento',
     discountCode: 'Código de descuento',
     discountPlaceholder: 'Código de descuento',
@@ -518,6 +522,8 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     yourLocation: 'Your location',
     useMyLocation: 'Use my location',
     confirmOrder: 'Confirm Order',
+    sendViaWhatsApp: 'Send via WhatsApp',
+    goToPayment: 'Go to Payment',
     discount: 'Discount',
     discountCode: 'Discount Code',
     discountPlaceholder: 'Discount code',
@@ -712,6 +718,8 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     yourLocation: 'Sua localização',
     useMyLocation: 'Usar minha localização',
     confirmOrder: 'Confirmar Pedido',
+    sendViaWhatsApp: 'Enviar via WhatsApp',
+    goToPayment: 'Ir para o Pagamento',
     discount: 'Desconto',
     discountCode: 'Código de Desconto',
     discountPlaceholder: 'Código de desconto',
