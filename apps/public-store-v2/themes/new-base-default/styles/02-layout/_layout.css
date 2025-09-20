@@ -19,5 +19,7 @@
 @media (max-width: 768px) {
     .nbd-container {
         padding: 0 var(--nbd-space-lg);
+        margin: 0 auto;
+        max-width: 100%;
     }
 }
