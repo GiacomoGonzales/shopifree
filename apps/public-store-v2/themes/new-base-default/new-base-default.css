@@ -7293,13 +7293,16 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         right: var(--nbd-space-lg);
     }
     
-    /* Eliminar todos los efectos hover en móvil para experiencia más limpia durante scroll */
+    /* Eliminar todos los efectos hover, focus y active en móvil para experiencia más limpia durante scroll */
     .nbd-collection-card {
         /* Deshabilitar hover completamente en dispositivos táctiles */
         pointer-events: auto;
         touch-action: manipulation;
+        /* Deshabilitar outline para focus */
+        outline: none !important;
     }
 
+    /* Deshabilitar hover */
     .nbd-collection-card:hover {
         transform: none !important;
         box-shadow: var(--nbd-shadow-sm) !important;
@@ -7322,18 +7325,72 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         transform: translateX(10px) !important;
     }
 
-    /* Media query específica para dispositivos táctiles para eliminar hover completamente */
+    /* Deshabilitar focus durante scroll */
+    .nbd-collection-card:focus {
+        transform: none !important;
+        box-shadow: var(--nbd-shadow-sm) !important;
+        outline: none !important;
+    }
+
+    .nbd-collection-card:focus .nbd-collection-image {
+        transform: none !important;
+    }
+
+    .nbd-collection-card:focus .nbd-collection-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.5) 100%
+        ) !important;
+    }
+
+    .nbd-collection-card:focus .nbd-collection-arrow {
+        opacity: 0 !important;
+        transform: translateX(10px) !important;
+    }
+
+    /* Deshabilitar active durante scroll */
+    .nbd-collection-card:active {
+        transform: none !important;
+        box-shadow: var(--nbd-shadow-sm) !important;
+    }
+
+    .nbd-collection-card:active .nbd-collection-image {
+        transform: none !important;
+    }
+
+    .nbd-collection-card:active .nbd-collection-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.5) 100%
+        ) !important;
+    }
+
+    .nbd-collection-card:active .nbd-collection-arrow {
+        opacity: 0 !important;
+        transform: translateX(10px) !important;
+    }
+
+    /* Media query específica para dispositivos táctiles para eliminar todos los efectos */
     @media (hover: none) and (pointer: coarse) {
-        .nbd-collection-card:hover {
+        .nbd-collection-card:hover,
+        .nbd-collection-card:focus,
+        .nbd-collection-card:active {
             transform: none !important;
             box-shadow: var(--nbd-shadow-sm) !important;
+            outline: none !important;
         }
 
-        .nbd-collection-card:hover .nbd-collection-image {
+        .nbd-collection-card:hover .nbd-collection-image,
+        .nbd-collection-card:focus .nbd-collection-image,
+        .nbd-collection-card:active .nbd-collection-image {
             transform: none !important;
         }
 
-        .nbd-collection-card:hover .nbd-collection-overlay {
+        .nbd-collection-card:hover .nbd-collection-overlay,
+        .nbd-collection-card:focus .nbd-collection-overlay,
+        .nbd-collection-card:active .nbd-collection-overlay {
             background: linear-gradient(
                 135deg,
                 rgba(0, 0, 0, 0.3) 0%,
@@ -7341,19 +7398,15 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
             ) !important;
         }
 
-        .nbd-collection-card:hover .nbd-collection-arrow {
+        .nbd-collection-card:hover .nbd-collection-arrow,
+        .nbd-collection-card:focus .nbd-collection-arrow,
+        .nbd-collection-card:active .nbd-collection-arrow {
             opacity: 0 !important;
             transform: translateX(10px) !important;
         }
     }
-    
-    /* Efecto focus más sutil para móvil */
-    .nbd-collection-card:focus,
-    .nbd-collection-card:active {
-        transform: scale(0.98) !important;
-        transition: transform 0.1s ease-out !important;
-        outline: none;
-    }
+
+    /* Efectos focus y active completamente deshabilitados en móvil para evitar interferencia con scroll */
 }
 
 /* Animaciones y micro-interacciones */
