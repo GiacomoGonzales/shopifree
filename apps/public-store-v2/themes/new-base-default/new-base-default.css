@@ -4823,18 +4823,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     color: var(--nbd-neutral-700);
 }
 
-/* Estado activo minimalista */
-.nbd-subcategory-button--active {
-    background: var(--nbd-primary) !important;
-    border-color: var(--nbd-primary) !important;
-    color: white !important;
-    font-weight: 500;
+/* Focus ahora se maneja con JavaScript dinámico */
+.nbd-subcategory-button:focus {
+    outline: none;
 }
 
-.nbd-subcategory-button--active:hover {
-    background: var(--nbd-secondary) !important;
-    border-color: var(--nbd-secondary) !important;
-}
+/* Los estilos activos ahora se manejan con inline styles dinámicos */
 
 .nbd-subcategory-name {
     font-weight: inherit;
@@ -4873,24 +4867,11 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 }
 
-/* Optimizaciones para iOS - solo lo esencial */
+/* Optimizaciones para iOS - solo scroll suave */
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 768px) {
         .nbd-subcategories-grid {
             -webkit-overflow-scrolling: touch;
-        }
-
-        /* Eliminar hover en dispositivos táctiles */
-        .nbd-subcategory-button:hover {
-            background: var(--nbd-neutral-100) !important;
-            border-color: var(--nbd-neutral-200) !important;
-            color: var(--nbd-neutral-600) !important;
-        }
-
-        .nbd-subcategory-button--active:hover {
-            background: var(--nbd-primary) !important;
-            border-color: var(--nbd-primary) !important;
-            color: white !important;
         }
     }
 }
