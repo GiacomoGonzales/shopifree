@@ -230,7 +230,6 @@ export async function getStorePrimaryLocale(storeId: string): Promise<ValidLocal
                     const data = docSnap.data();
                     const language = data?.advanced?.language || 'es';
                     
-                    console.log(`🔗 [Firestore] Store ${storeId}: advanced.language=${language}`);
                     
                     return language as ValidLocale;
                 }
@@ -328,11 +327,9 @@ export async function getStoreShippingConfig(storeId: string): Promise<StoreShip
         if (!snap.exists()) return null;
         
         const data = snap.data();
-        console.log(`🚚 [Store] Raw Firestore data for ${storeId}:`, data);
         
         // Obtener configuración de shipping desde advanced.shipping
         const shippingConfig = data.advanced?.shipping || {};
-        console.log(`🚚 [Store] Shipping config from advanced:`, shippingConfig);
         
         return {
             storePickup: shippingConfig.storePickup || { enabled: false },
@@ -373,22 +370,6 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
         // Obtener configuración avanzada
         const advanced = data.advanced || {};
         
-        // 🔍 DEBUGGING: Log de configuración completa
-        console.log(`🔧 [Store Config] Raw data for store ${storeId}:`, {
-            hasAdvanced: !!data.advanced,
-            hasPayments: !!advanced.payments,
-            paymentProvider: advanced.payments?.provider,
-            hasCredentials: !!(advanced.payments?.publicKey && advanced.payments?.secretKey),
-            isConnected: advanced.payments?.connected,
-            checkoutMethod: advanced.checkout?.method,
-            paymentData: {
-                provider: advanced.payments?.provider,
-                publicKey: advanced.payments?.publicKey ? advanced.payments.publicKey.substring(0, 20) + '...' : undefined,
-                secretKey: advanced.payments?.secretKey ? 'sk_***' : undefined,
-                webhookEndpoint: advanced.payments?.webhookEndpoint,
-                connected: advanced.payments?.connected
-            }
-        });
         
         return {
             checkout: {
@@ -496,7 +477,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
         option.style.setProperty('background', primaryColor, 'important');
         option.style.setProperty('background-color', primaryColor, 'important');
         option.style.setProperty('color', 'white', 'important');
-        console.log(`🎯 Applied primary color to dropdown option: ${primaryColor}`);
       });
     };
     
@@ -573,8 +553,7 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               target.style.setProperty('background-color', primaryColor, 'important');
               target.style.setProperty('border-color', primaryColor, 'important');
               target.style.setProperty('color', 'white', 'important');
-              console.log(`🎯 Applied color to selected variant: ${primaryColor}`);
-            }
+                    }
           }, 10);
         }
       };
@@ -582,7 +561,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       // Remover listeners existentes y agregar uno nuevo
       document.removeEventListener('click', handleVariantClick);
       document.addEventListener('click', handleVariantClick);
-      console.log(`🎯 Improved variant click handler set up`);
     };
     
     // Aplicar inmediatamente y después de un delay
@@ -593,11 +571,9 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     const applyTextureColors = () => {
       // Usar el color secundario real de la tienda, no el calculado
       const realSecondaryColor = secondaryColor || darkerColor;
-      console.log(`🎨 Starting texture color application - Primary: ${primaryColor}, Secondary from store: ${secondaryColor}, Using: ${realSecondaryColor}`);
       
       // Validar que tenemos un color válido
       if (!realSecondaryColor || !realSecondaryColor.startsWith('#')) {
-        console.error('❌ Invalid secondary color for textures:', realSecondaryColor);
         return;
       }
       
@@ -605,13 +581,11 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       const hexToRgba = (hex: string, opacity: number) => {
         const cleanHex = hex.replace('#', '');
         if (cleanHex.length !== 6) {
-          console.error('❌ Invalid hex color format:', hex);
           return `rgba(0, 0, 0, ${opacity})`; // fallback
         }
         const r = parseInt(cleanHex.slice(0, 2), 16);
         const g = parseInt(cleanHex.slice(2, 4), 16);
         const b = parseInt(cleanHex.slice(4, 6), 16);
-        console.log(`🔄 Converting ${hex} to rgba(${r}, ${g}, ${b}, ${opacity})`);
         return `rgba(${r}, ${g}, ${b}, ${opacity})`;
       };
       
@@ -688,22 +662,14 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
         styleElement = document.createElement('style');
         styleElement.id = 'dynamic-texture-styles';
         document.head.appendChild(styleElement);
-        console.log('✅ Created new style element for textures');
       } else {
-        console.log('✅ Using existing style element for textures');
       }
       
       styleElement.textContent = dynamicStyles;
-      console.log('📝 Style content applied:', dynamicStyles.substring(0, 200) + '...');
       
       // Verificar que las clases de textura existen en el DOM
       const textureElements = document.querySelectorAll('[class*="texture-"]');
-      console.log(`🔍 Found ${textureElements.length} elements with texture classes`);
-      textureElements.forEach(el => {
-        console.log(`- Element with classes: ${el.className}`);
-      });
       
-      console.log(`✅ Applied dynamic texture colors with secondary color: ${realSecondaryColor}`);
     };
     
     // Aplicar colores de texturas con múltiples intentos
@@ -719,7 +685,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
           const target = mutation.target as HTMLElement;
           const className = target.className || '';
           if (typeof className === 'string' && className.includes('texture-')) {
-            console.log('🔍 Detected texture class change:', className);
             setTimeout(applyTextureColors, 50);
           }
         }
@@ -729,7 +694,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               const element = node as HTMLElement;
               const className = element.className || '';
               if (typeof className === 'string' && className.includes('texture-')) {
-                console.log('🔍 Detected new element with texture class:', className);
                 setTimeout(applyTextureColors, 50);
               }
             }
@@ -745,14 +709,12 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       subtree: true
     });
     
-    console.log('🔍 Texture observer set up');
     
     // SOLUCIÓN DEFINITIVA: Aplicar gradiente directamente al ícono del newsletter
     const newsletterIcon = document.querySelector('.nbd-newsletter-icon') as HTMLElement;
     if (newsletterIcon) {
       const dynamicGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
       newsletterIcon.style.background = dynamicGradient;
-      console.log(`🎯 Applied direct gradient to newsletter icon: ${dynamicGradient}`);
     }
     
     // TAMBIÉN aplicar DEGRADADO dinámico al botón de suscribirse (igual que el ícono)
@@ -760,7 +722,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     if (newsletterButton) {
       const dynamicButtonGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
       newsletterButton.style.background = dynamicButtonGradient;
-      console.log(`🎯 Applied dynamic gradient to newsletter button: ${dynamicButtonGradient}`);
       
       // Aplicar hover gradient también (más oscuro)
       const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
@@ -770,7 +731,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       newsletterButton.addEventListener('mouseleave', () => {
         newsletterButton.style.background = dynamicButtonGradient;
       });
-      console.log(`🎯 Applied hover gradient to newsletter button: ${hoverGradient}`);
     }
     
     // APLICAR DEGRADADO dinámico a los botones de la hero section
@@ -779,7 +739,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       const dynamicHeroPrimaryGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
       heroPrimaryButton.style.background = dynamicHeroPrimaryGradient;
       heroPrimaryButton.style.borderColor = primaryColor;
-      console.log(`🎯 Applied dynamic gradient to hero primary button: ${dynamicHeroPrimaryGradient}`);
       
       // Aplicar hover gradient para el botón primario
       const heroPrimaryHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
@@ -791,7 +750,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
         heroPrimaryButton.style.background = dynamicHeroPrimaryGradient;
         heroPrimaryButton.style.borderColor = primaryColor;
       });
-      console.log(`🎯 Applied hover gradient to hero primary button: ${heroPrimaryHoverGradient}`);
     }
     
     // APLICAR ESTILO dinámico al botón secundario de la hero section (transparente con borde y texto del color dinámico)
@@ -800,7 +758,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       heroSecondaryButton.style.background = 'transparent';
       heroSecondaryButton.style.borderColor = primaryColor;
       heroSecondaryButton.style.color = primaryColor;
-      console.log(`🎯 Applied dynamic color to hero secondary button: ${primaryColor}`);
       
       // Aplicar hover para el botón secundario (se rellena con el degradado)
       const heroSecondaryHoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
@@ -814,7 +771,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
         heroSecondaryButton.style.color = primaryColor;
         heroSecondaryButton.style.borderColor = primaryColor;
       });
-      console.log(`🎯 Applied hover gradient to hero secondary button: ${heroSecondaryHoverGradient}`);
     }
     
     // APLICAR DEGRADADO dinámico al botón "Proceder al checkout" del carrito
@@ -823,7 +779,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       const dynamicCartCheckoutGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
       cartCheckoutButton.style.background = dynamicCartCheckoutGradient;
       cartCheckoutButton.style.borderColor = primaryColor;
-      console.log(`🎯 Applied dynamic gradient to cart checkout button: ${dynamicCartCheckoutGradient}`);
       
       // Aplicar hover gradient para el botón de checkout
       const cartCheckoutHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
@@ -841,7 +796,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
           cartCheckoutButton.style.borderColor = primaryColor;
         }
       });
-      console.log(`🎯 Applied hover gradient to cart checkout button: ${cartCheckoutHoverGradient}`);
     }
     
     // APLICAR ESTILO dinámico al botón "Seguir comprando" del carrito (transparente con borde y texto del color dinámico)
@@ -850,7 +804,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       cartContinueButton.style.background = 'transparent';
       cartContinueButton.style.borderColor = primaryColor;
       cartContinueButton.style.color = primaryColor;
-      console.log(`🎯 Applied dynamic color to cart continue button: ${primaryColor}`);
       
       // Aplicar hover para el botón "Seguir comprando" (se rellena con el degradado)
       const cartContinueHoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
@@ -864,7 +817,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
         cartContinueButton.style.color = primaryColor;
         cartContinueButton.style.borderColor = primaryColor;
       });
-      console.log(`🎯 Applied hover gradient to cart continue button: ${cartContinueHoverGradient}`);
     }
     
     // APLICAR DEGRADADO dinámico a TODOS los botones primarios del sitio (.nbd-btn--primary) - EXCEPTO WhatsApp
@@ -873,7 +825,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       const dynamicGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
       button.style.background = dynamicGradient;
       button.style.borderColor = primaryColor;
-      console.log(`🎯 Applied dynamic gradient to primary button: ${dynamicGradient}`);
       
       // Aplicar hover gradient
       const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
@@ -899,7 +850,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       button.style.background = 'transparent';
       button.style.borderColor = primaryColor;
       button.style.color = primaryColor;
-      console.log(`🎯 Applied dynamic color to secondary button: ${primaryColor}`);
       
       // Aplicar hover
       const hoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
@@ -951,7 +901,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               target.style.removeProperty('transition');
             }, 0);
             
-            console.log('🎯 Applied IMMEDIATE color to cart button:', primaryColor);
           }
         }
       });
@@ -983,7 +932,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               const dynamicCartCheckoutGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
               newCartCheckoutButton.style.background = dynamicCartCheckoutGradient;
               newCartCheckoutButton.style.borderColor = primaryColor;
-              console.log(`🎯 Applied dynamic gradient to NEW cart checkout button: ${dynamicCartCheckoutGradient}`);
               
               // Aplicar hover gradient
               const cartCheckoutHoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
@@ -1008,7 +956,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               newCartContinueButton.style.background = 'transparent';
               newCartContinueButton.style.borderColor = primaryColor;
               newCartContinueButton.style.color = primaryColor;
-              console.log(`🎯 Applied dynamic color to NEW cart continue button: ${primaryColor}`);
               
               // Aplicar hover
               const cartContinueHoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
@@ -1030,7 +977,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               const dynamicGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
               button.style.background = dynamicGradient;
               button.style.borderColor = primaryColor;
-              console.log(`🎯 Applied dynamic gradient to NEW primary button: ${dynamicGradient}`);
               
               const hoverGradient = `linear-gradient(135deg, ${darkerColor} 0%, ${muchDarkerColor} 100%)`;
               button.addEventListener('mouseenter', () => {
@@ -1055,7 +1001,6 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
               button.style.background = 'transparent';
               button.style.borderColor = primaryColor;
               button.style.color = primaryColor;
-              console.log(`🎯 Applied dynamic color to NEW secondary button: ${primaryColor}`);
               
               const hoverGradient = `linear-gradient(135deg, ${primaryColor} 0%, ${darkerColor} 100%)`;
               button.addEventListener('mouseenter', () => {
@@ -1095,21 +1040,15 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     });
     
     nodeObserver.observe(document.body, { childList: true, subtree: true });
-    console.log(`🎯 Applied dynamic color system to add-to-cart buttons: ${primaryColor}`);
     
     // Forzar repaint para asegurar que los cambios se apliquen
     document.documentElement.offsetHeight;
     
-    console.log(`✅ Primary color applied successfully: ${primaryColor}`);
-    console.log(`✅ Light variant applied: ${lighterColor}`);
-    console.log(`✅ Dark variant applied: ${darkerColor}`);
-    console.log(`✅ Darker variant applied: ${muchDarkerColor}`);
   }
   
   // Aplicar color secundario si está disponible
   if (secondaryColor) {
     document.documentElement.style.setProperty('--nbd-secondary-custom', secondaryColor);
-    console.log(`🎨 Applied secondary color: ${secondaryColor}`);
   }
 }
 

@@ -17,13 +17,6 @@ function hasValidConfig(): boolean {
 		firebaseConfig.projectId
 	);
 
-	console.log('[Firebase] Config validation:', {
-		apiKey: firebaseConfig.apiKey ? 'SET' : 'MISSING',
-		authDomain: firebaseConfig.authDomain ? 'SET' : 'MISSING',
-		projectId: firebaseConfig.projectId ? 'SET' : 'MISSING',
-		isValid
-	});
-
 	return isValid;
 }
 

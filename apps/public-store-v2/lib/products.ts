@@ -126,7 +126,6 @@ function transformToPublicProduct(raw: any): PublicProduct {
 
 export async function getStoreProducts(storeId: string): Promise<PublicProduct[]> {
 	try {
-		console.log(`🔍 [getStoreProducts] Obteniendo productos para storeId: ${storeId}`);
 		const db = getFirebaseDb();
 		if (!db) {
 			console.warn(`❌ [getStoreProducts] No hay conexión a Firebase`);
@@ -136,24 +135,18 @@ export async function getStoreProducts(storeId: string): Promise<PublicProduct[]
 		let snap;
 		try {
 			snap = await getDocs(query(ref, where("status", "==", "active")));
-			console.log(`📊 [getStoreProducts] Query por status=active devolvió: ${snap.size} productos`);
 		} catch {
 			snap = await getDocs(ref);
-			console.log(`📊 [getStoreProducts] Query general devolvió: ${snap.size} productos`);
 		}
 		const items: PublicProduct[] = [];
 		snap.forEach((doc) => {
 			const data = { id: doc.id, ...doc.data() } as any;
 			const p = transformToPublicProduct(data);
-			console.log(`📦 [getStoreProducts] Producto procesado: ${p.name} - Status: ${p.status} - urlSlug: ${p.slug || 'NO_SLUG'}`);
 			if (p.status === "active") {
 				items.push(p);
-				console.log(`✅ [getStoreProducts] Producto activo añadido: ${p.name}`);
 			} else {
-				console.log(`⚠️ [getStoreProducts] Producto no activo omitido: ${p.name} (status: ${p.status})`);
 			}
 		});
-		console.log(`🎯 [getStoreProducts] Total productos activos devueltos: ${items.length}`);
 		return items;
 	} catch (e) {
 		console.warn("[public-store-v2] getStoreProducts fallo", e);
@@ -179,19 +172,15 @@ export async function getProductBySlug(storeId: string, slug: string): Promise<P
 
 export async function getProduct(storeId: string, slugOrId: string): Promise<PublicProduct | null> {
     try {
-        console.log(`🔍 [getProduct] Buscando producto: "${slugOrId}" en store: ${storeId}`);
         const db = getFirebaseDb();
         if (!db) return null;
         // 1) intentar por urlSlug (campo real en Firestore)
         const ref = collection(db, "stores", storeId, "products");
         const snap = await getDocs(query(ref, where("urlSlug", "==", slugOrId)));
-        console.log(`🔍 [getProduct] Búsqueda por urlSlug encontró ${snap.docs.length} documentos`);
         if (!snap.empty) {
             const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
-            console.log(`🔍 [getProduct] Datos del producto encontrado:`, { id: data.id, name: data.name, urlSlug: data.urlSlug, status: data.status });
             const p = transformToPublicProduct(data);
             const result = p.status === 'active' ? p : null;
-            console.log(`🔍 [getProduct] Producto transformado (activo: ${p.status === 'active'}):`, result);
             return result;
         }
         // 2) fallback por ID de documento

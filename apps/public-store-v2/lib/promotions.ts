@@ -23,19 +23,15 @@ export interface Promotion {
  * Obtener promociones activas para un producto específico
  */
 export async function getActivePromotionsForProduct(storeId: string, productId: string): Promise<Promotion[]> {
-  console.log('🚀 [Promotions] Starting fetch for:', { storeId, productId });
 
   const db = getFirebaseDb();
   if (!db) {
-    console.warn('❌ [Promotions] Firebase not initialized');
     return [];
   }
 
   try {
-    console.log('📡 [Promotions] Fetching active promotions for product:', productId);
 
     const promotionsRef = collection(db, 'stores', storeId, 'promotions');
-    console.log('📂 [Promotions] Collection path:', `stores/${storeId}/promotions`);
 
     const q = query(
       promotionsRef,
@@ -44,27 +40,16 @@ export async function getActivePromotionsForProduct(storeId: string, productId: 
     );
 
     const querySnapshot = await getDocs(q);
-    console.log('📄 [Promotions] Query executed, docs found:', querySnapshot.size);
 
     const now = new Date().toISOString();
-    console.log('⏰ [Promotions] Current time:', now);
 
     const activePromotions: Promotion[] = [];
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      console.log('📋 [Promotions] Processing promotion:', {
-        id: doc.id,
-        name: data.name,
-        targetType: data.targetType,
-        targetIds: data.targetIds,
-        startDate: data.startDate,
-        endDate: data.endDate
-      });
 
       // Verificar que esté dentro del rango de fechas
       const withinDateRange = now >= data.startDate && now <= data.endDate;
-      console.log('📅 [Promotions] Date check:', { withinDateRange, now, startDate: data.startDate, endDate: data.endDate });
 
       if (withinDateRange) {
         // Verificar si el producto está incluido
@@ -72,13 +57,6 @@ export async function getActivePromotionsForProduct(storeId: string, productId: 
           data.targetType === 'all_products' ||
           (data.targetType === 'specific_products' && data.targetIds.includes(productId));
 
-        console.log('🎯 [Promotions] Target check:', {
-          isTargeted,
-          targetType: data.targetType,
-          productId,
-          targetIds: data.targetIds,
-          includesProduct: data.targetIds?.includes(productId)
-        });
 
         if (isTargeted) {
           activePromotions.push({
@@ -101,7 +79,6 @@ export async function getActivePromotionsForProduct(storeId: string, productId: 
       }
     });
 
-    console.log('✅ [Promotions] Found active promotions:', activePromotions.length, activePromotions);
     return activePromotions.sort((a, b) => b.priority - a.priority);
 
   } catch (error) {

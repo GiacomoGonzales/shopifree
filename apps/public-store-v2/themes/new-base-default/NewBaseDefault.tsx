@@ -229,7 +229,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             const texture = await getStoreBackgroundTexture(storeId);
             setBackgroundTexture(texture || 'default');
         } catch (error) {
-            console.log('Using default background texture');
         }
     };
 
@@ -241,25 +240,17 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
     // Aplicar colores dinámicos de la tienda
     useEffect(() => {
-        console.log('🔄 Store color effect running...', {
-            storeInfo: storeInfo ? 'loaded' : 'null',
-            primaryColor: storeInfo?.primaryColor,
-            secondaryColor: storeInfo?.secondaryColor
-        });
         
         if (storeInfo?.primaryColor) {
-            console.log('✅ Applying store colors...');
             
             // Aplicar inmediatamente
             applyStoreColors(storeInfo.primaryColor, storeInfo.secondaryColor);
             
             // También aplicar después de un pequeño delay para asegurar que el DOM esté listo
             setTimeout(() => {
-                console.log('🔄 Re-applying colors after delay...');
                 applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
             }, 100);
         } else {
-            console.log('⚠️ No primary color found in store info');
         }
     }, [storeInfo?.primaryColor, storeInfo?.secondaryColor]);
 
@@ -320,14 +311,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         setStoreInfo(info);
                     });
                     
-                    console.log("Categorías cargadas:", cats);
-                    console.log("Categorías padre:", cats?.filter(c => !c.parentCategoryId));
-                    console.log("🔍 TODAS las categorías con parentCategoryId:");
-                    cats?.forEach(c => {
-                        console.log(`  - ${c.name} (${c.slug}): ID=${c.id}, parentCategoryId=${c.parentCategoryId || 'NULL'}`);
-                    });
-                    console.log("Productos cargados:", items);
-                    console.log("Productos con categoryId:", items.filter(p => p.categoryId));
                     
 
                 }
@@ -513,50 +496,22 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
     // 🆕 Obtener subcategorías de la categoría actual
     const currentCategorySubcategories = useMemo(() => {
-        console.log('🔍 Debugging subcategories detection:', {
-            isOnCategoryPage,
-            hasCategories: !!categories,
-            categorySlugFromUrl,
-            categoriesLength: categories?.length || 0
-        });
         
         if (!isOnCategoryPage || !categories || !categorySlugFromUrl) {
-            console.log('❌ Early return: missing requirements for subcategories');
             return [];
         }
         
         const currentCategory = categories.find(c => c.slug === categorySlugFromUrl);
-        console.log('🔍 Current category found:', currentCategory);
         
         if (!currentCategory) {
-            console.log('❌ No current category found with slug:', categorySlugFromUrl);
-            console.log('Available categories:', categories.map(c => ({ id: c.id, name: c.name, slug: c.slug })));
             return [];
         }
         
         // Encontrar subcategorías que pertenecen a esta categoría padre
-        console.log(`🔍 Looking for subcategories with parentCategoryId: "${currentCategory.id}"`);
-        console.log('🔍 All categories with their parentCategoryId:', 
-            categories.map(c => ({ 
-                id: c.id, 
-                name: c.name, 
-                slug: c.slug, 
-                parentCategoryId: c.parentCategoryId || 'null' 
-            })));
             
-        console.log('🔍 Exact ID comparison:');
-        console.log('Current category ID:', JSON.stringify(currentCategory.id));
-        categories.forEach(c => {
-            if (c.parentCategoryId) {
-                console.log(`Category "${c.name}" has parentCategoryId:`, JSON.stringify(c.parentCategoryId));
-                console.log(`Does it match? ${c.parentCategoryId === currentCategory.id}`);
-            }
-        });
         
         const subcategories = categories.filter(c => c.parentCategoryId === currentCategory.id);
         
-        console.log(`🔍 Subcategorías encontradas para "${currentCategory.name}" (ID: ${currentCategory.id}):`, 
-            subcategories.map(s => ({ id: s.id, name: s.name, slug: s.slug, parentCategoryId: s.parentCategoryId })));
         
 
         
@@ -572,34 +527,15 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
         // Filtrar por colección si estamos en una página de colección
         if (isOnCollectionPage && currentCollection) {
-            console.log("=== COLLECTION FILTERING DEBUG ===");
-            console.log("collectionSlug prop:", collectionSlug);
-            console.log("isOnCollectionPage:", isOnCollectionPage);
-            console.log("Colección encontrada:", currentCollection);
-            console.log("IDs de productos en colección:", currentCollection.productIds);
-            console.log("Todos los productos:", base.map(p => ({id: p.id, name: p.name})));
             
             const beforeFilter = base.length;
             // Filtrar productos que estén en los productIds de la colección
             base = base.filter(p => currentCollection.productIds.includes(p.id));
             
-            console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
-            console.log("Productos filtrados por colección:", base.map(p => ({id: p.id, name: p.name})));
-            console.log("=== END COLLECTION FILTERING DEBUG ===");
         }
 
         // Filtrar por marca si estamos en una página de marca
         if (isOnBrandPage && currentBrand) {
-            console.log("=== BRAND FILTERING DEBUG ===");
-            console.log("brandSlug prop:", brandSlug);
-            console.log("isOnBrandPage:", isOnBrandPage);
-            console.log("Marca encontrada:", currentBrand);
-            console.log("Todos los productos:", base.map(p => ({
-                id: p.id, 
-                name: p.name, 
-                brand: p.brand, 
-                selectedBrandId: p.selectedBrandId
-            })));
             
             const beforeFilter = base.length;
             
@@ -620,47 +556,19 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 return false;
             });
             
-            console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
-            console.log("Productos filtrados por marca:", base.map(p => ({
-                id: p.id, 
-                name: p.name, 
-                brand: p.brand, 
-                selectedBrandId: p.selectedBrandId
-            })));
-            console.log("Comparando selectedBrandId con currentBrand.id:", {
-                currentBrandId: currentBrand.id,
-                currentBrandName: currentBrand.name,
-                currentBrandSlug: currentBrand.slug
-            });
-            console.log("=== END BRAND FILTERING DEBUG ===");
         }
         // Filtrar por categoría si no estamos en una página de colección
         else if (activeCategory && activeCategory !== 'todos') {
             const cat = categories?.find(c => c.slug === activeCategory);
-            console.log("=== CATEGORY FILTERING DEBUG ===");
-            console.log("activeCategory:", activeCategory);
-            console.log("categorySlug prop:", categorySlug);
-            console.log("isOnCategoryPage:", isOnCategoryPage);
-            console.log("Categoría encontrada:", cat);
-            console.log("Todas las categorías:", categories?.map(c => ({id: c.id, name: c.name, slug: c.slug})));
-            console.log("Todos los productos:", base.map(p => ({name: p.name, categoryId: p.categoryId, selectedParentCategoryIds: p.selectedParentCategoryIds})));
             
             if (cat) {
                 const beforeFilter = base.length;
                 
                 // Si hay una subcategoría seleccionada, filtrar solo por ella
                 if (selectedSubcategory) {
-                    console.log(`🔍 Filtrando por subcategoría: ${selectedSubcategory}`);
                     const subcategory = categories?.find(c => c.slug === selectedSubcategory);
-                    console.log('🔍 Subcategoría encontrada:', subcategory);
                     
                     if (subcategory) {
-                        console.log('🔍 Productos antes del filtro por subcategoría:', base.length);
-                        console.log('🔍 Productos con sus categoryIds:', base.map(p => ({
-                            name: p.name,
-                            categoryId: p.categoryId,
-                            selectedParentCategoryIds: p.selectedParentCategoryIds
-                        })));
                         
                         const filteredBySubcategory = base.filter(p => {
                             const matchesById = p.categoryId === subcategory.id;
@@ -669,31 +577,17 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                             // 🔧 CORRECCIÓN: Verificar selectedSubcategoryIds
                             const matchesBySubcategories = p.selectedSubcategoryIds?.includes(subcategory.id) || false;
                             
-                            console.log(`🔍 Producto "${p.name}":`, {
-                                categoryId: p.categoryId,
-                                selectedParentCategoryIds: p.selectedParentCategoryIds,
-                                selectedSubcategoryIds: p.selectedSubcategoryIds,
-                                subcategoryId: subcategory.id,
-                                matchesById,
-                                matchesBySlug,
-                                matchesByParentCategories,
-                                matchesBySubcategories,
-                                finalMatch: matchesById || matchesBySlug || matchesByParentCategories || matchesBySubcategories
-                            });
                             
                             return matchesById || matchesBySlug || matchesByParentCategories || matchesBySubcategories;
                         });
                         
-                        console.log(`🔍 Productos específicos de subcategoría "${subcategory.name}": ${filteredBySubcategory.length}`);
                         
                         if (filteredBySubcategory.length > 0) {
                             // Si hay productos específicos de la subcategoría, usar esos
                             base = filteredBySubcategory;
-                            console.log(`✅ Usando productos específicos de subcategoría`);
                         } else {
                             // 🔧 CORRECCIÓN: Si no hay productos en la subcategoría, mostrar lista vacía
                             // NO mostrar todos los productos de la tienda
-                            console.log(`⚠️ No hay productos específicos de "${subcategory.name}", mostrando lista vacía`);
                             base = []; // Lista vacía en lugar de mantener todos los productos
                         }
                     }
@@ -718,22 +612,13 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         return matchesById || matchesBySlug || matchesByParentCategories;
                     });
                     
-                    console.log(`Productos antes del filtro: ${beforeFilter}, después: ${base.length}`);
-                    console.log("IDs de categorías a buscar:", allCategoryIds);
-                    console.log("Slugs de categorías a buscar:", allCategorySlugs);
                 }
             } else {
-                console.log("❌ No se encontró la categoría con slug:", activeCategory);
             }
-            console.log("=== END CATEGORY FILTERING DEBUG ===");
         }
 
         // Aplicar filtros seleccionados
         if (Object.keys(selectedFilters).length > 0) {
-            console.log("=== APPLYING FILTERS ===");
-            console.log("Selected filters:", selectedFilters);
-            console.log("First product metadata example:", base[0]?.metadata);
-            console.log("First product tags example:", base[0]?.tags);
             
             base = base.filter(product => {
                 const productMatches = Object.entries(selectedFilters).every(([filterKey, selectedValues]) => {
@@ -744,12 +629,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     const productMetadata = product.metadata || {};
                     const productFilterValue = productMetadata[filterKey];
                     
-                    console.log(`Product ${product.name}:`);
-                    console.log(`  Filter ${filterKey}: productValue="${productFilterValue}", selectedValues:`, selectedValues);
                     
                     // Si el producto no tiene este filtro, no lo incluimos
                     if (!productFilterValue) {
-                        console.log(`  ❌ Product has no value for filter ${filterKey}`);
                         return false;
                     }
                     
@@ -762,15 +644,12 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         matches = selectedValues.includes(productFilterValue);
                     }
                     
-                    console.log(`  ${matches ? '✅' : '❌'} Filter match: ${matches}`);
                     return matches;
                 });
                 
-                console.log(`Product ${product.name} overall match: ${productMatches}`);
                 return productMatches;
             });
             
-            console.log(`Productos después de filtros: ${base.length}`);
         }
 
         return base;
@@ -836,7 +715,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     };
 
     const handleFilterChange = (filterKey: string, optionValue: string, checked: boolean) => {
-        console.log(`Filter change: ${filterKey} = "${optionValue}" (${checked})`);
         setSelectedFilters(prev => {
             const current = prev[filterKey] || [];
             
@@ -846,21 +724,18 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     ...prev,
                     [filterKey]: [...current, optionValue]
                 };
-                console.log('New selected filters:', newFilters);
                 return newFilters;
             } else {
                 // Remover la opción si está desmarcada
                 const updated = current.filter(val => val !== optionValue);
                 if (updated.length === 0) {
                     const { [filterKey]: removed, ...rest } = prev;
-                    console.log('New selected filters (removed key):', rest);
                     return rest;
                 } else {
                     const newFilters = {
                         ...prev,
                         [filterKey]: updated
                     };
-                    console.log('New selected filters (updated):', newFilters);
                     return newFilters;
                 }
             }
@@ -912,22 +787,14 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             }
         }
         
-        console.log(`🛒 Product "${product.name}" variants analysis:`, {
-            hasVariantsData: !!variantsData,
-            variantsCount,
-            hasVariants,
-            action: hasVariants ? 'OPEN_QUICKVIEW' : 'ADD_DIRECT'
-        });
 
         if (hasVariants) {
             // Producto tiene variantes → abrir modal quickview
-            console.log(`Producto con variantes: ${product.name} - Abriendo modal`);
             setQuickViewProduct(product);
             setIsQuickViewOpen(true);
             // No agregamos efecto de loading porque se abre el modal inmediatamente
         } else {
             // Producto sin opciones → agregar directamente al carrito
-            console.log(`Producto sin opciones: ${product.name} - Agregando directamente`);
             setLoadingCartButton(product.id);
 
             // Usar el precio ya calculado desde ProductCard o precio original como fallback
@@ -946,7 +813,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
             setLoadingCartButton(null);
             openCart();
-            console.log(`Agregado al carrito: ${product.name} con precio ${priceToUse}`);
         }
     };
     
@@ -1035,15 +901,6 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
             {/* Sección de Colecciones - Solo en home */}
             {(() => {
-                console.log('🔍 Collections Debug:', {
-                    isOnCategoryPage,
-                    isOnCollectionPage,
-                    isOnBrandPage,
-                    hasCollections: collections && collections.length > 0,
-                    sectionsConfig: storeInfo?.sections,
-                    collectionsEnabled: storeInfo?.sections?.collections?.enabled,
-                    shouldShow: !isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 && (storeInfo?.sections?.collections?.enabled === true)
-                });
 
                 return (!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 &&
                         (storeInfo?.sections?.collections?.enabled === true)) ? (
