@@ -2376,8 +2376,59 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         z-index: 5 !important;
     }
 
+    /* SOLUCIÓN ESPECÍFICA PARA iOS SAFARI - Eliminar todas las transiciones */
+    .nbd-product-img {
+        transition: none !important;
+        -webkit-transition: none !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+        will-change: auto !important;
+        backface-visibility: visible !important;
+        -webkit-backface-visibility: visible !important;
+    }
+
     .nbd-sort-dropdown {
         z-index: 6 !important;
+    }
+}
+
+/* SOLUCIÓN ESPECÍFICA PARA iOS/iPadOS SAFARI usando feature detection */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+        .nbd-product-img {
+            transition: none !important;
+            -webkit-transition: none !important;
+            transform: none !important;
+            -webkit-transform: none !important;
+            will-change: auto !important;
+            backface-visibility: visible !important;
+            -webkit-backface-visibility: visible !important;
+            transform-style: flat !important;
+            -webkit-transform-style: flat !important;
+        }
+
+        .nbd-product-card:hover .nbd-product-img,
+        .nbd-product-card:focus .nbd-product-img,
+        .nbd-product-card:active .nbd-product-img {
+            transition: none !important;
+            -webkit-transition: none !important;
+            transform: none !important;
+            -webkit-transform: none !important;
+        }
+
+        /* Eliminar cualquier efecto de transformación en toda la tarjeta */
+        .nbd-product-card {
+            transform: none !important;
+            -webkit-transform: none !important;
+            transition: none !important;
+            -webkit-transition: none !important;
+        }
+
+        /* Forzar re-flow estable */
+        .nbd-product-image {
+            contain: layout style paint !important;
+            isolation: isolate !important;
+        }
     }
 }
 

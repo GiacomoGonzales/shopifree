@@ -41,7 +41,12 @@ const ProductImage = memo(({
       style={{
         opacity: 1,
         transition: 'none',
-        willChange: 'auto'
+        WebkitTransition: 'none',
+        transform: 'none',
+        WebkitTransform: 'none',
+        willChange: 'auto',
+        backfaceVisibility: 'visible',
+        WebkitBackfaceVisibility: 'visible'
       }}
     />
   );
