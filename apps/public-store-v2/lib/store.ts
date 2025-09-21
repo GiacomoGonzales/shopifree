@@ -57,6 +57,31 @@ export type StoreBasicInfo = {
         twitter?: string;
         x?: string;
     };
+    sections?: StoreSectionsConfig;
+};
+
+export type SectionConfig = {
+    enabled: boolean;
+    order: number;
+};
+
+export type StoreSectionsConfig = {
+    hero?: SectionConfig;
+    categories?: SectionConfig;
+    collections?: SectionConfig;
+    carousel?: SectionConfig;
+    newsletter?: SectionConfig;
+    brands?: SectionConfig;
+    // products section is always enabled and has fixed order
+};
+
+export const DEFAULT_SECTIONS_CONFIG: StoreSectionsConfig = {
+    hero: { enabled: true, order: 1 },
+    categories: { enabled: true, order: 2 },
+    collections: { enabled: false, order: 3 },
+    carousel: { enabled: true, order: 4 },
+    newsletter: { enabled: false, order: 5 },
+    brands: { enabled: false, order: 6 }
 };
 
 export type StoreCheckoutConfig = {
@@ -148,14 +173,15 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
                 lat: data.location.lat || 0,
                 lng: data.location.lng || 0
             } : undefined,
-            language: (data?.advanced?.language === 'en' ? 'en' : 
-                    data?.advanced?.language === 'pt' ? 'pt' : 
+            language: (data?.advanced?.language === 'en' ? 'en' :
+                    data?.advanced?.language === 'pt' ? 'pt' :
                     data?.advanced?.language === 'es' ? 'es' : undefined),
             theme: data.theme || 'new-base-default',
             primaryColor: data.primaryColor || undefined,
             secondaryColor: data.secondaryColor || undefined,
             carouselImages: data.carouselImages || undefined,
             socialMedia: socialFromGroup,
+            sections: data.sections || undefined,
         };
 	} catch (e) {
 		console.warn("[public-store-v2] getStoreBasicInfo fallo", e);
@@ -427,6 +453,20 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     // APLICAR VARIABLES CSS PRINCIPALES para botones, selectores de variantes, etc.
     document.documentElement.style.setProperty('--nbd-primary', primaryColor);
     document.documentElement.style.setProperty('--nbd-secondary', darkerColor);
+
+    // CONVERTIR COLORES A RGB PARA USAR CON rgba()
+    const hexToRgb = (hex: string) => {
+      const cleanHex = hex.replace('#', '');
+      if (cleanHex.length !== 6) return '0, 0, 0'; // fallback
+      const r = parseInt(cleanHex.slice(0, 2), 16);
+      const g = parseInt(cleanHex.slice(2, 4), 16);
+      const b = parseInt(cleanHex.slice(4, 6), 16);
+      return `${r}, ${g}, ${b}`;
+    };
+
+    document.documentElement.style.setProperty('--nbd-primary-rgb', hexToRgb(primaryColor));
+    document.documentElement.style.setProperty('--nbd-secondary-rgb', hexToRgb(darkerColor));
+    console.log(`🎨 RGB values set: primary-rgb=${hexToRgb(primaryColor)}, secondary-rgb=${hexToRgb(darkerColor)}`);
     
     // APLICAR VARIABLES CSS PARA NEWSLETTER basadas en el color secundario
     if (secondaryColor) {

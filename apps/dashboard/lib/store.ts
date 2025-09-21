@@ -203,9 +203,34 @@ export interface StoreConfig {
       metaPixel?: string
     }
   }
+  sections?: StoreSectionsConfig
   ownerId: string
   createdAt: Date | unknown
   updatedAt: Date | unknown
+}
+
+export type SectionConfig = {
+  enabled: boolean
+  order: number
+}
+
+export type StoreSectionsConfig = {
+  hero?: SectionConfig
+  categories?: SectionConfig
+  collections?: SectionConfig
+  carousel?: SectionConfig
+  newsletter?: SectionConfig
+  brands?: SectionConfig
+  // products section is always enabled and has fixed order
+}
+
+export const DEFAULT_SECTIONS_CONFIG: StoreSectionsConfig = {
+  hero: { enabled: true, order: 1 },
+  categories: { enabled: true, order: 2 },
+  collections: { enabled: false, order: 3 },
+  carousel: { enabled: true, order: 4 },
+  newsletter: { enabled: false, order: 5 },
+  brands: { enabled: false, order: 6 }
 }
 
 export interface StoreWithId {
@@ -292,6 +317,7 @@ export interface StoreWithId {
       }
     }
   }
+  sections?: StoreSectionsConfig
   ownerId: string
   createdAt: Date | unknown
   updatedAt: Date | unknown
@@ -474,6 +500,32 @@ export const createStore = async (storeData: Omit<StoreConfig, 'createdAt' | 'up
     return { id: storeRef.id, ...newStore }
   } catch (error) {
     console.error('Error creating store:', error)
+    throw error
+  }
+}
+
+// Update store sections configuration
+export const updateStoreSections = async (storeId: string, sections: StoreSectionsConfig) => {
+  try {
+    console.log('🔥 [Firestore] updateStoreSections llamada con:', { storeId, sections })
+
+    const db = getFirebaseDb()
+    if (!db) {
+      console.error('❌ [Firestore] Firebase db not available')
+      throw new Error('Firebase db not available')
+    }
+
+    console.log('🔥 [Firestore] Firebase db disponible, actualizando documento...')
+    const storeRef = doc(db, 'stores', storeId)
+    await updateDoc(storeRef, {
+      sections,
+      updatedAt: serverTimestamp()
+    })
+
+    console.log('✅ [Firestore] Documento actualizado exitosamente')
+    return true
+  } catch (error) {
+    console.error('❌ [Firestore] Error updating store sections:', error)
     throw error
   }
 } 

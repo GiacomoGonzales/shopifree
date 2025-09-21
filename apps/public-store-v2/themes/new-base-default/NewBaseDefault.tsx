@@ -1008,8 +1008,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             />
 
             {/* Hero Section Moderno - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
-                <NewBaseDefaultHero 
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage &&
+             (storeInfo?.sections?.hero?.enabled !== false) && (
+                <NewBaseDefaultHero
                     storeInfo={storeInfo}
                     storeSubdomain={storeSubdomain}
                     t={t as (key: string) => string}
@@ -1018,15 +1019,29 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             )}
 
             {/* Sección de Colecciones - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 && (
-                <CollectionsMosaic 
-                    collections={collections}
-                    storeSubdomain={storeSubdomain}
-                />
-            )}
+            {(() => {
+                console.log('🔍 Collections Debug:', {
+                    isOnCategoryPage,
+                    isOnCollectionPage,
+                    isOnBrandPage,
+                    hasCollections: collections && collections.length > 0,
+                    sectionsConfig: storeInfo?.sections,
+                    collectionsEnabled: storeInfo?.sections?.collections?.enabled,
+                    shouldShow: !isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 && (storeInfo?.sections?.collections?.enabled === true)
+                });
+
+                return (!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 &&
+                        (storeInfo?.sections?.collections?.enabled === true)) ? (
+                    <CollectionsMosaic
+                        collections={collections}
+                        storeSubdomain={storeSubdomain}
+                    />
+                ) : null;
+            })()}
 
             {/* Sección de categorías con mosaico inteligente - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage &&
+             (storeInfo?.sections?.categories?.enabled !== false) && (
                 <NewBaseDefaultCategories
                     categories={categories || []}
                     products={products || []}
@@ -1087,17 +1102,20 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             </section>
 
             {/* Carrusel Simple */}
-            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 &&
+             (storeInfo?.sections?.carousel?.enabled !== false) && (
                 <NewBaseDefaultSimpleCarousel images={storeInfo.carouselImages} />
             )}
 
             {/* Sección de Newsletter */}
-            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage &&
+             (storeInfo?.sections?.newsletter?.enabled === true) && (
                 <NewBaseDefaultNewsletter additionalText={additionalText} t={t as (key: string) => string} />
             )}
 
             {/* Sección de Marcas Carousel - Solo en home */}
-            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && brands && brands.length > 0 && (
+            {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && brands && brands.length > 0 &&
+             (storeInfo?.sections?.brands?.enabled === true) && (
                 <NewBaseDefaultBrands
                     brands={brands}
                     isMobile={isMobile}

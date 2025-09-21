@@ -1,8 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
+import { useStore } from '../../../../lib/hooks/useStore'
+import { updateStoreSections, DEFAULT_SECTIONS_CONFIG, StoreSectionsConfig } from '../../../../lib/store'
+import { Toast } from '../../../../components/shared/Toast'
+import { useToast } from '../../../../lib/hooks/useToast'
 import { 
   DndContext, 
   closestCenter,
@@ -115,17 +119,51 @@ export default function ContentSectionsPage() {
   const t = useTranslations('content')
   const params = useParams()
   const locale = params?.locale || 'es'
+  const { store, loading } = useStore()
+  const { toast, showToast, hideToast } = useToast()
 
-  // Estado inicial de las secciones
-  const [sections, setSections] = useState<Section[]>([
-    { id: 'hero', enabled: true, order: 1 },
-    { id: 'categories', enabled: true, order: 2 },
-    { id: 'collections', enabled: false, order: 3 },
-    { id: 'promotional', enabled: false, order: 4 },
-    { id: 'newsletter', enabled: false, order: 5 },
-    { id: 'brands', enabled: false, order: 6 },
-    { id: 'products', enabled: true, order: 7, locked: true },
-  ])
+  // Estado inicial de las secciones - cargar desde store o usar default
+  const [sections, setSections] = useState<Section[]>(() => {
+    const storeConfig = store?.sections || DEFAULT_SECTIONS_CONFIG
+    console.log('🔍 [Dashboard] Estado inicial sections - store?.sections:', store?.sections)
+    console.log('🔍 [Dashboard] Estado inicial sections - storeConfig:', storeConfig)
+    console.log('🔍 [Dashboard] Estado inicial sections - store?.id:', store?.id)
+
+    const initialSections = [
+      { id: 'hero', enabled: storeConfig.hero?.enabled !== false, order: storeConfig.hero?.order || 1 },
+      { id: 'categories', enabled: storeConfig.categories?.enabled !== false, order: storeConfig.categories?.order || 2 },
+      { id: 'collections', enabled: storeConfig.collections?.enabled === true, order: storeConfig.collections?.order || 3 },
+      { id: 'carousel', enabled: storeConfig.carousel?.enabled !== false, order: storeConfig.carousel?.order || 4 },
+      { id: 'newsletter', enabled: storeConfig.newsletter?.enabled === true, order: storeConfig.newsletter?.order || 5 },
+      { id: 'brands', enabled: storeConfig.brands?.enabled === true, order: storeConfig.brands?.order || 6 },
+      { id: 'products', enabled: true, order: 7, locked: true },
+    ]
+
+    console.log('🔍 [Dashboard] Estado inicial sections - initialSections:', initialSections)
+    return initialSections
+  })
+
+  const [saving, setSaving] = useState(false)
+
+  // Actualizar secciones cuando se carga el store
+  useEffect(() => {
+    if (store?.sections) {
+      console.log('🔄 [Dashboard] Store cargado, actualizando sections con:', store.sections)
+
+      const updatedSections = [
+        { id: 'hero', enabled: store.sections.hero?.enabled !== false, order: store.sections.hero?.order || 1 },
+        { id: 'categories', enabled: store.sections.categories?.enabled !== false, order: store.sections.categories?.order || 2 },
+        { id: 'collections', enabled: store.sections.collections?.enabled === true, order: store.sections.collections?.order || 3 },
+        { id: 'carousel', enabled: store.sections.carousel?.enabled !== false, order: store.sections.carousel?.order || 4 },
+        { id: 'newsletter', enabled: store.sections.newsletter?.enabled === true, order: store.sections.newsletter?.order || 5 },
+        { id: 'brands', enabled: store.sections.brands?.enabled === true, order: store.sections.brands?.order || 6 },
+        { id: 'products', enabled: true, order: 7, locked: true },
+      ]
+
+      console.log('🔄 [Dashboard] Sections actualizadas a:', updatedSections)
+      setSections(updatedSections)
+    }
+  }, [store?.sections])
 
   // Configuración de sensores para drag and drop
   const sensors = useSensors(
@@ -157,11 +195,49 @@ export default function ContentSectionsPage() {
 
   // Manejar toggle de secciones
   const handleToggle = (id: string) => {
-    setSections(sections.map(section => 
-      section.id === id 
+    console.log('🔄 [Dashboard] Toggle section:', id)
+    setSections(sections.map(section =>
+      section.id === id
         ? { ...section, enabled: !section.enabled }
         : section
     ))
+  }
+
+  // Guardar configuración en Firestore
+  const handleSave = async () => {
+    console.log('💾 [Dashboard] Intentando guardar configuración...')
+    console.log('💾 [Dashboard] store?.id:', store?.id)
+    console.log('💾 [Dashboard] sections actual:', sections)
+
+    if (!store?.id) {
+      console.error('❌ [Dashboard] No hay store.id disponible')
+      showToast('Error: No se encontró la tienda', 'error')
+      return
+    }
+
+    setSaving(true)
+    try {
+      // Convertir a formato StoreSectionsConfig
+      const sectionsConfig: StoreSectionsConfig = {}
+      sections.forEach(section => {
+        if (section.id !== 'products') { // products no se configura
+          sectionsConfig[section.id as keyof StoreSectionsConfig] = {
+            enabled: section.enabled,
+            order: section.order
+          }
+        }
+      })
+
+      console.log('💾 [Dashboard] sectionsConfig a guardar:', sectionsConfig)
+      await updateStoreSections(store.id, sectionsConfig)
+      console.log('✅ [Dashboard] Configuración guardada exitosamente')
+      showToast('Configuración guardada exitosamente', 'success')
+    } catch (error) {
+      console.error('❌ [Dashboard] Error saving sections:', error)
+      showToast('Error al guardar la configuración', 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   // Obtener información de las secciones
@@ -187,6 +263,10 @@ export default function ContentSectionsPage() {
         title: t('sections.home.collections.title'),
         description: t('sections.home.collections.description')
       },
+      carousel: {
+        title: 'Carrusel de imágenes',
+        description: 'Carrusel de imágenes adicionales que se muestra después de los productos'
+      },
       promotional: {
         title: t('sections.home.promotional.title'),
         description: t('sections.home.promotional.description')
@@ -198,6 +278,44 @@ export default function ContentSectionsPage() {
     }
     
     return sectionInfoMap[id] || { title: id, description: '' }
+  }
+
+  // Mostrar loading mientras se carga el store
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Navegación por pestañas */}
+            <ContentTabs currentTab="sections" />
+
+            {/* Loading estado */}
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6">
+                <div className="animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-6"></div>
+                  <div className="space-y-3">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center flex-1">
+                          <div className="w-4 h-4 bg-gray-300 rounded mr-3"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                          </div>
+                        </div>
+                        <div className="w-11 h-6 bg-gray-300 rounded-full"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
@@ -260,41 +378,24 @@ export default function ContentSectionsPage() {
               
               {/* Botones de acción */}
               <div className="border-t pt-6">
-                <div className="flex items-center justify-between">
-                  <button 
+                <div className="flex justify-end">
+                  <button
                     type="button"
-                    onClick={() => {
-                      // Resetear a configuración por defecto
-                      setSections([
-                        { id: 'hero', enabled: true, order: 1 },
-                        { id: 'categories', enabled: true, order: 2 },
-                        { id: 'collections', enabled: false, order: 3 },
-                        { id: 'promotional', enabled: false, order: 4 },
-                        { id: 'newsletter', enabled: false, order: 5 },
-                        { id: 'brands', enabled: false, order: 6 },
-                        { id: 'products', enabled: true, order: 7, locked: true },
-                      ])
-                    }}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    onClick={handleSave}
+                    disabled={saving || !store?.id}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
                   >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    {t('sections.actions.reset')}
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      // Aquí implementaremos la lógica para guardar en Firestore
-                      console.log('Guardando configuración de secciones:', sections)
-                      alert('Configuración guardada (por ahora solo en consola)')
-                    }}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {t('sections.actions.save')}
+                    {saving ? (
+                      <svg className="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    {saving ? 'Guardando...' : t('sections.actions.save')}
                   </button>
                 </div>
               </div>
@@ -302,6 +403,14 @@ export default function ContentSectionsPage() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </DashboardLayout>
   )
 }
