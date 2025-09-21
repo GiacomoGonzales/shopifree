@@ -2597,7 +2597,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <animate attributeName="stroke-dashoffset" dur="2s" values="0;-16;-32;-32" repeatCount="indefinite"/>
                                                 </circle>
                                             </svg>
-                                            Procesando...
+                                            {t('processing')}
                                         </span>
                                     ) : (
                                         <>
