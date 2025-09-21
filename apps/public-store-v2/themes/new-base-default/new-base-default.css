@@ -4776,92 +4776,205 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 
 
-/* Sección de subcategorías */
+/* Sección de subcategorías con fondo glassmorphism */
 .nbd-subcategories-section {
     padding: var(--nbd-space-xl) 0;
-    border-bottom: 1px solid var(--nbd-neutral-200);
-    background: linear-gradient(135deg, rgba(var(--nbd-primary-rgb), 0.02) 0%, rgba(var(--nbd-secondary-rgb), 0.02) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg,
+        rgba(var(--nbd-primary-rgb), 0.08) 0%,
+        rgba(var(--nbd-secondary-rgb), 0.08) 50%,
+        rgba(var(--nbd-primary-rgb), 0.05) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    position: relative;
+}
+
+/* Overlay sutil para mejorar el glassmorphism */
+.nbd-subcategories-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
 }
 
 .nbd-subcategories-grid {
     display: flex;
-    gap: var(--nbd-space-md);
+    gap: 12px;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+    position: relative;
+    z-index: 1;
 }
 
-/* Subcategorías heredan directamente de los botones base */
+/* Glassmorphism Pills Design */
 .nbd-subcategory-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--nbd-space-md) var(--nbd-space-xl);
-    border: 2px solid;
-    border-radius: var(--nbd-radius-xl);
+    padding: 12px 24px;
+
+    /* Glassmorphism effect */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* Pills shape */
+    border-radius: 50px;
+
+    /* Typography */
     font-weight: 500;
-    font-size: var(--nbd-font-size-sm);
+    font-size: 14px;
+    color: var(--nbd-neutral-700);
     text-decoration: none;
-    transition: all var(--nbd-transition-base);
+    white-space: nowrap;
+
+    /* Interactions */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     min-height: 44px;
-    white-space: nowrap;
+
+    /* Fallback for browsers without backdrop-filter support */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* No seleccionado = botón secundario */
-.nbd-subcategory-button:not(.nbd-subcategory-button--active) {
-    background: transparent;
-    color: var(--nbd-primary);
-    border-color: var(--nbd-primary);
-}
-
+/* Hover effect para botones no activos */
 .nbd-subcategory-button:not(.nbd-subcategory-button--active):hover {
-    background: var(--nbd-primary);
-    color: white;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: var(--nbd-neutral-800);
 }
 
-.nbd-subcategory-button:not(.nbd-subcategory-button--active):active {
-    background: var(--nbd-primary);
-    color: white;
-}
-
-/* Seleccionado = botón primario */
+/* Active/Selected state */
 .nbd-subcategory-button--active {
-    background: var(--nbd-primary) !important;
-    color: white !important;
-    border-color: var(--nbd-primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: rgba(var(--nbd-primary-rgb), 0.2) !important;
+    border-color: rgba(var(--nbd-primary-rgb), 0.3) !important;
+    color: var(--nbd-primary) !important;
+    box-shadow: 0 4px 15px rgba(var(--nbd-primary-rgb), 0.3);
+    font-weight: 600;
 }
 
 .nbd-subcategory-button--active:hover {
-    background: var(--nbd-secondary) !important;
-    border-color: var(--nbd-secondary) !important;
+    background: rgba(var(--nbd-primary-rgb), 0.3) !important;
+    border-color: rgba(var(--nbd-primary-rgb), 0.4) !important;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.nbd-subcategory-button--active:active {
-    background: var(--nbd-secondary) !important;
-    border-color: var(--nbd-secondary) !important;
+    box-shadow: 0 8px 25px rgba(var(--nbd-primary-rgb), 0.4);
 }
 
 .nbd-subcategory-name {
     font-weight: inherit;
 }
 
-/* Responsive para subcategorías */
+/* Responsive - Scroll horizontal en móvil */
 @media (max-width: 768px) {
+    .nbd-subcategories-section {
+        padding: var(--nbd-space-lg) 0;
+    }
+
     .nbd-subcategories-grid {
         justify-content: flex-start;
-        gap: var(--nbd-space-sm);
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 8px;
+        padding: 0 16px;
+
+        /* Ocultar scrollbar */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+
+        /* Scroll suave en iOS */
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
     }
-    
+
+    /* Ocultar scrollbar en WebKit browsers */
+    .nbd-subcategories-grid::-webkit-scrollbar {
+        display: none;
+    }
+
     .nbd-subcategory-button {
-        padding: var(--nbd-space-sm) var(--nbd-space-lg);
-        font-size: var(--nbd-font-size-xs);
+        flex-shrink: 0; /* No se comprimen */
+        min-width: max-content; /* Ancho automático basado en contenido */
+        padding: 10px 20px;
+        font-size: 13px;
         min-height: 40px;
+    }
+
+    /* Efecto de fade en los extremos para indicar scroll */
+    .nbd-subcategories-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        background: linear-gradient(to left,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 100%
+        );
+        pointer-events: none;
+        z-index: 2;
+    }
+}
+
+/* Fallback para navegadores sin soporte de backdrop-filter */
+@supports not (backdrop-filter: blur(12px)) {
+    .nbd-subcategory-button {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .nbd-subcategory-button--active {
+        background: rgba(var(--nbd-primary-rgb), 0.1) !important;
+    }
+}
+
+/* Optimizaciones específicas para iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+        /* Evitar problemas de rendering en iOS con glassmorphism */
+        .nbd-subcategory-button {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            will-change: auto;
+            /* Reducir blur en iOS para mejor performance */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Asegurar que el scroll horizontal funcione suave en iOS */
+        .nbd-subcategories-grid {
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
+        }
+
+        .nbd-subcategory-button {
+            scroll-snap-align: start;
+        }
+
+        /* Eliminar hover effects en dispositivos táctiles para evitar parpadeo */
+        .nbd-subcategory-button:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            transform: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .nbd-subcategory-button--active:hover {
+            background: rgba(var(--nbd-primary-rgb), 0.2) !important;
+            border-color: rgba(var(--nbd-primary-rgb), 0.3) !important;
+            transform: none !important;
+            box-shadow: 0 4px 15px rgba(var(--nbd-primary-rgb), 0.3) !important;
+        }
     }
 }
 
