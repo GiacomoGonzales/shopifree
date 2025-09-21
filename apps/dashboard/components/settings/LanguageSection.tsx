@@ -8,12 +8,12 @@ interface LanguageSectionProps {
   store: StoreWithId
   onUpdate: (data: Partial<StoreWithId>) => Promise<boolean>
   saving?: boolean
+  showToast: (message: string, type: 'success' | 'error') => void
 }
 
-export default function LanguageSection({ store, onUpdate, saving }: LanguageSectionProps) {
+export default function LanguageSection({ store, onUpdate, saving, showToast }: LanguageSectionProps) {
   const t = useTranslations('settings.advanced.checkout')
   const [languageSaving, setLanguageSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
 
   const currentLanguage = store?.advanced?.language || 'es'
 
@@ -30,16 +30,13 @@ export default function LanguageSection({ store, onUpdate, saving }: LanguageSec
       })
       
       if (success) {
-        setMessage('✅ Idioma actualizado correctamente')
-        setTimeout(() => setMessage(null), 3000)
+        showToast('Idioma actualizado correctamente', 'success')
       } else {
-        setMessage('❌ Error al actualizar el idioma')
-        setTimeout(() => setMessage(null), 3000)
+        showToast('Error al actualizar el idioma', 'error')
       }
     } catch (error) {
       console.error('Error updating language:', error)
-      setMessage('❌ Error al actualizar el idioma')
-      setTimeout(() => setMessage(null), 3000)
+      showToast('Error al actualizar el idioma', 'error')
     } finally {
       setLanguageSaving(false)
     }
@@ -171,16 +168,6 @@ export default function LanguageSection({ store, onUpdate, saving }: LanguageSec
             </p>
           </div>
 
-          {/* Mensaje de estado */}
-          {message && (
-            <div className={`p-3 rounded-md text-sm ${
-              message.includes('✅') 
-                ? 'bg-green-50 text-green-800 border border-green-200' 
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}>
-              {message}
-            </div>
-          )}
 
           {/* Indicador de carga */}
           {languageSaving && (

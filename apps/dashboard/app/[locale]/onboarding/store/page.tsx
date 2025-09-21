@@ -382,7 +382,7 @@ function StoreOnboardingContent() {
       }
       
       const result = await uploadImageToCloudinary(file, {
-        folder: 'store_photos',
+        folder: 'hero',
         storeId: 'temp' // Usamos 'temp' hasta que se cree la tienda
       })
       
@@ -439,11 +439,15 @@ function StoreOnboardingContent() {
         // Usar los campos de Cloudinary si existen, sino usar los legacy para compatibilidad
         logoUrl: formData.logoUrl,
         logoPublicId: formData.logoPublicId,
-        storefrontImageUrl: formData.storefrontImageUrl,
-        storefrontImagePublicId: formData.storefrontImagePublicId,
+        // Hero image - usar los mismos campos que store-design
+        heroMediaUrl: formData.storefrontImageUrl,
+        heroMediaPublicId: formData.storefrontImagePublicId,
+        heroMediaType: formData.storefrontImageUrl ? 'image' : null,
         // Mantener campos legacy para compatibilidad
         logo: formData.logoUrl || '',
         storePhoto: formData.storefrontImageUrl || '',
+        heroImageUrl: formData.storefrontImageUrl || '',
+        heroImagePublicId: formData.storefrontImagePublicId || '',
         socialMedia: formData.socialMedia,
         ownerId: user.uid
       }

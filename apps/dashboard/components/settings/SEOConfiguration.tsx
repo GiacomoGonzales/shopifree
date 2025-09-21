@@ -844,20 +844,6 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
             <p className="text-xs text-gray-600 mt-1">{t('analytics.googleAnalytics.help')}</p>
           </div>
 
-          {/* Google Search Console */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('analytics.googleSearch.label')}
-            </label>
-            <input
-              type="text"
-              value={seoData.googleSearchConsole}
-              onChange={(e) => handleInputChange('googleSearchConsole', e.target.value)}
-              placeholder={t('analytics.googleSearch.placeholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-            />
-            <p className="text-xs text-gray-600 mt-1">{t('analytics.googleSearch.help')}</p>
-          </div>
 
           {/* Meta Pixel */}
           <div>
@@ -956,16 +942,18 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         {activeTab === 'advanced' && renderAdvancedSEO()}
       </div>
 
-      {/* Google Search Console Integration */}
-      <GSCIntegration
-        storeSubdomain={store.subdomain}
-        customDomain={store.customDomain}
-        googleSearchConsole={seoData.googleSearchConsole}
-        onUpdate={(data) => {
-          setSeoData(prev => ({ ...prev, ...data }));
-          handleSave();
-        }}
-      />
+      {/* Google Search Console Integration - Solo en pestaña avanzada */}
+      {activeTab === 'advanced' && (
+        <GSCIntegration
+          storeSubdomain={store.subdomain}
+          customDomain={store.customDomain}
+          googleSearchConsole={seoData.googleSearchConsole}
+          onUpdate={(data) => {
+            setSeoData(prev => ({ ...prev, ...data }));
+            handleSave();
+          }}
+        />
+      )}
 
       {/* Consejos SEO */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">

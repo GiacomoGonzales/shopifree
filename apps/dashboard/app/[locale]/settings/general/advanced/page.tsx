@@ -318,10 +318,11 @@ export default function GeneralSettingsAdvancedPage() {
 
             {/* Selector de idioma de la tienda */}
             {store && (
-              <LanguageSection 
-                store={store} 
-                onUpdate={handleStoreUpdate} 
-                saving={saving} 
+              <LanguageSection
+                store={store}
+                onUpdate={handleStoreUpdate}
+                saving={saving}
+                showToast={showToast}
               />
             )}
 

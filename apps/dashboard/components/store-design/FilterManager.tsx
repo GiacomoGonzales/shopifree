@@ -48,6 +48,7 @@ async function translateFilterOptions(fieldId: string, options: string[], langua
 
 interface FilterManagerProps {
   onFiltersChange?: (filters: StoreFilterConfig[]) => void
+  showToast?: (message: string, type: 'success' | 'error') => void
 }
 
 interface SortableFilterItemProps {
@@ -152,7 +153,7 @@ function SortableFilterItem({ filter, onToggle, saving, translatedOptions }: Sor
   )
 }
 
-export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
+export default function FilterManager({ onFiltersChange, showToast }: FilterManagerProps) {
   const { store } = useStore()
   const [availableFilters, setAvailableFilters] = useState<StoreFilterConfig[]>([])
   const [translatedOptions, setTranslatedOptions] = useState<Record<string, string[]>>({})
@@ -217,7 +218,11 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       }
     } catch (err) {
       console.error('Error loading filters:', err)
-      setError('Error al cargar los filtros')
+      if (showToast) {
+        showToast('Error al cargar los filtros', 'error')
+      } else {
+        setError('Error al cargar los filtros')
+      }
     } finally {
       setLoading(false)
     }
@@ -265,11 +270,19 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
       // Traducir opciones para mostrar en la UI
       await translateOptionsForDisplay(updatedFilters)
       
-      setSuccessMessage('Filtros actualizados y traducidos correctamente')
-      setTimeout(() => setSuccessMessage(null), 3000)
+      if (showToast) {
+        showToast('Filtros actualizados y traducidos correctamente', 'success')
+      } else {
+        setSuccessMessage('Filtros actualizados y traducidos correctamente')
+        setTimeout(() => setSuccessMessage(null), 3000)
+      }
     } catch (err) {
       console.error('Error updating and translating filters:', err)
-      setError('Error al actualizar los filtros')
+      if (showToast) {
+        showToast('Error al actualizar los filtros', 'error')
+      } else {
+        setError('Error al actualizar los filtros')
+      }
     } finally {
       setLoading(false)
     }
@@ -373,17 +386,24 @@ export default function FilterManager({ onFiltersChange }: FilterManagerProps) {
         onFiltersChange(filters)
       }
       
-      setSuccessMessage('Configuración guardada')
-      setTimeout(() => setSuccessMessage(null), 3000)
+      if (showToast) {
+        showToast('Configuración guardada', 'success')
+      } else {
+        setSuccessMessage('Configuración guardada')
+        setTimeout(() => setSuccessMessage(null), 3000)
+      }
     } catch (err) {
       console.error('FilterManager: Error saving filters:', err)
-      const errorMessage = err instanceof Error 
-        ? `Error al guardar: ${err.message}` 
+      const errorMessage = err instanceof Error
+        ? `Error al guardar: ${err.message}`
         : 'Error al guardar la configuración'
-      setError(errorMessage)
-      
-      // Mantener el error por más tiempo para que el usuario lo vea
-      setTimeout(() => setError(null), 10000)
+
+      if (showToast) {
+        showToast(errorMessage, 'error')
+      } else {
+        setError(errorMessage)
+        setTimeout(() => setError(null), 10000)
+      }
     } finally {
       setSaving(false)
     }
