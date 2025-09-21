@@ -4776,97 +4776,64 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 
 
-/* Sección de subcategorías con fondo glassmorphism */
+/* Sección de subcategorías minimalista */
 .nbd-subcategories-section {
     padding: var(--nbd-space-xl) 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: linear-gradient(135deg,
-        rgba(var(--nbd-primary-rgb), 0.08) 0%,
-        rgba(var(--nbd-secondary-rgb), 0.08) 50%,
-        rgba(var(--nbd-primary-rgb), 0.05) 100%
-    );
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: transparent;
     position: relative;
-}
-
-/* Overlay sutil para mejorar el glassmorphism */
-.nbd-subcategories-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.02);
-    pointer-events: none;
 }
 
 .nbd-subcategories-grid {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    position: relative;
-    z-index: 1;
 }
 
-/* Glassmorphism Pills Design */
+/* Pills minimalistas y limpias */
 .nbd-subcategory-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
+    padding: 8px 16px;
 
-    /* Glassmorphism effect */
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    /* Pills shape */
+    /* Diseño minimalista */
+    background: var(--nbd-neutral-100);
+    border: 1px solid var(--nbd-neutral-200);
     border-radius: 50px;
 
-    /* Typography */
-    font-weight: 500;
+    /* Typography sutil */
+    font-weight: 400;
     font-size: 14px;
-    color: var(--nbd-neutral-700);
+    color: var(--nbd-neutral-600);
     text-decoration: none;
     white-space: nowrap;
 
-    /* Interactions */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transición suave */
+    transition: all 0.2s ease;
     cursor: pointer;
-    min-height: 44px;
-
-    /* Fallback for browsers without backdrop-filter support */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-height: 36px;
 }
 
-/* Hover effect para botones no activos */
+/* Hover sutil */
 .nbd-subcategory-button:not(.nbd-subcategory-button--active):hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    color: var(--nbd-neutral-800);
+    background: var(--nbd-neutral-200);
+    border-color: var(--nbd-neutral-300);
+    color: var(--nbd-neutral-700);
 }
 
-/* Active/Selected state */
+/* Estado activo minimalista */
 .nbd-subcategory-button--active {
-    background: rgba(var(--nbd-primary-rgb), 0.2) !important;
-    border-color: rgba(var(--nbd-primary-rgb), 0.3) !important;
-    color: var(--nbd-primary) !important;
-    box-shadow: 0 4px 15px rgba(var(--nbd-primary-rgb), 0.3);
-    font-weight: 600;
+    background: var(--nbd-primary) !important;
+    border-color: var(--nbd-primary) !important;
+    color: white !important;
+    font-weight: 500;
 }
 
 .nbd-subcategory-button--active:hover {
-    background: rgba(var(--nbd-primary-rgb), 0.3) !important;
-    border-color: rgba(var(--nbd-primary-rgb), 0.4) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(var(--nbd-primary-rgb), 0.4);
+    background: var(--nbd-secondary) !important;
+    border-color: var(--nbd-secondary) !important;
 }
 
 .nbd-subcategory-name {
@@ -4884,96 +4851,46 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         flex-wrap: nowrap;
         overflow-x: auto;
         overflow-y: hidden;
-        gap: 8px;
+        gap: 6px;
         padding: 0 16px;
 
         /* Ocultar scrollbar */
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE/Edge */
-
-        /* Scroll suave en iOS */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
         -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
     }
 
-    /* Ocultar scrollbar en WebKit browsers */
     .nbd-subcategories-grid::-webkit-scrollbar {
         display: none;
     }
 
     .nbd-subcategory-button {
-        flex-shrink: 0; /* No se comprimen */
-        min-width: max-content; /* Ancho automático basado en contenido */
-        padding: 10px 20px;
+        flex-shrink: 0;
+        min-width: max-content;
+        padding: 6px 14px;
         font-size: 13px;
-        min-height: 40px;
-    }
-
-    /* Efecto de fade en los extremos para indicar scroll */
-    .nbd-subcategories-section::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 20px;
-        background: linear-gradient(to left,
-            rgba(255, 255, 255, 0.1) 0%,
-            transparent 100%
-        );
-        pointer-events: none;
-        z-index: 2;
+        min-height: 32px;
     }
 }
 
-/* Fallback para navegadores sin soporte de backdrop-filter */
-@supports not (backdrop-filter: blur(12px)) {
-    .nbd-subcategory-button {
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .nbd-subcategory-button--active {
-        background: rgba(var(--nbd-primary-rgb), 0.1) !important;
-    }
-}
-
-/* Optimizaciones específicas para iOS Safari */
+/* Optimizaciones para iOS - solo lo esencial */
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 768px) {
-        /* Evitar problemas de rendering en iOS con glassmorphism */
-        .nbd-subcategory-button {
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            will-change: auto;
-            /* Reducir blur en iOS para mejor performance */
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        /* Asegurar que el scroll horizontal funcione suave en iOS */
         .nbd-subcategories-grid {
             -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x proximity;
         }
 
-        .nbd-subcategory-button {
-            scroll-snap-align: start;
-        }
-
-        /* Eliminar hover effects en dispositivos táctiles para evitar parpadeo */
+        /* Eliminar hover en dispositivos táctiles */
         .nbd-subcategory-button:hover {
-            background: rgba(255, 255, 255, 0.15) !important;
-            border-color: rgba(255, 255, 255, 0.2) !important;
-            transform: none !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+            background: var(--nbd-neutral-100) !important;
+            border-color: var(--nbd-neutral-200) !important;
+            color: var(--nbd-neutral-600) !important;
         }
 
         .nbd-subcategory-button--active:hover {
-            background: rgba(var(--nbd-primary-rgb), 0.2) !important;
-            border-color: rgba(var(--nbd-primary-rgb), 0.3) !important;
-            transform: none !important;
-            box-shadow: 0 4px 15px rgba(var(--nbd-primary-rgb), 0.3) !important;
+            background: var(--nbd-primary) !important;
+            border-color: var(--nbd-primary) !important;
+            color: white !important;
         }
     }
 }
