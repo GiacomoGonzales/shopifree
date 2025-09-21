@@ -2432,6 +2432,79 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 }
 
+/* SOLUCIÓN ESPECÍFICA PARA PARPADEO EN DROPDOWN DE ORDENAMIENTO - iOS */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+        /* Forzar aceleración de hardware en imágenes durante estados del dropdown */
+        .nbd-sort-dropdown.nbd-dropdown--open ~ .nbd-products-grid .nbd-product-img,
+        .nbd-sort-dropdown[aria-expanded="true"] ~ .nbd-products-grid .nbd-product-img,
+        .nbd-dropdown--open .nbd-product-img {
+            -webkit-transform: translateZ(0) !important;
+            transform: translateZ(0) !important;
+            -webkit-backface-visibility: hidden !important;
+            backface-visibility: hidden !important;
+            will-change: auto !important;
+            /* Forzar composite layer para prevenir repaint */
+            -webkit-filter: blur(0) !important;
+            filter: blur(0) !important;
+        }
+
+        /* Estabilizar grid durante apertura del dropdown */
+        .nbd-sort-dropdown.nbd-dropdown--open ~ .nbd-products-grid,
+        .nbd-sort-dropdown[aria-expanded="true"] ~ .nbd-products-grid {
+            /* Crear stacking context para aislar repaints */
+            position: relative !important;
+            z-index: 1 !important;
+            isolation: isolate !important;
+            contain: layout style paint !important;
+        }
+
+        /* Prevenir reflow/repaint cuando el dropdown aparece */
+        .nbd-dropdown-menu {
+            /* Asegurar que el dropdown no cause reflow del grid */
+            position: fixed !important;
+            z-index: 1000 !important;
+            will-change: auto !important;
+            /* Forzar su propia layer de compositing */
+            -webkit-transform: translateZ(0) !important;
+            transform: translateZ(0) !important;
+        }
+
+        /* Aplicar durante toda la duración de la animación del dropdown */
+        .nbd-sort-dropdown.nbd-dropdown--opening .nbd-product-img,
+        .nbd-sort-dropdown.nbd-dropdown--closing .nbd-product-img {
+            -webkit-transform: translateZ(0) !important;
+            transform: translateZ(0) !important;
+            -webkit-backface-visibility: hidden !important;
+            backface-visibility: hidden !important;
+        }
+
+        /* Solución más agresiva: Forzar aceleración de hardware en TODAS las imágenes cuando hay un dropdown visible */
+        .nbd-sort-dropdown:hover .nbd-product-img,
+        .nbd-sort-dropdown:focus .nbd-product-img,
+        .nbd-sort-dropdown:active .nbd-product-img,
+        .nbd-dropdown-menu:not([style*="display: none"]) ~ .nbd-products-grid .nbd-product-img {
+            -webkit-transform: translateZ(0) !important;
+            transform: translateZ(0) !important;
+            -webkit-backface-visibility: hidden !important;
+            backface-visibility: hidden !important;
+            will-change: auto !important;
+            /* Crear layer de compositing propio para cada imagen */
+            position: relative !important;
+            z-index: 0 !important;
+        }
+
+        /* Optimización específica cuando se hace click en cualquier control */
+        .nbd-product-controls:active ~ .nbd-products-grid .nbd-product-img,
+        .nbd-control-btn:active ~ .nbd-products-grid .nbd-product-img {
+            -webkit-transform: translateZ(0) !important;
+            transform: translateZ(0) !important;
+            -webkit-backface-visibility: hidden !important;
+            backface-visibility: hidden !important;
+        }
+    }
+}
+
 .nbd-product-placeholder {
     color: var(--nbd-neutral-400);
     background: var(--nbd-neutral-100);
