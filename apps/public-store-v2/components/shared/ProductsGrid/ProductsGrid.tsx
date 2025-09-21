@@ -30,13 +30,16 @@ const ProductImage = memo(({
 
   const src800 = toCloudinarySquare(imageUrl, 800);
 
+  // Detectar iOS para aplicar configuración específica
+  const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   return (
     <img
       src={src800 || imageUrl}
       alt={productName}
       className="nbd-product-img"
-      loading="lazy"
-      decoding="async"
+      loading={isIOS ? "eager" : "lazy"}
+      decoding={isIOS ? "sync" : "async"}
       sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
       style={{
         opacity: 1,
