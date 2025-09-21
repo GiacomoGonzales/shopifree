@@ -8214,3 +8214,27 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 }
 
+/* ===================================================
+   ESPACIADO DINÁMICO SIN HERO
+   =================================================== */
+
+/* Cuando no hay hero visible, agregar espaciado superior solo a la primera sección visible */
+body.no-hero .nbd-categories-mosaic:first-of-type .nbd-container,
+body.no-hero .nbd-collections-mosaic:first-of-type .nbd-container,
+body.no-hero .nbd-newsletter:first-of-type .nbd-container,
+body.no-hero .nbd-brands-section:first-of-type .nbd-container,
+body.no-hero .nbd-products:first-of-type .nbd-container {
+    padding-top: calc(var(--nbd-space-lg) + 40px);
+}
+
+/* En mobile, aplicar solo a la primera sección visible */
+@media (max-width: 768px) {
+    body.no-hero .nbd-categories-mosaic:first-of-type .nbd-container,
+    body.no-hero .nbd-collections-mosaic:first-of-type .nbd-container,
+    body.no-hero .nbd-newsletter:first-of-type .nbd-container,
+    body.no-hero .nbd-brands-section:first-of-type .nbd-container,
+    body.no-hero .nbd-products:first-of-type .nbd-container {
+        padding-top: calc(var(--nbd-space-xl) + 48px);
+    }
+}
+

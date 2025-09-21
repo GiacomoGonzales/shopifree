@@ -178,6 +178,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const isOnCategoryPage = !!categorySlug || (typeof window !== 'undefined' && window.location.pathname.includes('/categoria/'));
     const isOnCollectionPage = !!collectionSlug || (typeof window !== 'undefined' && window.location.pathname.includes('/coleccion/'));
     const isOnBrandPage = !!brandSlug || (typeof window !== 'undefined' && window.location.pathname.includes('/marca/'));
+
     const categorySlugFromUrl = categorySlug || (isOnCategoryPage ? 
         window.location.pathname.split('/categoria/')[1]?.split('/')[0] : null);
     const collectionSlugFromUrl = collectionSlug || (isOnCollectionPage ? 
@@ -261,6 +262,20 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             console.log('⚠️ No primary color found in store info');
         }
     }, [storeInfo?.primaryColor, storeInfo?.secondaryColor]);
+
+    // Manejar espaciado cuando no hay hero visible
+    useEffect(() => {
+        const heroVisible = !isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage &&
+                           (storeInfo?.sections?.hero?.enabled !== false);
+
+        if (typeof document !== 'undefined') {
+            if (heroVisible) {
+                document.body.classList.remove('no-hero');
+            } else {
+                document.body.classList.add('no-hero');
+            }
+        }
+    }, [storeInfo?.sections?.hero?.enabled, isOnCategoryPage, isOnCollectionPage, isOnBrandPage]);
 
     // Resetear botón cuando se cierre el carrito (solo cuando se cierra, no cuando se abre)
     useEffect(() => {
