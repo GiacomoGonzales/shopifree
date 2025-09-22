@@ -4785,7 +4785,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 /* Reducir padding superior de productos en páginas de categoría */
 .nbd-theme:has(.nbd-category-page-header) .nbd-products {
-    padding-top: var(--nbd-space-lg) !important;
+    padding-top: var(--nbd-space-sm) !important; /* Menor margen top solo en categorías */
 }
 
 .nbd-category-breadcrumbs .nbd-breadcrumb-link {
