@@ -4,6 +4,7 @@ interface CarouselImage {
   publicId: string
   url: string
   order: number
+  link: string | null
 }
 
 interface NewBaseDefaultSimpleCarouselProps {

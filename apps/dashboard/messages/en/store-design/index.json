@@ -30,10 +30,14 @@
       "delete": "Delete",
       "processing": "Processing images...",
       "maxImagesError": "You already have the maximum of {max} images",
+      "link": "Link (optional)",
+      "linkPlaceholder": "https://example.com/product",
+      "linkSave": "Save link",
       "tips": {
         "drag": "• You can drag images to reorder them",
         "size": "• Recommended size: 1920x600px (16:5 ratio)",
-        "formats": "• Supported formats: JPG, PNG"
+        "formats": "• Supported formats: JPG, PNG",
+        "links": "• Add optional links to make images clickable"
       }
     },
     "customSections": {
@@ -125,14 +129,14 @@
   "branding": {
     "title": "Branding",
     "subtitle": "Customize colors and visual identity of your store",
-    "logo": "Logo",
-    "logoUpload": "Upload logo",
+    "logo": "Square logo",
+    "logoUpload": "Upload square logo",
     "logoHint": "Recommended: 200x200px, PNG or JPG format",
     "logoUploadHint": "Drag an image here or click to select",
     "logoRequired": "required",
-    "storePhoto": "Store photo",
-    "storePhotoUpload": "Upload photo",
-    "storePhotoHint": "Optional: Photo of your physical store",
+    "storePhoto": "Horizontal logo",
+    "storePhotoUpload": "Upload horizontal logo",
+    "storePhotoHint": "Horizontal logo preferably with white letters for better contrast, will appear in the store footer",
     "storePhotoUploadHint": "Drag an image here or click to select",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",

@@ -4,6 +4,7 @@ interface CarouselImage {
   publicId: string
   url: string
   order: number
+  link: string | null
 }
 
 interface SimpleCarouselProps {
@@ -59,8 +60,9 @@ export function SimpleCarousel({ images }: SimpleCarouselProps) {
   };
 
   // Funciones para el touch en móvil con prevención de scroll conflictivo
-  const minSwipeDistance = 50;
-  const directionThreshold = 30; // Umbral para detectar dirección
+  const minSwipeDistance = 40; // Reducido para ser más sensible
+  const directionThreshold = 20; // Reducido para detectar antes
+  const horizontalTolerance = 1.5; // Tolerancia para movimientos diagonales
 
   const onTouchStart = useCallback((e: TouchEvent) => {
     setTouchEnd(null);
@@ -81,12 +83,12 @@ export function SimpleCarousel({ images }: SimpleCarouselProps) {
     if (isHorizontalSwipe === null && touchStart !== null && touchStartY !== null) {
       const deltaX = Math.abs(currentX - touchStart);
       const deltaY = Math.abs(currentY - touchStartY);
-      
-      // Si el movimiento horizontal es mayor que el vertical por el threshold
-      if (deltaX > deltaY && deltaX > directionThreshold) {
+
+      // Ser más permisivo con swipes diagonales - si hay componente horizontal significativo
+      if (deltaX > directionThreshold && deltaX > deltaY / horizontalTolerance) {
         setIsHorizontalSwipe(true);
         console.log('🔄 Swipe horizontal detectado - bloqueando scroll vertical');
-      } else if (deltaY > deltaX && deltaY > directionThreshold) {
+      } else if (deltaY > directionThreshold && deltaY > deltaX * horizontalTolerance) {
         setIsHorizontalSwipe(false);
         console.log('🔄 Swipe vertical detectado - permitiendo scroll normal');
       }
@@ -96,7 +98,7 @@ export function SimpleCarousel({ images }: SimpleCarouselProps) {
     if (isHorizontalSwipe === true) {
       e.preventDefault();
     }
-  }, [isHorizontalSwipe, touchStart, touchStartY, directionThreshold]);
+  }, [isHorizontalSwipe, touchStart, touchStartY, directionThreshold, horizontalTolerance]);
 
   const onTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd || isHorizontalSwipe !== true) {
@@ -169,18 +171,31 @@ export function SimpleCarousel({ images }: SimpleCarouselProps) {
           {images
             .sort((a, b) => a.order - b.order)
             .map((image, index) => (
-            <div 
-              key={image.publicId} 
+            <div
+              key={image.publicId}
               className="nbd-carousel-slide"
               style={{
                 transform: `translateX(${(index - currentSlide) * 100}%)`
               }}
             >
-              <img
-                src={image.url}
-                alt={`Promoción ${index + 1}`}
-                className="nbd-carousel-image"
-              />
+              {image.link ? (
+                <a
+                  href={image.link}
+                  className="block w-full h-full"
+                >
+                  <img
+                    src={image.url}
+                    alt={`Promoción ${index + 1}`}
+                    className="nbd-carousel-image"
+                  />
+                </a>
+              ) : (
+                <img
+                  src={image.url}
+                  alt={`Promoción ${index + 1}`}
+                  className="nbd-carousel-image"
+                />
+              )}
             </div>
           ))}
         </div>

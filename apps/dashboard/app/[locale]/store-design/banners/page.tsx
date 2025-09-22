@@ -61,16 +61,6 @@ export default function StoreDesignBannersPage() {
             <HeroImageUpload />
 
             <CarouselImagesUpload />
-
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">{t('sections.customSections.title')}</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  {t('sections.customSections.description')}
-                </p>
-                {/* Aquí irá el gestor de secciones */}
-              </div>
-            </div>
           </div>
         </div>
       </div>

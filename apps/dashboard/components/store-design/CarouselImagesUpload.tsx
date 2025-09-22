@@ -4,13 +4,18 @@ import { useStore } from '../../lib/hooks/useStore'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 import { doc, updateDoc } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
+import { useToast } from '../../lib/hooks/useToast'
+import { Toast } from '../shared/Toast'
 
 export default function CarouselImagesUpload() {
   const t = useTranslations('storeDesign.sections.carousel')
+  const tActions = useTranslations('storeDesign.actions')
   const { store, mutate, loading } = useStore()
+  const { toast, showToast, hideToast } = useToast()
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [linkInputs, setLinkInputs] = useState<{[key: string]: string}>({})
 
   const carouselImages = store?.carouselImages || []
   const maxImages = 5
@@ -37,7 +42,8 @@ export default function CarouselImagesUpload() {
         return {
           url: result.secure_url,
           publicId: result.public_id,
-          order: carouselImages.length + index
+          order: carouselImages.length + index,
+          link: null
         }
       })
 
@@ -142,6 +148,47 @@ export default function CarouselImagesUpload() {
     setDraggedIndex(null)
   }
 
+  const handleSaveAllLinks = async () => {
+    try {
+      setIsUploading(true)
+      setError(null)
+
+      // Crear imágenes actualizadas con los enlaces de los inputs
+      const updatedImages = carouselImages.map(img => {
+        const newLink = linkInputs[img.publicId] ?? img.link ?? ''
+        const linkToSave = newLink.trim() === '' ? null : newLink.trim()
+        return { ...img, link: linkToSave }
+      })
+
+      // Actualizar en Firestore
+      const db = getFirebaseDb()
+      if (store?.id && db) {
+        const storeRef = doc(db, 'stores', store.id)
+        await updateDoc(storeRef, {
+          carouselImages: updatedImages
+        })
+
+        // Actualizar el estado local
+        mutate({
+          ...store,
+          carouselImages: updatedImages
+        })
+
+        // Limpiar todos los inputs locales después de guardar
+        setLinkInputs({})
+
+        // Mostrar toast de éxito
+        showToast(tActions('saved'), 'success')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error updating links')
+      showToast(tActions('error'), 'error')
+      console.error('Error updating carousel image links:', err)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
 
 
 
@@ -182,25 +229,44 @@ export default function CarouselImagesUpload() {
             .map((image, index) => (
               <div
                 key={image.publicId}
-                draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragEnd={handleDragEnd}
-                className="relative group cursor-move"
+                className="space-y-2"
               >
-                <img
-                  src={image.url}
-                  alt={`Carousel ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-lg"
-                />
-                <div className="absolute top-2 right-2">
-                  <button
-                    onClick={() => handleImageDelete(image.publicId)}
-                    disabled={isUploading}
-                    className="bg-white text-red-600 px-2 py-1 rounded text-sm shadow hover:bg-gray-50"
-                  >
-                    {t('delete')}
-                  </button>
+                <div
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className="relative group cursor-move"
+                >
+                  <img
+                    src={image.url}
+                    alt={`Carousel ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <button
+                      onClick={() => handleImageDelete(image.publicId)}
+                      disabled={isUploading}
+                      className="bg-white text-red-600 px-2 py-1 rounded text-sm shadow hover:bg-gray-50"
+                    >
+                      {t('delete')}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Input de enlace */}
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-600">{t('link')}</label>
+                  <input
+                    type="url"
+                    placeholder={t('linkPlaceholder')}
+                    value={linkInputs[image.publicId] ?? image.link ?? ''}
+                    onChange={(e) => setLinkInputs(prev => ({
+                      ...prev,
+                      [image.publicId]: e.target.value
+                    }))}
+                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-500"
+                  />
                 </div>
               </div>
             ))}
@@ -226,6 +292,19 @@ export default function CarouselImagesUpload() {
           )}
         </div>
 
+        {/* Botón para guardar enlaces */}
+        {carouselImages.length > 0 && (
+          <div className="flex justify-end">
+            <button
+              onClick={handleSaveAllLinks}
+              disabled={isUploading}
+              className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
+            >
+              {isUploading ? tActions('saving') : tActions('save')}
+            </button>
+          </div>
+        )}
+
         {/* Contador de imágenes */}
         <div className="text-sm text-gray-500">
           {t('imagesUploaded', {
@@ -242,6 +321,15 @@ export default function CarouselImagesUpload() {
           <div className="mt-2 text-sm text-red-600">{error}</div>
         )}
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </div>
   )
 } 

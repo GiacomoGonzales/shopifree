@@ -48,6 +48,7 @@ export type StoreBasicInfo = {
         url: string;
         publicId: string;
         order: number;
+        link?: string;
     }>;
     socialMedia?: {
         instagram?: string;

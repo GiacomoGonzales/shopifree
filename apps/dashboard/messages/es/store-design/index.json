@@ -30,10 +30,14 @@
       "delete": "Eliminar",
       "processing": "Procesando imágenes...",
       "maxImagesError": "Ya tienes el máximo de {max} imágenes",
+      "link": "Enlace (opcional)",
+      "linkPlaceholder": "https://ejemplo.com/producto",
+      "linkSave": "Guardar enlace",
       "tips": {
         "drag": "• Puedes arrastrar las imágenes para reordenarlas",
         "size": "• Tamaño recomendado: 1920x600px (proporción 16:5)",
-        "formats": "• Formatos soportados: JPG, PNG"
+        "formats": "• Formatos soportados: JPG, PNG",
+        "links": "• Agrega enlaces opcionales para hacer las imágenes clickeables"
       }
     },
     "customSections": {
@@ -173,7 +177,7 @@
     "logoRequired": "obligatorio",
     "storePhoto": "Logo horizontal",
     "storePhotoUpload": "Subir logo horizontal",
-    "storePhotoHint": "Opcional: Logo en formato horizontal para el header",
+    "storePhotoHint": "Logo en formato horizontal de preferencia con letras blancas para mejor contraste, aparecerá en el footer de la tienda",
     "storePhotoUploadHint": "Arrastra una imagen aquí o haz clic para seleccionar",
     "primaryColor": "Color primario",
     "secondaryColor": "Color secundario",
