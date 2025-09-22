@@ -58,6 +58,21 @@ export type StoreBasicInfo = {
         x?: string;
     };
     sections?: StoreSectionsConfig;
+    announcementBar?: {
+        enabled: boolean;
+        message: string;
+        backgroundColor: string;
+        textColor: string;
+        link?: string;
+        linkText?: string;
+        animation: 'none' | 'slide' | 'fade' | 'bounce';
+        animationSpeed: 'slow' | 'normal' | 'fast';
+        startDate?: string;
+        endDate?: string;
+        showOnMobile: boolean;
+        showOnDesktop: boolean;
+        position: 'top' | 'bottom';
+    };
 };
 
 export type SectionConfig = {
@@ -182,6 +197,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             carouselImages: data.carouselImages || undefined,
             socialMedia: socialFromGroup,
             sections: data.sections || undefined,
+            announcementBar: data.announcementBar || undefined,
         };
 	} catch (e) {
 		console.warn("[public-store-v2] getStoreBasicInfo fallo", e);

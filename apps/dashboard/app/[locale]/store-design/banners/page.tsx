@@ -40,6 +40,12 @@ export default function StoreDesignBannersPage() {
                   {t('tabs.banners')}
                 </a>
                 <a
+                  href={`/${locale}/store-design/announcement-bar`}
+                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
+                >
+                  {t('tabs.announcementBar')}
+                </a>
+                <a
                   href={`/${locale}/store-design/themes`}
                   className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
                 >

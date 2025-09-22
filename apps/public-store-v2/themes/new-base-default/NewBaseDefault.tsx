@@ -32,6 +32,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
 import ProductQuickView from "./components/ProductQuickView";
+import AnnouncementBar from "./AnnouncementBar";
 
 type Props = {
     storeSubdomain: string;
@@ -867,6 +868,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     
     return (
         <div data-theme="new-base-default" className={`nbd-theme ${getTextureClass()}`}>
+            {/* Announcement Bar */}
+            <AnnouncementBar storeInfo={storeInfo} />
+
             <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products || []} />
             
             <NewBaseDefaultPageHeaders

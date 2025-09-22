@@ -5,6 +5,7 @@
   "tabs": {
     "logoColors": "Marca",
     "banners": "Banners y secciones",
+    "announcementBar": "Barra de Anuncios",
     "themes": "Temas"
   },
   "sections": {
@@ -38,6 +39,47 @@
     "customSections": {
       "title": "Secciones personalizadas",
       "description": "Añade y personaliza secciones adicionales para tu tienda."
+    },
+    "announcementBar": {
+      "title": "Announcement Bar",
+      "description": "Configura una barra de anuncios para mostrar promociones, avisos importantes o llamadas a la acción en tu tienda.",
+      "settings": {
+        "title": "Configuración",
+        "enabled": "Activar Announcement Bar",
+        "message": "Mensaje",
+        "messagePlaceholder": "Ej: ¡Envío gratis en compras mayores a $50!",
+        "backgroundColor": "Color de fondo",
+        "textColor": "Color del texto",
+        "link": "Enlace (opcional)",
+        "linkPlaceholder": "https://ejemplo.com",
+        "linkText": "Texto del enlace",
+        "linkTextPlaceholder": "Ver ofertas",
+        "animation": "Animación",
+        "animationSpeed": "Velocidad de animación",
+        "startDate": "Fecha de inicio",
+        "endDate": "Fecha de finalización",
+        "showOnMobile": "Mostrar en móvil",
+        "showOnDesktop": "Mostrar en escritorio",
+        "position": "Posición",
+        "positionTop": "Arriba del header",
+        "positionBottom": "Debajo del header"
+      },
+      "animations": {
+        "none": "Sin animación",
+        "slide": "Deslizar",
+        "fade": "Desvanecer",
+        "bounce": "Rebotar"
+      },
+      "speeds": {
+        "slow": "Lenta",
+        "normal": "Normal",
+        "fast": "Rápida"
+      },
+      "preview": {
+        "title": "Vista previa",
+        "description": "Así se verá tu announcement bar en la tienda:",
+        "disabled": "El announcement bar está desactivado"
+      }
     },
     "themes": {
       "gallery": {

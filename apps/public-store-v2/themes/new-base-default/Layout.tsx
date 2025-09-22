@@ -8,6 +8,7 @@ import { PublicProduct } from "../../lib/products";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
+import AnnouncementBar from "./AnnouncementBar";
 
 type Props = {
     children: ReactNode;
@@ -37,13 +38,20 @@ export default function Layout({ children, storeInfo, categories, storeSubdomain
         }
     }, [storeInfo?.primaryColor, storeInfo?.secondaryColor]);
 
+    // Debug: ver qué llega en storeInfo
+    console.log('🏪 Layout - storeInfo received:', storeInfo);
+    console.log('🏪 Layout - announcementBar específico:', storeInfo?.announcementBar);
+
     return (
         <div data-theme="new-base-default" className="nbd-theme">
+            {/* Announcement Bar */}
+            <AnnouncementBar storeInfo={storeInfo} />
+
             {(storeInfo || categories || storeSubdomain) && (
-                <Header 
-                    storeInfo={storeInfo || null} 
-                    categories={categories || null} 
-                    storeSubdomain={storeSubdomain || ''} 
+                <Header
+                    storeInfo={storeInfo || null}
+                    categories={categories || null}
+                    storeSubdomain={storeSubdomain || ''}
                     products={products || []}
                 />
             )}

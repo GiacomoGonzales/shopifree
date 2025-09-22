@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import DashboardLayout from '../../../../components/DashboardLayout'
-import ThemeGallery from '../../../../components/themes/ThemeGallery'
+import AnnouncementBarSection from '../../../../components/store-design/AnnouncementBarSection'
 
-export default function StoreDesignThemesPage() {
+export default function StoreDesignAnnouncementBarPage() {
   const t = useTranslations('storeDesign')
   const params = useParams()
   const locale = params?.locale || 'es'
@@ -17,10 +17,10 @@ export default function StoreDesignThemesPage() {
           {/* Navegación por pestañas - Carrusel horizontal */}
           <div className="mb-6">
             <div className="border-b border-gray-200">
-              <nav 
-                className="flex space-x-8 overflow-x-auto px-4 sm:px-0 scrollbar-none" 
+              <nav
+                className="flex space-x-8 overflow-x-auto px-4 sm:px-0 scrollbar-none"
                 style={{
-                  scrollbarWidth: 'none', 
+                  scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
                   WebkitOverflowScrolling: 'touch'
                 }}
@@ -40,13 +40,13 @@ export default function StoreDesignThemesPage() {
                 </a>
                 <a
                   href={`/${locale}/store-design/announcement-bar`}
-                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
+                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-gray-600 text-gray-800"
                 >
                   {t('tabs.announcementBar')}
                 </a>
                 <a
                   href={`/${locale}/store-design/themes`}
-                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-gray-600 text-gray-800"
+                  className="py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 border-transparent text-gray-500 hover:text-gray-700"
                 >
                   {t('tabs.themes')}
                 </a>
@@ -56,10 +56,10 @@ export default function StoreDesignThemesPage() {
 
           {/* Contenido */}
           <div>
-            <ThemeGallery />
+            <AnnouncementBarSection />
           </div>
         </div>
       </div>
     </DashboardLayout>
   )
-} 
+}

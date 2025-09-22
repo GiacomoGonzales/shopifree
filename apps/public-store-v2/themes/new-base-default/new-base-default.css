@@ -3575,7 +3575,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 
     .nbd-products {
-        padding: 0; /* Sin separación vertical en móvil */
+        padding: var(--nbd-space-md) 0; /* Igualar con categorías */
     }
 
     /* Alinear título de productos con tarjetas (sin padding adicional) */
