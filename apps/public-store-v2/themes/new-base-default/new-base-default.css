@@ -4,6 +4,36 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* ===================================================
+   BLOQUEO DE ROTACIÓN EN MOBILE
+   =================================================== */
+/* Mostrar mensaje cuando el dispositivo está en horizontal */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+  .nbd-theme::before {
+    content: "Por favor, rota tu dispositivo a posición vertical para una mejor experiencia";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 9999;
+    font-size: 14px;
+    max-width: 280px;
+    line-height: 1.4;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Ocultar el contenido principal cuando está en horizontal */
+  .nbd-theme > *:not(::before) {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
 /* Reset completo y configuración base */
 [data-theme="new-base-default"] * {
     box-sizing: border-box;

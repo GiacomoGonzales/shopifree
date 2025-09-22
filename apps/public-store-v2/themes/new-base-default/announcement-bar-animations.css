@@ -189,16 +189,33 @@
   padding-right: max(16px, env(safe-area-inset-right));
 }
 
-/* Announcement bar en posición bottom - eliminar separación de 5-10px */
-.announcement-slide[style*="top: 80px"],
-.announcement-fade[style*="top: 80px"],
-.announcement-bounce[style*="top: 80px"] {
-  top: 70px !important; /* Mover 10px más arriba para eliminar gap */
-  margin-top: 0 !important;
-  padding-top: 8px !important;
-  border-top: none !important;
-  box-shadow: none !important;
-  outline: none !important;
+/* Announcement bar en posición bottom - eliminar separación */
+/* DESKTOP: */
+@media (min-width: 769px) {
+  .announcement-slide[style*="top: 80px"],
+  .announcement-fade[style*="top: 80px"],
+  .announcement-bounce[style*="top: 80px"] {
+    top: 70px !important; /* Ajuste para desktop */
+    margin-top: 0 !important;
+    padding-top: 8px !important;
+    border-top: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+/* MOBILE: pegado al header */
+@media (max-width: 768px) {
+  .announcement-slide[style*="top: 80px"],
+  .announcement-fade[style*="top: 80px"],
+  .announcement-bounce[style*="top: 80px"] {
+    top: 60px !important; /* Más pegado para mobile */
+    margin-top: 0 !important;
+    padding-top: 8px !important;
+    border-top: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
 }
 
 /* Mejorar legibilidad con fondo semi-transparente si el color de fondo es muy transparente */
