@@ -150,8 +150,8 @@ export default function BrandingSection() {
       }
       
       const result = await replaceImageInCloudinary(
-        file, 
-        { folder: 'store_photos', storeId: store?.id },
+        file,
+        { folder: 'logo_horizontal', storeId: store?.id },
         formData.storefrontImagePublicId || undefined
       )
       

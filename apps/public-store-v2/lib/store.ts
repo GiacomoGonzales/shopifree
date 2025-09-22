@@ -29,6 +29,7 @@ export type StoreBasicInfo = {
     heroMediaUrl?: string;
     heroMediaType?: 'image' | 'video';
     logoUrl?: string;
+    storefrontImageUrl?: string;
     currency?: string;
     emailStore?: string;
     phone?: string;
@@ -178,6 +179,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             heroMediaUrl: data.heroMediaUrl || undefined,
             heroMediaType: data.heroMediaType || undefined,
             logoUrl: data.logoUrl || data.headerLogoUrl || undefined,
+            storefrontImageUrl: data.storefrontImageUrl || undefined,
             currency: data.currency || data.currencyCode || undefined,
             emailStore: data.emailStore || data.email || undefined,
             phone: data.phone || data.phoneNumber || undefined,

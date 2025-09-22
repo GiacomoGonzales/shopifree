@@ -45,9 +45,18 @@ export default function Footer({ storeInfo, categories, storeSubdomain, storeId 
                     
                     {/* Información de la tienda */}
                     <div className="nbd-footer-section nbd-footer-section--brand">
-                        <h3 className="nbd-footer-title">
-                            {storeInfo?.storeName || storeSubdomain}
-                        </h3>
+                        {storeInfo?.storefrontImageUrl ? (
+                            <img
+                                src={storeInfo.storefrontImageUrl}
+                                alt={storeInfo.storeName || storeSubdomain}
+                                className="nbd-footer-logo"
+                                style={{ maxHeight: '60px', objectFit: 'contain' }}
+                            />
+                        ) : (
+                            <h3 className="nbd-footer-title">
+                                {storeInfo?.storeName || storeSubdomain}
+                            </h3>
+                        )}
                         {storeInfo?.description && (
                             <p className="nbd-footer-description">
                                 {storeInfo.description}

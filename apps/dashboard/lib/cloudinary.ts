@@ -229,7 +229,7 @@ const generateCloudinarySignature = (paramsToSign: Record<string, string>, apiSe
 export const deleteImageFromCloudinary = async (publicId: string): Promise<void> => {
   try {
     // Validar configuración
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
       console.warn('Cloudinary credentials not configured for deletion')
       return
     }
@@ -238,11 +238,11 @@ export const deleteImageFromCloudinary = async (publicId: string): Promise<void>
     const timestamp = Math.round(Date.now() / 1000).toString()
 
     // Preparar autenticación Basic Auth
-    const auth = btoa(`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`)
+    const auth = btoa(`${process.env.CLOUDINARY_API_KEY}:${process.env.CLOUDINARY_API_SECRET}`)
 
     // Usar el endpoint de recursos para eliminación
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image/upload/${encodeURIComponent(publicId)}`,
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/resources/image/upload/${encodeURIComponent(publicId)}`,
       {
         method: 'DELETE',
         headers: {
@@ -289,7 +289,7 @@ export const deleteVideoFromCloudinary = async (publicId: string): Promise<void>
     }
 
     // Preparar autenticación Basic Auth
-    const auth = btoa(`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`)
+    const auth = btoa(`${process.env.CLOUDINARY_API_KEY}:${process.env.CLOUDINARY_API_SECRET}`)
     
     // Realizar eliminación usando la API de administración para videos
     const response = await fetch(
