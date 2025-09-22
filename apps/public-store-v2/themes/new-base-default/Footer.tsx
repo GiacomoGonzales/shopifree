@@ -138,7 +138,7 @@ export default function Footer({ storeInfo, categories, storeSubdomain, storeId 
                     </div>
 
                     {/* Navegación */}
-                    <div className="nbd-footer-section">
+                    <div className="nbd-footer-section nbd-footer-navigation">
                         <h3 className="nbd-footer-title">{t('navigation')}</h3>
                         <ul className="nbd-footer-links">
                             <li>

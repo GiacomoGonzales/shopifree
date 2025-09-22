@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { StoreBasicInfo } from "../../lib/store";
 import "./announcement-bar-animations.css";
 
@@ -8,8 +9,31 @@ type Props = {
 };
 
 export default function AnnouncementBar({ storeInfo }: Props) {
+    const [isHomePage, setIsHomePage] = useState(false);
+
+    useEffect(() => {
+        // Verificar si estamos en la página home
+        const checkHomePage = () => {
+            const path = window.location.pathname;
+            // Es home si es la raíz o solo tiene el subdominio
+            const isHome = path === '/' || path.split('/').filter(segment => segment !== '').length === 0;
+            setIsHomePage(isHome);
+        };
+
+        checkHomePage();
+
+        // Verificar en cambios de URL
+        window.addEventListener('popstate', checkHomePage);
+        return () => window.removeEventListener('popstate', checkHomePage);
+    }, []);
+
     // Si no hay configuración de announcement bar, no mostrar nada
     if (!storeInfo?.announcementBar?.enabled) {
+        return null;
+    }
+
+    // Solo mostrar en página home
+    if (!isHomePage) {
         return null;
     }
 

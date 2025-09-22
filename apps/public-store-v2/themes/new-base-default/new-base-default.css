@@ -34,6 +34,16 @@
   }
 }
 
+/* ===================================================
+   FOOTER MOBILE ADJUSTMENTS
+   =================================================== */
+/* Ocultar sección de navegación del footer solo en mobile */
+@media (max-width: 768px) {
+  .nbd-footer-navigation {
+    display: none !important;
+  }
+}
+
 /* Reset completo y configuración base */
 [data-theme="new-base-default"] * {
     box-sizing: border-box;
