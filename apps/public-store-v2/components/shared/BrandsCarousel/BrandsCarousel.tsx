@@ -105,11 +105,8 @@ export function BrandsCarousel({
                    '--brands-count': brands.length,
                    '--animation-duration': `${brands.length * 4}s`
                } as React.CSSProperties}>
-            {/* Duplicar las marcas: desktop 2x, móvil 4x para scroll infinito */}
-            {(isMobile ? 
-              [...brands, ...brands, ...brands, ...brands] : 
-              [...brands, ...brands]
-            ).map((brand, index) => (
+            {/* Duplicar las marcas: 4x para ambos para que funcione con translateX(-50%) */}
+            {[...brands, ...brands, ...brands, ...brands].map((brand, index) => (
               <a 
                 key={`${brand.id}-${index}`} 
                 href={buildUrl(`/marca/${brand.slug}`)}

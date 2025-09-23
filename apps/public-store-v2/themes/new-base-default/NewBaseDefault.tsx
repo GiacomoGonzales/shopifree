@@ -309,6 +309,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                         setBrands(brandList);
                         setFilters(filterList);
                         setCollections(collectionsList);
+
                         setStoreInfo(info);
                     });
                     

@@ -134,9 +134,9 @@
 
 /* DESKTOP: Ajustar hero section cuando hay announcement bar en BOTTOM */
 @media (min-width: 769px) {
-  .nbd-theme:has(.announcement-slide[style*="top: 70px"]) .nbd-hero,
-  .nbd-theme:has(.announcement-fade[style*="top: 70px"]) .nbd-hero,
-  .nbd-theme:has(.announcement-bounce[style*="top: 70px"]) .nbd-hero {
+  .nbd-theme:has(.announcement-slide[style*="top: 80px"]) .nbd-hero,
+  .nbd-theme:has(.announcement-fade[style*="top: 80px"]) .nbd-hero,
+  .nbd-theme:has(.announcement-bounce[style*="top: 80px"]) .nbd-hero {
     margin-top: var(--announcement-bar-height) !important;
     padding-top: calc(var(--nbd-space-lg) + var(--announcement-bar-height)) !important;
     /* Reducir altura para que quepa en una vista */

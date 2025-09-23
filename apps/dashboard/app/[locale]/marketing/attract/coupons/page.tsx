@@ -515,11 +515,11 @@ export default function CouponsPage() {
           </div>
         )}
 
-        {/* Modal básico de creación (placeholder) */}
+        {/* Modal básico de creación */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-              <div className="flex items-center justify-between mb-4">
+            <div className="relative top-0 md:top-20 mx-auto h-full md:h-auto p-0 md:p-5 border-0 md:border w-full md:w-3/4 lg:w-1/2 shadow-lg rounded-none md:rounded-md bg-white">
+              <div className="flex items-center justify-between mb-4 p-4 md:p-0">
                 <h3 className="text-lg font-medium text-gray-900">
                   {editingCoupon ? 'Editar cupón' : 'Crear nuevo cupón'}
                 </h3>
@@ -546,8 +546,8 @@ export default function CouponsPage() {
                   </svg>
                 </button>
               </div>
-              
-              <form className="space-y-4">
+
+              <form className="space-y-4 px-4 md:px-0 pb-4 md:pb-0">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre del cupón</label>
                   <input
@@ -601,6 +601,7 @@ export default function CouponsPage() {
                       type="number"
                       value={formData.value}
                       onChange={(e) => setFormData(prev => ({ ...prev, value: Number(e.target.value) }))}
+                      onFocus={(e) => e.target.select()}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder={formData.type === 'percentage' ? '25' : '50'}
                       min="0"
@@ -655,6 +656,7 @@ export default function CouponsPage() {
                       type="number"
                       value={formData.maxUses}
                       onChange={(e) => setFormData(prev => ({ ...prev, maxUses: Number(e.target.value) }))}
+                      onFocus={(e) => e.target.select()}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="1"
                     />
@@ -665,6 +667,7 @@ export default function CouponsPage() {
                       type="number"
                       value={formData.usesPerCustomer}
                       onChange={(e) => setFormData(prev => ({ ...prev, usesPerCustomer: Number(e.target.value) }))}
+                      onFocus={(e) => e.target.select()}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="1"
                     />

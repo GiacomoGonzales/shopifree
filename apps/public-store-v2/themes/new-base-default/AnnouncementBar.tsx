@@ -15,8 +15,10 @@ export default function AnnouncementBar({ storeInfo }: Props) {
         // Verificar si estamos en la página home
         const checkHomePage = () => {
             const path = window.location.pathname;
-            // Es home si es la raíz o solo tiene el subdominio
-            const isHome = path === '/' || path.split('/').filter(segment => segment !== '').length === 0;
+            // Es home si es la raíz, solo tiene el subdominio, o es /subdomain (como /technova)
+            const isHome = path === '/' ||
+                          path.split('/').filter(segment => segment !== '').length === 0 ||
+                          path.split('/').filter(segment => segment !== '').length === 1; // /technova
             setIsHomePage(isHome);
         };
 
