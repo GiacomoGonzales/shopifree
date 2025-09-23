@@ -70,6 +70,12 @@
       "title": "Home",
       "subtitle": "Store overview",
       "description": "Here you'll see a general overview of your store, recent sales and important statistics.",
+      "welcome": {
+        "title": "Welcome to {storeName}",
+        "titleFallback": "Welcome to your online store",
+        "subtitle": "Congratulations on completing the initial setup",
+        "description": "We're here to accompany you every step of the way. Our mission is to help you create a successful online store that reflects the essence of your business and connects with your customers."
+      },
       "stats": {
         "monthlySales": "Monthly sales",
         "orders": "Orders",

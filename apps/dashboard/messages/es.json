@@ -70,6 +70,15 @@
       "title": "Inicio",
       "subtitle": "Resumen de tu tienda",
       "description": "Aquí verás un resumen general de tu tienda, ventas recientes y estadísticas importantes.",
+      "welcome": {
+        "title": "Bienvenido a {storeName}",
+        "titleFallback": "Bienvenido a tu tienda online",
+        "subtitle": "Felicitaciones por completar la configuración inicial",
+        "description": "Estamos aquí para acompañarte en cada paso del camino. Nuestra misión es ayudarte a crear una tienda online exitosa que refleje la esencia de tu negocio y conecte con tus clientes."
+      },
+      "status": {
+        "inDevelopment": "En desarrollo - próximamente más funcionalidades"
+      },
       "stats": {
         "monthlySales": "Ventas del mes",
         "orders": "Pedidos",
