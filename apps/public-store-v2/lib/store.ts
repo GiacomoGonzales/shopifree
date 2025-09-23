@@ -115,11 +115,21 @@ export type MercadoPagoConfig = {
     connected?: boolean; // Estado de conexión del dashboard
 };
 
+export type CulqiConfig = {
+    enabled: boolean;
+    publicKey: string;
+    secretKey: string;
+    environment: 'test' | 'live';
+    webhookUrl?: string;
+    connected?: boolean; // Estado de conexión del dashboard
+};
+
 export type StorePaymentsConfig = {
     acceptCashOnDelivery?: boolean;
     cashOnDeliveryMethods?: string[];
     acceptOnlinePayment?: boolean;
     mercadopago?: MercadoPagoConfig;
+    culqi?: CulqiConfig;
 };
 
 export type StoreAdvancedConfig = {
@@ -399,14 +409,25 @@ export async function getStoreCheckoutConfig(storeId: string): Promise<StoreAdva
                 acceptCashOnDelivery: advanced.payments?.acceptCashOnDelivery || false,
                 cashOnDeliveryMethods: advanced.payments?.cashOnDeliveryMethods || [],
                 acceptOnlinePayment: advanced.payments?.acceptOnlinePayment || false,
-                mercadopago: advanced.payments?.provider === 'mercadopago' && 
-                            advanced.payments?.publicKey && 
+                mercadopago: advanced.payments?.provider === 'mercadopago' &&
+                            advanced.payments?.publicKey &&
                             advanced.payments?.secretKey ? {
                     enabled: true, // Si tienes credenciales, está habilitado
                     publicKey: advanced.payments.publicKey,
                     accessToken: advanced.payments.secretKey, // Dashboard usa 'secretKey'
-                    environment: advanced.payments.publicKey.includes('test') || advanced.payments.publicKey.includes('TEST') 
+                    environment: advanced.payments.publicKey.includes('test') || advanced.payments.publicKey.includes('TEST')
                                ? 'sandbox' : 'production',
+                    webhookUrl: advanced.payments.webhookEndpoint || undefined,
+                    connected: advanced.payments?.connected || false // Info adicional para dashboard
+                } : undefined,
+                culqi: advanced.payments?.provider === 'culqi' &&
+                       advanced.payments?.publicKey &&
+                       advanced.payments?.secretKey ? {
+                    enabled: true, // Si tienes credenciales, está habilitado
+                    publicKey: advanced.payments.publicKey,
+                    secretKey: advanced.payments.secretKey,
+                    environment: advanced.payments.publicKey.includes('test') || advanced.payments.publicKey.includes('pk_test')
+                               ? 'test' : 'live',
                     webhookUrl: advanced.payments.webhookEndpoint || undefined,
                     connected: advanced.payments?.connected || false // Info adicional para dashboard
                 } : undefined

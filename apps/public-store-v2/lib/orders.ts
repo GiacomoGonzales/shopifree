@@ -40,7 +40,16 @@ export interface OrderData {
  * Crear pedido en Firestore
  * Formato compatible con dashboard existente en apps/dashboard/lib/orders.ts
  */
-export async function createOrder(storeId: string, orderData: OrderData) {
+export async function createOrder(
+  storeId: string,
+  orderData: OrderData,
+  paymentInfo?: {
+    isPaid: boolean;
+    paidAmount?: number;
+    paymentType?: 'cash_on_delivery' | 'card_on_delivery' | 'mobile_transfer' | 'online_payment';
+    transactionId?: string;
+  }
+) {
   console.log('[Orders] Attempting to create order for store:', storeId);
   console.log('[Orders] Order data:', JSON.stringify(orderData, null, 2));
 
@@ -106,17 +115,23 @@ export async function createOrder(storeId: string, orderData: OrderData) {
       status: orderData.checkoutMethod === 'whatsapp' ? 'whatsapp_sent' : 'pending',
       
       // 🆕 NUEVOS CAMPOS DE PAGO
-      paymentType: (() => {
-        // Mapear método legacy a nuevo tipo
+      paymentType: paymentInfo?.paymentType || (() => {
+        // Mapear método legacy a nuevo tipo si no se especifica
         switch (orderData.payment.method) {
           case 'cash': return 'cash_on_delivery'
           case 'card': return 'card_on_delivery'
           case 'transfer': return 'mobile_transfer'
+          case 'culqi':
+          case 'mercadopago':
+          case 'paypal': return 'online_payment'
           default: return 'cash_on_delivery'
         }
       })(),
-      paymentStatus: 'pending', // Todos los pedidos contra entrega empiezan pendientes
-      paidAmount: 0, // Inicialmente no se ha pagado nada
+      paymentStatus: paymentInfo?.isPaid ? 'paid' : 'pending',
+      paidAmount: paymentInfo?.paidAmount || 0,
+
+      // Información adicional del pago online (si aplica)
+      ...(paymentInfo?.transactionId && { transactionId: paymentInfo.transactionId }),
       
       // Metadata requerida por dashboard
       storeId: storeId,

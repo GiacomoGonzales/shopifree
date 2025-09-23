@@ -26,8 +26,16 @@ import { getStoreStockConfig, logStockConfig, shouldValidateStock, shouldShowWar
 import { StockValidationResult } from '../../lib/stock-types';
 import StockWarningModal from './StockWarningModal';
 import { orderDataToPreference, createPreference, validateMercadoPagoConfig, getInitPoint } from '../../lib/mercadopago';
+import { validateCulqiConfig, orderDataToCharge, createCharge } from '../../lib/culqi';
 import { validateCoupon, applyCouponDiscount, CouponValidationResult } from '../../lib/coupons';
 import { useToast } from '../../components/ui/Toast';
+
+// Tipos para Culqi
+declare global {
+    interface Window {
+        CulqiCheckout: any;
+    }
+}
 
 // Definición de métodos de pago con imágenes
 const paymentMethodsConfig = {
@@ -60,6 +68,12 @@ const paymentMethodsConfig = {
         name: 'Pago Online con MercadoPago',
         description: 'Paga seguro con tarjetas, Yape, PagoEfectivo y más',
         imageUrl: '/paymentimages/mercadopago.png'
+    },
+    'culqi': {
+        id: 'culqi',
+        name: 'Pago Seguro con Culqi',
+        description: 'Paga seguro con tarjetas Visa, Mastercard y más',
+        imageUrl: '/paymentimages/culqi.png'
     }
 };
 
@@ -86,7 +100,7 @@ interface CheckoutData {
     city: string;
     zipCode: string;
     shippingMethod: 'standard' | 'express' | 'pickup';
-    paymentMethod: 'cash' | 'transfer' | 'card' | 'mercadopago';
+    paymentMethod: 'cash' | 'transfer' | 'card' | 'mercadopago' | 'culqi';
     notes: string;
     // Nuevos campos para manejo avanzado de direcciones
     addressText: string; // Lo que escribió el usuario
@@ -130,6 +144,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     // Removed showMap state - map shows automatically when there are coordinates
     const [gettingLocation, setGettingLocation] = useState(false);
     const [userCoordinates, setUserCoordinates] = useState<{lat: number; lng: number} | null>(null);
+
+    // Estados para Culqi
+    const [isCulqiLoaded, setIsCulqiLoaded] = useState(false);
+    const [culqiInstance, setCulqiInstance] = useState<any>(null);
     const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
     const [loadingZones, setLoadingZones] = useState(false);
     const [shippingCost, setShippingCost] = useState(0);
@@ -258,6 +276,15 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             methods.push(baseMethod);
         }
 
+        // Si Culqi está configurado y los pagos online están habilitados, agregarlo
+        if (checkoutConfig?.payments?.culqi?.enabled &&
+            checkoutConfig?.payments?.acceptOnlinePayment &&
+            paymentMethodsConfig['culqi']) {
+            const baseMethod = paymentMethodsConfig['culqi'];
+            // Culqi mantiene su nombre original por ser una marca
+            methods.push(baseMethod);
+        }
+
         // Si no hay métodos configurados o como fallback, agregar transferencia bancaria
         if (methods.length === 0) {
             methods.push(defaultPaymentMethod);
@@ -333,6 +360,480 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             appliedCoupon: null
         }));
         setCouponError('');
+    };
+
+    // Funciones para manejar Culqi
+    const loadCulqiScript = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            // Si ya está cargado, resolver inmediatamente
+            if (window.CulqiCheckout) {
+                setIsCulqiLoaded(true);
+                resolve();
+                return;
+            }
+
+            // Si ya existe el script, no cargarlo de nuevo
+            if (document.querySelector('script[src="https://js.culqi.com/checkout-js"]')) {
+                resolve();
+                return;
+            }
+
+            console.log('🔔 [Culqi] Cargando script de Culqi...');
+            const script = document.createElement('script');
+            script.src = 'https://js.culqi.com/checkout-js';
+            script.onload = () => {
+                console.log('🔔 [Culqi] Script cargado exitosamente');
+                setIsCulqiLoaded(true);
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('🔔 [Culqi] Error al cargar script');
+                reject(new Error('Error al cargar Culqi script'));
+            };
+            document.head.appendChild(script);
+        });
+    };
+
+    const initializeCulqi = (params: { publicKey: string, config: any }) => {
+        if (!window.CulqiCheckout) {
+            throw new Error('Culqi script no está cargado');
+        }
+
+        console.log('🔔 [Culqi] Inicializando Culqi con publicKey y config:', {
+            publicKey: params.publicKey.substring(0, 20) + '...',
+            config: params.config
+        });
+        const culqi = new window.CulqiCheckout(params.publicKey, params.config);
+
+        // El CulqiCheckout constructor debería crear el objeto global Culqi
+        // Verificar que está disponible
+        console.log('🔔 [Culqi] Verificando configuración global después de inicializar:', {
+            windowCulqi: !!(window as any).Culqi,
+            culqiCloseExists: !!(window as any).Culqi?.close,
+            culqiInstance: !!culqi
+        });
+
+        // Configurar callback
+        culqi.culqi = () => {
+            console.log('🔔 [Culqi] Callback ejecutado');
+            if (culqi.token) {
+                console.log('🔔 [Culqi] Token recibido:', culqi.token.id);
+                handleCulqiToken(culqi.token);
+            } else if (culqi.order) {
+                console.log('🔔 [Culqi] Orden recibida:', culqi.order);
+                handleCulqiOrder(culqi.order);
+            } else {
+                console.error('🔔 [Culqi] No se recibió token ni orden');
+            }
+        };
+
+        setCulqiInstance(culqi);
+        return culqi;
+    };
+
+    const handleCulqiToken = async (token: any) => {
+        try {
+            console.log('🔔 [Culqi] Token recibido, cerrando modal de Culqi primero...');
+
+            // PRIMERO: Cerrar el modal de Culqi usando el método global
+            console.log('🔔 [Culqi] Verificando Culqi global y close method...');
+
+            // Debug del objeto global Culqi
+            if (typeof window !== 'undefined') {
+                console.log('🔔 [Culqi] Objeto window.Culqi disponible:', (window as any).Culqi);
+                if ((window as any).Culqi) {
+                    console.log('🔔 [Culqi] Métodos disponibles en Culqi:', Object.getOwnPropertyNames((window as any).Culqi));
+                    console.log('🔔 [Culqi] Prototipo de Culqi:', Object.getPrototypeOf((window as any).Culqi));
+                }
+            }
+
+            // Intentar cerrar usando el objeto global Culqi
+            if (typeof window !== 'undefined' && (window as any).Culqi && typeof (window as any).Culqi.close === 'function') {
+                console.log('🔔 [Culqi] Cerrando modal usando Culqi.close()...');
+                try {
+                    (window as any).Culqi.close();
+                    console.log('🔔 [Culqi] Modal cerrado exitosamente con Culqi.close()');
+                } catch (error) {
+                    console.error('🔔 [Culqi] Error al cerrar modal con Culqi.close():', error);
+                }
+            } else if (culqiInstance && typeof culqiInstance.close === 'function') {
+                console.log('🔔 [Culqi] Cerrando modal usando culqiInstance.close()...');
+                try {
+                    culqiInstance.close();
+                    console.log('🔔 [Culqi] Modal cerrado exitosamente con culqiInstance.close()');
+                } catch (error) {
+                    console.error('🔔 [Culqi] Error al cerrar modal con culqiInstance.close():', error);
+                }
+            } else {
+                console.warn('🔔 [Culqi] No se encontró método close disponible, intentando cerrar via DOM...');
+                console.log('🔔 [Culqi] Debug info:', {
+                    windowCulqi: typeof window !== 'undefined' ? !!(window as any).Culqi : 'undefined',
+                    culqiCloseMethod: typeof window !== 'undefined' && (window as any).Culqi ? typeof (window as any).Culqi.close : 'no-global',
+                    culqiInstance: !!culqiInstance,
+                    instanceCloseMethod: culqiInstance ? typeof culqiInstance.close : 'no-instance'
+                });
+
+                // Método de respaldo: cerrar modal de Culqi específicamente
+                try {
+                    console.log('🔔 [Culqi] Buscando iframe específico de Culqi...');
+
+                    // Buscar específicamente el iframe de Culqi
+                    const culqiIframe = document.querySelector('iframe.culqi_checkout, iframe[name="checkout_frame"]');
+
+                    if (culqiIframe) {
+                        console.log('🔔 [Culqi] Encontrado iframe de Culqi, eliminando completamente...');
+
+                        // CRÍTICO: Desactivar completamente la interceptación de eventos
+                        (culqiIframe as HTMLElement).style.pointerEvents = 'none';
+                        (culqiIframe as HTMLElement).style.display = 'none';
+                        (culqiIframe as HTMLElement).style.visibility = 'hidden';
+                        (culqiIframe as HTMLElement).style.opacity = '0';
+                        (culqiIframe as HTMLElement).style.zIndex = '-999999';
+
+                        // Buscar y limpiar el contenedor padre del iframe
+                        const iframeParent = culqiIframe.parentElement;
+                        if (iframeParent) {
+                            console.log('🔔 [Culqi] Encontrado contenedor padre del iframe:', iframeParent);
+
+                            // Desactivar eventos en el contenedor padre también
+                            (iframeParent as HTMLElement).style.pointerEvents = 'none';
+                            (iframeParent as HTMLElement).style.display = 'none';
+                            (iframeParent as HTMLElement).style.visibility = 'hidden';
+                            (iframeParent as HTMLElement).style.opacity = '0';
+                            (iframeParent as HTMLElement).style.zIndex = '-999999';
+                        }
+
+                        // Buscar contenedores abuelos PERO NO tocar body/html
+                        let currentElement = culqiIframe.parentElement;
+                        let level = 1;
+                        while (currentElement && level <= 3) {
+                            const tagName = currentElement.tagName.toLowerCase();
+
+                            // CRÍTICO: NO tocar body ni html para evitar bloquear toda la página
+                            if (tagName === 'body' || tagName === 'html') {
+                                console.log(`🔔 [Culqi] SALTANDO ${tagName} para evitar bloquear toda la página`);
+                                currentElement = currentElement.parentElement;
+                                level++;
+                                continue;
+                            }
+
+                            console.log(`🔔 [Culqi] Desactivando contenedor nivel ${level} (${tagName}):`, currentElement);
+                            (currentElement as HTMLElement).style.pointerEvents = 'none';
+                            (currentElement as HTMLElement).style.zIndex = '-999999';
+
+                            // Si tiene atributos de Culqi, también ocultarlo
+                            if (currentElement.classList.contains('culqi') ||
+                                currentElement.getAttribute('data-v-9a32aa2a') !== null ||
+                                currentElement.getAttribute('data-v-app') !== null) {
+                                (currentElement as HTMLElement).style.display = 'none';
+                                (currentElement as HTMLElement).style.visibility = 'hidden';
+                                (currentElement as HTMLElement).style.opacity = '0';
+                            }
+
+                            currentElement = currentElement.parentElement;
+                            level++;
+                        }
+
+                        // CRÍTICO: Restaurar funcionalidad de body y html si fue afectada
+                        console.log('🔔 [Culqi] Restaurando funcionalidad de body y html...');
+                        const bodyElement = document.body;
+                        const htmlElement = document.documentElement;
+
+                        if (bodyElement) {
+                            bodyElement.style.pointerEvents = '';
+                            bodyElement.style.zIndex = '';
+                            console.log('🔔 [Culqi] Body restaurado');
+                        }
+
+                        if (htmlElement) {
+                            htmlElement.style.pointerEvents = '';
+                            htmlElement.style.zIndex = '';
+                            console.log('🔔 [Culqi] HTML restaurado');
+                        }
+
+                        // Intentar eliminar completamente el iframe del DOM
+                        try {
+                            culqiIframe.remove();
+                            console.log('🔔 [Culqi] Iframe de Culqi eliminado completamente del DOM');
+                        } catch (e) {
+                            console.log('🔔 [Culqi] No se pudo eliminar iframe, desactivado completamente:', e);
+                        }
+                    }
+
+                    // SOLO buscar el overlay específico de Culqi con ID dinámico
+                    const culqiOverlaySelectors = [
+                        'div[id*="c2b0a"]',     // Patrón anterior
+                        'div[id*="c329b"]',     // Patrón anterior
+                        'div[id*="c3bf0e9"]',   // Patrón nuevo identificado
+                        'div[id*="culqi"]'      // Cualquier div con culqi en el ID
+                    ];
+
+                    let culqiOverlay = null;
+                    for (const selector of culqiOverlaySelectors) {
+                        culqiOverlay = document.querySelector(selector);
+                        if (culqiOverlay) {
+                            console.log(`🔔 [Culqi] Encontrado overlay de Culqi con selector "${selector}":`, culqiOverlay);
+                            break;
+                        }
+                    }
+
+                    if (culqiOverlay) {
+                        console.log('🔔 [Culqi] Eliminando overlay de Culqi:', culqiOverlay);
+                        try {
+                            culqiOverlay.remove();
+                            console.log('🔔 [Culqi] Overlay de Culqi eliminado exitosamente');
+                        } catch (e) {
+                            console.log('🔔 [Culqi] Error al eliminar overlay, ocultando:', e);
+                            (culqiOverlay as HTMLElement).style.display = 'none';
+                            (culqiOverlay as HTMLElement).style.visibility = 'hidden';
+                            (culqiOverlay as HTMLElement).style.pointerEvents = 'none';
+                        }
+                    } else {
+                        console.log('🔔 [Culqi] No se encontró overlay específico de Culqi');
+                    }
+
+                } catch (domError) {
+                    console.error('🔔 [Culqi] Error al cerrar modal via DOM:', domError);
+                }
+            }
+
+            // Pequeño delay para que el usuario vea que se está procesando
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Limpieza adicional específica para overlay E iframe de Culqi con delay
+            setTimeout(() => {
+                console.log('🔔 [Culqi] Verificación final con delay...');
+                try {
+                    // 1. Buscar overlays de Culqi
+                    const delayedSelectors = [
+                        'div[id*="c2b0a"]',
+                        'div[id*="c329b"]',
+                        'div[id*="c3bf0e9"]'
+                    ];
+
+                    for (const selector of delayedSelectors) {
+                        const delayedCulqiOverlay = document.querySelector(selector);
+                        if (delayedCulqiOverlay) {
+                            console.log(`🔔 [Culqi] Eliminando overlay con delay (${selector}):`, delayedCulqiOverlay);
+                            try {
+                                delayedCulqiOverlay.remove();
+                            } catch (e) {
+                                (delayedCulqiOverlay as HTMLElement).style.display = 'none';
+                                (delayedCulqiOverlay as HTMLElement).style.pointerEvents = 'none';
+                            }
+                        }
+                    }
+
+                    // 2. CRÍTICO: Verificar si aún hay iframes de Culqi activos
+                    const remainingIframes = document.querySelectorAll('iframe.culqi_checkout, iframe[name="checkout_frame"]');
+                    if (remainingIframes.length > 0) {
+                        console.log(`🔔 [Culqi] Encontrados ${remainingIframes.length} iframe(s) restantes, eliminando...`);
+                        remainingIframes.forEach((iframe, index) => {
+                            console.log(`🔔 [Culqi] Eliminando iframe restante ${index + 1}:`, iframe);
+                            try {
+                                // Desactivar completamente
+                                (iframe as HTMLElement).style.pointerEvents = 'none';
+                                (iframe as HTMLElement).style.display = 'none';
+                                (iframe as HTMLElement).style.visibility = 'hidden';
+                                (iframe as HTMLElement).style.opacity = '0';
+                                (iframe as HTMLElement).style.zIndex = '-999999';
+
+                                // Eliminar del DOM
+                                iframe.remove();
+                            } catch (e) {
+                                console.log(`🔔 [Culqi] Error al eliminar iframe restante ${index + 1}:`, e);
+                            }
+                        });
+                    }
+
+                    // 3. Verificar si hay elementos con data-v-9a32aa2a (Vue de Culqi)
+                    const culqiVueElements = document.querySelectorAll('[data-v-9a32aa2a]');
+                    if (culqiVueElements.length > 0) {
+                        console.log(`🔔 [Culqi] Encontrados ${culqiVueElements.length} elemento(s) Vue de Culqi, desactivando...`);
+                        culqiVueElements.forEach((element, index) => {
+                            const tagName = element.tagName.toLowerCase();
+
+                            // NO tocar body ni html
+                            if (tagName !== 'body' && tagName !== 'html') {
+                                (element as HTMLElement).style.pointerEvents = 'none';
+                                (element as HTMLElement).style.zIndex = '-999999';
+                                console.log(`🔔 [Culqi] Elemento Vue ${index + 1} desactivado:`, element);
+                            } else {
+                                console.log(`🔔 [Culqi] SALTANDO elemento Vue ${tagName} para evitar bloquear página`);
+                            }
+                        });
+                    }
+
+                    // 4. CRÍTICO: Asegurar que body y html estén funcionales
+                    console.log('🔔 [Culqi] Verificación final: restaurando body y html...');
+                    const bodyElement = document.body;
+                    const htmlElement = document.documentElement;
+
+                    if (bodyElement) {
+                        bodyElement.style.pointerEvents = '';
+                        bodyElement.style.zIndex = '';
+                        console.log('🔔 [Culqi] Body final restaurado');
+                    }
+
+                    if (htmlElement) {
+                        htmlElement.style.pointerEvents = '';
+                        htmlElement.style.zIndex = '';
+                        console.log('🔔 [Culqi] HTML final restaurado');
+                    }
+
+                } catch (error) {
+                    console.error('🔔 [Culqi] Error en verificación final:', error);
+                }
+            }, 1000);
+
+            console.log('🔔 [Culqi] Procesando token en segundo plano:', token.id);
+
+            // Obtener configuración de Culqi
+            const culqiConfig = checkoutConfig?.payments?.culqi;
+            if (!culqiConfig) {
+                throw new Error('Configuración de Culqi no disponible');
+            }
+
+            // Preparar datos del pedido (necesitamos recrear OrderData aquí)
+            const orderData: OrderData = {
+                items: state.items,
+                customer: {
+                    fullName: formData.fullName || 'Cliente',
+                    email: formData.email || '',
+                    phone: formData.phone || ''
+                },
+                ...(customerId && { customerId }),
+                totals: {
+                    subtotal,
+                    shipping: shipping || 0,
+                    total: total || subtotal + (shipping || 0)
+                },
+                currency: 'PEN',
+                shipping: {
+                    method: formData.shippingMethod as 'standard' | 'express' | 'pickup',
+                    address: formData.address,
+                    city: formData.city,
+                    cost: shipping || 0,
+                    ...(selectedLocation && { pickupLocation: selectedLocation })
+                },
+                payment: {
+                    method: 'culqi',
+                    notes: formData.notes
+                },
+                checkoutMethod: 'traditional' as const,
+                discount: discount || 0,
+                ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
+            };
+
+            // Convertir a formato de cargo de Culqi
+            console.log('🔔 [Culqi] Convirtiendo a formato de cargo...');
+            const chargeData = orderDataToCharge(orderData, culqiConfig);
+
+            // Crear cargo real en Culqi
+            console.log('🔔 [Culqi] Creando cargo en Culqi API...');
+            const chargeResult = await createCharge(chargeData, token.id, culqiConfig);
+
+            console.log('🔔 [Culqi] Cargo creado exitosamente:', {
+                id: chargeResult.id,
+                amount: chargeResult.amount,
+                paid: chargeResult.paid,
+                currency: chargeResult.currency_code
+            });
+
+            // Verificar si el cargo fue exitoso (en pruebas, paid puede ser false pero outcome indica éxito)
+            const isSuccessful = chargeResult.paid || chargeResult.outcome?.type === 'venta_exitosa';
+
+            console.log('🔔 [Culqi] Evaluando resultado del cargo:', {
+                paid: chargeResult.paid,
+                outcomeType: chargeResult.outcome?.type,
+                isSuccessful,
+                chargeId: chargeResult.id
+            });
+
+            if (isSuccessful) {
+                console.log('🔔 [Culqi] Pago confirmado, procesando pedido...');
+
+                // CRÍTICO: Guardar pedido en Firestore con información de pago de Culqi
+                console.log('🔔 [Culqi] Guardando pedido en Firestore...');
+                try {
+                    const orderDoc = await createOrder(storeId!, orderData, {
+                        isPaid: true,
+                        paidAmount: chargeResult.amount / 100, // Culqi devuelve en centavos
+                        paymentType: 'online_payment',
+                        transactionId: chargeResult.id
+                    });
+                    const orderId = orderDoc?.id || null;
+
+                    if (orderId) {
+                        console.log('🔔 [Culqi] Pedido guardado exitosamente en Firestore:', orderId);
+
+                        // Agregar información del pago de Culqi a los logs
+                        console.log('🔔 [Culqi] Detalles del pago guardado:', {
+                            orderId,
+                            culqiChargeId: chargeResult.id,
+                            amount: chargeResult.amount,
+                            currency: chargeResult.currency_code,
+                            paymentMethod: 'culqi'
+                        });
+                    } else {
+                        console.warn('🔔 [Culqi] Pedido no se pudo guardar en Firestore (Firebase no disponible), continuando...');
+                    }
+
+                    // Limpiar carrito después del guardado exitoso
+                    clearCart();
+                    setIsSubmitting(false);
+
+                    // Usar el mismo flujo que otros métodos de pago: mostrar confirmación
+                    if (onShowConfirmation) {
+                        console.log('🔔 [Culqi] Mostrando modal de confirmación...');
+                        onShowConfirmation(orderData);
+                    } else {
+                        console.log('🔔 [Culqi] Usando fallback de confirmación...');
+                        onSuccess?.();
+                    }
+                    onClose();
+
+                    console.log('🔔 [Culqi] Proceso completado exitosamente');
+
+                } catch (saveError) {
+                    console.error('🔔 [Culqi] Error al guardar pedido en Firestore:', saveError);
+
+                    // Incluso si falla el guardado, mostrar confirmación al usuario
+                    // porque el pago ya se procesó exitosamente
+                    clearCart();
+                    setIsSubmitting(false);
+
+                    if (onShowConfirmation) {
+                        console.log('🔔 [Culqi] Mostrando confirmación a pesar del error de guardado...');
+                        onShowConfirmation(orderData);
+                    } else {
+                        onSuccess?.();
+                    }
+                    onClose();
+
+                    // Opcional: Mostrar notificación al usuario sobre el problema de guardado
+                    alert('El pago se procesó exitosamente, pero hubo un problema al guardar el pedido. Por favor contacta al soporte.');
+                }
+            } else {
+                throw new Error(`Pago no exitoso. Estado: paid=${chargeResult.paid}, outcome=${chargeResult.outcome?.type}`);
+            }
+
+        } catch (error) {
+            console.error('🔔 [Culqi] Error al procesar token:', error);
+            setIsSubmitting(false);
+
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            alert(`Error al procesar el pago: ${errorMessage}`);
+        }
+    };
+
+    const handleCulqiOrder = async (order: any) => {
+        try {
+            console.log('🔔 [Culqi] Procesando orden:', order);
+            // TODO: Manejar órdenes si es necesario
+        } catch (error) {
+            console.error('🔔 [Culqi] Error al procesar orden:', error);
+        }
     };
 
     // Cargar configuración de envío y checkout cuando se abre el modal
@@ -1637,13 +2138,29 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         unavailableItems: stockValidation.unavailableItems.length
                     });
                     
-                    // Si debe mostrar advertencias, mostrar modal y return early
-                    if (shouldWarn && stockValidation.unavailableItems.length > 0) {
+                    // Filtrar solo items que realmente manejan stock y están no disponibles
+                    const unavailableWithStockManagement = stockValidation.unavailableItems.filter(item => item.manageStock);
+
+                    console.log('🔍 [Stock Validation] Análisis detallado:', {
+                        totalUnavailable: stockValidation.unavailableItems.length,
+                        unavailableWithStockManagement: unavailableWithStockManagement.length,
+                        itemsDetail: stockValidation.unavailableItems.map(item => ({
+                            productId: item.productId,
+                            manageStock: item.manageStock,
+                            available: item.available,
+                            message: item.message
+                        }))
+                    });
+
+                    // Solo mostrar advertencia si hay items con rastreo de stock que están realmente no disponibles
+                    if (shouldWarn && unavailableWithStockManagement.length > 0) {
                         console.log('⚠️ [Stock Validation] Mostrando modal de advertencia');
-                        setStockWarningItems(stockValidation.unavailableItems);
+                        setStockWarningItems(unavailableWithStockManagement);
                         setShowStockWarning(true);
                         setIsSubmitting(false); // Detener el loading
                         return; // No continuar con el checkout hasta que el usuario decida
+                    } else if (stockValidation.unavailableItems.length > 0 && unavailableWithStockManagement.length === 0) {
+                        console.log('ℹ️ [Stock Validation] Todos los items no disponibles son productos sin rastreo de stock - continuando checkout');
                     }
                     
                     // Si debe bloquear completamente (futuro)
@@ -1752,8 +2269,138 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 
                 return; // ← IMPORTANTE: NO continuar con processCheckoutFlow()
             }
-            
-            // Solo ejecutar flujo normal si NO es MercadoPago
+
+            // 🔔 PROCESAMIENTO CULQI
+            if (formData.paymentMethod === 'culqi') {
+                console.log('🔔 [Culqi] Usuario seleccionó Culqi!');
+                console.log('🔔 [Culqi] Config disponible:', {
+                    enabled: checkoutConfig?.payments?.culqi?.enabled,
+                    publicKey: checkoutConfig?.payments?.culqi?.publicKey ? 'PRESENTE' : 'FALTANTE',
+                    secretKey: checkoutConfig?.payments?.culqi?.secretKey ? 'PRESENTE' : 'FALTANTE',
+                    environment: checkoutConfig?.payments?.culqi?.environment
+                });
+
+                console.log('🔔 [Culqi] Iniciando flujo de pago Culqi...');
+
+                // 🚀 BIFURCACIÓN: No continuar con flujo normal, procesar con Culqi
+                console.log('🔔 [Culqi] Iniciando flujo de pago Culqi (NO flujo normal)');
+
+                // Validar configuración de Culqi
+                const culqiConfig = checkoutConfig?.payments?.culqi;
+                if (!culqiConfig) {
+                    console.error('🔔 [Culqi] Error: No hay configuración disponible');
+                    alert('Error: Configuración de Culqi no disponible');
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                const validation = validateCulqiConfig(culqiConfig);
+                if (validation !== true) {
+                    console.error('🔔 [Culqi] Error de configuración:', validation);
+                    alert(`Error de configuración Culqi: ${validation}`);
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                try {
+                    // Preparar datos del pedido para Culqi
+                    console.log('🔔 [Culqi] Preparando datos del pedido...');
+
+                    const orderData: OrderData = {
+                        items: state.items,
+                        customer: {
+                            fullName: formData.fullName || 'Cliente',
+                            email: formData.email || '',
+                            phone: formData.phone || ''
+                        },
+                        ...(customerId && { customerId }),
+                        totals: {
+                            subtotal,
+                            shipping: shipping || 0,
+                            total: total || subtotal + (shipping || 0)
+                        },
+                        currency: 'PEN', // Culqi principalmente maneja PEN
+                        shipping: {
+                            method: formData.shippingMethod as 'standard' | 'express' | 'pickup',
+                            address: formData.address,
+                            city: formData.city,
+                            cost: shipping || 0,
+                            ...(selectedLocation && { pickupLocation: selectedLocation })
+                        },
+                        payment: {
+                            method: 'culqi',
+                            notes: formData.notes
+                        },
+                        checkoutMethod: 'traditional' as const,
+                        discount: discount || 0,
+                        ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
+                    };
+
+                    // Cargar script de Culqi
+                    console.log('🔔 [Culqi] Cargando script de Culqi...');
+                    await loadCulqiScript();
+
+                    // Preparar configuración del checkout
+                    const totalInCents = Math.round(orderData.totals.total * 100);
+                    const checkoutSettings = {
+                        title: 'Mi Tienda',
+                        currency: 'PEN',
+                        amount: totalInCents,
+                    };
+
+                    const culqiSettings = {
+                        title: checkoutSettings.title,
+                        currency: checkoutSettings.currency,
+                        amount: checkoutSettings.amount,
+                        // Removido: order field (por ahora solo tarjetas)
+                    };
+
+                    const culqiClient = {
+                        email: orderData.customer.email || '',
+                    };
+
+                    const culqiOptions = {
+                        lang: 'auto',
+                        modal: true,
+                        installments: true
+                        // Removido: paymentMethods (sin order, solo tarjetas disponibles)
+                    };
+
+                    const culqiConfig_init = {
+                        settings: culqiSettings,
+                        client: culqiClient,
+                        options: culqiOptions
+                    };
+
+                    console.log('🔔 [Culqi] Inicializando checkout con configuración:', {
+                        amount: totalInCents,
+                        currency: 'PEN',
+                        title: checkoutSettings.title,
+                        email: orderData.customer.email
+                    });
+
+                    // Inicializar Culqi checkout
+                    const culqi = initializeCulqi({
+                        publicKey: culqiConfig.publicKey,
+                        config: culqiConfig_init
+                    });
+
+                    // Abrir el modal de Culqi
+                    console.log('🔔 [Culqi] Abriendo modal de checkout...');
+                    culqi.open();
+
+                    // Note: El flujo continúa en handleCulqiToken cuando el usuario complete el pago
+
+                } catch (error) {
+                    console.error('🔔 [Culqi] Error al inicializar checkout:', error);
+                    alert('Error al abrir el checkout de Culqi. Por favor intenta de nuevo.');
+                    setIsSubmitting(false);
+                }
+
+                return; // ← IMPORTANTE: NO continuar con processCheckoutFlow()
+            }
+
+            // Solo ejecutar flujo normal si NO es MercadoPago ni Culqi
             console.log('💳 [Payment Method] Continuando con flujo tradicional...');
             await processCheckoutFlow();
             
@@ -2629,6 +3276,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <div className="nbd-loading-spinner"></div>
                                                     {isWhatsAppCheckout ? t('sending') :
                                                      formData.paymentMethod === 'mercadopago' ? t('processingPayment') :
+                                                     formData.paymentMethod === 'culqi' ? t('processing') :
                                                      t('processing')}
                                                 </>
                                             ) : (
@@ -2646,6 +3294,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     )}
                                                     {isWhatsAppCheckout ? t('sendViaWhatsApp') :
                                                      formData.paymentMethod === 'mercadopago' ? t('goToPayment') :
+                                                     formData.paymentMethod === 'culqi' ? t('goToPayment') :
                                                      t('confirmOrder')}
                                                 </>
                                             )}
