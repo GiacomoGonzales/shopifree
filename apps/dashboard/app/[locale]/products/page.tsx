@@ -328,6 +328,30 @@ export default function ProductsPage() {
     }
   }, [openMenuId])
 
+  // Manejar scroll para reposicionar dropdown móvil
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+
+    const handleMobileScroll = () => {
+      const buttonRef = mobileMenuRefs.current[mobileMenuOpen]
+      const dropdown = document.querySelector('[data-mobile-dropdown]') as HTMLElement
+
+      if (buttonRef && dropdown) {
+        const buttonRect = buttonRef.getBoundingClientRect()
+        dropdown.style.top = `${buttonRect.bottom + 8}px`
+        dropdown.style.right = `${window.innerWidth - buttonRect.right}px`
+      }
+    }
+
+    // Escuchar scroll en window y en contenedores con scroll
+    window.addEventListener('scroll', handleMobileScroll, { passive: true })
+    document.addEventListener('scroll', handleMobileScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleMobileScroll)
+      document.removeEventListener('scroll', handleMobileScroll)
+    }
+  }, [mobileMenuOpen])
 
   // Función para vista previa del producto en la tienda
   const handlePreview = (product: ProductWithId) => {
@@ -1042,8 +1066,18 @@ export default function ProductsPage() {
 
                                     {/* Dropdown móvil */}
                                     {mobileMenuOpen === product.id && (
-                                      <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-md shadow-xl z-50"
-                                           data-mobile-dropdown="true">
+                                      <div
+                                        className="fixed w-48 bg-white border border-gray-200 rounded-md shadow-xl z-[9999]"
+                                        data-mobile-dropdown="true"
+                                        style={{
+                                          top: mobileMenuRefs.current[product.id]
+                                            ? `${mobileMenuRefs.current[product.id].getBoundingClientRect().bottom + 8}px`
+                                            : '50px',
+                                          right: mobileMenuRefs.current[product.id]
+                                            ? `${window.innerWidth - mobileMenuRefs.current[product.id].getBoundingClientRect().right}px`
+                                            : '16px'
+                                        }}
+                                      >
                                         <div className="py-1">
                                           <button
                                             type="button"
