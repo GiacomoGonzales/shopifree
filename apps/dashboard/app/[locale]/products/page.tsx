@@ -445,7 +445,7 @@ export default function ProductsPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pb-32">
         <div className="max-w-7xl mx-auto">
           {/* Botones de acción flotantes */}
           <div className="px-4 sm:px-6 lg:px-8 py-6">
@@ -770,7 +770,7 @@ export default function ProductsPage() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="relative" ref={(el) => menuRefs.current[product.id] = el}>
-                                  <button 
+                                  <button
                                     onClick={() => toggleMenu(product.id)}
                                     className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
                                     title="Acciones"
@@ -781,7 +781,20 @@ export default function ProductsPage() {
                                   </button>
                                   
                                   {openMenuId === product.id && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                                    <div
+                                      ref={(el) => {
+                                        if (el) {
+                                          const button = el.previousElementSibling as HTMLElement;
+                                          if (button) {
+                                            const rect = button.getBoundingClientRect();
+                                            el.style.position = 'fixed';
+                                            el.style.top = `${rect.bottom + 8}px`;
+                                            el.style.right = `${window.innerWidth - rect.right}px`;
+                                          }
+                                        }
+                                      }}
+                                      className="w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5"
+                                      style={{ zIndex: 9999 }}>
                                       <div className="py-1">
                                         <button
                                           onClick={() => {
