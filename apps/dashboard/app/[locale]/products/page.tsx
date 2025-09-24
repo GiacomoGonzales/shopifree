@@ -33,6 +33,7 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<string | null>(null)
   const [stockModalOpen, setStockModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<ProductWithId | null>(null)
   const [stockChanges, setStockChanges] = useState<{
@@ -41,6 +42,7 @@ export default function ProductsPage() {
   }>({})
   const [updating, setUpdating] = useState(false)
   const menuRefs = useRef<{[key: string]: HTMLDivElement | null}>({})
+  const mobileMenuRefs = useRef<{[key: string]: HTMLDivElement | null}>({})
   
   // Estados para filtros y paginación
   const [searchQuery, setSearchQuery] = useState('')
@@ -276,14 +278,56 @@ export default function ProductsPage() {
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Manejar dropdown desktop
       if (openMenuId && menuRefs.current[openMenuId] && !menuRefs.current[openMenuId]?.contains(event.target as Node)) {
         setOpenMenuId(null)
+      }
+
+      // Manejar dropdown móvil
+      if (mobileMenuOpen && mobileMenuRefs.current[mobileMenuOpen] && !mobileMenuRefs.current[mobileMenuOpen]?.contains(event.target as Node)) {
+        setMobileMenuOpen(null)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openMenuId, mobileMenuOpen])
+
+  // Función para recalcular posición del dropdown
+  const updateDropdownPosition = (dropdownElement: HTMLElement, buttonElement: HTMLElement) => {
+    const buttonRect = buttonElement.getBoundingClientRect()
+    dropdownElement.style.position = 'fixed'
+    dropdownElement.style.top = `${buttonRect.bottom + 8}px`
+    dropdownElement.style.right = `${window.innerWidth - buttonRect.right}px`
+    dropdownElement.style.zIndex = '9999'
+  }
+
+  // Manejar scroll para reposicionar dropdown
+  useEffect(() => {
+    if (!openMenuId) return
+
+    const handleScroll = () => {
+      const menuRef = menuRefs.current[openMenuId]
+      if (!menuRef) return
+
+      const button = menuRef.querySelector('button') as HTMLElement
+      const dropdown = menuRef.querySelector('[data-dropdown]') as HTMLElement
+
+      if (button && dropdown) {
+        updateDropdownPosition(dropdown, button)
+      }
+    }
+
+    // Escuchar scroll en window y en contenedores con scroll
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    document.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('scroll', handleScroll)
+    }
   }, [openMenuId])
+
 
   // Función para vista previa del producto en la tienda
   const handlePreview = (product: ProductWithId) => {
@@ -786,15 +830,12 @@ export default function ProductsPage() {
                                         if (el) {
                                           const button = el.previousElementSibling as HTMLElement;
                                           if (button) {
-                                            const rect = button.getBoundingClientRect();
-                                            el.style.position = 'fixed';
-                                            el.style.top = `${rect.bottom + 8}px`;
-                                            el.style.right = `${window.innerWidth - rect.right}px`;
+                                            updateDropdownPosition(el, button);
                                           }
                                         }
                                       }}
-                                      className="w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5"
-                                      style={{ zIndex: 9999 }}>
+                                      data-dropdown="true"
+                                      className="w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                                       <div className="py-1">
                                         <button
                                           onClick={() => {
@@ -884,38 +925,53 @@ export default function ProductsPage() {
                               
                               {/* Product Image */}
                               <div className="flex-shrink-0">
-                                {product.mediaFiles && product.mediaFiles.length > 0 ? (
-                                  <img
-                                    className="h-16 w-16 rounded-lg object-cover border border-gray-200"
-                                    src={product.mediaFiles[0].url.includes('.mp4') || product.mediaFiles[0].url.includes('.webm') || product.mediaFiles[0].url.includes('.mov') 
-                                      ? product.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
-                                      : product.mediaFiles[0].url}
-                                    alt={product.name}
-                                    onError={(e) => {
-                                      // Fallback si no existe el thumbnail
-                                      const target = e.target as HTMLImageElement;
-                                      if (target.src.includes('.jpg') && product.mediaFiles[0].url.includes('.mp4')) {
-                                        target.src = product.mediaFiles[0].url.replace('.mp4', '.png'); // Try PNG thumbnail
-                                      } else if (target.src.includes('.png') && product.mediaFiles[0].url.includes('.mp4')) {
-                                        // Final fallback - mostrar placeholder
-                                        target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkwzMiA0Mkw0NCAyNkgyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPC9zdmc+';
-                                      }
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="h-16 w-16 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
-                                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                  </div>
-                                )}
+                                <div className="flex flex-col items-center space-y-2">
+                                  {product.mediaFiles && product.mediaFiles.length > 0 ? (
+                                    <img
+                                      className="h-16 w-16 rounded-lg object-cover border border-gray-200"
+                                      src={product.mediaFiles[0].url.includes('.mp4') || product.mediaFiles[0].url.includes('.webm') || product.mediaFiles[0].url.includes('.mov')
+                                        ? product.mediaFiles[0].url.replace(/\.(mp4|webm|mov)$/, '.jpg') // Cloudinary auto-generates thumbnails
+                                        : product.mediaFiles[0].url}
+                                      alt={product.name}
+                                      onError={(e) => {
+                                        // Fallback si no existe el thumbnail
+                                        const target = e.target as HTMLImageElement;
+                                        if (target.src.includes('.jpg') && product.mediaFiles[0].url.includes('.mp4')) {
+                                          target.src = product.mediaFiles[0].url.replace('.mp4', '.png'); // Try PNG thumbnail
+                                        } else if (target.src.includes('.png') && product.mediaFiles[0].url.includes('.mp4')) {
+                                          // Final fallback - mostrar placeholder
+                                          target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkwzMiA0Mkw0NCAyNkgyMFoiIGZpbGw9IiM5Q0E0QUYiLz4KPC9zdmc+';
+                                        }
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="h-16 w-16 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+                                      <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                      </svg>
+                                    </div>
+                                  )}
+
+                                  {/* Status Badge - Debajo de la imagen */}
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    product.status === 'active'
+                                      ? 'bg-green-100 text-green-800'
+                                      : product.status === 'draft'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {product.status === 'active' && t('status.active')}
+                                    {product.status === 'draft' && t('status.draft')}
+                                    {product.status === 'archived' && t('status.archived')}
+                                  </span>
+                                </div>
                               </div>
 
                               {/* Product Info */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm font-medium text-gray-900 truncate">
+                                    <h3 className="text-sm font-medium text-gray-900 h-10 flex items-start leading-5 overflow-hidden line-clamp-2">
                                       {product.name}
                                     </h3>
                                     <div className="mt-1 flex items-center space-x-2">
@@ -937,23 +993,10 @@ export default function ProductsPage() {
                                       })()}
                                     </div>
                                   </div>
-                                  
-                                  {/* Status Badge */}
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    product.status === 'active' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : product.status === 'draft'
-                                      ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {product.status === 'active' && t('status.active')}
-                                    {product.status === 'draft' && t('status.draft')}
-                                    {product.status === 'archived' && t('status.archived')}
-                                  </span>
                                 </div>
 
                                 {/* Categories and Brand */}
-                                <div className="mt-2 space-y-1">
+                                <div className="mt-2 space-y-1 relative">
                                   {/* Categories */}
                                   {(getCategoryNames(product.selectedParentCategoryIds).length > 0 || 
                                     getSubcategoryNames(product.selectedSubcategoryIds).length > 0) && (
@@ -979,13 +1022,118 @@ export default function ProductsPage() {
                                       </span>
                                     </div>
                                   )}
+
+                                  {/* Botón de tres puntitos - Solo móvil */}
+                                  <div className="absolute bottom-0 right-0 lg:hidden" data-mobile-menu="true" ref={(el) => mobileMenuRefs.current[product.id] = el}>
+                                    <button
+                                      type="button"
+                                      className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+                                      title="Más acciones"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        setMobileMenuOpen(mobileMenuOpen === product.id ? null : product.id)
+                                      }}
+                                    >
+                                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                      </svg>
+                                    </button>
+
+                                    {/* Dropdown móvil */}
+                                    {mobileMenuOpen === product.id && (
+                                      <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-md shadow-xl z-50"
+                                           data-mobile-dropdown="true">
+                                        <div className="py-1">
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.preventDefault()
+                                              e.stopPropagation()
+                                              handlePreview(product)
+                                              setMobileMenuOpen(null)
+                                            }}
+                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                          >
+                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            Ver en catálogo
+                                          </button>
+
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.preventDefault()
+                                              e.stopPropagation()
+                                              handleEdit(product.id)
+                                              setMobileMenuOpen(null)
+                                            }}
+                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                          >
+                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Editar producto
+                                          </button>
+
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.preventDefault()
+                                              e.stopPropagation()
+                                              handleUpdateStock(product)
+                                              setMobileMenuOpen(null)
+                                            }}
+                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                          >
+                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                            </svg>
+                                            Actualizar existencias
+                                          </button>
+
+                                          <button
+                                            type="button"
+                                            disabled={deleting === product.id}
+                                            onClick={(e) => {
+                                              e.preventDefault()
+                                              e.stopPropagation()
+                                              if (window.confirm(t('actions.confirmDelete'))) {
+                                                handleDelete(product.id)
+                                              }
+                                              setMobileMenuOpen(null)
+                                            }}
+                                            className={`flex items-center w-full px-4 py-2 text-sm hover:bg-red-50 active:bg-red-100 transition-colors ${
+                                              deleting === product.id
+                                                ? 'text-gray-400 cursor-not-allowed'
+                                                : 'text-red-700'
+                                            }`}
+                                          >
+                                            {deleting === product.id ? (
+                                              <svg className="animate-spin h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                              </svg>
+                                            ) : (
+                                              <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                              </svg>
+                                            )}
+                                            Eliminar producto
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
 
                                 {/* Actions */}
                                 <div className="mt-3 flex items-center space-x-2">
-                                  <button 
+                                  <button
                                     onClick={() => handlePreview(product)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+                                    className="text-gray-400 hover:text-gray-600 transition-colors p-2 hidden lg:block"
                                     title={t('actions.preview')}
                                   >
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -993,9 +1141,9 @@ export default function ProductsPage() {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                   </button>
-                                  <button 
+                                  <button
                                     onClick={() => handleEdit(product.id)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+                                    className="text-gray-400 hover:text-gray-600 transition-colors p-2 hidden lg:block"
                                     title={t('actions.edit')}
                                   >
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1009,8 +1157,8 @@ export default function ProductsPage() {
                                       }
                                     }}
                                     disabled={deleting === product.id}
-                                    className={`transition-colors p-2 ${
-                                      deleting === product.id 
+                                    className={`transition-colors p-2 hidden lg:block ${
+                                      deleting === product.id
                                         ? 'text-gray-400 cursor-not-allowed'
                                         : 'text-gray-400 hover:text-red-600'
                                     }`}
