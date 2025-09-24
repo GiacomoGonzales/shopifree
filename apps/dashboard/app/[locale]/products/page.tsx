@@ -289,69 +289,16 @@ export default function ProductsPage() {
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    if (openMenuId || mobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [openMenuId, mobileMenuOpen])
 
-  // Función para recalcular posición del dropdown
-  const updateDropdownPosition = (dropdownElement: HTMLElement, buttonElement: HTMLElement) => {
-    const buttonRect = buttonElement.getBoundingClientRect()
-    dropdownElement.style.position = 'fixed'
-    dropdownElement.style.top = `${buttonRect.bottom + 8}px`
-    dropdownElement.style.right = `${window.innerWidth - buttonRect.right}px`
-    dropdownElement.style.zIndex = '9999'
-  }
 
-  // Manejar scroll para reposicionar dropdown
-  useEffect(() => {
-    if (!openMenuId) return
-
-    const handleScroll = () => {
-      const menuRef = menuRefs.current[openMenuId]
-      if (!menuRef) return
-
-      const button = menuRef.querySelector('button') as HTMLElement
-      const dropdown = menuRef.querySelector('[data-dropdown]') as HTMLElement
-
-      if (button && dropdown) {
-        updateDropdownPosition(dropdown, button)
-      }
-    }
-
-    // Escuchar scroll en window y en contenedores con scroll
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    document.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      document.removeEventListener('scroll', handleScroll)
-    }
-  }, [openMenuId])
-
-  // Manejar scroll para reposicionar dropdown móvil
-  useEffect(() => {
-    if (!mobileMenuOpen) return
-
-    const handleMobileScroll = () => {
-      const buttonRef = mobileMenuRefs.current[mobileMenuOpen]
-      const dropdown = document.querySelector('[data-mobile-dropdown]') as HTMLElement
-
-      if (buttonRef && dropdown) {
-        const buttonRect = buttonRef.getBoundingClientRect()
-        dropdown.style.top = `${buttonRect.bottom + 8}px`
-        dropdown.style.right = `${window.innerWidth - buttonRect.right}px`
-      }
-    }
-
-    // Escuchar scroll en window y en contenedores con scroll
-    window.addEventListener('scroll', handleMobileScroll, { passive: true })
-    document.addEventListener('scroll', handleMobileScroll, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', handleMobileScroll)
-      document.removeEventListener('scroll', handleMobileScroll)
-    }
-  }, [mobileMenuOpen])
 
   // Función para vista previa del producto en la tienda
   const handlePreview = (product: ProductWithId) => {
@@ -849,17 +796,7 @@ export default function ProductsPage() {
                                   </button>
                                   
                                   {openMenuId === product.id && (
-                                    <div
-                                      ref={(el) => {
-                                        if (el) {
-                                          const button = el.previousElementSibling as HTMLElement;
-                                          if (button) {
-                                            updateDropdownPosition(el, button);
-                                          }
-                                        }
-                                      }}
-                                      data-dropdown="true"
-                                      className="w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                                       <div className="py-1">
                                         <button
                                           onClick={() => {
@@ -1048,7 +985,7 @@ export default function ProductsPage() {
                                   )}
 
                                   {/* Botón de tres puntitos - Solo móvil */}
-                                  <div className="absolute bottom-0 right-0 lg:hidden" data-mobile-menu="true" ref={(el) => mobileMenuRefs.current[product.id] = el}>
+                                  <div className="absolute bottom-0 right-0 lg:hidden relative" data-mobile-menu="true" ref={(el) => mobileMenuRefs.current[product.id] = el}>
                                     <button
                                       type="button"
                                       className="text-gray-400 hover:text-gray-600 transition-colors p-2"
@@ -1066,17 +1003,7 @@ export default function ProductsPage() {
 
                                     {/* Dropdown móvil */}
                                     {mobileMenuOpen === product.id && (
-                                      <div
-                                        className="fixed w-48 bg-white border border-gray-200 rounded-md shadow-xl z-[9999]"
-                                        data-mobile-dropdown="true"
-                                        style={{
-                                          top: mobileMenuRefs.current[product.id]
-                                            ? `${mobileMenuRefs.current[product.id].getBoundingClientRect().bottom + 8}px`
-                                            : '50px',
-                                          right: mobileMenuRefs.current[product.id]
-                                            ? `${window.innerWidth - mobileMenuRefs.current[product.id].getBoundingClientRect().right}px`
-                                            : '16px'
-                                        }}
+                                      <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
                                       >
                                         <div className="py-1">
                                           <button

@@ -3,10 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { Timestamp } from 'firebase/firestore'
-import { 
-  updateCustomer, 
-  type CustomerWithId 
+import {
+  updateCustomer,
+  type CustomerWithId
 } from '../../lib/customers'
+import {
+  subscribeToStoreOrders,
+  type Order,
+  formatOrderDate,
+  formatCurrency
+} from '../../lib/orders'
 
 interface CustomerModalProps {
   customer: CustomerWithId
@@ -35,6 +41,8 @@ export default function CustomerModal({
     newsletter: customer.preferences?.newsletter || false,
     notifyOrderStatus: customer.preferences?.notifyOrderStatus || false
   })
+  const [customerOrders, setCustomerOrders] = useState<Order[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(false)
 
   // Reset state when customer changes
   useEffect(() => {
@@ -46,7 +54,49 @@ export default function CustomerModal({
     })
     setIsEditing(false)
     setActiveTab('info')
+    setCustomerOrders([])
   }, [customer])
+
+  // Load customer orders when switching to orders tab
+  useEffect(() => {
+    if (activeTab === 'orders' && isOpen && storeId) {
+      setLoadingOrders(true)
+
+      const unsubscribe = subscribeToStoreOrders(storeId, (orders) => {
+        // Filter orders for this customer by multiple criteria
+        const filteredOrders = orders.filter(order => {
+          // First try: match by uid if both exist
+          if (customer.uid && order.userId) {
+            return order.userId === customer.uid
+          }
+
+          // Second try: match by email and name
+          if (customer.email && order.clientName && customer.displayName) {
+            const nameMatch = order.clientName.toLowerCase().includes(customer.displayName.toLowerCase()) ||
+                             customer.displayName.toLowerCase().includes(order.clientName.toLowerCase())
+            return nameMatch
+          }
+
+          // Third try: match by phone if both exist
+          if (customer.phone && order.clientPhone) {
+            // Clean phone numbers for comparison (remove spaces, dashes, etc.)
+            const cleanCustomerPhone = customer.phone.replace(/[^\d+]/g, '')
+            const cleanOrderPhone = order.clientPhone.replace(/[^\d+]/g, '')
+            return cleanCustomerPhone === cleanOrderPhone
+          }
+
+          return false
+        })
+
+        setCustomerOrders(filteredOrders.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ))
+        setLoadingOrders(false)
+      })
+
+      return () => unsubscribe?.()
+    }
+  }, [activeTab, isOpen, storeId, customer.uid])
 
   // Format date helper
   const formatDate = (timestamp: Timestamp | Date | string | null | undefined) => {
@@ -129,12 +179,12 @@ export default function CustomerModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Overlay de fondo */}
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
+      <div className="h-full w-full sm:flex sm:items-center sm:justify-center sm:min-h-screen sm:px-4 sm:pt-4 sm:pb-20 sm:text-center sm:block sm:p-0">
+        {/* Overlay de fondo - solo en desktop */}
+        <div className="hidden sm:block fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
 
         {/* Modal */}
-        <div className="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
+        <div className="w-full h-full px-4 pt-5 text-left bg-white shadow-xl flex flex-col sm:inline-block sm:rounded-lg sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6 sm:h-auto sm:overflow-y-auto sm:overflow-hidden sm:align-bottom sm:transition-all sm:transform">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
@@ -241,8 +291,8 @@ export default function CustomerModal({
           </div>
 
           {/* Content */}
-          <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
-            <div className="min-h-[400px]">
+          <div className="flex-1 overflow-y-auto pb-4 sm:max-h-[calc(100vh-300px)] sm:pb-0">
+            <div className="sm:min-h-[400px]">
               {activeTab === 'info' && (
                 <div className="space-y-6">
                   {/* Personal Information */}
@@ -399,14 +449,50 @@ export default function CustomerModal({
               )}
 
               {activeTab === 'orders' && (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center py-12">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">{t('details.noOrders')}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{t('details.noOrdersMessage')}</p>
-                  </div>
+                <div className="space-y-4">
+                  {loadingOrders ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                    </div>
+                  ) : customerOrders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">{t('details.noOrders')}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{t('details.noOrdersMessage')}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {customerOrders.map((order) => (
+                        <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <h4 className="text-sm font-medium text-gray-900">#{order.id.slice(-6)}</h4>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                order.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : order.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {order.status}
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatCurrency(order.total)}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 mb-2">
+                            {formatOrderDate(order.createdAt)}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

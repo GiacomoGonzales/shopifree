@@ -43,9 +43,7 @@ function extractNameFromEmail(email: string): string {
 
 function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurrency, t }: CustomerCardProps) {
   const [showMenu, setShowMenu] = useState(false)
-  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 })
   const menuRef = useRef<HTMLDivElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -64,17 +62,6 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
     }
   }, [showMenu])
 
-  // Calculate menu position when opening
-  const handleToggleMenu = () => {
-    if (!showMenu && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect()
-      setMenuPosition({
-        top: buttonRect.bottom + window.scrollY + 4,
-        right: window.innerWidth - buttonRect.right + window.scrollX
-      })
-    }
-    setShowMenu(!showMenu)
-  }
 
   return (
     <div className="p-4 hover:bg-gray-50 relative">
@@ -114,10 +101,9 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
             </div>
 
                          {/* Actions Menu */}
-             <div className="flex items-center ml-2">
+             <div className="flex items-center ml-2 relative" ref={menuRef}>
                <button
-                 ref={buttonRef}
-                 onClick={handleToggleMenu}
+                 onClick={() => setShowMenu(!showMenu)}
                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                  title="Opciones"
                >
@@ -125,22 +111,10 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                  </svg>
                </button>
-             </div>
 
-             {/* Fixed positioned dropdown menu - appears above all containers */}
-             {showMenu && (
-               <>
-                 {/* Overlay para cerrar el menú */}
-                 <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                 
-                 <div 
-                   ref={menuRef}
-                   className="fixed w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-                   style={{
-                     top: `${menuPosition.top}px`,
-                     right: `${menuPosition.right}px`
-                   }}
-                 >
+               {/* Dropdown Menu */}
+               {showMenu && (
+                 <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                    <div className="py-1">
                      <button
                        onClick={() => {
@@ -180,8 +154,8 @@ function CustomerCard({ customer, onViewDetails, onDelete, deleting, formatCurre
                      </button>
                    </div>
                  </div>
-               </>
-             )}
+               )}
+             </div>
           </div>
 
           {/* Stats */}

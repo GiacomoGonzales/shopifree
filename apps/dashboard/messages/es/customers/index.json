@@ -90,6 +90,7 @@
     "notePlaceholder": "Agrega notas internas sobre este cliente...",
     "addTag": "Agregar etiqueta",
     "tagPlaceholder": "VIP, Frecuente, etc.",
+    "noTags": "Sin etiquetas configuradas",
     "noOrders": "Sin pedidos aún",
     "noOrdersMessage": "Este cliente no ha realizado ningún pedido todavía.",
     "close": "Cerrar"

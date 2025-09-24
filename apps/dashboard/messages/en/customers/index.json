@@ -90,6 +90,7 @@
     "notePlaceholder": "Add internal notes about this customer...",
     "addTag": "Add tag",
     "tagPlaceholder": "VIP, Frequent, etc.",
+    "noTags": "No tags configured",
     "noOrders": "No orders yet",
     "noOrdersMessage": "This customer hasn't placed any orders yet.",
     "close": "Close"
