@@ -66,16 +66,29 @@ export default function CheckoutSuccessPage() {
   const handleGoHome = () => {
     const pathname = window.location.pathname;
     const host = window.location.hostname;
-    const isCustomDomain = !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+    const port = window.location.port;
 
     let homeUrl;
-    if (isCustomDomain) {
-      homeUrl = '/';
+
+    // Si estamos en localhost con puerto, incluir el store ID
+    if ((host === 'localhost' || host.endsWith('localhost')) && port) {
+      const pathParts = pathname.split('/').filter(part => part.length > 0);
+      if (pathParts.length > 0) {
+        const storeId = pathParts[0];
+        homeUrl = `/${storeId}`;
+      } else {
+        homeUrl = '/';
+      }
     } else {
-      const pathParts = pathname.split('/');
-      const storeSubdomain = pathParts[1];
-      homeUrl = `/${storeSubdomain}`;
+      // Producción: subdominio o dominio personalizado
+      homeUrl = '/';
     }
+
+    console.log('🏠 [handleGoHome]', {
+      currentPath: pathname,
+      host: `${host}:${port}`,
+      homeUrl
+    });
 
     window.location.href = homeUrl;
   };

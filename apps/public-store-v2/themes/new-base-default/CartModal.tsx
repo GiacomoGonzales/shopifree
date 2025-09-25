@@ -11,6 +11,53 @@ import { OrderData } from '../../lib/orders';
 import { useStoreLanguage } from '../../lib/store-language-context';
 import { generateConfirmationToken } from '../../lib/confirmation-tokens';
 
+/**
+ * Construye URL respetando la estructura de la tienda
+ * - Localhost con puerto (ej: localhost:3004): /store-name/path?params
+ * - Producción (subdominio/dominio): /path?params
+ */
+function buildStoreUrl(path: string, queryParams?: string): string {
+    if (typeof window === 'undefined') return path;
+
+    const pathname = window.location.pathname;
+    const host = window.location.hostname;
+    const port = window.location.port;
+
+    let baseUrl: string;
+
+    // Si estamos en localhost con puerto, incluir el store ID del path actual
+    if ((host === 'localhost' || host.endsWith('localhost')) && port) {
+        const pathParts = pathname.split('/').filter(part => part.length > 0);
+
+        if (pathParts.length > 0) {
+            // El primer segmento es el store ID (ej: "lunara")
+            const storeId = pathParts[0];
+            baseUrl = `/${storeId}${path}`;
+        } else {
+            baseUrl = path;
+        }
+    } else {
+        // Producción: subdominio o dominio personalizado
+        baseUrl = path;
+    }
+
+    // Agregar query parameters si existen
+    if (queryParams) {
+        const separator = baseUrl.includes('?') ? '&' : '?';
+        baseUrl += separator + queryParams;
+    }
+
+    console.log('🔗 [buildStoreUrl]', {
+        input: path,
+        queryParams,
+        currentPath: pathname,
+        host: `${host}:${port}`,
+        result: baseUrl
+    });
+
+    return baseUrl;
+}
+
 interface CartModalProps {
     storeInfo?: StoreBasicInfo | null;
     storeId?: string;
@@ -194,8 +241,8 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
             // Limpiar carrito tras confirmación exitosa
             clearCart()
 
-            // Redireccionar a página de confirmación
-            const confirmationUrl = `/checkout/success?token=${token}`
+            // Construir URL de confirmación respetando la estructura de la tienda
+            const confirmationUrl = buildStoreUrl('/checkout/success', `token=${token}`)
 
             console.log('🔄 Redirigiendo a:', confirmationUrl)
             window.location.href = confirmationUrl
