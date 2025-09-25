@@ -9,6 +9,7 @@ import CheckoutModal from './CheckoutModal';
 import ConfirmationModal from './ConfirmationModal';
 import { OrderData } from '../../lib/orders';
 import { useStoreLanguage } from '../../lib/store-language-context';
+import { generateConfirmationToken } from '../../lib/confirmation-tokens';
 
 interface CartModalProps {
     storeInfo?: StoreBasicInfo | null;
@@ -175,12 +176,38 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
         closeCart();
     };
 
-    // Función para mostrar modal de confirmación (llamada desde CheckoutModal)
+    // Función para redirigir a página de confirmación (llamada desde CheckoutModal)
     const showConfirmationModalWithData = (orderData: OrderData) => {
-        console.log('📧 CartModal recibió datos para confirmación:', orderData);
-        setOrderDataForConfirmation(orderData);
-        setIsCheckoutOpen(false); // Cerrar checkout modal
-        setShowConfirmationModal(true); // Mostrar confirmation modal
+        console.log('📧 CartModal recibió datos para confirmación - redirigiendo a página:', orderData);
+
+        try {
+            // Generar token único para esta confirmación
+            const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            const token = generateConfirmationToken(orderData, orderId, storeId || 'default')
+
+            console.log('🎫 Token de confirmación generado:', { token, orderId })
+
+            // Cerrar modales
+            setIsCheckoutOpen(false)
+            closeCart()
+
+            // Limpiar carrito tras confirmación exitosa
+            clearCart()
+
+            // Redireccionar a página de confirmación
+            const confirmationUrl = `/checkout/success?token=${token}`
+
+            console.log('🔄 Redirigiendo a:', confirmationUrl)
+            window.location.href = confirmationUrl
+
+        } catch (error) {
+            console.error('❌ Error generando token de confirmación:', error)
+
+            // Fallback: mostrar modal tradicional si falla
+            setOrderDataForConfirmation(orderData)
+            setIsCheckoutOpen(false)
+            setShowConfirmationModal(true)
+        }
     };
 
     // Función para manejar el cierre del modal de confirmación
