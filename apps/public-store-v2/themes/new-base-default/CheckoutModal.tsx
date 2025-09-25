@@ -2262,7 +2262,29 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         configuredEnvironment: mpConfig.environment,
                         usingDefault: !mpConfig.environment
                     });
-                    
+
+                    // 🆕 GUARDAR PEDIDO EN FIRESTORE ANTES DE REDIRIGIR
+                    console.log('🔔 [MercadoPago] Guardando pedido en Firestore antes de redirigir...');
+                    try {
+                        const orderDoc = await createOrder(storeId!, orderData, {
+                            isPaid: false, // Inicialmente no está pagado hasta que se confirme
+                            paidAmount: 0,
+                            paymentType: 'online_payment',
+                            transactionId: preferenceResult.id // Usar ID de preferencia como referencia
+                        });
+
+                        if (orderDoc?.id) {
+                            console.log('🔔 [MercadoPago] ✅ Pedido guardado exitosamente:', orderDoc.id);
+                            console.log('🔔 [MercadoPago] Pedido creado con ID:', orderDoc.id);
+                        } else {
+                            console.warn('🔔 [MercadoPago] ⚠️ No se pudo obtener ID del pedido, continuando...');
+                        }
+                    } catch (orderError) {
+                        console.error('🔔 [MercadoPago] ❌ Error guardando pedido:', orderError);
+                        // Continuar con el pago aunque falle guardar el pedido
+                        // El webhook puede crear/actualizar el pedido después
+                    }
+
                     // Redireccionar a MercadoPago
                     console.log('🔔 [MercadoPago] Redirigiendo a página de pago...');
                     window.location.href = initUrl;
