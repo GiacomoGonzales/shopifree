@@ -12,8 +12,20 @@ interface CollectionCardProps {
 }
 
 const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: CollectionCardProps) => {
-    // Optimizar imagen según el tamaño de la card
-    const optimizedImageUrl = toCloudinaryMosaic(collection.image, size, 400);
+    // Optimizar imagen según el tamaño de la card con diferentes resoluciones para responsive
+    const getOptimizedImageUrl = () => {
+        // Para desktop usamos tamaños más grandes, para móvil más pequeños
+        const mobileBaseSize = 400;
+        const desktopBaseSize = 800;
+
+        return {
+            mobile: toCloudinaryMosaic(collection.image, size, mobileBaseSize),
+            desktop: toCloudinaryMosaic(collection.image, size, desktopBaseSize)
+        };
+    };
+
+    const imageUrls = getOptimizedImageUrl();
+    const optimizedImageUrl = imageUrls.desktop; // Por ahora usamos la versión desktop
     
     // Contar productos en la colección
     const productCount = collection.productIds?.length || 0;
@@ -44,9 +56,11 @@ const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: Co
         >
             {/* Imagen de fondo */}
             <div className="nbd-collection-background">
-                {optimizedImageUrl ? (
+                {imageUrls.desktop ? (
                     <img
-                        src={optimizedImageUrl}
+                        src={imageUrls.desktop}
+                        srcSet={`${imageUrls.mobile} 480w, ${imageUrls.desktop} 1024w`}
+                        sizes="(max-width: 768px) 480px, 1024px"
                         alt={collection.title}
                         className="nbd-collection-image"
                         loading="lazy"

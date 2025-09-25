@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { validateAndConsumeToken, ConfirmationToken } from '../../../../lib/confirmation-tokens';
 import { formatPrice } from '../../../../lib/currency';
-import { StoreBasicInfo } from '../../../../lib/store';
+import { StoreBasicInfo, getStoreBySubdomain } from '../../../../lib/store';
 import { buildStoreUrl } from '../../../../lib/url-utils';
 
 interface OrderConfirmationPageState {
@@ -24,10 +24,28 @@ interface OrderConfirmationPageState {
 export default function CheckoutSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
   const [state, setState] = useState<OrderConfirmationPageState>({
     step: 'loading',
     token: null
   });
+  const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
+
+  // Obtener información de la tienda
+  useEffect(() => {
+    const loadStoreInfo = async () => {
+      const storeSubdomain = params.storeSubdomain as string;
+      if (storeSubdomain) {
+        try {
+          const store = await getStoreBySubdomain(storeSubdomain);
+          setStoreInfo(store);
+        } catch (error) {
+          console.error('Error loading store info:', error);
+        }
+      }
+    };
+    loadStoreInfo();
+  }, [params.storeSubdomain]);
 
   useEffect(() => {
     const tokenId = searchParams.get('token');
@@ -319,9 +337,15 @@ export default function CheckoutSuccessPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => {
-                  const message = `¡Hola! Acabo de realizar el pedido #${orderId}. ¿Podrías confirmarme los detalles del envío?`;
-                  const whatsappUrl = `https://wa.me/51926258059?text=${encodeURIComponent(message)}`;
-                  window.open(whatsappUrl, '_blank');
+                  if (storeInfo?.whatsapp) {
+                    const message = `¡Hola! Acabo de realizar el pedido #${orderId}. ¿Podrías confirmarme los detalles del envío?`;
+                    const cleanPhone = storeInfo.whatsapp.replace(/[^\d+]/g, '');
+                    const phoneNumber = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
+                  } else {
+                    alert('WhatsApp no está configurado para esta tienda');
+                  }
                 }}
                 className="flex items-center justify-center gap-3 bg-emerald-600 text-white py-4 px-6 rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-sm"
               >
@@ -425,9 +449,15 @@ export default function CheckoutSuccessPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   onClick={() => {
-                    const message = `¡Hola! Acabo de realizar un pago con MercadoPago (ID: ${mercadopagoData.payment_id}). ¿Podrías confirmarme los detalles del pedido?`;
-                    const whatsappUrl = `https://wa.me/51926258059?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappUrl, '_blank');
+                    if (storeInfo?.whatsapp) {
+                      const message = `¡Hola! Acabo de realizar un pago con MercadoPago (ID: ${mercadopagoData.payment_id}). ¿Podrías confirmarme los detalles del pedido?`;
+                      const cleanPhone = storeInfo.whatsapp.replace(/[^\d+]/g, '');
+                      const phoneNumber = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
+                      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                      window.open(whatsappUrl, '_blank');
+                    } else {
+                      alert('WhatsApp no está configurado para esta tienda');
+                    }
                   }}
                   className="flex items-center justify-center gap-3 bg-emerald-600 text-white py-4 px-6 rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-sm"
                 >
