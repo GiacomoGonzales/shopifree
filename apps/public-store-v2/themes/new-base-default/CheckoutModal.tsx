@@ -2248,13 +2248,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     console.log('🔔 [MercadoPago] Creando preferencia en MercadoPago...');
                     const preferenceResult = await createPreference(preference, mpConfig);
                     
-                    // Obtener URL de inicialización
-                    const initUrl = getInitPoint(preferenceResult, mpConfig.environment);
+                    // Obtener URL de inicialización - usar 'production' como default
+                    const environment = mpConfig.environment || 'production';
+                    const initUrl = getInitPoint(preferenceResult, environment);
                     
                     console.log('🔔 [MercadoPago] Preferencia creada exitosamente:', {
                         preferenceId: preferenceResult.id,
                         initUrl: initUrl.substring(0, 50) + '...',
-                        environment: mpConfig.environment
+                        environment: environment,
+                        configuredEnvironment: mpConfig.environment,
+                        usingDefault: !mpConfig.environment
                     });
                     
                     // Redireccionar a MercadoPago

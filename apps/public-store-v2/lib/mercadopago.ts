@@ -65,7 +65,7 @@ export function orderDataToPreference(
     title: `${item.name}${item.variant?.name ? ` - ${item.variant.name}` : ''}`,
     quantity: item.quantity,
     unit_price: Math.round((item.variant?.price || item.price) * 100) / 100, // Asegurar máximo 2 decimales
-    currency_id: orderData.currency || 'COP'
+    currency_id: orderData.currency || 'PEN'
   }))
 
   // Agregar shipping como item si existe
@@ -74,7 +74,7 @@ export function orderDataToPreference(
       title: `Envío - ${orderData.shipping.method}`,
       quantity: 1,
       unit_price: Math.round(orderData.totals.shipping * 100) / 100, // Asegurar máximo 2 decimales
-      currency_id: orderData.currency || 'COP'
+      currency_id: orderData.currency || 'PEN'
     })
   }
 
@@ -157,37 +157,44 @@ export async function createPreference(
   preference: MercadoPagoPreference,
   config: MercadoPagoConfig
 ): Promise<MercadoPagoPreferenceResult> {
-  
+  // Usar 'production' como default si no está configurado
+  const effectiveConfig = {
+    ...config,
+    environment: config.environment || 'production' as const
+  };
+
   // Validar configuración
-  const validation = validateMercadoPagoConfig(config)
+  const validation = validateMercadoPagoConfig(effectiveConfig)
   if (validation !== true) {
     throw new Error(validation)
   }
   
   // Verificar que las credenciales coincidan con el environment
-  const isTestToken = config.accessToken.startsWith('TEST-')
-  const isProductionToken = config.accessToken.startsWith('APP_USR-')
-  
+  const isTestToken = effectiveConfig.accessToken.startsWith('TEST-')
+  const isProductionToken = effectiveConfig.accessToken.startsWith('APP_USR-')
+
   console.log('🔄 [MercadoPago] Creando preferencia REAL:', {
-    environment: config.environment,
+    environment: effectiveConfig.environment,
+    originalEnvironment: config.environment,
+    usingDefaultEnvironment: !config.environment,
     items: preference.items.length,
     total: preference.items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0),
-    accessToken: config.accessToken.substring(0, 20) + '...',
+    accessToken: effectiveConfig.accessToken.substring(0, 20) + '...',
     isTestToken,
     isProductionToken,
-    credentialsMatch: (config.environment === 'sandbox' && isTestToken) || (config.environment === 'production' && isProductionToken)
+    credentialsMatch: (effectiveConfig.environment === 'sandbox' && isTestToken) || (effectiveConfig.environment === 'production' && isProductionToken)
   })
-  
+
   // Advertencia si las credenciales no coinciden
-  if (config.environment === 'sandbox' && !isTestToken) {
+  if (effectiveConfig.environment === 'sandbox' && !isTestToken) {
     console.warn('⚠️ [MercadoPago] ADVERTENCIA: Environment es sandbox pero el token parece de producción')
   }
-  if (config.environment === 'production' && !isProductionToken) {
+  if (effectiveConfig.environment === 'production' && !isProductionToken) {
     console.warn('⚠️ [MercadoPago] ADVERTENCIA: Environment es production pero el token parece de test')
   }
-  
+
   // Determinar URL de API según environment
-  const apiUrl = config.environment === 'sandbox' 
+  const apiUrl = effectiveConfig.environment === 'sandbox'
     ? 'https://api.mercadopago.com/checkout/preferences'  // Mismo endpoint para sandbox y production
     : 'https://api.mercadopago.com/checkout/preferences'
   
@@ -214,7 +221,7 @@ export async function createPreference(
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${config.accessToken}`,
+        'Authorization': `Bearer ${effectiveConfig.accessToken}`,
         'Content-Type': 'application/json',
         'X-Integrator-Id': 'dev_24c65fb163bf11ea96500242ac130004' // Opcional: ID de integrador
       },
