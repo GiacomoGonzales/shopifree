@@ -195,7 +195,20 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
             clearCart()
 
             // Redireccionar a página de confirmación
-            const confirmationUrl = `/checkout/success?token=${token}`
+            // Construir URL correcta para ambos entornos
+            const pathname = window.location.pathname;
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname.endsWith('localhost');
+            let confirmationUrl;
+
+            if (isLocalhost && pathname.includes('/')) {
+                // Localhost: /lunara -> /lunara/checkout/success
+                const pathParts = pathname.split('/').filter(part => part.length > 0);
+                const storeId = pathParts[0] || '';
+                confirmationUrl = `/${storeId}/checkout/success?token=${token}`;
+            } else {
+                // Producción: subdominio -> /checkout/success
+                confirmationUrl = `/checkout/success?token=${token}`;
+            }
 
             console.log('🔄 Redirigiendo a:', confirmationUrl)
             window.location.href = confirmationUrl
