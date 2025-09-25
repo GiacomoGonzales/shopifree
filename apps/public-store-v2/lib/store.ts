@@ -166,7 +166,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             instagram: data.instagram || undefined,
             facebook: data.facebook || undefined,
             tiktok: data.tiktok || undefined,
-            whatsapp: data.whatsapp || undefined,
+            whatsapp: data.whatsapp || data.phone || undefined,
             youtube: data.youtube || undefined,
             twitter: data.twitter || data.x || undefined,
             x: data.x || undefined,
