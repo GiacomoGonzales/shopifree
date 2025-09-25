@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { validateAndConsumeToken, ConfirmationToken } from '../../../../lib/confirmation-tokens';
 import { formatPrice } from '../../../../lib/currency';
-import { StoreBasicInfo, getStoreBySubdomain } from '../../../../lib/store';
+import { StoreBasicInfo, getStoreInfoBySubdomain } from '../../../../lib/store';
 import { buildStoreUrl } from '../../../../lib/url-utils';
 
 interface OrderConfirmationPageState {
@@ -37,7 +37,7 @@ export default function CheckoutSuccessPage() {
       const storeSubdomain = params.storeSubdomain as string;
       if (storeSubdomain) {
         try {
-          const store = await getStoreBySubdomain(storeSubdomain);
+          const store = await getStoreInfoBySubdomain(storeSubdomain);
           setStoreInfo(store);
         } catch (error) {
           console.error('Error loading store info:', error);
@@ -337,9 +337,9 @@ export default function CheckoutSuccessPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => {
-                  if (storeInfo?.whatsapp) {
+                  if (storeInfo?.socialMedia?.whatsapp) {
                     const message = `¡Hola! Acabo de realizar el pedido #${orderId}. ¿Podrías confirmarme los detalles del envío?`;
-                    const cleanPhone = storeInfo.whatsapp.replace(/[^\d+]/g, '');
+                    const cleanPhone = storeInfo.socialMedia.whatsapp.replace(/[^\d+]/g, '');
                     const phoneNumber = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
                     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                     window.open(whatsappUrl, '_blank');
@@ -449,9 +449,9 @@ export default function CheckoutSuccessPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   onClick={() => {
-                    if (storeInfo?.whatsapp) {
+                    if (storeInfo?.socialMedia?.whatsapp) {
                       const message = `¡Hola! Acabo de realizar un pago con MercadoPago (ID: ${mercadopagoData.payment_id}). ¿Podrías confirmarme los detalles del pedido?`;
-                      const cleanPhone = storeInfo.whatsapp.replace(/[^\d+]/g, '');
+                      const cleanPhone = storeInfo.socialMedia.whatsapp.replace(/[^\d+]/g, '');
                       const phoneNumber = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
                       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                       window.open(whatsappUrl, '_blank');
