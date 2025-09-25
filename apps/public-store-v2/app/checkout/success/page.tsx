@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { validateAndConsumeToken, ConfirmationToken } from '../../../lib/confirmation-tokens';
 import { formatPrice } from '../../../lib/currency';
 import { StoreBasicInfo } from '../../../lib/store';
@@ -14,7 +14,6 @@ interface OrderConfirmationPageState {
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [state, setState] = useState<OrderConfirmationPageState>({
     step: 'loading',
     token: null
@@ -23,7 +22,9 @@ export default function CheckoutSuccessPage() {
   useEffect(() => {
     // Solo ejecutar del lado del cliente
     if (typeof window !== 'undefined') {
-      const tokenId = searchParams.get('token');
+      // Obtener token directamente de window.location en lugar de useSearchParams
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenId = urlParams.get('token');
 
       if (!tokenId) {
         console.warn('🎫 No se proporcionó token de confirmación');
@@ -60,7 +61,7 @@ export default function CheckoutSuccessPage() {
 
       return () => clearTimeout(loadingTimeout);
     }
-  }, [searchParams]);
+  }, []);
 
   const handleGoHome = () => {
     const pathname = window.location.pathname;

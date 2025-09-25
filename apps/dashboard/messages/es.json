@@ -602,7 +602,7 @@
       },
       "paymentMethods": {
         "cash": "Efectivo",
-        "cash_on_delivery": "Pago contra entrega",
+        "cash_on_delivery": "Pago manual",
         "transfer": "Transferencia",
         "card": "Tarjeta",
         "paypal": "PayPal",

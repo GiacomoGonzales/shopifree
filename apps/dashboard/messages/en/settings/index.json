@@ -74,7 +74,7 @@
     "title": "Accepted Payment Methods",
     "description": "Configure the payment methods your store accepts",
     "cashOnDelivery": {
-      "title": "Cash on Delivery",
+      "title": "Manual Payments",
       "description": "Customer pays when receiving the product (compatible with WhatsApp and traditional checkout)",
       "selectMethods": "Select the payment methods you accept:"
     },
