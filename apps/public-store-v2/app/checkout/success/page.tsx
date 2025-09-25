@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { validateAndConsumeToken, ConfirmationToken } from '../../../lib/confirmation-tokens';
 import { formatPrice } from '../../../lib/currency';
 import { StoreBasicInfo } from '../../../lib/store';
@@ -14,7 +14,6 @@ interface OrderConfirmationPageState {
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [state, setState] = useState<OrderConfirmationPageState>({
     step: 'loading',
     token: null
@@ -23,7 +22,9 @@ export default function CheckoutSuccessPage() {
   useEffect(() => {
     // Solo ejecutar del lado del cliente
     if (typeof window !== 'undefined') {
-      const tokenId = searchParams.get('token');
+      // Obtener token directamente de window.location en lugar de useSearchParams
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenId = urlParams.get('token');
 
       if (!tokenId) {
         console.warn('🎫 No se proporcionó token de confirmación');
@@ -60,21 +61,34 @@ export default function CheckoutSuccessPage() {
 
       return () => clearTimeout(loadingTimeout);
     }
-  }, [searchParams]);
+  }, []);
 
   const handleGoHome = () => {
     const pathname = window.location.pathname;
     const host = window.location.hostname;
-    const isCustomDomain = !host.endsWith('shopifree.app') && !host.endsWith('localhost') && host !== 'localhost';
+    const port = window.location.port;
 
     let homeUrl;
-    if (isCustomDomain) {
-      homeUrl = '/';
+
+    // Si estamos en localhost con puerto, incluir el store ID
+    if ((host === 'localhost' || host.endsWith('localhost')) && port) {
+      const pathParts = pathname.split('/').filter(part => part.length > 0);
+      if (pathParts.length > 0) {
+        const storeId = pathParts[0];
+        homeUrl = `/${storeId}`;
+      } else {
+        homeUrl = '/';
+      }
     } else {
-      const pathParts = pathname.split('/');
-      const storeSubdomain = pathParts[1];
-      homeUrl = `/${storeSubdomain}`;
+      // Producción: subdominio o dominio personalizado
+      homeUrl = '/';
     }
+
+    console.log('🏠 [handleGoHome]', {
+      currentPath: pathname,
+      host: `${host}:${port}`,
+      homeUrl
+    });
 
     window.location.href = homeUrl;
   };

@@ -127,28 +127,30 @@ export default function PaymentMethodSelector({ settings, onSettingsChange, chec
 
   return (
     <div className="space-y-6">
-      {/* Pago contra entrega */}
+      {/* Pagos manuales */}
       <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
+        <div className="flex items-start justify-between mb-4 gap-3">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <Icons.Truck />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h4 className="text-sm font-medium text-gray-900">{t('cashOnDelivery.title')}</h4>
               <p className="text-xs text-gray-500">{t('cashOnDelivery.description')}</p>
             </div>
           </div>
-          <Switch
-            checked={settings.acceptCashOnDelivery}
-            onChange={handleCashOnDeliveryToggle}
-            colorScheme="blue"
-          />
+          <div className="flex-shrink-0">
+            <Switch
+              checked={settings.acceptCashOnDelivery}
+              onChange={handleCashOnDeliveryToggle}
+              colorScheme="blue"
+            />
+          </div>
         </div>
 
-        {/* Opciones de pago contra entrega */}
+        {/* Opciones de pagos manuales */}
         {settings.acceptCashOnDelivery && (
-          <div className="ml-14 space-y-3">
+          <div className="ml-0 sm:ml-14 space-y-3">
             <p className="text-xs text-gray-600 mb-3">{t('cashOnDelivery.selectMethods')}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {paymentMethodsTranslated.map((method) => (
@@ -195,25 +197,27 @@ export default function PaymentMethodSelector({ settings, onSettingsChange, chec
       {/* Pago online - Solo para checkout tradicional */}
       {checkoutMethod === 'traditional' && (
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center space-x-3 flex-1 min-w-0">
+              <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
                 <Icons.Globe />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h4 className="text-sm font-medium text-gray-900">{t('onlinePayment.title')}</h4>
                 <p className="text-xs text-gray-500">{t('onlinePayment.description')}</p>
               </div>
             </div>
-            <Switch
-              checked={settings.acceptOnlinePayment}
-              onChange={handleOnlinePaymentToggle}
-              colorScheme="green"
-            />
+            <div className="flex-shrink-0">
+              <Switch
+                checked={settings.acceptOnlinePayment}
+                onChange={handleOnlinePaymentToggle}
+                colorScheme="green"
+              />
+            </div>
           </div>
           
           {settings.acceptOnlinePayment && (
-            <div className="ml-14 mt-3">
+            <div className="ml-0 sm:ml-14 mt-3">
               <p className="text-xs text-gray-600">
                 {t('onlinePayment.configureGateway')}
               </p>

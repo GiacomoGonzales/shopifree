@@ -25,7 +25,7 @@
   },
   "paymentMethods": {
     "cash": "Efectivo",
-    "cash_on_delivery": "Pago contra entrega",
+    "cash_on_delivery": "Pago manual",
     "card": "Tarjeta",
     "transfer": "Transferencia",
     "yape": "Pago con Yape",

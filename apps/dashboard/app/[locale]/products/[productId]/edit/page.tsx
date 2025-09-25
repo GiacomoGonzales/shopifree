@@ -914,37 +914,6 @@ export default function EditProductPage() {
                   </label>
                 </div>
 
-                {/* Manejo de Stock */}
-                <div className="mt-4 space-y-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={trackStock}
-                      onChange={(e) => setTrackStock(e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Gestionar inventario</span>
-                  </label>
-                  
-                  {trackStock && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Cantidad en stock
-                      </label>
-                      <input
-                        type="number"
-                        value={stockQuantity}
-                        onChange={(e) => setStockQuantity(e.target.value)}
-                        placeholder="0"
-                        min="0"
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Si no gestionas inventario, el producto siempre aparecerá disponible
-                      </p>
-                    </div>
-                  )}
-                </div>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
@@ -1474,6 +1443,58 @@ export default function EditProductPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* Subcategorías - Solo mostrar si hay categorías padre seleccionadas */}
+                  {selectedParentCategoryIds.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Subcategorías ({selectedSubcategoryIds.length} seleccionadas)
+                      </label>
+                      {loadingSubcategories ? (
+                        <p className="text-sm text-gray-500">Cargando subcategorías...</p>
+                      ) : dynamicSubcategories.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-2 border border-gray-200 rounded-md">
+                          No hay subcategorías disponibles para las categorías seleccionadas
+                        </p>
+                      ) : (
+                        <div className="space-y-2 border border-gray-200 rounded-md p-2">
+                          {dynamicSubcategories.map((subcategory) => (
+                            <label key={subcategory.id} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedSubcategoryIds.includes(subcategory.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedSubcategoryIds([...selectedSubcategoryIds, subcategory.id])
+                                  } else {
+                                    setSelectedSubcategoryIds(selectedSubcategoryIds.filter(id => id !== subcategory.id))
+                                  }
+                                }}
+                                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                              />
+                              <span className="ml-2 text-sm text-gray-900">{subcategory.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Mostrar subcategorías seleccionadas */}
+                      {selectedSubcategoryIds.length > 0 && (
+                        <div className="mt-2">
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {selectedSubcategoryIds.map(id => {
+                              const subcategory = dynamicSubcategories.find(c => c.id === id)
+                              return subcategory && (
+                                <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                  {subcategory.name}
+                                </span>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Marcas */}
                   <div>

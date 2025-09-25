@@ -74,7 +74,7 @@
     "title": "Métodos de pago aceptados",
     "description": "Configure los métodos de pago que acepta su tienda",
     "cashOnDelivery": {
-      "title": "Pago contra entrega",
+      "title": "Pagos manuales",
       "description": "El cliente paga al recibir el producto (compatible con WhatsApp y checkout tradicional)",
       "selectMethods": "Selecciona los métodos de pago que aceptas:"
     },

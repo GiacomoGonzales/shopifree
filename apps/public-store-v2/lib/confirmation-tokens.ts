@@ -46,18 +46,21 @@ export function generateConfirmationToken(
   }
 
   try {
-    // Guardar en localStorage
-    localStorage.setItem(
-      `${STORAGE_KEY_PREFIX}${tokenId}`,
-      JSON.stringify(token)
-    )
+    // Solo ejecutar si estamos en el cliente
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Guardar en localStorage
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}${tokenId}`,
+        JSON.stringify(token)
+      )
 
-    console.log('🎫 [ConfirmationToken] Token generado:', {
-      tokenId,
-      orderId,
-      paymentMethod: orderData.payment.method,
-      expiresInMinutes: TOKEN_EXPIRATION_TIME / 60000
-    })
+      console.log('🎫 [ConfirmationToken] Token generado:', {
+        tokenId,
+        orderId,
+        paymentMethod: orderData.payment.method,
+        expiresInMinutes: TOKEN_EXPIRATION_TIME / 60000
+      })
+    }
 
     return tokenId
   } catch (error) {
@@ -72,6 +75,12 @@ export function generateConfirmationToken(
  */
 export function validateAndConsumeToken(tokenId: string): ConfirmationToken | null {
   try {
+    // Solo ejecutar si estamos en el cliente
+    if (typeof window === 'undefined' || !window.localStorage) {
+      console.warn('🎫 [ConfirmationToken] localStorage no disponible')
+      return null
+    }
+
     const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${tokenId}`)
 
     if (!stored) {
@@ -123,6 +132,11 @@ export function validateAndConsumeToken(tokenId: string): ConfirmationToken | nu
  */
 export function cleanupExpiredTokens(): void {
   try {
+    // Solo ejecutar si estamos en el cliente
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return
+    }
+
     const keys = Object.keys(localStorage)
     const tokenKeys = keys.filter(key => key.startsWith(STORAGE_KEY_PREFIX))
 
@@ -160,6 +174,11 @@ export function cleanupExpiredTokens(): void {
  */
 export function isTokenValid(tokenId: string): boolean {
   try {
+    // Solo ejecutar si estamos en el cliente
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return false
+    }
+
     const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${tokenId}`)
     if (!stored) return false
 
@@ -188,6 +207,11 @@ function generateUniqueId(): string {
  */
 export function getTokenInfo(tokenId: string): Partial<ConfirmationToken> | null {
   try {
+    // Solo ejecutar si estamos en el cliente
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null
+    }
+
     const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${tokenId}`)
     if (!stored) return null
 
