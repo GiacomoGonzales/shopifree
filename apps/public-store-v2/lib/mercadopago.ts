@@ -7,6 +7,7 @@
 
 import { MercadoPagoConfig } from './store'
 import { OrderData } from './orders'
+import { buildStoreUrl } from './url-utils'
 
 /**
  * Datos para crear una preferencia de pago en MercadoPago
@@ -196,9 +197,9 @@ export async function createPreference(
       ...preference,
       // Configuraciones adicionales para mejorar la experiencia
       back_urls: {
-        success: `${window.location.origin}/checkout/success`,
-        failure: `${window.location.origin}/checkout/failure`, 
-        pending: `${window.location.origin}/checkout/pending`
+        success: window.location.origin + buildStoreUrl('/checkout/success'),
+        failure: window.location.origin + buildStoreUrl('/checkout/failure'),
+        pending: window.location.origin + buildStoreUrl('/checkout/pending')
       },
       auto_return: 'approved',
       ...(config.webhookUrl && { notification_url: config.webhookUrl }), // Solo si está configurado

@@ -5,11 +5,20 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { validateAndConsumeToken, ConfirmationToken } from '../../../../lib/confirmation-tokens';
 import { formatPrice } from '../../../../lib/currency';
 import { StoreBasicInfo } from '../../../../lib/store';
+import { buildStoreUrl } from '../../../../lib/url-utils';
 
 interface OrderConfirmationPageState {
   step: 'loading' | 'success' | 'error' | 'expired';
   token: ConfirmationToken | null;
   error?: string;
+  // Nuevos campos para MercadoPago
+  paymentType?: 'manual' | 'mercadopago';
+  mercadopagoData?: {
+    payment_id: string;
+    status: string;
+    external_reference?: string;
+    preference_id?: string;
+  };
 }
 
 export default function CheckoutSuccessPage() {
@@ -22,18 +31,39 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     const tokenId = searchParams.get('token');
+    const paymentId = searchParams.get('payment_id');
+    const status = searchParams.get('status');
+    const externalReference = searchParams.get('external_reference');
+    const preferenceId = searchParams.get('preference_id');
 
-    if (!tokenId) {
-      console.warn('🎫 No se proporcionó token de confirmación');
+    // 🔍 Detectar tipo de pago basado en parámetros
+    if (tokenId) {
+      // ✅ Flujo manual (actual) - tiene token
+      console.log('🎫 Detectado flujo manual con token:', tokenId);
+      handleManualPaymentFlow(tokenId);
+    } else if (paymentId && status) {
+      // ✅ Flujo MercadoPago - tiene payment_id y status
+      console.log('💳 Detectado flujo MercadoPago:', { paymentId, status, externalReference });
+      handleMercadoPagoFlow({
+        payment_id: paymentId,
+        status,
+        external_reference: externalReference || undefined,
+        preference_id: preferenceId || undefined
+      });
+    } else {
+      // ❌ No hay parámetros válidos
+      console.warn('❌ No se detectaron parámetros válidos');
       setState({
         step: 'error',
         token: null,
-        error: 'Token de confirmación no encontrado'
+        error: 'No se encontraron parámetros de confirmación válidos'
       });
-      return;
     }
+  }, [searchParams]);
 
-    console.log('🎫 Validando token de confirmación:', tokenId);
+  // 🎫 Maneja el flujo de pagos manuales (actual)
+  const handleManualPaymentFlow = (tokenId: string) => {
+    console.log('🎫 Procesando flujo manual con token:', tokenId);
 
     // Simular loading por 2.5 segundos (como el modal original)
     const loadingTimeout = setTimeout(() => {
@@ -44,7 +74,8 @@ export default function CheckoutSuccessPage() {
         setState({
           step: 'expired',
           token: null,
-          error: 'Token de confirmación inválido o expirado'
+          error: 'Token de confirmación inválido o expirado',
+          paymentType: 'manual'
         });
         return;
       }
@@ -52,18 +83,59 @@ export default function CheckoutSuccessPage() {
       console.log('✅ Token válido - mostrando confirmación:', tokenData.orderId);
       setState({
         step: 'success',
-        token: tokenData
+        token: tokenData,
+        paymentType: 'manual'
       });
     }, 2500);
 
+    // Cleanup timeout si el componente se desmonta
     return () => clearTimeout(loadingTimeout);
-  }, [searchParams]);
+  };
+
+  // 💳 Maneja el flujo de MercadoPago (nuevo)
+  const handleMercadoPagoFlow = (mercadopagoData: NonNullable<OrderConfirmationPageState['mercadopagoData']>) => {
+    console.log('💳 Procesando flujo MercadoPago:', mercadopagoData);
+    console.log('💳 Status recibido:', `"${mercadopagoData.status}"`, 'Length:', mercadopagoData.status.length);
+
+    // Simular loading por 2.5 segundos para consistencia
+    const loadingTimeout = setTimeout(() => {
+      const status = mercadopagoData.status.toLowerCase().trim();
+      console.log('💳 Status procesado:', `"${status}"`);
+
+      // Verificar si el pago fue exitoso (más tolerante)
+      if (status === 'approved' || status === 'approve' || status === 'success') {
+        console.log('✅ Pago MercadoPago aprobado');
+        setState({
+          step: 'success',
+          token: null, // No hay token en MercadoPago
+          paymentType: 'mercadopago',
+          mercadopagoData
+        });
+      } else if (status === 'pending' || status === 'in_process') {
+        console.log('⏳ Pago MercadoPago pendiente - redirigiendo...');
+        // Usar buildStoreUrl para redirección correcta
+        const pendingUrl = window.location.origin + buildStoreUrl('/checkout/pending',
+          `payment_id=${mercadopagoData.payment_id}&status=${mercadopagoData.status}`);
+        console.log('🔄 Redirigiendo a:', pendingUrl);
+        window.location.href = pendingUrl;
+      } else {
+        console.log('❌ Pago MercadoPago fallido o cancelado - redirigiendo...');
+        // Usar buildStoreUrl para redirección correcta
+        const failureUrl = window.location.origin + buildStoreUrl('/checkout/failure',
+          `payment_id=${mercadopagoData.payment_id}&status=${mercadopagoData.status}`);
+        console.log('🔄 Redirigiendo a:', failureUrl);
+        window.location.href = failureUrl;
+      }
+    }, 2500);
+
+    return () => clearTimeout(loadingTimeout);
+  };
 
   const handleGoHome = () => {
     router.push('/');
   };
 
-  // Estado de loading
+  // Renderizado principal basado en el estado
   if (state.step === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -78,7 +150,7 @@ export default function CheckoutSuccessPage() {
             ¡Espera un momento!
           </h1>
           <p className="text-gray-600 text-sm">
-            Estamos procesando tu pedido...
+            {state.paymentType === 'mercadopago' ? 'Procesando tu pago...' : 'Estamos procesando tu pedido...'}
           </p>
 
           {/* Progreso visual */}
@@ -90,7 +162,6 @@ export default function CheckoutSuccessPage() {
     );
   }
 
-  // Estados de error
   if (state.step === 'error' || state.step === 'expired') {
     return (
       <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
@@ -120,13 +191,16 @@ export default function CheckoutSuccessPage() {
     );
   }
 
-  // Estado de éxito
-  const { token } = state;
-  const { orderData } = token!;
-  const currency = orderData.currency || 'COP';
-  const orderId = token!.orderId.slice(-6).toUpperCase();
+  // Estado de éxito - renderizado inteligente
+  const { token, paymentType, mercadopagoData } = state;
 
-  return (
+  if (paymentType === 'manual' && token) {
+    // ✅ Flujo manual - mostrar datos del token
+    const { orderData } = token;
+    const currency = orderData.currency || 'COP';
+    const orderId = token.orderId.slice(-6).toUpperCase();
+
+    return (
     <div className="min-h-screen bg-green-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg overflow-hidden">
 
@@ -238,6 +312,94 @@ export default function CheckoutSuccessPage() {
             </p>
           </div>
         </div>
+      </div>
+    </div>
+    );
+  }
+
+  if (paymentType === 'mercadopago' && mercadopagoData) {
+    // ✅ Flujo MercadoPago - mostrar datos de MercadoPago
+    return (
+      <div className="min-h-screen bg-green-50 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg overflow-hidden">
+
+          {/* Header de éxito */}
+          <div className="bg-green-600 text-white p-6 text-center">
+            <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold mb-2">¡Pago Aprobado!</h1>
+            <p className="opacity-90">Tu pago con MercadoPago fue procesado exitosamente</p>
+          </div>
+
+          <div className="p-6">
+            {/* Información del pago MercadoPago */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                Pago MercadoPago
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">ID de Pago:</p>
+                  <p className="font-medium">{mercadopagoData.payment_id}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Estado:</p>
+                  <p className="font-medium text-green-600">{mercadopagoData.status}</p>
+                </div>
+                {mercadopagoData.external_reference && (
+                  <div>
+                    <p className="text-gray-600">Referencia:</p>
+                    <p className="font-medium">{mercadopagoData.external_reference}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Información adicional */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-blue-900 mb-2">¿Qué sigue?</h4>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>• Recibirás un correo de confirmación de MercadoPago</p>
+                <p>• Prepararemos tu pedido para envío</p>
+                <p>• Te notificaremos cuando esté listo</p>
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="space-y-3">
+              <button
+                onClick={handleGoHome}
+                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              >
+                Continuar Comprando
+              </button>
+
+              <p className="text-center text-xs text-gray-500">
+                Gracias por usar MercadoPago para tu pago
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ❌ Estado inconsistente
+  return (
+    <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
+      <div className="text-center p-8">
+        <p className="text-gray-600">Error: Estado de confirmación inconsistente</p>
+        <button
+          onClick={handleGoHome}
+          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Volver a la Tienda
+        </button>
       </div>
     </div>
   );
