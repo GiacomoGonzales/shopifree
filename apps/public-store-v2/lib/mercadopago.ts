@@ -14,6 +14,7 @@ import { buildStoreUrl } from './url-utils'
  */
 export interface MercadoPagoPreference {
   items: Array<{
+    id: string
     title: string
     quantity: number
     unit_price: number
@@ -61,7 +62,8 @@ export function orderDataToPreference(
 ): MercadoPagoPreference {
   
   // Convertir items del carrito a formato MercadoPago
-  const items = orderData.items.map(item => ({
+  const items = orderData.items.map((item, index) => ({
+    id: item.id || `item-${index}`, // Campo obligatorio según documentación
     title: `${item.name}${item.variant?.name ? ` - ${item.variant.name}` : ''}`,
     quantity: item.quantity,
     unit_price: Math.round((item.variant?.price || item.price) * 100) / 100, // Asegurar máximo 2 decimales
@@ -71,6 +73,7 @@ export function orderDataToPreference(
   // Agregar shipping como item si existe
   if (orderData.shipping && orderData.totals.shipping > 0) {
     items.push({
+      id: 'shipping-001', // Campo obligatorio según documentación
       title: `Envío - ${orderData.shipping.method}`,
       quantity: 1,
       unit_price: Math.round(orderData.totals.shipping * 100) / 100, // Asegurar máximo 2 decimales
@@ -103,7 +106,6 @@ export function orderDataToPreference(
     items,
     payer,
     external_reference: `order-${Date.now()}`, // En producción usar el ID real del pedido
-    auto_return: 'approved' as const
   }
 }
 
@@ -209,10 +211,10 @@ export async function createPreference(
         pending: window.location.origin + buildStoreUrl('/checkout/pending')
       },
       auto_return: 'approved',
-      ...(config.webhookUrl && { notification_url: config.webhookUrl }), // Solo si está configurado
-      statement_descriptor: 'Tienda Online', // Aparece en el estado de cuenta
-      expires: false, // La preferencia no expira
-      binary_mode: false // Permite pagos pendientes
+      ...(config.webhookUrl && { notification_url: config.webhookUrl }),
+      statement_descriptor: 'Tienda Online',
+      expires: false,
+      binary_mode: false
     };
     
     console.log('🔄 [MercadoPago] Payload completo a enviar:', JSON.stringify(payload, null, 2));
@@ -222,8 +224,7 @@ export async function createPreference(
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${effectiveConfig.accessToken}`,
-        'Content-Type': 'application/json',
-        'X-Integrator-Id': 'dev_24c65fb163bf11ea96500242ac130004' // Opcional: ID de integrador
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     })

@@ -2223,7 +2223,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             shipping: shipping || 0,
                             total: total || subtotal + (shipping || 0)
                         },
-                        currency: 'COP',
+                        currency: currency,
                         shipping: {
                             method: formData.shippingMethod as 'standard' | 'express' | 'pickup',
                             address: formData.address,
