@@ -187,6 +187,66 @@ export async function createOrder(
 }
 
 /**
+ * Función auxiliar para traducir métodos de envío
+ */
+export function translateShippingMethod(method: string, language: string = 'es'): string {
+  const translations: Record<string, Record<string, string>> = {
+    es: {
+      'pickup': 'Recojo en tienda',
+      'standard': 'Envío estándar',
+      'express': 'Envío express'
+    },
+    en: {
+      'pickup': 'Store pickup',
+      'standard': 'Standard shipping',
+      'express': 'Express shipping'
+    },
+    pt: {
+      'pickup': 'Retirada na loja',
+      'standard': 'Envio padrão',
+      'express': 'Envio expresso'
+    }
+  };
+  return translations[language]?.[method] || translations['es']?.[method] || method;
+}
+
+/**
+ * Función auxiliar para traducir métodos de pago
+ */
+export function translatePaymentMethod(method: string, language: string = 'es'): string {
+  const translations: Record<string, Record<string, string>> = {
+    es: {
+      'cash': 'Efectivo contra entrega',
+      'card': 'Tarjeta con el repartidor',
+      'transfer': 'Transferencia móvil',
+      'mercadopago': 'Pago online (MercadoPago)',
+      'culqi': 'Pago online (Culqi)',
+      'paypal': 'Pago online (PayPal)',
+      'online_payment': 'Pago online'
+    },
+    en: {
+      'cash': 'Cash on delivery',
+      'card': 'Card with delivery',
+      'transfer': 'Mobile transfer',
+      'mercadopago': 'Online payment (MercadoPago)',
+      'culqi': 'Online payment (Culqi)',
+      'paypal': 'Online payment (PayPal)',
+      'online_payment': 'Online payment'
+    },
+    pt: {
+      'cash': 'Dinheiro na entrega',
+      'card': 'Cartão com entregador',
+      'transfer': 'Transferência móvel',
+      'mercadopago': 'Pagamento online (MercadoPago)',
+      'culqi': 'Pagamento online (Culqi)',
+      'paypal': 'Pagamento online (PayPal)',
+      'online_payment': 'Pagamento online'
+    }
+  };
+  return translations[language]?.[method] || translations['es']?.[method] || method;
+}
+
+/**
  * Generar mensaje de WhatsApp con ID del pedido
  */
 export function generateWhatsAppMessageWithId(
@@ -223,19 +283,14 @@ export function generateWhatsAppMessageWithId(
 
   // Agregar información de envío
   message += `\nENVIO:\n`;
-  if (orderData.shipping.method === 'pickup') {
-    message += `Metodo: Recojo en tienda\n`;
-  } else {
-    const methodName = orderData.shipping.method === 'express' ? 'Envio express' : 'Envio estandar';
-    message += `Metodo: ${methodName}\n`;
-    if (orderData.shipping.address) {
-      message += `Direccion: ${orderData.shipping.address}\n`;
-    }
+  message += `Metodo: ${translateShippingMethod(orderData.shipping.method)}\n`;
+  if (orderData.shipping.address) {
+    message += `Direccion: ${orderData.shipping.address}\n`;
   }
 
   // Agregar información de pago
   message += `\nPAGO:\n`;
-  message += `Metodo: ${orderData.payment.method}\n`;
+  message += `Metodo: ${translatePaymentMethod(orderData.payment.method)}\n`;
 
   // Agregar totales
   message += `\nRESUMEN:\n`;
@@ -254,4 +309,74 @@ export function generateWhatsAppMessageWithId(
   }
   
   return { message, phone: whatsappPhone };
+}
+
+/**
+ * Generar mensaje completo de WhatsApp para página de confirmación
+ * Incluye toda la información del pedido para pagos ya confirmados
+ */
+export function generateConfirmationWhatsAppMessage(
+  orderData: OrderData,
+  orderId: string,
+  isPaid: boolean = false,
+  paymentId?: string,
+  language: string = 'es'
+): string {
+  let message = `¡Hola! Acabo de realizar un pedido:\n\n`;
+
+  // Agregar ID del pedido
+  message += `PEDIDO #${orderId.slice(-6).toUpperCase()}\n`;
+  if (paymentId) {
+    message += `ID de Pago: ${paymentId}\n`;
+  }
+  message += `Estado: ${isPaid ? 'PAGADO' : 'PENDIENTE DE PAGO'}\n\n`;
+
+  // Agregar productos
+  message += `PRODUCTOS:\n`;
+  orderData.items.forEach((item, index) => {
+    const itemTotal = (item.variant?.price || item.price) * item.quantity;
+    message += `${index + 1}. ${item.name}`;
+    if (item.variant) {
+      message += ` (${item.variant.name})`;
+    }
+    message += `\n   Cantidad: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+  });
+
+  // Agregar información del cliente
+  message += `\nDATOS DE ENTREGA:\n`;
+  message += `Nombre: ${orderData.customer.fullName}\n`;
+  message += `Email: ${orderData.customer.email}\n`;
+  message += `Teléfono: ${orderData.customer.phone}\n`;
+
+  // Agregar información de envío
+  message += `\nENVÍO:\n`;
+  message += `Método: ${translateShippingMethod(orderData.shipping.method, language)}\n`;
+  if (orderData.shipping.address) {
+    message += `Dirección: ${orderData.shipping.address}\n`;
+  }
+
+  // Agregar información de pago
+  message += `\nPAGO:\n`;
+  message += `Método: ${translatePaymentMethod(orderData.payment.method, language)}\n`;
+  message += `Estado: ${isPaid ? '✅ PAGADO' : '⏳ PENDIENTE'}\n`;
+
+  // Agregar totales
+  message += `\nRESUMEN:\n`;
+  message += `Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
+  message += `Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
+
+  if (orderData.discount && orderData.discount > 0) {
+    message += `Descuento: -${formatPrice(orderData.discount, orderData.currency)}\n`;
+  }
+
+  message += `*Total: ${formatPrice(orderData.totals.total, orderData.currency)}*\n`;
+
+  // Agregar notas si las hay
+  if (orderData.payment.notes?.trim()) {
+    message += `\n📝 *NOTAS:*\n${orderData.payment.notes}\n`;
+  }
+
+  message += `\n¿Podrías confirmarme los detalles y tiempos de entrega?`;
+
+  return message;
 }
