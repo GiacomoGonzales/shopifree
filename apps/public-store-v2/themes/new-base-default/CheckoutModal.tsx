@@ -787,11 +787,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     if (onShowConfirmation) {
                         console.log('🔔 [Culqi] Mostrando modal de confirmación...');
                         onShowConfirmation(orderData);
+                        // No cerrar modal - la redirección se encarga de eso
                     } else {
                         console.log('🔔 [Culqi] Usando fallback de confirmación...');
                         onSuccess?.();
+                        onClose();
                     }
-                    onClose();
 
                     console.log('🔔 [Culqi] Proceso completado exitosamente');
 
@@ -806,10 +807,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     if (onShowConfirmation) {
                         console.log('🔔 [Culqi] Mostrando confirmación a pesar del error de guardado...');
                         onShowConfirmation(orderData);
+                        // No cerrar modal - la redirección se encarga de eso
                     } else {
                         onSuccess?.();
+                        onClose();
                     }
-                    onClose();
 
                     // Opcional: Mostrar notificación al usuario sobre el problema de guardado
                     alert('El pago se procesó exitosamente, pero hubo un problema al guardar el pedido. Por favor contacta al soporte.');
@@ -2069,6 +2071,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 // Llamar función para mostrar modal de confirmación
                 if (onShowConfirmation) {
                     onShowConfirmation(checkoutPayload);
+                    // No cerrar modal - la redirección se encarga de eso
                 } else {
                     // Fallback si no se pasa la función
                     onSuccess();

@@ -65,7 +65,7 @@ export default function CheckoutSuccessPage() {
   const handleManualPaymentFlow = (tokenId: string) => {
     console.log('🎫 Procesando flujo manual con token:', tokenId);
 
-    // Simular loading por 2.5 segundos (como el modal original)
+    // Simular loading por 3 segundos para una mejor UX
     const loadingTimeout = setTimeout(() => {
       const tokenData = validateAndConsumeToken(tokenId);
 
@@ -86,7 +86,7 @@ export default function CheckoutSuccessPage() {
         token: tokenData,
         paymentType: 'manual'
       });
-    }, 2500);
+    }, 3000);
 
     // Cleanup timeout si el componente se desmonta
     return () => clearTimeout(loadingTimeout);
@@ -138,25 +138,40 @@ export default function CheckoutSuccessPage() {
   // Renderizado principal basado en el estado
   if (state.step === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          {/* Spinner de carga */}
-          <div className="w-16 h-16 mx-auto mb-6 relative">
-            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          {/* Spinner moderno */}
+          <div className="relative w-20 h-20 mx-auto mb-8">
+            <div className="absolute inset-0 rounded-full border-3 border-neutral-200"></div>
+            <div className="absolute inset-0 rounded-full border-3 border-neutral-800 border-t-transparent animate-spin"></div>
+            <div className="absolute inset-2 rounded-full border-2 border-neutral-300 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
           </div>
 
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
-            ¡Espera un momento!
+          {/* Texto de carga */}
+          <h1 className="text-2xl font-medium text-neutral-900 mb-3">
+            Procesando
           </h1>
-          <p className="text-gray-600 text-sm">
-            {state.paymentType === 'mercadopago' ? 'Procesando tu pago...' : 'Estamos procesando tu pedido...'}
+          <p className="text-neutral-600 text-base mb-8">
+            {state.paymentType === 'mercadopago' ? 'Confirmando tu pago' : 'Preparando tu pedido'}
           </p>
 
-          {/* Progreso visual */}
-          <div className="mt-6 bg-gray-200 rounded-full h-2 overflow-hidden">
-            <div className="bg-blue-600 h-full rounded-full animate-pulse" style={{width: '70%'}}></div>
+          {/* Barra de progreso */}
+          <div className="w-full bg-neutral-200 rounded-full h-2 mb-4">
+            <div className="bg-neutral-800 h-2 rounded-full animate-pulse" style={{
+              width: '0%',
+              animation: 'progressBar 3s ease-out forwards'
+            }}></div>
           </div>
+
+          <style jsx>{`
+            @keyframes progressBar {
+              0% { width: 0%; }
+              30% { width: 40%; }
+              70% { width: 80%; }
+              100% { width: 100%; }
+            }
+          `}</style>
+
         </div>
       </div>
     );
@@ -201,25 +216,25 @@ export default function CheckoutSuccessPage() {
     const orderId = token.orderId.slice(-6).toUpperCase();
 
     return (
-    <div className="min-h-screen bg-green-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
 
         {/* Header de éxito */}
-        <div className="bg-green-600 text-white p-6 text-center">
-          <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+        <div className="bg-gradient-to-r from-neutral-800 to-neutral-700 text-white p-8 text-center">
+          <div className="w-20 h-20 mx-auto bg-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2">¡Pedido Confirmado!</h1>
-          <p className="opacity-90">Tu pedido ha sido procesado correctamente</p>
+          <h1 className="text-3xl font-semibold mb-3">¡Pedido Confirmado!</h1>
+          <p className="text-neutral-200 text-lg">Tu pedido ha sido procesado correctamente</p>
         </div>
 
         <div className="p-6">
           {/* Información del pedido */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-              <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+          <div className="bg-neutral-50 rounded-xl p-6 mb-8">
+            <h3 className="font-semibold text-neutral-900 mb-4 flex items-center">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full mr-3"></div>
               Pedido #{orderId}
             </h3>
 
@@ -264,7 +279,7 @@ export default function CheckoutSuccessPage() {
           </div>
 
           {/* Totales */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="bg-neutral-50 rounded-xl p-6 mb-8">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
@@ -277,7 +292,7 @@ export default function CheckoutSuccessPage() {
                 </div>
               )}
               {orderData.discount && orderData.discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-emerald-600">
                   <span>Descuento:</span>
                   <span>-{formatPrice(orderData.discount, currency)}</span>
                 </div>
@@ -290,26 +305,51 @@ export default function CheckoutSuccessPage() {
           </div>
 
           {/* Información de pago */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h4 className="font-semibold text-blue-900 mb-2">Método de pago:</h4>
-            <p className="text-blue-800">{orderData.payment.method}</p>
+          <div className="bg-neutral-100 border border-neutral-200 rounded-xl p-6 mb-8">
+            <h4 className="font-semibold text-neutral-900 mb-3">Método de pago:</h4>
+            <p className="text-neutral-700 text-lg capitalize">{orderData.payment.method}</p>
             {orderData.payment.notes && (
-              <p className="text-blue-700 text-sm mt-1">Notas: {orderData.payment.notes}</p>
+              <p className="text-neutral-600 text-sm mt-2">Notas: {orderData.payment.notes}</p>
             )}
           </div>
 
           {/* Acciones */}
-          <div className="space-y-3">
-            <button
-              onClick={handleGoHome}
-              className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
-            >
-              Continuar Comprando
-            </button>
+          <div className="space-y-4">
+            {/* Botones principales */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                onClick={() => {
+                  const message = `¡Hola! Acabo de realizar el pedido #${orderId}. ¿Podrías confirmarme los detalles del envío?`;
+                  const whatsappUrl = `https://wa.me/51926258059?text=${encodeURIComponent(message)}`;
+                  window.open(whatsappUrl, '_blank');
+                }}
+                className="flex items-center justify-center gap-3 bg-emerald-600 text-white py-4 px-6 rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.787"/>
+                </svg>
+                Contactar por WhatsApp
+              </button>
 
-            <p className="text-center text-xs text-gray-500">
-              Recibirás un correo electrónico con los detalles de tu pedido
-            </p>
+              <button
+                onClick={handleGoHome}
+                className="flex items-center justify-center gap-3 bg-neutral-800 text-white py-4 px-6 rounded-xl font-medium hover:bg-neutral-900 transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v1H8V5z"/>
+                </svg>
+                Volver a la Tienda
+              </button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-neutral-500 leading-relaxed">
+                Recibirás un correo electrónico con los detalles de tu pedido.
+                <br />
+                Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -320,68 +360,102 @@ export default function CheckoutSuccessPage() {
   if (paymentType === 'mercadopago' && mercadopagoData) {
     // ✅ Flujo MercadoPago - mostrar datos de MercadoPago
     return (
-      <div className="min-h-screen bg-green-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
 
           {/* Header de éxito */}
-          <div className="bg-green-600 text-white p-6 text-center">
-            <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          <div className="bg-gradient-to-r from-neutral-800 to-neutral-700 text-white p-8 text-center">
+            <div className="w-20 h-20 mx-auto bg-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <h1 className="text-2xl font-bold mb-2">¡Pago Aprobado!</h1>
-            <p className="opacity-90">Tu pago con MercadoPago fue procesado exitosamente</p>
+            <h1 className="text-3xl font-semibold mb-3">¡Pago Aprobado!</h1>
+            <p className="text-neutral-200 text-lg">Tu pago con MercadoPago fue procesado exitosamente</p>
           </div>
 
           <div className="p-6">
             {/* Información del pago MercadoPago */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+            <div className="bg-neutral-50 rounded-xl p-6 mb-8">
+              <h3 className="font-semibold text-neutral-900 mb-4 flex items-center">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full mr-3"></div>
                 Pago MercadoPago
               </h3>
 
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="grid md:grid-cols-2 gap-6 text-sm">
                 <div>
-                  <p className="text-gray-600">ID de Pago:</p>
-                  <p className="font-medium">{mercadopagoData.payment_id}</p>
+                  <p className="text-neutral-600 mb-1">ID de Pago:</p>
+                  <p className="font-medium text-base">{mercadopagoData.payment_id}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Estado:</p>
-                  <p className="font-medium text-green-600">{mercadopagoData.status}</p>
+                  <p className="text-neutral-600 mb-1">Estado:</p>
+                  <p className="font-medium text-base text-emerald-600">{mercadopagoData.status}</p>
                 </div>
                 {mercadopagoData.external_reference && (
-                  <div>
-                    <p className="text-gray-600">Referencia:</p>
-                    <p className="font-medium">{mercadopagoData.external_reference}</p>
+                  <div className="col-span-full">
+                    <p className="text-neutral-600 mb-1">Referencia:</p>
+                    <p className="font-medium text-base">{mercadopagoData.external_reference}</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Información adicional */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-blue-900 mb-2">¿Qué sigue?</h4>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>• Recibirás un correo de confirmación de MercadoPago</p>
-                <p>• Prepararemos tu pedido para envío</p>
-                <p>• Te notificaremos cuando esté listo</p>
+            <div className="bg-neutral-100 border border-neutral-200 rounded-xl p-6 mb-8">
+              <h4 className="font-semibold text-neutral-900 mb-4">¿Qué sigue?</h4>
+              <div className="text-sm text-neutral-700 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <p>Recibirás un correo de confirmación de MercadoPago</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <p>Prepararemos tu pedido para envío</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <p>Te notificaremos cuando esté listo</p>
+                </div>
               </div>
             </div>
 
             {/* Acciones */}
-            <div className="space-y-3">
-              <button
-                onClick={handleGoHome}
-                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
-              >
-                Continuar Comprando
-              </button>
+            <div className="space-y-4">
+              {/* Botones principales */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => {
+                    const message = `¡Hola! Acabo de realizar un pago con MercadoPago (ID: ${mercadopagoData.payment_id}). ¿Podrías confirmarme los detalles del pedido?`;
+                    const whatsappUrl = `https://wa.me/51926258059?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
+                  }}
+                  className="flex items-center justify-center gap-3 bg-emerald-600 text-white py-4 px-6 rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.787"/>
+                  </svg>
+                  Contactar por WhatsApp
+                </button>
 
-              <p className="text-center text-xs text-gray-500">
-                Gracias por usar MercadoPago para tu pago
-              </p>
+                <button
+                  onClick={handleGoHome}
+                  className="flex items-center justify-center gap-3 bg-neutral-800 text-white py-4 px-6 rounded-xl font-medium hover:bg-neutral-900 transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v1H8V5z"/>
+                  </svg>
+                  Volver a la Tienda
+                </button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm text-neutral-500 leading-relaxed">
+                  Gracias por usar MercadoPago para tu pago.
+                  <br />
+                  Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp.
+                </p>
+              </div>
             </div>
           </div>
         </div>

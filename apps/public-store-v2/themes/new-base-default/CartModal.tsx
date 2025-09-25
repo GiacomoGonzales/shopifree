@@ -234,17 +234,15 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
 
             console.log('🎫 Token de confirmación generado:', { token, orderId })
 
-            // Cerrar modales
-            setIsCheckoutOpen(false)
-            closeCart()
-
-            // Limpiar carrito tras confirmación exitosa
-            clearCart()
-
             // Construir URL de confirmación respetando la estructura de la tienda
             const confirmationUrl = buildStoreUrl('/checkout/success', `token=${token}`)
 
-            console.log('🔄 Redirigiendo a:', confirmationUrl)
+            console.log('🔄 Redirigiendo directamente a confirmación (sin cerrar modales):', confirmationUrl)
+
+            // Limpiar carrito inmediatamente antes de redireccionar
+            clearCart()
+
+            // Redireccionar inmediatamente - los modales se "cerrarán" con el cambio de página
             window.location.href = confirmationUrl
 
         } catch (error) {
