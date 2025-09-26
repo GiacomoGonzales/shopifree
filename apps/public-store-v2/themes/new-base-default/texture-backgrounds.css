@@ -154,9 +154,9 @@
 .texture-paper-texture .nbd-product-card:hover {
   /* Usar exactamente los mismos estilos de hover que tarjetas sin textura */
   transform: translateY(-8px);
-  box-shadow: var(--nbd-shadow-xl);
+  box-shadow: none; /* Eliminado para integrar imagen como parte de la tarjeta */
   border-color: var(--nbd-neutral-300);
-  transition: transform var(--nbd-transition-base), box-shadow var(--nbd-transition-base), border-color var(--nbd-transition-base);
+  transition: transform var(--nbd-transition-base), border-color var(--nbd-transition-base);
 }
 
 /* Sección de productos transparente con texturas */
