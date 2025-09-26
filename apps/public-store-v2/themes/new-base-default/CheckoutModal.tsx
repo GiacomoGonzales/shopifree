@@ -1947,51 +1947,72 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         cleanPhone = cleanPhone.substring(1);
                     }
 
-                    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-                    const whatsappScheme = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-
-                    console.log('[WhatsApp] URLs prepared:', {
-                        whatsappUrl,
-                        whatsappScheme,
-                        message: message.substring(0, 100) + '...'
-                    });
-
                     // Detectar dispositivo móvil para optimizar la apertura de WhatsApp
                     const isMobileDevice = isMobile();
                     const isAndroid = /Android/i.test(navigator.userAgent);
                     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+                    // URLs para diferentes versiones de WhatsApp
+                    const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+                    const whatsappPersonalUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                    const whatsappSchemePersonal = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+
+                    console.log('[WhatsApp] URLs prepared:', {
+                        whatsappWebUrl,
+                        whatsappPersonalUrl,
+                        whatsappSchemePersonal,
+                        message: message.substring(0, 100) + '...'
+                    });
 
                     console.log('[WhatsApp] Device detection:', {
                         isMobileDevice,
                         isAndroid,
                         isIOS,
                         userAgent: navigator.userAgent,
-                        whatsappUrl,
                         cleanPhone,
                         windowWidth: window.innerWidth
                     });
 
                     if (isMobileDevice) {
-                        // En móviles, usar window.location.href directamente es más confiable
-                        console.log('[WhatsApp] Opening on mobile device');
+                        // En móviles: priorizar WhatsApp personal app sobre Business
+                        console.log('[WhatsApp] Opening on mobile device - prioritizing personal WhatsApp');
 
                         try {
-                            // Para móviles, usar window.location.href directamente
-                            // Es más confiable que crear elementos dinámicos
-                            console.log('[WhatsApp] Mobile - Using direct window.location.href');
-                            console.log('[WhatsApp] URL:', whatsappUrl);
+                            if (isIOS) {
+                                // iOS: intentar abrir app personal primero
+                                console.log('[WhatsApp] iOS - Trying personal WhatsApp app first');
+                                window.location.href = whatsappSchemePersonal;
 
-                            // Usar window.location.href directamente en móviles
-                            window.location.href = whatsappUrl;
+                                // Fallback a wa.me después de un tiempo
+                                setTimeout(() => {
+                                    console.log('[WhatsApp] iOS - Fallback to wa.me');
+                                    window.location.href = whatsappPersonalUrl;
+                                }, 1500);
+                            } else if (isAndroid) {
+                                // Android: usar intent específico para WhatsApp personal
+                                console.log('[WhatsApp] Android - Using personal WhatsApp intent');
+                                const androidIntent = `intent://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
+
+                                try {
+                                    window.location.href = androidIntent;
+                                } catch (intentError) {
+                                    console.log('[WhatsApp] Android intent failed, using wa.me');
+                                    window.location.href = whatsappPersonalUrl;
+                                }
+                            } else {
+                                // Otros móviles: usar wa.me directamente
+                                console.log('[WhatsApp] Other mobile - Using wa.me');
+                                window.location.href = whatsappPersonalUrl;
+                            }
 
                             console.log('[WhatsApp] Mobile redirect initiated successfully');
                         } catch (error) {
                             console.error('[WhatsApp] Error opening WhatsApp on mobile:', error);
 
-                            // Fallback: crear enlace temporal como antes
+                            // Fallback: crear enlace temporal
                             console.log('[WhatsApp] Falling back to link creation method');
                             const fallbackLink = document.createElement('a');
-                            fallbackLink.href = whatsappUrl;
+                            fallbackLink.href = whatsappPersonalUrl;
                             fallbackLink.target = '_blank';
                             fallbackLink.rel = 'noopener noreferrer';
 
@@ -2000,9 +2021,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             document.body.removeChild(fallbackLink);
                         }
                     } else {
-                        // En desktop, usar window.open para abrir en nueva pestaña
-                        console.log('[WhatsApp] Opening on desktop device');
-                        const whatsappWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                        // En desktop: usar WhatsApp Web para mejor experiencia
+                        console.log('[WhatsApp] Opening on desktop device - using WhatsApp Web');
+                        const whatsappWindow = window.open(whatsappWebUrl, '_blank', 'noopener,noreferrer');
 
                         // Verificar si se bloqueó el popup y mostrar enlace alternativo
                         if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed === 'undefined') {
@@ -2010,7 +2031,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                             // Crear enlace de respaldo
                             const fallbackLink = document.createElement('a');
-                            fallbackLink.href = whatsappUrl;
+                            fallbackLink.href = whatsappWebUrl;
                             fallbackLink.target = '_blank';
                             fallbackLink.rel = 'noopener noreferrer';
                             fallbackLink.textContent = 'Abrir WhatsApp';
