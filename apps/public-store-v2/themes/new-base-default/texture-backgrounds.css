@@ -79,10 +79,11 @@
 .texture-asymmetric-waves .nbd-product-card,
 .texture-scattered-leaves .nbd-product-card,
 .texture-paper-texture .nbd-product-card {
-  background: var(--nbd-bg-overlay-light);
-  backdrop-filter: blur(2px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: var(--nbd-shadow-texture);
+  /* Usar exactamente los mismos estilos que tarjetas sin textura */
+  background: var(--nbd-neutral-0);
+  border: 1px solid var(--nbd-neutral-200);
+  /* Eliminar backdrop-filter para que se vea igual que sin textura */
+  /* Eliminar box-shadow para que se vea igual que sin textura */
   position: relative;
 }
 
@@ -151,10 +152,11 @@
 .texture-asymmetric-waves .nbd-product-card:hover,
 .texture-scattered-leaves .nbd-product-card:hover,
 .texture-paper-texture .nbd-product-card:hover {
-  background: var(--nbd-bg-overlay);
+  /* Usar exactamente los mismos estilos de hover que tarjetas sin textura */
   transform: translateY(-8px);
-  box-shadow: var(--nbd-shadow-texture-hover);
-  border-color: rgba(255, 255, 255, 1);
+  box-shadow: var(--nbd-shadow-xl);
+  border-color: var(--nbd-neutral-300);
+  transition: transform var(--nbd-transition-base), box-shadow var(--nbd-transition-base), border-color var(--nbd-transition-base);
 }
 
 /* Sección de productos transparente con texturas */
@@ -384,7 +386,7 @@
   backdrop-filter: blur(4px);
 }
 
-/* Hero section flotante sobre textura */
+/* Hero section libre - igual que sin texturas */
 .texture-subtle-dots .nbd-hero-text,
 .texture-geometric-grid .nbd-hero-text,
 .texture-organic-waves .nbd-hero-text,
@@ -396,11 +398,12 @@
 .texture-asymmetric-waves .nbd-hero-text,
 .texture-scattered-leaves .nbd-hero-text,
 .texture-paper-texture .nbd-hero-text {
-  background: var(--nbd-bg-overlay);
-  backdrop-filter: blur(2px);
-  border-radius: var(--nbd-radius-xl);
-  padding: var(--nbd-space-2xl);
-  box-shadow: var(--nbd-shadow-lg);
+  /* Eliminar todos los estilos de contenedor para que flote libre como sin texturas */
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 /* ===================================================
@@ -596,4 +599,27 @@
 .texture-paper-texture .nbd-header--scrolled {
   background: var(--nbd-bg-overlay);
   backdrop-filter: blur(12px);
+}
+
+/* ========================================
+   ANULACIÓN MÓVIL: Igualar hover en móvil para tarjetas con texturas
+   ======================================== */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+    .texture-subtle-dots .nbd-product-card:hover,
+    .texture-geometric-grid .nbd-product-card:hover,
+    .texture-organic-waves .nbd-product-card:hover,
+    .texture-diagonal-lines .nbd-product-card:hover,
+    .texture-fabric-weave .nbd-product-card:hover,
+    .texture-hexagon-pattern .nbd-product-card:hover,
+    .texture-noise-texture .nbd-product-card:hover,
+    .texture-floating-bubbles .nbd-product-card:hover,
+    .texture-asymmetric-waves .nbd-product-card:hover,
+    .texture-scattered-leaves .nbd-product-card:hover,
+    .texture-paper-texture .nbd-product-card:hover {
+        /* Usar exactamente los mismos estilos móvil que tarjetas sin textura */
+        transform: none !important;
+        box-shadow: none !important;
+        border-color: var(--nbd-neutral-200) !important;
+        transition: none !important;
+    }
 }
