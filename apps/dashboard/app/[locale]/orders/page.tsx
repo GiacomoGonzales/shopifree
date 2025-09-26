@@ -479,7 +479,7 @@ export default function OrdersPage() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                        className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                         placeholder={t('search.placeholder')}
                       />
                     </div>
@@ -587,7 +587,7 @@ export default function OrdersPage() {
                               <select
                                 value={filters.sortBy}
                                 onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
                               >
                                 <option value="date-desc">{t('sortOptions.newest')}</option>
                                 <option value="date-asc">{t('sortOptions.oldest')}</option>
@@ -611,7 +611,7 @@ export default function OrdersPage() {
                                     ...prev,
                                     dateRange: { ...prev.dateRange, from: e.target.value }
                                   }))}
-                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
                                   placeholder={t('filterSections.from')}
                                 />
                                 <input
@@ -621,7 +621,7 @@ export default function OrdersPage() {
                                     ...prev,
                                     dateRange: { ...prev.dateRange, to: e.target.value }
                                   }))}
-                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
                                   placeholder={t('filterSections.to')}
                                 />
                               </div>
@@ -641,7 +641,7 @@ export default function OrdersPage() {
                                     ...prev,
                                     amountRange: { ...prev.amountRange, min: e.target.value }
                                   }))}
-                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
                                   placeholder={t('filterSections.minimum')}
                                 />
                                 <input
@@ -652,7 +652,7 @@ export default function OrdersPage() {
                                     ...prev,
                                     amountRange: { ...prev.amountRange, max: e.target.value }
                                   }))}
-                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-gray-500"
                                   placeholder={t('filterSections.maximum')}
                                 />
                               </div>
@@ -1168,7 +1168,7 @@ export default function OrdersPage() {
                             value={selectedOrder.status}
                             onChange={(e) => handleStatusUpdate(selectedOrder.id, e.target.value as Order['status'])}
                             disabled={updating}
-                            className="flex-1 pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md bg-white"
+                            className="flex-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md bg-white"
                           >
                             <option value="pending">{t('status.pending')}</option>
                             <option value="whatsapp_sent">{t('status.whatsapp_sent')}</option>
@@ -1355,7 +1355,7 @@ export default function OrdersPage() {
                       ...prev, 
                       paymentStatus: e.target.value as PaymentStatus 
                     }))}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 rounded-md"
                   >
                     <option value="paid">✅ Pagado</option>
                     <option value="partial">⚠️ Pago parcial</option>
@@ -1379,7 +1379,7 @@ export default function OrdersPage() {
                         ...prev, 
                         paidAmount: e.target.value 
                       }))}
-                      className="block w-full pl-3 pr-12 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                      className="block w-full pl-3 pr-12 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 rounded-md"
                       placeholder="0.00"
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -1402,7 +1402,7 @@ export default function OrdersPage() {
                       ...prev, 
                       paymentReference: e.target.value 
                     }))}
-                    className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                    className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 rounded-md"
                     placeholder="Ej: YAPE-123456, REF001, etc."
                   />
                 </div>
@@ -1419,7 +1419,7 @@ export default function OrdersPage() {
                       ...prev, 
                       paymentNotes: e.target.value 
                     }))}
-                    className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 sm:text-sm rounded-md"
+                    className="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-600 focus:border-gray-600 rounded-md"
                     placeholder="Ej: Cliente pagó con Yape, comprobante enviado por WhatsApp..."
                   />
                 </div>

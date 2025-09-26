@@ -874,7 +874,99 @@ export default function ProductsPage() {
                     <div className="lg:hidden">
                       <div className="divide-y divide-gray-200">
                         {paginatedProducts.map((product) => (
-                          <div key={product.id} className="p-4 hover:bg-gray-50">
+                          <div key={product.id} className="relative p-4 hover:bg-gray-50">
+                            {/* Botón de tres puntitos - Solo móvil - Esquina superior derecha */}
+                            <div className="absolute top-2 right-2 lg:hidden" data-mobile-menu="true" ref={(el) => mobileMenuRefs.current[product.id] = el}>
+                              <button
+                                type="button"
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                                title="Más acciones"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  setMobileMenuOpen(mobileMenuOpen === product.id ? null : product.id)
+                                }}
+                              >
+                                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                </svg>
+                              </button>
+
+                              {/* Dropdown móvil */}
+                              {mobileMenuOpen === product.id && (
+                                <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                  <div className="py-1">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handlePreview(product)
+                                        setMobileMenuOpen(null)
+                                      }}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                    >
+                                      <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                      Ver en catálogo
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleEdit(product.id)
+                                        setMobileMenuOpen(null)
+                                      }}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                    >
+                                      <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                      Editar producto
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleUpdateStock(product)
+                                        setMobileMenuOpen(null)
+                                      }}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                    >
+                                      <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4z" />
+                                      </svg>
+                                      Actualizar existencias
+                                    </button>
+
+                                    <div className="border-t border-gray-100 my-1"></div>
+
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleDelete(product.id)
+                                        setMobileMenuOpen(null)
+                                      }}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 active:bg-red-100 transition-colors"
+                                    >
+                                      <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                      Eliminar producto
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
                             <div className="flex items-start space-x-4">
                               {/* Checkbox */}
                               <div className="flex-shrink-0 pt-1">
@@ -931,7 +1023,7 @@ export default function ProductsPage() {
                               {/* Product Info */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between">
-                                  <div className="flex-1 min-w-0">
+                                  <div className="flex-1 min-w-0 pr-12 lg:pr-0">
                                     <h3 className="text-sm font-medium text-gray-900 h-10 flex items-start leading-5 overflow-hidden line-clamp-2">
                                       {product.name}
                                     </h3>
@@ -984,110 +1076,6 @@ export default function ProductsPage() {
                                     </div>
                                   )}
 
-                                  {/* Botón de tres puntitos - Solo móvil */}
-                                  <div className="absolute bottom-0 right-0 lg:hidden relative" data-mobile-menu="true" ref={(el) => mobileMenuRefs.current[product.id] = el}>
-                                    <button
-                                      type="button"
-                                      className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-                                      title="Más acciones"
-                                      onClick={(e) => {
-                                        e.preventDefault()
-                                        e.stopPropagation()
-                                        setMobileMenuOpen(mobileMenuOpen === product.id ? null : product.id)
-                                      }}
-                                    >
-                                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                      </svg>
-                                    </button>
-
-                                    {/* Dropdown móvil */}
-                                    {mobileMenuOpen === product.id && (
-                                      <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
-                                      >
-                                        <div className="py-1">
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.preventDefault()
-                                              e.stopPropagation()
-                                              handlePreview(product)
-                                              setMobileMenuOpen(null)
-                                            }}
-                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                                          >
-                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            Ver en catálogo
-                                          </button>
-
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.preventDefault()
-                                              e.stopPropagation()
-                                              handleEdit(product.id)
-                                              setMobileMenuOpen(null)
-                                            }}
-                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                                          >
-                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                            Editar producto
-                                          </button>
-
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.preventDefault()
-                                              e.stopPropagation()
-                                              handleUpdateStock(product)
-                                              setMobileMenuOpen(null)
-                                            }}
-                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                                          >
-                                            <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                            </svg>
-                                            Actualizar existencias
-                                          </button>
-
-                                          <button
-                                            type="button"
-                                            disabled={deleting === product.id}
-                                            onClick={(e) => {
-                                              e.preventDefault()
-                                              e.stopPropagation()
-                                              if (window.confirm(t('actions.confirmDelete'))) {
-                                                handleDelete(product.id)
-                                              }
-                                              setMobileMenuOpen(null)
-                                            }}
-                                            className={`flex items-center w-full px-4 py-2 text-sm hover:bg-red-50 active:bg-red-100 transition-colors ${
-                                              deleting === product.id
-                                                ? 'text-gray-400 cursor-not-allowed'
-                                                : 'text-red-700'
-                                            }`}
-                                          >
-                                            {deleting === product.id ? (
-                                              <svg className="animate-spin h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                              </svg>
-                                            ) : (
-                                              <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                              </svg>
-                                            )}
-                                            Eliminar producto
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
                                 </div>
 
                                 {/* Actions */}
