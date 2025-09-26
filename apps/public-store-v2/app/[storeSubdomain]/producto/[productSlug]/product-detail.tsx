@@ -5,6 +5,7 @@ import { getStoreIdBySubdomain, getStorePrimaryLocale } from '../../../../lib/st
 import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../../lib/products';
 import { toCloudinarySquare } from '../../../../lib/images';
 import { formatPrice } from '../../../../lib/currency';
+import { generateProductWhatsAppMessage } from '../../../../lib/orders';
 import Layout from '../../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../../lib/store';
 import { getStoreCategories, Category } from '../../../../lib/categories';
@@ -196,35 +197,17 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   // Función para generar mensaje de WhatsApp
   const generateWhatsAppMessage = () => {
     if (!product || !storeInfo) return '';
-    
-    const productUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const price = selectedPricingVariant ? selectedPricingVariant.price : product.price;
-    const currency = storeInfo.currency || 'COP';
-    const formattedPrice = formatPrice(price, currency);
-    
-    // Obtener información de variantes seleccionadas
-    let variantText = '';
-    if (selectedPricingVariant) {
-      variantText = `\n📋 Variante: ${selectedPricingVariant.value || selectedPricingVariant.name}`;
-    }
-    
-    // Usar el estado quantity
-    
-    const message = `¡Hola! 👋
 
-Estoy interesado/a en este producto de ${storeInfo.storeName}:
+    // Obtener el idioma de la tienda
+    const storeLanguage = storeInfo?.advanced?.language || storeInfo?.language || 'es';
 
-🛍️ *${product.name}*
-💰 Precio: ${formattedPrice}${variantText}
-📦 ${additionalText('quantity')}: ${quantity}
-
-${productUrl}
-
-¿Podrías darme más información sobre disponibilidad y proceso de compra?
-
-¡Gracias!`;
-    
-    return encodeURIComponent(message);
+    return generateProductWhatsAppMessage(
+      product,
+      storeInfo,
+      selectedPricingVariant,
+      quantity,
+      storeLanguage
+    );
   };
 
   // Función para abrir WhatsApp

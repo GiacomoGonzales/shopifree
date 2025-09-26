@@ -781,7 +781,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                     // Limpiar carrito después del guardado exitoso
                     clearCart();
-                    setIsSubmitting(false);
+                    // NO llamar setIsSubmitting(false) aquí - mantener cargando hasta redirect
 
                     // Usar el mismo flujo que otros métodos de pago: mostrar confirmación
                     if (onShowConfirmation) {
@@ -802,7 +802,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     // Incluso si falla el guardado, mostrar confirmación al usuario
                     // porque el pago ya se procesó exitosamente
                     clearCart();
-                    setIsSubmitting(false);
+                    // NO llamar setIsSubmitting(false) aquí - mantener cargando hasta redirect
 
                     if (onShowConfirmation) {
                         console.log('🔔 [Culqi] Mostrando confirmación a pesar del error de guardado...');
@@ -980,7 +980,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 console.log('🔍 [Notification Debug] hasChanged:', hasChanged);
 
                 if (hasChanged) {
-                    let estimatedTime = 'Tiempo por calcular';
+                    let estimatedTime = t('timeToCalculate');
                     if (formData.shippingMethod === 'express' && shippingConfig?.localDelivery?.express?.estimatedTime) {
                         estimatedTime = shippingConfig.localDelivery.express.estimatedTime;
                     } else if (formData.shippingMethod === 'standard' && zone?.estimatedTime) {
@@ -1045,6 +1045,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             // Scroll to top al abrir el modal en móviles
             setTimeout(() => scrollToTopOnMobile(), 200);
         } else {
+            // Cuando se cierra el modal, resetear el estado de loading
+            setIsSubmitting(false);
             // Limpiar estados al cerrar
             setMap(null);
             setMarker(null);
@@ -1932,7 +1934,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             // Procesar según el método de checkout
             if (isWhatsAppCheckout) {
                 // Para WhatsApp: usar nueva función con ID del pedido
-                const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo);
+                // Obtener el idioma de la tienda
+                const storeLanguage = storeInfo?.advanced?.language || storeInfo?.language || 'es';
+                const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo, storeLanguage);
 
                 if (phone) {
                     // Limpiar número de teléfono y asegurar formato correcto para WhatsApp
@@ -2024,7 +2028,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                     setTimeout(() => {
                         clearCart();
-                        setIsSubmitting(false);
+                        // IMPORTANTE: NO llamar setIsSubmitting(false) aquí
+                        // El botón debe mantenerse cargando hasta que el modal se cierre completamente
+                        // para evitar confusión del usuario y clics múltiples
                         onSuccess();
                         onClose();
                     }, cleanupDelay);
@@ -2063,8 +2069,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 
                 // Mostrar modal de confirmación
                 console.log('🚀 Mostrando modal de confirmación...');
-                setIsSubmitting(false);
-                
+                // IMPORTANTE: NO llamar setIsSubmitting(false) aquí
+                // El botón debe mantenerse cargando hasta que se redirija a la página de éxito
+                // para evitar confusión del usuario y clics múltiples
+
                 // Limpiar carrito y mostrar modal de confirmación
                 clearCart();
                 
@@ -2522,21 +2530,21 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                             <div className="space-y-2">
                                 {shippingNotificationData.zoneName && (
                                     <div className="flex justify-between text-sm">
-                                        <span>Zona:</span>
+                                        <span>{t('shippingZone')}:</span>
                                         <span className="font-medium text-right">{shippingNotificationData.zoneName}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-sm">
-                                    <span>Costo:</span>
+                                    <span>{t('shippingCost')}:</span>
                                     <span className="font-medium text-right">
                                         {shippingNotificationData.cost > 0
                                             ? formatPrice(shippingNotificationData.cost, currency)
-                                            : 'Gratis'
+                                            : t('free')
                                         }
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span>Tiempo:</span>
+                                    <span>{t('shippingTime')}:</span>
                                     <span className="font-medium text-right">{shippingNotificationData.estimatedTime}</span>
                                 </div>
                             </div>
@@ -2622,7 +2630,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                     <div className="nbd-method-info">
                                                         <span className="nbd-method-name">{t('pickupInStore')}</span>
                                                         <span className="nbd-method-desc">
-                                                            {selectedLocation?.preparationTime || 'Tiempo por calcular'}
+                                                            {selectedLocation?.preparationTime || t('timeToCalculate')}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -2639,7 +2647,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             <div className="nbd-method-content">
                                                 <div className="nbd-method-info">
                                                     <span className="nbd-method-name">{t('homeDelivery')}</span>
-                                                    <span className="nbd-method-desc">Tiempo por calcular</span>
+                                                    <span className="nbd-method-desc">{t('timeToCalculate')}</span>
                                                 </div>
                                             </div>
                                         </label>

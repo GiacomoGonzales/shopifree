@@ -247,67 +247,156 @@ export function translatePaymentMethod(method: string, language: string = 'es'):
 }
 
 /**
+ * Translations for WhatsApp messages
+ */
+const whatsappTranslations = {
+  es: {
+    greeting: (storeName: string) => `Hola! Me interesa realizar un pedido desde ${storeName}:\n\n`,
+    order: 'PEDIDO',
+    products: 'PRODUCTOS',
+    quantity: 'Cantidad',
+    customerData: 'DATOS DEL CLIENTE',
+    name: 'Nombre',
+    email: 'Email',
+    phone: 'Telefono',
+    shipping: 'ENVIO',
+    method: 'Metodo',
+    address: 'Direccion',
+    payment: 'PAGO',
+    summary: 'RESUMEN',
+    subtotal: 'Subtotal',
+    shippingCost: 'Envío',
+    discount: 'Descuento',
+    total: 'Total',
+    notes: 'NOTAS',
+    deliveryData: 'DATOS DE ENTREGA',
+    deliveryMethod: 'Método',
+    deliveryAddress: 'Dirección',
+    status: 'Estado',
+    paid: 'PAGADO',
+    pending: 'PENDIENTE DE PAGO',
+    confirmation: '¿Podrías confirmarme los detalles y tiempos de entrega?'
+  },
+  en: {
+    greeting: (storeName: string) => `Hello! I'm interested in placing an order from ${storeName}:\n\n`,
+    order: 'ORDER',
+    products: 'PRODUCTS',
+    quantity: 'Quantity',
+    customerData: 'CUSTOMER DATA',
+    name: 'Name',
+    email: 'Email',
+    phone: 'Phone',
+    shipping: 'SHIPPING',
+    method: 'Method',
+    address: 'Address',
+    payment: 'PAYMENT',
+    summary: 'SUMMARY',
+    subtotal: 'Subtotal',
+    shippingCost: 'Shipping',
+    discount: 'Discount',
+    total: 'Total',
+    notes: 'NOTES',
+    deliveryData: 'DELIVERY DATA',
+    deliveryMethod: 'Method',
+    deliveryAddress: 'Address',
+    status: 'Status',
+    paid: 'PAID',
+    pending: 'PENDING PAYMENT',
+    confirmation: 'Could you confirm the details and delivery times?'
+  },
+  pt: {
+    greeting: (storeName: string) => `Olá! Estou interessado em fazer um pedido de ${storeName}:\n\n`,
+    order: 'PEDIDO',
+    products: 'PRODUTOS',
+    quantity: 'Quantidade',
+    customerData: 'DADOS DO CLIENTE',
+    name: 'Nome',
+    email: 'Email',
+    phone: 'Telefone',
+    shipping: 'ENVIO',
+    method: 'Método',
+    address: 'Endereço',
+    payment: 'PAGAMENTO',
+    summary: 'RESUMO',
+    subtotal: 'Subtotal',
+    shippingCost: 'Envio',
+    discount: 'Desconto',
+    total: 'Total',
+    notes: 'NOTAS',
+    deliveryData: 'DADOS DE ENTREGA',
+    deliveryMethod: 'Método',
+    deliveryAddress: 'Endereço',
+    status: 'Status',
+    paid: 'PAGO',
+    pending: 'PAGAMENTO PENDENTE',
+    confirmation: 'Você poderia confirmar os detalhes e os prazos de entrega?'
+  }
+};
+
+/**
  * Generar mensaje de WhatsApp con ID del pedido
  */
 export function generateWhatsAppMessageWithId(
   orderData: OrderData,
   orderId: string | null,
-  storeInfo: any
+  storeInfo: any,
+  language: string = 'es'
 ): { message: string; phone: string | null } {
   const storeName = storeInfo?.storeName || 'Tienda';
   const whatsappPhone = storeInfo?.socialMedia?.whatsapp || storeInfo?.phone;
+  const t = whatsappTranslations[language as keyof typeof whatsappTranslations] || whatsappTranslations.es;
 
-  let message = `Hola! Me interesa realizar un pedido desde ${storeName}:\n\n`;
+  let message = t.greeting(storeName);
 
   // Agregar ID del pedido si existe
   if (orderId) {
-    message += `PEDIDO #${orderId.slice(-6).toUpperCase()}\n\n`;
+    message += `${t.order} #${orderId.slice(-6).toUpperCase()}\n\n`;
   }
 
   // Agregar productos (sin emojis problemáticos)
-  message += `PRODUCTOS:\n`;
+  message += `${t.products}:\n`;
   orderData.items.forEach((item, index) => {
     const itemTotal = (item.variant?.price || item.price) * item.quantity;
     message += `${index + 1}. ${item.name}`;
     if (item.variant) {
       message += ` (${item.variant.name})`;
     }
-    message += `\n   Cantidad: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+    message += `\n   ${t.quantity}: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
   });
 
   // Agregar información del cliente
-  message += `\nDATOS DEL CLIENTE:\n`;
-  message += `Nombre: ${orderData.customer.fullName}\n`;
-  message += `Email: ${orderData.customer.email}\n`;
-  message += `Telefono: ${orderData.customer.phone}\n`;
+  message += `\n${t.customerData}:\n`;
+  message += `${t.name}: ${orderData.customer.fullName}\n`;
+  message += `${t.email}: ${orderData.customer.email}\n`;
+  message += `${t.phone}: ${orderData.customer.phone}\n`;
 
   // Agregar información de envío
-  message += `\nENVIO:\n`;
-  message += `Metodo: ${translateShippingMethod(orderData.shipping.method)}\n`;
+  message += `\n${t.shipping}:\n`;
+  message += `${t.method}: ${translateShippingMethod(orderData.shipping.method, language)}\n`;
   if (orderData.shipping.address) {
-    message += `Direccion: ${orderData.shipping.address}\n`;
+    message += `${t.address}: ${orderData.shipping.address}\n`;
   }
 
   // Agregar información de pago
-  message += `\nPAGO:\n`;
-  message += `Metodo: ${translatePaymentMethod(orderData.payment.method)}\n`;
+  message += `\n${t.payment}:\n`;
+  message += `${t.method}: ${translatePaymentMethod(orderData.payment.method, language)}\n`;
 
   // Agregar totales
-  message += `\nRESUMEN:\n`;
-  message += `Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
-  message += `Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
+  message += `\n${t.summary}:\n`;
+  message += `${t.subtotal}: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
+  message += `${t.shippingCost}: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
 
   if (orderData.discount && orderData.discount > 0) {
-    message += `Descuento: -${formatPrice(orderData.discount, orderData.currency)}\n`;
+    message += `${t.discount}: -${formatPrice(orderData.discount, orderData.currency)}\n`;
   }
 
-  message += `*Total: ${formatPrice(orderData.totals.total, orderData.currency)}*\n`;
-  
+  message += `*${t.total}: ${formatPrice(orderData.totals.total, orderData.currency)}*\n`;
+
   // Agregar notas si las hay
   if (orderData.payment.notes?.trim()) {
-    message += `\n📝 *NOTAS:*\n${orderData.payment.notes}\n`;
+    message += `\n📝 *${t.notes}:*\n${orderData.payment.notes}\n`;
   }
-  
+
   return { message, phone: whatsappPhone };
 }
 
@@ -322,61 +411,148 @@ export function generateConfirmationWhatsAppMessage(
   paymentId?: string,
   language: string = 'es'
 ): string {
-  let message = `¡Hola! Acabo de realizar un pedido:\n\n`;
+  const t = whatsappTranslations[language as keyof typeof whatsappTranslations] || whatsappTranslations.es;
+
+  const greetings = {
+    es: '¡Hola! Acabo de realizar un pedido:\n\n',
+    en: 'Hello! I just placed an order:\n\n',
+    pt: 'Olá! Acabei de fazer um pedido:\n\n'
+  };
+
+  let message = greetings[language as keyof typeof greetings] || greetings.es;
 
   // Agregar ID del pedido
-  message += `PEDIDO #${orderId.slice(-6).toUpperCase()}\n`;
+  message += `${t.order} #${orderId.slice(-6).toUpperCase()}\n`;
   if (paymentId) {
-    message += `ID de Pago: ${paymentId}\n`;
+    const paymentLabels = {
+      es: 'ID de Pago',
+      en: 'Payment ID',
+      pt: 'ID de Pagamento'
+    };
+    message += `${paymentLabels[language as keyof typeof paymentLabels] || paymentLabels.es}: ${paymentId}\n`;
   }
-  message += `Estado: ${isPaid ? 'PAGADO' : 'PENDIENTE DE PAGO'}\n\n`;
+  message += `${t.status}: ${isPaid ? `✅ ${t.paid}` : `⏳ ${t.pending}`}\n\n`;
 
   // Agregar productos
-  message += `PRODUCTOS:\n`;
+  message += `${t.products}:\n`;
   orderData.items.forEach((item, index) => {
     const itemTotal = (item.variant?.price || item.price) * item.quantity;
     message += `${index + 1}. ${item.name}`;
     if (item.variant) {
       message += ` (${item.variant.name})`;
     }
-    message += `\n   Cantidad: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+    message += `\n   ${t.quantity}: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
   });
 
   // Agregar información del cliente
-  message += `\nDATOS DE ENTREGA:\n`;
-  message += `Nombre: ${orderData.customer.fullName}\n`;
-  message += `Email: ${orderData.customer.email}\n`;
-  message += `Teléfono: ${orderData.customer.phone}\n`;
+  message += `\n${t.deliveryData}:\n`;
+  message += `${t.name}: ${orderData.customer.fullName}\n`;
+  message += `${t.email}: ${orderData.customer.email}\n`;
+  const phoneLabels = {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  };
+  message += `${phoneLabels[language as keyof typeof phoneLabels] || phoneLabels.es}: ${orderData.customer.phone}\n`;
 
   // Agregar información de envío
-  message += `\nENVÍO:\n`;
-  message += `Método: ${translateShippingMethod(orderData.shipping.method, language)}\n`;
+  const shippingLabels = {
+    es: 'ENVÍO',
+    en: 'SHIPPING',
+    pt: 'ENVIO'
+  };
+  message += `\n${shippingLabels[language as keyof typeof shippingLabels] || shippingLabels.es}:\n`;
+  message += `${t.deliveryMethod}: ${translateShippingMethod(orderData.shipping.method, language)}\n`;
   if (orderData.shipping.address) {
-    message += `Dirección: ${orderData.shipping.address}\n`;
+    message += `${t.deliveryAddress}: ${orderData.shipping.address}\n`;
   }
 
   // Agregar información de pago
-  message += `\nPAGO:\n`;
-  message += `Método: ${translatePaymentMethod(orderData.payment.method, language)}\n`;
-  message += `Estado: ${isPaid ? '✅ PAGADO' : '⏳ PENDIENTE'}\n`;
+  message += `\n${t.payment}:\n`;
+  message += `${t.method}: ${translatePaymentMethod(orderData.payment.method, language)}\n`;
+  message += `${t.status}: ${isPaid ? `✅ ${t.paid}` : `⏳ ${t.pending}`}\n`;
 
   // Agregar totales
-  message += `\nRESUMEN:\n`;
-  message += `Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
-  message += `Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
+  message += `\n${t.summary}:\n`;
+  message += `${t.subtotal}: ${formatPrice(orderData.totals.subtotal, orderData.currency)}\n`;
+  message += `${t.shippingCost}: ${formatPrice(orderData.totals.shipping, orderData.currency)}\n`;
 
   if (orderData.discount && orderData.discount > 0) {
-    message += `Descuento: -${formatPrice(orderData.discount, orderData.currency)}\n`;
+    message += `${t.discount}: -${formatPrice(orderData.discount, orderData.currency)}\n`;
   }
 
-  message += `*Total: ${formatPrice(orderData.totals.total, orderData.currency)}*\n`;
+  message += `*${t.total}: ${formatPrice(orderData.totals.total, orderData.currency)}*\n`;
 
   // Agregar notas si las hay
   if (orderData.payment.notes?.trim()) {
-    message += `\n📝 *NOTAS:*\n${orderData.payment.notes}\n`;
+    message += `\n📝 *${t.notes}:*\n${orderData.payment.notes}\n`;
   }
 
-  message += `\n¿Podrías confirmarme los detalles y tiempos de entrega?`;
+  message += `\n${t.confirmation}`;
 
   return message;
+}
+
+/**
+ * Generar mensaje de WhatsApp para productos individuales (desde página de producto)
+ */
+export function generateProductWhatsAppMessage(
+  product: any,
+  storeInfo: any,
+  selectedVariant: any,
+  quantity: number,
+  language: string = 'es'
+): string {
+  const productMessages = {
+    es: {
+      greeting: '¡Hola! 👋',
+      interested: (storeName: string) => `Estoy interesado/a en este producto de ${storeName}:`,
+      price: 'Precio',
+      variant: 'Variante',
+      quantity: 'Cantidad',
+      question: '¿Podrías darme más información sobre disponibilidad y proceso de compra?',
+      thanks: '¡Gracias!'
+    },
+    en: {
+      greeting: 'Hello! 👋',
+      interested: (storeName: string) => `I'm interested in this product from ${storeName}:`,
+      price: 'Price',
+      variant: 'Variant',
+      quantity: 'Quantity',
+      question: 'Could you give me more information about availability and purchasing process?',
+      thanks: 'Thank you!'
+    },
+    pt: {
+      greeting: 'Olá! 👋',
+      interested: (storeName: string) => `Estou interessado neste produto de ${storeName}:`,
+      price: 'Preço',
+      variant: 'Variante',
+      quantity: 'Quantidade',
+      question: 'Você poderia me dar mais informações sobre disponibilidade e processo de compra?',
+      thanks: 'Obrigado!'
+    }
+  };
+
+  const t = productMessages[language as keyof typeof productMessages] || productMessages.es;
+  const productUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const price = selectedVariant ? selectedVariant.price : product.price;
+  const currency = storeInfo.currency || 'USD';
+  const formattedPrice = formatPrice(price, currency);
+
+  // Obtener información de variantes seleccionadas
+  let variantText = '';
+  if (selectedVariant) {
+    variantText = `\n📋 ${t.variant}: ${selectedVariant.value || selectedVariant.name}`;
+  }
+
+  const message = `${t.greeting}
+${t.interested(storeInfo.storeName)}
+🛍️ *${product.name}*
+💰 ${t.price}: ${formattedPrice}${variantText}
+📦 ${t.quantity}: ${quantity}
+${productUrl}
+${t.question}
+${t.thanks}`;
+
+  return encodeURIComponent(message);
 }

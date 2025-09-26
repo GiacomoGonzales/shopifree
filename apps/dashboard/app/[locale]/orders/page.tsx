@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useAuth } from '../../../lib/simple-auth-context'
 import { getUserStore } from '../../../lib/store'
 import DashboardLayout from '../../../components/DashboardLayout'
@@ -59,6 +59,7 @@ export default function OrdersPage() {
   
   const { user } = useAuth()
   const t = useTranslations('orders')
+  const locale = useLocale()
 
   // Cargar datos de la tienda y suscribirse a pedidos
   useEffect(() => {
@@ -306,7 +307,7 @@ export default function OrdersPage() {
   const handleWhatsAppReply = (order: Order) => {
     if (!storeData || !order.clientPhone) return
 
-    const message = generateWhatsAppMessage(order, storeData.storeName, 'es')
+    const message = generateWhatsAppMessage(order, storeData.storeName, locale)
     const url = generateWhatsAppURL(order.clientPhone, message)
     window.open(url, '_blank')
   }

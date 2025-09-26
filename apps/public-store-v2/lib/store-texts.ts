@@ -199,6 +199,12 @@ export interface StoreTexts {
   paymentMethodBankTransferDesc: string;
   paymentMethodYapeDesc: string;
   paymentMethodMercadopagoDesc: string;
+
+  // Textos del modal de información de envío
+  shippingZone: string;
+  shippingCost: string;
+  shippingTime: string;
+  timeToCalculate: string;
 }
 
 const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
@@ -395,7 +401,13 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     paymentMethodTransferDesc: 'Transferencia móvil',
     paymentMethodBankTransferDesc: 'Transferencia directa a cuenta bancaria',
     paymentMethodYapeDesc: 'Transferencia móvil Yape',
-    paymentMethodMercadopagoDesc: 'Paga seguro con tarjetas, Yape, PagoEfectivo y más'
+    paymentMethodMercadopagoDesc: 'Paga seguro con tarjetas, Yape, PagoEfectivo y más',
+
+    // Textos del modal de información de envío
+    shippingZone: 'Zona',
+    shippingCost: 'Costo',
+    shippingTime: 'Tiempo',
+    timeToCalculate: 'Tiempo por calcular'
   },
   
   en: {
@@ -591,7 +603,13 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     paymentMethodTransferDesc: 'Mobile transfer',
     paymentMethodBankTransferDesc: 'Direct bank account transfer',
     paymentMethodYapeDesc: 'Yape mobile transfer',
-    paymentMethodMercadopagoDesc: 'Pay securely with cards, Yape, PagoEfectivo and more'
+    paymentMethodMercadopagoDesc: 'Pay securely with cards, Yape, PagoEfectivo and more',
+
+    // Textos del modal de información de envío
+    shippingZone: 'Zone',
+    shippingCost: 'Cost',
+    shippingTime: 'Time',
+    timeToCalculate: 'Time to calculate'
   },
   
   pt: {
@@ -787,7 +805,13 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     paymentMethodTransferDesc: 'Transferência móvel',
     paymentMethodBankTransferDesc: 'Transferência direta para conta bancária',
     paymentMethodYapeDesc: 'Transferência móvel Yape',
-    paymentMethodMercadopagoDesc: 'Pague com segurança com cartões, Yape, PagoEfectivo e mais'
+    paymentMethodMercadopagoDesc: 'Pague com segurança com cartões, Yape, PagoEfectivo e mais',
+
+    // Textos del modal de información de envío
+    shippingZone: 'Zona',
+    shippingCost: 'Custo',
+    shippingTime: 'Tempo',
+    timeToCalculate: 'Tempo a calcular'
   }
 };
 

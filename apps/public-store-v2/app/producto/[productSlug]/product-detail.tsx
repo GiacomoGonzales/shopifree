@@ -5,6 +5,7 @@ import { getStoreIdBySubdomain, getStorePrimaryLocale } from '../../../lib/store
 import { getProduct, getProductBySlug, getStoreProducts, PublicProduct } from '../../../lib/products';
 import { toCloudinarySquare } from '../../../lib/images';
 import { formatPrice } from '../../../lib/currency';
+import { generateProductWhatsAppMessage } from '../../../lib/orders';
 import Layout from '../../../themes/new-base-default/Layout';
 import { getStoreBasicInfo, StoreBasicInfo } from '../../../lib/store';
 import { getStoreCategories, Category } from '../../../lib/categories';
@@ -204,40 +205,34 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   // Función para generar mensaje de WhatsApp
   const generateWhatsAppMessage = () => {
     if (!product || !storeInfo) return '';
-    
-    const productUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const price = promotionsData.finalPrice || (selectedVariant ? selectedVariant.price : product.price);
-    const currency = storeInfo.currency || 'COP';
-    const formattedPrice = formatPrice(price, currency);
-    
-    // Obtener información de variantes seleccionadas
-    let variantText = '';
+
+    // Obtener el idioma de la tienda
+    const storeLanguage = storeInfo?.advanced?.language || storeInfo?.language || 'es';
+
+    // Obtener cantidad desde el input
+    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
+    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+
+    // Crear un objeto de variante compatible con la nueva función
+    let compatibleVariant = null;
     if (selectedVariant && selectedVariant.attributes) {
       const variants = Object.entries(selectedVariant.attributes)
         .map(([key, value]) => `${key}: ${value}`)
         .join(', ');
-      variantText = `\n📋 Variantes: ${variants}`;
+      compatibleVariant = {
+        name: variants,
+        value: variants,
+        price: selectedVariant.price
+      };
     }
-    
-    // Obtener cantidad
-    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
-    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
-    
-    const message = `¡Hola! 👋
 
-Estoy interesado/a en este producto de ${storeInfo.storeName}:
-
-🛍️ *${product.name}*
-💰 Precio: ${formattedPrice}${variantText}
-📦 Cantidad: ${quantity}
-
-${productUrl}
-
-¿Podrías darme más información sobre disponibilidad y proceso de compra?
-
-¡Gracias!`;
-    
-    return encodeURIComponent(message);
+    return generateProductWhatsAppMessage(
+      product,
+      storeInfo,
+      compatibleVariant,
+      quantity,
+      storeLanguage
+    );
   };
 
   // Función para abrir WhatsApp

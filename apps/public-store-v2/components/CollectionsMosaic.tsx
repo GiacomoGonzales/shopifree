@@ -156,7 +156,7 @@ const CollectionsMosaic = ({ collections, storeSubdomain }: CollectionsMosaicPro
         <section className="nbd-collections-mosaic">
             <div className="nbd-container">
                 <div className="nbd-section-header">
-                    <h2 className="nbd-section-title">Colecciones</h2>
+                    <h2 className="nbd-section-title">{additionalText('ourCollections')}</h2>
                 </div>
                 
                 <div className="nbd-collections-grid">
