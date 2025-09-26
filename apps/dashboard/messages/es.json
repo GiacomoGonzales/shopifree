@@ -604,7 +604,7 @@
         "cash": "Efectivo",
         "cash_on_delivery": "Pago manual",
         "transfer": "Transferencia",
-        "card": "Tarjeta",
+        "card": "Tarjeta al repartidor",
         "paypal": "PayPal",
         "stripe": "Stripe",
         "mercadopago": "MercadoPago",

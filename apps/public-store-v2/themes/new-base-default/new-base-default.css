@@ -1102,7 +1102,7 @@
         overflow-y: hidden;
         scroll-behavior: smooth;
         gap: var(--nbd-space-md);
-        padding: var(--nbd-space-md) 0 var(--nbd-space-md) var(--nbd-space-lg); /* Alinear primer elemento con margen de página */
+        padding: var(--nbd-space-md) var(--nbd-space-lg) var(--nbd-space-md) var(--nbd-space-lg); /* Alinear primer y último elemento con márgenes de página */
         /* Ocultar scrollbar pero mantener funcionalidad */
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
@@ -7449,7 +7449,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         overflow-y: hidden;
         scroll-behavior: smooth;
         gap: var(--nbd-space-md);
-        padding: var(--nbd-space-md) 0 var(--nbd-space-md) var(--nbd-space-lg); /* Alinear primer elemento con margen de página */
+        padding: var(--nbd-space-md) var(--nbd-space-lg) var(--nbd-space-md) var(--nbd-space-lg); /* Alinear primer y último elemento con márgenes de página */
         margin-bottom: 0; /* Sin separación vertical en móvil */
         /* Ocultar scrollbar pero mantener funcionalidad */
         scrollbar-width: none; /* Firefox */

@@ -548,7 +548,7 @@
       "paymentMethods": {
         "cash": "Cash",
         "transfer": "Transfer",
-        "card": "Card",
+        "card": "Card on Delivery",
         "other": "Other"
       },
       "details": {

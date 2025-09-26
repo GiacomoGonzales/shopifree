@@ -26,7 +26,7 @@
   "paymentMethods": {
     "cash": "Cash",
     "cash_on_delivery": "Cash on Delivery",
-    "card": "Card",
+    "card": "Card on Delivery",
     "transfer": "Transfer",
     "yape": "Yape Payment",
     "bank_transfer": "Bank Transfer",
@@ -61,7 +61,26 @@
     "updating": "Updating...",
     "replyWhatsApp": "Reply via WhatsApp",
     "resendEmail": "Resend email",
-    "close": "Close"
+    "close": "Close",
+    "paymentInfo": "Payment Information",
+    "paymentStatusLabel": "Payment status",
+    "paymentType": "Payment type",
+    "totalAmount": "Total amount",
+    "paidAmount": "Paid amount",
+    "reference": "Reference",
+    "paidOn": "Paid on",
+    "paymentNotes": "Payment notes",
+    "processedBy": "Processed by",
+    "orderStatus": "Order status",
+    "notifyStatusChange": "Notify status change",
+    "notifyByEmail": "Notify by email",
+    "notifyByWhatsApp": "Notify by WhatsApp",
+    "paymentStatusSection": "Payment status",
+    "paymentMethod": "Method",
+    "confirmManualPayment": "Confirm manual payment",
+    "markAsPaid": "Mark as paid",
+    "markAsFailed": "Mark as failed",
+    "paymentConfirmed": "Payment confirmed"
   },
   "actions": {
     "markAsConfirmed": "Mark as confirmed",
@@ -122,5 +141,34 @@
     "markAsFailed": "Mark as failed",
     "addPaymentNote": "Add payment note",
     "viewPaymentHistory": "View payment history"
+  },
+  "search": {
+    "placeholder": "Search by customer, phone, email or ID...",
+    "filters": "Filters",
+    "clearAll": "Clear all",
+    "close": "Close"
+  },
+  "orderCount": {
+    "order": "order",
+    "orders": "orders"
+  },
+  "filterSections": {
+    "orderStatus": "Order status",
+    "paymentStatus": "Payment status",
+    "sortBy": "Sort by",
+    "dateRange": "Date range",
+    "amountRange": "Amount range",
+    "from": "From",
+    "to": "To",
+    "minimum": "Minimum",
+    "maximum": "Maximum"
+  },
+  "sortOptions": {
+    "newest": "Newest first",
+    "oldest": "Oldest first",
+    "highestTotal": "Highest total",
+    "lowestTotal": "Lowest total",
+    "customerAZ": "Customer A-Z",
+    "customerZA": "Customer Z-A"
   }
 } 

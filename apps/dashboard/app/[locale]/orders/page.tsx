@@ -244,6 +244,38 @@ export default function OrdersPage() {
     }))
   }
 
+  // Función para determinar si un método de pago es automático
+  const isAutomaticPayment = (paymentMethod: string) => {
+    const automaticMethods = [
+      'mercadopago',
+      'paypal',
+      'stripe',
+      'culqi',
+      'online'
+    ]
+    return automaticMethods.some(method =>
+      paymentMethod.toLowerCase().includes(method)
+    )
+  }
+
+  // Función para determinar si se puede cambiar el estado de pago
+  const canChangePaymentStatus = (order: Order) => {
+    const paymentMethod = order.paymentMethod
+    const currentStatus = (order as any).paymentStatus
+
+    // Si es automático y ya está pagado, no se puede cambiar
+    if (isAutomaticPayment(paymentMethod) && currentStatus === 'paid') {
+      return false
+    }
+
+    // Si es manual y ya está pagado, no se puede cambiar (ya se confirmó)
+    if (!isAutomaticPayment(paymentMethod) && currentStatus === 'paid') {
+      return false
+    }
+
+    return true
+  }
+
   // Manejar cambio de estado
   const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
     if (!storeData) return
@@ -401,7 +433,7 @@ export default function OrdersPage() {
                   <div className="flex items-center text-sm text-gray-500">
                     <span className="font-medium text-gray-900">{totalItems}</span>
                     <span className="ml-1">
-                      {totalItems === 1 ? 'pedido' : 'pedidos'}
+                      {totalItems === 1 ? t('orderCount.order') : t('orderCount.orders')}
                     </span>
                   </div>
 
@@ -419,7 +451,7 @@ export default function OrdersPage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                        placeholder="Buscar por cliente, teléfono o ID..."
+                        placeholder={t('search.placeholder')}
                       />
                     </div>
 
@@ -435,7 +467,7 @@ export default function OrdersPage() {
                         </svg>
 
                         {/* Texto "Filtros" - solo visible en desktop */}
-                        <span className="hidden sm:inline">Filtros</span>
+                        <span className="hidden sm:inline">{t('search.filters')}</span>
 
                         {/* Badge de filtros activos - posicionado diferente en móvil vs desktop */}
                         {getActiveFiltersCount() > 0 && (
@@ -459,17 +491,17 @@ export default function OrdersPage() {
 
                       {/* Dropdown de filtros */}
                       {showFilters && (
-                        <div className="absolute right-0 mt-2 w-96 sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div className="absolute right-0 mt-2 w-80 sm:w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                           <div className="p-4 space-y-4">
                             {/* Header */}
                             <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-medium text-gray-900">Filtros</h3>
+                              <h3 className="text-lg font-medium text-gray-900">{t('search.filters')}</h3>
                               {getActiveFiltersCount() > 0 && (
                                 <button
                                   onClick={clearAllFilters}
                                   className="text-sm text-gray-500 hover:text-gray-700"
                                 >
-                                  Limpiar todo
+                                  {t('search.clearAll')}
                                 </button>
                               )}
                             </div>
@@ -477,27 +509,20 @@ export default function OrdersPage() {
                             {/* Estados del pedido */}
                             <div>
                               <label className="text-sm font-medium text-gray-700 block mb-2">
-                                Estados del pedido
+                                {t('filterSections.orderStatus')}
                               </label>
-                              <div className="space-y-2 max-h-32 overflow-y-auto">
+                              <div className="space-y-2">
                                 {[
-                                  { value: 'pending', label: 'Pendiente' },
-                                  { value: 'whatsapp_sent', label: 'Enviado por WhatsApp' },
-                                  { value: 'confirmed', label: 'Confirmado' },
-                                  { value: 'preparing', label: 'Preparando' },
-                                  { value: 'ready', label: 'Listo' },
-                                  { value: 'shipped', label: 'Enviado' },
-                                  { value: 'delivered', label: 'Entregado' },
-                                  { value: 'cancelled', label: 'Cancelado' }
+                                  'pending', 'whatsapp_sent', 'confirmed', 'preparing', 'ready', 'shipped', 'delivered', 'cancelled'
                                 ].map(status => (
-                                  <label key={status.value} className="flex items-center">
+                                  <label key={status} className="flex items-center">
                                     <input
                                       type="checkbox"
-                                      checked={filters.status.includes(status.value)}
-                                      onChange={() => toggleStatusFilter(status.value)}
+                                      checked={filters.status.includes(status)}
+                                      onChange={() => toggleStatusFilter(status)}
                                       className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                                     />
-                                    <span className="ml-2 text-sm text-gray-700">{status.label}</span>
+                                    <span className="ml-2 text-sm text-gray-700">{t(`status.${status}`)}</span>
                                   </label>
                                 ))}
                               </div>
@@ -506,23 +531,20 @@ export default function OrdersPage() {
                             {/* Estados de pago */}
                             <div>
                               <label className="text-sm font-medium text-gray-700 block mb-2">
-                                Estados de pago
+                                {t('filterSections.paymentStatus')}
                               </label>
                               <div className="space-y-2">
                                 {[
-                                  { value: 'pending', label: 'Pendiente' },
-                                  { value: 'paid', label: 'Pagado' },
-                                  { value: 'partial', label: 'Pago parcial' },
-                                  { value: 'failed', label: 'Fallido' }
+                                  'pending', 'paid', 'failed'
                                 ].map(status => (
-                                  <label key={status.value} className="flex items-center">
+                                  <label key={status} className="flex items-center">
                                     <input
                                       type="checkbox"
-                                      checked={filters.paymentStatus.includes(status.value)}
-                                      onChange={() => togglePaymentStatusFilter(status.value)}
+                                      checked={filters.paymentStatus.includes(status)}
+                                      onChange={() => togglePaymentStatusFilter(status)}
                                       className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                                     />
-                                    <span className="ml-2 text-sm text-gray-700">{status.label}</span>
+                                    <span className="ml-2 text-sm text-gray-700">{t(`paymentStatus.${status}`)}</span>
                                   </label>
                                 ))}
                               </div>
@@ -531,26 +553,26 @@ export default function OrdersPage() {
                             {/* Ordenar por */}
                             <div>
                               <label className="text-sm font-medium text-gray-700 block mb-2">
-                                Ordenar por
+                                {t('filterSections.sortBy')}
                               </label>
                               <select
                                 value={filters.sortBy}
                                 onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
                               >
-                                <option value="date-desc">Más recientes</option>
-                                <option value="date-asc">Más antiguos</option>
-                                <option value="total-desc">Mayor total</option>
-                                <option value="total-asc">Menor total</option>
-                                <option value="customer-asc">Cliente A-Z</option>
-                                <option value="customer-desc">Cliente Z-A</option>
+                                <option value="date-desc">{t('sortOptions.newest')}</option>
+                                <option value="date-asc">{t('sortOptions.oldest')}</option>
+                                <option value="total-desc">{t('sortOptions.highestTotal')}</option>
+                                <option value="total-asc">{t('sortOptions.lowestTotal')}</option>
+                                <option value="customer-asc">{t('sortOptions.customerAZ')}</option>
+                                <option value="customer-desc">{t('sortOptions.customerZA')}</option>
                               </select>
                             </div>
 
                             {/* Rango de fechas */}
                             <div>
                               <label className="text-sm font-medium text-gray-700 block mb-2">
-                                Rango de fechas
+                                {t('filterSections.dateRange')}
                               </label>
                               <div className="grid grid-cols-2 gap-2">
                                 <input
@@ -561,7 +583,7 @@ export default function OrdersPage() {
                                     dateRange: { ...prev.dateRange, from: e.target.value }
                                   }))}
                                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                  placeholder="Desde"
+                                  placeholder={t('filterSections.from')}
                                 />
                                 <input
                                   type="date"
@@ -571,7 +593,7 @@ export default function OrdersPage() {
                                     dateRange: { ...prev.dateRange, to: e.target.value }
                                   }))}
                                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                  placeholder="Hasta"
+                                  placeholder={t('filterSections.to')}
                                 />
                               </div>
                             </div>
@@ -579,7 +601,7 @@ export default function OrdersPage() {
                             {/* Rango de montos */}
                             <div>
                               <label className="text-sm font-medium text-gray-700 block mb-2">
-                                Rango de montos ({storeData?.currency || 'USD'})
+                                {t('filterSections.amountRange')} ({storeData?.currency || 'USD'})
                               </label>
                               <div className="grid grid-cols-2 gap-2">
                                 <input
@@ -591,7 +613,7 @@ export default function OrdersPage() {
                                     amountRange: { ...prev.amountRange, min: e.target.value }
                                   }))}
                                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                  placeholder="Mínimo"
+                                  placeholder={t('filterSections.minimum')}
                                 />
                                 <input
                                   type="number"
@@ -602,7 +624,7 @@ export default function OrdersPage() {
                                     amountRange: { ...prev.amountRange, max: e.target.value }
                                   }))}
                                   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                  placeholder="Máximo"
+                                  placeholder={t('filterSections.maximum')}
                                 />
                               </div>
                             </div>
@@ -613,7 +635,7 @@ export default function OrdersPage() {
                                 onClick={() => setShowFilters(false)}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
                               >
-                                Cerrar
+                                {t('search.close')}
                               </button>
                             </div>
                           </div>
@@ -634,6 +656,9 @@ export default function OrdersPage() {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ID
+                        </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           {t('table.date')}
                         </th>
@@ -658,6 +683,9 @@ export default function OrdersPage() {
                       {/* Skeleton rows */}
                       {[...Array(5)].map((_, index) => (
                         <tr key={index} className="animate-pulse">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="h-4 bg-gray-200 rounded w-24"></div>
                           </td>
@@ -706,6 +734,9 @@ export default function OrdersPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           {t('table.date')}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -728,6 +759,9 @@ export default function OrdersPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                            #{order.id.slice(-8)}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatOrderDate(order.createdAt)}
                           </td>
@@ -895,17 +929,17 @@ export default function OrdersPage() {
 
       {/* Modal de detalles */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-start justify-center overflow-hidden">
+          <div className="relative w-full h-full md:w-3/4 lg:w-1/2 md:h-auto md:max-h-[90vh] md:top-20 md:mx-auto md:border md:shadow-lg md:rounded-md bg-white overflow-y-auto">
+            <div className="p-4 md:p-5 md:mt-3">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-6 pt-2 md:pt-0">
                 <h3 className="text-lg font-medium text-gray-900">
                   {t('details.title')} #{selectedOrder.id.slice(-8)}
                 </h3>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 p-1 -mr-1"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -918,77 +952,96 @@ export default function OrdersPage() {
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-3">{t('details.customerInfo')}</h4>
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                    <div><strong>{t('details.name')}:</strong> {selectedOrder.clientName}</div>
-                    <div><strong>{t('details.phone')}:</strong> {selectedOrder.clientPhone}</div>
+                    <div className="flex justify-between items-center">
+                      <span><strong>{t('details.name')}:</strong></span>
+                      <span>{selectedOrder.clientName}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span><strong>{t('details.phone')}:</strong></span>
+                      <span>{selectedOrder.clientPhone}</span>
+                    </div>
                     {(selectedOrder as any).email && (
-                      <div><strong>{t('details.email')}:</strong> {(selectedOrder as any).email}</div>
+                      <div className="flex justify-between items-center">
+                        <span><strong>{t('details.email')}:</strong></span>
+                        <span>{(selectedOrder as any).email}</span>
+                      </div>
                     )}
                     {(selectedOrder as any).shippingMethod && (
-                      <div><strong>{t('details.shippingMethod')}:</strong> {t(`shippingMethods.${(selectedOrder as any).shippingMethod}`)}</div>
+                      <div className="flex justify-between items-center">
+                        <span><strong>{t('details.shippingMethod')}:</strong></span>
+                        <span>{t(`shippingMethods.${(selectedOrder as any).shippingMethod}`)}</span>
+                      </div>
                     )}
                     {selectedOrder.clientAddress && (
-                      <div><strong>{t('details.address')}:</strong> {selectedOrder.clientAddress}</div>
+                      <div className="flex justify-between items-start">
+                        <span><strong>{t('details.address')}:</strong></span>
+                        <span className="text-right">{selectedOrder.clientAddress}</span>
+                      </div>
                     )}
                     {selectedOrder.clientNotes && (
-                      <div><strong>{t('details.notes')}:</strong> {selectedOrder.clientNotes}</div>
+                      <div className="flex justify-between items-start">
+                        <span><strong>{t('details.notes')}:</strong></span>
+                        <span className="text-right">{selectedOrder.clientNotes}</span>
+                      </div>
                     )}
                   </div>
                 </div>
 
                 {/* 🆕 Información de Pago */}
                 <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-3">💳 Información de Pago</h4>
+                  <div className="flex items-center mb-3">
+                    <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <h4 className="text-md font-medium text-gray-900">{t('details.paymentInfo')}</h4>
+                  </div>
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between items-center">
-                      <span><strong>Estado del pago:</strong></span>
+                      <span><strong>{t('details.paymentStatusLabel')}:</strong></span>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        (selectedOrder as any).paymentStatus === 'paid' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : (selectedOrder as any).paymentStatus === 'pending'
-                          ? 'bg-orange-100 text-orange-800'
-                          : (selectedOrder as any).paymentStatus === 'partial'
-                          ? 'bg-yellow-100 text-yellow-800'
+                        (selectedOrder as any).paymentStatus === 'paid'
+                          ? 'bg-emerald-100 text-emerald-800'
                           : (selectedOrder as any).paymentStatus === 'failed'
                           ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
+                          : 'bg-orange-100 text-orange-800'
                       }`}>
-                        {(selectedOrder as any).paymentStatus 
-                          ? t(`paymentStatus.${(selectedOrder as any).paymentStatus}`)
-                          : 'Pendiente de pago'
-                        }
+                        {t(`paymentStatus.${(selectedOrder as any).paymentStatus || 'pending'}`)}
                       </span>
                     </div>
                     
                     {(selectedOrder as any).paymentType && (
-                      <div><strong>Tipo de pago:</strong> {t(`paymentTypes.${(selectedOrder as any).paymentType}`)}</div>
+                      <div className="flex justify-between items-center">
+                        <span><strong>{t('details.paymentType')}:</strong></span>
+                        <span>{t(`paymentTypes.${(selectedOrder as any).paymentType}`)}</span>
+                      </div>
                     )}
                     
                     <div className="flex justify-between">
-                      <span><strong>Monto total:</strong></span>
+                      <span><strong>{t('details.totalAmount')}:</strong></span>
                       <span>{formatCurrency(selectedOrder.total, storeData?.currency || 'USD')}</span>
                     </div>
                     
                     {(selectedOrder as any).paidAmount !== undefined && (selectedOrder as any).paidAmount > 0 && (
                       <div className="flex justify-between">
-                        <span><strong>Monto pagado:</strong></span>
+                        <span><strong>{t('details.paidAmount')}:</strong></span>
                         <span className="text-green-600">{formatCurrency((selectedOrder as any).paidAmount, storeData?.currency || 'USD')}</span>
                       </div>
                     )}
                     
                     {(selectedOrder as any).paymentReference && (
-                      <div><strong>Referencia:</strong> {(selectedOrder as any).paymentReference}</div>
+                      <div><strong>{t('details.reference')}:</strong> {(selectedOrder as any).paymentReference}</div>
                     )}
                     
                     {(selectedOrder as any).paidAt && (
-                      <div><strong>Pagado el:</strong> {formatOrderDate((selectedOrder as any).paidAt)}</div>
+                      <div><strong>{t('details.paidOn')}:</strong> {formatOrderDate((selectedOrder as any).paidAt)}</div>
                     )}
                     
                     {(selectedOrder as any).paymentNotes && (
-                      <div><strong>Notas de pago:</strong> {(selectedOrder as any).paymentNotes}</div>
+                      <div><strong>{t('details.paymentNotes')}:</strong> {(selectedOrder as any).paymentNotes}</div>
                     )}
                     
                     {(selectedOrder as any).processedBy && (
-                      <div><strong>Procesado por:</strong> {(selectedOrder as any).processedBy}</div>
+                      <div><strong>{t('details.processedBy')}:</strong> {(selectedOrder as any).processedBy}</div>
                     )}
                   </div>
                 </div>
@@ -1071,92 +1124,168 @@ export default function OrdersPage() {
                   <h4 className="text-md font-medium text-gray-900 mb-3">{t('details.actions')}</h4>
                   <div className="space-y-4">
                     {/* Actualizar estado del pedido */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-4">
-                        <label className="text-sm font-semibold text-blue-700 min-w-0 flex-shrink-0">
-                          📦 Estado del pedido:
-                        </label>
-                        <select
-                          value={selectedOrder.status}
-                          onChange={(e) => handleStatusUpdate(selectedOrder.id, e.target.value as Order['status'])}
-                          disabled={updating}
-                          className="flex-1 max-w-xs pl-3 pr-10 py-2 text-base border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white"
-                        >
-                          <option value="pending">{t('status.pending')}</option>
-                          <option value="whatsapp_sent">{t('status.whatsapp_sent')}</option>
-                          <option value="confirmed">{t('status.confirmed')}</option>
-                          <option value="preparing">{t('status.preparing')}</option>
-                          <option value="ready">{t('status.ready')}</option>
-                          <option value="shipped">{t('status.shipped')}</option>
-                          <option value="delivered">{t('status.delivered')}</option>
-                          <option value="cancelled">{t('status.cancelled')}</option>
-                        </select>
-                        {updating && (
-                          <span className="text-sm text-blue-600">{t('details.updating')}</span>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                          </svg>
+                          <label className="text-sm font-medium text-gray-700">
+                            {t('details.orderStatus')}
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <select
+                            value={selectedOrder.status}
+                            onChange={(e) => handleStatusUpdate(selectedOrder.id, e.target.value as Order['status'])}
+                            disabled={updating}
+                            className="flex-1 pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md bg-white"
+                          >
+                            <option value="pending">{t('status.pending')}</option>
+                            <option value="whatsapp_sent">{t('status.whatsapp_sent')}</option>
+                            <option value="confirmed">{t('status.confirmed')}</option>
+                            <option value="preparing">{t('status.preparing')}</option>
+                            <option value="ready">{t('status.ready')}</option>
+                            <option value="shipped">{t('status.shipped')}</option>
+                            <option value="delivered">{t('status.delivered')}</option>
+                            <option value="cancelled">{t('status.cancelled')}</option>
+                          </select>
+                          {updating && (
+                            <span className="text-xs text-gray-600 flex-shrink-0">{t('details.updating')}</span>
+                          )}
+                        </div>
+
+                        {/* Botones de notificación */}
+                        <div className="pt-3 border-t border-gray-200">
+                          <div className="space-y-2">
+                            <span className="text-sm text-gray-700 block">
+                              {t('details.notifyStatusChange')}
+                            </span>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <button
+                                onClick={() => {
+                                  // TODO: Implementar lógica de email
+                                  console.log('Enviar notificación por email')
+                                }}
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 border border-gray-300"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                {t('details.notifyByEmail')}
+                              </button>
+                              {selectedOrder.clientPhone && (
+                                <button
+                                  onClick={() => {
+                                    // TODO: Implementar lógica de WhatsApp
+                                    console.log('Enviar notificación por WhatsApp')
+                                  }}
+                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.097"/>
+                                  </svg>
+                                  {t('details.notifyByWhatsApp')}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Gestión de pago */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            <label className="text-sm font-medium text-gray-700">
+                              {t('details.paymentStatusSection')}
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              (selectedOrder as any).paymentStatus === 'paid'
+                                ? 'bg-gray-900 text-white'
+                                : (selectedOrder as any).paymentStatus === 'failed'
+                                ? 'bg-gray-600 text-white'
+                                : 'bg-gray-300 text-gray-800'
+                            }`}>
+                              {t(`paymentStatus.${(selectedOrder as any).paymentStatus || 'pending'}`)}
+                            </span>
+                            {isAutomaticPayment(selectedOrder.paymentMethod) && (
+                              <span className="inline-flex items-center text-xs text-gray-600 bg-gray-200 px-2 py-0.5 rounded">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Auto
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Información del método de pago */}
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium">{t('details.paymentMethod')}:</span> {t(`paymentMethods.${selectedOrder.paymentMethod}`)}
+                        </div>
+
+                        {/* Acción de pago para métodos manuales */}
+                        {!isAutomaticPayment(selectedOrder.paymentMethod) &&
+                         (selectedOrder as any).paymentStatus !== 'paid' && (
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="space-y-3">
+                              <span className="text-sm text-gray-700 block">
+                                {t('details.confirmManualPayment')}
+                              </span>
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                <button
+                                  onClick={() => handlePaymentStatusUpdate(selectedOrder.id, 'paid')}
+                                  disabled={updating}
+                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  {t('details.markAsPaid')}
+                                </button>
+                                <button
+                                  onClick={() => handlePaymentStatusUpdate(selectedOrder.id, 'failed')}
+                                  disabled={updating}
+                                  className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                  {t('details.markAsFailed')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Mensaje para pagos ya confirmados */}
+                        {(selectedOrder as any).paymentStatus === 'paid' && (
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="flex items-center text-xs text-gray-600">
+                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                              {t('details.paymentConfirmed')}
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Actualizar estado de pago */}
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-4">
-                        <label className="text-sm font-semibold text-green-700 min-w-0 flex-shrink-0">
-                          💳 Estado de pago:
-                        </label>
-                        <select
-                          value={(selectedOrder as any).paymentStatus || 'pending'}
-                          onChange={(e) => handlePaymentStatusUpdate(selectedOrder.id, e.target.value as PaymentStatus)}
-                          disabled={updating}
-                          className="flex-1 max-w-xs pl-3 pr-10 py-2 text-base border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md bg-white"
-                        >
-                          <option value="pending">Pendiente</option>
-                          <option value="paid">Pagado</option>
-                          <option value="partial">Pago parcial</option>
-                          <option value="failed">Fallido</option>
-                        </select>
-
-                        {/* Botón para pago avanzado */}
-                        <button
-                          onClick={() => openPaymentModal(selectedOrder)}
-                          disabled={updating}
-                          className="inline-flex items-center px-3 py-1.5 border border-green-300 rounded-md text-xs font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                          title="Configuración avanzada de pago"
-                        >
-                          ⚙️ Detalles
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Botones de acción */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      {selectedOrder.clientPhone && (
-                        <button
-                          onClick={() => handleWhatsAppReply(selectedOrder)}
-                          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                        >
-                          <svg className="-ml-1 mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.097"/>
-                          </svg>
-                          {t('details.replyWhatsApp')}
-                        </button>
-                      )}
-                      
-                      <button
-                        disabled
-                        className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed"
-                      >
-                        <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        {t('details.resendEmail')} (Pro)
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => setSelectedOrder(null)}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"

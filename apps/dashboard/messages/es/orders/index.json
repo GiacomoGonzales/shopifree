@@ -26,7 +26,7 @@
   "paymentMethods": {
     "cash": "Efectivo",
     "cash_on_delivery": "Pago manual",
-    "card": "Tarjeta",
+    "card": "Tarjeta al repartidor",
     "transfer": "Transferencia",
     "yape": "Pago con Yape",
     "bank_transfer": "Transferencia bancaria",
@@ -61,7 +61,26 @@
     "updating": "Actualizando...",
     "replyWhatsApp": "Responder por WhatsApp",
     "resendEmail": "Reenviar email",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "paymentInfo": "Información de Pago",
+    "paymentStatusLabel": "Estado del pago",
+    "paymentType": "Tipo de pago",
+    "totalAmount": "Monto total",
+    "paidAmount": "Monto pagado",
+    "reference": "Referencia",
+    "paidOn": "Pagado el",
+    "paymentNotes": "Notas de pago",
+    "processedBy": "Procesado por",
+    "orderStatus": "Estado del pedido",
+    "notifyStatusChange": "Notificar cambio de estado",
+    "notifyByEmail": "Informar por email",
+    "notifyByWhatsApp": "Informar por WhatsApp",
+    "paymentStatusSection": "Estado de pago",
+    "paymentMethod": "Método",
+    "confirmManualPayment": "Confirmar pago manual",
+    "markAsPaid": "Marcar como pagado",
+    "markAsFailed": "Marcar como fallido",
+    "paymentConfirmed": "Pago confirmado"
   },
   "actions": {
     "markAsConfirmed": "Marcar como confirmado",
@@ -122,5 +141,34 @@
     "markAsFailed": "Marcar como fallido",
     "addPaymentNote": "Agregar nota de pago",
     "viewPaymentHistory": "Ver historial de pagos"
+  },
+  "search": {
+    "placeholder": "Buscar por cliente, teléfono, email o ID...",
+    "filters": "Filtros",
+    "clearAll": "Limpiar todo",
+    "close": "Cerrar"
+  },
+  "orderCount": {
+    "order": "pedido",
+    "orders": "pedidos"
+  },
+  "filterSections": {
+    "orderStatus": "Estados del pedido",
+    "paymentStatus": "Estados de pago",
+    "sortBy": "Ordenar por",
+    "dateRange": "Rango de fechas",
+    "amountRange": "Rango de montos",
+    "from": "Desde",
+    "to": "Hasta",
+    "minimum": "Mínimo",
+    "maximum": "Máximo"
+  },
+  "sortOptions": {
+    "newest": "Más recientes",
+    "oldest": "Más antiguos",
+    "highestTotal": "Mayor total",
+    "lowestTotal": "Menor total",
+    "customerAZ": "Cliente A-Z",
+    "customerZA": "Cliente Z-A"
   }
 } 

@@ -138,10 +138,36 @@ export const formatOrderDate = (timestamp: unknown, locale: string = 'es-ES'): s
 
 // Formatear moneda
 export const formatCurrency = (amount: number, currency: string = 'USD'): string => {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: currency
+  // Mapear códigos de moneda a símbolos específicos
+  const currencySymbols: { [key: string]: string } = {
+    'USD': '$',
+    'PEN': 'S/',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+    'CNY': '¥',
+    'CAD': 'C$',
+    'AUD': 'A$',
+    'MXN': '$',
+    'BRL': 'R$',
+    'COP': '$',
+    'CLP': '$',
+    'ARS': '$',
+    'UYU': '$',
+    'BOB': 'Bs',
+    'PYG': '₲',
+    'VES': 'Bs'
+  }
+
+  const symbol = currencySymbols[currency.toUpperCase()] || currency
+
+  // Formatear el número con separadores de miles
+  const formattedAmount = new Intl.NumberFormat('es-ES', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(amount)
+
+  return `${symbol} ${formattedAmount}`
 }
 
 // Generar mensaje de WhatsApp
