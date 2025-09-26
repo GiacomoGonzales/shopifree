@@ -207,7 +207,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     if (!product || !storeInfo) return '';
 
     // Obtener el idioma de la tienda
-    const storeLanguage = storeInfo?.advanced?.language || storeInfo?.language || 'es';
+    const storeLanguage = storeInfo?.language || 'es';
 
     // Obtener cantidad desde el input
     const quantityInput = document.getElementById('quantity') as HTMLInputElement;

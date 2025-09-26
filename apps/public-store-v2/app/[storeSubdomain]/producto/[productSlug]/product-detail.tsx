@@ -199,7 +199,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     if (!product || !storeInfo) return '';
 
     // Obtener el idioma de la tienda
-    const storeLanguage = storeInfo?.advanced?.language || storeInfo?.language || 'es';
+    const storeLanguage = storeInfo?.language || 'es';
 
     return generateProductWhatsAppMessage(
       product,

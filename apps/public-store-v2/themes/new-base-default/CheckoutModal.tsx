@@ -1935,7 +1935,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             if (isWhatsAppCheckout) {
                 // Para WhatsApp: usar nueva función con ID del pedido
                 // Obtener el idioma de la tienda
-                const storeLanguage = storeInfo?.advanced?.language || storeInfo?.language || 'es';
+                const storeLanguage = storeInfo?.language || 'es';
                 const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo, storeLanguage);
 
                 if (phone) {

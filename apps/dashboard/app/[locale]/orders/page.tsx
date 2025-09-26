@@ -110,6 +110,18 @@ export default function OrdersPage() {
     }
   }, [user?.uid])
 
+  // Helper function to convert Firestore timestamp to Date
+  const getDateFromTimestamp = (timestamp: unknown): Date => {
+    if (!timestamp) return new Date(0) // Fecha muy antigua como fallback
+
+    // Type guard para objetos con método toDate (Firestore timestamp)
+    const hasToDate = (obj: unknown): obj is { toDate: () => Date } => {
+      return typeof obj === 'object' && obj !== null && 'toDate' in obj && typeof (obj as { toDate: unknown }).toDate === 'function'
+    }
+
+    return hasToDate(timestamp) ? timestamp.toDate() : new Date(timestamp as string | number | Date)
+  }
+
   // Lógica de filtrado y paginación
   useEffect(() => {
     let filtered = [...orders]
@@ -138,12 +150,18 @@ export default function OrdersPage() {
     // Aplicar filtro de rango de fechas
     if (filters.dateRange.from) {
       const fromDate = new Date(filters.dateRange.from)
-      filtered = filtered.filter(order => new Date(order.createdAt) >= fromDate)
+      filtered = filtered.filter(order => {
+        const orderDate = getDateFromTimestamp(order.createdAt)
+        return orderDate >= fromDate
+      })
     }
     if (filters.dateRange.to) {
       const toDate = new Date(filters.dateRange.to)
       toDate.setHours(23, 59, 59, 999) // Final del día
-      filtered = filtered.filter(order => new Date(order.createdAt) <= toDate)
+      filtered = filtered.filter(order => {
+        const orderDate = getDateFromTimestamp(order.createdAt)
+        return orderDate <= toDate
+      })
     }
 
     // Aplicar filtro de rango de montos
@@ -160,9 +178,9 @@ export default function OrdersPage() {
     filtered.sort((a, b) => {
       switch (filters.sortBy) {
         case 'date-desc':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          return getDateFromTimestamp(b.createdAt).getTime() - getDateFromTimestamp(a.createdAt).getTime()
         case 'date-asc':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          return getDateFromTimestamp(a.createdAt).getTime() - getDateFromTimestamp(b.createdAt).getTime()
         case 'total-desc':
           return b.total - a.total
         case 'total-asc':
