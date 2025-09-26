@@ -24,6 +24,12 @@ export default function HomePage() {
   const [socialMediaCount, setSocialMediaCount] = useState(0)
   const [shippingMethodsCount, setShippingMethodsCount] = useState(0)
   const [promotionsCount, setPromotionsCount] = useState(0)
+  const [announcementBarConfigured, setAnnouncementBarConfigured] = useState(false)
+  const [allFirstStepsCompleted, setAllFirstStepsCompleted] = useState(false)
+  const [seoConfigured, setSeoConfigured] = useState(false)
+  const [domainConfigured, setDomainConfigured] = useState(false)
+  const [analyticsConfigured, setAnalyticsConfigured] = useState(false)
+  const [showFirstStepsDetails, setShowFirstStepsDetails] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // Cargar el conteo de productos y categorías
@@ -109,7 +115,74 @@ export default function HomePage() {
     }
     console.log('Shipping methods count:', shippingCount)
     setShippingMethodsCount(shippingCount)
-  }, [store])
+
+    // Verificar si la barra de anuncio está configurada
+    const isAnnouncementBarConfigured = !!(
+      store.announcementBar?.enabled &&
+      store.announcementBar?.message?.trim()
+    )
+    console.log('Announcement bar configured:', isAnnouncementBarConfigured)
+    setAnnouncementBarConfigured(isAnnouncementBarConfigured)
+
+    // Verificar si SEO está configurado básicamente
+    const isSeoConfigured = !!(
+      store.advanced?.seo?.title?.trim() ||
+      store.advanced?.seo?.metaDescription?.trim()
+    )
+    console.log('SEO configured:', isSeoConfigured)
+    setSeoConfigured(isSeoConfigured)
+
+    // Verificar si el dominio personalizado está configurado
+    const checkDomainConfiguration = async () => {
+      if (!store?.id) return false
+      try {
+        const { getFirebaseDb } = await import('../../../lib/firebase')
+        const { doc, getDoc } = await import('firebase/firestore')
+        const db = getFirebaseDb()
+        if (!db) return false
+
+        const domainRef = doc(db, 'stores', store.id, 'settings', 'domain')
+        const domainSnap = await getDoc(domainRef)
+
+        if (domainSnap.exists()) {
+          const domainData = domainSnap.data()
+          const isConfigured = !!(
+            domainData?.customDomain?.trim() &&
+            (domainData?.verified || domainData?.vercelData?.verified)
+          )
+          console.log('Domain configured:', isConfigured, domainData)
+          return isConfigured
+        }
+        return false
+      } catch (error) {
+        console.error('Error checking domain configuration:', error)
+        return false
+      }
+    }
+
+    checkDomainConfiguration().then(setDomainConfigured)
+
+    // Verificar si Analytics está configurado
+    const isAnalyticsConfigured = !!(
+      store.advanced?.integrations?.googleAnalytics?.trim()
+    )
+    console.log('Analytics configured:', isAnalyticsConfigured)
+    setAnalyticsConfigured(isAnalyticsConfigured)
+
+    // Verificar si todos los primeros pasos están completados
+    const firstStepsCompleted =
+      productCount >= 10 &&
+      categoryCount >= 1 &&
+      paymentMethodsCount >= 1 &&
+      isAnnouncementBarConfigured &&
+      carouselImagesCount >= 3 &&
+      socialMediaCount >= 1 &&
+      shippingMethodsCount >= 1 &&
+      promotionsCount >= 1
+
+    console.log('All first steps completed:', firstStepsCompleted)
+    setAllFirstStepsCompleted(firstStepsCompleted)
+  }, [store, productCount, categoryCount, paymentMethodsCount, carouselImagesCount, socialMediaCount, shippingMethodsCount, promotionsCount])
 
   // Verificar si los datos están listos
   const isDataLoaded = userData && store && !loading
@@ -209,21 +282,51 @@ export default function HomePage() {
       </div>
 
       {/* Sección 2: Primeros Pasos */}
-      <div className="py-6">
+      <div className={`py-6 ${allFirstStepsCompleted ? 'bg-green-50' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              {isSpanish ? 'Primeros pasos' : 'First steps'}
+            <h2 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+              {allFirstStepsCompleted && (
+                <svg className="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              {allFirstStepsCompleted
+                ? (isSpanish ? '¡Primeros pasos completados!' : 'First steps completed!')
+                : (isSpanish ? 'Primeros pasos' : 'First steps')
+              }
             </h2>
             <p className="text-sm text-gray-600">
-              {isSpanish
-                ? 'Comienza configurando estos elementos básicos de tu tienda.'
-                : 'Start by setting up these basic elements of your store.'
+              {allFirstStepsCompleted
+                ? (isSpanish
+                    ? '¡Excelente trabajo! Has configurado todos los elementos básicos de tu tienda.'
+                    : 'Excellent work! You have configured all the basic elements of your store.')
+                : (isSpanish
+                    ? 'Comienza configurando estos elementos básicos de tu tienda.'
+                    : 'Start by setting up these basic elements of your store.')
               }
             </p>
+
+            {allFirstStepsCompleted && (
+              <button
+                onClick={() => setShowFirstStepsDetails(!showFirstStepsDetails)}
+                className="inline-flex items-center text-sm text-green-700 hover:text-green-800 font-medium"
+              >
+                {showFirstStepsDetails ? 'Ocultar detalles' : 'Ver detalles'}
+                <svg
+                  className={`ml-1 w-4 h-4 transition-transform ${showFirstStepsDetails ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(!allFirstStepsCompleted || showFirstStepsDetails) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Agregar primer producto */}
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex items-center mb-3">
@@ -364,26 +467,43 @@ export default function HomePage() {
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex items-center mb-3">
                 <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                  </svg>
+                  {announcementBarConfigured ? (
+                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                    </svg>
+                  )}
                 </div>
                 <h3 className="text-sm font-medium text-gray-900">
                   {isSpanish ? 'Barra de anuncio' : 'Announcement bar'}
                 </h3>
               </div>
               <p className="text-xs text-gray-600 mb-2">
-                0/1 {isSpanish ? 'anuncio configurado' : 'announcement configured'}
+                {announcementBarConfigured ? 1 : 0}/1 {isSpanish ? 'anuncio configurado' : 'announcement configured'}
               </p>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div className="bg-gray-600 h-2 rounded-full" style={{ width: '0%' }}></div>
+                <div
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    announcementBarConfigured ? 'bg-green-600' : 'bg-gray-600'
+                  }`}
+                  style={{ width: `${announcementBarConfigured ? 100 : 0}%` }}
+                ></div>
               </div>
-              <a
-                href="/store-design/announcement-bar"
-                className="text-xs text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
-              >
-                {isSpanish ? 'Configura barra de anuncio' : 'Set up announcement bar'}
-              </a>
+              {announcementBarConfigured ? (
+                <p className="text-xs text-green-600 font-medium">
+                  {isSpanish ? '¡Objetivo completado!' : 'Goal completed!'}
+                </p>
+              ) : (
+                <a
+                  href="/store-design/announcement-bar"
+                  className="text-xs text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
+                >
+                  {isSpanish ? 'Configura barra de anuncio' : 'Set up announcement bar'}
+                </a>
+              )}
             </div>
 
             {/* Agregar imágenes del carrusel */}
@@ -565,9 +685,180 @@ export default function HomePage() {
               )}
             </div>
 
-          </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Sección 3: Pasos Avanzados - Solo si se completaron los primeros pasos */}
+      {allFirstStepsCompleted && (
+        <div className="py-6 bg-blue-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                {isSpanish ? 'Lleva tu tienda al siguiente nivel' : 'Take your store to the next level'}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {isSpanish
+                  ? 'Optimiza y escala tu tienda con estas funcionalidades avanzadas.'
+                  : 'Optimize and scale your store with these advanced features.'
+                }
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Configurar SEO */}
+              <div className="bg-white border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    {seoConfigured ? (
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900">SEO</h3>
+                </div>
+                <p className="text-xs text-gray-600 mb-2">
+                  {seoConfigured ? 1 : 0}/1 {isSpanish ? 'configuración básica' : 'basic setup'}
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      seoConfigured ? 'bg-green-600' : 'bg-blue-600'
+                    }`}
+                    style={{ width: `${seoConfigured ? 100 : 0}%` }}
+                  ></div>
+                </div>
+                {seoConfigured ? (
+                  <p className="text-xs text-green-600 font-medium">
+                    {isSpanish ? '¡Objetivo completado!' : 'Goal completed!'}
+                  </p>
+                ) : (
+                  <a
+                    href="/settings/seo"
+                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-pointer"
+                  >
+                    {isSpanish ? 'Optimiza para buscadores' : 'Optimize for search engines'}
+                  </a>
+                )}
+              </div>
+
+              {/* Dominio personalizado */}
+              <div className="bg-white border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    {domainConfigured ? (
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {isSpanish ? 'Dominio' : 'Domain'}
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-600 mb-2">
+                  {domainConfigured ? 1 : 0}/1 {isSpanish ? 'dominio conectado' : 'domain connected'}
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      domainConfigured ? 'bg-green-600' : 'bg-blue-600'
+                    }`}
+                    style={{ width: `${domainConfigured ? 100 : 0}%` }}
+                  ></div>
+                </div>
+                {domainConfigured ? (
+                  <p className="text-xs text-green-600 font-medium">
+                    {isSpanish ? '¡Objetivo completado!' : 'Goal completed!'}
+                  </p>
+                ) : (
+                  <a
+                    href="/settings/general/advanced"
+                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-pointer"
+                  >
+                    {isSpanish ? 'Conecta tu dominio propio' : 'Connect your own domain'}
+                  </a>
+                )}
+              </div>
+
+              {/* Analytics */}
+              <div className="bg-white border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    {analyticsConfigured ? (
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900">Analytics</h3>
+                </div>
+                <p className="text-xs text-gray-600 mb-2">
+                  {analyticsConfigured ? 1 : 0}/1 {isSpanish ? 'configuración realizada' : 'setup completed'}
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      analyticsConfigured ? 'bg-green-600' : 'bg-blue-600'
+                    }`}
+                    style={{ width: `${analyticsConfigured ? 100 : 0}%` }}
+                  ></div>
+                </div>
+                {analyticsConfigured ? (
+                  <p className="text-xs text-green-600 font-medium">
+                    {isSpanish ? '¡Objetivo completado!' : 'Goal completed!'}
+                  </p>
+                ) : (
+                  <a
+                    href="/settings/seo"
+                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-pointer"
+                  >
+                    {isSpanish ? 'Mide el rendimiento' : 'Track performance'}
+                  </a>
+                )}
+              </div>
+
+              {/* Marketing */}
+              <div className="bg-white border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {isSpanish ? 'Email Marketing' : 'Email Marketing'}
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-600 mb-2">
+                  0/1 {isSpanish ? 'campaña creada' : 'campaign created'}
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '0%' }}></div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {isSpanish ? 'Conecta con clientes' : 'Connect with customers'}
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
 
     </DashboardLayout>
   )

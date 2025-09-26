@@ -35,12 +35,25 @@ export default function OrdersPage() {
 
   // Estados para filtros y paginación
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [paymentFilter, setPaymentFilter] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<string>('date-desc')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
   const [totalItems, setTotalItems] = useState(0)
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Estado unificado de filtros
+  const [filters, setFilters] = useState({
+    status: [] as string[],
+    paymentStatus: [] as string[],
+    sortBy: 'date-desc',
+    dateRange: {
+      from: '',
+      to: ''
+    },
+    amountRange: {
+      min: '',
+      max: ''
+    }
+  })
 
   const itemsPerPage = 10
   
@@ -112,18 +125,39 @@ export default function OrdersPage() {
     }
 
     // Aplicar filtro de estado
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(order => order.status === statusFilter)
+    if (filters.status.length > 0) {
+      filtered = filtered.filter(order => filters.status.includes(order.status))
     }
 
     // Aplicar filtro de pago
-    if (paymentFilter !== 'all') {
-      filtered = filtered.filter(order => (order as any).paymentStatus === paymentFilter)
+    if (filters.paymentStatus.length > 0) {
+      filtered = filtered.filter(order => filters.paymentStatus.includes((order as any).paymentStatus || 'pending'))
+    }
+
+    // Aplicar filtro de rango de fechas
+    if (filters.dateRange.from) {
+      const fromDate = new Date(filters.dateRange.from)
+      filtered = filtered.filter(order => new Date(order.createdAt) >= fromDate)
+    }
+    if (filters.dateRange.to) {
+      const toDate = new Date(filters.dateRange.to)
+      toDate.setHours(23, 59, 59, 999) // Final del día
+      filtered = filtered.filter(order => new Date(order.createdAt) <= toDate)
+    }
+
+    // Aplicar filtro de rango de montos
+    if (filters.amountRange.min) {
+      const minAmount = parseFloat(filters.amountRange.min)
+      filtered = filtered.filter(order => order.total >= minAmount)
+    }
+    if (filters.amountRange.max) {
+      const maxAmount = parseFloat(filters.amountRange.max)
+      filtered = filtered.filter(order => order.total <= maxAmount)
     }
 
     // Aplicar ordenamiento
     filtered.sort((a, b) => {
-      switch (sortBy) {
+      switch (filters.sortBy) {
         case 'date-desc':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         case 'date-asc':
@@ -151,12 +185,64 @@ export default function OrdersPage() {
     setFilteredOrders(paginatedOrders)
     setTotalItems(totalItems)
     setTotalPages(totalPages)
-  }, [orders, searchQuery, statusFilter, paymentFilter, sortBy, currentPage])
+  }, [orders, searchQuery, filters, currentPage])
 
   // Resetear página cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, statusFilter, paymentFilter, sortBy])
+  }, [searchQuery, filters])
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (showFilters && !target.closest('[data-filters-dropdown]')) {
+        setShowFilters(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showFilters])
+
+  // Funciones helper para filtros
+  const getActiveFiltersCount = () => {
+    let count = 0
+    if (filters.status.length > 0) count++
+    if (filters.paymentStatus.length > 0) count++
+    if (filters.dateRange.from || filters.dateRange.to) count++
+    if (filters.amountRange.min || filters.amountRange.max) count++
+    if (filters.sortBy !== 'date-desc') count++
+    return count
+  }
+
+  const clearAllFilters = () => {
+    setFilters({
+      status: [],
+      paymentStatus: [],
+      sortBy: 'date-desc',
+      dateRange: { from: '', to: '' },
+      amountRange: { min: '', max: '' }
+    })
+  }
+
+  const toggleStatusFilter = (status: string) => {
+    setFilters(prev => ({
+      ...prev,
+      status: prev.status.includes(status)
+        ? prev.status.filter(s => s !== status)
+        : [...prev.status, status]
+    }))
+  }
+
+  const togglePaymentStatusFilter = (status: string) => {
+    setFilters(prev => ({
+      ...prev,
+      paymentStatus: prev.paymentStatus.includes(status)
+        ? prev.paymentStatus.filter(s => s !== status)
+        : [...prev.paymentStatus, status]
+    }))
+  }
 
   // Manejar cambio de estado
   const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
@@ -320,9 +406,9 @@ export default function OrdersPage() {
                   </div>
 
                   {/* Controles de búsqueda y filtros */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex items-center gap-3">
                     {/* Barra de búsqueda */}
-                    <div className="relative flex-1 sm:flex-none">
+                    <div className="relative flex-1">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -332,55 +418,207 @@ export default function OrdersPage() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full sm:w-64 pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                        className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                         placeholder="Buscar por cliente, teléfono o ID..."
                       />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      {/* Filtro de estado */}
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="block w-full sm:w-auto py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    {/* Botón de filtros unificado */}
+                    <div className="relative flex-shrink-0" data-filters-dropdown>
+                      <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="relative inline-flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
                       >
-                        <option value="all">Todos los estados</option>
-                        <option value="pending">Pendiente</option>
-                        <option value="whatsapp_sent">Enviado por WhatsApp</option>
-                        <option value="confirmed">Confirmado</option>
-                        <option value="preparing">Preparando</option>
-                        <option value="ready">Listo</option>
-                        <option value="shipped">Enviado</option>
-                        <option value="delivered">Entregado</option>
-                        <option value="cancelled">Cancelado</option>
-                      </select>
+                        {/* Icono del filtro */}
+                        <svg className="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+                        </svg>
 
-                      {/* Filtro de pago */}
-                      <select
-                        value={paymentFilter}
-                        onChange={(e) => setPaymentFilter(e.target.value)}
-                        className="block w-full sm:w-auto py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                      >
-                        <option value="all">Todos los pagos</option>
-                        <option value="pending">Pago pendiente</option>
-                        <option value="paid">Pagado</option>
-                        <option value="partial">Pago parcial</option>
-                        <option value="failed">Pago fallido</option>
-                      </select>
+                        {/* Texto "Filtros" - solo visible en desktop */}
+                        <span className="hidden sm:inline">Filtros</span>
 
-                      {/* Ordenar */}
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="block w-full sm:w-auto py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                      >
-                        <option value="date-desc">Más recientes</option>
-                        <option value="date-asc">Más antiguos</option>
-                        <option value="total-desc">Mayor total</option>
-                        <option value="total-asc">Menor total</option>
-                        <option value="customer-asc">Cliente A-Z</option>
-                        <option value="customer-desc">Cliente Z-A</option>
-                      </select>
+                        {/* Badge de filtros activos - posicionado diferente en móvil vs desktop */}
+                        {getActiveFiltersCount() > 0 && (
+                          <>
+                            {/* Badge para móvil - posición absoluta */}
+                            <span className="sm:hidden absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-gray-600 text-white rounded-full">
+                              {getActiveFiltersCount()}
+                            </span>
+                            {/* Badge para desktop - posición normal */}
+                            <span className="hidden sm:inline-flex ml-2 items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-600 text-white">
+                              {getActiveFiltersCount()}
+                            </span>
+                          </>
+                        )}
+
+                        {/* Flecha dropdown - solo visible en desktop */}
+                        <svg className={`hidden sm:block w-4 h-4 ml-2 transition-transform ${showFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Dropdown de filtros */}
+                      {showFilters && (
+                        <div className="absolute right-0 mt-2 w-96 sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                          <div className="p-4 space-y-4">
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-lg font-medium text-gray-900">Filtros</h3>
+                              {getActiveFiltersCount() > 0 && (
+                                <button
+                                  onClick={clearAllFilters}
+                                  className="text-sm text-gray-500 hover:text-gray-700"
+                                >
+                                  Limpiar todo
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Estados del pedido */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Estados del pedido
+                              </label>
+                              <div className="space-y-2 max-h-32 overflow-y-auto">
+                                {[
+                                  { value: 'pending', label: 'Pendiente' },
+                                  { value: 'whatsapp_sent', label: 'Enviado por WhatsApp' },
+                                  { value: 'confirmed', label: 'Confirmado' },
+                                  { value: 'preparing', label: 'Preparando' },
+                                  { value: 'ready', label: 'Listo' },
+                                  { value: 'shipped', label: 'Enviado' },
+                                  { value: 'delivered', label: 'Entregado' },
+                                  { value: 'cancelled', label: 'Cancelado' }
+                                ].map(status => (
+                                  <label key={status.value} className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={filters.status.includes(status.value)}
+                                      onChange={() => toggleStatusFilter(status.value)}
+                                      className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                                    />
+                                    <span className="ml-2 text-sm text-gray-700">{status.label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Estados de pago */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Estados de pago
+                              </label>
+                              <div className="space-y-2">
+                                {[
+                                  { value: 'pending', label: 'Pendiente' },
+                                  { value: 'paid', label: 'Pagado' },
+                                  { value: 'partial', label: 'Pago parcial' },
+                                  { value: 'failed', label: 'Fallido' }
+                                ].map(status => (
+                                  <label key={status.value} className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={filters.paymentStatus.includes(status.value)}
+                                      onChange={() => togglePaymentStatusFilter(status.value)}
+                                      className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                                    />
+                                    <span className="ml-2 text-sm text-gray-700">{status.label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Ordenar por */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Ordenar por
+                              </label>
+                              <select
+                                value={filters.sortBy}
+                                onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                              >
+                                <option value="date-desc">Más recientes</option>
+                                <option value="date-asc">Más antiguos</option>
+                                <option value="total-desc">Mayor total</option>
+                                <option value="total-asc">Menor total</option>
+                                <option value="customer-asc">Cliente A-Z</option>
+                                <option value="customer-desc">Cliente Z-A</option>
+                              </select>
+                            </div>
+
+                            {/* Rango de fechas */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Rango de fechas
+                              </label>
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="date"
+                                  value={filters.dateRange.from}
+                                  onChange={(e) => setFilters(prev => ({
+                                    ...prev,
+                                    dateRange: { ...prev.dateRange, from: e.target.value }
+                                  }))}
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  placeholder="Desde"
+                                />
+                                <input
+                                  type="date"
+                                  value={filters.dateRange.to}
+                                  onChange={(e) => setFilters(prev => ({
+                                    ...prev,
+                                    dateRange: { ...prev.dateRange, to: e.target.value }
+                                  }))}
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  placeholder="Hasta"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Rango de montos */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Rango de montos ({storeData?.currency || 'USD'})
+                              </label>
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={filters.amountRange.min}
+                                  onChange={(e) => setFilters(prev => ({
+                                    ...prev,
+                                    amountRange: { ...prev.amountRange, min: e.target.value }
+                                  }))}
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  placeholder="Mínimo"
+                                />
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={filters.amountRange.max}
+                                  onChange={(e) => setFilters(prev => ({
+                                    ...prev,
+                                    amountRange: { ...prev.amountRange, max: e.target.value }
+                                  }))}
+                                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                  placeholder="Máximo"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="flex justify-end pt-2 border-t border-gray-200">
+                              <button
+                                onClick={() => setShowFilters(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                              >
+                                Cerrar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
