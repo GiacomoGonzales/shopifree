@@ -212,6 +212,57 @@ export const generateWhatsAppURL = (phone: string, message: string): string => {
   return `https://wa.me/${cleanPhone}?text=${message}`
 }
 
+// Generar mensaje de WhatsApp para cambio de estado
+export const generateStatusChangeWhatsAppMessage = (
+  order: Order,
+  storeName: string,
+  locale: string = 'es'
+): string => {
+  const statusTranslations = {
+    es: {
+      pending: 'Pendiente',
+      whatsapp_sent: 'Enviado por WhatsApp',
+      confirmed: 'Confirmado',
+      preparing: 'Preparando',
+      ready: 'Listo',
+      shipped: 'Enviado',
+      delivered: 'Entregado',
+      cancelled: 'Cancelado'
+    },
+    en: {
+      pending: 'Pending',
+      whatsapp_sent: 'Sent via WhatsApp',
+      confirmed: 'Confirmed',
+      preparing: 'Preparing',
+      ready: 'Ready',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    }
+  }
+
+  const messages = {
+    es: {
+      greeting: `¡Hola ${order.clientName}!`,
+      storeIntro: `Te escribo desde ${storeName} para informarte sobre tu pedido #${order.id.slice(-8)}.`,
+      statusUpdate: `El estado de tu pedido ha cambiado a: *${statusTranslations.es[order.status as keyof typeof statusTranslations.es]}*`,
+      thanks: 'Gracias por tu preferencia. 😊'
+    },
+    en: {
+      greeting: `Hello ${order.clientName}!`,
+      storeIntro: `I'm writing from ${storeName} to inform you about your order #${order.id.slice(-8)}.`,
+      statusUpdate: `Your order status has changed to: *${statusTranslations.en[order.status as keyof typeof statusTranslations.en]}*`,
+      thanks: 'Thank you for your preference. 😊'
+    }
+  }
+
+  const selectedMessages = messages[locale as keyof typeof messages] || messages.es
+
+  const fullMessage = `${selectedMessages.greeting}\n\n${selectedMessages.storeIntro}\n\n${selectedMessages.statusUpdate}\n\n${selectedMessages.thanks}`
+
+  return encodeURIComponent(fullMessage)
+}
+
 // 🆕 FUNCIONES PARA MANEJO DE PAGOS
 
 // Mapear paymentMethod legacy a PaymentType nuevo

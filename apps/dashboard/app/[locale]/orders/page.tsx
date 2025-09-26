@@ -5,13 +5,14 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useAuth } from '../../../lib/simple-auth-context'
 import { getUserStore } from '../../../lib/store'
 import DashboardLayout from '../../../components/DashboardLayout'
-import { 
-  subscribeToStoreOrders, 
-  updateOrderStatus, 
+import {
+  subscribeToStoreOrders,
+  updateOrderStatus,
   updateOrderPaymentStatus,
-  formatOrderDate, 
+  formatOrderDate,
   formatCurrency,
   generateWhatsAppMessage,
+  generateStatusChangeWhatsAppMessage,
   generateWhatsAppURL,
   Order,
   OrderItem,
@@ -326,6 +327,15 @@ export default function OrdersPage() {
     if (!storeData || !order.clientPhone) return
 
     const message = generateWhatsAppMessage(order, storeData.storeName, locale)
+    const url = generateWhatsAppURL(order.clientPhone, message)
+    window.open(url, '_blank')
+  }
+
+  // Notificar cambio de estado por WhatsApp
+  const handleWhatsAppStatusNotification = (order: Order) => {
+    if (!storeData || !order.clientPhone) return
+
+    const message = generateStatusChangeWhatsAppMessage(order, storeData.storeName, locale)
     const url = generateWhatsAppURL(order.clientPhone, message)
     window.open(url, '_blank')
   }
@@ -949,7 +959,7 @@ export default function OrdersPage() {
       {/* Modal de detalles */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-start justify-center overflow-hidden">
-          <div className="relative w-full h-full md:w-3/4 lg:w-1/2 md:h-auto md:max-h-[90vh] md:top-20 md:mx-auto md:border md:shadow-lg md:rounded-md bg-white overflow-y-auto">
+          <div className="relative w-full h-full md:w-3/4 lg:w-1/2 md:h-auto md:max-h-[80vh] md:my-20 md:mx-auto md:border md:shadow-lg md:rounded-md bg-white overflow-y-auto">
             <div className="p-4 md:p-5 md:mt-3">
               {/* Header */}
               <div className="flex items-center justify-between mb-6 pt-2 md:pt-0">
@@ -1195,10 +1205,7 @@ export default function OrdersPage() {
                               </button>
                               {selectedOrder.clientPhone && (
                                 <button
-                                  onClick={() => {
-                                    // TODO: Implementar lógica de WhatsApp
-                                    console.log('Enviar notificación por WhatsApp')
-                                  }}
+                                  onClick={() => handleWhatsAppStatusNotification(selectedOrder)}
                                   className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
                                 >
                                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
