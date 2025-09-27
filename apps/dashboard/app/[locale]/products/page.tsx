@@ -57,11 +57,30 @@ export default function ProductsPage() {
 
   // Estados para filtros avanzados
   const [showFilters, setShowFilters] = useState(false)
+  const [showSortOptions, setShowSortOptions] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState<string>('')
   const [brandFilter, setBrandFilter] = useState<string>('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
-  
+
   const itemsPerPage = 8
+
+  // Función para hacer scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Función para obtener el texto del ordenamiento actual
+  const getSortText = () => {
+    switch (sortBy) {
+      case 'created-desc': return t('sortOptions.newest')
+      case 'created-asc': return t('sortOptions.oldest')
+      case 'name-asc': return t('sortOptions.nameAsc')
+      case 'name-desc': return t('sortOptions.nameDesc')
+      case 'price-asc': return t('sortOptions.priceAsc')
+      case 'price-desc': return t('sortOptions.priceDesc')
+      default: return t('sort')
+    }
+  }
 
   // Crear objeto de filtros
   const filters: ProductFilters = useMemo(() => ({
@@ -350,16 +369,30 @@ export default function ProductsPage() {
       if (mobileMenuOpen && mobileMenuRefs.current[mobileMenuOpen] && !mobileMenuRefs.current[mobileMenuOpen]?.contains(event.target as Node)) {
         setMobileMenuOpen(null)
       }
+
+      // Manejar dropdown de filtros y ordenar
+      const target = event.target as Element
+      const filtersContainer = document.querySelector('.filters-container')
+      const sortContainer = document.querySelector('.sort-container')
+
+      if (showFilters && filtersContainer && !filtersContainer.contains(target as Node)) {
+        setShowFilters(false)
+      }
+      if (showSortOptions && sortContainer && !sortContainer.contains(target as Node)) {
+        setShowSortOptions(false)
+      }
     }
 
-    if (openMenuId || mobileMenuOpen) {
+    if (openMenuId || mobileMenuOpen || showFilters || showSortOptions) {
       document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('touchstart', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
     }
-  }, [openMenuId, mobileMenuOpen])
+  }, [openMenuId, mobileMenuOpen, showFilters, showSortOptions])
 
 
 
@@ -435,23 +468,48 @@ export default function ProductsPage() {
 
   // Componente de paginación
   const PaginationComponent = () => (
-    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg">
-      <div className="flex flex-1 justify-between sm:hidden">
-        <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="relative inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {t('pagination.previous')}
-        </button>
-        <button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="relative ml-3 inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {t('pagination.next')}
-        </button>
+    <div className="border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg">
+      <div className="flex flex-col items-center space-y-4 sm:hidden">
+        {/* Información de productos y página actual en móvil */}
+        <div className="text-center">
+          <p className="text-sm text-gray-700">
+            {t('pagination.showing')} <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}</span> {t('pagination.to')}{' '}
+            <span className="font-medium">
+              {Math.min(currentPage * itemsPerPage, totalItems)}
+            </span>{' '}
+            {t('pagination.of')} <span className="font-medium">{totalItems}</span> {t('pagination.products')}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {t('pagination.pageOf', { current: currentPage, total: totalPages })}
+          </p>
+        </div>
+
+        {/* Botones de navegación en móvil */}
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={() => {
+              setCurrentPage(currentPage - 1)
+              scrollToTop()
+            }}
+            disabled={currentPage === 1}
+            className="relative inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {t('pagination.previous')}
+          </button>
+          <button
+            onClick={() => {
+              setCurrentPage(currentPage + 1)
+              scrollToTop()
+            }}
+            disabled={currentPage === totalPages}
+            className="relative inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {t('pagination.next')}
+          </button>
+        </div>
       </div>
+
+      {/* Versión desktop */}
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
@@ -465,7 +523,10 @@ export default function ProductsPage() {
         <div>
           <nav className="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
             <button
-              onClick={() => setCurrentPage(currentPage - 1)}
+              onClick={() => {
+                setCurrentPage(currentPage - 1)
+                scrollToTop()
+              }}
               disabled={currentPage === 1}
               className="relative inline-flex items-center rounded-l-lg px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -477,7 +538,10 @@ export default function ProductsPage() {
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
-                onClick={() => setCurrentPage(page)}
+                onClick={() => {
+                  setCurrentPage(page)
+                  scrollToTop()
+                }}
                 disabled={currentPage === page}
                 className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
                   currentPage === page
@@ -489,7 +553,10 @@ export default function ProductsPage() {
               </button>
             ))}
             <button
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => {
+                setCurrentPage(currentPage + 1)
+                scrollToTop()
+              }}
               disabled={currentPage === totalPages}
               className="relative inline-flex items-center rounded-r-lg px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -628,12 +695,12 @@ export default function ProductsPage() {
                       />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex flex-row gap-3 sm:flex-row">
                       {/* Filtros */}
-                      <div className="relative">
+                      <div className="filters-container relative flex-1 sm:flex-none">
                         <button
                           onClick={() => setShowFilters(!showFilters)}
-                          className={`inline-flex items-center justify-center px-4 py-2 border shadow-sm text-sm leading-4 font-medium rounded-lg transition-all min-h-[44px] sm:min-h-auto ${
+                          className={`w-full inline-flex items-center justify-center px-4 py-2 border shadow-sm text-sm leading-4 font-medium rounded-lg transition-all min-h-[44px] sm:min-h-auto ${
                             showFilters || hasActiveFilters
                               ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500'
                               : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'
@@ -652,7 +719,7 @@ export default function ProductsPage() {
 
                         {/* Dropdown de filtros */}
                         {showFilters && (
-                          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                          <div className="filters-dropdown absolute left-0 -right-8 sm:right-0 sm:left-auto mt-2 w-auto sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                             <div className="p-4">
                               <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-medium text-gray-900">{t('filters.title')}</h3>
@@ -727,6 +794,7 @@ export default function ProductsPage() {
                                       value={priceRange.min}
                                       onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
                                       className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                      style={{ fontSize: '16px' }}
                                     />
                                     <input
                                       type="number"
@@ -734,6 +802,7 @@ export default function ProductsPage() {
                                       value={priceRange.max}
                                       onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
                                       className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                      style={{ fontSize: '16px' }}
                                     />
                                   </div>
                                 </div>
@@ -761,19 +830,96 @@ export default function ProductsPage() {
                       </div>
 
                       {/* Ordenar */}
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortOption)}
-                        className="block w-full sm:w-auto py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all min-h-[44px] sm:min-h-auto"
-                      >
-                        <option value="created-desc">{t('sort')}</option>
-                        <option value="created-desc">{t('sortOptions.newest')}</option>
-                        <option value="created-asc">{t('sortOptions.oldest')}</option>
-                        <option value="name-asc">{t('sortOptions.nameAsc')}</option>
-                        <option value="name-desc">{t('sortOptions.nameDesc')}</option>
-                        <option value="price-asc">{t('sortOptions.priceAsc')}</option>
-                        <option value="price-desc">{t('sortOptions.priceDesc')}</option>
-                      </select>
+                      <div className="sort-container relative flex-1 sm:flex-none">
+                        <button
+                          onClick={() => setShowSortOptions(!showSortOptions)}
+                          className="w-full inline-flex items-center justify-between px-4 py-2 border border-gray-300 text-gray-700 bg-white shadow-sm text-sm leading-4 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all min-h-[44px] sm:min-h-auto"
+                        >
+                          <span className="flex items-center">
+                            <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                            {getSortText()}
+                          </span>
+                          <svg className="h-4 w-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {/* Dropdown de ordenar */}
+                        {showSortOptions && (
+                          <div className="sort-dropdown absolute left-0 right-0 sm:right-0 sm:left-auto mt-2 w-full sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div className="py-1">
+                              <button
+                                onClick={() => {
+                                  setSortBy('created-desc')
+                                  setShowSortOptions(false)
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                  sortBy === 'created-desc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                }`}
+                              >
+                                {t('sortOptions.newest')}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSortBy('created-asc')
+                                  setShowSortOptions(false)
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                  sortBy === 'created-asc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                }`}
+                              >
+                                {t('sortOptions.oldest')}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSortBy('name-asc')
+                                  setShowSortOptions(false)
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                  sortBy === 'name-asc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                }`}
+                              >
+                                {t('sortOptions.nameAsc')}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSortBy('name-desc')
+                                  setShowSortOptions(false)
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                  sortBy === 'name-desc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                }`}
+                              >
+                                {t('sortOptions.nameDesc')}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSortBy('price-asc')
+                                  setShowSortOptions(false)
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                  sortBy === 'price-asc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                }`}
+                              >
+                                {t('sortOptions.priceAsc')}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSortBy('price-desc')
+                                  setShowSortOptions(false)
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                  sortBy === 'price-desc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                }`}
+                              >
+                                {t('sortOptions.priceDesc')}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -118,11 +118,12 @@ export const createProduct = async (storeId: string, productData: Omit<Product, 
     // Crear referencia a la subcolección de productos dentro de la tienda
     const productsCollectionRef = collection(db, 'stores', storeId, 'products')
     
+    const now = new Date()
     const newProduct: Product = {
       ...productData,
       storeId,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      createdAt: now,
+      updatedAt: now
     }
     
     // Limpiar valores undefined antes de guardar
@@ -204,7 +205,7 @@ export const updateProduct = async (storeId: string, productId: string, data: Pa
     const productRef = doc(db, 'stores', storeId, 'products', productId)
     await updateDoc(productRef, {
       ...data,
-      updatedAt: serverTimestamp()
+      updatedAt: new Date()
     })
     
     // Auto-update filters if the product metadata was updated
@@ -321,10 +322,50 @@ export const filterProductsBySearch = (products: ProductWithId[], searchQuery: s
   })
 }
 
+// Función auxiliar para obtener timestamp de diferentes formatos
+const getTimestamp = (dateValue: any): number => {
+  if (!dateValue) {
+    return 0
+  }
+
+  // Objeto Date nativo
+  if (dateValue instanceof Date) {
+    return dateValue.getTime()
+  }
+
+  // String de fecha
+  if (typeof dateValue === 'string') {
+    const parsed = new Date(dateValue).getTime()
+    return isNaN(parsed) ? 0 : parsed
+  }
+
+  // Número (timestamp)
+  if (typeof dateValue === 'number') {
+    return dateValue < 1e12 ? dateValue * 1000 : dateValue
+  }
+
+  // Firestore Timestamp con propiedad seconds
+  if (typeof dateValue === 'object' && 'seconds' in dateValue && typeof dateValue.seconds === 'number') {
+    return dateValue.seconds * 1000
+  }
+
+  // Firestore Timestamp con método toMillis()
+  if (typeof dateValue === 'object' && typeof dateValue.toMillis === 'function') {
+    return dateValue.toMillis()
+  }
+
+  // ServerTimestamp pendiente - usar fecha actual como fallback
+  if (typeof dateValue === 'object' && dateValue._methodName === 'serverTimestamp') {
+    return Date.now()
+  }
+
+  return 0
+}
+
 // Función para ordenar productos
 export const sortProducts = (products: ProductWithId[], sortBy: SortOption): ProductWithId[] => {
   const sortedProducts = [...products]
-  
+
   switch (sortBy) {
     case 'name-asc':
       return sortedProducts.sort((a, b) => a.name.localeCompare(b.name))
@@ -336,17 +377,14 @@ export const sortProducts = (products: ProductWithId[], sortBy: SortOption): Pro
       return sortedProducts.sort((a, b) => b.price - a.price)
     case 'created-asc':
       return sortedProducts.sort((a, b) => {
-        const aTime = (a.createdAt as { seconds?: number })?.seconds || 0
-        const bTime = (b.createdAt as { seconds?: number })?.seconds || 0
+        const aTime = getTimestamp(a.createdAt)
+        const bTime = getTimestamp(b.createdAt)
         return aTime - bTime
       })
     case 'created-desc':
     default:
-      return sortedProducts.sort((a, b) => {
-        const aTime = (a.createdAt as { seconds?: number })?.seconds || 0
-        const bTime = (b.createdAt as { seconds?: number })?.seconds || 0
-        return bTime - aTime
-      })
+      // Los productos ya vienen ordenados por createdAt desc desde Firestore
+      return products
   }
 }
 
@@ -395,7 +433,7 @@ export const updateProductStock = async (
 
     // Preparar datos de actualización
     const updateData: Partial<Product> = {
-      updatedAt: serverTimestamp()
+      updatedAt: new Date()
     }
 
     // Si es un producto con variantes
