@@ -650,7 +650,7 @@ export default function ProductsPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-visible">
                     {/* Desktop Table View */}
                     <div className="hidden lg:block">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -1405,6 +1405,7 @@ export default function ProductsPage() {
           onClose={hideToast}
         />
       )}
+
     </DashboardLayout>
   )
 } 
