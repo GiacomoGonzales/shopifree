@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   DndContext,
   closestCenter,
@@ -56,9 +57,10 @@ interface SortableFilterItemProps {
   onToggle: (filterId: string) => void
   saving: boolean
   translatedOptions?: string[]
+  t: (key: string) => string
 }
 
-function SortableFilterItem({ filter, onToggle, saving, translatedOptions }: SortableFilterItemProps) {
+function SortableFilterItem({ filter, onToggle, saving, translatedOptions, t }: SortableFilterItemProps) {
   const {
     attributes,
     listeners,
@@ -102,34 +104,24 @@ function SortableFilterItem({ filter, onToggle, saving, translatedOptions }: Sor
               </svg>
             </div>
 
-            {/* Icono del filtro */}
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Icono del filtro - Oculto en móvil */}
+            <div className="hidden sm:flex w-12 h-12 bg-gray-100 rounded-lg items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
               </svg>
             </div>
 
             {/* Información del filtro */}
             <div className="flex-1 mr-4">
-                             <div className="flex items-center gap-2">
-                 <h3 className="text-sm font-medium text-gray-900">
-                   {filter.name}
-                 </h3>
-                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                   filter.type === 'tags' ? 'bg-blue-100 text-blue-800' :
-                   filter.type === 'select' ? 'bg-green-100 text-green-800' :
-                   filter.type === 'range' ? 'bg-purple-100 text-purple-800' :
-                   'bg-gray-100 text-gray-800'
-                 }`}>
-                   {filter.type}
-                 </span>
-               </div>
+              <h3 className="text-sm font-medium text-gray-900">
+                {filter.name}
+              </h3>
               <p className="text-sm text-gray-500 mt-1 line-clamp-2 pr-8">
-                {filter.options.length} opciones: {(Array.isArray(translatedOptions) ? translatedOptions : filter.options).slice(0, 3).join(', ')}
+                {filter.options.length} {t('messages.options')}: {(Array.isArray(translatedOptions) ? translatedOptions : filter.options).slice(0, 3).join(', ')}
                 {filter.options.length > 3 && '...'}
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                Filtro activo • <span className="ml-1">{filter.productCount} productos</span>
+                {t('messages.activeFilter')} • <span className="ml-1">{filter.productCount} {t('messages.products')}</span>
               </p>
             </div>
           </div>
@@ -154,6 +146,7 @@ function SortableFilterItem({ filter, onToggle, saving, translatedOptions }: Sor
 }
 
 export default function FilterManager({ onFiltersChange, showToast }: FilterManagerProps) {
+  const t = useTranslations('content.filters')
   const { store } = useStore()
   const [availableFilters, setAvailableFilters] = useState<StoreFilterConfig[]>([])
   const [translatedOptions, setTranslatedOptions] = useState<Record<string, string[]>>({})
@@ -219,9 +212,9 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
     } catch (err) {
       console.error('Error loading filters:', err)
       if (showToast) {
-        showToast('Error al cargar los filtros', 'error')
+        showToast(t('messages.loadError'), 'error')
       } else {
-        setError('Error al cargar los filtros')
+        setError(t('messages.loadError'))
       }
     } finally {
       setLoading(false)
@@ -271,17 +264,17 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
       await translateOptionsForDisplay(updatedFilters)
       
       if (showToast) {
-        showToast('Filtros actualizados y traducidos correctamente', 'success')
+        showToast(t('messages.updateSuccess'), 'success')
       } else {
-        setSuccessMessage('Filtros actualizados y traducidos correctamente')
+        setSuccessMessage(t('messages.updateSuccess'))
         setTimeout(() => setSuccessMessage(null), 3000)
       }
     } catch (err) {
       console.error('Error updating and translating filters:', err)
       if (showToast) {
-        showToast('Error al actualizar los filtros', 'error')
+        showToast(t('messages.updateError'), 'error')
       } else {
-        setError('Error al actualizar los filtros')
+        setError(t('messages.updateError'))
       }
     } finally {
       setLoading(false)
@@ -387,16 +380,16 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
       }
       
       if (showToast) {
-        showToast('Configuración guardada', 'success')
+        showToast(t('messages.saved'), 'success')
       } else {
-        setSuccessMessage('Configuración guardada')
+        setSuccessMessage(t('messages.saved'))
         setTimeout(() => setSuccessMessage(null), 3000)
       }
     } catch (err) {
       console.error('FilterManager: Error saving filters:', err)
       const errorMessage = err instanceof Error
-        ? `Error al guardar: ${err.message}`
-        : 'Error al guardar la configuración'
+        ? `${t('messages.saveError')}: ${err.message}`
+        : t('messages.saveError')
 
       if (showToast) {
         showToast(errorMessage, 'error')
@@ -421,7 +414,7 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        <span className="ml-3 text-gray-600">Cargando filtros...</span>
+        <span className="ml-3 text-gray-600">{t('messages.loading')}</span>
       </div>
     )
   }
@@ -438,7 +431,7 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          {loading ? 'Actualizando...' : 'Actualizar filtros'}
+          {loading ? t('messages.updating') : t('actions.updateFilters')}
         </button>
       </div>
 
@@ -476,9 +469,9 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Sin filtros disponibles</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('messages.noFiltersTitle')}</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Agrega productos con metadatos para generar filtros automáticamente.
+              {t('messages.noFiltersDescription')}
             </p>
           </div>
         ) : (
@@ -501,6 +494,7 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
                       onToggle={handleFilterToggle}
                       saving={saving}
                       translatedOptions={translatedOptions[filter.id]}
+                      t={t}
                     />
                   ))}
                 </SortableContext>
@@ -520,8 +514,8 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
                         </svg>
                       </div>
 
-                      {/* Icono del filtro deshabilitado */}
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                      {/* Icono del filtro deshabilitado - Oculto en móvil */}
+                      <div className="hidden sm:flex w-12 h-12 bg-gray-100 rounded-lg items-center justify-center flex-shrink-0">
                         <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
                         </svg>
@@ -529,20 +523,15 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
 
                       {/* Información del filtro */}
                       <div className="flex-1 mr-4">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-medium text-gray-500">
-                            {filter.name}
-                          </h3>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                            {filter.type}
-                          </span>
-                        </div>
+                        <h3 className="text-sm font-medium text-gray-500">
+                          {filter.name}
+                        </h3>
                         <p className="text-sm text-gray-400 mt-1 line-clamp-2 pr-8">
-                          {filter.options.length} opciones: {(Array.isArray(translatedOptions) ? translatedOptions : filter.options).slice(0, 3).join(', ')}
+                          {filter.options.length} {t('messages.options')}: {(Array.isArray(translatedOptions) ? translatedOptions : filter.options).slice(0, 3).join(', ')}
                           {filter.options.length > 3 && '...'}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          Filtro oculto • <span className="ml-1">{filter.productCount} productos</span>
+                          {t('messages.hiddenFilter')} • <span className="ml-1">{filter.productCount} {t('messages.products')}</span>
                         </p>
                       </div>
                     </div>
@@ -573,7 +562,7 @@ export default function FilterManager({ onFiltersChange, showToast }: FilterMana
         <div className="fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg">
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>Guardando...</span>
+            <span>{t('messages.saving')}</span>
           </div>
         </div>
       )}

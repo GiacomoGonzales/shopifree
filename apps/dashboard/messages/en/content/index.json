@@ -74,7 +74,24 @@
       "editFilter": "Edit Filter",
       "deleteFilter": "Delete Filter",
       "save": "Save Changes",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "updateFilters": "Update filters"
+    },
+    "messages": {
+      "loading": "Loading filters...",
+      "updating": "Updating...",
+      "saving": "Saving...",
+      "saved": "Configuration saved",
+      "loadError": "Error loading filters",
+      "updateError": "Error updating filters",
+      "saveError": "Error saving configuration",
+      "updateSuccess": "Filters updated and translated correctly",
+      "noFiltersTitle": "No filters available",
+      "noFiltersDescription": "Add products with metadata to automatically generate filters.",
+      "options": "options",
+      "products": "products",
+      "activeFilter": "Active filter",
+      "hiddenFilter": "Hidden filter"
     }
   },
   "editor": {
@@ -152,6 +169,7 @@
       "saved": "Sections configuration saved successfully",
       "error": "Error saving sections configuration",
       "confirmReset": "Are you sure you want to reset all sections to their default state?"
-    }
+    },
+    "dragToReorderSections": "Drag sections to change their order of appearance in the store"
   }
 } 

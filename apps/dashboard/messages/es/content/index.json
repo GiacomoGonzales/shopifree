@@ -74,7 +74,24 @@
       "editFilter": "Editar Filtro",
       "deleteFilter": "Eliminar Filtro",
       "save": "Guardar Cambios",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "updateFilters": "Actualizar filtros"
+    },
+    "messages": {
+      "loading": "Cargando filtros...",
+      "updating": "Actualizando...",
+      "saving": "Guardando...",
+      "saved": "Configuración guardada",
+      "loadError": "Error al cargar los filtros",
+      "updateError": "Error al actualizar los filtros",
+      "saveError": "Error al guardar la configuración",
+      "updateSuccess": "Filtros actualizados y traducidos correctamente",
+      "noFiltersTitle": "Sin filtros disponibles",
+      "noFiltersDescription": "Agrega productos con metadatos para generar filtros automáticamente.",
+      "options": "opciones",
+      "products": "productos",
+      "activeFilter": "Filtro activo",
+      "hiddenFilter": "Filtro oculto"
     }
   },
   "editor": {
@@ -152,6 +169,7 @@
       "saved": "Configuración de secciones guardada exitosamente",
       "error": "Error al guardar la configuración de secciones",
       "confirmReset": "¿Estás seguro de que quieres restablecer todas las secciones a su estado predeterminado?"
-    }
+    },
+    "dragToReorderSections": "Arrastra las secciones para cambiar su orden de aparición en la tienda"
   }
 } 
