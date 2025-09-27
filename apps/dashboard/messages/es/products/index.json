@@ -39,11 +39,14 @@
   "actions": {
     "preview": "Vista previa",
     "edit": "Editar",
+    "updateStock": "Actualizar existencias",
+    "updating": "Actualizando...",
     "delete": "Eliminar",
     "confirmDelete": "¿Estás seguro de que deseas eliminar este producto?",
     "duplicate": "Duplicar",
     "archive": "Archivar",
-    "activate": "Activar"
+    "activate": "Activar",
+    "managePromotions": "Gestionar promociones"
   },
   "sortOptions": {
     "newest": "Más recientes",
@@ -99,5 +102,33 @@
     "save": "Guardar producto",
     "saveAndContinue": "Guardar y continuar editando",
     "cancel": "Cancelar"
+  },
+  "stock": {
+    "title": "Stock",
+    "noTracking": "Sin rastreo",
+    "outOfStock": "Agotado",
+    "lowStock": "Poco stock",
+    "inStock": "En stock",
+    "available": "Stock disponible",
+    "status": "Estado",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "noTrackingProduct": "Producto sin rastreo de inventario",
+    "total": "Total",
+    "active": "Activas",
+    "units": "unidades",
+    "variants": "variantes",
+    "byVariation": "por variación",
+    "noTrackingTitle": "Sin rastreo de inventario",
+    "noTrackingDescription": "Este producto no tiene habilitado el rastreo de inventario. Para gestionar existencias, primero activa el rastreo en la configuración del producto.",
+    "updateSuccess": "Existencias actualizadas correctamente",
+    "updateError": "Error al actualizar existencias",
+    "variant": "Variante",
+    "stock": "Existencias"
+  },
+  "promotions": {
+    "title": "Promociones",
+    "none": "Sin promoción",
+    "discount": "descuento"
   }
 } 

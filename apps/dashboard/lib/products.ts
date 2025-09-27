@@ -455,4 +455,18 @@ export const getFilteredProducts = async (
       totalItems: 0
     }
   }
+}
+
+// Mapeo de códigos de moneda a símbolos
+const currencySymbols: Record<string, string> = {
+  'USD': '$', 'EUR': '€', 'MXN': '$', 'COP': '$', 'ARS': '$', 'CLP': '$',
+  'PEN': 'S/', 'BRL': 'R$', 'UYU': '$', 'PYG': '₲', 'BOB': 'Bs', 'VES': 'Bs',
+  'GTQ': 'Q', 'CRC': '₡', 'NIO': 'C$', 'PAB': 'B/.', 'DOP': 'RD$', 'HNL': 'L',
+  'SVC': '$', 'GBP': '£', 'CAD': 'C$', 'CHF': 'CHF', 'JPY': '¥', 'CNY': '¥', 'AUD': 'A$'
+}
+
+// Función para formatear precios con la moneda correcta
+export const formatPrice = (price: number, currency: string = 'USD'): string => {
+  const symbol = currencySymbols[currency] || '$'
+  return `${symbol} ${price.toFixed(2)}`
 } 

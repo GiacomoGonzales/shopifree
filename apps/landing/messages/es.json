@@ -66,7 +66,11 @@
         "customerSegmentation": "Segmentación de clientes",
         "advancedMarketing": "Marketing avanzado",
         "exclusiveThemes": "Acceso a temas exclusivos",
-        "prioritySupport": "Soporte prioritario"
+        "prioritySupport": "Soporte prioritario",
+        "automaticTranslation": "Traducción automática",
+        "multipleLanguages": "Múltiples idiomas",
+        "internationalSales": "Ventas internacionales",
+        "countryAnalytics": "Analytics de países"
       }
     },
     "blog": {

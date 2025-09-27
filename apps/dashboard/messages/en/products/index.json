@@ -39,11 +39,14 @@
   "actions": {
     "preview": "Preview",
     "edit": "Edit",
+    "updateStock": "Update Stock",
+    "updating": "Updating...",
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this product?",
     "duplicate": "Duplicate",
     "archive": "Archive",
-    "activate": "Activate"
+    "activate": "Activate",
+    "managePromotions": "Manage Promotions"
   },
   "sortOptions": {
     "newest": "Newest",
@@ -99,5 +102,33 @@
     "save": "Save product",
     "saveAndContinue": "Save and continue editing",
     "cancel": "Cancel"
+  },
+  "stock": {
+    "title": "Stock",
+    "noTracking": "No tracking",
+    "outOfStock": "Out of stock",
+    "lowStock": "Low stock",
+    "inStock": "In stock",
+    "available": "Available stock",
+    "status": "Status",
+    "cancel": "Cancel",
+    "save": "Save",
+    "noTrackingProduct": "Product without inventory tracking",
+    "total": "Total",
+    "active": "Active",
+    "units": "units",
+    "variants": "variants",
+    "byVariation": "by variation",
+    "noTrackingTitle": "No inventory tracking",
+    "noTrackingDescription": "This product does not have inventory tracking enabled. To manage stock, first enable tracking in the product settings.",
+    "updateSuccess": "Stock updated successfully",
+    "updateError": "Error updating stock",
+    "variant": "Variant",
+    "stock": "Stock"
+  },
+  "promotions": {
+    "title": "Promotions",
+    "none": "No promotion",
+    "discount": "discount"
   }
 } 

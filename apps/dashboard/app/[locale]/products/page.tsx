@@ -11,6 +11,7 @@ import {
   getFilteredProducts,
   deleteProduct,
   updateProductStock,
+  formatPrice,
   type ProductWithId,
   type ProductFilters,
   type SortOption,
@@ -18,6 +19,7 @@ import {
 } from '../../../lib/products'
 import { getBrands, type BrandWithId } from '../../../lib/brands'
 import { getParentCategories, getSubcategories, type CategoryWithId } from '../../../lib/categories'
+import { getActivePromotionsForProduct, type Promotion, calculateDiscountedPrice } from '../../../lib/promotions'
 
 export default function ProductsPage() {
   const router = useRouter()
@@ -29,6 +31,7 @@ export default function ProductsPage() {
   const [brands, setBrands] = useState<BrandWithId[]>([])
   const [categories, setCategories] = useState<CategoryWithId[]>([])
   const [subcategories, setSubcategories] = useState<CategoryWithId[]>([])
+  const [productPromotions, setProductPromotions] = useState<Record<string, Promotion[]>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -51,6 +54,12 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
   const [totalItems, setTotalItems] = useState(0)
+
+  // Estados para filtros avanzados
+  const [showFilters, setShowFilters] = useState(false)
+  const [categoryFilter, setCategoryFilter] = useState<string>('')
+  const [brandFilter, setBrandFilter] = useState<string>('')
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   
   const itemsPerPage = 8
 
@@ -58,8 +67,14 @@ export default function ProductsPage() {
   const filters: ProductFilters = useMemo(() => ({
     searchQuery: searchQuery.trim() || undefined,
     sortBy,
-    status: statusFilter
-  }), [searchQuery, sortBy, statusFilter])
+    status: statusFilter,
+    categoryIds: categoryFilter ? [categoryFilter] : undefined,
+    brandIds: brandFilter ? [brandFilter] : undefined,
+    priceRange: (priceRange.min || priceRange.max) ? {
+      min: priceRange.min ? parseFloat(priceRange.min) : undefined,
+      max: priceRange.max ? parseFloat(priceRange.max) : undefined
+    } : undefined
+  }), [searchQuery, sortBy, statusFilter, categoryFilter, brandFilter, priceRange])
 
   // Cargar marcas y categorías
   useEffect(() => {
@@ -114,11 +129,24 @@ export default function ProductsPage() {
         setLoading(true)
         
         const result = await getFilteredProducts(store.id, filters, currentPage, itemsPerPage)
-        
+
         setPaginatedProducts(result.paginatedProducts)
         setTotalPages(result.totalPages)
         setCurrentPage(result.currentPage)
         setTotalItems(result.totalItems)
+
+        // Cargar promociones para cada producto
+        const promotionsMap: Record<string, Promotion[]> = {}
+        for (const product of result.paginatedProducts) {
+          try {
+            const promotions = await getActivePromotionsForProduct(store.id, product.id)
+            promotionsMap[product.id] = promotions
+          } catch (error) {
+            console.error(`Error loading promotions for product ${product.id}:`, error)
+            promotionsMap[product.id] = []
+          }
+        }
+        setProductPromotions(promotionsMap)
         
       } catch (err) {
         console.error('Error cargando productos:', err)
@@ -169,19 +197,42 @@ export default function ProductsPage() {
   // Función para obtener nombres de subcategorías
   const getSubcategoryNames = (subcategoryIds?: string[] | null) => {
     if (!subcategoryIds || subcategoryIds.length === 0) return []
-    
+
     const names = subcategoryIds.map(id => {
       const subcategory = subcategories.find(s => s.id === id)
       return subcategory?.name || ''
     }).filter(Boolean)
-    
+
     return names
+  }
+
+  // Función para obtener información de precio con promociones
+  const getPriceInfo = (product: ProductWithId) => {
+    const promotions = productPromotions[product.id] || []
+    if (promotions.length === 0) {
+      return {
+        finalPrice: product.price,
+        originalPrice: product.price,
+        hasPromotion: false,
+        discount: 0,
+        promotionName: null
+      }
+    }
+
+    const { finalPrice, discount, appliedPromotion } = calculateDiscountedPrice(product.price, promotions)
+    return {
+      finalPrice,
+      originalPrice: product.price,
+      hasPromotion: discount > 0,
+      discount,
+      promotionName: appliedPromotion?.name || null
+    }
   }
 
   // Función para obtener indicador de stock
   const getStockIndicator = (product: ProductWithId) => {
     if (!product.trackStock) {
-      return { text: 'Sin rastreo', color: 'text-gray-400', icon: '⚪' }
+      return { text: t('stock.noTracking'), color: 'text-gray-400', icon: '⚪' }
     }
 
     if (product.hasVariants && product.variants.length > 0) {
@@ -189,7 +240,7 @@ export default function ProductsPage() {
       const activeVariants = product.variants.filter(variant => variant.stock > 0).length
       
       if (totalStock === 0) {
-        return { text: 'Agotado', color: 'text-red-500', icon: '🔴' }
+        return { text: t('stock.outOfStock'), color: 'text-red-500', icon: '🔴' }
       } else if (totalStock < 10) {
         return { text: `${activeVariants}/${product.variants.length}`, color: 'text-yellow-500', icon: '🟡' }
       } else {
@@ -198,7 +249,7 @@ export default function ProductsPage() {
     } else {
       const stock = product.stockQuantity || 0
       if (stock === 0) {
-        return { text: 'Agotado', color: 'text-red-500', icon: '🔴' }
+        return { text: t('stock.outOfStock'), color: 'text-red-500', icon: '🔴' }
       } else if (stock < 10) {
         return { text: `${stock}`, color: 'text-yellow-500', icon: '🟡' }
       } else {
@@ -216,6 +267,18 @@ export default function ProductsPage() {
   const toggleMenu = (productId: string) => {
     setOpenMenuId(openMenuId === productId ? null : productId)
   }
+
+  // Funciones para filtros
+  const clearFilters = () => {
+    setCategoryFilter('')
+    setBrandFilter('')
+    setPriceRange({ min: '', max: '' })
+    setStatusFilter('all')
+    setSearchQuery('')
+    setCurrentPage(1)
+  }
+
+  const hasActiveFilters = categoryFilter || brandFilter || priceRange.min || priceRange.max || statusFilter !== 'all' || searchQuery
 
   // Función para manejar actualización de stock
   const handleUpdateStock = (product: ProductWithId) => {
@@ -266,10 +329,10 @@ export default function ProductsPage() {
 
       setStockModalOpen(false)
       setStockChanges({})
-      showToast('Existencias actualizadas correctamente', 'success')
+      showToast(t('stock.updateSuccess'), 'success')
     } catch (error) {
       console.error('Error actualizando existencias:', error)
-      showToast('Error al actualizar existencias', 'error')
+      showToast(t('stock.updateError'), 'error')
     } finally {
       setUpdating(false)
     }
@@ -560,19 +623,142 @@ export default function ProductsPage() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full sm:w-64 pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="block w-full sm:w-64 pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                         placeholder={t('searchPlaceholder')}
                       />
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3">
                       {/* Filtros */}
-                      <button className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all min-h-[44px] sm:min-h-auto">
-                        <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.586V4z" />
-                        </svg>
-                        {t('filter')}
-                      </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowFilters(!showFilters)}
+                          className={`inline-flex items-center justify-center px-4 py-2 border shadow-sm text-sm leading-4 font-medium rounded-lg transition-all min-h-[44px] sm:min-h-auto ${
+                            showFilters || hasActiveFilters
+                              ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500'
+                              : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'
+                          } focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                        >
+                          <svg className={`h-4 w-4 mr-2 ${showFilters || hasActiveFilters ? 'text-blue-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.586V4z" />
+                          </svg>
+                          {t('filter')}
+                          {hasActiveFilters && (
+                            <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-blue-500 rounded-full">
+                              {[categoryFilter, brandFilter, priceRange.min, priceRange.max, statusFilter !== 'all' ? statusFilter : null, searchQuery].filter(Boolean).length}
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Dropdown de filtros */}
+                        {showFilters && (
+                          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div className="p-4">
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-medium text-gray-900">{t('filters.title')}</h3>
+                                <div className="flex items-center gap-2">
+                                  {hasActiveFilters && (
+                                    <button
+                                      onClick={clearFilters}
+                                      className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                                    >
+                                      {t('filters.clear')}
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => setShowFilters(false)}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                  >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-4">
+                                {/* Filtro por categoría */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('filters.category')}
+                                  </label>
+                                  <select
+                                    value={categoryFilter}
+                                    onChange={(e) => setCategoryFilter(e.target.value)}
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  >
+                                    <option value="">{t('table.noCategory')}</option>
+                                    {categories.map((category) => (
+                                      <option key={category.id} value={category.id}>
+                                        {category.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                {/* Filtro por marca */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('filters.brand')}
+                                  </label>
+                                  <select
+                                    value={brandFilter}
+                                    onChange={(e) => setBrandFilter(e.target.value)}
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  >
+                                    <option value="">{t('table.noBrand')}</option>
+                                    {brands.map((brand) => (
+                                      <option key={brand.id} value={brand.id}>
+                                        {brand.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                {/* Filtro por rango de precio */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('filters.priceRange')}
+                                  </label>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <input
+                                      type="number"
+                                      placeholder={t('filters.minPrice')}
+                                      value={priceRange.min}
+                                      onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                    <input
+                                      type="number"
+                                      placeholder={t('filters.maxPrice')}
+                                      value={priceRange.max}
+                                      onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Filtro por estado */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('filters.status')}
+                                  </label>
+                                  <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'draft' | 'archived')}
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  >
+                                    <option value="all">{t('tabs.all')}</option>
+                                    <option value="active">{t('status.active')}</option>
+                                    <option value="draft">{t('status.draft')}</option>
+                                    <option value="archived">{t('status.archived')}</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       {/* Ordenar */}
                       <select
@@ -593,6 +779,7 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
+
 
             {/* Error state */}
             {error && (
@@ -674,6 +861,9 @@ export default function ProductsPage() {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               {t('table.brand')}
                             </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              {t('promotions.title')}
+                            </th>
                             <th scope="col" className="relative px-6 py-3">
                               <span className="sr-only">{t('table.actions')}</span>
                             </th>
@@ -722,18 +912,26 @@ export default function ProductsPage() {
                                       {product.name}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                      S/ {product.price.toFixed(2)}
-                                      {product.comparePrice && (
-                                        <span className="ml-2 line-through text-gray-400">
-                                          S/ {product.comparePrice.toFixed(2)}
-                                        </span>
-                                      )}
                                       {(() => {
+                                        const priceInfo = getPriceInfo(product)
                                         const stockInfo = getStockIndicator(product)
                                         return (
-                                          <span className={`ml-2 text-xs ${stockInfo.color}`} title={`Stock: ${stockInfo.text}`}>
-                                            📦 {stockInfo.text}
-                                          </span>
+                                          <>
+                                            {priceInfo.hasPromotion ? (
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-medium text-green-600">{formatPrice(priceInfo.finalPrice, store?.currency)}</span>
+                                                <span className="line-through text-gray-400">{formatPrice(priceInfo.originalPrice, store?.currency)}</span>
+                                                <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
+                                                  {Math.round(((priceInfo.originalPrice - priceInfo.finalPrice) / priceInfo.originalPrice) * 100)}% OFF
+                                                </span>
+                                              </div>
+                                            ) : (
+                                              <span>{formatPrice(product.price, store?.currency)}</span>
+                                            )}
+                                            <span className={`ml-2 text-xs ${stockInfo.color}`} title={`Stock: ${stockInfo.text}`}>
+                                              📦 {stockInfo.text}
+                                            </span>
+                                          </>
                                         )
                                       })()}
                                     </div>
@@ -783,6 +981,25 @@ export default function ProductsPage() {
                                   <span className="text-sm text-gray-400">{t('table.noBrand')}</span>
                                 )}
                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {(() => {
+                                  const priceInfo = getPriceInfo(product)
+                                  if (priceInfo.hasPromotion && priceInfo.promotionName) {
+                                    return (
+                                      <div className="flex flex-col gap-1">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                          {priceInfo.promotionName}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                          -{Math.round(((priceInfo.originalPrice - priceInfo.finalPrice) / priceInfo.originalPrice) * 100)}% {t('promotions.discount')}
+                                        </span>
+                                      </div>
+                                    )
+                                  } else {
+                                    return <span className="text-sm text-gray-400">{t('promotions.none')}</span>
+                                  }
+                                })()}
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="relative" ref={(el) => menuRefs.current[product.id] = el}>
                                   <button
@@ -808,7 +1025,7 @@ export default function ProductsPage() {
                                           <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                           </svg>
-                                          Editar producto
+                                          {t('actions.edit')}
                                         </button>
                                         
                                         <button
@@ -818,7 +1035,7 @@ export default function ProductsPage() {
                                           <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                           </svg>
-                                          Actualizar existencias
+                                          {t('actions.updateStock')}
                                         </button>
                                         
                                         <button
@@ -832,7 +1049,20 @@ export default function ProductsPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                           </svg>
-                                          Ver en catálogo
+                                          {t('actions.preview')}
+                                        </button>
+
+                                        <button
+                                          onClick={() => {
+                                            router.push('/marketing/attract/promotions')
+                                            setOpenMenuId(null)
+                                          }}
+                                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                          <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                          </svg>
+                                          {t('actions.managePromotions')}
                                         </button>
                                         
                                         <hr className="my-1" />
@@ -857,7 +1087,7 @@ export default function ProductsPage() {
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                           )}
-                                          Eliminar producto
+                                          {t('actions.delete')}
                                         </button>
                                       </div>
                                     </div>
@@ -910,7 +1140,7 @@ export default function ProductsPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                       </svg>
-                                      Ver en catálogo
+                                      {t('actions.preview')}
                                     </button>
 
                                     <button
@@ -926,7 +1156,7 @@ export default function ProductsPage() {
                                       <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                       </svg>
-                                      Editar producto
+                                      {t('actions.edit')}
                                     </button>
 
                                     <button
@@ -940,9 +1170,25 @@ export default function ProductsPage() {
                                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
                                     >
                                       <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                       </svg>
-                                      Actualizar existencias
+                                      {t('actions.updateStock')}
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        router.push('/marketing/attract/promotions')
+                                        setMobileMenuOpen(null)
+                                      }}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                                    >
+                                      <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                      </svg>
+                                      {t('actions.managePromotions')}
                                     </button>
 
                                     <div className="border-t border-gray-100 my-1"></div>
@@ -960,7 +1206,7 @@ export default function ProductsPage() {
                                       <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                       </svg>
-                                      Eliminar producto
+                                      {t('actions.delete')}
                                     </button>
                                   </div>
                                 </div>
@@ -1028,20 +1274,34 @@ export default function ProductsPage() {
                                       {product.name}
                                     </h3>
                                     <div className="mt-1 flex items-center space-x-2">
-                                      <p className="text-sm font-semibold text-gray-900">
-                                        S/ {product.price.toFixed(2)}
-                                      </p>
-                                      {product.comparePrice && (
-                                        <p className="text-sm line-through text-gray-400">
-                                          S/ {product.comparePrice.toFixed(2)}
-                                        </p>
-                                      )}
                                       {(() => {
+                                        const priceInfo = getPriceInfo(product)
                                         const stockInfo = getStockIndicator(product)
                                         return (
-                                          <span className={`text-xs ${stockInfo.color}`} title={`Stock: ${stockInfo.text}`}>
-                                            📦 {stockInfo.text}
-                                          </span>
+                                          <>
+                                            {priceInfo.hasPromotion ? (
+                                              <div className="flex flex-col">
+                                                <div className="flex items-center gap-2">
+                                                  <p className="text-sm font-semibold text-green-600">
+                                                    {formatPrice(priceInfo.finalPrice, store?.currency)}
+                                                  </p>
+                                                  <p className="text-sm line-through text-gray-400">
+                                                    {formatPrice(priceInfo.originalPrice, store?.currency)}
+                                                  </p>
+                                                </div>
+                                                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full w-fit">
+                                                  {Math.round(((priceInfo.originalPrice - priceInfo.finalPrice) / priceInfo.originalPrice) * 100)}% OFF
+                                                </span>
+                                              </div>
+                                            ) : (
+                                              <p className="text-sm font-semibold text-gray-900">
+                                                {formatPrice(product.price, store?.currency)}
+                                              </p>
+                                            )}
+                                            <span className={`text-xs ${stockInfo.color}`} title={`Stock: ${stockInfo.text}`}>
+                                              📦 {stockInfo.text}
+                                            </span>
+                                          </>
                                         )
                                       })()}
                                     </div>
@@ -1075,6 +1335,21 @@ export default function ProductsPage() {
                                       </span>
                                     </div>
                                   )}
+
+                                  {/* Promociones */}
+                                  {(() => {
+                                    const priceInfo = getPriceInfo(product)
+                                    if (priceInfo.hasPromotion && priceInfo.promotionName) {
+                                      return (
+                                        <div className="mt-1">
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                            {priceInfo.promotionName}
+                                          </span>
+                                        </div>
+                                      )
+                                    }
+                                    return null
+                                  })()}
 
                                 </div>
 
@@ -1159,8 +1434,8 @@ export default function ProductsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     {selectedProduct.hasVariants && selectedProduct.variants.length > 0 
-                      ? 'Existencias por variación' 
-                      : 'Actualizar existencias'
+                      ? t('actions.updateStock') + ' ' + t('stock.byVariation')
+                      : t('actions.updateStock')
                     }
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">{selectedProduct.name}</p>
@@ -1178,17 +1453,16 @@ export default function ProductsPage() {
               {/* Content */}
               <div className="flex-1 overflow-y-auto px-6 py-4">
                 {!selectedProduct.trackStock ? (
-                  /* Producto sin rastreo de inventario */
+                  /* {t('stock.noTrackingProduct')} */
                   <div className="text-center py-8">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Sin rastreo de inventario</h4>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">{t('stock.noTrackingTitle')}</h4>
                     <p className="text-gray-500">
-                      Este producto no tiene habilitado el rastreo de inventario. 
-                      Para gestionar existencias, primero activa el rastreo en la configuración del producto.
+                      {t('stock.noTrackingDescription')}
                     </p>
                   </div>
                 ) : selectedProduct.hasVariants && selectedProduct.variants.length > 0 ? (
@@ -1197,16 +1471,16 @@ export default function ProductsPage() {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-blue-800">
-                          Total: {selectedProduct.variants.reduce((sum, v) => {
+                          {t('stock.total')}: {selectedProduct.variants.reduce((sum, v) => {
                             const currentStock = stockChanges.variants?.[v.id] ?? v.stock
                             return sum + currentStock
-                          }, 0)} unidades
+                          }, 0)} {t('stock.units')}
                         </span>
                         <span className="text-sm text-blue-800">
-                          Activas: {selectedProduct.variants.filter(v => {
+                          {t('stock.active')}: {selectedProduct.variants.filter(v => {
                             const currentStock = stockChanges.variants?.[v.id] ?? v.stock
                             return currentStock > 0
-                          }).length}/{selectedProduct.variants.length} variantes
+                          }).length}/{selectedProduct.variants.length} {t('stock.variants')}
                         </span>
                       </div>
                     </div>
@@ -1216,13 +1490,13 @@ export default function ProductsPage() {
                         <thead className="bg-gray-50">
                           <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Variante
+                              {t('stock.variant')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Existencias
+                              {t('stock.stock')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Estado
+                              {t('stock.status')}
                             </th>
                           </tr>
                         </thead>
@@ -1248,7 +1522,7 @@ export default function ProductsPage() {
                                   </div>
                                   <div className="ml-4">
                                     <div className="text-sm font-medium text-gray-900">{variant.name}</div>
-                                    <div className="text-sm text-gray-500">S/ {variant.price.toFixed(2)}</div>
+                                    <div className="text-sm text-gray-500">{formatPrice(variant.price, store?.currency)}</div>
                                   </div>
                                 </div>
                               </td>
@@ -1281,7 +1555,7 @@ export default function ProductsPage() {
                                         ? 'bg-yellow-100 text-yellow-800'
                                         : 'bg-red-100 text-red-800'
                                     }`}>
-                                      {currentStock > 10 ? 'En stock' : currentStock > 0 ? 'Poco stock' : 'Agotado'}
+                                      {currentStock > 10 ? t('stock.inStock') : currentStock > 0 ? t('stock.lowStock') : t('stock.outOfStock')}
                                     </span>
                                   )
                                 })()}
@@ -1314,14 +1588,14 @@ export default function ProductsPage() {
                         </div>
                         <div className="ml-4 flex-1">
                           <h4 className="text-lg font-medium text-gray-900">{selectedProduct.name}</h4>
-                          <p className="text-gray-500">S/ {selectedProduct.price.toFixed(2)}</p>
+                          <p className="text-gray-500">{formatPrice(selectedProduct.price, store?.currency)}</p>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Stock disponible
+                            {t('stock.available')}
                           </label>
                           <input
                             type="number"
@@ -1340,7 +1614,7 @@ export default function ProductsPage() {
                         <div className="flex items-end">
                           <div className="w-full">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Estado actual
+                              {t('stock.status')}
                             </label>
                             {(() => {
                               const currentStock = stockChanges.stockQuantity ?? selectedProduct.stockQuantity ?? 0
@@ -1371,7 +1645,7 @@ export default function ProductsPage() {
                     onClick={() => setStockModalOpen(false)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    Cancelar
+                    {t('stock.cancel')}
                   </button>
                   <button
                     onClick={handleSaveStock}
@@ -1384,10 +1658,10 @@ export default function ProductsPage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Actualizando...
+                        {t('actions.updating')}
                       </>
                     ) : (
-                      'Actualizar existencias'
+                      t('actions.updateStock')
                     )}
                   </button>
                 </div>

@@ -100,7 +100,11 @@ export default function HomePage() {
         t('pricing.proFeatures.customerSegmentation'),
         t('pricing.proFeatures.advancedMarketing'),
         t('pricing.proFeatures.exclusiveThemes'),
-        t('pricing.proFeatures.prioritySupport')
+        t('pricing.proFeatures.prioritySupport'),
+        t('pricing.proFeatures.automaticTranslation'),
+        t('pricing.proFeatures.multipleLanguages'),
+        t('pricing.proFeatures.internationalSales'),
+        t('pricing.proFeatures.countryAnalytics')
       ],
       cta: t('pricing.scaleUp'),
       colors: {
