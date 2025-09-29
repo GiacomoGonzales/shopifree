@@ -10,6 +10,14 @@ import { getUserStore } from '../../../../lib/store'
 import { getCoupons } from '../../../../lib/coupons'
 import { getPromotions } from '../../../../lib/promotions'
 
+// Mapeo de códigos de moneda a símbolos
+const currencySymbols: Record<string, string> = {
+  'USD': '$', 'EUR': '€', 'MXN': '$', 'COP': '$', 'ARS': '$', 'CLP': '$',
+  'PEN': 'S/', 'BRL': 'R$', 'UYU': '$', 'PYG': '₲', 'BOB': 'Bs', 'VES': 'Bs',
+  'GTQ': 'Q', 'CRC': '₡', 'NIO': 'C$', 'PAB': 'B/.', 'DOP': 'RD$', 'HNL': 'L',
+  'SVC': '$', 'GBP': '£', 'CAD': 'C$', 'CHF': 'CHF', 'JPY': '¥', 'CNY': '¥', 'AUD': 'A$'
+}
+
 export default function AttractCustomersPage() {
   const t = useTranslations('marketing')
   const router = useRouter()
@@ -19,6 +27,7 @@ export default function AttractCustomersPage() {
   const [coupons, setCoupons] = useState<any[]>([])
   const [promotions, setPromotions] = useState<any[]>([])
   const [storeId, setStoreId] = useState<string | null>(null)
+  const [storeCurrency, setStoreCurrency] = useState('USD')
 
   useEffect(() => {
     loadData()
@@ -31,6 +40,7 @@ export default function AttractCustomersPage() {
       const store = await getUserStore(user.uid)
       if (store) {
         setStoreId(store.id)
+        setStoreCurrency(store.currency || 'USD')
 
         // Cargar cupones y promociones en paralelo
         const [storeCoupons, storePromotions] = await Promise.all([
@@ -137,7 +147,7 @@ export default function AttractCustomersPage() {
                             <div className="text-right">
                               <div className="text-sm font-medium text-gray-900">
                                 {coupon.type === 'percentage' ? `${coupon.value}%` :
-                                 coupon.type === 'fixed_amount' ? `$${coupon.value}` :
+                                 coupon.type === 'fixed_amount' ? `${currencySymbols[storeCurrency] || '$'}${coupon.value}` :
                                  'Envío gratis'}
                               </div>
                               <div className="text-xs text-gray-500">
@@ -224,7 +234,7 @@ export default function AttractCustomersPage() {
                             <div className="text-right">
                               <div className="text-sm font-medium text-gray-900">
                                 {promotion.type === 'percentage' ? `${promotion.discountValue}%` :
-                                 promotion.type === 'price_discount' ? `$${promotion.discountValue}` :
+                                 promotion.type === 'price_discount' ? `${currencySymbols[storeCurrency] || '$'}${promotion.discountValue}` :
                                  `${promotion.discountValue} gratis`}
                               </div>
                               <div className="text-xs text-gray-500">
