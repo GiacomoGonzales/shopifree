@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendOrderConfirmationEmails } from '../../../lib/email';
 import { OrderData } from '../../../lib/orders';
 import { getStoreBasicInfo } from '../../../lib/store';
+import { getUserEmail } from '../../../lib/user';
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🆕 OBTENER INFORMACIÓN REAL DE LA TIENDA DESDE FIRESTORE
+    // OBTENER INFORMACIÓN DE LA TIENDA DESDE FIRESTORE
     console.log('[API] 🏪 Obteniendo información de la tienda:', storeId);
     const storeInfo = await getStoreBasicInfo(storeId);
 
@@ -49,17 +50,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar que la tienda tenga email configurado
-    if (!storeInfo.emailStore) {
-      console.error('[API] ❌ La tienda no tiene emailStore configurado:', storeId);
+    // VALIDAR QUE LA TIENDA TENGA OWNERID
+    if (!storeInfo.ownerId) {
+      console.error('[API] ❌ La tienda no tiene ownerId:', storeId);
       return NextResponse.json(
-        { success: false, error: 'Store email not configured' },
+        { success: false, error: 'Store does not have owner configured' },
+        { status: 400 }
+      );
+    }
+
+    // OBTENER EMAIL DEL USUARIO DUEÑO DE LA TIENDA
+    console.log('[API] 👤 Obteniendo email del usuario dueño:', storeInfo.ownerId);
+    const storeOwnerEmail = await getUserEmail(storeInfo.ownerId);
+
+    if (!storeOwnerEmail) {
+      console.error('[API] ❌ No se pudo obtener email del usuario:', storeInfo.ownerId);
+      return NextResponse.json(
+        { success: false, error: 'Owner email not found' },
         { status: 400 }
       );
     }
 
     const storeName = storeInfo.storeName || 'Tienda';
-    const storeOwnerEmail = storeInfo.emailStore;
+    console.log('[API] ✅ Email del dueño obtenido:', storeOwnerEmail);
 
     console.log('[API] 📧 Enviando emails para pedido:', orderId);
     console.log('[API] 📧 Cliente:', orderData.customer.email);

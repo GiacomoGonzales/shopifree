@@ -23,6 +23,7 @@ export async function getStoreIdBySubdomain(subdomain: string): Promise<string |
 
 export type StoreBasicInfo = {
     id?: string; // Agregar ID para facilitar el manejo
+    ownerId?: string; // ID del usuario dueño de la tienda
     storeName: string;
     description?: string;
     heroImageUrl?: string;
@@ -184,6 +185,7 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
 
         return {
             id: storeId, // Incluir el ID
+            ownerId: data.ownerId || undefined, // ID del usuario dueño
             storeName: data.storeName || data.name || "",
             description: data.description || data.slogan || "",
             heroImageUrl: data.heroImageUrl || data.headerImageUrl || data.logoUrl || undefined,

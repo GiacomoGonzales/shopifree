@@ -10,7 +10,10 @@ if (process.env.SENDGRID_API_KEY) {
 }
 
 export interface EmailConfig {
-  from: string;
+  from: {
+    name: string;
+    email: string;
+  };
   storeOwnerEmail?: string; // Ahora opcional, se pasa como parámetro
 }
 
@@ -34,20 +37,31 @@ function getEmailConfig(storeOwnerEmail?: string, storeName?: string): EmailConf
   const domain = baseDomain.split('@')[1];
 
   // Generar email personalizado por tienda si se proporciona storeName
-  let from = baseDomain;
+  let fromEmail = baseDomain;
+  let fromName = 'Tienda'; // Nombre por defecto
+
   if (storeName) {
-    // Convertir nombre de tienda a formato slug (minúsculas, sin espacios, solo letras/números)
+    // Usar el nombre real de la tienda como remitente
+    fromName = storeName;
+
+    // Convertir nombre de tienda a formato slug para el email (minúsculas, sin espacios, solo letras/números)
     const storeSlug = storeName
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')  // Reemplazar caracteres especiales con -
       .replace(/-+/g, '-')         // Múltiples - consecutivos a uno solo
       .replace(/^-|-$/g, '');      // Remover - al inicio y final
 
-    from = `${storeSlug}-noreply@${domain}`;
-    console.log(`[Email] 📧 Email personalizado generado: ${from} (tienda: ${storeName})`);
+    fromEmail = `${storeSlug}-noreply@${domain}`;
+    console.log(`[Email] 📧 Email configurado - Nombre: "${fromName}", Email: ${fromEmail}`);
   }
 
-  return { from, storeOwnerEmail };
+  return {
+    from: {
+      name: fromName,
+      email: fromEmail
+    },
+    storeOwnerEmail
+  };
 }
 
 // Función para probar la conexión con SendGrid
