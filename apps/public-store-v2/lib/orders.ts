@@ -3,6 +3,7 @@ import { getFirebaseDb } from './firebase';
 import { CartItem } from './cart-context';
 import { formatPrice } from './currency';
 import { finalizeCustomerOrder, saveCustomerToLocalStorage } from './customers';
+import { sendOrderConfirmationEmailsClient } from './email-client';
 
 // Tipos compatibles con el dashboard existente
 export interface OrderData {
@@ -171,6 +172,27 @@ export async function createOrder(
     const docRef = await addDoc(ordersRef, newOrder);
     console.log('[Orders] ✅ Order created successfully! Doc ID:', docRef.id);
     console.log('[Orders] ✅ Order path: stores/' + storeId + '/orders/' + docRef.id);
+
+    // 🆕 ENVIAR EMAILS DE CONFIRMACIÓN
+    try {
+      console.log('[Orders] 📧 Enviando emails de confirmación...');
+      const storeUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const dashboardUrl = 'https://dashboard.shopifree.app/orders'; // TODO: URL real del dashboard
+
+      const emailResults = await sendOrderConfirmationEmailsClient(
+        docRef.id,
+        orderData,
+        storeId,
+        storeUrl,
+        dashboardUrl
+      );
+
+      console.log(`[Orders] 📧 Emails enviados - Cliente: ${emailResults.customerSent ? '✅' : '❌'}, Admin: ${emailResults.adminSent ? '✅' : '❌'}`);
+    } catch (emailError) {
+      // NO fallar el pedido si los emails fallan
+      console.error('[Orders] ⚠️ Error enviando emails de confirmación:', emailError);
+      console.error('[Orders] ⚠️ El pedido se creó correctamente, pero los emails fallaron');
+    }
 
     return docRef;
   } catch (error) {
