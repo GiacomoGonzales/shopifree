@@ -62,7 +62,8 @@
     "showing": "Mostrando",
     "to": "a",
     "of": "de",
-    "products": "productos"
+    "products": "productos",
+    "pageOf": "Página {current} de {total}"
   },
   "filters": {
     "title": "Filtros",

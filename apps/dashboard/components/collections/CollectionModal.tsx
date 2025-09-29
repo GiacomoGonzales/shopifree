@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { CollectionWithId } from '../../lib/collections'
-import { ProductWithId } from '../../lib/products'
+import { ProductWithId, formatPrice } from '../../lib/products'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '../../lib/cloudinary'
 
 interface CollectionData {
@@ -20,6 +20,7 @@ interface CollectionModalProps {
   collection?: CollectionWithId | null
   storeId: string
   products: ProductWithId[]
+  storeCurrency?: string
 }
 
 export default function CollectionModal({
@@ -28,7 +29,8 @@ export default function CollectionModal({
   onSave,
   collection,
   storeId,
-  products
+  products,
+  storeCurrency = 'USD'
 }: CollectionModalProps) {
   const t = useTranslations('collections')
   
@@ -421,7 +423,7 @@ export default function CollectionModal({
                     </div>
                     <input
                       type="text"
-                      placeholder="Buscar productos..."
+                      placeholder={t('productSelector.searchPlaceholder')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-600 focus:border-gray-600"
@@ -431,7 +433,7 @@ export default function CollectionModal({
                   {/* Selected products count */}
                   {selectedProductIds.length > 0 && (
                     <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-md">
-                      {selectedProductIds.length} {selectedProductIds.length === 1 ? 'producto seleccionado' : 'productos seleccionados'}
+                      {selectedProductIds.length} {selectedProductIds.length === 1 ? t('productSelector.productSelected') : t('productSelector.productsSelected')}
                     </div>
                   )}
 
@@ -520,9 +522,9 @@ export default function CollectionModal({
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
                             <div className="flex items-center space-x-2 mt-1">
-                              <span className="text-sm font-medium text-gray-900">${product.price.toFixed(2)}</span>
+                              <span className="text-sm font-medium text-gray-900">{formatPrice(product.price, storeCurrency)}</span>
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                product.status === 'active' 
+                                product.status === 'active'
                                   ? 'bg-green-100 text-green-800'
                                   : product.status === 'draft'
                                   ? 'bg-yellow-100 text-yellow-800'

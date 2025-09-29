@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
-import { ProductWithId } from '../../lib/products'
+import { ProductWithId, formatPrice } from '../../lib/products'
 
 interface ProductSelectorProps {
   isOpen: boolean
@@ -11,6 +11,7 @@ interface ProductSelectorProps {
   products: ProductWithId[]
   selectedProductIds: string[]
   title?: string
+  storeCurrency?: string
 }
 
 export default function ProductSelector({
@@ -19,7 +20,8 @@ export default function ProductSelector({
   onSelect,
   products,
   selectedProductIds,
-  title
+  title,
+  storeCurrency = 'USD'
 }: ProductSelectorProps) {
   const t = useTranslations('collections.productSelector')
   const [searchQuery, setSearchQuery] = useState('')
@@ -206,10 +208,10 @@ export default function ProductSelector({
                         )}
                         <div className="flex items-center space-x-4 mt-2">
                           <span className="text-sm font-medium text-gray-900">
-                            ${product.price.toFixed(2)}
+                            {formatPrice(product.price, storeCurrency)}
                           </span>
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            product.status === 'active' 
+                            product.status === 'active'
                               ? 'bg-green-100 text-green-800'
                               : product.status === 'draft'
                               ? 'bg-yellow-100 text-yellow-800'

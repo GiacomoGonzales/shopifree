@@ -83,6 +83,8 @@
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
     "apply": "Apply selection",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "productSelected": "product selected",
+    "productsSelected": "products selected"
   }
 } 

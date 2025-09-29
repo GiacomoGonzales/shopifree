@@ -219,10 +219,15 @@ export async function deletePromotion(storeId: string, promotionId: string): Pro
  */
 export async function getActivePromotionsForProduct(storeId: string, productId: string): Promise<Promotion[]> {
   const allPromotions = await getPromotions(storeId);
+  const now = new Date().toISOString();
 
   return allPromotions.filter(promotion => {
     // Solo promociones activas
     if (promotion.status !== 'active') return false;
+
+    // Verificar que esté dentro del rango de fechas
+    const withinDateRange = now >= promotion.startDate && (promotion.noExpiration || now <= promotion.endDate);
+    if (!withinDateRange) return false;
 
     // Verificar si el producto está incluido
     if (promotion.targetType === 'all_products') return true;
@@ -233,4 +238,47 @@ export async function getActivePromotionsForProduct(storeId: string, productId: 
     // TODO: Implementar filtros por categorías y marcas
     return false;
   }).sort((a, b) => b.priority - a.priority); // Mayor prioridad primero
+}
+
+/**
+ * Calcular precio con descuento aplicando la mejor promoción
+ */
+export function calculateDiscountedPrice(originalPrice: number, promotions: Promotion[]): {
+  finalPrice: number;
+  discount: number;
+  appliedPromotion?: Promotion;
+} {
+  if (promotions.length === 0) {
+    return { finalPrice: originalPrice, discount: 0 };
+  }
+
+  // Tomar la promoción de mayor prioridad
+  const bestPromotion = promotions[0];
+  let discount = 0;
+
+  switch (bestPromotion.type) {
+    case 'percentage':
+      discount = (originalPrice * bestPromotion.discountValue) / 100;
+      break;
+    case 'price_discount':
+      discount = Math.min(bestPromotion.discountValue, originalPrice);
+      break;
+    default:
+      discount = 0;
+  }
+
+  const finalPrice = Math.max(0, originalPrice - discount);
+
+  return {
+    finalPrice,
+    discount,
+    appliedPromotion: bestPromotion
+  };
+}
+
+/**
+ * Verificar si un producto tiene promociones activas con badge
+ */
+export function hasPromotionBadge(promotions: Promotion[]): boolean {
+  return promotions.some(promotion => promotion.showBadge);
 }

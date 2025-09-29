@@ -44,6 +44,63 @@
       "title": "Custom Sections",
       "description": "Add and customize additional sections for your store."
     },
+    "announcementBar": {
+      "title": "Announcement Bar",
+      "description": "Configure an announcement bar to display promotions, important notices, or calls to action in your store.",
+      "settings": {
+        "title": "Settings",
+        "enabled": "Enable Announcement Bar",
+        "message": "Message",
+        "messagePlaceholder": "E.g.: Free shipping on orders over $50!",
+        "backgroundColor": "Background color",
+        "textColor": "Text color",
+        "link": "Link (optional)",
+        "linkPlaceholder": "https://example.com",
+        "linkText": "Link text",
+        "linkTextPlaceholder": "View offers",
+        "animation": "Animation",
+        "animationSpeed": "Animation speed",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "showOnMobile": "Show on mobile",
+        "showOnDesktop": "Show on desktop",
+        "position": "Position",
+        "positionTop": "Above header",
+        "positionBottom": "Below header"
+      },
+      "animations": {
+        "none": "No animation",
+        "slide": "Slide",
+        "fade": "Fade",
+        "bounce": "Bounce"
+      },
+      "speeds": {
+        "slow": "Slow",
+        "normal": "Normal",
+        "fast": "Fast"
+      },
+      "preview": {
+        "title": "Preview",
+        "description": "This is how your announcement bar will look in the store:",
+        "disabled": "The announcement bar is disabled"
+      },
+      "toolbar": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "strikethrough": "Strikethrough",
+        "formatHint": "Select text and use buttons to apply formatting"
+      },
+      "devices": "Devices",
+      "mobileLabel": "Mobile",
+      "desktopLabel": "Desktop",
+      "headerLabel": "Header",
+      "contentLabel": "Store content",
+      "headerStore": "Store header",
+      "mainContent": "Main store content",
+      "resetButton": "Reset",
+      "errorMessage": "Could not load your store information. Please try reloading the page."
+    },
     "themes": {
       "gallery": {
         "title": "Theme Gallery",

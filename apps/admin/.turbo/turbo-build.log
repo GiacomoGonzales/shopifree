@@ -6,3 +6,7 @@
 > @shopifree/ui@1.0.0 build
 > tsc
 
+  ▲ Next.js 14.2.30
+  - Environments: .env.local
+
+   Creating an optimized production build ...

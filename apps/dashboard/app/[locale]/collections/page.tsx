@@ -24,6 +24,7 @@ export default function CollectionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCollection, setSelectedCollection] = useState<CollectionWithId | null>(null)
   const [storeId, setStoreId] = useState<string>('')
+  const [storeCurrency, setStoreCurrency] = useState<string>('USD')
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -39,19 +40,20 @@ export default function CollectionsPage() {
           console.warn('No se encontró la tienda del usuario')
           return
         }
-        
+
         setStoreId(store.id)
-        
+        setStoreCurrency(store.currency || 'USD')
+
         // Cargar colecciones y productos en paralelo
         console.log('Cargando colecciones y productos para store:', store.id)
         const [allCollections, allProducts] = await Promise.all([
           getCollections(store.id),
           getProducts(store.id)
         ])
-        
+
         console.log('Colecciones cargadas:', allCollections)
         console.log('Productos cargados:', allProducts.length)
-        
+
         setCollections(allCollections)
         setProducts(allProducts)
       } catch (error) {
@@ -246,6 +248,7 @@ export default function CollectionsPage() {
         collection={selectedCollection}
         storeId={storeId}
         products={products}
+        storeCurrency={storeCurrency}
       />
 
       {/* Toast notification */}

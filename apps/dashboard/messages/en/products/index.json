@@ -62,7 +62,8 @@
     "showing": "Showing",
     "to": "to",
     "of": "of",
-    "products": "products"
+    "products": "products",
+    "pageOf": "Page {current} of {total}"
   },
   "filters": {
     "title": "Filters",

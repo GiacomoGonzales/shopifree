@@ -238,7 +238,7 @@ export default function AnnouncementBarSection() {
           </div>
           <div className="ml-3">
             <p className="text-sm text-red-700">
-              No se pudo cargar la información de tu tienda. Intenta recargar la página.
+              {t('errorMessage')}
             </p>
           </div>
         </div>
@@ -296,7 +296,7 @@ export default function AnnouncementBarSection() {
                   type="button"
                   onClick={() => handleFormatClick('bold')}
                   className="p-2 text-gray-700 hover:bg-gray-200 rounded text-sm font-bold border border-gray-300 hover:border-gray-400"
-                  title="Negrita"
+                  title={t('toolbar.bold')}
                 >
                   B
                 </button>
@@ -304,7 +304,7 @@ export default function AnnouncementBarSection() {
                   type="button"
                   onClick={() => handleFormatClick('italic')}
                   className="p-2 text-gray-700 hover:bg-gray-200 rounded text-sm italic border border-gray-300 hover:border-gray-400"
-                  title="Cursiva"
+                  title={t('toolbar.italic')}
                 >
                   I
                 </button>
@@ -312,7 +312,7 @@ export default function AnnouncementBarSection() {
                   type="button"
                   onClick={() => handleFormatClick('underline')}
                   className="p-2 text-gray-700 hover:bg-gray-200 rounded text-sm underline border border-gray-300 hover:border-gray-400"
-                  title="Subrayado"
+                  title={t('toolbar.underline')}
                 >
                   U
                 </button>
@@ -320,13 +320,13 @@ export default function AnnouncementBarSection() {
                   type="button"
                   onClick={() => handleFormatClick('strikeThrough')}
                   className="p-2 text-gray-700 hover:bg-gray-200 rounded text-sm line-through border border-gray-300 hover:border-gray-400"
-                  title="Tachado"
+                  title={t('toolbar.strikethrough')}
                 >
                   S
                 </button>
                 <div className="border-l border-gray-300 h-6 mx-2"></div>
                 <span className="text-xs text-gray-500">
-                  Selecciona texto y usa los botones para aplicar formato
+                  {t('toolbar.formatHint')}
                 </span>
               </div>
 
@@ -490,7 +490,7 @@ export default function AnnouncementBarSection() {
             {/* Configuración responsive */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Dispositivos
+                {t('devices')}
               </label>
               <div className="space-y-3">
                 <div className="flex items-center">
@@ -565,7 +565,7 @@ export default function AnnouncementBarSection() {
                 onClick={resetConfig}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               >
-                Resetear
+                {t('resetButton')}
               </button>
 
               <button
@@ -594,7 +594,7 @@ export default function AnnouncementBarSection() {
                 {/* Vista previa móvil */}
                 {config.showOnMobile && (
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Móvil</h5>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">{t('mobileLabel')}</h5>
                     <div className="w-full max-w-xs mx-auto border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
                       {/* Simulación de pantalla móvil */}
                       <div className="bg-white">
@@ -611,7 +611,7 @@ export default function AnnouncementBarSection() {
                         )}
 
                         <div className="h-8 bg-gray-100 border-b border-gray-200 flex items-center justify-center text-xs text-gray-500">
-                          Header
+                          {t('headerLabel')}
                         </div>
 
                         {config.position === 'bottom' && (
@@ -627,7 +627,7 @@ export default function AnnouncementBarSection() {
                         )}
 
                         <div className="h-32 bg-white flex items-center justify-center text-xs text-gray-500">
-                          Contenido de la tienda
+                          {t('contentLabel')}
                         </div>
                       </div>
                     </div>
@@ -637,7 +637,7 @@ export default function AnnouncementBarSection() {
                 {/* Vista previa desktop */}
                 {config.showOnDesktop && (
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Escritorio</h5>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">{t('desktopLabel')}</h5>
                     <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
                       {/* Simulación de pantalla desktop */}
                       <div className="bg-white">
@@ -654,7 +654,7 @@ export default function AnnouncementBarSection() {
                         )}
 
                         <div className="h-12 bg-gray-100 border-b border-gray-200 flex items-center justify-center text-sm text-gray-500">
-                          Header de la tienda
+                          {t('headerStore')}
                         </div>
 
                         {config.position === 'bottom' && (
@@ -670,7 +670,7 @@ export default function AnnouncementBarSection() {
                         )}
 
                         <div className="h-32 bg-white flex items-center justify-center text-sm text-gray-500">
-                          Contenido principal de la tienda
+                          {t('mainContent')}
                         </div>
                       </div>
                     </div>

@@ -83,7 +83,23 @@
         "title": "Vista previa",
         "description": "Así se verá tu announcement bar en la tienda:",
         "disabled": "El announcement bar está desactivado"
-      }
+      },
+      "toolbar": {
+        "bold": "Negrita",
+        "italic": "Cursiva",
+        "underline": "Subrayado",
+        "strikethrough": "Tachado",
+        "formatHint": "Selecciona texto y usa los botones para aplicar formato"
+      },
+      "devices": "Dispositivos",
+      "mobileLabel": "Móvil",
+      "desktopLabel": "Escritorio",
+      "headerLabel": "Header",
+      "contentLabel": "Contenido de la tienda",
+      "headerStore": "Header de la tienda",
+      "mainContent": "Contenido principal de la tienda",
+      "resetButton": "Resetear",
+      "errorMessage": "No se pudo cargar la información de tu tienda. Intenta recargar la página."
     },
     "themes": {
       "gallery": {

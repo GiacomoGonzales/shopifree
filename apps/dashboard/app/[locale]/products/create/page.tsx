@@ -1221,9 +1221,9 @@ export default function CreateProductPage() {
               {/* 5. Inventario y Variantes */}
               <Card className="p-6">
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Inventario y variaciones</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('inventory.title')}</h2>
                   <p className="text-sm text-gray-500">
-                    Configura el stock y las variaciones de tu producto
+                    {t('inventory.subtitle')}
                   </p>
                 </div>
 
@@ -1236,14 +1236,14 @@ export default function CreateProductPage() {
                       onChange={(e) => setTrackStock(e.target.checked)}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-900">Rastrear inventario de este producto</span>
+                    <span className="ml-2 text-sm font-medium text-gray-900">{t('inventory.trackStock')}</span>
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">Si no está activado, el producto siempre aparecerá como disponible</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('inventory.trackStockDescription')}</p>
                 </div>
 
                 {/* Pregunta principal tipo RedireDi */}
                 <div className="mb-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-4">¿Este producto tiene variaciones?</h3>
+                  <h3 className="text-md font-medium text-gray-900 mb-4">{t('inventory.hasVariations')}</h3>
                   <div className="space-y-3">
                     <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer">
                       <input
@@ -1255,8 +1255,8 @@ export default function CreateProductPage() {
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                       />
                       <div className="ml-3">
-                        <span className="text-sm font-medium text-gray-900">No, es un producto simple</span>
-                        <p className="text-sm text-gray-500">Solo necesita precio y stock general</p>
+                        <span className="text-sm font-medium text-gray-900">{t('inventory.noVariations')}</span>
+                        <p className="text-sm text-gray-500">{t('inventory.noVariationsDescription')}</p>
                       </div>
                     </label>
                     
@@ -1270,8 +1270,8 @@ export default function CreateProductPage() {
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                       />
                       <div className="ml-3">
-                        <span className="text-sm font-medium text-gray-900">Sí, tiene variaciones</span>
-                        <p className="text-sm text-gray-500">Diferentes colores, tallas, pesos, etc.</p>
+                        <span className="text-sm font-medium text-gray-900">{t('inventory.yesVariations')}</span>
+                        <p className="text-sm text-gray-500">{t('inventory.yesVariationsDescription')}</p>
                       </div>
                     </label>
                   </div>
@@ -1281,17 +1281,17 @@ export default function CreateProductPage() {
                 {!hasVariants ? (
                   /* STOCK SIMPLE - Producto sin variaciones */
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                    <h4 className="text-sm font-medium text-gray-900 mb-4">Existencias del producto</h4>
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">{t('inventory.productStock')}</h4>
                     {!trackStock && (
                       <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                         <p className="text-sm text-yellow-800">
-                          ⚠️ El rastreo de inventario está desactivado. El producto siempre aparecerá como disponible.
+                          {t('inventory.stockDisabledWarning')}
                         </p>
                       </div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Stock disponible</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.stockAvailable')}</label>
                         <input
                           type="number"
                           min="0"
@@ -1309,7 +1309,7 @@ export default function CreateProductPage() {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-green-800">
-                        ✅ Matriz generada. Configura precios y stock abajo.
+                        {t('inventory.matrixGenerated')}
                       </span>
                       <Button
                         onClick={() => {
@@ -1324,18 +1324,18 @@ export default function CreateProductPage() {
                         size="sm"
                         className="text-green-700 border-green-300"
                       >
-                        Reconfigurar
+                        {t('inventory.reconfigure')}
                       </Button>
                     </div>
                   </div>
                 ) : hasVariants ? (
                   /* CONFIGURADOR DE VARIANTES estilo RedireDi */
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
-                    <h4 className="text-md font-medium text-blue-900">Configurador de variaciones</h4>
+                    <h4 className="text-md font-medium text-blue-900">{t('inventory.variationsConfigurator')}</h4>
                     {!trackStock && (
                       <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                         <p className="text-sm text-yellow-800">
-                          ⚠️ El rastreo de inventario está desactivado. Los campos de stock estarán bloqueados.
+                          {t('inventory.variationsStockDisabledWarning')}
                         </p>
                       </div>
                     )}
@@ -1343,7 +1343,7 @@ export default function CreateProductPage() {
                     {/* Paso 1: Tipo principal de variación */}
                     <div className="space-y-3">
                       <label className="block text-sm font-medium text-gray-700">
-                        Paso 1: Selecciona el tipo principal de variación
+                        {t('inventory.step1')}
                       </label>
                       <div className="flex flex-wrap gap-3">
                         {/* Pastilla Color */}
@@ -1359,7 +1359,7 @@ export default function CreateProductPage() {
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Color
+                          {t('inventory.color')}
                         </button>
                         
                         {/* Pastilla Talla */}
@@ -1375,7 +1375,7 @@ export default function CreateProductPage() {
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Talla
+                          {t('inventory.size')}
                         </button>
                         
                         {/* Pastilla Otro */}
@@ -1393,7 +1393,7 @@ export default function CreateProductPage() {
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          Otro
+                          {t('inventory.other')}
                         </button>
                       </div>
                       
@@ -1404,7 +1404,7 @@ export default function CreateProductPage() {
                             type="text"
                             value={variationType1Custom}
                             onChange={(e) => setVariationType1Custom(e.target.value)}
-                            placeholder="Escribe el nombre del tipo (ej: Peso, Material, Capacidad)"
+                            placeholder={t('inventory.customTypePlaceholder')}
                             className="block w-full px-3 py-2 border border-blue-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
                           />
                         </div>
@@ -1415,7 +1415,7 @@ export default function CreateProductPage() {
                     {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && (
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
-                          Paso 2: Define las opciones de {variationType1 === 'otro' ? variationType1Custom : variationType1}
+                          {t('inventory.step2')} {variationType1 === 'otro' ? variationType1Custom : variationType1}
                         </label>
                         <div className="space-y-2">
                           {variationType1Options.map((option, index) => (
@@ -1433,7 +1433,7 @@ export default function CreateProductPage() {
                                     inputRefs1.current[index]?.focus()
                                   }, 0)
                                 }}
-                                placeholder="Ej: Rojo"
+                                placeholder={t('inventory.exampleRed')}
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
                               />
                               {variationType1Options.length > 1 && (
@@ -1469,7 +1469,7 @@ export default function CreateProductPage() {
                                     }, 0)
                                   }
                                 }}
-                                placeholder="Ej: Rojo"
+                                placeholder={t('inventory.exampleRed')}
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
                               />
                             </div>
@@ -1485,7 +1485,7 @@ export default function CreateProductPage() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            Agregar otra opción
+                            {t('inventory.addAnotherOption')}
                           </button>
                         </div>
                       </div>
@@ -1495,7 +1495,7 @@ export default function CreateProductPage() {
                     {variationType1 && variationType1Options.filter(opt => opt.trim() !== '').length > 0 && (
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
-                          Paso 3: ¿Tiene un segundo tipo de variación?
+                          {t('inventory.step3')}
                         </label>
                         <div className="space-y-2">
                           <label className="flex items-center">
@@ -1511,7 +1511,7 @@ export default function CreateProductPage() {
                               }}
                               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                             />
-                            <span className="ml-2 text-sm text-gray-700">No, solo {variationType1 === 'otro' ? variationType1Custom : variationType1}</span>
+                            <span className="ml-2 text-sm text-gray-700">{t('inventory.step3OptionNo')} {variationType1 === 'otro' ? variationType1Custom : variationType1}</span>
                           </label>
                           <label className="flex items-center">
                             <input
@@ -1521,7 +1521,7 @@ export default function CreateProductPage() {
                               onChange={() => setHasSecondVariation(true)}
                               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                             />
-                            <span className="ml-2 text-sm text-gray-700">Sí, agregar segundo tipo</span>
+                            <span className="ml-2 text-sm text-gray-700">{t('inventory.step3OptionYes')}</span>
                           </label>
                         </div>
                       </div>
@@ -1532,7 +1532,7 @@ export default function CreateProductPage() {
                       <div className="space-y-4 pl-4 border-l-2 border-gray-200">
                         <div className="space-y-3">
                           <label className="block text-sm font-medium text-gray-700">
-                            Paso 4: Selecciona el segundo tipo
+                            {t('inventory.step4')}
                           </label>
                           <div className="flex flex-wrap gap-3">
                             {/* Pastilla Color - deshabilitada si ya está seleccionada */}
@@ -1551,7 +1551,7 @@ export default function CreateProductPage() {
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
-                              Color {variationType1 === 'color' && '(ya seleccionado)'}
+                              {t('inventory.color')} {variationType1 === 'color' && t('inventory.alreadySelected')}
                             </button>
                             
                             {/* Pastilla Talla - deshabilitada si ya está seleccionada */}
@@ -1570,7 +1570,7 @@ export default function CreateProductPage() {
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
-                              Talla {variationType1 === 'talla' && '(ya seleccionado)'}
+                              {t('inventory.size')} {variationType1 === 'talla' && t('inventory.alreadySelected')}
                             </button>
                             
                             {/* Pastilla Otro - deshabilitada si ya está seleccionada */}
@@ -1591,7 +1591,7 @@ export default function CreateProductPage() {
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
-                              Otro {variationType1 === 'otro' && '(ya seleccionado)'}
+                              {t('inventory.other')} {variationType1 === 'otro' && t('inventory.alreadySelected')}
                             </button>
                           </div>
                           
@@ -1602,7 +1602,7 @@ export default function CreateProductPage() {
                                 type="text"
                                 value={variationType2Custom}
                                 onChange={(e) => setVariationType2Custom(e.target.value)}
-                                placeholder="Escribe el nombre del segundo tipo (ej: Material, Capacidad)"
+                                placeholder={t('inventory.customSecondTypePlaceholder')}
                                 className="block w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500 bg-green-50"
                               />
                             </div>
@@ -1612,7 +1612,7 @@ export default function CreateProductPage() {
                         {((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && (
                           <div className="space-y-3">
                             <label className="block text-sm font-medium text-gray-700">
-                              Define las opciones de {variationType2 === 'otro' ? variationType2Custom : variationType2}
+                              {t('inventory.defineOptionsFor')} {variationType2 === 'otro' ? variationType2Custom : variationType2}
                             </label>
                             <div className="space-y-2">
                               {variationType2Options.map((option, index) => (
@@ -1682,7 +1682,7 @@ export default function CreateProductPage() {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                Agregar otra opción
+                                {t('inventory.addAnotherOption')}
                               </button>
                             </div>
                           </div>
@@ -1701,10 +1701,10 @@ export default function CreateProductPage() {
                           onClick={generateVariantMatrix}
                           className="w-full"
                         >
-                          Paso 5: Generar matriz de variaciones 
+                          {t('inventory.generateMatrix')} 
                           ({hasSecondVariation ? 
                             variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length : 
-                            variationType1Options.filter(opt => opt.trim() !== '').length} combinaciones)
+                            variationType1Options.filter(opt => opt.trim() !== '').length} {t('inventory.combinations')})
                         </Button>
                       </div>
                     )}
@@ -1716,12 +1716,12 @@ export default function CreateProductPage() {
                   <div className="space-y-4">
                     <div className="mb-4">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Variantes ({variants.length})
+                        {t('inventory.variants')} ({variants.length})
                       </h4>
                       {!trackStock && (
                         <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                           <p className="text-sm text-yellow-800">
-                            ⚠️ El rastreo de inventario está desactivado. Los campos de stock están bloqueados.
+                            {t('inventory.matrixStockDisabledWarning')}
                           </p>
                         </div>
                       )}
@@ -1732,10 +1732,10 @@ export default function CreateProductPage() {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <h3 className="text-md font-medium text-gray-900">
-                            Configurar Variantes ({variants.filter(v => v.available !== false).length} activas)
+                            {t('inventory.configureVariants')} ({variants.filter(v => v.available !== false).length} {t('inventory.active')})
                           </h3>
                           <div className="text-xs text-gray-500">
-                            Desmarca las que no quieres ofrecer
+                            {t('inventory.uncheckUnwanted')}
                           </div>
                         </div>
                         
@@ -1746,21 +1746,21 @@ export default function CreateProductPage() {
                                 {/* Checkbox de disponibilidad simplificado */}
                                 <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   <div className="flex items-center justify-center">
-                                    <span className="sr-only">Activa</span>
+                                    <span className="sr-only">{t('inventory.activeCheckbox')}</span>
                                     ✓
                                   </div>
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Variante
+                                  {t('inventory.variant')}
                                 </th>
                                 <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Precio ({currencyName})
+                                  {t('inventory.price')} ({currencyName})
                                 </th>
                                 <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Stock
+                                  {t('inventory.stock')}
                                 </th>
                                 <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  <span className="sr-only">Acciones</span>
+                                  <span className="sr-only">{t('inventory.actions')}</span>
                                 </th>
                               </tr>
                             </thead>
