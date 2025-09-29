@@ -8,6 +8,14 @@ import { getCoupons, Coupon, createCoupon, generateCouponCode, updateCouponStatu
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore } from '../../../../../lib/store'
 
+// Mapeo de códigos de moneda a símbolos
+const currencySymbols: Record<string, string> = {
+  'USD': '$', 'EUR': '€', 'MXN': '$', 'COP': '$', 'ARS': '$', 'CLP': '$',
+  'PEN': 'S/', 'BRL': 'R$', 'UYU': '$', 'PYG': '₲', 'BOB': 'Bs', 'VES': 'Bs',
+  'GTQ': 'Q', 'CRC': '₡', 'NIO': 'C$', 'PAB': 'B/.', 'DOP': 'RD$', 'HNL': 'L',
+  'SVC': '$', 'GBP': '£', 'CAD': 'C$', 'CHF': 'CHF', 'JPY': '¥', 'CNY': '¥', 'AUD': 'A$'
+}
+
 export default function CouponsPage() {
   const t = useTranslations('marketing')
   const { user } = useAuth()
@@ -15,7 +23,8 @@ export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
-  const [storeData, setStoreData] = useState<{ id: string; storeName: string } | null>(null)
+  const [storeData, setStoreData] = useState<{ id: string; storeName: string; currency?: string } | null>(null)
+  const [storeCurrency, setStoreCurrency] = useState('USD')
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null)
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
@@ -52,7 +61,12 @@ export default function CouponsPage() {
           return
         }
 
-        setStoreData(store)
+        setStoreData({
+          id: store.id,
+          storeName: store.storeName,
+          currency: store.currency
+        })
+        setStoreCurrency(store.currency || 'USD')
 
         // Cargar cupones
         const fetchedCoupons = await getCoupons(store.id)
@@ -247,9 +261,10 @@ export default function CouponsPage() {
   }
 
   const getDiscountText = (type: string, value: number) => {
+    const symbol = currencySymbols[storeCurrency] || '$'
     switch (type) {
       case 'percentage': return `${value}%`
-      case 'fixed_amount': return `S/ ${value}`
+      case 'fixed_amount': return `${symbol} ${value}`
       case 'free_shipping': return 'Envío gratis'
       default: return '-'
     }
@@ -595,7 +610,7 @@ export default function CouponsPage() {
                 {formData.type !== 'free_shipping' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      {formData.type === 'percentage' ? 'Porcentaje (%)' : 'Monto fijo (S/)'}
+                      {formData.type === 'percentage' ? 'Porcentaje (%)' : `Monto fijo (${currencySymbols[storeCurrency] || '$'})`}
                     </label>
                     <input
                       type="number"
