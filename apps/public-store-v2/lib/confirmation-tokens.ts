@@ -16,6 +16,7 @@ export interface ConfirmationToken {
   used: boolean
   paymentMethod: string
   storeId: string
+  orderNumber?: number // 🆕 Número de orden secuencial
 }
 
 const STORAGE_KEY_PREFIX = 'shopifree_confirmation_token_'
@@ -27,7 +28,8 @@ const TOKEN_EXPIRATION_TIME = 30 * 60 * 1000 // 30 minutos
 export function generateConfirmationToken(
   orderData: OrderData,
   orderId: string,
-  storeId: string = 'default'
+  storeId: string = 'default',
+  orderNumber?: number // 🆕 Número de orden secuencial
 ): string {
   // Generar ID único
   const tokenId = generateUniqueId()
@@ -42,7 +44,8 @@ export function generateConfirmationToken(
     expiresAt: now + TOKEN_EXPIRATION_TIME,
     used: false,
     paymentMethod: orderData.payment.method,
-    storeId
+    storeId,
+    orderNumber // 🆕 Incluir número de orden secuencial
   }
 
   try {

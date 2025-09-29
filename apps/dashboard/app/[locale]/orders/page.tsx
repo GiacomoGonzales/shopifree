@@ -134,7 +134,9 @@ export default function OrdersPage() {
         order.clientName?.toLowerCase().includes(searchTerm) ||
         order.clientPhone?.toLowerCase().includes(searchTerm) ||
         (order as any).email?.toLowerCase().includes(searchTerm) ||
-        order.id.toLowerCase().includes(searchTerm)
+        order.id.toLowerCase().includes(searchTerm) ||
+        // 🆕 Buscar también por orderNumber
+        (order.orderNumber && order.orderNumber.toString().includes(searchTerm))
       )
     }
 
@@ -789,7 +791,7 @@ export default function OrdersPage() {
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                            #{order.id.slice(-8)}
+                            {order.orderNumber ? `#${order.orderNumber}` : `#${order.id.slice(-8)}`}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatOrderDate(order.createdAt)}
@@ -964,7 +966,7 @@ export default function OrdersPage() {
               {/* Header */}
               <div className="flex items-center justify-between mb-6 pt-2 md:pt-0">
                 <h3 className="text-lg font-medium text-gray-900">
-                  {t('details.title')} #{selectedOrder.id.slice(-8)}
+                  {t('details.title')} {selectedOrder.orderNumber ? `#${selectedOrder.orderNumber}` : `#${selectedOrder.id.slice(-8)}`}
                 </h3>
                 <button
                   onClick={() => setSelectedOrder(null)}

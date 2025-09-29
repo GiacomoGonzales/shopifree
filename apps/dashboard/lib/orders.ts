@@ -44,7 +44,10 @@ export interface Order {
   paymentMethod: 'cash' | 'transfer' | 'card' | 'other'
   status: string
   storeId: string
-  
+
+  // 🆕 NÚMERO DE ORDEN SECUENCIAL
+  orderNumber?: number
+
   // 🆕 NUEVOS CAMPOS DE PAGO (opcionales para backward compatibility)
   paymentStatus?: PaymentStatus
   paymentType?: PaymentType
@@ -197,9 +200,12 @@ export const generateWhatsAppMessage = (
     }
   }
 
+  // 🆕 Usar orderNumber si está disponible, sino usar últimos 8 caracteres del ID
+  const displayOrderNumber = order.orderNumber ? `#${order.orderNumber}` : `#${order.id.slice(-8)}`
+
   const greetings = {
-    es: `Hola! Te escribo desde ${storeName} sobre tu pedido #${order.id}.\n\nTu pedido está ahora en estado: ${statusTranslations.es[order.status as keyof typeof statusTranslations.es]}`,
-    en: `Hello! I'm writing from ${storeName} about your order #${order.id}.\n\nYour order is now in status: ${statusTranslations.en[order.status as keyof typeof statusTranslations.en]}`
+    es: `Hola! Te escribo desde ${storeName} sobre tu pedido ${displayOrderNumber}.\n\nTu pedido está ahora en estado: ${statusTranslations.es[order.status as keyof typeof statusTranslations.es]}`,
+    en: `Hello! I'm writing from ${storeName} about your order ${displayOrderNumber}.\n\nYour order is now in status: ${statusTranslations.en[order.status as keyof typeof statusTranslations.en]}`
   }
 
   return encodeURIComponent(greetings[locale as keyof typeof greetings] || greetings.es)
@@ -241,16 +247,19 @@ export const generateStatusChangeWhatsAppMessage = (
     }
   }
 
+  // 🆕 Usar orderNumber si está disponible, sino usar últimos 8 caracteres del ID
+  const displayOrderNumber = order.orderNumber ? `#${order.orderNumber}` : `#${order.id.slice(-8)}`
+
   const messages = {
     es: {
       greeting: `¡Hola ${order.clientName}!`,
-      storeIntro: `Te escribo desde ${storeName} para informarte sobre tu pedido #${order.id.slice(-8)}.`,
+      storeIntro: `Te escribo desde ${storeName} para informarte sobre tu pedido ${displayOrderNumber}.`,
       statusUpdate: `El estado de tu pedido ha cambiado a: *${statusTranslations.es[order.status as keyof typeof statusTranslations.es]}*`,
       thanks: 'Gracias por tu preferencia. 😊'
     },
     en: {
       greeting: `Hello ${order.clientName}!`,
-      storeIntro: `I'm writing from ${storeName} to inform you about your order #${order.id.slice(-8)}.`,
+      storeIntro: `I'm writing from ${storeName} to inform you about your order ${displayOrderNumber}.`,
       statusUpdate: `Your order status has changed to: *${statusTranslations.en[order.status as keyof typeof statusTranslations.en]}*`,
       thanks: 'Thank you for your preference. 😊'
     }

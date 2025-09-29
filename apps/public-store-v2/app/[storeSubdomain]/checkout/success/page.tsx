@@ -312,7 +312,9 @@ export default function CheckoutSuccessPage() {
     // ✅ Flujo manual - mostrar datos del token
     const { orderData } = token;
     const currency = orderData.currency || 'COP';
-    const orderId = token.orderId.slice(-6).toUpperCase();
+    // 🆕 Usar orderNumber si está disponible, sino usar últimos 6 caracteres del ID
+    const displayOrderNumber = token.orderNumber ? `${token.orderNumber}` : token.orderId.slice(-6).toUpperCase();
+    const orderId = displayOrderNumber;
 
     return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
