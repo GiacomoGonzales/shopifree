@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Parsear el body de la request
     const body = await request.json();
-    const { orderId, orderData, storeId, storeUrl, dashboardUrl } = body;
+    const { orderId, orderData, storeId, storeUrl, dashboardUrl, orderNumber } = body;
 
     // Validar datos requeridos
     if (!orderId || !orderData || !storeId) {
@@ -86,7 +86,8 @@ export async function POST(request: NextRequest) {
       storeName,
       storeOwnerEmail,
       storeUrl,
-      dashboardUrl
+      dashboardUrl,
+      orderNumber // 🆕 Pasar número de orden
     );
 
     console.log('[API] 📧 Resultado - Cliente:', emailResults.customerSent ? '✅' : '❌');

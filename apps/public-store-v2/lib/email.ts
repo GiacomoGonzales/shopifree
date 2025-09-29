@@ -23,6 +23,7 @@ export interface EmailTemplateData {
   orderData: OrderData;
   storeUrl?: string;
   dashboardUrl?: string;
+  orderNumber?: number; // 🆕 Número de orden secuencial
 }
 
 // Función para obtener configuración de email desde variables de entorno
@@ -109,7 +110,10 @@ export async function sendCustomerOrderConfirmation(
 ): Promise<boolean> {
   try {
     const config = getEmailConfig(undefined, templateData.storeName);
-    const { orderData, orderId, storeName } = templateData;
+    const { orderData, orderId, storeName, orderNumber } = templateData;
+
+    // 🆕 Usar orderNumber si está disponible, sino usar últimos 6 caracteres del ID
+    const displayOrderNumber = orderNumber ? `#${orderNumber}` : `#${orderId.slice(-6).toUpperCase()}`;
 
     // Generar HTML del pedido
     const itemsHtml = orderData.items.map(item => `
@@ -124,13 +128,13 @@ export async function sendCustomerOrderConfirmation(
     const message = {
       to: customerEmail,
       from: config.from,
-      subject: `Confirmación de pedido #${orderId.slice(-6).toUpperCase()} - ${storeName}`,
+      subject: `Confirmación de pedido ${displayOrderNumber} - ${storeName}`,
       text: `
         Hola ${orderData.customer.fullName},
 
         Gracias por tu pedido en ${storeName}.
 
-        PEDIDO #${orderId.slice(-6).toUpperCase()}
+        PEDIDO ${displayOrderNumber}
 
         PRODUCTOS:
         ${orderData.items.map(item =>
@@ -194,7 +198,7 @@ export async function sendCustomerOrderConfirmation(
                   Pedido
                 </p>
                 <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: 600; color: #212529;">
-                  #${orderId.slice(-6).toUpperCase()}
+                  ${displayOrderNumber}
                 </p>
               </div>
             </div>
@@ -320,7 +324,10 @@ export async function sendAdminOrderNotification(
 ): Promise<boolean> {
   try {
     const config = getEmailConfig(storeOwnerEmail, templateData.storeName);
-    const { orderData, orderId, storeName } = templateData;
+    const { orderData, orderId, storeName, orderNumber } = templateData;
+
+    // 🆕 Usar orderNumber si está disponible, sino usar últimos 6 caracteres del ID
+    const displayOrderNumber = orderNumber ? `#${orderNumber}` : `#${orderId.slice(-6).toUpperCase()}`;
 
     // Generar HTML del pedido para admin
     const itemsHtml = orderData.items.map(item => `
@@ -335,11 +342,11 @@ export async function sendAdminOrderNotification(
     const message = {
       to: storeOwnerEmail,
       from: config.from,
-      subject: `Nuevo pedido #${orderId.slice(-6).toUpperCase()} - ${storeName}`,
+      subject: `Nuevo pedido ${displayOrderNumber} - ${storeName}`,
       text: `
         NUEVO PEDIDO RECIBIDO
 
-        Pedido #${orderId.slice(-6).toUpperCase()}
+        Pedido ${displayOrderNumber}
         Método: ${orderData.checkoutMethod}
 
         CLIENTE:
@@ -395,7 +402,7 @@ export async function sendAdminOrderNotification(
               <!-- Alert -->
               <div style="background-color: #212529; color: #ffffff; padding: 16px; margin-bottom: 32px;">
                 <p style="margin: 0; font-size: 16px; font-weight: 600;">
-                  Pedido #${orderId.slice(-6).toUpperCase()}
+                  Pedido ${displayOrderNumber}
                 </p>
                 <p style="margin: 4px 0 0 0; font-size: 14px; opacity: 0.8;">
                   Método: ${orderData.checkoutMethod} • ${new Date().toLocaleDateString()}
@@ -559,7 +566,8 @@ export async function sendOrderConfirmationEmails(
   storeName: string,
   storeOwnerEmail: string,
   storeUrl?: string,
-  dashboardUrl?: string
+  dashboardUrl?: string,
+  orderNumber?: number // 🆕 Número de orden secuencial
 ): Promise<{ customerSent: boolean; adminSent: boolean }> {
 
   const templateData: EmailTemplateData = {
@@ -567,7 +575,8 @@ export async function sendOrderConfirmationEmails(
     orderId,
     orderData,
     storeUrl,
-    dashboardUrl
+    dashboardUrl,
+    orderNumber // 🆕 Pasar número de orden
   };
 
   // Enviar emails en paralelo

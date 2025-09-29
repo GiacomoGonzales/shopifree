@@ -1,9 +1,52 @@
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, runTransaction } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 import { CartItem } from './cart-context';
 import { formatPrice } from './currency';
 import { finalizeCustomerOrder, saveCustomerToLocalStorage } from './customers';
 import { sendOrderConfirmationEmailsClient } from './email-client';
+
+/**
+ * Obtener el siguiente número de orden secuencial para la tienda
+ * Usa transacciones atómicas para evitar duplicados
+ */
+async function getNextOrderNumber(storeId: string): Promise<number> {
+  const db = getFirebaseDb();
+  if (!db) {
+    console.error('[Orders] Firebase not initialized, cannot get order number');
+    throw new Error('Firebase not initialized');
+  }
+
+  try {
+    const counterRef = doc(db, 'stores', storeId, 'config', 'orderCounter');
+
+    // Usar transacción para asegurar que no haya duplicados
+    const nextNumber = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+
+      let currentNumber = 0;
+      if (counterDoc.exists()) {
+        currentNumber = counterDoc.data().value || 0;
+      }
+
+      const nextNumber = currentNumber + 1;
+
+      // Actualizar o crear el contador
+      transaction.set(counterRef, {
+        value: nextNumber,
+        updatedAt: serverTimestamp()
+      });
+
+      return nextNumber;
+    });
+
+    console.log(`[Orders] ✅ Next order number for store ${storeId}: ${nextNumber}`);
+    return nextNumber;
+  } catch (error) {
+    console.error('[Orders] ❌ Error getting next order number:', error);
+    // En caso de error, retornar timestamp como fallback
+    return Date.now() % 100000;
+  }
+}
 
 // Tipos compatibles con el dashboard existente
 export interface OrderData {
@@ -66,6 +109,10 @@ export async function createOrder(
   console.log('[Orders] Firebase initialized successfully');
 
   try {
+    // 🆕 OBTENER NÚMERO DE ORDEN SECUENCIAL
+    const orderNumber = await getNextOrderNumber(storeId);
+    console.log('[Orders] 🔢 Número de orden asignado:', orderNumber);
+
     // 🆕 FINALIZAR CLIENTE PROGRESIVO (si ya tiene customerId) o proceso legacy
     let customerId = orderData.customerId;
 
@@ -87,6 +134,9 @@ export async function createOrder(
 
     // Formato EXACTO que espera el dashboard
     const newOrder = {
+      // 🆕 NÚMERO DE ORDEN SECUENCIAL
+      orderNumber: orderNumber,
+
       // Información del cliente (nombres compatibles)
       clientName: orderData.customer.fullName,
       clientPhone: orderData.customer.phone,
@@ -184,7 +234,8 @@ export async function createOrder(
         orderData,
         storeId,
         storeUrl,
-        dashboardUrl
+        dashboardUrl,
+        orderNumber // 🆕 Pasar número de orden
       );
 
       console.log(`[Orders] 📧 Emails enviados - Cliente: ${emailResults.customerSent ? '✅' : '❌'}, Admin: ${emailResults.adminSent ? '✅' : '❌'}`);

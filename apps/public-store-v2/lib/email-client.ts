@@ -6,6 +6,7 @@ export interface SendEmailsRequest {
   storeId: string;
   storeUrl?: string;
   dashboardUrl?: string;
+  orderNumber?: number; // 🆕 Número de orden secuencial
 }
 
 export interface SendEmailsResponse {
@@ -69,7 +70,8 @@ export async function sendOrderConfirmationEmailsClient(
   orderData: OrderData,
   storeId: string,
   storeUrl?: string,
-  dashboardUrl?: string
+  dashboardUrl?: string,
+  orderNumber?: number // 🆕 Número de orden secuencial
 ): Promise<{ customerSent: boolean; adminSent: boolean }> {
 
   const result = await sendOrderEmailsViaAPI({
@@ -77,7 +79,8 @@ export async function sendOrderConfirmationEmailsClient(
     orderData,
     storeId,
     storeUrl,
-    dashboardUrl
+    dashboardUrl,
+    orderNumber // 🆕 Pasar número de orden
   });
 
   if (result.success && result.results) {
