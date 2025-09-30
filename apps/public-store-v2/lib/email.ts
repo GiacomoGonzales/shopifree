@@ -504,31 +504,28 @@ export async function sendAdminOrderNotification(
 
             <!-- Shipping & Payment -->
             <div style="padding: 0 32px; margin-bottom: 32px;">
-              <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-                <div style="flex: 1;">
-                  <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #212529;">
-                    Entrega
-                  </h4>
-                  <div style="background-color: #f8f9fa; padding: 16px;">
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">Método</p>
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #212529;">${translateShippingMethod(orderData.shipping.method, 'es')}</p>
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">Dirección</p>
-                    <p style="margin: 0; font-size: 14px; color: #212529;">${orderData.shipping.address || 'Recojo en tienda'}</p>
-                  </div>
+              <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #212529;">
+                Entrega y pago
+              </h3>
+              <div style="background-color: #f8f9fa; padding: 20px;">
+                <div style="margin-bottom: 12px;">
+                  <span style="font-size: 13px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Método de entrega</span>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #212529;">${translateShippingMethod(orderData.shipping.method, 'es')}</p>
                 </div>
-                <div style="flex: 1;">
-                  <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #212529;">
-                    Pago
-                  </h4>
-                  <div style="background-color: #f8f9fa; padding: 16px;">
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">Método</p>
-                    <p style="margin: 0; font-size: 14px; color: #212529;">${translatePaymentMethod(orderData.payment.method, 'es')}</p>
-                    ${orderData.payment.notes ? `
-                      <p style="margin: 12px 0 8px 0; font-size: 13px; color: #6c757d;">Notas</p>
-                      <p style="margin: 0; font-size: 14px; color: #212529;">${orderData.payment.notes}</p>
-                    ` : ''}
-                  </div>
+                <div style="margin-bottom: 12px;">
+                  <span style="font-size: 13px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Dirección</span>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #212529;">${orderData.shipping.address || 'Recojo en tienda'}</p>
                 </div>
+                <div ${orderData.payment.notes ? 'style="margin-bottom: 12px;"' : ''}>
+                  <span style="font-size: 13px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Método de pago</span>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #212529;">${translatePaymentMethod(orderData.payment.method, 'es')}</p>
+                </div>
+                ${orderData.payment.notes ? `
+                <div>
+                  <span style="font-size: 13px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Notas de pago</span>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #212529;">${orderData.payment.notes}</p>
+                </div>
+                ` : ''}
               </div>
             </div>
 
