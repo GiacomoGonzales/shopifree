@@ -15,8 +15,8 @@ export default function MarketingPage() {
       title: t('sections.attract.title'),
       description: t('sections.attract.description'),
       image: '/images/marketing/attract.png',
-      gradientFrom: 'from-blue-500',
-      gradientTo: 'to-blue-600',
+      gradientFrom: 'from-gray-600',
+      gradientTo: 'to-gray-700',
       href: '/marketing/attract'
     },
     {
@@ -24,8 +24,8 @@ export default function MarketingPage() {
       title: t('sections.maintain.title'),
       description: t('sections.maintain.description'),
       image: '/images/marketing/maintain.png',
-      gradientFrom: 'from-green-500',
-      gradientTo: 'to-green-600',
+      gradientFrom: 'from-gray-600',
+      gradientTo: 'to-gray-700',
       href: '/marketing/maintain'
     },
     {
@@ -33,8 +33,8 @@ export default function MarketingPage() {
       title: t('sections.recover.title'),
       description: t('sections.recover.description'),
       image: '/images/marketing/recover.png',
-      gradientFrom: 'from-orange-500',
-      gradientTo: 'to-orange-600',
+      gradientFrom: 'from-gray-600',
+      gradientTo: 'to-gray-700',
       href: '/marketing/recover'
     }
   ]
