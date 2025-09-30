@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import DashboardLayout from '../../../../../components/DashboardLayout'
-import { getCoupons, Coupon, createCoupon, generateCouponCode, updateCouponStatus, deleteCoupon, updateCoupon, calculateCouponStatus } from '../../../../../lib/coupons'
+import { getCoupons, Coupon, createCoupon, generateCouponCode, updateCouponStatus, deleteCoupon, updateCoupon, calculateCouponStatus, getCouponUsageCount } from '../../../../../lib/coupons'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore } from '../../../../../lib/store'
 
@@ -25,6 +25,7 @@ export default function CouponsPage() {
   const [creating, setCreating] = useState(false)
   const [storeData, setStoreData] = useState<{ id: string; storeName: string; currency?: string } | null>(null)
   const [storeCurrency, setStoreCurrency] = useState('USD')
+  const [couponUsageCounts, setCouponUsageCounts] = useState<Record<string, number>>({})
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null)
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
@@ -83,6 +84,16 @@ export default function CouponsPage() {
         })
 
         setCoupons(updatedCoupons)
+
+        // 🆕 Cargar conteos dinámicos de uso de cupones
+        if (updatedCoupons.length > 0) {
+          const counts: Record<string, number> = {}
+          for (const coupon of updatedCoupons) {
+            const count = await getCouponUsageCount(store.id, coupon.id)
+            counts[coupon.id] = count
+          }
+          setCouponUsageCounts(counts)
+        }
       } catch (error) {
         console.error('Error loading store and coupons:', error)
       }
@@ -464,7 +475,7 @@ export default function CouponsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {coupon.totalUses} / {coupon.maxUses}
+                          {couponUsageCounts[coupon.id] !== undefined ? couponUsageCounts[coupon.id] : (coupon.totalUses || 0)} / {coupon.maxUses}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="relative">
