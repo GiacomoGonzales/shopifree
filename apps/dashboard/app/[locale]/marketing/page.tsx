@@ -60,22 +60,22 @@ export default function MarketingPage() {
                 <div
                   key={tool.id}
                   onClick={() => router.push(tool.href)}
-                  className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-200 hover:border-gray-300 overflow-hidden"
+                  className="group relative bg-white rounded-2xl shadow-sm md:hover:shadow-2xl md:transition-all md:duration-500 cursor-pointer border border-gray-200 md:hover:border-gray-300 overflow-hidden"
                 >
                   {/* Gradient Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${tool.gradientFrom} ${tool.gradientTo} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}></div>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${tool.gradientFrom} ${tool.gradientTo} opacity-5 md:group-hover:opacity-10 md:transition-opacity md:duration-500`}></div>
 
                   {/* Content Container */}
                   <div className="relative p-6">
                     {/* 3D Graphic Element */}
                     <div className="relative w-full h-32 mb-4 flex items-center justify-center">
-                      <div className="relative w-28 h-28 group-hover:scale-110 transition-transform duration-500 ease-out" style={{ perspective: '1000px' }}>
+                      <div className="relative w-28 h-28 md:group-hover:scale-110 md:transition-transform md:duration-500 md:ease-out" style={{ perspective: '1000px' }}>
                         <Image
                           src={tool.image}
                           alt={tool.title}
                           width={112}
                           height={112}
-                          className="drop-shadow-2xl group-hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.25)] transition-all duration-500"
+                          className="drop-shadow-2xl md:group-hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.25)] md:transition-all md:duration-500"
                           style={{
                             transform: 'translateZ(20px)',
                             filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))'
@@ -86,7 +86,7 @@ export default function MarketingPage() {
 
                     {/* Text Content */}
                     <div className="text-center space-y-2">
-                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
+                      <h3 className="text-xl font-bold text-gray-900 md:group-hover:text-gray-700 md:transition-colors">
                         {tool.title}
                       </h3>
                       <p className="text-sm text-gray-600 leading-relaxed">
@@ -96,8 +96,8 @@ export default function MarketingPage() {
 
                     {/* Arrow Button */}
                     <div className="mt-4 flex justify-center">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 group-hover:bg-gray-900 transition-all duration-300">
-                        <svg className="h-4 w-4 text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 md:group-hover:bg-gray-900 md:transition-all md:duration-300">
+                        <svg className="h-4 w-4 text-gray-600 md:group-hover:text-white md:group-hover:translate-x-1 md:transition-all md:duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -105,7 +105,7 @@ export default function MarketingPage() {
                   </div>
 
                   {/* Bottom Accent Bar */}
-                  <div className={`absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r ${tool.gradientFrom} ${tool.gradientTo} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}></div>
+                  <div className={`absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r ${tool.gradientFrom} ${tool.gradientTo} transform scale-x-0 md:group-hover:scale-x-100 md:transition-transform md:duration-500 origin-left`}></div>
                 </div>
               ))}
             </div>
