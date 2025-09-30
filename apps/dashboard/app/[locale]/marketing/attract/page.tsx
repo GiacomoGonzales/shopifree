@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import DashboardLayout from '../../../../components/DashboardLayout'
 import { useAuth } from '../../../../lib/simple-auth-context'
 import { getUserStore } from '../../../../lib/store'
-import { getCoupons } from '../../../../lib/coupons'
+import { getCoupons, getCouponUsageCount } from '../../../../lib/coupons'
 import { getPromotions } from '../../../../lib/promotions'
 
 // Mapeo de códigos de moneda a símbolos
@@ -28,6 +28,7 @@ export default function AttractCustomersPage() {
   const [promotions, setPromotions] = useState<any[]>([])
   const [storeId, setStoreId] = useState<string | null>(null)
   const [storeCurrency, setStoreCurrency] = useState('USD')
+  const [couponUsageCounts, setCouponUsageCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     loadData()
@@ -50,6 +51,16 @@ export default function AttractCustomersPage() {
 
         setCoupons(storeCoupons)
         setPromotions(storePromotions)
+
+        // 🆕 Cargar conteos dinámicos de uso de cupones
+        if (storeCoupons.length > 0) {
+          const counts: Record<string, number> = {}
+          for (const coupon of storeCoupons) {
+            const count = await getCouponUsageCount(store.id, coupon.id)
+            counts[coupon.id] = count
+          }
+          setCouponUsageCounts(counts)
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error)
@@ -151,7 +162,7 @@ export default function AttractCustomersPage() {
                                  'Envío gratis'}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {coupon.totalUses || 0} usos
+                                {couponUsageCounts[coupon.id] !== undefined ? couponUsageCounts[coupon.id] : (coupon.totalUses || 0)} usos
                               </div>
                             </div>
                           </div>
