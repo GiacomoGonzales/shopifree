@@ -211,13 +211,24 @@ export async function createOrder(
         appliedCoupon: orderData.appliedCoupon
       })
     };
-    
+
     console.log('[Orders] Creating order with data:', {
       storeId,
       checkoutMethod: orderData.checkoutMethod,
       newOrderKeys: Object.keys(newOrder),
       newOrderSize: JSON.stringify(newOrder).length
     });
+
+    // 🆕 DEBUG: Log coupon info before saving
+    if (orderData.appliedCoupon) {
+      console.log('[Orders] 🏷️ Coupon in orderData:', {
+        id: orderData.appliedCoupon.id,
+        code: orderData.appliedCoupon.code,
+        discount: orderData.discount
+      });
+    } else {
+      console.log('[Orders] ℹ️ No coupon applied to this order');
+    }
 
     const docRef = await addDoc(ordersRef, newOrder);
     console.log('[Orders] ✅ Order created successfully! Doc ID:', docRef.id);
@@ -226,14 +237,21 @@ export async function createOrder(
     // 🆕 INCREMENTAR USO DEL CUPÓN (si aplica)
     if (orderData.appliedCoupon?.id) {
       try {
-        console.log('[Orders] 🏷️ Incrementando uso del cupón:', orderData.appliedCoupon.code);
+        console.log('[Orders] 🏷️ Incrementando uso del cupón:', {
+          couponId: orderData.appliedCoupon.id,
+          couponCode: orderData.appliedCoupon.code,
+          storeId: storeId
+        });
         const { incrementCouponUsage } = await import('./coupons');
         await incrementCouponUsage(storeId, orderData.appliedCoupon.id);
         console.log('[Orders] ✅ Uso del cupón incrementado correctamente');
       } catch (couponError) {
         console.error('[Orders] ⚠️ Error incrementando uso del cupón:', couponError);
+        console.error('[Orders] ⚠️ Error details:', couponError);
         // No fallar el pedido si falla el incremento del cupón
       }
+    } else {
+      console.log('[Orders] ℹ️ No se incrementa uso de cupón (no hay appliedCoupon.id)');
     }
 
     // 🆕 ENVIAR EMAILS DE CONFIRMACIÓN
