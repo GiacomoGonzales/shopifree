@@ -320,7 +320,13 @@ export default function CouponsPage() {
                 <h1 className="text-2xl font-light text-gray-900">{t('coupons.title')}</h1>
                 <p className="mt-1 text-sm text-gray-600">{t('coupons.description')}</p>
               </div>
-              <button 
+            </div>
+          </div>
+
+          <div className="px-4 sm:px-6 lg:px-8 pb-8">
+            {/* Botón crear cupón */}
+            <div className="mb-6 flex justify-end">
+              <button
                 onClick={() => setShowCreateModal(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800"
               >
@@ -330,9 +336,6 @@ export default function CouponsPage() {
                 {t('coupons.create')}
               </button>
             </div>
-          </div>
-
-          <div className="px-4 sm:px-6 lg:px-8">
             {/* Filtros y controles */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
               <div className="px-4 sm:px-6 py-4">

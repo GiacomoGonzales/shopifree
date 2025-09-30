@@ -97,7 +97,7 @@ export default function AttractCustomersPage() {
               {/* Cupones de descuento */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="px-6 py-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center">
                       <div className="bg-blue-100 p-2 rounded-lg mr-3">
                         <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,9 +109,9 @@ export default function AttractCustomersPage() {
                         <p className="text-sm text-gray-500">{t('coupons.description')}</p>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => router.push('/marketing/attract/coupons')}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+                      className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 sm:w-auto w-full"
                     >
                       {t('coupons.create')}
                     </button>
@@ -176,7 +176,7 @@ export default function AttractCustomersPage() {
               {/* Promociones y precios rebajados */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="px-6 py-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center">
                       <div className="bg-green-100 p-2 rounded-lg mr-3">
                         <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,7 +190,7 @@ export default function AttractCustomersPage() {
                     </div>
                     <button
                       onClick={() => router.push('/marketing/attract/promotions')}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+                      className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 sm:w-auto w-full"
                     >
                       {t('promotions.create')}
                     </button>
