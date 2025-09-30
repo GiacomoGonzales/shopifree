@@ -144,21 +144,31 @@ export function applyCouponDiscount(
 
 /**
  * Incrementar el uso de un cupón (llamar después de crear la orden)
+ * Usa una API route con Firebase Admin SDK para evitar problemas de permisos
  */
 export async function incrementCouponUsage(storeId: string, couponId: string): Promise<boolean> {
-  const db = getFirebaseDb();
-  if (!db) return false;
-
   try {
-    const couponRef = doc(db, 'stores', storeId, 'coupons', couponId);
-    await updateDoc(couponRef, {
-      totalUses: increment(1)
+    console.log('[Coupons] 🔄 Calling API to increment coupon usage:', { storeId, couponId });
+
+    const response = await fetch('/api/increment-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ storeId, couponId })
     });
-    
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      console.error('[Coupons] ❌ API error:', result.error);
+      return false;
+    }
+
     console.log('[Coupons] ✅ Incremented usage for coupon:', couponId);
     return true;
   } catch (error) {
-    console.error('[Coupons] ❌ Error incrementing coupon usage:', error);
+    console.error('[Coupons] ❌ Error calling increment API:', error);
     return false;
   }
 }
