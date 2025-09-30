@@ -17,6 +17,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@heroicons/react": "^2.2.0",
     "@react-google-maps/api": "^2.20.7",
+    "@sendgrid/mail": "^8.1.6",
     "@shopifree/types": "file:../../packages/types",
     "@shopifree/ui": "file:../../packages/ui",
     "@types/react-beautiful-dnd": "^13.1.8",
