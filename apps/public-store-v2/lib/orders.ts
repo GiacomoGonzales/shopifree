@@ -234,26 +234,6 @@ export async function createOrder(
     console.log('[Orders] ✅ Order created successfully! Doc ID:', docRef.id);
     console.log('[Orders] ✅ Order path: stores/' + storeId + '/orders/' + docRef.id);
 
-    // 🆕 INCREMENTAR USO DEL CUPÓN (si aplica)
-    if (orderData.appliedCoupon?.id) {
-      try {
-        console.log('[Orders] 🏷️ Incrementando uso del cupón:', {
-          couponId: orderData.appliedCoupon.id,
-          couponCode: orderData.appliedCoupon.code,
-          storeId: storeId
-        });
-        const { incrementCouponUsage } = await import('./coupons');
-        await incrementCouponUsage(storeId, orderData.appliedCoupon.id);
-        console.log('[Orders] ✅ Uso del cupón incrementado correctamente');
-      } catch (couponError) {
-        console.error('[Orders] ⚠️ Error incrementando uso del cupón:', couponError);
-        console.error('[Orders] ⚠️ Error details:', couponError);
-        // No fallar el pedido si falla el incremento del cupón
-      }
-    } else {
-      console.log('[Orders] ℹ️ No se incrementa uso de cupón (no hay appliedCoupon.id)');
-    }
-
     // 🆕 ENVIAR EMAILS DE CONFIRMACIÓN
     try {
       console.log('[Orders] 📧 Enviando emails de confirmación...');
