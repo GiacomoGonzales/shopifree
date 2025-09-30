@@ -256,3 +256,35 @@ export function generateCouponCode(baseName: string = ''): string {
   const suffix = Math.random().toString(36).substr(2, 6).toUpperCase();
   return `${prefix}${suffix}`.slice(0, 12);
 }
+
+/**
+ * 🆕 Obtener el conteo de usos de un cupón basado en pedidos reales
+ * Esta función consulta los pedidos que tienen el cupón aplicado
+ * @param storeId - ID de la tienda
+ * @param couponId - ID del cupón
+ * @returns Número de veces que se ha usado el cupón
+ */
+export async function getCouponUsageCount(storeId: string, couponId: string): Promise<number> {
+  const db = getFirebaseDb();
+  if (!db) {
+    console.warn('[Coupons] Firebase not initialized');
+    return 0;
+  }
+
+  try {
+    console.log('[Coupons] 📊 Counting usage for coupon:', couponId);
+
+    const ordersRef = collection(db, 'stores', storeId, 'orders');
+    const q = query(ordersRef, where('appliedCoupon.id', '==', couponId));
+
+    const querySnapshot = await getDocs(q);
+    const count = querySnapshot.size;
+
+    console.log('[Coupons] ✅ Usage count:', count);
+    return count;
+
+  } catch (error) {
+    console.error('[Coupons] ❌ Error counting coupon usage:', error);
+    return 0;
+  }
+}
