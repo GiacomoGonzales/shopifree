@@ -66,15 +66,15 @@ export default function MarketingPage() {
                   <div className={`absolute inset-0 bg-gradient-to-br ${tool.gradientFrom} ${tool.gradientTo} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}></div>
 
                   {/* Content Container */}
-                  <div className="relative p-8">
+                  <div className="relative p-6">
                     {/* 3D Graphic Element */}
-                    <div className="relative w-full h-48 mb-6 flex items-center justify-center">
-                      <div className="relative w-40 h-40 group-hover:scale-110 transition-transform duration-500 ease-out" style={{ perspective: '1000px' }}>
+                    <div className="relative w-full h-32 mb-4 flex items-center justify-center">
+                      <div className="relative w-28 h-28 group-hover:scale-110 transition-transform duration-500 ease-out" style={{ perspective: '1000px' }}>
                         <Image
                           src={tool.image}
                           alt={tool.title}
-                          width={160}
-                          height={160}
+                          width={112}
+                          height={112}
                           className="drop-shadow-2xl group-hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.25)] transition-all duration-500"
                           style={{
                             transform: 'translateZ(20px)',
@@ -85,19 +85,19 @@ export default function MarketingPage() {
                     </div>
 
                     {/* Text Content */}
-                    <div className="text-center space-y-3">
-                      <h3 className="text-2xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
+                    <div className="text-center space-y-2">
+                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
                         {tool.title}
                       </h3>
-                      <p className="text-sm text-gray-600 leading-relaxed px-2">
+                      <p className="text-sm text-gray-600 leading-relaxed">
                         {tool.description}
                       </p>
                     </div>
 
                     {/* Arrow Button */}
-                    <div className="mt-6 flex justify-center">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 group-hover:bg-gray-900 transition-all duration-300">
-                        <svg className="h-5 w-5 text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="mt-4 flex justify-center">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 group-hover:bg-gray-900 transition-all duration-300">
+                        <svg className="h-4 w-4 text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
