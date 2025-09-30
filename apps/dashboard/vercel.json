@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "cd ../.. && npm install && cd apps/dashboard && npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "cd ../.. && npm install",
   "outputDirectory": ".next"
 } 
