@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     const storeName = storeInfo.storeName || 'Tienda';
+    const logoUrl = storeInfo.logoUrl;
     console.log('[API] ✅ Email del dueño obtenido:', storeOwnerEmail);
 
     console.log('[API] 📧 Enviando emails para pedido:', orderId);
@@ -87,7 +88,8 @@ export async function POST(request: NextRequest) {
       storeOwnerEmail,
       storeUrl,
       dashboardUrl,
-      orderNumber // 🆕 Pasar número de orden
+      orderNumber, // 🆕 Número de orden
+      logoUrl // 🆕 Logo de la tienda
     );
 
     console.log('[API] 📧 Resultado - Cliente:', emailResults.customerSent ? '✅' : '❌');

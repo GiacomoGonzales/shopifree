@@ -1,6 +1,7 @@
 import sgMail from '@sendgrid/mail';
-import { OrderData } from './orders';
+import { OrderData, translateShippingMethod, translatePaymentMethod } from './orders';
 import { formatPrice } from './currency';
+import { toCloudinarySquare } from './images';
 
 // Configurar SendGrid con la API key
 if (process.env.SENDGRID_API_KEY) {
@@ -24,6 +25,7 @@ export interface EmailTemplateData {
   storeUrl?: string;
   dashboardUrl?: string;
   orderNumber?: number; // 🆕 Número de orden secuencial
+  logoUrl?: string; // 🆕 URL del logo de la tienda
 }
 
 // Función para obtener configuración de email desde variables de entorno
@@ -144,7 +146,7 @@ export async function sendCustomerOrderConfirmation(
         RESUMEN:
         Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}
         Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}
-        Total: ${formatPrice(orderData.totals.total, orderData.currency)}
+        ${orderData.discount && orderData.discount > 0 ? `Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}: -${formatPrice(orderData.discount, orderData.currency)}\n        ` : ''}Total: ${formatPrice(orderData.totals.total, orderData.currency)}
 
         INFORMACIÓN DE ENTREGA:
         ${orderData.customer.fullName}
@@ -152,7 +154,7 @@ export async function sendCustomerOrderConfirmation(
         ${orderData.customer.phone}
         ${orderData.shipping.address || 'Recojo en tienda'}
 
-        MÉTODO DE PAGO: ${orderData.payment.method}
+        MÉTODO DE PAGO: ${translatePaymentMethod(orderData.payment.method, 'es')}
 
         Te contactaremos pronto para coordinar la entrega.
 
@@ -171,9 +173,20 @@ export async function sendCustomerOrderConfirmation(
 
           <div style="max-width: 560px; margin: 40px auto; background-color: #ffffff; border: 1px solid #e9ecef;">
 
+            <!-- Logo -->
+            ${templateData.logoUrl ? `
+            <div style="text-align: center; padding: 32px 32px 16px;">
+              <img
+                src="${toCloudinarySquare(templateData.logoUrl, 100) || templateData.logoUrl}"
+                alt="${storeName}"
+                style="max-width: 80px; height: auto; border-radius: 8px; display: inline-block;"
+              />
+            </div>
+            ` : ''}
+
             <!-- Header -->
-            <div style="padding: 32px 32px 0 32px;">
-              <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 24px; margin-bottom: 32px;">
+            <div style="padding: ${templateData.logoUrl ? '16px' : '32px'} 32px 0 32px;">
+              <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 24px; margin-bottom: 32px; text-align: center;">
                 <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #212529; letter-spacing: -0.5px;">
                   ${storeName}
                 </h1>
@@ -241,20 +254,28 @@ export async function sendCustomerOrderConfirmation(
             <!-- Order Summary -->
             <div style="padding: 0 32px; margin-bottom: 32px;">
               <div style="border: 1px solid #e9ecef; padding: 24px;">
-                <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 16px; margin-bottom: 16px;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-size: 14px; color: #6c757d;">Subtotal</span>
-                    <span style="font-size: 14px; color: #212529;">${formatPrice(orderData.totals.subtotal, orderData.currency)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 14px; color: #6c757d;">Envío</span>
-                    <span style="font-size: 14px; color: #212529;">${formatPrice(orderData.totals.shipping, orderData.currency)}</span>
-                  </div>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="font-size: 16px; font-weight: 600; color: #212529;">Total</span>
-                  <span style="font-size: 16px; font-weight: 600; color: #212529;">${formatPrice(orderData.totals.total, orderData.currency)}</span>
-                </div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom: 1px solid #f1f3f4; padding-bottom: 16px; margin-bottom: 16px;">
+                  <tr>
+                    <td style="font-size: 14px; color: #6c757d; padding: 4px 0;">Subtotal</td>
+                    <td style="font-size: 14px; color: #212529; text-align: right; padding: 4px 0;">${formatPrice(orderData.totals.subtotal, orderData.currency)}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size: 14px; color: #6c757d; padding: 4px 0;">Envío</td>
+                    <td style="font-size: 14px; color: #212529; text-align: right; padding: 4px 0;">${formatPrice(orderData.totals.shipping, orderData.currency)}</td>
+                  </tr>
+                  ${orderData.discount && orderData.discount > 0 ? `
+                  <tr>
+                    <td style="font-size: 14px; color: #28a745; padding: 4px 0;">Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}</td>
+                    <td style="font-size: 14px; color: #28a745; text-align: right; padding: 4px 0;">-${formatPrice(orderData.discount, orderData.currency)}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="font-size: 16px; font-weight: 600; color: #212529; padding: 4px 0;">Total</td>
+                    <td style="font-size: 16px; font-weight: 600; color: #212529; text-align: right; padding: 4px 0;">${formatPrice(orderData.totals.total, orderData.currency)}</td>
+                  </tr>
+                </table>
               </div>
             </div>
 
@@ -282,7 +303,7 @@ export async function sendCustomerOrderConfirmation(
                 </div>
                 <div>
                   <span style="font-size: 13px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Método de pago</span>
-                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #212529;">${orderData.payment.method}</p>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #212529;">${translatePaymentMethod(orderData.payment.method, 'es')}</p>
                 </div>
               </div>
             </div>
@@ -360,17 +381,17 @@ export async function sendAdminOrderNotification(
         ).join('\n')}
 
         ENTREGA:
-        Método: ${orderData.shipping.method}
+        Método: ${translateShippingMethod(orderData.shipping.method, 'es')}
         Dirección: ${orderData.shipping.address || 'Recojo en tienda'}
 
         PAGO:
-        Método: ${orderData.payment.method}
+        Método: ${translatePaymentMethod(orderData.payment.method, 'es')}
         ${orderData.payment.notes ? `Notas: ${orderData.payment.notes}` : ''}
 
         TOTALES:
         Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}
         Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}
-        TOTAL: ${formatPrice(orderData.totals.total, orderData.currency)}
+        ${orderData.discount && orderData.discount > 0 ? `Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}: -${formatPrice(orderData.discount, orderData.currency)}\n        ` : ''}TOTAL: ${formatPrice(orderData.totals.total, orderData.currency)}
 
         Revisa tu dashboard para gestionar este pedido.
 
@@ -388,9 +409,20 @@ export async function sendAdminOrderNotification(
 
           <div style="max-width: 560px; margin: 40px auto; background-color: #ffffff; border: 1px solid #e9ecef;">
 
+            <!-- Logo -->
+            ${templateData.logoUrl ? `
+            <div style="text-align: center; padding: 32px 32px 16px;">
+              <img
+                src="${toCloudinarySquare(templateData.logoUrl, 100) || templateData.logoUrl}"
+                alt="${storeName}"
+                style="max-width: 80px; height: auto; border-radius: 8px; display: inline-block;"
+              />
+            </div>
+            ` : ''}
+
             <!-- Header -->
-            <div style="padding: 32px 32px 0 32px;">
-              <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 24px; margin-bottom: 32px;">
+            <div style="padding: ${templateData.logoUrl ? '16px' : '32px'} 32px 0 32px;">
+              <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 24px; margin-bottom: 32px; text-align: center;">
                 <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #212529; letter-spacing: -0.5px;">
                   ${storeName}
                 </h1>
@@ -479,7 +511,7 @@ export async function sendAdminOrderNotification(
                   </h4>
                   <div style="background-color: #f8f9fa; padding: 16px;">
                     <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">Método</p>
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #212529;">${orderData.shipping.method}</p>
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #212529;">${translateShippingMethod(orderData.shipping.method, 'es')}</p>
                     <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">Dirección</p>
                     <p style="margin: 0; font-size: 14px; color: #212529;">${orderData.shipping.address || 'Recojo en tienda'}</p>
                   </div>
@@ -490,7 +522,7 @@ export async function sendAdminOrderNotification(
                   </h4>
                   <div style="background-color: #f8f9fa; padding: 16px;">
                     <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">Método</p>
-                    <p style="margin: 0; font-size: 14px; color: #212529;">${orderData.payment.method}</p>
+                    <p style="margin: 0; font-size: 14px; color: #212529;">${translatePaymentMethod(orderData.payment.method, 'es')}</p>
                     ${orderData.payment.notes ? `
                       <p style="margin: 12px 0 8px 0; font-size: 13px; color: #6c757d;">Notas</p>
                       <p style="margin: 0; font-size: 14px; color: #212529;">${orderData.payment.notes}</p>
@@ -503,20 +535,28 @@ export async function sendAdminOrderNotification(
             <!-- Order Summary -->
             <div style="padding: 0 32px; margin-bottom: 32px;">
               <div style="border: 1px solid #e9ecef; padding: 24px; background-color: #212529; color: #ffffff;">
-                <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #495057;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-size: 14px; opacity: 0.8;">Subtotal</span>
-                    <span style="font-size: 14px;">${formatPrice(orderData.totals.subtotal, orderData.currency)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 14px; opacity: 0.8;">Envío</span>
-                    <span style="font-size: 14px;">${formatPrice(orderData.totals.shipping, orderData.currency)}</span>
-                  </div>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="font-size: 18px; font-weight: 600;">Total</span>
-                  <span style="font-size: 18px; font-weight: 600;">${formatPrice(orderData.totals.total, orderData.currency)}</span>
-                </div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom: 1px solid #495057; padding-bottom: 16px; margin-bottom: 16px;">
+                  <tr>
+                    <td style="font-size: 14px; opacity: 0.8; padding: 4px 0;">Subtotal</td>
+                    <td style="font-size: 14px; text-align: right; padding: 4px 0;">${formatPrice(orderData.totals.subtotal, orderData.currency)}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size: 14px; opacity: 0.8; padding: 4px 0;">Envío</td>
+                    <td style="font-size: 14px; text-align: right; padding: 4px 0;">${formatPrice(orderData.totals.shipping, orderData.currency)}</td>
+                  </tr>
+                  ${orderData.discount && orderData.discount > 0 ? `
+                  <tr>
+                    <td style="font-size: 14px; color: #7fdb90; padding: 4px 0;">Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}</td>
+                    <td style="font-size: 14px; color: #7fdb90; text-align: right; padding: 4px 0;">-${formatPrice(orderData.discount, orderData.currency)}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="font-size: 18px; font-weight: 600; padding: 4px 0;">Total</td>
+                    <td style="font-size: 18px; font-weight: 600; text-align: right; padding: 4px 0;">${formatPrice(orderData.totals.total, orderData.currency)}</td>
+                  </tr>
+                </table>
               </div>
             </div>
 
@@ -567,7 +607,8 @@ export async function sendOrderConfirmationEmails(
   storeOwnerEmail: string,
   storeUrl?: string,
   dashboardUrl?: string,
-  orderNumber?: number // 🆕 Número de orden secuencial
+  orderNumber?: number, // 🆕 Número de orden secuencial
+  logoUrl?: string // 🆕 Logo de la tienda
 ): Promise<{ customerSent: boolean; adminSent: boolean }> {
 
   const templateData: EmailTemplateData = {
@@ -576,7 +617,8 @@ export async function sendOrderConfirmationEmails(
     orderData,
     storeUrl,
     dashboardUrl,
-    orderNumber // 🆕 Pasar número de orden
+    orderNumber, // 🆕 Pasar número de orden
+    logoUrl // 🆕 Pasar logo de la tienda
   };
 
   // Enviar emails en paralelo
