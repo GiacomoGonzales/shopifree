@@ -298,22 +298,13 @@ export async function sendCustomerOrderConfirmation(
             </div>
 
             <!-- Footer -->
-            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa; position: relative;">
+            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa;">
               <p style="margin: 0 0 8px 0; font-size: 14px; color: #6c757d;">
                 Te contactaremos pronto para coordinar la entrega.
               </p>
               <p style="margin: 0; font-size: 13px; color: #adb5bd;">
                 Equipo ${storeName}
               </p>
-              ${templateData.logoUrl ? `
-              <div style="position: absolute; bottom: 24px; right: 32px;">
-                <img
-                  src="${toCloudinarySquare(templateData.logoUrl, 80) || templateData.logoUrl}"
-                  alt="${storeName}"
-                  style="max-width: 50px; height: auto; border-radius: 6px; opacity: 0.6;"
-                />
-              </div>
-              ` : ''}
             </div>
 
           </div>
@@ -554,22 +545,13 @@ export async function sendAdminOrderNotification(
             ` : ''}
 
             <!-- Footer -->
-            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa; position: relative;">
+            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa;">
               <p style="margin: 0 0 8px 0; font-size: 14px; color: #6c757d;">
                 Revisa tu dashboard para gestionar este pedido.
               </p>
               <p style="margin: 0; font-size: 13px; color: #adb5bd;">
                 ${storeName} • ID: ${orderId}
               </p>
-              ${templateData.logoUrl ? `
-              <div style="position: absolute; bottom: 24px; right: 32px;">
-                <img
-                  src="${toCloudinarySquare(templateData.logoUrl, 80) || templateData.logoUrl}"
-                  alt="${storeName}"
-                  style="max-width: 50px; height: auto; border-radius: 6px; opacity: 0.6;"
-                />
-              </div>
-              ` : ''}
             </div>
 
           </div>
