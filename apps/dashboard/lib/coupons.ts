@@ -11,7 +11,7 @@ export interface Coupon {
   status: 'active' | 'paused' | 'expired' | 'scheduled';
   startDate: string; // ISO date string
   endDate: string; // ISO date string
-  totalUses: number;
+  totalUses?: number; // ⚠️ DEPRECATED: Usar getCouponUsageCount() para conteo real
   maxUses: number;
   usesPerCustomer: number;
   noExpiration?: boolean;
@@ -102,7 +102,6 @@ export async function createCoupon(storeId: string, couponData: CreateCouponData
     const newCoupon = {
       ...couponData,
       status,
-      totalUses: 0,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };

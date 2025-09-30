@@ -11,7 +11,7 @@ export interface Coupon {
   status: 'active' | 'expired' | 'scheduled';
   startDate: string; // ISO date string
   endDate: string; // ISO date string
-  totalUses: number;
+  totalUses?: number; // ⚠️ DEPRECATED: Campo no se mantiene actualizado
   maxUses: number;
   usesPerCustomer: number;
 }
@@ -82,9 +82,19 @@ export async function validateCoupon(
       return { valid: false, error: 'Cupón expirado' };
     }
 
-    // Verificar límite de usos
-    if (coupon.totalUses >= coupon.maxUses) {
-      return { valid: false, error: 'Cupón agotado' };
+    // Verificar límite de usos (contar pedidos reales)
+    try {
+      const ordersRef = collection(db, 'stores', storeId, 'orders');
+      const usageQuery = query(ordersRef, where('appliedCoupon.id', '==', coupon.id));
+      const usageSnapshot = await getDocs(usageQuery);
+      const currentUses = usageSnapshot.size;
+
+      if (currentUses >= coupon.maxUses) {
+        return { valid: false, error: 'Cupón agotado' };
+      }
+    } catch (error) {
+      console.error('[Coupons] ⚠️ Error checking usage count:', error);
+      // Continuar con la validación si falla el conteo
     }
 
     // Calcular descuento
