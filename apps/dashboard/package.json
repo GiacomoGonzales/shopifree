@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
-    "prebuild": "cd ../../packages/ui && npm run build && cd ../types && npm run build && cd ../../apps/dashboard",
+    "prebuild": "cd ../../packages/ui && npx tsc && cd ../types && npx tsc && cd ../../apps/dashboard",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
