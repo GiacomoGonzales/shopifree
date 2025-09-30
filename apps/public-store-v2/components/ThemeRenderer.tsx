@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { getStoreIdBySubdomain, getStoreTheme, getStorePrimaryLocale } from "../lib/store";
 import dynamic from "next/dynamic";
 import UnifiedLoading from "./UnifiedLoading";
+import CartRecovery from "./CartRecovery";
 
 // Importación dinámica de temas disponibles
 const NewBaseDefault = dynamic(() => import("../themes/new-base-default/NewBaseDefault"), {
@@ -109,14 +110,19 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
     switch (themeToRender) {
         case 'new-base-default':
             return (
-                <NewBaseDefault 
-                    storeSubdomain={storeSubdomain} 
-                    categorySlug={categorySlug}
-                    collectionSlug={collectionSlug}
-                    brandSlug={brandSlug}
-                    effectiveLocale={effectiveLocale}
-                    storeId={storeId}
-                />
+                <>
+                    <Suspense fallback={null}>
+                        {storeId && <CartRecovery storeId={storeId} />}
+                    </Suspense>
+                    <NewBaseDefault
+                        storeSubdomain={storeSubdomain}
+                        categorySlug={categorySlug}
+                        collectionSlug={collectionSlug}
+                        brandSlug={brandSlug}
+                        effectiveLocale={effectiveLocale}
+                        storeId={storeId}
+                    />
+                </>
             );
         // Additional themes will be added here as they are created
         // case 'otro-tema':
@@ -125,14 +131,19 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
             // Por ahora, solo tenemos new-base-default disponible
             // Using new-base-default theme as fallback
             return (
-                <NewBaseDefault 
-                    storeSubdomain={storeSubdomain} 
-                    categorySlug={categorySlug}
-                    collectionSlug={collectionSlug}
-                    brandSlug={brandSlug}
-                    effectiveLocale={effectiveLocale}
-                    storeId={storeId}
-                />
+                <>
+                    <Suspense fallback={null}>
+                        {storeId && <CartRecovery storeId={storeId} />}
+                    </Suspense>
+                    <NewBaseDefault
+                        storeSubdomain={storeSubdomain}
+                        categorySlug={categorySlug}
+                        collectionSlug={collectionSlug}
+                        brandSlug={brandSlug}
+                        effectiveLocale={effectiveLocale}
+                        storeId={storeId}
+                    />
+                </>
             );
     }
 }

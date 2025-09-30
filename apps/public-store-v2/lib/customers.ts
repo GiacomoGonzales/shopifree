@@ -434,3 +434,42 @@ export function loadCustomerFromLocalStorage(): { email: string; fullName: strin
     return null;
   }
 }
+
+/**
+ * Recuperar carrito abandonado de un cliente por email
+ */
+export async function recoverAbandonedCart(
+  storeId: string,
+  email: string
+): Promise<any[] | null> {
+  const db = getFirebaseDb();
+  if (!db) {
+    console.warn('[Customers] Firebase not initialized');
+    return null;
+  }
+
+  try {
+    const customersRef = collection(db, 'stores', storeId, 'customers');
+    const emailQuery = query(customersRef, where('email', '==', email));
+    const results = await getDocs(emailQuery);
+
+    if (results.empty) {
+      console.log('[Customers] No customer found with email:', email);
+      return null;
+    }
+
+    const customerDoc = results.docs[0];
+    const customerData = customerDoc.data();
+
+    if (customerData.abandonedCart && customerData.abandonedCart.items && customerData.abandonedCart.items.length > 0) {
+      console.log('[Customers] ✅ Carrito abandonado encontrado:', customerData.abandonedCart.items);
+      return customerData.abandonedCart.items;
+    }
+
+    console.log('[Customers] No hay carrito abandonado para este cliente');
+    return null;
+  } catch (error) {
+    console.error('[Customers] Error recovering abandoned cart:', error);
+    return null;
+  }
+}

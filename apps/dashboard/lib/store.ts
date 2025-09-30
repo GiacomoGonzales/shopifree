@@ -528,4 +528,36 @@ export const updateStoreSections = async (storeId: string, sections: StoreSectio
     console.error('❌ [Firestore] Error updating store sections:', error)
     throw error
   }
+}
+
+// Get store by owner ID
+export const getStoreByOwner = async (ownerId: string): Promise<StoreWithId | null> => {
+  try {
+    const db = getFirebaseDb()
+    if (!db) {
+      throw new Error('Firebase db not available')
+    }
+
+    const q = query(collection(db, 'stores'), where('ownerId', '==', ownerId))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      console.log(`No store found for owner: ${ownerId}`)
+      return null
+    }
+
+    // Return the first store (assuming one owner = one store)
+    const storeDoc = querySnapshot.docs[0]
+    const storeData = storeDoc.data() as StoreConfig
+
+    return {
+      id: storeDoc.id,
+      ...storeData,
+      customDomain: storeData.advanced?.customDomain?.domain
+    } as StoreWithId
+
+  } catch (error) {
+    console.error('Error getting store by owner:', error)
+    throw error
+  }
 } 

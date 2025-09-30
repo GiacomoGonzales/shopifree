@@ -35,6 +35,7 @@ export interface CartContextType {
   toggleCart: () => void;
   openCheckout: () => void;
   closeCheckout: () => void;
+  loadCart: (items: CartItem[]) => void;
 }
 
 type CartAction =
@@ -95,7 +96,7 @@ export const useCart = () => {
   const ctx = useContext(CartContext);
   if (!ctx) {
     console.warn('useCart must be used within a CartProvider');
-    return { state: initialState, addItem: () => {}, removeItem: () => {}, updateQuantity: () => {}, clearCart: () => {}, openCart: () => {}, closeCart: () => {}, toggleCart: () => {}, openCheckout: () => {}, closeCheckout: () => {} } as CartContextType;
+    return { state: initialState, addItem: () => {}, removeItem: () => {}, updateQuantity: () => {}, clearCart: () => {}, openCart: () => {}, closeCart: () => {}, toggleCart: () => {}, openCheckout: () => {}, closeCheckout: () => {}, loadCart: () => {} } as CartContextType;
   }
   return ctx;
 };
@@ -118,6 +119,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toggleCart: () => dispatch({ type: 'TOGGLE_CART' }),
     openCheckout: () => dispatch({ type: 'OPEN_CHECKOUT' }),
     closeCheckout: () => dispatch({ type: 'CLOSE_CHECKOUT' }),
+    loadCart: (items) => dispatch({ type: 'LOAD_CART', payload: { items } }),
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
