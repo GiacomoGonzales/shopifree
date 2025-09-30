@@ -8,15 +8,23 @@ import CustomerModal from '../../../components/customers/CustomerModal'
 import { useStore } from '../../../lib/hooks/useStore'
 import { Toast } from '../../../components/shared/Toast'
 import { useToast } from '../../../lib/hooks/useToast'
-import { 
-  getCustomers, 
-  deleteCustomer, 
+import {
+  getCustomers,
+  deleteCustomer,
   exportCustomersToCSV,
   getCustomerTags,
-  type CustomerWithId, 
+  type CustomerWithId,
   type CustomerFilters,
-  type CustomerSortOption 
+  type CustomerSortOption
 } from '../../../lib/customers'
+
+// Mapeo de códigos de moneda a símbolos
+const currencySymbols: Record<string, string> = {
+  'USD': '$', 'EUR': '€', 'MXN': '$', 'COP': '$', 'ARS': '$', 'CLP': '$',
+  'PEN': 'S/', 'BRL': 'R$', 'UYU': '$', 'PYG': '₲', 'BOB': 'Bs', 'VES': 'Bs',
+  'GTQ': 'Q', 'CRC': '₡', 'NIO': 'C$', 'PAB': 'B/.', 'DOP': 'RD$', 'HNL': 'L',
+  'SVC': '$', 'GBP': '£', 'CAD': 'C$', 'CHF': 'CHF', 'JPY': '¥', 'CNY': '¥', 'AUD': 'A$'
+}
 
 // Componente CustomerCard para la vista móvil
 interface CustomerCardProps {
@@ -366,10 +374,13 @@ export default function CustomersPage() {
 
   // Función para formatear moneda
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-PE', {
-      style: 'currency',
-      currency: store?.currency || 'PEN'
+    const currency = store?.currency || 'USD'
+    const symbol = currencySymbols[currency] || '$'
+    const formattedAmount = new Intl.NumberFormat('es-PE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount)
+    return `${symbol}${formattedAmount}`
   }
 
   // Componente de paginación
