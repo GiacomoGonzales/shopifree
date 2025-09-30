@@ -173,19 +173,8 @@ export async function sendCustomerOrderConfirmation(
 
           <div style="max-width: 560px; margin: 40px auto; background-color: #ffffff; border: 1px solid #e9ecef;">
 
-            <!-- Logo -->
-            ${templateData.logoUrl ? `
-            <div style="text-align: center; padding: 32px 32px 16px;">
-              <img
-                src="${toCloudinarySquare(templateData.logoUrl, 100) || templateData.logoUrl}"
-                alt="${storeName}"
-                style="max-width: 80px; height: auto; border-radius: 8px; display: inline-block;"
-              />
-            </div>
-            ` : ''}
-
             <!-- Header -->
-            <div style="padding: ${templateData.logoUrl ? '16px' : '32px'} 32px 0 32px;">
+            <div style="padding: 32px 32px 0 32px;">
               <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 24px; margin-bottom: 32px; text-align: center;">
                 <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #212529; letter-spacing: -0.5px;">
                   ${storeName}
@@ -309,13 +298,22 @@ export async function sendCustomerOrderConfirmation(
             </div>
 
             <!-- Footer -->
-            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa;">
+            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa; position: relative;">
               <p style="margin: 0 0 8px 0; font-size: 14px; color: #6c757d;">
                 Te contactaremos pronto para coordinar la entrega.
               </p>
               <p style="margin: 0; font-size: 13px; color: #adb5bd;">
                 Equipo ${storeName}
               </p>
+              ${templateData.logoUrl ? `
+              <div style="position: absolute; bottom: 24px; right: 32px;">
+                <img
+                  src="${toCloudinarySquare(templateData.logoUrl, 80) || templateData.logoUrl}"
+                  alt="${storeName}"
+                  style="max-width: 50px; height: auto; border-radius: 6px; opacity: 0.6;"
+                />
+              </div>
+              ` : ''}
             </div>
 
           </div>
@@ -409,19 +407,8 @@ export async function sendAdminOrderNotification(
 
           <div style="max-width: 560px; margin: 40px auto; background-color: #ffffff; border: 1px solid #e9ecef;">
 
-            <!-- Logo -->
-            ${templateData.logoUrl ? `
-            <div style="text-align: center; padding: 32px 32px 16px;">
-              <img
-                src="${toCloudinarySquare(templateData.logoUrl, 100) || templateData.logoUrl}"
-                alt="${storeName}"
-                style="max-width: 80px; height: auto; border-radius: 8px; display: inline-block;"
-              />
-            </div>
-            ` : ''}
-
             <!-- Header -->
-            <div style="padding: ${templateData.logoUrl ? '16px' : '32px'} 32px 0 32px;">
+            <div style="padding: 32px 32px 0 32px;">
               <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 24px; margin-bottom: 32px; text-align: center;">
                 <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #212529; letter-spacing: -0.5px;">
                   ${storeName}
@@ -567,13 +554,22 @@ export async function sendAdminOrderNotification(
             ` : ''}
 
             <!-- Footer -->
-            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa;">
+            <div style="padding: 24px 32px 32px 32px; border-top: 1px solid #e9ecef; background-color: #f8f9fa; position: relative;">
               <p style="margin: 0 0 8px 0; font-size: 14px; color: #6c757d;">
                 Revisa tu dashboard para gestionar este pedido.
               </p>
               <p style="margin: 0; font-size: 13px; color: #adb5bd;">
                 ${storeName} • ID: ${orderId}
               </p>
+              ${templateData.logoUrl ? `
+              <div style="position: absolute; bottom: 24px; right: 32px;">
+                <img
+                  src="${toCloudinarySquare(templateData.logoUrl, 80) || templateData.logoUrl}"
+                  alt="${storeName}"
+                  style="max-width: 50px; height: auto; border-radius: 6px; opacity: 0.6;"
+                />
+              </div>
+              ` : ''}
             </div>
 
           </div>
