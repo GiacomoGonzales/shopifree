@@ -221,15 +221,27 @@ export async function deleteCoupon(storeId: string, couponId: string): Promise<b
 }
 
 /**
- * Calcular el estado automático de un cupón basado en fechas
+ * Calcular el estado automático de un cupón basado en fechas y usos
  */
-export function calculateCouponStatus(startDate: string, endDate: string, currentStatus?: string, noExpiration?: boolean): 'active' | 'expired' | 'scheduled' {
+export function calculateCouponStatus(
+  startDate: string,
+  endDate: string,
+  currentStatus?: string,
+  noExpiration?: boolean,
+  usageCount?: number,
+  maxUses?: number
+): 'active' | 'expired' | 'scheduled' {
   const now = new Date();
   const start = new Date(startDate);
 
   // Si está pausado manualmente, mantener ese estado no debería cambiar automáticamente
   if (currentStatus === 'paused') {
     return 'paused' as any; // Mantener pausado
+  }
+
+  // Verificar si el cupón se agotó por usos
+  if (usageCount !== undefined && maxUses !== undefined && usageCount >= maxUses) {
+    return 'expired';
   }
 
   if (now < start) {

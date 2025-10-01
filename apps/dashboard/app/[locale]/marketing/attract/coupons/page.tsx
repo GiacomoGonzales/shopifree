@@ -27,11 +27,11 @@ export default function CouponsPage() {
   const [storeCurrency, setStoreCurrency] = useState('USD')
   const [couponUsageCounts, setCouponUsageCounts] = useState<Record<string, number>>({})
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null)
-  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null)
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [searchFilter, setSearchFilter] = useState<string>('')
+  const [activeTab, setActiveTab] = useState<'normal' | 'recovery'>('normal')
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -72,9 +72,27 @@ export default function CouponsPage() {
         // Cargar cupones
         const fetchedCoupons = await getCoupons(store.id)
 
-        // Actualizar estados automáticamente basándose en fechas
+        // 🆕 Cargar conteos dinámicos de uso de cupones primero
+        const counts: Record<string, number> = {}
+        if (fetchedCoupons.length > 0) {
+          for (const coupon of fetchedCoupons) {
+            const count = await getCouponUsageCount(store.id, coupon.id)
+            counts[coupon.id] = count
+          }
+          setCouponUsageCounts(counts)
+        }
+
+        // Actualizar estados automáticamente basándose en fechas y usos
         const updatedCoupons = fetchedCoupons.map(coupon => {
-          const autoStatus = calculateCouponStatus(coupon.startDate, coupon.endDate, coupon.status, coupon.noExpiration)
+          const usageCount = counts[coupon.id] || 0
+          const autoStatus = calculateCouponStatus(
+            coupon.startDate,
+            coupon.endDate,
+            coupon.status,
+            coupon.noExpiration,
+            usageCount,
+            coupon.maxUses
+          )
           if (autoStatus !== coupon.status && coupon.status !== 'paused') {
             // Solo actualizar si no está pausado manualmente
             updateCouponStatus(store.id, coupon.id, autoStatus)
@@ -84,16 +102,6 @@ export default function CouponsPage() {
         })
 
         setCoupons(updatedCoupons)
-
-        // 🆕 Cargar conteos dinámicos de uso de cupones
-        if (updatedCoupons.length > 0) {
-          const counts: Record<string, number> = {}
-          for (const coupon of updatedCoupons) {
-            const count = await getCouponUsageCount(store.id, coupon.id)
-            counts[coupon.id] = count
-          }
-          setCouponUsageCounts(counts)
-        }
       } catch (error) {
         console.error('Error loading store and coupons:', error)
       }
@@ -238,17 +246,8 @@ export default function CouponsPage() {
   }
 
   const toggleDropdown = (couponId: string, event: React.MouseEvent) => {
-    if (dropdownOpen === couponId) {
-      setDropdownOpen(null)
-      setDropdownPosition(null)
-    } else {
-      const rect = event.currentTarget.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 2,
-        right: window.innerWidth - rect.right + window.scrollX - 4
-      })
-      setDropdownOpen(couponId)
-    }
+    event.stopPropagation()
+    setDropdownOpen(dropdownOpen === couponId ? null : couponId)
   }
 
   const getStatusColor = (status: string) => {
@@ -281,8 +280,20 @@ export default function CouponsPage() {
     }
   }
 
+  const formatDate = (dateString: string) => {
+    // Si la fecha viene en formato ISO completo (2025-10-01T03:06:50.026Z), extraer solo la fecha
+    if (dateString.includes('T')) {
+      return dateString.split('T')[0]
+    }
+    return dateString
+  }
+
   // Función para filtrar cupones
   const filteredCoupons = coupons.filter(coupon => {
+    // Filtro por tipo de cupón (normal vs recuperación)
+    const isRecoveryCoupon = (coupon as any).isRecoveryCoupon === true
+    const matchesTab = activeTab === 'recovery' ? isRecoveryCoupon : !isRecoveryCoupon
+
     // Filtro por estado
     const matchesStatus = statusFilter === '' || coupon.status === statusFilter
 
@@ -291,8 +302,12 @@ export default function CouponsPage() {
       coupon.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       coupon.code.toLowerCase().includes(searchFilter.toLowerCase())
 
-    return matchesStatus && matchesSearch
+    return matchesTab && matchesStatus && matchesSearch
   })
+
+  // Contadores por pestaña
+  const normalCouponsCount = coupons.filter(c => !(c as any).isRecoveryCoupon).length
+  const recoveryCouponsCount = coupons.filter(c => (c as any).isRecoveryCoupon).length
 
   return (
     <DashboardLayout>
@@ -324,17 +339,51 @@ export default function CouponsPage() {
           </div>
 
           <div className="px-4 sm:px-6 lg:px-8 pb-8">
-            {/* Botón crear cupón */}
-            <div className="mb-6 flex justify-end">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {t('coupons.create')}
-              </button>
+            {/* Pestañas para separar cupones normales y de recuperación */}
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
+                <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setActiveTab('normal')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      activeTab === 'normal'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Cupones principales
+                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-200">
+                      {normalCouponsCount}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('recovery')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      activeTab === 'recovery'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Cupones de recuperación
+                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-200">
+                      {recoveryCouponsCount}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Botón crear cupón - solo visible en pestaña normal */}
+                {activeTab === 'normal' && (
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 w-full sm:w-auto"
+                  >
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    {t('coupons.create')}
+                  </button>
+                )}
+              </div>
             </div>
             {/* Filtros y controles */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
@@ -389,7 +438,7 @@ export default function CouponsPage() {
                     "Cargando..."
                   ) : (
                     <>
-                      Mostrando {filteredCoupons.length} de {coupons.length} cupones
+                      Mostrando {filteredCoupons.length} de {activeTab === 'normal' ? normalCouponsCount : recoveryCouponsCount} cupones
                       {(statusFilter || searchFilter) && (
                         <span className="ml-2 text-gray-500">
                           (filtrados)
@@ -402,8 +451,8 @@ export default function CouponsPage() {
             </div>
 
             {/* Tabla de cupones */}
-            <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden relative">
-              <div className="overflow-x-auto">
+            <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-visible relative">
+              <div className="overflow-x-auto overflow-y-visible">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -440,8 +489,10 @@ export default function CouponsPage() {
                     ) : filteredCoupons.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                          {coupons.length === 0
+                          {activeTab === 'normal' && normalCouponsCount === 0
                             ? "No tienes cupones creados. ¡Crea tu primer cupón!"
+                            : activeTab === 'recovery' && recoveryCouponsCount === 0
+                            ? "Aún no hay cupones de recuperación. Se generan automáticamente cuando envías emails de carritos abandonados."
                             : "No se encontraron cupones que coincidan con los filtros seleccionados."
                           }
                         </td>
@@ -468,17 +519,26 @@ export default function CouponsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div>{coupon.startDate}</div>
+                          <div>{formatDate(coupon.startDate)}</div>
                           <div>
                             {coupon.noExpiration ? (
                               <span className="text-blue-600 font-medium">Sin expiración</span>
                             ) : (
-                              coupon.endDate
+                              formatDate(coupon.endDate)
                             )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {couponUsageCounts[coupon.id] !== undefined ? couponUsageCounts[coupon.id] : (coupon.totalUses || 0)} / {coupon.maxUses}
+                          <div className="flex items-center gap-2">
+                            <span>
+                              {couponUsageCounts[coupon.id] !== undefined ? couponUsageCounts[coupon.id] : (coupon.totalUses || 0)} / {coupon.maxUses}
+                            </span>
+                            {couponUsageCounts[coupon.id] >= coupon.maxUses && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                Agotado
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="relative">
@@ -491,6 +551,40 @@ export default function CouponsPage() {
                               </svg>
                             </button>
 
+                            {/* Dropdown */}
+                            {dropdownOpen === coupon.id && (
+                              <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                <div className="py-1">
+                                  <button
+                                    onClick={() => handlePauseCoupon(coupon.id)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {coupon.status === 'paused' ? 'Activar' : 'Pausar'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleEditCoupon(coupon.id)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Editar
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteCoupon(coupon.id)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                  >
+                                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Eliminar
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -502,47 +596,6 @@ export default function CouponsPage() {
             </div>
           </div>
         </div>
-
-        {/* Dropdown menu */}
-        {dropdownOpen && dropdownPosition && (
-          <div
-            className="fixed w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
-            style={{
-              top: dropdownPosition.top,
-              right: dropdownPosition.right
-            }}
-          >
-            <div className="py-1">
-              <button
-                onClick={() => handlePauseCoupon(dropdownOpen)}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-{coupons.find(c => c.id === dropdownOpen)?.status === 'paused' ? 'Activar' : 'Pausar'}
-              </button>
-              <button
-                onClick={() => handleEditCoupon(dropdownOpen)}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Editar
-              </button>
-              <button
-                onClick={() => handleDeleteCoupon(dropdownOpen)}
-                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Eliminar
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Modal básico de creación */}
         {showCreateModal && (
