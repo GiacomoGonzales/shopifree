@@ -28,6 +28,7 @@ export default function AbandonedCartsPage() {
   const [storeName, setStoreName] = useState<string>('')
   const [sendingEmails, setSendingEmails] = useState<{ [key: string]: boolean }>({})
   const [timeFilter, setTimeFilter] = useState<number>(24) // 24 horas por defecto
+  const [discounts, setDiscounts] = useState<{ [key: string]: number }>({}) // Descuento por cada carrito
 
   useEffect(() => {
     loadData()
@@ -81,9 +82,12 @@ export default function AbandonedCartsPage() {
     try {
       setSendingEmails(prev => ({ ...prev, [customer.id]: true }))
 
-      // Generar cupón de recuperación (10% de descuento)
-      const couponCode = generateRecoveryCoupon(customer.email, 10)
-      const discountValue = calculateDiscountValue(customer.abandonedCart.subtotal, 10)
+      // Obtener descuento seleccionado o usar 10% por defecto
+      const discountPercentage = discounts[customer.id] || 10
+
+      // Generar cupón de recuperación
+      const couponCode = generateRecoveryCoupon(customer.email, discountPercentage)
+      const discountValue = calculateDiscountValue(customer.abandonedCart.subtotal, discountPercentage)
 
       // Preparar datos del email
       const emailData: AbandonedCartEmailData = {
@@ -122,7 +126,7 @@ export default function AbandonedCartsPage() {
           storeId,
           couponCode,
           customer.email,
-          10 // 10% de descuento
+          discountPercentage
         )
 
         if (!couponCreated) {
@@ -296,54 +300,82 @@ export default function AbandonedCartsPage() {
             ) : (
               <div className="space-y-4">
                 {abandonedCarts.map((customer) => (
-                  <div key={customer.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-medium text-gray-900">{customer.displayName}</h3>
-                          {customer.abandonedCart.emailSent && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              <svg className="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                              Email enviado ({customer.abandonedCart.reminderCount || 1}x)
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <span className="flex items-center">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <div key={customer.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    {/* Header - Responsive */}
+                    <div className="flex flex-col space-y-3 mb-4">
+                      {/* Nombre y badge */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-lg font-medium text-gray-900">{customer.displayName}</h3>
+                        {customer.abandonedCart.emailSent && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <svg className="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                            {customer.email}
+                            Email enviado ({customer.abandonedCart.reminderCount || 1}x)
                           </span>
-                          {customer.phone && (
-                            <span className="flex items-center">
-                              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                              </svg>
-                              {customer.phone}
-                            </span>
-                          )}
-                          <span className="flex items-center">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {formatTimeAgo(customer.abandonedCart.abandonedAt)}
-                          </span>
-                        </div>
+                        )}
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-right mr-4">
-                          <p className="text-sm text-gray-600">Total del carrito</p>
-                          <p className="text-xl font-semibold text-gray-900">
-                            {formatCurrency(customer.abandonedCart.subtotal, customer.abandonedCart.currency)}
-                          </p>
+
+                      {/* Info del cliente - Stack en móvil */}
+                      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-gray-600">
+                        <span className="flex items-center">
+                          <svg className="h-4 w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          <span className="truncate">{customer.email}</span>
+                        </span>
+                        {customer.phone && (
+                          <span className="flex items-center">
+                            <svg className="h-4 w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            {customer.phone}
+                          </span>
+                        )}
+                        <span className="flex items-center">
+                          <svg className="h-4 w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {formatTimeAgo(customer.abandonedCart.abandonedAt)}
+                        </span>
+                      </div>
+
+                      {/* Total y controles - Stack en móvil, lado a lado en desktop */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-between sm:justify-start sm:gap-6">
+                          <div>
+                            <p className="text-xs text-gray-600">Total del carrito</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {formatCurrency(customer.abandonedCart.subtotal, customer.abandonedCart.currency)}
+                            </p>
+                          </div>
+
+                          {/* Selector de descuento */}
+                          <div>
+                            <label htmlFor={`discount-${customer.id}`} className="block text-xs text-gray-600 mb-1">
+                              Descuento
+                            </label>
+                            <select
+                              id={`discount-${customer.id}`}
+                              value={discounts[customer.id] || 10}
+                              onChange={(e) => setDiscounts(prev => ({ ...prev, [customer.id]: Number(e.target.value) }))}
+                              className="block w-full sm:w-24 rounded-md border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 text-sm"
+                            >
+                              <option value={5}>5%</option>
+                              <option value={10}>10%</option>
+                              <option value={15}>15%</option>
+                              <option value={20}>20%</option>
+                              <option value={25}>25%</option>
+                              <option value={30}>30%</option>
+                            </select>
+                          </div>
                         </div>
+
+                        {/* Botón enviar */}
                         <button
                           onClick={() => sendRecoveryEmail(customer)}
                           disabled={sendingEmails[customer.id]}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-auto"
                         >
                           {sendingEmails[customer.id] ? (
                             <>
