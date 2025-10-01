@@ -76,8 +76,10 @@ export async function sendAbandonedCartEmail(
   try {
     const config = getEmailConfig(data.storeName);
 
-    // Generar enlace para recuperar carrito
-    const cartRecoveryUrl = `${data.storeUrl}?recover=cart`;
+    // Generar enlace para recuperar carrito con cupón incluido
+    const cartRecoveryUrl = data.couponCode
+      ? `${data.storeUrl}?recover=cart&coupon=${data.couponCode}`
+      : `${data.storeUrl}?recover=cart`;
 
     // Calcular total con descuento si hay cupón
     const discount = data.couponDiscount || 0;

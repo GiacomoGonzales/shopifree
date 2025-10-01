@@ -8,7 +8,8 @@ import {
   updateDoc,
   Timestamp,
   orderBy,
-  limit
+  limit,
+  addDoc
 } from 'firebase/firestore';
 
 export interface AbandonedCartItem {
@@ -247,4 +248,59 @@ export function calculateDiscountValue(
   discountPercentage: number
 ): number {
   return Math.round((subtotal * discountPercentage) / 100);
+}
+
+/**
+ * Crear cupón de recuperación de carrito abandonado en Firestore
+ * @param storeId ID de la tienda
+ * @param couponCode Código del cupón generado
+ * @param customerEmail Email del cliente (para uso único)
+ * @param discountPercentage Porcentaje de descuento
+ * @returns true si se creó exitosamente
+ */
+export async function createRecoveryCoupon(
+  storeId: string,
+  couponCode: string,
+  customerEmail: string,
+  discountPercentage: number
+): Promise<boolean> {
+  try {
+    const db = getFirebaseDb();
+    if (!db) {
+      throw new Error('Firebase database not available');
+    }
+
+    const couponsRef = collection(db, 'stores', storeId, 'coupons');
+
+    // Crear fecha de inicio (ahora) y expiración (7 días)
+    const now = new Date();
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7); // Válido por 7 días
+
+    const couponData = {
+      name: `Recuperación de Carrito - ${customerEmail}`,
+      code: couponCode,
+      type: 'percentage',
+      value: discountPercentage,
+      status: 'active',
+      startDate: now.toISOString(),
+      endDate: expiryDate.toISOString(),
+      maxUses: 1, // Uso único
+      usesPerCustomer: 1,
+      // Metadata adicional para carritos abandonados
+      isRecoveryCoupon: true,
+      customerEmail: customerEmail,
+      createdAt: Timestamp.now(),
+      createdBy: 'abandoned-cart-system'
+    };
+
+    await addDoc(couponsRef, couponData);
+
+    console.log(`[AbandonedCarts] ✅ Cupón de recuperación creado: ${couponCode} para ${customerEmail}`);
+    return true;
+
+  } catch (error) {
+    console.error('[AbandonedCarts] ❌ Error al crear cupón de recuperación:', error);
+    return false;
+  }
 }

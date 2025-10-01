@@ -51,6 +51,18 @@ export default function CartRecovery({ storeId }: CartRecoveryProps) {
       // Cargar items en el carrito
       loadCart(abandonedCartItems);
 
+      // Obtener el cupón de la URL si existe
+      const couponParam = searchParams.get('coupon');
+      if (couponParam) {
+        // Guardar cupón en localStorage para que se aplique en el checkout
+        try {
+          localStorage.setItem('recovery_coupon', couponParam);
+          console.log('[CartRecovery] 🎁 Cupón guardado para aplicación automática:', couponParam);
+        } catch (error) {
+          console.error('[CartRecovery] ❌ Error al guardar cupón:', error);
+        }
+      }
+
       // Abrir el carrito automáticamente
       setTimeout(() => {
         openCart();

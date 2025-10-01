@@ -903,6 +903,46 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     }, [shippingConfig, formData.shippingMethod]);
 
+    // Detectar y aplicar cupón de recuperación automáticamente
+    useEffect(() => {
+        if (isOpen && storeId) {
+            try {
+                const recoveryCoupon = localStorage.getItem('recovery_coupon');
+                if (recoveryCoupon) {
+                    console.log('[CheckoutModal] 🎁 Cupón de recuperación detectado:', recoveryCoupon);
+                    // Aplicar cupón automáticamente
+                    setFormData(prev => ({
+                        ...prev,
+                        couponCode: recoveryCoupon
+                    }));
+                    // Validar cupón inmediatamente
+                    setTimeout(async () => {
+                        const result = await validateCoupon(storeId, recoveryCoupon, subtotal);
+                        if (result.valid && result.coupon && result.discount) {
+                            console.log('[CheckoutModal] ✅ Cupón aplicado automáticamente');
+                            setFormData(prev => ({
+                                ...prev,
+                                appliedCoupon: {
+                                    id: result.coupon!.id,
+                                    code: result.coupon!.code,
+                                    type: result.coupon!.type as 'percentage' | 'fixed_amount' | 'free_shipping',
+                                    discount: result.discount!.amount
+                                }
+                            }));
+                            setCouponError('');
+                            // Limpiar cupón de localStorage después de aplicarlo
+                            localStorage.removeItem('recovery_coupon');
+                        } else {
+                            setCouponError(result.error || 'Cupón no válido');
+                        }
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('[CheckoutModal] Error aplicando cupón de recuperación:', error);
+            }
+        }
+    }, [isOpen, storeId]);
+
     // Si express está deshabilitado y el usuario lo tenía seleccionado, cambiar a standard
     useEffect(() => {
         if (shippingConfig && formData.shippingMethod === 'express' && !shippingConfig.localDelivery?.express?.enabled) {

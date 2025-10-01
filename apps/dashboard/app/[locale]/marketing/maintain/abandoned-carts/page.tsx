@@ -12,6 +12,7 @@ import {
   markCartEmailSent,
   generateRecoveryCoupon,
   calculateDiscountValue,
+  createRecoveryCoupon,
   type CustomerWithAbandonedCart
 } from '../../../../../lib/abandoned-carts'
 import type { AbandonedCartEmailData } from '../../../../../../../public-store-v2/lib/email'
@@ -116,6 +117,18 @@ export default function AbandonedCartsPage() {
       const result = await response.json()
 
       if (result.success) {
+        // Crear cupón en Firestore
+        const couponCreated = await createRecoveryCoupon(
+          storeId,
+          couponCode,
+          customer.email,
+          10 // 10% de descuento
+        )
+
+        if (!couponCreated) {
+          console.warn('[AbandonedCarts] ⚠️ Cupón no se pudo crear en Firestore, pero el email fue enviado')
+        }
+
         // Marcar como enviado en Firestore
         await markCartEmailSent(storeId, customer.id)
 
