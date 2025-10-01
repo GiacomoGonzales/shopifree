@@ -597,8 +597,8 @@ export default function CouponsPage() {
 
         {/* Modal básico de creación */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-0 md:top-20 mx-auto h-full md:h-auto p-0 md:p-5 border-0 md:border w-full md:w-3/4 lg:w-1/2 shadow-lg rounded-none md:rounded-md bg-white">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto overflow-x-hidden h-full w-full z-50">
+            <div className="relative top-0 md:top-20 mx-auto min-h-full md:min-h-0 md:h-auto p-0 md:p-5 border-0 md:border w-full md:w-3/4 lg:w-1/2 md:max-w-2xl shadow-lg rounded-none md:rounded-md bg-white">
               <div className="flex items-center justify-between mb-4 p-4 md:p-0">
                 <h3 className="text-lg font-medium text-gray-900">
                   {editingCoupon ? 'Editar cupón' : 'Crear nuevo cupón'}
@@ -627,14 +627,14 @@ export default function CouponsPage() {
                 </button>
               </div>
 
-              <form className="space-y-4 px-4 md:px-0 pb-4 md:pb-0">
+              <form className="space-y-4 px-4 md:px-0 pb-4 md:pb-0 overflow-x-hidden">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre del cupón</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                     placeholder="Ej: Black Friday 2024"
                   />
                 </div>
@@ -646,7 +646,7 @@ export default function CouponsPage() {
                       type="text"
                       value={formData.code}
                       onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
-                      className="block w-full border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="block w-full border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       placeholder="BLACKFRIDAY2024"
                     />
                     <button
@@ -664,7 +664,7 @@ export default function CouponsPage() {
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                   >
                     <option value="percentage">Porcentaje</option>
                     <option value="fixed_amount">Monto fijo</option>
@@ -682,7 +682,7 @@ export default function CouponsPage() {
                       value={formData.value}
                       onChange={(e) => setFormData(prev => ({ ...prev, value: Number(e.target.value) }))}
                       onFocus={(e) => e.target.select()}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       placeholder={formData.type === 'percentage' ? '25' : '50'}
                       min="0"
                       max={formData.type === 'percentage' ? '100' : undefined}
@@ -690,14 +690,14 @@ export default function CouponsPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Fecha inicio</label>
                     <input
                       type="date"
                       value={formData.startDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                     />
                   </div>
                   <div>
@@ -706,7 +706,7 @@ export default function CouponsPage() {
                       type="date"
                       value={formData.endDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       disabled={formData.noExpiration}
                     />
                   </div>
@@ -718,7 +718,7 @@ export default function CouponsPage() {
                       type="checkbox"
                       checked={formData.noExpiration}
                       onChange={(e) => setFormData(prev => ({ ...prev, noExpiration: e.target.checked }))}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-gray-600 focus:ring-gray-300 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">
                       Sin fecha de expiración (cupón permanente)
@@ -729,7 +729,7 @@ export default function CouponsPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Usos máximos</label>
                     <input
@@ -737,7 +737,7 @@ export default function CouponsPage() {
                       value={formData.maxUses}
                       onChange={(e) => setFormData(prev => ({ ...prev, maxUses: Number(e.target.value) }))}
                       onFocus={(e) => e.target.select()}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       min="1"
                     />
                   </div>
@@ -748,13 +748,13 @@ export default function CouponsPage() {
                       value={formData.usesPerCustomer}
                       onChange={(e) => setFormData(prev => ({ ...prev, usesPerCustomer: Number(e.target.value) }))}
                       onFocus={(e) => e.target.select()}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       min="1"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -772,7 +772,7 @@ export default function CouponsPage() {
                         noExpiration: false
                       })
                     }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 w-full sm:w-auto"
                     disabled={creating}
                   >
                     Cancelar
@@ -781,7 +781,7 @@ export default function CouponsPage() {
                     type="button"
                     onClick={handleCreateCoupon}
                     disabled={creating || !formData.name || !formData.code}
-                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                   >
                     {creating ? (editingCoupon ? 'Actualizando...' : 'Creando...') : (editingCoupon ? 'Actualizar cupón' : 'Crear cupón')}
                   </button>

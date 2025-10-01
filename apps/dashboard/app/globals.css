@@ -62,7 +62,7 @@
   }
 
   *:focus-visible {
-    outline: 2px solid rgb(var(--dashboard-primary)) !important;
+    outline: 2px solid rgb(var(--dashboard-neutral-400)) !important;
     outline-offset: 2px !important;
   }
 
@@ -71,7 +71,7 @@
   textarea:focus,
   select:focus,
   button:focus-visible {
-    outline: 2px solid rgb(var(--dashboard-primary)) !important;
+    outline: 2px solid rgb(var(--dashboard-neutral-400)) !important;
     outline-offset: 2px !important;
   }
 
@@ -183,7 +183,7 @@
 
   /* Botones del dashboard con tema */
   .btn-dashboard-primary {
-    @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+    @apply bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2;
   }
 
   .btn-dashboard-secondary {
@@ -217,7 +217,7 @@
   }
 
   .sidebar-dashboard-item.active {
-    @apply bg-indigo-100 text-indigo-700;
+    @apply bg-gray-200 text-gray-900;
   }
 }
 
