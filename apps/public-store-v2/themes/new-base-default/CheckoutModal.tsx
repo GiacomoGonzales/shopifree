@@ -2712,6 +2712,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             placeholder={t('emailPlaceholder')}
                                             required
                                         />
+                                        {/* 🎁 Mensaje sutil de puntos disponibles */}
+                                        {loyaltyPoints?.active && loyaltyPoints.points > 0 && (
+                                            <p style={{
+                                                fontSize: '12px',
+                                                color: '#6b7280',
+                                                marginTop: '6px',
+                                                marginBottom: '0'
+                                            }}>
+                                                Tienes {loyaltyPoints.points} puntos disponibles ({formatPrice(loyaltyPoints.value, currency)})
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="nbd-form-group nbd-form-group--full">
                                         <label className="nbd-form-label">{t('phone')} *</label>
