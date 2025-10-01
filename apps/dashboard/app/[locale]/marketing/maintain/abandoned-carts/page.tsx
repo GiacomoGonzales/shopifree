@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import DashboardLayout from '../../../../../components/DashboardLayout'
+import Toast from '../../../../../components/shared/Toast/Toast'
+import { useToast } from '../../../../../lib/hooks/useToast'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getStoreByOwner } from '../../../../../lib/store'
 import {
@@ -20,6 +22,7 @@ import type { AbandonedCartEmailData } from '../../../../../../../public-store-v
 export default function AbandonedCartsPage() {
   const t = useTranslations('marketing')
   const { user } = useAuth()
+  const { toast, showToast, hideToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [abandonedCarts, setAbandonedCarts] = useState<CustomerWithAbandonedCart[]>([])
   const [stats, setStats] = useState<any>(null)
@@ -27,6 +30,7 @@ export default function AbandonedCartsPage() {
   const [storeUrl, setStoreUrl] = useState<string>('')
   const [storeName, setStoreName] = useState<string>('')
   const [sendingEmails, setSendingEmails] = useState<{ [key: string]: boolean }>({})
+  const [successEmails, setSuccessEmails] = useState<{ [key: string]: boolean }>({})
   const [timeFilter, setTimeFilter] = useState<number>(24) // 24 horas por defecto
   const [discounts, setDiscounts] = useState<{ [key: string]: number }>({}) // Descuento por cada carrito
 
@@ -75,7 +79,7 @@ export default function AbandonedCartsPage() {
 
   const sendRecoveryEmail = async (customer: CustomerWithAbandonedCart) => {
     if (!storeId || !storeUrl) {
-      alert('Error: Información de tienda no disponible')
+      showToast('Error: Información de tienda no disponible', 'error')
       return
     }
 
@@ -136,18 +140,30 @@ export default function AbandonedCartsPage() {
         // Marcar como enviado en Firestore
         await markCartEmailSent(storeId, customer.id)
 
-        alert(`✅ Email enviado exitosamente a ${customer.email}\n\nCupón generado: ${couponCode}`)
+        // Mostrar estado de éxito en el botón
+        setSendingEmails(prev => ({ ...prev, [customer.id]: false }))
+        setSuccessEmails(prev => ({ ...prev, [customer.id]: true }))
 
-        // Recargar datos
-        await loadData()
+        // Mostrar toast de éxito
+        showToast(`Email enviado a ${customer.email} con cupón ${couponCode}`, 'success')
+
+        // Volver el botón a la normalidad después de 2 segundos
+        setTimeout(() => {
+          setSuccessEmails(prev => ({ ...prev, [customer.id]: false }))
+        }, 2000)
+
+        // Recargar datos después de la animación
+        setTimeout(() => {
+          loadData()
+        }, 2500)
       } else {
-        alert(`❌ Error al enviar email: ${result.error}`)
+        showToast(`Error al enviar email: ${result.error}`, 'error')
+        setSendingEmails(prev => ({ ...prev, [customer.id]: false }))
       }
 
     } catch (error) {
       console.error('Error al enviar email:', error)
-      alert('❌ Error al enviar email. Ver consola para detalles.')
-    } finally {
+      showToast('Error al enviar email. Intenta de nuevo.', 'error')
       setSendingEmails(prev => ({ ...prev, [customer.id]: false }))
     }
   }
@@ -189,6 +205,15 @@ export default function AbandonedCartsPage() {
 
   return (
     <DashboardLayout>
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
+
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -374,8 +399,14 @@ export default function AbandonedCartsPage() {
                         {/* Botón enviar */}
                         <button
                           onClick={() => sendRecoveryEmail(customer)}
-                          disabled={sendingEmails[customer.id]}
-                          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-auto"
+                          disabled={sendingEmails[customer.id] || successEmails[customer.id]}
+                          className={`inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white w-full sm:w-auto transition-all duration-500 ease-in-out ${
+                            successEmails[customer.id]
+                              ? 'bg-green-600 hover:bg-green-600'
+                              : sendingEmails[customer.id]
+                              ? 'bg-gray-600 cursor-not-allowed'
+                              : 'bg-gray-900 hover:bg-gray-800'
+                          }`}
                         >
                           {sendingEmails[customer.id] ? (
                             <>
@@ -384,6 +415,13 @@ export default function AbandonedCartsPage() {
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
                               Enviando...
+                            </>
+                          ) : successEmails[customer.id] ? (
+                            <>
+                              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Enviado
                             </>
                           ) : (
                             <>
