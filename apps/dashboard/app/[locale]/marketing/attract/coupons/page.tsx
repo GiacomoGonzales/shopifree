@@ -317,20 +317,20 @@ export default function CouponsPage() {
           <div className="px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="flex items-center mb-2">
-                  <Link href="/marketing" className="text-sm text-gray-500 hover:text-gray-700 mr-2">
+                <div className="flex items-center mb-2 flex-wrap gap-1">
+                  <Link href="/marketing" className="text-sm text-gray-500 hover:text-gray-700">
                     Marketing
                   </Link>
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  <Link href="/marketing/attract" className="text-sm text-gray-500 hover:text-gray-700 ml-2 mr-2">
+                  <Link href="/marketing/attract" className="text-sm text-gray-500 hover:text-gray-700">
                     {t('sections.attract.title')}
                   </Link>
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  <span className="text-sm text-gray-700 ml-2">{t('coupons.title')}</span>
+                  <span className="text-sm text-gray-700">{t('coupons.title')}</span>
                 </div>
                 <h1 className="text-2xl font-light text-gray-900">{t('coupons.title')}</h1>
                 <p className="mt-1 text-sm text-gray-600">{t('coupons.description')}</p>
@@ -371,18 +371,16 @@ export default function CouponsPage() {
                   </button>
                 </div>
 
-                {/* Botón crear cupón - solo visible en pestaña normal */}
-                {activeTab === 'normal' && (
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 w-full sm:w-auto"
-                  >
-                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    {t('coupons.create')}
-                  </button>
-                )}
+                {/* Botón crear cupón */}
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 w-full sm:w-auto"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  {t('coupons.create')}
+                </button>
               </div>
             </div>
             {/* Filtros y controles */}
