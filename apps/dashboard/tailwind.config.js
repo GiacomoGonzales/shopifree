@@ -10,8 +10,8 @@ try {
   // Fallback a colores hardcodeados si hay problemas de importación
   console.warn('⚠️  Usando colores hardcodeados como fallback en dashboard/tailwind.config.js');
   brandColors = {
-    primary: "#4F46E5",
-    secondary: "#06B6D4", 
+    primary: "#111827", // gray-900
+    secondary: "#4B5563", // gray-600
     accent: "#F59E0B",
     success: "#10B981",
     warning: "#F59E0B",
@@ -29,16 +29,16 @@ try {
       900: "#111827"
     },
     blue: {
-      50: "#EFF6FF",
-      500: "#3B82F6",
-      600: "#2563EB",
-      700: "#1D4ED8"
+      50: "#F9FAFB",
+      500: "#6B7280",
+      600: "#4B5563",
+      700: "#374151"
     },
     indigo: {
-      50: "#EEF2FF",
-      500: "#6366F1",
-      600: "#4F46E5",
-      700: "#4338CA"
+      50: "#F9FAFB",
+      500: "#6B7280",
+      600: "#4B5563",
+      700: "#374151"
     }
   };
 }
@@ -73,10 +73,10 @@ module.exports = {
         
         // Alias para componentes existentes
         primary: {
-          50: brandColors.indigo[50],
-          500: brandColors.primary,
-          600: brandColors.indigo[600],
-          700: brandColors.indigo[700],
+          50: brandColors.neutral[50],
+          500: brandColors.neutral[900],
+          600: brandColors.neutral[800],
+          700: brandColors.neutral[700],
         },
         
         // Variables CSS para compatibilidad con el sistema existente

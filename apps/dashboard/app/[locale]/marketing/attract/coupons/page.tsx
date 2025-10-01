@@ -255,7 +255,7 @@ export default function CouponsPage() {
       case 'active': return 'bg-green-100 text-green-800'
       case 'paused': return 'bg-yellow-100 text-yellow-800'
       case 'expired': return 'bg-red-100 text-red-800'
-      case 'scheduled': return 'bg-blue-100 text-blue-800'
+      case 'scheduled': return 'bg-gray-100 text-gray-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -398,7 +398,7 @@ export default function CouponsPage() {
                       type="text"
                       value={searchFilter}
                       onChange={(e) => setSearchFilter(e.target.value)}
-                      className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       placeholder="Buscar cupones..."
                     />
                   </div>
@@ -407,7 +407,7 @@ export default function CouponsPage() {
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                   >
                     <option value="">Todos los estados</option>
                     <option value="active">Activos</option>
@@ -520,7 +520,7 @@ export default function CouponsPage() {
                           <div>{formatDate(coupon.startDate)}</div>
                           <div>
                             {coupon.noExpiration ? (
-                              <span className="text-blue-600 font-medium">Sin expiración</span>
+                              <span className="text-gray-700 font-medium">Sin expiración</span>
                             ) : (
                               formatDate(coupon.endDate)
                             )}

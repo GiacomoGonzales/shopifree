@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* Variables del sistema de temas centralizado para Dashboard */
-    --dashboard-primary: 79 70 229; /* brandColors.primary -> #4F46E5 */
-    --dashboard-secondary: 6 182 212; /* brandColors.secondary -> #06B6D4 */
+    --dashboard-primary: 17 24 39; /* brandColors.primary -> #111827 (gray-900) */
+    --dashboard-secondary: 75 85 99; /* brandColors.secondary -> #4B5563 (gray-600) */
     --dashboard-accent: 245 158 11; /* brandColors.accent -> #F59E0B */
     --dashboard-success: 16 185 129; /* brandColors.success -> #10B981 */
     --dashboard-warning: 245 158 11; /* brandColors.warning -> #F59E0B */
@@ -36,8 +36,8 @@
     /* Componentes específicos del dashboard */
     --dashboard-sidebar-bg: var(--dashboard-neutral-50);
     --dashboard-sidebar-fg: var(--dashboard-neutral-900);
-    --dashboard-sidebar-active: var(--dashboard-primary);
-    --dashboard-sidebar-active-fg: 255 255 255;
+    --dashboard-sidebar-active: var(--dashboard-neutral-200);
+    --dashboard-sidebar-active-fg: var(--dashboard-neutral-900);
     
     --dashboard-header-bg: var(--dashboard-neutral-900);
     --dashboard-header-fg: var(--dashboard-neutral-50);
