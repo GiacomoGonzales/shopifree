@@ -153,18 +153,18 @@ export async function sendAbandonedCartEmail(
 
                 <div style="border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden;">
                   ${data.cartItems.map((item, index) => `
-                    <div style="padding: 16px; ${index !== data.cartItems.length - 1 ? 'border-bottom: 1px solid #f1f3f4;' : ''} display: flex; align-items: center; gap: 16px;">
-                      <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #e9ecef;" />
-                      <div style="flex: 1;">
-                        <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 500; color: #212529;">
+                    <div style="padding: 16px; ${index !== data.cartItems.length - 1 ? 'border-bottom: 1px solid #f1f3f4;' : ''} display: flex; align-items: center;">
+                      <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #e9ecef; margin-right: 16px;" />
+                      <div style="flex: 1; padding-right: 12px;">
+                        <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 500; color: #212529; line-height: 1.4;">
                           ${item.name}
                         </p>
-                        <p style="margin: 0; font-size: 13px; color: #6c757d;">
+                        <p style="margin: 0; font-size: 13px; color: #6c757d; line-height: 1.4;">
                           Cantidad: ${item.quantity} × ${formatPrice(item.price, item.currency)}
                         </p>
                       </div>
-                      <div style="text-align: right;">
-                        <p style="margin: 0; font-size: 15px; font-weight: 600; color: #212529;">
+                      <div style="text-align: right; min-width: 80px; margin-left: auto;">
+                        <p style="margin: 0; font-size: 16px; font-weight: 600; color: #212529; white-space: nowrap;">
                           ${formatPrice(item.price * item.quantity, item.currency)}
                         </p>
                       </div>
