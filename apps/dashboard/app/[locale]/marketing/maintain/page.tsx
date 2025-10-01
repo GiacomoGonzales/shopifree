@@ -29,63 +29,37 @@ export default function MaintainCustomersPage() {
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="space-y-6">
               {/* Carritos Abandonados */}
-              <Link href="/marketing/maintain/abandoned-carts">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
-                  <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-                    {/* Mobile Layout */}
-                    <div className="sm:hidden space-y-3">
-                      <div className="flex items-start space-x-3">
-                        <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
-                          <svg className="h-4 w-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-medium text-gray-900">Recuperación de Carritos Abandonados</h3>
-                          <p className="text-sm text-gray-500 mt-1">Envía recordatorios automáticos con cupones de descuento</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between pl-11">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          ✓ Activo
-                        </span>
-                        <svg className="h-5 w-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="bg-gray-100 p-2.5 sm:p-3 rounded-lg flex-shrink-0">
+                        <svg className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                       </div>
-                    </div>
-
-                    {/* Desktop Layout */}
-                    <div className="hidden sm:flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="bg-gray-100 p-2 rounded-lg mr-3">
-                          <svg className="h-5 w-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900">Recuperación de Carritos Abandonados</h3>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ✓ Activo
+                          </span>
                         </div>
-                        <div>
-                          <h3 className="text-base font-medium text-gray-900">Recuperación de Carritos Abandonados</h3>
-                          <p className="text-sm text-gray-500">Envía recordatorios automáticos con cupones de descuento</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          ✓ Activo
-                        </span>
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <p className="mt-1 text-sm text-gray-500">Envía recordatorios automáticos con cupones de descuento para recuperar ventas perdidas</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="px-4 sm:px-6 py-4 bg-gray-50">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
-                      <span className="text-gray-600">Recupera ventas perdidas con emails personalizados</span>
-                      <span className="text-gray-900 font-medium whitespace-nowrap">Gestionar →</span>
-                    </div>
+                    <Link
+                      href="/marketing/maintain/abandoned-carts"
+                      className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 transition-colors w-full sm:w-auto sm:flex-shrink-0"
+                    >
+                      Gestionar carritos
+                      <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
                   </div>
                 </div>
-              </Link>
+              </div>
 
               {/* Email Marketing */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">
