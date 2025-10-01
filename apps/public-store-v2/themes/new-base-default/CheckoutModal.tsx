@@ -185,7 +185,22 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
     // 🆕 Estado para loading del botón SIGUIENTE
     const [isNextStepLoading, setIsNextStepLoading] = useState(false);
-    
+
+    // 🎁 Estados para programa de lealtad
+    const [loyaltyPoints, setLoyaltyPoints] = useState<{
+        active: boolean;
+        points: number;
+        value: number;
+        canRedeem: boolean;
+        program?: {
+            pointsPerCurrency: number;
+            minPurchaseAmount: number;
+            pointsValue: number;
+            minPointsToRedeem: number;
+        };
+    } | null>(null);
+    const [loadingLoyaltyPoints, setLoadingLoyaltyPoints] = useState(false);
+
     // Estado del formulario de checkout
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
@@ -962,6 +977,18 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     }, [formData.shippingMethod, shippingConfig, selectedLocation]);
 
+    // 🎁 Consultar puntos de lealtad cuando el usuario ingresa su email
+    useEffect(() => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (formData.email && emailRegex.test(formData.email)) {
+            console.log('[Loyalty] 📧 Valid email detected, checking points...');
+            checkLoyaltyPoints(formData.email);
+        } else {
+            // Limpiar puntos si el email no es válido
+            setLoyaltyPoints(null);
+        }
+    }, [formData.email, storeId]);
+
     // Calcular y actualizar costo de envío
     useEffect(() => {
         console.log('🔄 [useEffect Debug] Executing shipping calculation useEffect');
@@ -1212,6 +1239,38 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             }
         }
     }, [userCoordinates, formData.lat, formData.lng, formData.address, isGoogleMapsLoaded, map]);
+
+    // 🎁 Función para consultar puntos de lealtad del cliente
+    const checkLoyaltyPoints = async (email: string) => {
+        if (!storeId || !email || !email.includes('@')) return;
+
+        setLoadingLoyaltyPoints(true);
+        try {
+            console.log('[Loyalty] 🎁 Checking loyalty points for:', email);
+
+            const response = await fetch(`/api/loyalty/check-points?storeId=${storeId}&customerEmail=${encodeURIComponent(email)}`);
+            const data = await response.json();
+
+            if (data.success) {
+                console.log('[Loyalty] ✅ Points retrieved:', data);
+                setLoyaltyPoints({
+                    active: data.active,
+                    points: data.points || 0,
+                    value: data.value || 0,
+                    canRedeem: data.canRedeem || false,
+                    program: data.program
+                });
+            } else {
+                console.log('[Loyalty] ℹ️  No points or program inactive');
+                setLoyaltyPoints(null);
+            }
+        } catch (error) {
+            console.error('[Loyalty] ❌ Error checking points:', error);
+            setLoyaltyPoints(null);
+        } finally {
+            setLoadingLoyaltyPoints(false);
+        }
+    };
 
     const handleInputChange = (field: keyof CheckoutData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
