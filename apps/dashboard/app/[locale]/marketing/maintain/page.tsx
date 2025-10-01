@@ -39,13 +39,13 @@ export default function MaintainCustomersPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-base sm:text-lg font-medium text-gray-900">Recuperación de Carritos Abandonados</h3>
+                        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Recuperación de Carritos Abandonados</h3>
+                        <div className="flex items-start gap-2 flex-col sm:flex-row sm:items-center">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             ✓ Activo
                           </span>
+                          <p className="text-sm text-gray-500">Envía recordatorios automáticos con cupones de descuento para recuperar ventas perdidas</p>
                         </div>
-                        <p className="mt-1 text-sm text-gray-500">Envía recordatorios automáticos con cupones de descuento para recuperar ventas perdidas</p>
                       </div>
                     </div>
                     <Link
