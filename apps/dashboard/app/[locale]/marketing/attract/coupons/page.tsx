@@ -598,8 +598,8 @@ export default function CouponsPage() {
         {/* Modal básico de creación */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto overflow-x-hidden h-full w-full z-50">
-            <div className="relative top-0 md:top-20 mx-auto min-h-full md:min-h-0 md:h-auto p-0 md:p-5 border-0 md:border w-full md:w-3/4 lg:w-1/2 md:max-w-2xl shadow-lg rounded-none md:rounded-md bg-white">
-              <div className="flex items-center justify-between mb-4 p-4 md:p-0">
+            <div className="relative top-0 md:top-20 mx-auto min-h-full md:min-h-0 md:h-auto p-4 md:p-5 border-0 md:border w-full md:w-3/4 lg:w-1/2 md:max-w-2xl shadow-lg rounded-none md:rounded-md bg-white">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
                   {editingCoupon ? 'Editar cupón' : 'Crear nuevo cupón'}
                 </h3>
@@ -627,7 +627,7 @@ export default function CouponsPage() {
                 </button>
               </div>
 
-              <form className="space-y-4 px-4 md:px-0 pb-4 md:pb-0 overflow-x-hidden">
+              <form className="space-y-4 overflow-x-hidden">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre del cupón</label>
                   <input
