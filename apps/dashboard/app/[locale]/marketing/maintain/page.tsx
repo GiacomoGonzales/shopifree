@@ -13,27 +13,17 @@ export default function MaintainCustomersPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-              <div>
-                <div className="flex items-center mb-2">
-                  <Link href="/marketing" className="text-sm text-gray-500 hover:text-gray-700 mr-2">
-                    Marketing
-                  </Link>
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                  <span className="text-sm text-gray-700 ml-2">{t('sections.maintain.title')}</span>
-                </div>
-                <h1 className="text-2xl font-light text-gray-900">{t('sections.maintain.title')}</h1>
-                <p className="mt-1 text-sm text-gray-600">{t('sections.maintain.description')}</p>
-              </div>
-              <button className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 w-full sm:w-auto">
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {t('createCampaign')}
-              </button>
+            <div className="flex items-center mb-2">
+              <Link href="/marketing" className="text-sm text-gray-500 hover:text-gray-700 mr-2">
+                Marketing
+              </Link>
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              <span className="text-sm text-gray-700 ml-2">{t('sections.maintain.title')}</span>
             </div>
+            <h1 className="text-2xl font-light text-gray-900">{t('sections.maintain.title')}</h1>
+            <p className="mt-1 text-sm text-gray-600">{t('sections.maintain.description')}</p>
           </div>
 
           <div className="px-4 sm:px-6 lg:px-8">
