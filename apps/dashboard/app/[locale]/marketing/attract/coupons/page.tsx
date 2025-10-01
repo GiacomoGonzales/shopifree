@@ -398,7 +398,7 @@ export default function CouponsPage() {
                       type="text"
                       value={searchFilter}
                       onChange={(e) => setSearchFilter(e.target.value)}
-                      className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
+                      className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                       placeholder="Buscar cupones..."
                     />
                   </div>
@@ -407,7 +407,7 @@ export default function CouponsPage() {
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
+                    className="block py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
                   >
                     <option value="">Todos los estados</option>
                     <option value="active">Activos</option>
