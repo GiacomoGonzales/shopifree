@@ -2023,13 +2023,39 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             // Guardar pedido en Firestore
             const orderDoc = await createOrder(storeId, orderData);
             const orderId = orderDoc?.id || null;
-            
+
             if (orderId) {
                 console.log('[Checkout] Order saved successfully:', orderId);
+
+                // 🎁 Agregar puntos de lealtad (si el programa está activo)
+                try {
+                    console.log('[Loyalty] 🎁 Attempting to add loyalty points...');
+                    const loyaltyResponse = await fetch('/api/loyalty/add-points', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            storeId,
+                            customerEmail: formData.email,
+                            customerName: formData.fullName,
+                            orderId,
+                            orderAmount: total
+                        })
+                    });
+
+                    const loyaltyResult = await loyaltyResponse.json();
+                    if (loyaltyResult.success && loyaltyResult.pointsAdded > 0) {
+                        console.log('[Loyalty] ✅ Points added:', loyaltyResult.pointsAdded);
+                    } else {
+                        console.log('[Loyalty] ℹ️  No points added:', loyaltyResult.message);
+                    }
+                } catch (loyaltyError) {
+                    console.error('[Loyalty] ❌ Error adding points (continuing anyway):', loyaltyError);
+                    // No bloquear el checkout si falla la acumulación de puntos
+                }
             } else {
                 console.warn('[Checkout] Order not saved (Firebase unavailable), continuing with checkout...');
             }
-            
+
             // Procesar según el método de checkout
             if (isWhatsAppCheckout) {
                 // Para WhatsApp: usar nueva función con ID del pedido
