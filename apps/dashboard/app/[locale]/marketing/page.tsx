@@ -14,7 +14,7 @@ export default function MarketingPage() {
       id: 'attract',
       title: t('sections.attract.title'),
       description: t('sections.attract.description'),
-      image: '/images/marketing/attract.png',
+      image: '/images/marketing/attract.png?v=2',
       gradientFrom: 'from-gray-600',
       gradientTo: 'to-gray-700',
       href: '/marketing/attract'
@@ -23,7 +23,7 @@ export default function MarketingPage() {
       id: 'maintain',
       title: t('sections.maintain.title'),
       description: t('sections.maintain.description'),
-      image: '/images/marketing/maintain.png',
+      image: '/images/marketing/maintain.png?v=2',
       gradientFrom: 'from-gray-600',
       gradientTo: 'to-gray-700',
       href: '/marketing/maintain'
@@ -32,7 +32,7 @@ export default function MarketingPage() {
       id: 'recover',
       title: t('sections.recover.title'),
       description: t('sections.recover.description'),
-      image: '/images/marketing/recover.png',
+      image: '/images/marketing/recover.png?v=2',
       gradientFrom: 'from-gray-600',
       gradientTo: 'to-gray-700',
       href: '/marketing/recover'
@@ -55,57 +55,48 @@ export default function MarketingPage() {
 
           <div className="px-4 sm:px-6 lg:px-8 pb-8">
             {/* Marketing Tools Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {marketingTools.map((tool) => (
                 <div
                   key={tool.id}
                   onClick={() => router.push(tool.href)}
-                  className="group relative bg-white rounded-2xl shadow-sm md:hover:shadow-2xl md:transition-all md:duration-500 cursor-pointer border border-gray-200 md:hover:border-gray-300 overflow-hidden"
+                  className="group relative cursor-pointer"
                 >
-                  {/* Gradient Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${tool.gradientFrom} ${tool.gradientTo} opacity-5 md:group-hover:opacity-10 md:transition-opacity md:duration-500`}></div>
-
-                  {/* Content Container */}
-                  <div className="relative p-6">
-                    {/* 3D Graphic Element */}
-                    <div className="relative w-full h-32 mb-4 flex items-center justify-center">
-                      <div className="relative w-28 h-28 md:group-hover:scale-110 md:transition-transform md:duration-500 md:ease-out" style={{ perspective: '1000px' }}>
+                  {/* Card Container */}
+                  <div className="bg-white rounded-3xl p-8 transition-all duration-300 md:hover:shadow-xl border border-gray-100 md:hover:border-gray-200 active:scale-[0.98]">
+                    {/* Floating Image */}
+                    <div className="flex justify-center mb-6">
+                      <div className="relative transition-transform duration-300 md:group-hover:scale-110 md:group-hover:-translate-y-2">
                         <Image
                           src={tool.image}
                           alt={tool.title}
-                          width={112}
-                          height={112}
-                          className="drop-shadow-2xl md:group-hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.25)] md:transition-all md:duration-500"
-                          style={{
-                            transform: 'translateZ(20px)',
-                            filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.15))'
-                          }}
+                          width={120}
+                          height={120}
+                          className="drop-shadow-[0_10px_25px_rgba(0,0,0,0.1)] transition-all duration-300 md:group-hover:drop-shadow-[0_20px_35px_rgba(0,0,0,0.15)]"
                         />
                       </div>
                     </div>
 
                     {/* Text Content */}
-                    <div className="text-center space-y-2">
-                      <h3 className="text-xl font-bold text-gray-900 md:group-hover:text-gray-700 md:transition-colors">
+                    <div className="text-center space-y-3">
+                      <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 md:group-hover:text-gray-700">
                         {tool.title}
                       </h3>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <p className="text-sm text-gray-500 leading-relaxed">
                         {tool.description}
                       </p>
                     </div>
 
-                    {/* Arrow Button */}
-                    <div className="mt-4 flex justify-center">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 md:group-hover:bg-gray-900 md:transition-all md:duration-300">
-                        <svg className="h-4 w-4 text-gray-600 md:group-hover:text-white md:group-hover:translate-x-1 md:transition-all md:duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {/* Arrow Indicator */}
+                    <div className="mt-6 flex justify-center">
+                      <div className="flex items-center gap-2 text-sm font-medium text-gray-600 md:text-gray-400 md:group-hover:text-gray-900 transition-colors duration-200">
+                        <span className="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">Ver más</span>
+                        <svg className="h-4 w-4 transform md:group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
                     </div>
                   </div>
-
-                  {/* Bottom Accent Bar */}
-                  <div className={`absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r ${tool.gradientFrom} ${tool.gradientTo} transform scale-x-0 md:group-hover:scale-x-100 md:transition-transform md:duration-500 origin-left`}></div>
                 </div>
               ))}
             </div>
