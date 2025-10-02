@@ -750,6 +750,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 ...(loyaltyDiscount > 0 && {
                     loyaltyDiscount,
                     loyaltyPointsRedeemed: pointsToRedeem
+                }),
+                // 🎁 Loyalty points earned
+                ...(loyaltyPoints?.active && loyaltyPoints.program?.pointsPerCurrency && subtotal >= (loyaltyPoints.program?.minPurchaseAmount || 0) && {
+                    loyaltyPointsEarned: Math.floor(subtotal * loyaltyPoints.program.pointsPerCurrency)
                 })
             };
 
@@ -2063,6 +2067,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 ...(loyaltyDiscount > 0 && {
                     loyaltyDiscount,
                     loyaltyPointsRedeemed: pointsToRedeem
+                }),
+                // 🎁 Loyalty points earned
+                ...(loyaltyPoints?.active && loyaltyPoints.program?.pointsPerCurrency && subtotal >= (loyaltyPoints.program?.minPurchaseAmount || 0) && {
+                    loyaltyPointsEarned: Math.floor(subtotal * loyaltyPoints.program.pointsPerCurrency)
                 })
             };
 
@@ -2298,7 +2306,18 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                     items: state.items,
                     totals: { subtotal, shipping, total },
                     currency: currency,
-                    checkoutMethod: 'traditional'
+                    checkoutMethod: 'traditional',
+                    discount: discount || 0,
+                    ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon }),
+                    // 🎁 Loyalty discount
+                    ...(loyaltyDiscount > 0 && {
+                        loyaltyDiscount,
+                        loyaltyPointsRedeemed: pointsToRedeem
+                    }),
+                    // 🎁 Loyalty points earned
+                    ...(loyaltyPoints?.active && loyaltyPoints.program?.pointsPerCurrency && subtotal >= (loyaltyPoints.program?.minPurchaseAmount || 0) && {
+                        loyaltyPointsEarned: Math.floor(subtotal * loyaltyPoints.program.pointsPerCurrency)
+                    })
                 };
                 
                 console.log('Checkout tradicional:', checkoutPayload);
@@ -2487,6 +2506,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         ...(loyaltyDiscount > 0 && {
                             loyaltyDiscount,
                             loyaltyPointsRedeemed: pointsToRedeem
+                        }),
+                        // 🎁 Loyalty points earned
+                        ...(loyaltyPoints?.active && loyaltyPoints.program?.pointsPerCurrency && subtotal >= (loyaltyPoints.program?.minPurchaseAmount || 0) && {
+                            loyaltyPointsEarned: Math.floor(subtotal * loyaltyPoints.program.pointsPerCurrency)
                         })
                     };
 
@@ -2613,6 +2636,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         ...(loyaltyDiscount > 0 && {
                             loyaltyDiscount,
                             loyaltyPointsRedeemed: pointsToRedeem
+                        }),
+                        // 🎁 Loyalty points earned
+                        ...(loyaltyPoints?.active && loyaltyPoints.program?.pointsPerCurrency && subtotal >= (loyaltyPoints.program?.minPurchaseAmount || 0) && {
+                            loyaltyPointsEarned: Math.floor(subtotal * loyaltyPoints.program.pointsPerCurrency)
                         })
                     };
 

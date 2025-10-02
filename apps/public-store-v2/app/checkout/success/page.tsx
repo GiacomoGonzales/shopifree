@@ -256,6 +256,12 @@ export default function CheckoutSuccessPage() {
                 <span>Total:</span>
                 <span>{formatPrice(orderData.totals.total, currency)}</span>
               </div>
+              {orderData.loyaltyPointsEarned && orderData.loyaltyPointsEarned > 0 && (
+                <div className="flex justify-between text-green-600 text-sm pt-2 border-t">
+                  <span>🎁 Puntos acumulados con esta compra:</span>
+                  <span className="font-semibold">+{orderData.loyaltyPointsEarned} pts</span>
+                </div>
+              )}
             </div>
           </div>
 

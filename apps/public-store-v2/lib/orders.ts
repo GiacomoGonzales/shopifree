@@ -81,6 +81,7 @@ export interface OrderData {
   // 🎁 Loyalty program fields
   loyaltyDiscount?: number;
   loyaltyPointsRedeemed?: number;
+  loyaltyPointsEarned?: number;
 }
 
 /**
