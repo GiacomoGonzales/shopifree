@@ -73,6 +73,8 @@ export interface StoreTexts {
   // Botones y acciones
   exploreProducts: string;
   viewCategories: string;
+  viewCollections: string;
+  viewBrands: string;
   addProducts: string;
   
   // Footer
@@ -276,6 +278,8 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     // Botones y acciones
     exploreProducts: 'Explorar productos',
     viewCategories: 'Ver categorías',
+    viewCollections: 'Ver colecciones',
+    viewBrands: 'Ver marcas',
     addProducts: 'Agrega productos para comenzar tu compra.',
     
     // Footer
@@ -478,6 +482,8 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     // Botones y acciones
     exploreProducts: 'Explore products',
     viewCategories: 'View categories',
+    viewCollections: 'View collections',
+    viewBrands: 'View brands',
     addProducts: 'Add products to start your purchase.',
     
     // Footer
@@ -680,6 +686,8 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     // Botões e ações
     exploreProducts: 'Explorar produtos',
     viewCategories: 'Ver categorias',
+    viewCollections: 'Ver coleções',
+    viewBrands: 'Ver marcas',
     addProducts: 'Adicione produtos para começar sua compra.',
     
     // Rodapé

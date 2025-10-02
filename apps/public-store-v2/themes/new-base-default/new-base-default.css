@@ -243,7 +243,7 @@
     .nbd-hero {
         min-height: calc(100vh - var(--nbd-header-height));
         align-items: center;
-        padding-top: calc(var(--nbd-space-xl) + 8px);
+        padding-top: var(--nbd-space-lg); /* Reducido para mejor ajuste con announcement bar */
         justify-content: center;
     }
 
@@ -348,15 +348,30 @@
     font-weight: 350;
     line-height: 1.1;
     color: var(--nbd-primary);
-    margin-bottom: var(--nbd-space-xl);
+    margin-bottom: var(--nbd-space-md);
     letter-spacing: -0.02em;
+}
+
+.nbd-hero-slogan {
+    font-size: var(--nbd-font-size-2xl);
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--nbd-secondary);
+    margin-bottom: var(--nbd-space-lg);
+    font-style: italic;
+    opacity: 0.9;
 }
 
 @media (max-width: 768px) {
     .nbd-hero-title {
         font-size: var(--nbd-font-size-2xl);
     }
-    
+
+    .nbd-hero-slogan {
+        font-size: var(--nbd-font-size-lg);
+        margin-bottom: var(--nbd-space-md);
+    }
+
     .nbd-hero-description {
         font-size: var(--nbd-font-size-xs);
         line-height: 1.4;
@@ -3475,8 +3490,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 @media (max-width: 768px) {
     .nbd-hero {
         min-height: 60vh; /* Reducir más la altura al no tener texto */
-        padding-top: var(--nbd-header-height); /* Reducido 4px más: +2px → +0px */
-        margin-top: 2px; /* Reducido 4px más: 4px → 0px, pero mínimo 2px para visibilidad */
+        padding-top: 80px; /* Por defecto sin barra de anuncio */
+        margin-top: 0; /* Sin margen superior */
         display: flex;
         align-items: center; /* Centrar verticalmente el contenido */
         justify-content: center;
@@ -3484,10 +3499,15 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         transform: none;
     }
 
+    /* Cuando hay barra de anuncio presente */
+    body:has([class*="announcement-"]) .nbd-hero {
+        padding-top: 110px; /* Con barra de anuncio */
+    }
+
     /* Estrategia específica para dispositivos iOS/Safari reales - reducido 4px más */
     @supports (-webkit-touch-callout: none) {
         .nbd-hero {
-            margin-top: 3px !important; /* Reducido 4px más: 6px → 2px, ajustado a 3px */
+            margin-top: 0 !important; /* Sin margen superior */
             padding-top: calc(var(--nbd-header-height) + 1px) !important; /* Reducido 4px más: +4px → +0px, ajustado a +1px */
         }
     }
@@ -3503,48 +3523,74 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 0; /* Sin espacio entre imagen y texto */
     }
 
-    /* Ocultar texto de hero en móvil - solo mostrar imagen */
-    .nbd-hero-title,
+    /* Mostrar título y slogan debajo de la imagen, ocultar solo descripción */
     .nbd-hero-description {
         display: none;
     }
 
-    /* Mantener el contenedor de texto pero hacerlo invisible */
+    .nbd-hero-title {
+        display: block;
+        text-align: center;
+        font-size: calc(var(--nbd-font-size-2xl) * 1.3); /* 30% más grande */
+        margin-top: 10px; /* 10px desde la imagen */
+        margin-bottom: var(--nbd-space-sm);
+        padding: 12px;
+    }
+
+    .nbd-hero-slogan {
+        display: block;
+        text-align: center;
+        font-size: calc(var(--nbd-font-size-md) * 1.3); /* 30% más grande */
+        margin-bottom: var(--nbd-space-md);
+        padding-bottom: 20px;
+    }
+
+    /* Contenedor de texto en flujo normal */
     .nbd-hero-text {
         background: transparent !important;
         padding: 0 !important;
         margin: 0 !important;
         position: relative;
-        order: 2; /* Mantener el orden */
+        order: 2; /* Después de la imagen */
         width: 100%;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
     }
 
     /* Ajustar la imagen hero para ocupar todo el espacio disponible */
     .nbd-hero-visual {
         order: 1;
         width: 100%; /* Ocupar todo el ancho del contenedor padre */
-        margin: 0 0 var(--nbd-space-lg) 0; /* Solo margen inferior, sin márgenes laterales */
+        margin: 0; /* Sin distancia entre imagen y título */
     }
 
-    /* Posicionar los botones relativos al contenedor hero principal */
+    .nbd-hero-media,
+    .nbd-hero-image,
+    .nbd-hero-img,
+    .nbd-hero-video {
+        margin-bottom: 0 !important;
+    }
+
+    .nbd-hero-image-overlay {
+        display: none; /* Ocultar overlay en móvil que genera espacio */
+    }
+
+    /* Botones en flujo normal debajo del slogan */
     .nbd-hero-actions {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: calc(-1 * (var(--nbd-space-xl) + 50px)); /* Más cerca de la hero, más lejos de colecciones */
-        z-index: 1000;
+        position: relative;
+        width: 100% !important;
         background: transparent !important;
-        padding: 0;
-        margin: 0;
-        width: auto;
+        padding: 0 0 20px 0 !important; /* 20px padding inferior */
+        margin: 0 !important;
         /* Hacer que ocupen todo el ancho disponible */
         display: flex !important;
         flex-direction: column !important;
-        gap: var(--nbd-space-lg) !important;
+        gap: var(--nbd-space-md) !important;
+        align-items: stretch !important;
     }
 
     /* Asegurar que los botones ocupen todo el ancho */
@@ -3552,6 +3598,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         width: 100% !important;
         max-width: none !important;
         margin: 0 !important;
+        flex: 1 !important;
     }
 
 
@@ -3573,14 +3620,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
     /* Reducir el padding del contenido de hero al ocultar texto */
     .nbd-hero-content {
-        padding: var(--nbd-space-lg) 0;
-        /* Reducir padding inferior para dar espacio a botones */
-        padding-bottom: 0;
+        padding: 0;
     }
 
     /* Dar espacio entre hero y siguiente sección */
     .nbd-hero {
-        margin-bottom: calc(var(--nbd-space-4xl) + 20px);
+        margin-bottom: 0;
     }
 }
 

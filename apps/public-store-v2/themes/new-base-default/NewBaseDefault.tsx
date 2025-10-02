@@ -901,6 +901,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     storeSubdomain={storeSubdomain}
                     t={t as (key: string) => string}
                     toCloudinarySquare={toCloudinarySquare as (url: string, size: number) => string}
+                    categoriesCount={topCategories.length}
+                    collectionsCount={collections?.length || 0}
+                    brandsCount={brands?.length || 0}
                 />
             )}
 
@@ -909,10 +912,12 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
                 return (!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 &&
                         (storeInfo?.sections?.collections?.enabled === true)) ? (
-                    <CollectionsMosaic
-                        collections={collections}
-                        storeSubdomain={storeSubdomain}
-                    />
+                    <div id="colecciones">
+                        <CollectionsMosaic
+                            collections={collections}
+                            storeSubdomain={storeSubdomain}
+                        />
+                    </div>
                 ) : null;
             })()}
 
@@ -993,13 +998,15 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             {/* Sección de Marcas Carousel - Solo en home */}
             {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && brands && brands.length > 0 &&
              (storeInfo?.sections?.brands?.enabled === true) && (
-                <NewBaseDefaultBrands
-                    brands={brands}
-                    isMobile={isMobile}
-                    additionalText={additionalText}
-                    buildUrl={buildUrl}
-                    toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
-                />
+                <div id="marcas">
+                    <NewBaseDefaultBrands
+                        brands={brands}
+                        isMobile={isMobile}
+                        additionalText={additionalText}
+                        buildUrl={buildUrl}
+                        toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
+                    />
+                </div>
             )}
 
             <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} storeId={storeId || undefined} />

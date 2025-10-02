@@ -25,6 +25,7 @@ export type StoreBasicInfo = {
     id?: string; // Agregar ID para facilitar el manejo
     ownerId?: string; // ID del usuario dueño de la tienda
     storeName: string;
+    slogan?: string; // Slogan de la tienda
     description?: string;
     heroImageUrl?: string;
     heroMediaUrl?: string;
@@ -187,7 +188,8 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             id: storeId, // Incluir el ID
             ownerId: data.ownerId || undefined, // ID del usuario dueño
             storeName: data.storeName || data.name || "",
-            description: data.description || data.slogan || "",
+            slogan: data.slogan || undefined,
+            description: data.description || undefined,
             heroImageUrl: data.heroImageUrl || data.headerImageUrl || data.logoUrl || undefined,
             heroMediaUrl: data.heroMediaUrl || undefined,
             heroMediaType: data.heroMediaType || undefined,
