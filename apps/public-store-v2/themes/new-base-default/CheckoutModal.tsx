@@ -200,6 +200,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         };
     } | null>(null);
     const [loadingLoyaltyPoints, setLoadingLoyaltyPoints] = useState(false);
+    const [pointsToRedeem, setPointsToRedeem] = useState<number>(0);
+    const [loyaltyDiscount, setLoyaltyDiscount] = useState<number>(0);
+    const [pointsInput, setPointsInput] = useState<string>('');
+    const [appliedPoints, setAppliedPoints] = useState<{points: number; discount: number} | null>(null);
+    const [pointsError, setPointsError] = useState<string>('');
 
     // Estado del formulario de checkout
     const [formData, setFormData] = useState<CheckoutData>({
@@ -323,11 +328,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         : { newSubtotal: subtotal, newShipping: shipping, discountAmount: 0 };
     
     const discount = discountCalculation.discountAmount;
-    
+
     // Si está fuera de cobertura, no incluir shipping en el total (se coordina aparte)
-    const total = isOutsideCoverage 
-        ? discountCalculation.newSubtotal 
+    const totalBeforeLoyalty = isOutsideCoverage
+        ? discountCalculation.newSubtotal
         : discountCalculation.newSubtotal + discountCalculation.newShipping;
+
+    // Aplicar descuento de puntos de lealtad
+    const total = Math.max(0, totalBeforeLoyalty - loyaltyDiscount);
 
     // Función para validar cupón
     const handleValidateCoupon = async () => {
@@ -737,7 +745,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 },
                 checkoutMethod: 'traditional' as const,
                 discount: discount || 0,
-                ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
+                ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon }),
+                // 🎁 Loyalty discount
+                ...(loyaltyDiscount > 0 && {
+                    loyaltyDiscount,
+                    loyaltyPointsRedeemed: pointsToRedeem
+                })
             };
 
             // Convertir a formato de cargo de Culqi
@@ -1270,6 +1283,53 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         } finally {
             setLoadingLoyaltyPoints(false);
         }
+    };
+
+    // 🎁 Función para aplicar puntos de lealtad
+    const handleApplyLoyaltyPoints = () => {
+        if (!loyaltyPoints || !loyaltyPoints.program || !pointsInput.trim()) return;
+
+        const points = parseInt(pointsInput) || 0;
+
+        // Validaciones
+        if (points <= 0) {
+            setPointsError('Ingresa una cantidad válida');
+            return;
+        }
+
+        if (points > loyaltyPoints.points) {
+            setPointsError(`No tienes suficientes puntos (máximo ${loyaltyPoints.points})`);
+            return;
+        }
+
+        if (points < loyaltyPoints.program.minPointsToRedeem) {
+            setPointsError(`Mínimo ${loyaltyPoints.program.minPointsToRedeem} puntos para canjear`);
+            return;
+        }
+
+        // Calcular descuento
+        const discount = points * loyaltyPoints.program.pointsValue;
+
+        // Aplicar puntos
+        setPointsToRedeem(points);
+        setLoyaltyDiscount(discount);
+        setAppliedPoints({ points, discount });
+        setPointsError('');
+
+        console.log('[Loyalty] 🎁 Points applied:', {
+            points,
+            discount,
+            pointsValue: loyaltyPoints.program.pointsValue
+        });
+    };
+
+    // 🎁 Función para quitar puntos aplicados
+    const handleRemoveLoyaltyPoints = () => {
+        setPointsToRedeem(0);
+        setLoyaltyDiscount(0);
+        setAppliedPoints(null);
+        setPointsInput('');
+        setPointsError('');
     };
 
     const handleInputChange = (field: keyof CheckoutData, value: string) => {
@@ -1999,7 +2059,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 checkoutMethod: isWhatsAppCheckout ? 'whatsapp' : 'traditional',
                 whatsappPhone: storeInfo?.socialMedia?.whatsapp || storeInfo?.phone || undefined,
                 discount: discount,
-                ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
+                ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon }),
+                // 🎁 Loyalty discount
+                ...(loyaltyDiscount > 0 && {
+                    loyaltyDiscount,
+                    loyaltyPointsRedeemed: pointsToRedeem
+                })
             };
 
             console.log('[Checkout] Saving order to Firestore...', {
@@ -2026,6 +2091,32 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
             if (orderId) {
                 console.log('[Checkout] Order saved successfully:', orderId);
+
+                // 🎁 Redimir puntos de lealtad (si se aplicaron puntos)
+                if (pointsToRedeem > 0) {
+                    try {
+                        console.log('[Loyalty] 🎁 Redeeming loyalty points...');
+                        const redeemResponse = await fetch('/api/loyalty/redeem-points', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                storeId,
+                                customerEmail: formData.email,
+                                pointsToRedeem,
+                                orderId
+                            })
+                        });
+
+                        const redeemResult = await redeemResponse.json();
+                        if (redeemResult.success) {
+                            console.log('[Loyalty] ✅ Points redeemed:', redeemResult.pointsRedeemed);
+                        } else {
+                            console.error('[Loyalty] ❌ Failed to redeem points:', redeemResult.error);
+                        }
+                    } catch (redeemError) {
+                        console.error('[Loyalty] ❌ Error redeeming points (continuing anyway):', redeemError);
+                    }
+                }
 
                 // 🎁 Agregar puntos de lealtad (si el programa está activo)
                 try {
@@ -2394,9 +2485,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         },
                         checkoutMethod: 'traditional' as const,
                         discount: discount || 0,
-                        ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
+                        ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon }),
+                        // 🎁 Loyalty discount
+                        ...(loyaltyDiscount > 0 && {
+                            loyaltyDiscount,
+                            loyaltyPointsRedeemed: pointsToRedeem
+                        })
                     };
-                    
+
                     // Convertir a preferencia MercadoPago
                     console.log('🔔 [MercadoPago] Convirtiendo a preferencia MercadoPago...');
                     const preference = orderDataToPreference(orderData, mpConfig);
@@ -2515,7 +2611,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         },
                         checkoutMethod: 'traditional' as const,
                         discount: discount || 0,
-                        ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon })
+                        ...(formData.appliedCoupon && { appliedCoupon: formData.appliedCoupon }),
+                        // 🎁 Loyalty discount
+                        ...(loyaltyDiscount > 0 && {
+                            loyaltyDiscount,
+                            loyaltyPointsRedeemed: pointsToRedeem
+                        })
                     };
 
                     // Cargar script de Culqi
@@ -2738,17 +2839,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             placeholder={t('emailPlaceholder')}
                                             required
                                         />
-                                        {/* 🎁 Mensaje sutil de puntos disponibles */}
-                                        {loyaltyPoints?.active && loyaltyPoints.points > 0 && (
-                                            <p style={{
-                                                fontSize: '12px',
-                                                color: '#6b7280',
-                                                marginTop: '6px',
-                                                marginBottom: '0'
-                                            }}>
-                                                Tienes {loyaltyPoints.points} puntos disponibles ({formatPrice(loyaltyPoints.value, currency)})
-                                            </p>
-                                        )}
                                     </div>
                                     <div className="nbd-form-group nbd-form-group--full">
                                         <label className="nbd-form-label">{t('phone')} *</label>
@@ -3232,6 +3322,97 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     </div>
                                 </div>
 
+                                {/* 🎁 Canjear puntos de lealtad */}
+                                {loyaltyPoints?.active && loyaltyPoints.points > 0 && (
+                                    <div className="nbd-form-group nbd-form-group--full">
+                                        <label className="nbd-form-label">
+                                            Puntos de lealtad
+                                            <span style={{
+                                                fontSize: '12px',
+                                                color: '#6b7280',
+                                                fontWeight: 'normal',
+                                                marginLeft: '8px'
+                                            }}>
+                                                ({loyaltyPoints.points} disponibles)
+                                            </span>
+                                        </label>
+
+                                        {!appliedPoints ? (
+                                            loyaltyPoints.canRedeem ? (
+                                                <div>
+                                                    <div className="nbd-coupon-input-group">
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            max={loyaltyPoints.points}
+                                                            className="nbd-form-input nbd-coupon-input"
+                                                            value={pointsInput}
+                                                            onChange={(e) => setPointsInput(e.target.value)}
+                                                            placeholder={`Mínimo ${loyaltyPoints.program?.minPointsToRedeem || 0} puntos`}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="nbd-btn nbd-btn--secondary nbd-coupon-apply-btn"
+                                                            onClick={handleApplyLoyaltyPoints}
+                                                            disabled={!pointsInput.trim()}
+                                                        >
+                                                            {t('apply')}
+                                                        </button>
+                                                    </div>
+
+                                                    {pointsError && (
+                                                        <div className="nbd-coupon-error">
+                                                            {pointsError}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p style={{
+                                                    fontSize: '13px',
+                                                    color: '#6b7280',
+                                                    padding: '12px',
+                                                    backgroundColor: '#f8f9fa',
+                                                    border: '1px solid #e9ecef',
+                                                    borderRadius: '6px',
+                                                    margin: '0'
+                                                }}>
+                                                    Tienes {loyaltyPoints.points} puntos (necesitas {loyaltyPoints.program?.minPointsToRedeem || 0} para canjear)
+                                                </p>
+                                            )
+                                        ) : (
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '12px',
+                                                backgroundColor: '#f8f9fa',
+                                                border: '1px solid #e9ecef',
+                                                borderRadius: '6px',
+                                                fontSize: '14px'
+                                            }}>
+                                                <span style={{ color: '#6c757d' }}>
+                                                    <strong style={{ color: '#495057' }}>{appliedPoints.points} puntos</strong> canjeados ({formatPrice(appliedPoints.discount, currency)})
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveLoyaltyPoints}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: '#6c757d',
+                                                        fontSize: '13px',
+                                                        cursor: 'pointer',
+                                                        textDecoration: 'underline',
+                                                        padding: '0'
+                                                    }}
+                                                >
+                                                    Quitar
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* Cupón de descuento */}
                                 <div className="nbd-form-group nbd-form-group--full">
                                     <label className="nbd-form-label">{t('discount')}</label>
@@ -3385,6 +3566,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                         </span>
                                         <span className="nbd-discount-amount">
                                             -{formatPrice(discount, currency)}
+                                        </span>
+                                    </div>
+                                )}
+                                {loyaltyDiscount > 0 && (
+                                    <div className="nbd-summary-line nbd-summary-discount">
+                                        <span>
+                                            Descuento puntos ({pointsToRedeem} pts)
+                                        </span>
+                                        <span className="nbd-discount-amount">
+                                            -{formatPrice(loyaltyDiscount, currency)}
                                         </span>
                                     </div>
                                 )}

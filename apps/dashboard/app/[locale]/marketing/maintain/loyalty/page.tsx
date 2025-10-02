@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '../../../../../components/DashboardLayout'
+import Toast from '../../../../../components/shared/Toast/Toast'
 import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore } from '../../../../../lib/store'
 import {
@@ -17,6 +18,14 @@ import {
   calculatePointsValue
 } from '../../../../../lib/loyalty'
 
+// Mapeo de códigos de moneda a símbolos
+const currencySymbols: Record<string, string> = {
+  'USD': '$', 'EUR': '€', 'MXN': '$', 'COP': '$', 'ARS': '$', 'CLP': '$',
+  'PEN': 'S/', 'BRL': 'R$', 'UYU': '$', 'PYG': '₲', 'BOB': 'Bs', 'VES': 'Bs',
+  'GTQ': 'Q', 'CRC': '₡', 'NIO': 'C$', 'PAB': 'B/.', 'DOP': 'RD$', 'HNL': 'L',
+  'SVC': '$', 'GBP': '£', 'CAD': 'C$', 'CHF': 'CHF', 'JPY': '¥', 'CNY': '¥', 'AUD': 'A$'
+}
+
 export default function LoyaltyProgramPage() {
   const t = useTranslations('marketing')
   const router = useRouter()
@@ -25,15 +34,19 @@ export default function LoyaltyProgramPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [storeId, setStoreId] = useState<string | null>(null)
+  const [storeCurrency, setStoreCurrency] = useState('USD')
   const [program, setProgram] = useState<LoyaltyProgram | null>(null)
   const [customers, setCustomers] = useState<CustomerPoints[]>([])
 
+  // Toast state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
   // Form state
   const [active, setActive] = useState(false)
-  const [pointsPerCurrency, setPointsPerCurrency] = useState(1)
-  const [minPurchaseAmount, setMinPurchaseAmount] = useState(0)
-  const [pointsValue, setPointsValue] = useState(0.1)
-  const [minPointsToRedeem, setMinPointsToRedeem] = useState(100)
+  const [pointsPerCurrency, setPointsPerCurrency] = useState<number | string>(1)
+  const [minPurchaseAmount, setMinPurchaseAmount] = useState<number | string>(0)
+  const [pointsValue, setPointsValue] = useState<number | string>(0.1)
+  const [minPointsToRedeem, setMinPointsToRedeem] = useState<number | string>(100)
   const [sendEmailOnEarn, setSendEmailOnEarn] = useState(true)
   const [sendEmailOnRedeem, setSendEmailOnRedeem] = useState(true)
 
@@ -48,6 +61,7 @@ export default function LoyaltyProgramPage() {
       const store = await getUserStore(user.uid)
       if (store) {
         setStoreId(store.id)
+        setStoreCurrency(store.currency || 'USD')
 
         // Cargar programa existente
         const existingProgram = await getLoyaltyProgram(store.id)
@@ -79,24 +93,24 @@ export default function LoyaltyProgramPage() {
     setSaving(true)
     try {
       const programData = {
-        pointsPerCurrency,
-        minPurchaseAmount,
-        pointsValue,
-        minPointsToRedeem,
+        pointsPerCurrency: Number(pointsPerCurrency) || 0,
+        minPurchaseAmount: Number(minPurchaseAmount) || 0,
+        pointsValue: Number(pointsValue) || 0,
+        minPointsToRedeem: Number(minPointsToRedeem) || 0,
         sendEmailOnEarn,
         sendEmailOnRedeem
       }
 
       const success = await saveLoyaltyProgram(storeId, programData, active)
       if (success) {
-        alert('Programa de lealtad guardado exitosamente')
+        setToast({ message: 'Programa de lealtad guardado exitosamente', type: 'success' })
         await loadData() // Recargar datos
       } else {
-        alert('Error al guardar el programa de lealtad')
+        setToast({ message: 'Error al guardar el programa de lealtad', type: 'error' })
       }
     } catch (error) {
       console.error('Error saving program:', error)
-      alert('Error al guardar el programa de lealtad')
+      setToast({ message: 'Error al guardar el programa de lealtad', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -105,7 +119,7 @@ export default function LoyaltyProgramPage() {
   const handleToggle = async () => {
     if (!storeId || !program) {
       // Si no hay programa, hay que crearlo primero
-      alert('Por favor configura el programa antes de activarlo')
+      setToast({ message: 'Por favor configura el programa antes de activarlo', type: 'error' })
       return
     }
 
@@ -113,6 +127,10 @@ export default function LoyaltyProgramPage() {
     const success = await toggleLoyaltyProgram(storeId, newActive)
     if (success) {
       setActive(newActive)
+      setToast({
+        message: newActive ? 'Programa de lealtad activado' : 'Programa de lealtad desactivado',
+        type: 'success'
+      })
     }
   }
 
@@ -128,7 +146,10 @@ export default function LoyaltyProgramPage() {
 
   // Calcular ejemplo de valor
   const examplePoints = 100
-  const exampleValue = examplePoints * pointsValue
+  const exampleValue = examplePoints * (Number(pointsValue) || 0)
+
+  // Obtener símbolo de moneda
+  const currencySymbol = currencySymbols[storeCurrency] || storeCurrency
 
   return (
     <DashboardLayout>
@@ -136,22 +157,18 @@ export default function LoyaltyProgramPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center mb-2">
-              <Link href="/marketing" className="text-sm text-gray-500 hover:text-gray-700 mr-2">
-                Marketing
-              </Link>
-              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center flex-wrap gap-2 mb-2">
+              <Link href="/marketing" className="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap">Marketing</Link>
+              <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-              <Link href="/marketing/maintain" className="text-sm text-gray-500 hover:text-gray-700 mx-2">
-                Mantener Clientes
-              </Link>
-              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link href="/marketing/maintain" className="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap">Mantener Clientes</Link>
+              <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-              <span className="text-sm text-gray-700 ml-2">Programa de Lealtad</span>
+              <span className="text-sm text-gray-700 whitespace-nowrap">Programa de Lealtad</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-2xl font-light text-gray-900">Programa de Lealtad</h1>
                 <p className="mt-1 text-sm text-gray-600">Recompensa a tus clientes con puntos canjeables</p>
@@ -191,31 +208,39 @@ export default function LoyaltyProgramPage() {
                   <div className="p-6 space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Puntos por cada $ gastado
+                        Puntos por cada {currencySymbol} gastado
                       </label>
                       <input
-                        type="number"
-                        min="0"
-                        step="0.1"
+                        type="text"
                         value={pointsPerCurrency}
-                        onChange={(e) => setPointsPerCurrency(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setPointsPerCurrency(value);
+                          }
+                        }}
+                        placeholder="1"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 text-base"
                       />
                       <p className="mt-1 text-xs text-gray-500">
-                        Ejemplo: Si es 1, el cliente gana 1 punto por cada $1 que gaste
+                        Ejemplo: Si es 1, el cliente gana 1 punto por cada {currencySymbol}1 que gaste
                       </p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Compra mínima para ganar puntos ($)
+                        Compra mínima para ganar puntos ({currencySymbol})
                       </label>
                       <input
-                        type="number"
-                        min="0"
-                        step="1"
+                        type="text"
                         value={minPurchaseAmount}
-                        onChange={(e) => setMinPurchaseAmount(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setMinPurchaseAmount(value);
+                          }
+                        }}
+                        placeholder="0"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 text-base"
                       />
                       <p className="mt-1 text-xs text-gray-500">
@@ -227,8 +252,8 @@ export default function LoyaltyProgramPage() {
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <p className="text-sm font-medium text-gray-700 mb-2">Vista previa:</p>
                       <p className="text-sm text-gray-600">
-                        Un cliente que compre $100 ganará <span className="font-semibold text-gray-900">{Math.floor(100 * pointsPerCurrency)} puntos</span>
-                        {minPurchaseAmount > 0 && <span> (si la compra es mayor a ${minPurchaseAmount})</span>}
+                        Un cliente que compre {currencySymbol}100 ganará <span className="font-semibold text-gray-900">{Math.floor(100 * (Number(pointsPerCurrency) || 0))} puntos</span>
+                        {Number(minPurchaseAmount) > 0 && <span> (si la compra es mayor a {currencySymbol}{minPurchaseAmount})</span>}
                       </p>
                     </div>
                   </div>
@@ -243,18 +268,22 @@ export default function LoyaltyProgramPage() {
                   <div className="p-6 space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Valor de cada punto ($)
+                        Valor de cada punto ({currencySymbol})
                       </label>
                       <input
-                        type="number"
-                        min="0"
-                        step="0.01"
+                        type="text"
                         value={pointsValue}
-                        onChange={(e) => setPointsValue(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setPointsValue(value);
+                          }
+                        }}
+                        placeholder="0.1"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 text-base"
                       />
                       <p className="mt-1 text-xs text-gray-500">
-                        Ejemplo: Si es 0.1, entonces 100 puntos = $10 de descuento
+                        Ejemplo: Si es 0.1, entonces 100 puntos = {currencySymbol}10 de descuento
                       </p>
                     </div>
 
@@ -263,11 +292,15 @@ export default function LoyaltyProgramPage() {
                         Puntos mínimos para canjear
                       </label>
                       <input
-                        type="number"
-                        min="0"
-                        step="1"
+                        type="text"
                         value={minPointsToRedeem}
-                        onChange={(e) => setMinPointsToRedeem(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setMinPointsToRedeem(value);
+                          }
+                        }}
+                        placeholder="100"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 text-base"
                       />
                       <p className="mt-1 text-xs text-gray-500">
@@ -279,10 +312,10 @@ export default function LoyaltyProgramPage() {
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <p className="text-sm font-medium text-gray-700 mb-2">Vista previa:</p>
                       <p className="text-sm text-gray-600">
-                        {minPointsToRedeem} puntos = <span className="font-semibold text-gray-900">${(minPointsToRedeem * pointsValue).toFixed(2)} de descuento</span>
+                        {minPointsToRedeem || 0} puntos = <span className="font-semibold text-gray-900">{currencySymbol}{((Number(minPointsToRedeem) || 0) * (Number(pointsValue) || 0)).toFixed(2)} de descuento</span>
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        {examplePoints} puntos = <span className="font-semibold text-gray-900">${exampleValue.toFixed(2)} de descuento</span>
+                        {examplePoints} puntos = <span className="font-semibold text-gray-900">{currencySymbol}{exampleValue.toFixed(2)} de descuento</span>
                       </p>
                     </div>
                   </div>
@@ -365,7 +398,7 @@ export default function LoyaltyProgramPage() {
                               <p className="text-sm font-semibold text-gray-900">{customer.currentPoints} pts</p>
                               {program && (
                                 <p className="text-xs text-gray-500">
-                                  ${calculatePointsValue(customer.currentPoints, program).toFixed(2)}
+                                  {currencySymbol}{calculatePointsValue(customer.currentPoints, program).toFixed(2)}
                                 </p>
                               )}
                             </div>
@@ -385,6 +418,15 @@ export default function LoyaltyProgramPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </DashboardLayout>
   )
 }

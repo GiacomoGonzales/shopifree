@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       orderId,
       orderAmount,
       description: `Compra #${orderId.slice(-6)}`,
-      date: serverTimestamp()
+      date: new Date()
     };
 
     if (querySnapshot.empty) {

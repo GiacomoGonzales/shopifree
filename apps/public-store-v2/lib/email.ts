@@ -146,7 +146,7 @@ export async function sendCustomerOrderConfirmation(
         RESUMEN:
         Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}
         Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}
-        ${orderData.discount && orderData.discount > 0 ? `Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}: -${formatPrice(orderData.discount, orderData.currency)}\n        ` : ''}Total: ${formatPrice(orderData.totals.total, orderData.currency)}
+        ${orderData.discount && orderData.discount > 0 ? `Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}: -${formatPrice(orderData.discount, orderData.currency)}\n        ` : ''}${orderData.loyaltyDiscount && orderData.loyaltyDiscount > 0 ? `Descuento puntos (${orderData.loyaltyPointsRedeemed} pts): -${formatPrice(orderData.loyaltyDiscount, orderData.currency)}\n        ` : ''}Total: ${formatPrice(orderData.totals.total, orderData.currency)}
 
         INFORMACIÓN DE ENTREGA:
         ${orderData.customer.fullName}
@@ -256,6 +256,12 @@ export async function sendCustomerOrderConfirmation(
                   <tr>
                     <td style="font-size: 14px; color: #28a745; padding: 4px 0;">Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}</td>
                     <td style="font-size: 14px; color: #28a745; text-align: right; padding: 4px 0;">-${formatPrice(orderData.discount, orderData.currency)}</td>
+                  </tr>
+                  ` : ''}
+                  ${orderData.loyaltyDiscount && orderData.loyaltyDiscount > 0 ? `
+                  <tr>
+                    <td style="font-size: 14px; color: #28a745; padding: 4px 0;">Descuento puntos (${orderData.loyaltyPointsRedeemed} pts)</td>
+                    <td style="font-size: 14px; color: #28a745; text-align: right; padding: 4px 0;">-${formatPrice(orderData.loyaltyDiscount, orderData.currency)}</td>
                   </tr>
                   ` : ''}
                 </table>
@@ -380,7 +386,7 @@ export async function sendAdminOrderNotification(
         TOTALES:
         Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}
         Envío: ${formatPrice(orderData.totals.shipping, orderData.currency)}
-        ${orderData.discount && orderData.discount > 0 ? `Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}: -${formatPrice(orderData.discount, orderData.currency)}\n        ` : ''}TOTAL: ${formatPrice(orderData.totals.total, orderData.currency)}
+        ${orderData.discount && orderData.discount > 0 ? `Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}: -${formatPrice(orderData.discount, orderData.currency)}\n        ` : ''}${orderData.loyaltyDiscount && orderData.loyaltyDiscount > 0 ? `Descuento puntos (${orderData.loyaltyPointsRedeemed} pts): -${formatPrice(orderData.loyaltyDiscount, orderData.currency)}\n        ` : ''}TOTAL: ${formatPrice(orderData.totals.total, orderData.currency)}
 
         Revisa tu dashboard para gestionar este pedido.
 
@@ -523,6 +529,12 @@ export async function sendAdminOrderNotification(
                   <tr>
                     <td style="font-size: 14px; color: #7fdb90; padding: 4px 0;">Descuento${orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}</td>
                     <td style="font-size: 14px; color: #7fdb90; text-align: right; padding: 4px 0;">-${formatPrice(orderData.discount, orderData.currency)}</td>
+                  </tr>
+                  ` : ''}
+                  ${orderData.loyaltyDiscount && orderData.loyaltyDiscount > 0 ? `
+                  <tr>
+                    <td style="font-size: 14px; color: #7fdb90; padding: 4px 0;">Descuento puntos (${orderData.loyaltyPointsRedeemed} pts)</td>
+                    <td style="font-size: 14px; color: #7fdb90; text-align: right; padding: 4px 0;">-${formatPrice(orderData.loyaltyDiscount, orderData.currency)}</td>
                   </tr>
                   ` : ''}
                 </table>

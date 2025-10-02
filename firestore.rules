@@ -18,45 +18,55 @@ service cloud.firestore {
       // Permitir escritura solo al propio usuario
       allow read: if isAuthenticated();
       allow write: if isOwner(userId);
-      
+
       // Reglas para favoritos del usuario
       match /favorites/{favoriteId} {
         allow read, write: if isOwner(userId);
       }
     }
-    
+
+    // Permitir lectura de usuarios para obtener email del dueño en notificaciones de pedidos
+    match /users/{userId} {
+      allow get: if true;
+    }
+
     // ✅ REGLAS GLOBALES PARA TIENDA PÚBLICA
     // Permitir lectura pública de productos globales
     match /products/{productId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
-    
+
     // Permitir lectura pública de categorías globales
     match /categories/{categoryId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
-    
+
     // Permitir lectura pública de colecciones globales
     match /collections/{collectionId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
-    
+
+    // Contador de órdenes
+    match /stores/{storeId}/config/orderCounter {
+      allow read, write: if true;
+    }
+
     // Reglas para tiendas
     match /stores/{storeId} {
       // Información básica de la tienda es pública
       allow read: if true;
-      
+
       // Permitir crear tienda nueva si el usuario autenticado es el dueño
-      allow create: if isAuthenticated() && 
+      allow create: if isAuthenticated() &&
                       request.auth.uid == request.resource.data.ownerId;
-      
+
       // Solo el dueño puede actualizar/eliminar la tienda existente
-      allow update, delete: if isAuthenticated() && 
+      allow update, delete: if isAuthenticated() &&
                               request.auth.uid == resource.data.ownerId;
-      
+
       // Reglas para clientes de la tienda
       match /customers/{customerId} {
         // 🆕 PERMITIR CREACIÓN PÚBLICA DE CLIENTES (para checkout sin registro)
@@ -73,86 +83,109 @@ service cloud.firestore {
         allow read, write: if isAuthenticated() &&
                             request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para órdenes
       match /orders/{orderId} {
         // Lectura: permitir a cualquiera que tenga el ID específico del pedido (es único y difícil de adivinar)
         // También permitir al dueño de la tienda si está autenticado
-        allow read: if true || 
-                     (isAuthenticated() && 
+        allow read: if true ||
+                     (isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId);
-        
-        // Crear orden: permitir todas las creaciones 
+
+        // Crear orden: permitir todas las creaciones
         allow create: if true;
-        
+
         // Actualizar orden: solo el cliente autenticado (si tiene userId) o el dueño de la tienda
-        allow update: if isAuthenticated() && 
-                       (request.auth.uid == resource.data.userId || 
+        allow update: if isAuthenticated() &&
+                       (request.auth.uid == resource.data.userId ||
                         request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId);
-        
+
         // Eliminar orden: solo el dueño de la tienda
-        allow delete: if isAuthenticated() && 
+        allow delete: if isAuthenticated() &&
                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
+      // 🎁 Reglas para programa de lealtad
+      match /config/loyaltyProgram {
+        // Lectura pública para que los clientes vean si hay programa activo
+        allow read: if true;
+
+        // Solo el dueño puede crear/actualizar la configuración
+        allow create, update: if isAuthenticated() &&
+                                request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
+
+      // Reglas para puntos de clientes
+      match /customerPoints/{pointsId} {
+        // Lectura pública para que los clientes vean sus puntos
+        allow read: if true;
+
+        // Permitir creación y actualización pública (necesario para acumular puntos después de compras)
+        allow create, update: if true;
+
+        // Solo el dueño puede eliminar registros de puntos
+        allow delete: if isAuthenticated() &&
+                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
+
       // Reglas para productos (solo lectura para clientes)
       match /products/{productId} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para categorías (solo lectura para clientes)
       match /categories/{categoryId} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
-        
+
         // Reglas para subcategorías
         match /subcategorias/{subcategoryId} {
           allow read: if true;
-          allow write: if isAuthenticated() && 
+          allow write: if isAuthenticated() &&
                         request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
         }
       }
-      
+
       // Reglas para marcas (solo lectura para clientes)
       match /brands/{brandId} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para colecciones (solo lectura para clientes)
       match /collections/{collectionId} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para zonas de entrega
       match /deliveryZones/{zoneId} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para filtros de productos
       match /filters/{filterId} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
+        allow write: if isAuthenticated() &&
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para newsletter (suscripciones públicas)
       match /newsletter/{subscriptionId} {
         // Permitir a cualquiera crear y leer suscripciones (necesario para verificar duplicados)
         allow create, read: if true;
         // Solo el dueño puede actualizar/eliminar suscripciones
-        allow update, delete: if isAuthenticated() && 
+        allow update, delete: if isAuthenticated() &&
                                 request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para cupones de descuento
       match /coupons/{couponId} {
         // Lectura pública para validación de cupones
@@ -172,13 +205,27 @@ service cloud.firestore {
         allow create, update, delete: if isAuthenticated() &&
                                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
-      
+
       // Reglas para configuraciones de la tienda (settings)
       match /settings/{settingId} {
         // TEMPORAL: Permitir lectura y escritura para testing de dominios
         // TODO: Implementar Firebase Admin SDK para operaciones del servidor
         allow read, write: if true;
       }
+    }
+
+    // Regla adicional para cupones con lógica de incremento de totalUses
+    match /stores/{storeId}/coupons/{couponId} {
+      allow read: if true;
+
+      // Solo el dueño puede crear y eliminar cupones
+      allow create, delete: if isAuthenticated() &&
+                  request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+
+      // Para actualizar: el dueño puede todo, CUALQUIERA puede incrementar totalUses
+      allow update: if (isAuthenticated() &&
+            request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId) ||
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalUses']);
     }
   }
 }

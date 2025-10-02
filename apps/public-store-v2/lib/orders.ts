@@ -78,6 +78,9 @@ export interface OrderData {
   whatsappPhone?: string;
   discount?: number;
   appliedCoupon?: any;
+  // 🎁 Loyalty program fields
+  loyaltyDiscount?: number;
+  loyaltyPointsRedeemed?: number;
 }
 
 /**

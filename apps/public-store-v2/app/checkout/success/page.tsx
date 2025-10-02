@@ -234,8 +234,14 @@ export default function CheckoutSuccessPage() {
               )}
               {orderData.discount && orderData.discount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>Descuento:</span>
+                  <span>Descuento{orderData.appliedCoupon?.code ? ` (${orderData.appliedCoupon.code})` : ''}:</span>
                   <span>-{formatPrice(orderData.discount, currency)}</span>
+                </div>
+              )}
+              {orderData.loyaltyDiscount && orderData.loyaltyDiscount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Descuento puntos ({orderData.loyaltyPointsRedeemed} pts):</span>
+                  <span>-{formatPrice(orderData.loyaltyDiscount, currency)}</span>
                 </div>
               )}
               <div className="border-t pt-2 flex justify-between font-semibold text-lg">
