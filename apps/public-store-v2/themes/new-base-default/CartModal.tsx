@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart, CartItem } from '../../lib/cart-context';
 import { formatPrice } from '../../lib/currency';
 import { toCloudinarySquare } from '../../lib/images';
@@ -71,6 +71,13 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [orderDataForConfirmation, setOrderDataForConfirmation] = useState<OrderData | null>(null);
 
+    // 🎁 Estados para programa de lealtad
+    const [loyaltyProgram, setLoyaltyProgram] = useState<{
+        active: boolean;
+        pointsPerCurrency: number;
+        minPurchaseAmount: number;
+    } | null>(null);
+
     // Hook de idioma para traducciones
     const { language } = useStoreLanguage();
 
@@ -134,6 +141,36 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     
     // Detectar si hay productos incompletos
     const hasIncompleteItems = state.items.some(item => item.incomplete);
+
+    // 🎁 Consultar configuración del programa de lealtad
+    useEffect(() => {
+        const fetchLoyaltyProgram = async () => {
+            if (!storeId) return;
+
+            try {
+                console.log('[Cart Loyalty] 🎁 Fetching loyalty program configuration');
+                const response = await fetch(`/api/loyalty/program?storeId=${storeId}`);
+                const data = await response.json();
+
+                if (data.success && data.active) {
+                    console.log('[Cart Loyalty] ✅ Program active:', data.program);
+                    setLoyaltyProgram({
+                        active: true,
+                        pointsPerCurrency: data.program.pointsPerCurrency,
+                        minPurchaseAmount: data.program.minPurchaseAmount
+                    });
+                } else {
+                    console.log('[Cart Loyalty] ℹ️  Program inactive');
+                    setLoyaltyProgram(null);
+                }
+            } catch (error) {
+                console.error('[Cart Loyalty] ❌ Error fetching program:', error);
+                setLoyaltyProgram(null);
+            }
+        };
+
+        fetchLoyaltyProgram();
+    }, [storeId]);
 
     // Función para obtener las opciones faltantes de un producto
     const getMissingOptions = (item: CartItem) => {
@@ -415,6 +452,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                             {formatPrice(state.totalPrice, state.items[0]?.currency || 'COP')}
                                         </span>
                                     </div>
+
                                     {hasIncompleteItems ? (
                                         <div className="nbd-cart-incomplete-warning">
                                             <p className="nbd-incomplete-warning-text">
@@ -422,9 +460,20 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                             </p>
                                         </div>
                                     ) : (
-                                        <p className="nbd-cart-shipping-note">
-                                            {additionalText('shippingCalculated')}
-                                        </p>
+                                        <>
+                                            <p className="nbd-cart-shipping-note">
+                                                {additionalText('shippingCalculated')}
+                                            </p>
+                                            {/* Mensaje de puntos a acumular */}
+                                            {loyaltyProgram?.active && state.totalPrice >= loyaltyProgram.minPurchaseAmount && (
+                                                <p className="nbd-cart-shipping-note" style={{
+                                                    color: '#10b981',
+                                                    marginTop: '4px'
+                                                }}>
+                                                    Acumularás {Math.floor(state.totalPrice * loyaltyProgram.pointsPerCurrency)} puntos al finalizar la compra
+                                                </p>
+                                            )}
+                                        </>
                                     )}
                                 </div>
 

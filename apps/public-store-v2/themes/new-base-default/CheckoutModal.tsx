@@ -3542,20 +3542,77 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             if (formData.shippingMethod === 'pickup') {
                                                 return formatPrice(0, currency);
                                             }
-                                            
+
                                             if (!userCoordinates) {
                                                 return t('provideLocation');
                                             }
-                                            
+
                                             if (isOutsideCoverage) {
                                                 const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
                                                 return isWhatsAppCheckout ? 'A coordinar' : '--';
                                             }
-                                            
+
                                             return formatPrice(shipping, currency);
                                         })()}
                                     </span>
                                 </div>
+
+                                {/* Línea de puntos disponibles - solo en paso 1 */}
+                                {currentStep === 1 && !loadingLoyaltyPoints && loyaltyPoints?.active && loyaltyPoints.points > 0 && loyaltyDiscount === 0 && (
+                                    <div
+                                        className="nbd-summary-line"
+                                        style={{
+                                            opacity: 1,
+                                            animation: 'fadeIn 0.3s ease-in',
+                                            color: '#10b981',
+                                            fontSize: '14px',
+                                            borderTop: '1px dashed #e5e7eb',
+                                            borderBottom: '1px dashed #e5e7eb',
+                                            paddingTop: '8px',
+                                            paddingBottom: '8px',
+                                            marginTop: '4px',
+                                            marginBottom: '4px'
+                                        }}
+                                    >
+                                        <span style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '2px'
+                                        }}>
+                                            <span style={{ fontWeight: '500' }}>
+                                                {loyaltyPoints.points} puntos disponibles
+                                            </span>
+                                            <span style={{
+                                                fontSize: '11px',
+                                                color: '#6b7280',
+                                                fontWeight: 'normal'
+                                            }}>
+                                                Podrás canjearlos en el paso final
+                                            </span>
+                                        </span>
+                                        <span style={{
+                                            color: '#10b981',
+                                            fontWeight: '500'
+                                        }}>
+                                            {formatPrice(loyaltyPoints.value, currency)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Mensaje de puntos a acumular - todos los pasos */}
+                                {loyaltyPoints?.active && loyaltyPoints.program?.pointsPerCurrency && subtotal >= (loyaltyPoints.program?.minPurchaseAmount || 0) && (
+                                    <div style={{
+                                        padding: '8px 0',
+                                        fontSize: '13px',
+                                        color: '#10b981',
+                                        borderTop: '1px solid #f3f4f6',
+                                        marginTop: '8px',
+                                        paddingTop: '12px'
+                                    }}>
+                                        Acumularás {Math.floor(subtotal * loyaltyPoints.program.pointsPerCurrency)} puntos al finalizar la compra
+                                    </div>
+                                )}
+
                                 {formData.appliedCoupon && discount > 0 && (
                                     <div className="nbd-summary-line nbd-summary-discount">
                                         <span>
