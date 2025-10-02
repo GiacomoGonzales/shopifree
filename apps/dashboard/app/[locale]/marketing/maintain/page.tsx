@@ -1,11 +1,42 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import DashboardLayout from '../../../../components/DashboardLayout'
+import { useAuth } from '../../../../lib/simple-auth-context'
+import { getUserStore } from '../../../../lib/store'
+import { getLoyaltyProgram, LoyaltyProgram } from '../../../../lib/loyalty'
 
 export default function MaintainCustomersPage() {
   const t = useTranslations('marketing')
+  const { user } = useAuth()
+  const [loyaltyProgram, setLoyaltyProgram] = useState<LoyaltyProgram | null>(null)
+  const [loadingLoyalty, setLoadingLoyalty] = useState(true)
+
+  // Cargar estado del programa de lealtad
+  useEffect(() => {
+    const loadLoyaltyStatus = async () => {
+      if (!user) {
+        setLoadingLoyalty(false)
+        return
+      }
+
+      try {
+        const store = await getUserStore(user.uid)
+        if (store) {
+          const program = await getLoyaltyProgram(store.id)
+          setLoyaltyProgram(program)
+        }
+      } catch (error) {
+        console.error('Error loading loyalty program:', error)
+      } finally {
+        setLoadingLoyalty(false)
+      }
+    }
+
+    loadLoyaltyStatus()
+  }, [user])
 
   return (
     <DashboardLayout>
@@ -74,9 +105,17 @@ export default function MaintainCustomersPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Programa de Lealtad</h3>
                         <div className="flex items-start gap-2 flex-col sm:flex-row sm:items-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                            Configurar
-                          </span>
+                          {!loadingLoyalty && (
+                            loyaltyProgram && loyaltyProgram.active ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                ✓ Activo
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                Desactivado
+                              </span>
+                            )
+                          )}
                           <p className="text-sm text-gray-500">Recompensa a tus clientes con puntos que pueden canjear por descuentos</p>
                         </div>
                       </div>
