@@ -8312,6 +8312,11 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     padding-top: calc(var(--nbd-space-lg) + 40px);
 }
 
+/* Padding reducido específico para productos en páginas de colecciones/marcas/categorías */
+body.no-hero .nbd-products:first-of-type .nbd-container {
+    padding-top: 10px;
+}
+
 /* En mobile, aplicar solo a la primera sección visible */
 @media (max-width: 768px) {
     body.no-hero .nbd-categories-mosaic:first-of-type .nbd-container,
@@ -8320,6 +8325,11 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     body.no-hero .nbd-brands-section:first-of-type .nbd-container,
     body.no-hero .nbd-products:first-of-type .nbd-container {
         padding-top: calc(var(--nbd-space-xl) + 48px);
+    }
+
+    /* Padding reducido específico para productos en páginas de colecciones/marcas/categorías */
+    body.no-hero .nbd-products:first-of-type .nbd-container {
+        padding-top: 10px;
     }
 }
 
