@@ -188,7 +188,7 @@ function StoreOnboardingContent() {
   // Validación de subdominio simplificada (sin estado de loading)
   const validateSubdomain = useCallback(async (subdomain: string) => {
     if (!subdomain) return
-    
+
     try {
       const result = await checkSubdomainAvailability(subdomain)
       if (result) {
@@ -196,12 +196,12 @@ function StoreOnboardingContent() {
         setErrors(prev => ({ ...prev, subdomain: undefined }))
       } else {
         setSubdomainStatus('unavailable')
-        setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainTaken') }))
+        setErrors(prev => ({ ...prev, subdomain: t('steps.info.fields.subdomain.errorTaken') }))
       }
     } catch (error) {
       console.error('Error checking subdomain:', error)
       setSubdomainStatus('unavailable')
-      setErrors(prev => ({ ...prev, subdomain: t('errors.subdomainCheckError') }))
+      setErrors(prev => ({ ...prev, subdomain: t('steps.info.fields.subdomain.errorCheck') }))
     }
   }, [t])
 
@@ -733,11 +733,11 @@ function StoreOnboardingContent() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('steps.contact.fields.phone.label')} <span className="text-red-500">*</span>
               </label>
-              <div className="flex space-x-1 sm:space-x-2">
+              <div className="flex gap-2">
                 <select
                   value={formData.countryCode}
                   onChange={(e) => handleInputChange('countryCode', e.target.value)}
-                  className="w-20 sm:w-24 px-1 sm:px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white text-xs sm:text-sm"
+                  className="w-24 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 bg-white text-sm"
                 >
                   {countryCodes.map((country) => (
                     <option key={country.code} value={country.code}>
@@ -750,7 +750,7 @@ function StoreOnboardingContent() {
                   value={formData.localPhone}
                   onChange={(e) => handleInputChange('localPhone', e.target.value)}
                   placeholder={t('steps.contact.fields.phone.placeholder')}
-                  className={`flex-1 px-2 sm:px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 text-xs sm:text-sm ${
+                  className={`flex-1 min-w-0 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
                     errors.localPhone ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
