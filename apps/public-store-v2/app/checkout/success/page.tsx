@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { validateAndConsumeToken, ConfirmationToken } from '../../../lib/confirmation-tokens';
 import { formatPrice } from '../../../lib/currency';
 import { StoreBasicInfo } from '../../../lib/store';
+import { useCart } from '../../../lib/cart-context';
 
 interface OrderConfirmationPageState {
   step: 'loading' | 'success' | 'error' | 'expired';
@@ -14,10 +15,17 @@ interface OrderConfirmationPageState {
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
+  const { clearCart } = useCart();
   const [state, setState] = useState<OrderConfirmationPageState>({
     step: 'loading',
     token: null
   });
+
+  useEffect(() => {
+    // Limpiar carrito cuando se carga la página de éxito
+    clearCart();
+    console.log('🛒 Carrito limpiado después de confirmación exitosa');
+  }, [clearCart]);
 
   useEffect(() => {
     // Solo ejecutar del lado del cliente

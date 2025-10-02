@@ -8,6 +8,7 @@ import { StoreBasicInfo, getStoreInfoBySubdomain } from '../../../../lib/store';
 import { buildStoreUrl } from '../../../../lib/url-utils';
 import { translateShippingMethod, translatePaymentMethod, generateConfirmationWhatsAppMessage } from '../../../../lib/orders';
 import { useStoreLanguage } from '../../../../lib/store-language-context';
+import { useCart } from '../../../../lib/cart-context';
 
 interface OrderConfirmationPageState {
   step: 'loading' | 'success' | 'error' | 'expired';
@@ -28,6 +29,7 @@ export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const params = useParams();
   const { language } = useStoreLanguage();
+  const { clearCart } = useCart();
   const [state, setState] = useState<OrderConfirmationPageState>({
     step: 'loading',
     token: null
@@ -111,6 +113,12 @@ export default function CheckoutSuccessPage() {
   };
 
   const t = (key: string) => texts[language]?.[key] || texts['es']?.[key] || key;
+
+  // Limpiar carrito cuando se carga la página de éxito
+  useEffect(() => {
+    clearCart();
+    console.log('🛒 Carrito limpiado después de confirmación exitosa');
+  }, [clearCart]);
 
   // Obtener información de la tienda
   useEffect(() => {

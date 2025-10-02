@@ -807,17 +807,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         console.warn('🔔 [Culqi] Pedido no se pudo guardar en Firestore (Firebase no disponible), continuando...');
                     }
 
-                    // Limpiar carrito después del guardado exitoso
-                    clearCart();
-                    // NO llamar setIsSubmitting(false) aquí - mantener cargando hasta redirect
+                        // NO llamar setIsSubmitting(false) aquí - mantener cargando hasta redirect
 
                     // Usar el mismo flujo que otros métodos de pago: mostrar confirmación
                     if (onShowConfirmation) {
                         console.log('🔔 [Culqi] Mostrando modal de confirmación...');
                         onShowConfirmation(orderData);
-                        // No cerrar modal - la redirección se encarga de eso
+                        // NO limpiar carrito ni cerrar modal aquí - dejar que la redirección lo maneje
                     } else {
                         console.log('🔔 [Culqi] Usando fallback de confirmación...');
+                        clearCart();
                         onSuccess?.();
                         onClose();
                     }
@@ -829,14 +828,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
                     // Incluso si falla el guardado, mostrar confirmación al usuario
                     // porque el pago ya se procesó exitosamente
-                    clearCart();
                     // NO llamar setIsSubmitting(false) aquí - mantener cargando hasta redirect
 
                     if (onShowConfirmation) {
                         console.log('🔔 [Culqi] Mostrando confirmación a pesar del error de guardado...');
                         onShowConfirmation(orderData);
-                        // No cerrar modal - la redirección se encarga de eso
+                        // NO limpiar carrito ni cerrar modal aquí - dejar que la redirección lo maneje
                     } else {
+                        clearCart();
                         onSuccess?.();
                         onClose();
                     }
@@ -2310,15 +2309,13 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 // El botón debe mantenerse cargando hasta que se redirija a la página de éxito
                 // para evitar confusión del usuario y clics múltiples
 
-                // Limpiar carrito y mostrar modal de confirmación
-                clearCart();
-                
                 // Llamar función para mostrar modal de confirmación
                 if (onShowConfirmation) {
                     onShowConfirmation(checkoutPayload);
-                    // No cerrar modal - la redirección se encarga de eso
+                    // NO limpiar carrito ni cerrar modal aquí - dejar que la redirección lo maneje
                 } else {
                     // Fallback si no se pasa la función
+                    clearCart();
                     onSuccess();
                     onClose();
                 }

@@ -239,8 +239,8 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
 
             console.log('🔄 Redirigiendo directamente a confirmación (sin cerrar modales):', confirmationUrl)
 
-            // Limpiar carrito inmediatamente antes de redireccionar
-            clearCart()
+            // NO limpiar carrito aquí - mantener productos visibles hasta que se complete la navegación
+            // El carrito se limpiará después cuando el usuario vuelva o en la página de éxito
 
             // Redireccionar inmediatamente - los modales se "cerrarán" con el cambio de página
             window.location.href = confirmationUrl
