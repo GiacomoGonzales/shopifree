@@ -242,7 +242,7 @@ export async function createOrder(
     try {
       console.log('[Orders] 📧 Enviando emails de confirmación...');
       const storeUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const dashboardUrl = 'https://dashboard.shopifree.app/orders'; // TODO: URL real del dashboard
+      const dashboardUrl = 'https://dashboard.shopifree.app/es/orders';
 
       const emailResults = await sendOrderConfirmationEmailsClient(
         docRef.id,
