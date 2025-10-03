@@ -476,13 +476,22 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     return `${origin}${relativePath}`;
   };
 
+  // Buscar categoría del producto para breadcrumb dinámico
+  const productCategory = product && categories ? categories.find(cat =>
+    product.selectedParentCategoryIds?.includes(cat.id) ||
+    product.categoryId === cat.id
+  ) : null;
+
   const breadcrumbJsonLd = product ? {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
+    itemListElement: productCategory ? [
       { '@type': 'ListItem', position: 1, name: additionalText('home'), item: buildAbsoluteUrl('/') },
-      { '@type': 'ListItem', position: 2, name: 'Catálogo', item: buildAbsoluteUrl('/catalogo') },
+      { '@type': 'ListItem', position: 2, name: productCategory.name, item: buildAbsoluteUrl(`/categoria/${productCategory.slug}`) },
       { '@type': 'ListItem', position: 3, name: product.name, item: buildAbsoluteUrl(`/producto/${encodeURIComponent(product.slug || product.id)}`) }
+    ] : [
+      { '@type': 'ListItem', position: 1, name: additionalText('home'), item: buildAbsoluteUrl('/') },
+      { '@type': 'ListItem', position: 2, name: product.name, item: buildAbsoluteUrl(`/producto/${encodeURIComponent(product.slug || product.id)}`) }
     ]
   } : null;
 
@@ -712,33 +721,14 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
         <span className="nbd-breadcrumbs-sep">/</span>
         
         {/* Mostrar categoría si está disponible */}
-        {(() => {
-          // Buscar la categoría del producto
-          const productCategory = categories?.find(cat => 
-            product.selectedParentCategoryIds?.includes(cat.id) || 
-            product.categoryId === cat.id
-          );
-          
-          if (productCategory) {
-            return (
-              <>
-                <a href={buildUrl(`/categoria/${productCategory.slug}`)} className="nbd-breadcrumb-link">
-                  {productCategory.name}
-                </a>
-                <span className="nbd-breadcrumbs-sep">/</span>
-              </>
-            );
-          } else {
-            return (
-              <>
-                <a href={buildUrl('/catalogo')} className="nbd-breadcrumb-link">
-                  Catálogo
-                </a>
-                <span className="nbd-breadcrumbs-sep">/</span>
-              </>
-            );
-          }
-        })()}
+        {productCategory && (
+          <>
+            <a href={buildUrl(`/categoria/${productCategory.slug}`)} className="nbd-breadcrumb-link">
+              {productCategory.name}
+            </a>
+            <span className="nbd-breadcrumbs-sep">/</span>
+          </>
+        )}
         
         <span className="nbd-breadcrumb-current" aria-current="page">
           {product.name}

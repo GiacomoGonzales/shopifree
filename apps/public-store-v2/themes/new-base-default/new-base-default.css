@@ -3801,7 +3801,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Responsive para breadcrumbs */
 @media (max-width: 768px) {
     [data-theme="new-base-default"] .nbd-breadcrumbs {
-        padding: var(--nbd-space-md) var(--nbd-space-md);
+        padding: 20px var(--nbd-space-md) var(--nbd-space-md) var(--nbd-space-md);
         margin-top: 64px; /* Altura del header en móvil */
         max-width: none; /* En móvil ocupa todo el ancho */
         overflow-x: auto; /* Permitir scroll horizontal si es necesario */
@@ -3835,7 +3835,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Para pantallas muy pequeñas */
 @media (max-width: 480px) {
     [data-theme="new-base-default"] .nbd-breadcrumbs {
-        padding: var(--nbd-space-sm) var(--nbd-space-md);
+        padding: 20px var(--nbd-space-md) var(--nbd-space-sm) var(--nbd-space-md);
     }
     
     [data-theme="new-base-default"] .nbd-breadcrumb-current {
@@ -4230,7 +4230,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-breadcrumbs {
     background: transparent;
     border-bottom: none;
-    padding: var(--nbd-space-lg) 0;
+    padding: 20px 0;
 }
 
 .nbd-breadcrumb-link {
@@ -4260,7 +4260,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 /* Contenedor principal del producto */
 .nbd-product-detail {
-    padding: var(--nbd-space-4xl) 0;
+    padding: 10px 0;
     background: var(--nbd-neutral-0);
 }
 
@@ -4697,7 +4697,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 @media (max-width: 768px) {
     .nbd-product-detail {
-        padding: var(--nbd-space-2xl) 0;
+        padding: 10px 0;
     }
     
     .nbd-product-detail .nbd-product {
