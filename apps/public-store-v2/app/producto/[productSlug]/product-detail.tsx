@@ -355,15 +355,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
     let itemId = product.id;
 
-    if (selectedPricingVariant) {
-      finalPrice = promotionsData.finalPrice || selectedPricingVariant.price;
-      itemId = `${product.id}-${selectedPricingVariant.id}`;
-      variantInfo = {
-        id: selectedPricingVariant.id,
-        name: selectedPricingVariant.value || selectedPricingVariant.name || 'Variante',
-        price: finalPrice
-      };
-    } else if (selectedVariant && selectedVariant.price !== undefined) {
+    if (selectedVariant && selectedVariant.price !== undefined) {
       finalPrice = promotionsData.finalPrice || selectedVariant.price;
       itemId = `${product.id}-${selectedVariant.id}`;
       const variantDesc = Object.entries(selectedVariant.attributes || {})
