@@ -87,10 +87,14 @@ export default function CheckoutSuccessPage() {
 
               // Crear token de confirmación simulado para mostrar el resumen
               const mockToken: ConfirmationToken = {
+                id: `mp_${Date.now()}`,
                 orderId: orderDoc.id,
                 orderData: pendingOrder.orderData,
                 expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutos
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                used: false,
+                paymentMethod: 'mercadopago',
+                storeId: pendingOrder.storeId
               };
 
               setState({
