@@ -90,7 +90,6 @@ export default function CheckoutSuccessPage() {
                 orderId: orderDoc.id,
                 orderData: pendingOrder.orderData,
                 expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutos
-                consumed: false,
                 createdAt: Date.now()
               };
 
