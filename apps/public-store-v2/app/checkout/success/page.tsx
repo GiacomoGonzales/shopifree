@@ -76,8 +76,7 @@ export default function CheckoutSuccessPage() {
               isPaid: collectionStatus === 'approved',
               paidAmount: collectionStatus === 'approved' ? pendingOrder.orderData.totals.total : 0,
               paymentType: 'online_payment',
-              transactionId: collectionId,
-              preferenceId: preferenceId || pendingOrder.preferenceId
+              transactionId: collectionId
             });
 
             if (orderDoc?.id) {

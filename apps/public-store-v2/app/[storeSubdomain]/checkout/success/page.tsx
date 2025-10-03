@@ -249,8 +249,7 @@ export default function CheckoutSuccessPage() {
           isPaid: true,
           paidAmount: pendingOrder.orderData.totals.total,
           paymentType: 'online_payment',
-          transactionId: mercadopagoData.payment_id,
-          preferenceId: mercadopagoData.preference_id || pendingOrder.preferenceId
+          transactionId: mercadopagoData.payment_id
         });
 
         if (orderDoc?.id) {
