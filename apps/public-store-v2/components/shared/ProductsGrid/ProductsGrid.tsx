@@ -61,6 +61,170 @@ const ProductImage = memo(({
 
 ProductImage.displayName = 'ProductImage';
 
+// Componente memoizado para badge que evita re-renders innecesarios
+const ProductBadge = memo(({
+  showBadge,
+  badgeText
+}: {
+  showBadge: boolean
+  badgeText: string
+}) => {
+  if (!showBadge) return null;
+
+  return (
+    <div
+      className="nbd-product-badge"
+      style={{
+        opacity: 1,
+        transition: 'none',
+        WebkitTransition: 'none',
+        willChange: 'auto'
+      }}
+    >
+      {badgeText}
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Solo re-renderizar si showBadge o badgeText cambian
+  return prevProps.showBadge === nextProps.showBadge &&
+         prevProps.badgeText === nextProps.badgeText;
+});
+
+ProductBadge.displayName = 'ProductBadge';
+
+// Componente memoizado para precios que evita re-renders innecesarios
+const ProductPrice = memo(({
+  hasPromotion,
+  finalPrice,
+  originalPrice,
+  formatPrice,
+  currency
+}: {
+  hasPromotion: boolean
+  finalPrice: number
+  originalPrice: number
+  formatPrice: (price: number, currency?: string) => string
+  currency?: string
+}) => {
+  return (
+    <div
+      className="nbd-product-price"
+      style={{
+        opacity: 1,
+        transition: 'none',
+        WebkitTransition: 'none',
+        willChange: 'auto'
+      }}
+    >
+      {hasPromotion ? (
+        <>
+          <span className="nbd-price-current">{formatPrice(finalPrice, currency)}</span>
+          <span className="nbd-price-original">{formatPrice(originalPrice, currency)}</span>
+        </>
+      ) : (
+        <span className="nbd-price-current">{formatPrice(finalPrice, currency)}</span>
+      )}
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Solo re-renderizar si los precios o hasPromotion cambian
+  return prevProps.hasPromotion === nextProps.hasPromotion &&
+         prevProps.finalPrice === nextProps.finalPrice &&
+         prevProps.originalPrice === nextProps.originalPrice &&
+         prevProps.currency === nextProps.currency;
+});
+
+ProductPrice.displayName = 'ProductPrice';
+
+// Componente memoizado para cada tarjeta de producto
+const ProductCard = memo(({
+  product,
+  storeId,
+  loadingCartButton,
+  handleAddToCart,
+  buildUrl,
+  toCloudinarySquare,
+  formatPrice,
+  additionalText,
+  currency
+}: {
+  product: PublicProduct
+  storeId: string | null
+  loadingCartButton: string | null
+  handleAddToCart: (product: PublicProduct, finalPrice?: number) => Promise<void>
+  buildUrl: (path: string) => string
+  toCloudinarySquare: (url: string, size: number) => string
+  formatPrice: (price: number, currency?: string) => string
+  additionalText: (key: string) => string
+  currency?: string
+}) => {
+  const promotionData = usePromotions(storeId, product.id || '', product.price);
+
+  // Usar solo sistema de promociones, eliminar comparePrice obsoleto
+  const hasPromotion = promotionData.discount > 0;
+  const finalPrice = hasPromotion ? promotionData.finalPrice : product.price;
+  const originalPrice = product.price;
+  const showBadge = hasPromotion && promotionData.hasDiscountBadge;
+
+  return (
+    <div
+      className="nbd-product-card"
+      onClick={() => {
+        window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
+      }}
+      style={{ cursor: 'pointer' }}
+    >
+      <div className="nbd-product-image">
+        <ProductImage
+          imageUrl={product.image || product.mediaFiles?.[0]?.url}
+          productName={product.name}
+          toCloudinarySquare={toCloudinarySquare}
+          additionalText={additionalText}
+        />
+
+        <ProductBadge
+          showBadge={showBadge}
+          badgeText={additionalText('offer')}
+        />
+
+        <AddToCartButton
+          productId={product.id}
+          productName={product.name}
+          isLoading={loadingCartButton === product.id}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToCart(product, finalPrice);
+          }}
+        />
+      </div>
+
+      <div className="nbd-product-content">
+        <h3 className="nbd-product-name">{product.name}</h3>
+
+        <div className="nbd-product-footer">
+          <ProductPrice
+            hasPromotion={hasPromotion}
+            finalPrice={finalPrice}
+            originalPrice={originalPrice}
+            formatPrice={formatPrice}
+            currency={currency}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Solo re-renderizar si cambian datos relevantes del producto o estado de carga
+  return prevProps.product.id === nextProps.product.id &&
+         prevProps.product.name === nextProps.product.name &&
+         prevProps.product.price === nextProps.product.price &&
+         prevProps.product.image === nextProps.product.image &&
+         prevProps.loadingCartButton === nextProps.loadingCartButton &&
+         prevProps.currency === nextProps.currency;
+});
+
+ProductCard.displayName = 'ProductCard';
+
 interface ProductsGridProps {
   displayedProducts: PublicProduct[]
   filteredProducts: PublicProduct[]
@@ -103,75 +267,23 @@ export function ProductsGrid({
   storeId
 }: ProductsGridProps) {
 
-  // Componente interno para cada producto con promociones
-  function ProductCard({ product }: { product: PublicProduct }) {
-    const promotionData = usePromotions(storeId || null, product.id || '', product.price);
-
-    // Usar solo sistema de promociones, eliminar comparePrice obsoleto
-    const hasPromotion = promotionData.discount > 0;
-    const finalPrice = hasPromotion ? promotionData.finalPrice : product.price;
-    const originalPrice = product.price;
-    const showBadge = hasPromotion && promotionData.hasDiscountBadge;
-
-    return (
-      <div
-        className="nbd-product-card"
-        onClick={() => {
-          window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
-        }}
-        style={{ cursor: 'pointer' }}
-      >
-        <div className="nbd-product-image">
-          <ProductImage
-            imageUrl={product.image || product.mediaFiles?.[0]?.url}
-            productName={product.name}
-            toCloudinarySquare={toCloudinarySquare}
-            additionalText={additionalText}
-          />
-
-          {showBadge && (
-            <div className="nbd-product-badge">
-              {additionalText('offer')}
-            </div>
-          )}
-
-          <AddToCartButton
-            productId={product.id}
-            productName={product.name}
-            isLoading={loadingCartButton === product.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddToCart(product, finalPrice);
-            }}
-          />
-        </div>
-
-        <div className="nbd-product-content">
-          <h3 className="nbd-product-name">{product.name}</h3>
-
-          <div className="nbd-product-footer">
-            <div className="nbd-product-price">
-              {hasPromotion ? (
-                <>
-                  <span className="nbd-price-current">{formatPrice(finalPrice, storeInfo?.currency)}</span>
-                  <span className="nbd-price-original">{formatPrice(originalPrice, storeInfo?.currency)}</span>
-                </>
-              ) : (
-                <span className="nbd-price-current">{formatPrice(finalPrice, storeInfo?.currency)}</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className={`nbd-products-grid nbd-mobile-${mobileViewMode}`}>
         {displayedProducts.length > 0 ? (
           displayedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              storeId={storeId || null}
+              loadingCartButton={loadingCartButton}
+              handleAddToCart={handleAddToCart}
+              buildUrl={buildUrl}
+              toCloudinarySquare={toCloudinarySquare}
+              formatPrice={formatPrice}
+              additionalText={additionalText}
+              currency={storeInfo?.currency}
+            />
           ))
         ) : (
           <div className="nbd-empty-state">
