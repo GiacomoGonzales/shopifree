@@ -8074,7 +8074,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 .nbd-product-image {
     width: 100%;
-    max-width: 280px;
+    max-width: 100%;
     height: auto;
     border-radius: var(--nbd-radius-lg);
     box-shadow: var(--nbd-shadow-md);
@@ -8082,7 +8082,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-product-image-placeholder {
-    width: 280px;
+    width: 100%;
     height: 200px;
     background: var(--nbd-neutral-100);
     border-radius: var(--nbd-radius-lg);
