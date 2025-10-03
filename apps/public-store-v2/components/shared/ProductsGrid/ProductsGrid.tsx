@@ -301,10 +301,10 @@ export function ProductsGrid({
 
       {/* Botón "Cargar más" */}
       {hasMoreProducts && (
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: 'var(--nbd-space-4xl)', 
-          marginBottom: 'var(--nbd-space-2xl)' 
+        <div style={{
+          textAlign: 'center',
+          marginTop: 'var(--nbd-space-2xl)',
+          marginBottom: 'var(--nbd-space-2xl)'
         }}>
           <button 
             onClick={loadMoreProducts}
