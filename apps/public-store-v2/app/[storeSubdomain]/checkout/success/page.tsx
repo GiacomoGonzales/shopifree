@@ -6,7 +6,7 @@ import { validateAndConsumeToken, ConfirmationToken } from '../../../../lib/conf
 import { formatPrice } from '../../../../lib/currency';
 import { StoreBasicInfo, getStoreInfoBySubdomain } from '../../../../lib/store';
 import { buildStoreUrl } from '../../../../lib/url-utils';
-import { translateShippingMethod, translatePaymentMethod, generateConfirmationWhatsAppMessage } from '../../../../lib/orders';
+import { translateShippingMethod, translatePaymentMethod, generateConfirmationWhatsAppMessage, createOrder } from '../../../../lib/orders';
 import { useStoreLanguage } from '../../../../lib/store-language-context';
 import { useCart } from '../../../../lib/cart-context';
 
@@ -200,42 +200,92 @@ export default function CheckoutSuccessPage() {
   };
 
   // 💳 Maneja el flujo de MercadoPago (nuevo)
-  const handleMercadoPagoFlow = (mercadopagoData: NonNullable<OrderConfirmationPageState['mercadopagoData']>) => {
+  const handleMercadoPagoFlow = async (mercadopagoData: NonNullable<OrderConfirmationPageState['mercadopagoData']>) => {
     console.log('💳 Procesando flujo MercadoPago:', mercadopagoData);
     console.log('💳 Status recibido:', `"${mercadopagoData.status}"`, 'Length:', mercadopagoData.status.length);
 
-    // Simular loading por 2.5 segundos para consistencia
-    const loadingTimeout = setTimeout(() => {
-      const status = mercadopagoData.status.toLowerCase().trim();
-      console.log('💳 Status procesado:', `"${status}"`);
+    const status = mercadopagoData.status.toLowerCase().trim();
+    console.log('💳 Status procesado:', `"${status}"`);
 
-      // Verificar si el pago fue exitoso (más tolerante)
-      if (status === 'approved' || status === 'approve' || status === 'success') {
-        console.log('✅ Pago MercadoPago aprobado');
-        setState({
-          step: 'success',
-          token: null, // No hay token en MercadoPago
-          paymentType: 'mercadopago',
-          mercadopagoData
-        });
-      } else if (status === 'pending' || status === 'in_process') {
+    // Si el pago NO fue aprobado, redirigir según status
+    if (status !== 'approved' && status !== 'approve' && status !== 'success') {
+      if (status === 'pending' || status === 'in_process') {
         console.log('⏳ Pago MercadoPago pendiente - redirigiendo...');
-        // Usar buildStoreUrl para redirección correcta
         const pendingUrl = window.location.origin + buildStoreUrl('/checkout/pending',
           `payment_id=${mercadopagoData.payment_id}&status=${mercadopagoData.status}`);
-        console.log('🔄 Redirigiendo a:', pendingUrl);
         window.location.href = pendingUrl;
       } else {
         console.log('❌ Pago MercadoPago fallido o cancelado - redirigiendo...');
-        // Usar buildStoreUrl para redirección correcta
         const failureUrl = window.location.origin + buildStoreUrl('/checkout/failure',
           `payment_id=${mercadopagoData.payment_id}&status=${mercadopagoData.status}`);
-        console.log('🔄 Redirigiendo a:', failureUrl);
         window.location.href = failureUrl;
       }
-    }, 2500);
+      return;
+    }
 
-    return () => clearTimeout(loadingTimeout);
+    // Pago aprobado - recuperar datos del pedido y crearlo
+    console.log('✅ Pago MercadoPago aprobado - creando pedido...');
+
+    // Recuperar datos del pedido desde localStorage
+    const pendingOrderStr = localStorage.getItem('pendingMercadoPagoOrder');
+
+    if (!pendingOrderStr) {
+      console.error('🔔 [MercadoPago] No se encontraron datos del pedido pendiente');
+      setState({
+        step: 'error',
+        token: null,
+        error: 'No se encontraron datos del pedido. Por favor contacta con la tienda.'
+      });
+      return;
+    }
+
+    // Simular loading por 2.5 segundos para consistencia
+    setTimeout(async () => {
+      try {
+        const pendingOrder = JSON.parse(pendingOrderStr);
+        console.log('🔔 [MercadoPago] Creando pedido en Firestore...');
+
+        const orderDoc = await createOrder(pendingOrder.storeId, pendingOrder.orderData, {
+          isPaid: true,
+          paidAmount: pendingOrder.orderData.totals.total,
+          paymentType: 'online_payment',
+          transactionId: mercadopagoData.payment_id,
+          preferenceId: mercadopagoData.preference_id || pendingOrder.preferenceId
+        });
+
+        if (orderDoc?.id) {
+          console.log('✅ [MercadoPago] Pedido creado exitosamente:', orderDoc.id);
+
+          // Limpiar localStorage
+          localStorage.removeItem('pendingMercadoPagoOrder');
+
+          // Crear token de confirmación simulado para mostrar el resumen
+          const mockToken: ConfirmationToken = {
+            orderId: orderDoc.id,
+            orderData: pendingOrder.orderData,
+            expiresAt: Date.now() + (5 * 60 * 1000),
+            consumed: false,
+            createdAt: Date.now()
+          };
+
+          setState({
+            step: 'success',
+            token: mockToken,
+            paymentType: 'mercadopago',
+            mercadopagoData
+          });
+        } else {
+          throw new Error('No se pudo obtener ID del pedido');
+        }
+      } catch (error) {
+        console.error('🔔 [MercadoPago] Error creando pedido:', error);
+        setState({
+          step: 'error',
+          token: null,
+          error: 'Error al procesar el pedido. Por favor contacta con la tienda.'
+        });
+      }
+    }, 2500);
   };
 
   const handleGoHome = () => {

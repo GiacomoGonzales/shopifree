@@ -2480,27 +2480,25 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         usingDefault: !mpConfig.environment
                     });
 
-                    // 🆕 GUARDAR PEDIDO EN FIRESTORE ANTES DE REDIRIGIR
-                    console.log('🔔 [MercadoPago] Guardando pedido en Firestore antes de redirigir...');
+                    // 🆕 GUARDAR DATOS DEL PEDIDO EN LOCALSTORAGE TEMPORALMENTE
+                    // El pedido se creará DESPUÉS del pago exitoso en la página de confirmación
+                    console.log('🔔 [MercadoPago] Guardando datos del pedido temporalmente...');
                     try {
-                        const orderDoc = await createOrder(storeId!, orderData, {
-                            isPaid: false, // Inicialmente no está pagado hasta que se confirme
-                            paidAmount: 0,
-                            paymentType: 'online_payment',
-                            transactionId: preferenceResult.id // Usar ID de preferencia como referencia
-                        });
+                        const pendingOrderData = {
+                            orderData,
+                            preferenceId: preferenceResult.id,
+                            timestamp: Date.now(),
+                            storeId: storeId
+                        };
 
-                        if (orderDoc?.id) {
-                            console.log('🔔 [MercadoPago] ✅ Pedido guardado exitosamente:', orderDoc.id);
-                            console.log('🔔 [MercadoPago] Pedido creado con ID:', orderDoc.id);
-                        } else {
-                            console.warn('🔔 [MercadoPago] ⚠️ No se pudo obtener ID del pedido, continuando...');
-                        }
-                    } catch (orderError) {
-                        console.error('🔔 [MercadoPago] ❌ Error guardando pedido:', orderError);
-                        // Continuar con el pago aunque falle guardar el pedido
-                        // El webhook puede crear/actualizar el pedido después
+                        localStorage.setItem('pendingMercadoPagoOrder', JSON.stringify(pendingOrderData));
+                        console.log('🔔 [MercadoPago] ✅ Datos guardados temporalmente');
+                    } catch (storageError) {
+                        console.warn('🔔 [MercadoPago] ⚠️ Error guardando en localStorage:', storageError);
                     }
+
+                    // Limpiar carrito ANTES de redirigir
+                    clearCart();
 
                     // Redireccionar a MercadoPago
                     console.log('🔔 [MercadoPago] Redirigiendo a página de pago...');
@@ -3531,8 +3529,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                     </span>
                                 </div>
 
-                                {/* Línea de puntos disponibles - solo en paso 1 */}
-                                {currentStep === 1 && !loadingLoyaltyPoints && loyaltyPoints?.active && loyaltyPoints.points > 0 && loyaltyDiscount === 0 && (
+                                {/* Línea de puntos disponibles - todos los pasos */}
+                                {!loadingLoyaltyPoints && loyaltyPoints?.active && loyaltyPoints.points > 0 && loyaltyDiscount === 0 && (
                                     <div
                                         className="nbd-summary-line"
                                         style={{
@@ -3561,7 +3559,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                 color: '#6b7280',
                                                 fontWeight: 'normal'
                                             }}>
-                                                Podrás canjearlos en el paso final
+                                                {currentStep === 3 ? 'Canjéalos en esta sección' : 'Podrás canjearlos en el paso final'}
                                             </span>
                                         </span>
                                         <span style={{

@@ -88,7 +88,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   const [quantity, setQuantity] = useState(1);
 
   // Hook del carrito
-  const { addItem, openCart, openCheckout, state, removeItem } = useCart();
+  const { addItem, openCart, state, removeItem } = useCart();
 
   // Hook de promociones - igual que en ProductsGrid y ProductQuickView
   const originalPrice = selectedPricingVariant ? selectedPricingVariant.price : product?.price || 0;
@@ -376,54 +376,9 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     }
   };
 
-  // Función para comprar ahora (agregar al carrito y redirigir a checkout)
-  const handleBuyNow = () => {
-    console.log('🛒 [BuyNow] Iniciando compra directa');
-
-    if (!product) {
-      console.log('❌ [BuyNow] No hay producto');
-      return;
-    }
-
-    // Obtener cantidad (predeterminado: 1)
-    const quantityInput = document.getElementById('quantity') as HTMLInputElement;
-    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
-
-    // Usar precios promocionales si están disponibles, sino usar precios base
-    let finalPrice = promotionsData.finalPrice || product.price;
-    let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
-    let itemId = product.id;
-
-    if (selectedPricingVariant) {
-      finalPrice = promotionsData.finalPrice || selectedPricingVariant.price;
-      itemId = `${product.id}-${selectedPricingVariant.id}`;
-      variantInfo = {
-        id: selectedPricingVariant.id,
-        name: selectedPricingVariant.value || selectedPricingVariant.name || 'Variante',
-        price: finalPrice
-      };
-    }
-
-    // Agregar al carrito
-    try {
-      addItem({
-        id: itemId,
-        productId: product.id,
-        name: product.name,
-        price: finalPrice,
-        currency: storeInfo?.currency || 'COP',
-        image: product.image || '',
-        slug: product.slug || product.id,
-        variant: variantInfo
-      }, quantity);
-
-      console.log('✅ [BuyNow] Producto agregado al carrito, abriendo checkout...');
-
-      // Abrir modal de checkout
-      openCheckout();
-    } catch (error) {
-      console.error('❌ [BuyNow] Error al agregar al carrito:', error);
-    }
+  // Función para volver al inicio
+  const handleBackToHome = () => {
+    window.location.href = buildUrl('/');
   };
 
   useEffect(() => {
@@ -1129,19 +1084,13 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                   ) : (
                     <button
                       className="nbd-btn nbd-btn--outline nbd-btn--secondary"
-                      onClick={handleBuyNow}
-                      style={{
-                        backgroundColor: 'var(--nbd-primary)',
-                        borderColor: 'var(--nbd-primary)',
-                        color: 'white'
-                      }}
+                      onClick={handleBackToHome}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
                       </svg>
-                      Comprar ahora
+                      Seguir explorando
                     </button>
                   )}
                   <button

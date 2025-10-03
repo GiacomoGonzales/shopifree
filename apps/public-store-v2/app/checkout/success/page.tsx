@@ -6,11 +6,17 @@ import { validateAndConsumeToken, ConfirmationToken } from '../../../lib/confirm
 import { formatPrice } from '../../../lib/currency';
 import { StoreBasicInfo } from '../../../lib/store';
 import { useCart } from '../../../lib/cart-context';
+import { createOrder } from '../../../lib/orders';
 
 interface OrderConfirmationPageState {
   step: 'loading' | 'success' | 'error' | 'expired';
   token: ConfirmationToken | null;
   error?: string;
+  mercadoPagoData?: {
+    paymentId: string;
+    status: string;
+    orderId: string;
+  };
 }
 
 export default function CheckoutSuccessPage() {
@@ -30,10 +36,91 @@ export default function CheckoutSuccessPage() {
   useEffect(() => {
     // Solo ejecutar del lado del cliente
     if (typeof window !== 'undefined') {
-      // Obtener token directamente de window.location en lugar de useSearchParams
+      // Obtener parámetros de URL
       const urlParams = new URLSearchParams(window.location.search);
       const tokenId = urlParams.get('token');
 
+      // 🔔 DETECCIÓN DE RETORNO DE MERCADOPAGO
+      const collectionId = urlParams.get('collection_id') || urlParams.get('payment_id');
+      const collectionStatus = urlParams.get('collection_status') || urlParams.get('status');
+      const preferenceId = urlParams.get('preference_id');
+
+      // Si viene de MercadoPago
+      if (collectionId && (collectionStatus === 'approved' || collectionStatus === 'pending')) {
+        console.log('🔔 [MercadoPago] Retorno detectado:', {
+          paymentId: collectionId,
+          status: collectionStatus,
+          preferenceId
+        });
+
+        // Recuperar datos del pedido desde localStorage
+        const pendingOrderStr = localStorage.getItem('pendingMercadoPagoOrder');
+
+        if (!pendingOrderStr) {
+          console.error('🔔 [MercadoPago] No se encontraron datos del pedido pendiente');
+          setState({
+            step: 'error',
+            token: null,
+            error: 'No se encontraron datos del pedido. Por favor contacta con la tienda.'
+          });
+          return;
+        }
+
+        // Procesar el pedido de MercadoPago
+        const loadingTimeout = setTimeout(async () => {
+          try {
+            const pendingOrder = JSON.parse(pendingOrderStr);
+            console.log('🔔 [MercadoPago] Creando pedido en Firestore...');
+
+            const orderDoc = await createOrder(pendingOrder.storeId, pendingOrder.orderData, {
+              isPaid: collectionStatus === 'approved',
+              paidAmount: collectionStatus === 'approved' ? pendingOrder.orderData.totals.total : 0,
+              paymentType: 'online_payment',
+              transactionId: collectionId,
+              preferenceId: preferenceId || pendingOrder.preferenceId
+            });
+
+            if (orderDoc?.id) {
+              console.log('✅ [MercadoPago] Pedido creado exitosamente:', orderDoc.id);
+
+              // Limpiar localStorage
+              localStorage.removeItem('pendingMercadoPagoOrder');
+
+              // Crear token de confirmación simulado para mostrar el resumen
+              const mockToken: ConfirmationToken = {
+                orderId: orderDoc.id,
+                orderData: pendingOrder.orderData,
+                expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutos
+                consumed: false,
+                createdAt: Date.now()
+              };
+
+              setState({
+                step: 'success',
+                token: mockToken,
+                mercadoPagoData: {
+                  paymentId: collectionId,
+                  status: collectionStatus,
+                  orderId: orderDoc.id
+                }
+              });
+            } else {
+              throw new Error('No se pudo obtener ID del pedido');
+            }
+          } catch (error) {
+            console.error('🔔 [MercadoPago] Error creando pedido:', error);
+            setState({
+              step: 'error',
+              token: null,
+              error: 'Error al procesar el pedido. Por favor contacta con la tienda.'
+            });
+          }
+        }, 2500);
+
+        return () => clearTimeout(loadingTimeout);
+      }
+
+      // FLUJO NORMAL CON TOKEN (checkout tradicional)
       if (!tokenId) {
         console.warn('🎫 No se proporcionó token de confirmación');
         setState({
