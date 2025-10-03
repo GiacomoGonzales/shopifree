@@ -182,8 +182,8 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
           {/* Imagen del producto */}
           <div className="nbd-product-image-container">
             {product.image ? (
-              <img 
-                src={toCloudinarySquare(product.image, 300) || product.image} 
+              <img
+                src={toCloudinarySquare(product.image, 800) || product.image}
                 alt={product.name}
                 className="nbd-product-image"
               />

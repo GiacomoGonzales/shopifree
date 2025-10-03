@@ -8189,7 +8189,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-product-variants-section {
     margin-bottom: var(--nbd-space-lg);
     /* Agregar espacio extra para que el botón esté en la parte inferior */
-    padding-bottom: calc(40vh - 200px); /* Espaciado dinámico para llenar el espacio */
+    padding-bottom: 10px;
 }
 
 /* Botón de agregar personalizado */
@@ -8299,16 +8299,16 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
     
     .nbd-product-variants-section {
-        /* Espaciado reducido en móvil pero manteniendo el push hacia abajo */
-        padding-bottom: calc(30vh - 150px);
+        /* Espaciado reducido en móvil */
+        padding-bottom: 10px;
     }
     
     .nbd-product-image {
-        max-width: 240px;
+        max-width: 100%;
     }
-    
+
     .nbd-product-image-placeholder {
-        width: 240px;
+        width: 100%;
         height: 180px;
     }
     
