@@ -2302,8 +2302,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         padding: 2px var(--nbd-space-xs);
         font-size: 8px;
         letter-spacing: 0.2px;
-        font-weight: 500;
-        background: var(--nbd-neutral-600);
+        font-weight: 600;
         animation: none !important;
         transition: none !important;
         will-change: auto !important;
@@ -2316,8 +2315,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         padding: 1px var(--nbd-space-xs);
         font-size: 7px;
         letter-spacing: 0.1px;
-        font-weight: 500;
-        background: var(--nbd-neutral-600);
+        font-weight: 600;
         animation: none !important;
         transition: none !important;
         will-change: auto !important;
@@ -2543,18 +2541,22 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     position: absolute;
     top: var(--nbd-space-lg);
     left: var(--nbd-space-lg);
-    background: var(--nbd-neutral-600);
-    color: var(--nbd-neutral-0);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #1a1a1a;
     padding: 2px var(--nbd-space-sm);
     border-radius: var(--nbd-radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     font-size: 9px;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     will-change: auto;
     transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Etiqueta OFERTA más pequeña en desktop */
@@ -2563,7 +2565,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         padding: 1px var(--nbd-space-xs);
         font-size: 8px;
         letter-spacing: 0.2px;
-        font-weight: 500;
+        font-weight: 600;
     }
 }
 
@@ -2645,9 +2647,11 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-add-to-cart {
     width: 36px;
     height: 36px;
-    background: #1a1a1a;
-    color: var(--nbd-neutral-0);
-    border: none;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2656,7 +2660,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Botón + flotante sobre la imagen */
@@ -2668,9 +2672,9 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-add-to-cart:hover {
-    background: #2d2d2d;
+    background: rgba(255, 255, 255, 0.4);
     transform: scale(1.08);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .nbd-add-to-cart:active {
