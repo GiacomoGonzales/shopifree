@@ -83,7 +83,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   // Hook del carrito
-  const { addItem, openCart, state, removeItem } = useCart();
+  const { addItem, openCart, openCheckout, state, removeItem } = useCart();
   console.log('🎯 [ProductDetail] Después de useCart, antes de usePromotions');
 
   // Hook de promociones - COMENTADO TEMPORALMENTE PARA DEBUGGING
@@ -381,10 +381,10 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
         variant: variantInfo
       }, quantity);
 
-      console.log('✅ [BuyNow] Producto agregado al carrito, redirigiendo a checkout...');
+      console.log('✅ [BuyNow] Producto agregado al carrito, abriendo checkout...');
 
-      // Redirigir al checkout
-      window.location.href = buildUrl('/checkout');
+      // Abrir modal de checkout
+      openCheckout();
     } catch (error) {
       console.error('❌ [BuyNow] Error al agregar al carrito:', error);
     }
