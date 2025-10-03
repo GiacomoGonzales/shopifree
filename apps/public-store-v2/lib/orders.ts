@@ -238,26 +238,30 @@ export async function createOrder(
     console.log('[Orders] ✅ Order created successfully! Doc ID:', docRef.id);
     console.log('[Orders] ✅ Order path: stores/' + storeId + '/orders/' + docRef.id);
 
-    // 🆕 ENVIAR EMAILS DE CONFIRMACIÓN
-    try {
-      console.log('[Orders] 📧 Enviando emails de confirmación...');
-      const storeUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const dashboardUrl = 'https://dashboard.shopifree.app/es/orders';
+    // 🆕 ENVIAR EMAILS DE CONFIRMACIÓN - Solo para método tradicional
+    if (orderData.checkoutMethod !== 'whatsapp') {
+      try {
+        console.log('[Orders] 📧 Enviando emails de confirmación (método tradicional)...');
+        const storeUrl = typeof window !== 'undefined' ? window.location.origin : '';
+        const dashboardUrl = 'https://dashboard.shopifree.app/es/orders';
 
-      const emailResults = await sendOrderConfirmationEmailsClient(
-        docRef.id,
-        orderData,
-        storeId,
-        storeUrl,
-        dashboardUrl,
-        orderNumber // 🆕 Pasar número de orden
-      );
+        const emailResults = await sendOrderConfirmationEmailsClient(
+          docRef.id,
+          orderData,
+          storeId,
+          storeUrl,
+          dashboardUrl,
+          orderNumber // 🆕 Pasar número de orden
+        );
 
-      console.log(`[Orders] 📧 Emails enviados - Cliente: ${emailResults.customerSent ? '✅' : '❌'}, Admin: ${emailResults.adminSent ? '✅' : '❌'}`);
-    } catch (emailError) {
-      // NO fallar el pedido si los emails fallan
-      console.error('[Orders] ⚠️ Error enviando emails de confirmación:', emailError);
-      console.error('[Orders] ⚠️ El pedido se creó correctamente, pero los emails fallaron');
+        console.log(`[Orders] 📧 Emails enviados - Cliente: ${emailResults.customerSent ? '✅' : '❌'}, Admin: ${emailResults.adminSent ? '✅' : '❌'}`);
+      } catch (emailError) {
+        // NO fallar el pedido si los emails fallan
+        console.error('[Orders] ⚠️ Error enviando emails de confirmación:', emailError);
+        console.error('[Orders] ⚠️ El pedido se creó correctamente, pero los emails fallaron');
+      }
+    } else {
+      console.log('[Orders] 📧 Pedido por WhatsApp - No se envían emails automáticos');
     }
 
     return docRef;
@@ -642,5 +646,5 @@ ${productUrl}
 ${t.question}
 ${t.thanks}`;
 
-  return encodeURIComponent(message);
+  return message;
 }

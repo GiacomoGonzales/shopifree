@@ -295,48 +295,19 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     });
 
     if (isMobileDevice) {
-      // En móviles: priorizar WhatsApp personal app sobre Business
-      console.log('[Product WhatsApp] Opening on mobile device - prioritizing personal WhatsApp');
+      // En móviles: usar wa.me que abre la app sin cerrar la tienda
+      console.log('[Product WhatsApp] Opening on mobile device - using wa.me');
 
-      try {
-        if (isIOS) {
-          // iOS: intentar abrir app personal primero
-          console.log('[Product WhatsApp] iOS - Trying personal WhatsApp app first');
-          window.location.href = whatsappSchemePersonal;
+      // Usar window.open para que no cierre la tienda
+      const whatsappWindow = window.open(whatsappPersonalUrl, '_blank', 'noopener,noreferrer');
 
-          // Fallback a wa.me después de un tiempo
-          setTimeout(() => {
-            console.log('[Product WhatsApp] iOS - Fallback to wa.me');
-            window.location.href = whatsappPersonalUrl;
-          }, 1500);
-        } else if (isAndroid) {
-          // Android: usar intent específico para WhatsApp personal
-          console.log('[Product WhatsApp] Android - Using personal WhatsApp intent');
-          const androidIntent = `intent://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
-
-          try {
-            window.location.href = androidIntent;
-          } catch (intentError) {
-            console.log('[Product WhatsApp] Android intent failed, using wa.me');
-            window.location.href = whatsappPersonalUrl;
-          }
-        } else {
-          // Otros móviles: usar wa.me directamente
-          console.log('[Product WhatsApp] Other mobile - Using wa.me');
-          window.location.href = whatsappPersonalUrl;
-        }
-
-        console.log('[Product WhatsApp] Mobile redirect initiated successfully');
-      } catch (error) {
-        console.error('[Product WhatsApp] Error opening WhatsApp on mobile:', error);
-
-        // Fallback: crear enlace temporal
-        console.log('[Product WhatsApp] Falling back to link creation method');
+      // Fallback si se bloquea el popup
+      if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed === 'undefined') {
+        console.log('[Product WhatsApp] Popup blocked, creating fallback link');
         const fallbackLink = document.createElement('a');
         fallbackLink.href = whatsappPersonalUrl;
         fallbackLink.target = '_blank';
         fallbackLink.rel = 'noopener noreferrer';
-
         document.body.appendChild(fallbackLink);
         fallbackLink.click();
         document.body.removeChild(fallbackLink);
