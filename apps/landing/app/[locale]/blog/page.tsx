@@ -9,7 +9,7 @@ import LanguageSelector from '../../../components/LanguageSelector'
 
 export default function BlogPage() {
   const t = useTranslations('home')
-  const tBlog = useTranslations('blog')
+  const tBlog = useTranslations('home.blog')
   const locale = useLocale()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
