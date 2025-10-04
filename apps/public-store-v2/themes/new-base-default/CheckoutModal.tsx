@@ -2717,7 +2717,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 {/* Notificación de envío - Modal pequeño y elegante */}
                 {showShippingNotification && shippingNotificationData && (
                     <div style={{
-                        position: 'absolute',
+                        position: 'fixed',
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
