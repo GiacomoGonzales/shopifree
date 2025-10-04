@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { Button } from '@shopifree/ui'
 import LanguageSelector from '../../components/LanguageSelector'
 import FAQ from '../../components/FAQ'
+import { OrganizationSchema, SoftwareApplicationSchema, FAQSchema, WebSiteSchema } from '../../components/StructuredData'
 
 export default function HomePage() {
   const t = useTranslations('home')
@@ -21,6 +22,19 @@ export default function HomePage() {
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const dynamicPhrases = t.raw('dynamicPhrases') as string[]
+
+  // Integration names for better SEO
+  const integrationNames = [
+    'Mercado Pago',
+    'PayPal',
+    'Stripe',
+    'Google Analytics',
+    'Meta Pixel',
+    'WhatsApp Business',
+    'Mailchimp',
+    'Instagram Shopping',
+    'Google Ads'
+  ]
   
   const pricingPlans = [
     // Plan Gratis (index 0)
@@ -340,18 +354,52 @@ export default function HomePage() {
     )
   }
 
+  // FAQ data for structured data
+  const faqData = [
+    {
+      question: '¿Qué es Shopifree?',
+      answer: 'Shopifree es una plataforma completa para crear y gestionar tu tienda online sin conocimientos técnicos. Te permite vender productos, gestionar pedidos, personalizar tu tienda y mucho más, todo desde un panel intuitivo.'
+    },
+    {
+      question: '¿Necesito conocimientos técnicos para usarlo?',
+      answer: 'No, Shopifree está diseñado para ser extremadamente fácil de usar. Nuestro editor visual te permite crear y personalizar tu tienda simplemente arrastrando y soltando elementos, sin necesidad de programar.'
+    },
+    {
+      question: '¿Puedo conectar mi propio dominio?',
+      answer: 'Sí, puedes conectar tu dominio personalizado a tu tienda Shopifree. Te proporcionamos guías paso a paso para configurar tu dominio y asegurarnos de que todo funcione perfectamente.'
+    },
+    {
+      question: '¿Qué métodos de pago puedo habilitar en mi tienda?',
+      answer: 'Shopifree soporta múltiples métodos de pago incluyendo tarjetas de crédito/débito, PayPal, transferencias bancarias y más. Puedes habilitar los métodos que prefieras según tu ubicación y necesidades.'
+    },
+    {
+      question: '¿Puedo gestionar pedidos y clientes desde el panel?',
+      answer: 'Absolutamente. El panel de administración de Shopifree te permite gestionar todos tus pedidos, ver información detallada de clientes, controlar inventario, generar reportes y mucho más, todo desde un lugar centralizado.'
+    },
+    {
+      question: '¿Tiene algún costo o comisión por venta?',
+      answer: 'Shopifree ofrece planes flexibles sin comisiones por venta. Solo pagas una suscripción mensual fija que incluye todas las funcionalidades, hosting, soporte técnico y actualizaciones constantes.'
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Structured Data for SEO */}
+      <OrganizationSchema locale={locale} />
+      <SoftwareApplicationSchema locale={locale} />
+      <WebSiteSchema locale={locale} />
+      <FAQSchema faqs={faqData} />
+
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Link href={`/${locale}`} className="transition-all duration-200 hover:scale-105">
-                <Image 
-                  src="/logo-primary.png" 
-                  alt="Shopifree Logo" 
-                  width={224} 
+                <Image
+                  src="/logo-primary.png"
+                  alt="Shopifree - Crea tu tienda online gratis sin comisiones"
+                  width={224}
                   height={64}
                   className="h-12 w-auto object-contain"
                   priority
@@ -436,10 +484,10 @@ export default function HomePage() {
           <div className="px-8 py-4 h-full flex flex-col">
             {/* Logo */}
             <div className="mb-12">
-              <Image 
-                src="/logo-primary.png" 
-                alt="Shopifree Logo" 
-                width={160} 
+              <Image
+                src="/logo-primary.png"
+                alt="Shopifree - Plataforma de ecommerce gratuita"
+                width={160}
                 height={45}
                 className="h-10 w-auto object-contain"
               />
@@ -506,14 +554,19 @@ export default function HomePage() {
         </div>
         
         <div className="relative h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+          {/* SEO H1 - Hidden visually but readable by search engines */}
+          <h1 className="sr-only">
+            Crea tu Tienda Online Gratis con Shopifree - Ecommerce sin Comisiones
+          </h1>
+
           {/* Text Content - Left aligned on mobile, centered on desktop */}
           <div className="text-left md:text-center max-w-6xl mx-auto w-full flex-1 flex flex-col justify-center">
             <div className="h-[280px] min-[390px]:h-[330px] min-[414px]:h-[360px] sm:h-[380px] md:h-[250px] lg:h-[280px] xl:h-[300px] flex items-center justify-start md:justify-center mb-4 min-[390px]:mb-6 min-[414px]:mb-10 sm:mb-12 md:mb-6 lg:mb-8">
-              <h1 className="text-4xl min-[390px]:text-5xl min-[414px]:text-6xl sm:text-7xl md:text-5xl lg:text-6xl xl:text-7xl font-thin text-white drop-shadow-xl leading-tight">
+              <div className="text-4xl min-[390px]:text-5xl min-[414px]:text-6xl sm:text-7xl md:text-5xl lg:text-6xl xl:text-7xl font-thin text-white drop-shadow-xl leading-tight" aria-label="Tu tienda puede conquistar el mundo digital">
                 <span className="block">
                   {renderAnimatedText()}
                 </span>
-              </h1>
+              </div>
             </div>
             <div className="text-left md:text-center mb-6 min-[390px]:mb-8 min-[414px]:mb-12 sm:mb-16 md:mb-8 lg:mb-10">
               <p className="text-lg min-[390px]:text-xl min-[414px]:text-xl sm:text-2xl md:text-xl lg:text-2xl text-white/90 max-w-4xl md:mx-auto drop-shadow-lg leading-relaxed font-light">
@@ -550,6 +603,9 @@ export default function HomePage() {
       {/* Features Section */}
       <section id="features" className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-light text-gray-900 mb-8 text-center">
+          {t('feature1.title')}, {t('feature2.title')}, {t('feature3.title')}
+        </h2>
         {/* Features Grid */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
@@ -586,11 +642,11 @@ export default function HomePage() {
       </section>
 
       {/* Integrations Carousel */}
-      <section className="bg-gray-50 py-12">
+      <section className="bg-gray-50 py-12" aria-labelledby="integrations-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-light text-gray-900 mb-4">
-              Intégrate con las mejores herramientas
+            <h2 id="integrations-heading" className="text-3xl font-light text-gray-900 mb-4">
+              Integraciones con las Mejores Plataformas de Pago y Marketing
             </h2>
             <p className="text-xl text-gray-600 mb-8">
               Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más
@@ -611,8 +667,9 @@ export default function HomePage() {
                 <img
                   key={index}
                   src={`/integraciones/integracion${num}.png`}
-                  alt={`Integración ${num}`}
+                  alt={`Integración con ${integrationNames[num - 1]} - Shopifree`}
                   className="flex-shrink-0 h-10 md:h-20 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300"
+                  loading="lazy"
                 />
               ))}
             </div>
@@ -621,11 +678,11 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="bg-gray-50 py-20">
+      <section id="pricing" className="bg-gray-50 py-20" aria-labelledby="pricing-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-light text-gray-900 mb-4">
-              {t('nav.pricing')}
+            <h2 id="pricing-heading" className="text-3xl font-light text-gray-900 mb-4">
+              Planes y Precios para tu Tienda Online
             </h2>
             <p className="text-xl text-gray-600 mb-8">
               {t('pricing.subtitle')}
@@ -738,10 +795,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center">
-              <Image 
-                src="/footerlogo.png" 
-                alt="Shopifree Logo" 
-                width={160} 
+              <Image
+                src="/footerlogo.png"
+                alt="Shopifree - Crea tu tienda online gratis"
+                width={160}
                 height={45}
                 className="h-8 w-auto object-contain"
               />

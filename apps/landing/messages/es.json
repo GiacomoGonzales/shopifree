@@ -141,5 +141,13 @@
       "resendCode": "Reenviar código",
       "backToLogin": "Volver al login"
     }
+  },
+  "seo": {
+    "siteName": "Shopifree",
+    "title": "Crea tu Tienda Online Gratis | Shopifree - Ecommerce sin Comisiones",
+    "description": "Crea tu tienda online gratis en minutos. Sin comisiones por venta, sin conocimientos técnicos. Vende por WhatsApp, acepta pagos y gestiona pedidos fácilmente.",
+    "keywords": "tienda online gratis, ecommerce sin comisiones, crear tienda online, vender por whatsapp, tienda virtual, shopify alternativa, shopifree, plataforma ecommerce gratis",
+    "ogImage": "/og-image.png",
+    "twitterHandle": "@shopifree"
   }
 } 

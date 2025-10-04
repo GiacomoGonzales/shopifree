@@ -55,15 +55,13 @@ export default function FAQ() {
   }
 
   return (
-    <section className="bg-gray-50 py-20">
+    <section className="bg-gray-50 py-20" aria-labelledby="faq-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left Column - Title */}
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
-              Preguntas
-              <br />
-              Frecuentes
+            <h2 id="faq-heading" className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
+              Preguntas Frecuentes sobre Shopifree
             </h2>
             <p className="text-lg text-gray-600 max-w-lg">
               Resolvemos las dudas más comunes sobre Shopifree para que puedas empezar con confianza.

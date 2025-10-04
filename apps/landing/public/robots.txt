@@ -1,0 +1,24 @@
+# Shopifree Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://shopifree.app/sitemap.xml
+
+# Disallow admin paths
+Disallow: /api/
+Disallow: /_next/
+Disallow: /.next/
+
+# Allow images and media
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /integraciones/
+Allow: /videos/
+
+# Crawl delay for specific bots
+User-agent: Bingbot
+Crawl-delay: 1
+
+User-agent: Yandex
+Crawl-delay: 1

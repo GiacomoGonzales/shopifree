@@ -141,5 +141,13 @@
       "resendCode": "Resend code",
       "backToLogin": "Back to login"
     }
+  },
+  "seo": {
+    "siteName": "Shopifree",
+    "title": "Create Your Online Store for Free | Shopifree - No Commission Ecommerce",
+    "description": "Create your online store for free in minutes. No sales commissions, no technical knowledge required. Sell via WhatsApp, accept payments and manage orders easily.",
+    "keywords": "free online store, no commission ecommerce, create online store, sell on whatsapp, virtual store, shopify alternative, shopifree, free ecommerce platform",
+    "ogImage": "/og-image.png",
+    "twitterHandle": "@shopifree"
   }
 } 
