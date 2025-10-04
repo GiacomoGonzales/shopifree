@@ -334,10 +334,9 @@ export default function BrandingSection() {
           {/* Sección de imágenes */}
           <div className="space-y-6">
             <h4 className="text-base font-medium text-gray-900">
-              {t('branding.logo')} 
-              {store.hasPhysicalLocation && ` & ${t('branding.storePhoto')}`}
+              {t('branding.logo')} & {t('branding.storePhoto')}
             </h4>
-            <div className={`grid grid-cols-1 gap-6 ${store.hasPhysicalLocation ? 'lg:grid-cols-2' : ''}`}>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Logo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -445,12 +444,11 @@ export default function BrandingSection() {
                 </p>
               </div>
 
-              {/* Store Photo Upload - Solo mostrar si tiene ubicación física */}
-              {store.hasPhysicalLocation && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    {t('branding.storePhoto')} <span className="text-gray-400 text-xs">({t('branding.optional')})</span>
-                  </label>
+              {/* Store Photo Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  {t('branding.storePhoto')} <span className="text-gray-400 text-xs">({t('branding.optional')})</span>
+                </label>
                   <div className="relative">
                     {formData.storefrontImageUrl ? (
                       /* Vista previa de la foto de tienda */
@@ -552,7 +550,6 @@ export default function BrandingSection() {
                     {t('branding.storePhotoHint')}
                   </p>
                 </div>
-              )}
             </div>
           </div>
 

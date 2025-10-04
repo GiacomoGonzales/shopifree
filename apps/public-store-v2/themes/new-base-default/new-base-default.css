@@ -270,7 +270,7 @@
     align-items: center;
     max-width: 1280px;
     margin: 0 auto;
-    padding: var(--nbd-space-3xl) 0 var(--nbd-space-4xl);
+    padding: var(--nbd-space-4xl) 0 var(--nbd-space-4xl);
 }
 
 @media (max-width: 1024px) {
@@ -635,10 +635,12 @@
 }
 
 .nbd-btn--primary:hover {
-    background: var(--nbd-secondary, #2563eb);
-    border-color: var(--nbd-secondary, #2563eb);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
+.nbd-btn--primary:active {
+    opacity: 0.8;
+    transform: scale(0.98);
 }
 
 /* 2. SECUNDARIO - Para acciones secundarias */
@@ -649,10 +651,12 @@
 }
 
 .nbd-btn--secondary:hover {
-    background: var(--nbd-primary, #3b82f6);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
+.nbd-btn--secondary:active {
+    opacity: 0.8;
+    transform: scale(0.98);
 }
 
 /* 3. GHOST - Para acciones sutiles */
@@ -663,10 +667,12 @@
 }
 
 .nbd-btn--ghost:hover {
-    background: var(--nbd-neutral-100);
-    color: var(--nbd-primary, #3b82f6);
-    border-color: var(--nbd-neutral-400);
-    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.nbd-btn--ghost:active {
+    opacity: 0.8;
+    transform: scale(0.98);
 }
 
 /* === CASOS ESPECIALES === */
@@ -679,10 +685,12 @@
 }
 
 .nbd-btn--whatsapp:hover {
-    background: #128C7E !important;
-    border-color: #128C7E !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
+.nbd-btn--whatsapp:active {
+    opacity: 0.8;
+    transform: scale(0.98);
 }
 
 /* === MODIFICADORES === */
@@ -695,7 +703,7 @@
 }
 
 .nbd-btn:hover .nbd-btn-icon {
-    transform: translateX(2px);
+    transform: translateX(1px);
 }
 
 /* === ESTADOS === */
@@ -733,10 +741,19 @@
         min-height: 48px;
         font-size: var(--nbd-font-size-sm);
     }
-    
+
+    /* Desactivar hover en móvil, solo feedback táctil */
+    .nbd-btn--primary:hover,
+    .nbd-btn--secondary:hover,
+    .nbd-btn--ghost:hover,
+    .nbd-btn--whatsapp:hover,
     .nbd-btn:hover {
+        opacity: 1;
         transform: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .nbd-btn:hover .nbd-btn-icon {
+        transform: none;
     }
 }
 
