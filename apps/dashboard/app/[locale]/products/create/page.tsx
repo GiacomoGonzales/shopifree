@@ -884,7 +884,7 @@ export default function CreateProductPage() {
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         placeholder={currency === 'PEN' ? '100.00' : currency === 'USD' ? '25.00' : '100.00'}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
                       />
                     </div>
                   </div>
@@ -917,7 +917,7 @@ export default function CreateProductPage() {
                         value={cost}
                         onChange={(e) => setCost(e.target.value)}
                         placeholder={currency === 'PEN' ? '50.00' : currency === 'USD' ? '15.00' : '50.00'}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
                       />
                     </div>
                   </div>
@@ -957,7 +957,7 @@ export default function CreateProductPage() {
                         value={selectedCategory ? (tCategories(`categories.${selectedCategory}`) || findNodeById(CATEGORY_OPTIONS, selectedCategory)?.name || t('categorization.chooseCategoryPlaceholder')) : t('categorization.chooseCategoryPlaceholder')}
                         readOnly
                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                        className="block w-full px-3 py-2 border-2 border-blue-500 rounded-md bg-white cursor-pointer focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="block w-full px-3 py-2 border-2 border-blue-500 rounded-md bg-white cursor-pointer focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <span className="text-gray-400">
@@ -1173,7 +1173,7 @@ export default function CreateProductPage() {
                               <select 
                                 value={(metaFieldValues[field.id] as string) || ''}
                                 onChange={(e) => handleMetaFieldChange(field.id, e.target.value)}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 text-base sm:text-sm"
                               >
                                 <option value="">{t('categorization.selectOption')}</option>
                                 {field.options?.map(option => (
@@ -1186,7 +1186,7 @@ export default function CreateProductPage() {
                                 type="text"
                                 value={(metaFieldValues[field.id] as string) || ''}
                                 onChange={(e) => handleMetaFieldChange(field.id, e.target.value)}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 text-base sm:text-sm"
                                 placeholder={`Ingrese ${field.name.toLowerCase()}`}
                               />
                             )}
@@ -1266,7 +1266,13 @@ export default function CreateProductPage() {
                         name="hasVariations"
                         value="yes"
                         checked={hasVariants}
-                        onChange={() => setHasVariants(true)}
+                        onChange={() => {
+                          setHasVariants(true)
+                          // Seleccionar 'color' por defecto si no hay nada seleccionado
+                          if (!variationType1) {
+                            setVariationType1('color')
+                          }
+                        }}
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                       />
                       <div className="ml-3">
@@ -1282,13 +1288,6 @@ export default function CreateProductPage() {
                   /* STOCK SIMPLE - Producto sin variaciones */
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                     <h4 className="text-sm font-medium text-gray-900 mb-4">{t('inventory.productStock')}</h4>
-                    {!trackStock && (
-                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                        <p className="text-sm text-yellow-800">
-                          {t('inventory.stockDisabledWarning')}
-                        </p>
-                      </div>
-                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.stockAvailable')}</label>
@@ -1297,49 +1296,18 @@ export default function CreateProductPage() {
                           min="0"
                           value={stockQuantity}
                           onChange={(e) => setStockQuantity(parseInt(e.target.value) || 0)}
-                          className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500 ${!trackStock ? 'bg-gray-100 text-gray-400' : ''}`}
+                          className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500 ${!trackStock ? 'bg-gray-100 text-gray-400' : ''}`}
                           placeholder="0"
                           disabled={!trackStock}
                         />
                       </div>
                     </div>
                   </div>
-                ) : variants.length > 0 ? (
-                  /* Mensaje simple cuando ya se generó la matriz */
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-green-800">
-                        {t('inventory.matrixGenerated')}
-                      </span>
-                      <Button
-                        onClick={() => {
-                          setVariants([])
-                          setVariationType1('')
-                          setVariationType1Options([])
-                          setVariationType2('')
-                          setVariationType2Options([])
-                          setHasSecondVariation(false)
-                        }}
-                        variant="secondary"
-                        size="sm"
-                        className="text-green-700 border-green-300"
-                      >
-                        {t('inventory.reconfigure')}
-                      </Button>
-                    </div>
-                  </div>
                 ) : hasVariants ? (
                   /* CONFIGURADOR DE VARIANTES estilo RedireDi */
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-6">
-                    <h4 className="text-md font-medium text-blue-900">{t('inventory.variationsConfigurator')}</h4>
-                    {!trackStock && (
-                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                        <p className="text-sm text-yellow-800">
-                          {t('inventory.variationsStockDisabledWarning')}
-                        </p>
-                      </div>
-                    )}
-                    
+                  <div className="space-y-6">
+                    <h3 className="text-md font-medium text-gray-900">{t('inventory.variationsConfigurator')}</h3>
+
                     {/* Paso 1: Tipo principal de variación */}
                     <div className="space-y-3">
                       <label className="block text-sm font-medium text-gray-700">
@@ -1355,13 +1323,13 @@ export default function CreateProductPage() {
                           }}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                             variationType1 === 'color'
-                              ? 'bg-blue-500 text-white shadow-md'
+                              ? 'bg-primary-600 text-white shadow-md'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
                           {t('inventory.color')}
                         </button>
-                        
+
                         {/* Pastilla Talla */}
                         <button
                           type="button"
@@ -1371,13 +1339,13 @@ export default function CreateProductPage() {
                           }}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                             variationType1 === 'talla'
-                              ? 'bg-blue-500 text-white shadow-md'
+                              ? 'bg-primary-600 text-white shadow-md'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
                           {t('inventory.size')}
                         </button>
-                        
+
                         {/* Pastilla Otro */}
                         <button
                           type="button"
@@ -1389,7 +1357,7 @@ export default function CreateProductPage() {
                           }}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                             variationType1 === 'otro'
-                              ? 'bg-blue-500 text-white shadow-md'
+                              ? 'bg-primary-600 text-white shadow-md'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
@@ -1405,17 +1373,17 @@ export default function CreateProductPage() {
                             value={variationType1Custom}
                             onChange={(e) => setVariationType1Custom(e.target.value)}
                             placeholder={t('inventory.customTypePlaceholder')}
-                            className="block w-full px-3 py-2 border border-blue-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                           />
                         </div>
                       )}
                     </div>
 
                     {/* Paso 2: Opciones del tipo principal */}
-                    {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && (
+                    {variationType1 && (
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
-                          {t('inventory.step2')} {variationType1 === 'otro' ? variationType1Custom : variationType1}
+                          {t('inventory.step2')} {variationType1 === 'otro' ? (variationType1Custom || 'otro') : variationType1}
                         </label>
                         <div className="space-y-2">
                           {variationType1Options.map((option, index) => (
@@ -1434,7 +1402,7 @@ export default function CreateProductPage() {
                                   }, 0)
                                 }}
                                 placeholder={t('inventory.exampleRed')}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                               />
                               {variationType1Options.length > 1 && (
                                 <button
@@ -1470,7 +1438,7 @@ export default function CreateProductPage() {
                                   }
                                 }}
                                 placeholder={t('inventory.exampleRed')}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                               />
                             </div>
                           )}
@@ -1480,7 +1448,7 @@ export default function CreateProductPage() {
                             onClick={() => {
                               setVariationType1Options([...variationType1Options, ''])
                             }}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-primary-600 hover:text-primary-800 hover:bg-primary-50 rounded-md transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
@@ -1529,7 +1497,7 @@ export default function CreateProductPage() {
 
                     {/* Paso 4: Segundo tipo de variación */}
                     {hasSecondVariation && (
-                      <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+                      <div className="space-y-4">
                         <div className="space-y-3">
                           <label className="block text-sm font-medium text-gray-700">
                             {t('inventory.step4')}
@@ -1547,13 +1515,13 @@ export default function CreateProductPage() {
                                 variationType1 === 'color'
                                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                   : variationType2 === 'color'
-                                    ? 'bg-green-500 text-white shadow-md'
+                                    ? 'bg-primary-600 text-white shadow-md'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
                               {t('inventory.color')} {variationType1 === 'color' && t('inventory.alreadySelected')}
                             </button>
-                            
+
                             {/* Pastilla Talla - deshabilitada si ya está seleccionada */}
                             <button
                               type="button"
@@ -1566,32 +1534,27 @@ export default function CreateProductPage() {
                                 variationType1 === 'talla'
                                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                   : variationType2 === 'talla'
-                                    ? 'bg-green-500 text-white shadow-md'
+                                    ? 'bg-primary-600 text-white shadow-md'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
                               {t('inventory.size')} {variationType1 === 'talla' && t('inventory.alreadySelected')}
                             </button>
-                            
-                            {/* Pastilla Otro - deshabilitada si ya está seleccionada */}
+
+                            {/* Pastilla Otro */}
                             <button
                               type="button"
                               onClick={() => {
-                                if (variationType1 !== 'otro' && variationType2 !== 'otro') {
-                                  setVariationType2('otro')
-                                  setVariationType2Custom('')
-                                }
+                                setVariationType2('otro')
+                                setVariationType2Custom('')
                               }}
-                              disabled={variationType1 === 'otro'}
                               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                                variationType1 === 'otro'
-                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                  : variationType2 === 'otro'
-                                    ? 'bg-green-500 text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                variationType2 === 'otro'
+                                  ? 'bg-primary-600 text-white shadow-md'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
-                              {t('inventory.other')} {variationType1 === 'otro' && t('inventory.alreadySelected')}
+                              {t('inventory.other')}
                             </button>
                           </div>
                           
@@ -1603,16 +1566,16 @@ export default function CreateProductPage() {
                                 value={variationType2Custom}
                                 onChange={(e) => setVariationType2Custom(e.target.value)}
                                 placeholder={t('inventory.customSecondTypePlaceholder')}
-                                className="block w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500 bg-green-50"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                               />
                             </div>
                           )}
                         </div>
 
-                        {((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && (
+                        {variationType2 && (
                           <div className="space-y-3">
                             <label className="block text-sm font-medium text-gray-700">
-                              {t('inventory.defineOptionsFor')} {variationType2 === 'otro' ? variationType2Custom : variationType2}
+                              {t('inventory.defineOptionsFor')} {variationType2 === 'otro' ? (variationType2Custom || 'otro') : variationType2}
                             </label>
                             <div className="space-y-2">
                               {variationType2Options.map((option, index) => (
@@ -1631,7 +1594,7 @@ export default function CreateProductPage() {
                                       }, 0)
                                     }}
                                     placeholder="Ej: S"
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                                   />
                                   {variationType2Options.length > 1 && (
                                     <button
@@ -1667,7 +1630,7 @@ export default function CreateProductPage() {
                                       }
                                     }}
                                     placeholder="Ej: S"
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                                   />
                                 </div>
                               )}
@@ -1677,7 +1640,7 @@ export default function CreateProductPage() {
                                 onClick={() => {
                                   setVariationType2Options([...variationType2Options, ''])
                                 }}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-primary-600 hover:text-primary-800 hover:bg-primary-50 rounded-md transition-colors"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
@@ -1690,21 +1653,23 @@ export default function CreateProductPage() {
                       </div>
                     )}
 
-                    {/* Paso 5: Botón para generar matriz */}
-                    {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && 
-                     variationType1Options.filter(opt => opt.trim() !== '').length > 0 && 
-                     (!hasSecondVariation || 
-                      (((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && 
+                    {/* Botón para generar matriz */}
+                    {variationType1 &&
+                     variationType1Options.filter(opt => opt.trim() !== '').length > 0 &&
+                     (!hasSecondVariation ||
+                      (variationType2 &&
                        variationType2Options.filter(opt => opt.trim() !== '').length > 0)) && (
                       <div className="pt-4 border-t border-gray-200">
-                        <Button 
+                        <Button
                           onClick={generateVariantMatrix}
-                          className="w-full"
+                          className="w-full flex flex-col md:flex-row md:items-center md:justify-center gap-0 md:gap-1"
                         >
-                          {t('inventory.generateMatrix')} 
-                          ({hasSecondVariation ? 
-                            variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length : 
-                            variationType1Options.filter(opt => opt.trim() !== '').length} {t('inventory.combinations')})
+                          <span>{t('inventory.generateMatrix')}</span>
+                          <span>
+                            ({hasSecondVariation ?
+                              variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length :
+                              variationType1Options.filter(opt => opt.trim() !== '').length} {t('inventory.combinations')})
+                          </span>
                         </Button>
                       </div>
                     )}
@@ -1714,52 +1679,146 @@ export default function CreateProductPage() {
                 {/* Tabla de variantes existente (ahora solo se muestra si hay variantes) */}
                 {hasVariants && variants.length > 0 && (
                   <div className="space-y-4">
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-900">
-                        {t('inventory.variants')} ({variants.length})
-                      </h4>
-                      {!trackStock && (
-                        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                          <p className="text-sm text-yellow-800">
-                            {t('inventory.matrixStockDisabledWarning')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    
                     {/* Tabla de variantes */}
                     {variants.length > 0 && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between pt-5">
                           <h3 className="text-md font-medium text-gray-900">
                             {t('inventory.configureVariants')} ({variants.filter(v => v.available !== false).length} {t('inventory.active')})
                           </h3>
-                          <div className="text-xs text-gray-500">
+                          <div className="hidden md:block text-xs text-gray-500">
                             {t('inventory.uncheckUnwanted')}
                           </div>
                         </div>
                         
-                        <div className="overflow-x-auto">
+                        {/* Vista mobile: Cards */}
+                        <div className="md:hidden space-y-4">
+                          {variants.map(variant => (
+                            <div key={variant.id} className={`border border-gray-200 rounded-lg p-4 ${variant.available === false ? 'bg-gray-50 opacity-60' : 'bg-white'}`}>
+                              <div className="space-y-4">
+                                {/* Visible */}
+                                <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+                                  <label className="text-sm font-medium text-gray-700">{t('inventory.visible')}</label>
+                                  <input
+                                    type="checkbox"
+                                    checked={variant.available !== false}
+                                    onChange={() => toggleVariantAvailability(variant.id)}
+                                    className="h-5 w-5 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                  />
+                                </div>
+
+                                {/* Variante */}
+                                <div className="grid grid-cols-[120px_1fr] gap-3">
+                                  <label className="text-sm font-medium text-gray-700 pt-2">{t('inventory.variant')}</label>
+                                  <div className="space-y-1">
+                                    <input
+                                      type="text"
+                                      value={variant.name}
+                                      onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
+                                      className="block w-full px-3 py-2.5 border border-gray-300 rounded-md text-base focus:ring-primary-500 focus:border-primary-500"
+                                      placeholder={t('inventory.variantPlaceholder')}
+                                    />
+                                    {variant.attributes && Object.keys(variant.attributes).length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mt-1.5">
+                                        {Object.entries(variant.attributes).map(([key, value]) => (
+                                          <span key={key} className="inline-block bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-medium">
+                                            {key}: {value}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Precio */}
+                                <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+                                  <label className="text-sm font-medium text-gray-700">{t('inventory.price')} ({currencyName})</label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <span className="text-gray-500 text-sm">{currencySymbol}</span>
+                                    </div>
+                                    <input
+                                      type="number"
+                                      value={variant.price === 0 ? '' : variant.price}
+                                      onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                                        updateVariant(variant.id, 'price', value)
+                                      }}
+                                      onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                          e.target.select()
+                                        }
+                                      }}
+                                      className="block w-full pl-8 pr-2 py-2.5 border border-gray-300 rounded-md text-base focus:ring-primary-500 focus:border-primary-500"
+                                      min="0"
+                                      step="0.01"
+                                      disabled={variant.available === false}
+                                      placeholder="0.00"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Stock */}
+                                <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+                                  <label className="text-sm font-medium text-gray-700">{t('inventory.stock')}</label>
+                                  <input
+                                    type="number"
+                                    value={variant.stock === 0 ? '' : variant.stock}
+                                    onChange={(e) => {
+                                      const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
+                                      updateVariant(variant.id, 'stock', value)
+                                    }}
+                                    onFocus={(e) => {
+                                      if (e.target.value === '0') {
+                                        e.target.select()
+                                      }
+                                    }}
+                                    className={`block w-full px-3 py-2.5 border border-gray-300 rounded-md text-base focus:ring-primary-500 focus:border-primary-500 ${(!trackStock || variant.available === false) ? 'bg-gray-100 text-gray-400' : ''}`}
+                                    min="0"
+                                    disabled={!trackStock || variant.available === false}
+                                    placeholder="0"
+                                  />
+                                </div>
+
+                                {/* Botón eliminar */}
+                                <div className="pt-2 border-t border-gray-200">
+                                  <button
+                                    onClick={() => removeVariant(variant.id)}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors text-sm font-medium"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    {t('inventory.removeVariant')}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Vista desktop: Tabla */}
+                        <div className="hidden md:block overflow-x-auto">
                           <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                               <tr>
                                 {/* Checkbox de disponibilidad simplificado */}
-                                <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="w-16 px-3 py-3 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   <div className="flex items-center justify-center">
                                     <span className="sr-only">{t('inventory.activeCheckbox')}</span>
                                     ✓
                                   </div>
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   {t('inventory.variant')}
                                 </th>
-                                <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="w-32 px-4 py-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   {t('inventory.price')} ({currencyName})
                                 </th>
-                                <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="w-24 px-4 py-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   {t('inventory.stock')}
                                 </th>
-                                <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="w-16 px-3 py-3 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   <span className="sr-only">{t('inventory.actions')}</span>
                                 </th>
                               </tr>
@@ -1768,31 +1827,31 @@ export default function CreateProductPage() {
                               {variants.map(variant => (
                                 <tr key={variant.id} className={variant.available === false ? 'bg-gray-50 opacity-60' : ''}>
                                   {/* Checkbox para activar/desactivar variante */}
-                                  <td className="px-3 py-3 text-center">
+                                  <td className="px-3 py-4 md:py-3 text-center">
                                     <input
                                       type="checkbox"
                                       checked={variant.available !== false}
                                       onChange={() => toggleVariantAvailability(variant.id)}
-                                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                      className="h-5 w-5 md:h-4 md:w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                       title={variant.available !== false ? "Variante activa" : "Variante inactiva"}
                                     />
                                   </td>
-                                  
+
                                   {/* Nombre de variante */}
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-4 md:py-3">
                                     <div className="space-y-1">
                                       <input
                                         type="text"
                                         value={variant.name}
                                         onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
-                                        placeholder="Ej: Talla S, Color Rojo"
+                                        className="block w-full px-3 py-2.5 md:py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
+                                        placeholder={t('inventory.variantPlaceholder')}
                                       />
                                       {/* Mostrar atributos de la combinación */}
                                       {variant.attributes && Object.keys(variant.attributes).length > 0 && (
-                                        <div className="flex flex-wrap gap-1">
+                                        <div className="flex flex-wrap gap-1 mt-1.5">
                                           {Object.entries(variant.attributes).map(([key, value]) => (
-                                            <span key={key} className="inline-block bg-blue-100 text-blue-700 rounded px-1.5 py-0.5 text-xs font-medium">
+                                            <span key={key} className="inline-block bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-medium">
                                               {key}: {value}
                                             </span>
                                           ))}
@@ -1800,12 +1859,12 @@ export default function CreateProductPage() {
                                       )}
                                     </div>
                                   </td>
-                                  
+
                                   {/* Precio */}
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-4 md:py-3">
                                     <div className="relative">
                                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span className="text-gray-500 text-xs">{currencySymbol}</span>
+                                        <span className="text-gray-500 text-sm md:text-xs">{currencySymbol}</span>
                                       </div>
                                       <input
                                         type="number"
@@ -1819,7 +1878,7 @@ export default function CreateProductPage() {
                                             e.target.select()
                                           }
                                         }}
-                                        className="block w-full pl-8 pr-2 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                        className="block w-full pl-8 pr-2 py-2.5 md:py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500"
                                         min="0"
                                         step="0.01"
                                         disabled={variant.available === false}
@@ -1827,9 +1886,9 @@ export default function CreateProductPage() {
                                       />
                                     </div>
                                   </td>
-                                  
+
                                   {/* Stock */}
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-4 md:py-3">
                                     <input
                                       type="number"
                                       value={variant.stock === 0 ? '' : variant.stock}
@@ -1842,21 +1901,21 @@ export default function CreateProductPage() {
                                           e.target.select()
                                         }
                                       }}
-                                      className={`block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500 ${(!trackStock || variant.available === false) ? 'bg-gray-100 text-gray-400' : ''}`}
+                                      className={`block w-full px-3 py-2.5 md:py-2 border border-gray-300 rounded-md text-base md:text-sm focus:ring-primary-500 focus:border-primary-500 ${(!trackStock || variant.available === false) ? 'bg-gray-100 text-gray-400' : ''}`}
                                       min="0"
                                       disabled={!trackStock || variant.available === false}
                                       placeholder="0"
                                     />
                                   </td>
-                                  
+
                                   {/* Acciones */}
-                                  <td className="px-3 py-3 text-center">
+                                  <td className="px-3 py-4 md:py-3 text-center">
                                     <button
                                       onClick={() => removeVariant(variant.id)}
-                                      className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
+                                      className="inline-flex items-center justify-center w-9 h-9 md:w-8 md:h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
                                       title="Eliminar variante"
                                     >
-                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                       </svg>
                                     </button>
@@ -1958,7 +2017,7 @@ export default function CreateProductPage() {
                     </label>
                     <textarea
                       rows={3}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
                       placeholder={t('seo.metaDescriptionPlaceholder')}
                       value={metaDescription}
                       onChange={(e) => setMetaDescription(e.target.value)}
@@ -2101,7 +2160,7 @@ export default function CreateProductPage() {
                     <select
                       value={selectedBrandId}
                       onChange={(e) => setSelectedBrandId(e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 text-base sm:text-sm"
                     >
                       <option value="">{t('organization.brandPlaceholder')}</option>
                       {brands.map((brand) => (
