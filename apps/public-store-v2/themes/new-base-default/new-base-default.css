@@ -663,11 +663,13 @@ body.has-announcement-bar .nbd-hero-content {
 }
 
 .nbd-btn--secondary:hover {
-    background: color-mix(in srgb, var(--nbd-primary) 5%, transparent);
+    background: transparent;
+    border-width: 2.5px;
+    opacity: 0.8;
 }
 
 .nbd-btn--secondary:active {
-    background: color-mix(in srgb, var(--nbd-primary) 10%, transparent);
+    opacity: 0.6;
     transform: scale(0.99);
 }
 
