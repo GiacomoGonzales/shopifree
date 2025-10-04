@@ -83,6 +83,13 @@ export async function generateMetadata({
         'max-snippet': -1,
       },
     },
+
+    // Verification (Agregar tu código de verificación real aquí)
+    verification: {
+      google: 'google-site-verification-code-here',
+      // yandex: 'yandex-verification-code',
+      // bing: 'bing-verification-code',
+    },
   }
 }
 
