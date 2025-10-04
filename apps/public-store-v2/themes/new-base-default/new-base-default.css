@@ -273,6 +273,18 @@
     padding: var(--nbd-space-4xl) 0 var(--nbd-space-4xl);
 }
 
+/* Reducir padding superior cuando hay announcement bar */
+body.has-announcement-bar .nbd-hero-content {
+    padding-top: 2.5rem; /* 40px en lugar de 64px */
+}
+
+/* En móvil con announcement bar, eliminar padding superior */
+@media (max-width: 768px) {
+    body.has-announcement-bar .nbd-hero-content {
+        padding-top: 0;
+    }
+}
+
 @media (max-width: 1024px) {
     .nbd-hero-content {
         grid-template-columns: 1fr;
@@ -635,12 +647,12 @@
 }
 
 .nbd-btn--primary:hover {
-    opacity: 0.9;
+    filter: brightness(0.95);
 }
 
 .nbd-btn--primary:active {
-    opacity: 0.8;
-    transform: scale(0.98);
+    filter: brightness(0.9);
+    transform: scale(0.99);
 }
 
 /* 2. SECUNDARIO - Para acciones secundarias */
@@ -651,12 +663,12 @@
 }
 
 .nbd-btn--secondary:hover {
-    opacity: 0.9;
+    background: color-mix(in srgb, var(--nbd-primary) 5%, transparent);
 }
 
 .nbd-btn--secondary:active {
-    opacity: 0.8;
-    transform: scale(0.98);
+    background: color-mix(in srgb, var(--nbd-primary) 10%, transparent);
+    transform: scale(0.99);
 }
 
 /* 3. GHOST - Para acciones sutiles */
@@ -667,12 +679,12 @@
 }
 
 .nbd-btn--ghost:hover {
-    opacity: 0.9;
+    background: var(--nbd-neutral-50);
 }
 
 .nbd-btn--ghost:active {
-    opacity: 0.8;
-    transform: scale(0.98);
+    background: var(--nbd-neutral-100);
+    transform: scale(0.99);
 }
 
 /* === CASOS ESPECIALES === */
@@ -685,12 +697,12 @@
 }
 
 .nbd-btn--whatsapp:hover {
-    opacity: 0.9;
+    filter: brightness(0.95);
 }
 
 .nbd-btn--whatsapp:active {
-    opacity: 0.8;
-    transform: scale(0.98);
+    filter: brightness(0.9);
+    transform: scale(0.99);
 }
 
 /* === MODIFICADORES === */
@@ -744,11 +756,16 @@
 
     /* Desactivar hover en móvil, solo feedback táctil */
     .nbd-btn--primary:hover,
+    .nbd-btn--whatsapp:hover {
+        filter: none;
+    }
+
     .nbd-btn--secondary:hover,
-    .nbd-btn--ghost:hover,
-    .nbd-btn--whatsapp:hover,
+    .nbd-btn--ghost:hover {
+        background: transparent;
+    }
+
     .nbd-btn:hover {
-        opacity: 1;
         transform: none;
     }
 
@@ -4490,7 +4507,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 .nbd-product-header {
     border-bottom: 1px solid var(--nbd-neutral-200);
-    padding-bottom: var(--nbd-space-lg);
+    padding-bottom: 0;
     text-align: left;
 }
 
@@ -4587,7 +4604,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     display: flex;
     align-items: center;
     gap: var(--nbd-space-sm);
-    margin: var(--nbd-space-sm) 0;
+    margin-top: var(--nbd-space-sm);
+    margin-bottom: 0;
 }
 
 .nbd-availability-dot {
@@ -4624,7 +4642,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 /* === METADATOS DEL PRODUCTO === */
 .nbd-product-detail .nbd-product-metadata {
-    margin-top: var(--nbd-space-xl);
+    margin-top: 0;
 }
 
 .nbd-product-detail .nbd-product-metadata h3 {
@@ -8133,7 +8151,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-product-description {
-    margin-top: var(--nbd-space-md);
+    margin-top: 0;
     text-align: left;
 }
 

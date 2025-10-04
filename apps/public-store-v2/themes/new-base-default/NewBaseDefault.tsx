@@ -269,6 +269,19 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
     }, [storeInfo?.sections?.hero?.enabled, isOnCategoryPage, isOnCollectionPage, isOnBrandPage]);
 
+    // Agregar clase al body cuando hay announcement bar activo
+    useEffect(() => {
+        const hasAnnouncementBar = storeInfo?.announcementBar?.enabled === true;
+
+        if (typeof document !== 'undefined') {
+            if (hasAnnouncementBar) {
+                document.body.classList.add('has-announcement-bar');
+            } else {
+                document.body.classList.remove('has-announcement-bar');
+            }
+        }
+    }, [storeInfo?.announcementBar?.enabled]);
+
     // Resetear botón cuando se cierre el carrito (solo cuando se cierra, no cuando se abre)
     useEffect(() => {
         if (!cartState.isOpen && loadingCartButton) {
