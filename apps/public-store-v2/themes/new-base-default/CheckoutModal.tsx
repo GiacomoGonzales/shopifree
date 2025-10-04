@@ -3110,14 +3110,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                                             onClick={acceptSuggestedAddress}
                                                             className="nbd-suggestion-btn nbd-suggestion-btn--accept"
                                                         >
-                                                            Usar esta dirección
+                                                            {t('useThisAddress')}
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={rejectSuggestedAddress}
                                                             className="nbd-suggestion-btn nbd-suggestion-btn--reject"
                                                         >
-                                                            Mantener la mía
+                                                            {t('keepMine')}
                                                         </button>
                                                     </div>
                                                 </div>

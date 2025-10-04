@@ -207,6 +207,10 @@ export interface StoreTexts {
   shippingCost: string;
   shippingTime: string;
   timeToCalculate: string;
+
+  // Textos de dirección sugerida
+  useThisAddress: string;
+  keepMine: string;
 }
 
 const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
@@ -411,7 +415,11 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     shippingZone: 'Zona',
     shippingCost: 'Costo',
     shippingTime: 'Tiempo',
-    timeToCalculate: 'Tiempo por calcular'
+    timeToCalculate: 'Tiempo por calcular',
+
+    // Textos de dirección sugerida
+    useThisAddress: 'Usar esta dirección',
+    keepMine: 'Mantener la mía'
   },
   
   en: {
@@ -615,7 +623,11 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     shippingZone: 'Zone',
     shippingCost: 'Cost',
     shippingTime: 'Time',
-    timeToCalculate: 'Time to calculate'
+    timeToCalculate: 'Time to calculate',
+
+    // Textos de dirección sugerida
+    useThisAddress: 'Use this address',
+    keepMine: 'Keep mine'
   },
   
   pt: {
@@ -819,7 +831,11 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
     shippingZone: 'Zona',
     shippingCost: 'Custo',
     shippingTime: 'Tempo',
-    timeToCalculate: 'Tempo a calcular'
+    timeToCalculate: 'Tempo a calcular',
+
+    // Textos de dirección sugerida
+    useThisAddress: 'Usar este endereço',
+    keepMine: 'Manter o meu'
   }
 };
 
