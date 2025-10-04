@@ -1539,7 +1539,7 @@
     margin: var(--nbd-space-lg) 0;
     justify-content: flex-end;
     position: relative;
-    z-index: 10; /* Reducido para evitar problemas de rendering */
+    z-index: 100; /* Alto para asegurar que controles y dropdown estén por encima de tarjetas */
 }
 
 /* Reducir separación de controles en móvil y tablet */
@@ -1594,7 +1594,7 @@
 /* Dropdown de ordenamiento */
 .nbd-sort-dropdown {
     position: relative;
-    z-index: 20; /* Reducido para evitar problemas de rendering */
+    z-index: 100; /* Alto para asegurar que el dropdown esté por encima de las tarjetas de producto */
 }
 
 /* Botón de ordenar transparente para consistencia */
@@ -2354,8 +2354,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Solo aplicar aceleración por hardware en desktop */
 @media (min-width: 769px) {
     .nbd-product-card {
-        will-change: transform;
-        transform: translateZ(0);
+        /* Removido will-change y transform para evitar stacking context que causa problemas con z-index del dropdown */
     }
 }
 
@@ -2465,11 +2464,6 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         transition: none !important;
     }
 
-    /* Estabilizar z-index para evitar recomposition */
-    .nbd-product-controls {
-        z-index: 5 !important;
-    }
-
     /* SOLUCIÓN ESPECÍFICA PARA iOS SAFARI - Eliminar todas las transiciones */
     .nbd-product-img {
         transition: none !important;
@@ -2479,10 +2473,6 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         will-change: auto !important;
         backface-visibility: visible !important;
         -webkit-backface-visibility: visible !important;
-    }
-
-    .nbd-sort-dropdown {
-        z-index: 6 !important;
     }
 }
 
