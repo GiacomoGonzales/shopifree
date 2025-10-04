@@ -1933,13 +1933,13 @@ export default function CreateProductPage() {
                 <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <h3 className="text-sm font-medium text-gray-700 mb-3">Vista previa de la búsqueda de Google</h3>
                   <div className="space-y-1">
-                    <div className="text-blue-600 text-lg hover:underline cursor-pointer">
+                    <div className="text-blue-600 text-lg hover:underline cursor-pointer break-words">
                       {seoTitle || productName || 'Título del producto'}
                     </div>
-                    <div className="text-green-700 text-sm">
+                    <div className="text-green-700 text-sm break-all overflow-hidden">
                       https://{store?.subdomain || 'mi-tienda'}.shopifree.app/products/{urlSlug || 'producto-123'}
                     </div>
-                    <div className="text-gray-600 text-sm">
+                    <div className="text-gray-600 text-sm break-words">
                       {metaDescription || 'Descripción del producto que aparecerá en los resultados de búsqueda...'}
                     </div>
                   </div>

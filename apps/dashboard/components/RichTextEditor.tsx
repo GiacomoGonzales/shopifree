@@ -126,7 +126,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       .ql-editor {
         min-height: 120px;
         font-family: inherit;
-        font-size: 14px;
+        font-size: 16px;
         line-height: 1.5;
       }
       
