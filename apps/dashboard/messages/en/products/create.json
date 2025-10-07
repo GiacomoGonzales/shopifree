@@ -82,6 +82,7 @@
   },
   "categorization": {
     "title": "Categorize product",
+    "subtitle": "Classify your product to improve its organization",
     "metaFields": "metadata fields",
     "select": "Select",
     "selectOption": "Select",

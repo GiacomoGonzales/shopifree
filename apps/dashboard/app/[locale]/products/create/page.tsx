@@ -128,6 +128,7 @@ export default function CreateProductPage() {
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [showInventory, setShowInventory] = useState(false)
   const [showSEO, setShowSEO] = useState(false)
+  const [showCategorization, setShowCategorization] = useState(false)
   const [countryOrigin, setCountryOrigin] = useState('')
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [productStatus, setProductStatus] = useState<'draft' | 'active' | 'archived'>('draft')
@@ -940,15 +941,23 @@ export default function CreateProductPage() {
 
               {/* 4. Organización del producto */}
               <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">{t('categorization.title')}</h2>
-                  {selectedCategory && getMetaFieldsForCategory().length > 0 && (
-                    <span className="text-sm text-gray-500">
-                      {getMetaFieldsForCategory().length} {t('categorization.metaFields')}
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-4">
+                <button
+                  onClick={() => setShowCategorization(!showCategorization)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('categorization.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('categorization.subtitle')}
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showCategorization ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showCategorization && (
+                  <div className="mt-6 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t('categorization.categoryLabel')}</label>
                     
@@ -1218,6 +1227,8 @@ export default function CreateProductPage() {
                     </div>
                   )}
                 </div>
+                  </div>
+                )}
               </Card>
 
               {/* 5. Inventario y Variantes */}

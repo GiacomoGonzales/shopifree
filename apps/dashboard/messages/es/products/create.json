@@ -82,6 +82,7 @@
   },
   "categorization": {
     "title": "Categorizar producto",
+    "subtitle": "Clasifica tu producto para mejorar su organización",
     "metaFields": "metacampos",
     "select": "Seleccionar",
     "selectOption": "Seleccionar",
