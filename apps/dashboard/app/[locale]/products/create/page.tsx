@@ -2336,41 +2336,55 @@ export default function CreateProductPage() {
                               ) : (
                                 <div className="space-y-2">
                                   {group.options.map((option) => (
-                                    <div key={option.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded border border-gray-200">
-                                      <div className="flex-1">
+                                    <div key={option.id} className="p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
+                                      {/* Nombre de la opción */}
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                                          Nombre
+                                        </label>
                                         <input
                                           type="text"
                                           placeholder={t('modifiers.optionNamePlaceholder')}
                                           value={option.name}
                                           onChange={(e) => updateModifierOption(group.id, option.id, 'name', e.target.value)}
-                                          className="block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                          className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                                         />
                                       </div>
-                                      <div className="w-28">
-                                        <input
-                                          type="number"
-                                          placeholder="0"
-                                          step="0.01"
-                                          value={option.priceModifier}
-                                          onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', parseFloat(e.target.value) || 0)}
-                                          className="block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                                        />
+
+                                      {/* Precio, default y eliminar */}
+                                      <div className="flex items-end gap-2">
+                                        <div className="flex-1">
+                                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                                            Precio modificador ({currencySymbol})
+                                          </label>
+                                          <input
+                                            type="number"
+                                            placeholder="0"
+                                            step="0.01"
+                                            value={option.priceModifier}
+                                            onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', parseFloat(e.target.value) || 0)}
+                                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                          />
+                                        </div>
+                                        <label className="flex items-center cursor-pointer pb-2 whitespace-nowrap" title={t('modifiers.defaultOption')}>
+                                          <input
+                                            type="checkbox"
+                                            checked={option.isDefault}
+                                            onChange={(e) => updateModifierOption(group.id, option.id, 'isDefault', e.target.checked)}
+                                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                          />
+                                          <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
+                                        </label>
+                                        <button
+                                          onClick={() => removeModifierOption(group.id, option.id)}
+                                          className="text-red-600 hover:text-red-700 pb-2 px-2"
+                                          title="Eliminar opción"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                          </svg>
+                                        </button>
                                       </div>
-                                      <label className="flex items-center cursor-pointer" title={t('modifiers.defaultOption')}>
-                                        <input
-                                          type="checkbox"
-                                          checked={option.isDefault}
-                                          onChange={(e) => updateModifierOption(group.id, option.id, 'isDefault', e.target.checked)}
-                                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                        />
-                                        <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
-                                      </label>
-                                      <button
-                                        onClick={() => removeModifierOption(group.id, option.id)}
-                                        className="text-red-600 hover:text-red-700"
-                                      >
-                                        ✕
-                                      </button>
                                     </div>
                                   ))}
                                 </div>
