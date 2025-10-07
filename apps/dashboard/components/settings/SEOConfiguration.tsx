@@ -71,6 +71,8 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
   const [keywordInput, setKeywordInput] = useState('')
   const [uploadingOgImage, setUploadingOgImage] = useState(false)
   const [uploadingFavicon, setUploadingFavicon] = useState(false)
+  const [deletingOgImage, setDeletingOgImage] = useState(false)
+  const [deletingFavicon, setDeletingFavicon] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const { toast, showToast, hideToast } = useToast()
   const [isDraggingOgImage, setIsDraggingOgImage] = useState(false)
@@ -585,16 +587,33 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
               </label>
               <button
                 type="button"
-                onClick={() => {
-                  if (seoData.ogImagePublicId) {
-                    deleteImageFromCloudinary(seoData.ogImagePublicId)
+                onClick={async () => {
+                  setDeletingOgImage(true)
+                  try {
+                    if (seoData.ogImagePublicId) {
+                      await deleteImageFromCloudinary(seoData.ogImagePublicId)
+                      console.log('OG Image deleted from Cloudinary:', seoData.ogImagePublicId)
+                    }
+                    handleInputChange('ogImage', '')
+                    handleInputChange('ogImagePublicId', '')
+
+                    // Guardar en base de datos inmediatamente
+                    await onUpdate({
+                      ogImage: '',
+                      ogImagePublicId: ''
+                    })
+                    showToast('Imagen eliminada correctamente', 'success')
+                  } catch (error) {
+                    console.error('Error deleting OG image:', error)
+                    showToast('Error al eliminar imagen', 'error')
+                  } finally {
+                    setDeletingOgImage(false)
                   }
-                  handleInputChange('ogImage', '')
-                  handleInputChange('ogImagePublicId', '')
                 }}
-                className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                disabled={deletingOgImage}
+                className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('fields.ogImage.remove')}
+                {deletingOgImage ? 'Eliminando...' : t('fields.ogImage.remove')}
               </button>
             </div>
           </div>
@@ -713,16 +732,33 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
               </label>
               <button
                 type="button"
-                onClick={() => {
-                  if (seoData.faviconPublicId) {
-                    deleteImageFromCloudinary(seoData.faviconPublicId)
+                onClick={async () => {
+                  setDeletingFavicon(true)
+                  try {
+                    if (seoData.faviconPublicId) {
+                      await deleteImageFromCloudinary(seoData.faviconPublicId)
+                      console.log('Favicon deleted from Cloudinary:', seoData.faviconPublicId)
+                    }
+                    handleInputChange('favicon', '')
+                    handleInputChange('faviconPublicId', '')
+
+                    // Guardar en base de datos inmediatamente
+                    await onUpdate({
+                      favicon: '',
+                      faviconPublicId: ''
+                    })
+                    showToast('Favicon eliminado correctamente', 'success')
+                  } catch (error) {
+                    console.error('Error deleting favicon:', error)
+                    showToast('Error al eliminar favicon', 'error')
+                  } finally {
+                    setDeletingFavicon(false)
                   }
-                  handleInputChange('favicon', '')
-                  handleInputChange('faviconPublicId', '')
                 }}
-                className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                disabled={deletingFavicon}
+                className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('fields.favicon.remove')}
+                {deletingFavicon ? 'Eliminando...' : t('fields.favicon.remove')}
               </button>
             </div>
           </div>
