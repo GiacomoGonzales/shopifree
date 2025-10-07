@@ -2372,8 +2372,8 @@ export default function CreateProductPage() {
                                             type="number"
                                             placeholder="0"
                                             step="0.01"
-                                            value={option.priceModifier}
-                                            onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', parseFloat(e.target.value) || 0)}
+                                            value={option.priceModifier === 0 ? '' : option.priceModifier}
+                                            onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                             className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                                           />
                                         </div>
