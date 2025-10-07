@@ -127,6 +127,7 @@ export default function CreateProductPage() {
   const [urlSlug, setUrlSlug] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [showInventory, setShowInventory] = useState(false)
+  const [showSEO, setShowSEO] = useState(false)
   const [countryOrigin, setCountryOrigin] = useState('')
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [productStatus, setProductStatus] = useState<'draft' | 'active' | 'archived'>('draft')
@@ -1999,10 +2000,20 @@ export default function CreateProductPage() {
 
               {/* 7. SEO */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('seo.title')}</h2>
-                
-                {/* Vista previa de Google */}
-                <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <button
+                  onClick={() => setShowSEO(!showSEO)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <h2 className="text-lg font-semibold text-gray-900">{t('seo.title')}</h2>
+                  <span className="text-gray-400">
+                    {showSEO ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showSEO && (
+                  <div className="mt-4">
+                    {/* Vista previa de Google */}
+                    <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <h3 className="text-sm font-medium text-gray-700 mb-3">Vista previa de la búsqueda de Google</h3>
                   <div className="space-y-1">
                     <div className="text-blue-600 text-lg hover:underline cursor-pointer break-words">
@@ -2043,6 +2054,8 @@ export default function CreateProductPage() {
                     onChange={(e) => setUrlSlug(e.target.value)}
                   />
                 </div>
+                  </div>
+                )}
               </Card>
             </div>
 
