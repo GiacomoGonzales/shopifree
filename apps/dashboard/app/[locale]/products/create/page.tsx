@@ -528,7 +528,7 @@ export default function CreateProductPage() {
   const getBreadcrumb = (): string[] => {
     const breadcrumb: string[] = []
     let current = CATEGORY_OPTIONS
-    
+
     for (const pathId of categoryPath) {
       const node = current.find((n: CategoryNode) => n.id === pathId)
       if (node) {
@@ -541,8 +541,8 @@ export default function CreateProductPage() {
     return breadcrumb
   }
 
-    const navigateToCategory = (categoryId: string) => {
-      const node = findNodeById(CATEGORY_OPTIONS, categoryId)
+  const navigateToCategory = (categoryId: string) => {
+    const node = findNodeById(CATEGORY_OPTIONS, categoryId)
     if (node) {
       if (node.children && node.children.length > 0) {
         // Si tiene hijos, navegar al siguiente nivel
@@ -626,7 +626,7 @@ export default function CreateProductPage() {
         
         // Stock
         trackStock,
-        stockQuantity: trackStock ? parseInt(stockQuantity) || 0 : null,
+        stockQuantity: trackStock ? stockQuantity || 0 : null,
         
         // Organización
         selectedBrandId: selectedBrandId || null,
@@ -1226,7 +1226,6 @@ export default function CreateProductPage() {
                       )}
                     </div>
                   )}
-                </div>
                   </div>
                 )}
               </Card>
