@@ -76,7 +76,7 @@ export const getFileType = (file: File): 'image' | 'video' | 'unknown' => {
 
 // Subir imagen a Cloudinary
 export const uploadImageToCloudinary = async (
-  file: File, 
+  file: File,
   options: UploadOptions
 ): Promise<CloudinaryUploadResponse> => {
   try {
@@ -99,16 +99,18 @@ export const uploadImageToCloudinary = async (
     const formData = new FormData()
     formData.append('file', file)
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-    
+
     // Si se proporciona storeId, crear carpeta específica por tienda
     if (options.storeId) {
       formData.append('folder', `${options.folder}/${options.storeId}`)
     } else {
       formData.append('folder', options.folder)
     }
-    
+
     // Configuraciones de optimización
-    formData.append('quality', 'auto')
+    // Para logos, usar mejor calidad para evitar borrosidad
+    const isLogo = options.folder === 'logos' || options.folder === 'logo_horizontal'
+    formData.append('quality', isLogo ? '90' : 'auto')
     formData.append('fetch_format', 'auto')
     formData.append('flags', 'progressive')
 

@@ -18,6 +18,25 @@ export default function Footer({ storeInfo, categories, storeSubdomain, storeId 
     const topCategories = Array.isArray(categories) ? categories.filter(c => !c.parentCategoryId) : [];
     const { t } = useStoreLanguage();
 
+    // Helper para optimizar imagen de Cloudinary para logos
+    const getOptimizedLogoUrl = (url: string | undefined): string | undefined => {
+        if (!url) return undefined;
+
+        // Solo aplicar a URLs de Cloudinary
+        if (!url.includes('cloudinary.com')) return url;
+
+        // Aplicar transformaciones para logos con mejor calidad
+        // h_120 = altura 120px (2x del display de 60px para retina)
+        // q_90 = calidad 90%
+        // f_auto = formato automático (WebP en navegadores compatibles)
+        const transformations = 'h_120,q_90,f_auto,dpr_2.0';
+
+        // Insertar transformaciones después de /upload/
+        return url.replace('/upload/', `/upload/${transformations}/`);
+    };
+
+    const optimizedLogoUrl = getOptimizedLogoUrl(storeInfo?.storefrontImageUrl);
+
     // Memoizar la lógica de local físico basada en la configuración de contacto
     const { hasPhysicalStore, storeLocation } = useMemo(() => {
         const hasStore = storeInfo?.hasPhysicalLocation && 
@@ -45,12 +64,13 @@ export default function Footer({ storeInfo, categories, storeSubdomain, storeId 
                     
                     {/* Información de la tienda */}
                     <div className="nbd-footer-section nbd-footer-section--brand">
-                        {storeInfo?.storefrontImageUrl ? (
+                        {optimizedLogoUrl ? (
                             <img
-                                src={storeInfo.storefrontImageUrl}
-                                alt={storeInfo.storeName || storeSubdomain}
+                                src={optimizedLogoUrl}
+                                alt={storeInfo?.storeName || storeSubdomain}
                                 className="nbd-footer-logo"
                                 style={{ maxHeight: '60px', objectFit: 'contain' }}
+                                loading="lazy"
                             />
                         ) : (
                             <h3 className="nbd-footer-title">
