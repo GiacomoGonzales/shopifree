@@ -32,6 +32,7 @@ export default function BrandModal({
   const [imagePreview, setImagePreview] = useState<string>('')
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDraggingOver, setIsDraggingOver] = useState(false)
 
@@ -90,13 +91,41 @@ export default function BrandModal({
     setErrors({ ...errors, image: '' })
   }
 
-  const handleRemoveImage = () => {
-    setImageFile(null)
-    setImagePreview('')
-    setFormData({
-      ...formData,
-      image: ''
-    })
+  const handleRemoveImage = async () => {
+    setIsDeleting(true)
+
+    try {
+      // Si hay una imagen en Cloudinary, intentar eliminarla
+      if (formData.image && formData.image.includes('cloudinary')) {
+        try {
+          // Extraer public_id de la URL de Cloudinary
+          const urlParts = formData.image.split('/')
+          const versionIndex = urlParts.findIndex(part => part.startsWith('v'))
+          if (versionIndex > 0) {
+            // Todo después de la versión es el public_id con la extensión
+            const pathAfterVersion = urlParts.slice(versionIndex + 1).join('/')
+            const publicId = pathAfterVersion.replace(/\.[^.]+$/, '') // Remover extensión
+
+            await deleteImageFromCloudinary(publicId)
+            console.log('Image deleted from Cloudinary:', publicId)
+          }
+        } catch (deleteError) {
+          console.error('Error deleting image from Cloudinary:', deleteError)
+        }
+      }
+
+      // Limpiar estado local
+      setImageFile(null)
+      setImagePreview('')
+      setFormData({
+        ...formData,
+        image: ''
+      })
+    } catch (error) {
+      console.error('Error in handleRemoveImage:', error)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   // Handlers para drag & drop
@@ -277,9 +306,10 @@ export default function BrandModal({
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
+                          disabled={isDeleting}
+                          className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {t('imageUpload.remove')}
+                          {isDeleting ? 'Eliminando...' : t('imageUpload.remove')}
                         </button>
                       </div>
                     </div>
