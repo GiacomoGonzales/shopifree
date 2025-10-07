@@ -16,9 +16,10 @@ export const metadata: Metadata = {
 
   // PWA Configuration
   manifest: '/manifest.json',
+  themeColor: '#059669',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Shopifree',
   },
 
@@ -58,6 +59,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* Theme color for browsers and mobile devices */}
+        <meta name="theme-color" content="#059669" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
         {/* Preconnect to external domains for faster loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
