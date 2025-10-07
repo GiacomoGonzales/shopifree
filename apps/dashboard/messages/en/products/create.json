@@ -109,8 +109,8 @@
     "noOptions": "No options. Add one to get started.",
     "addOption": "Add option",
     "optionNamePlaceholder": "E.g.: Extra cheese, Personal size",
-    "defaultOption": "Mark as default option",
-    "default": "Default"
+    "defaultOption": "Mark as preselected option",
+    "default": "Preselected"
   },
   "inventory": {
     "title": "Inventory and variations",

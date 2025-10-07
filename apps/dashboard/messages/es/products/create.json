@@ -109,8 +109,8 @@
     "noOptions": "No hay opciones. Agrega una para empezar.",
     "addOption": "Agregar opción",
     "optionNamePlaceholder": "Ej: Extra queso, Tamaño personal",
-    "defaultOption": "Marcar como opción por defecto",
-    "default": "Por defecto"
+    "defaultOption": "Marcar como opción preseleccionada",
+    "default": "Preseleccionada"
   },
   "inventory": {
     "title": "Inventario y variaciones",
