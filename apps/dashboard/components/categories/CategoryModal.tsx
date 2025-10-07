@@ -36,6 +36,7 @@ export default function CategoryModal({
   const [imagePreview, setImagePreview] = useState<string>('')
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDraggingOver, setIsDraggingOver] = useState(false)
 
@@ -94,14 +95,29 @@ export default function CategoryModal({
     setErrors({ ...errors, image: '' })
   }
 
-  const handleRemoveImage = () => {
-    setImageFile(null)
-    setImagePreview('')
-    setFormData({
-      ...formData,
-      imageUrl: '',
-      imagePublicId: ''
-    })
+  const handleRemoveImage = async () => {
+    setIsDeleting(true)
+
+    try {
+      // Si hay una imagen en Cloudinary, eliminarla
+      if (formData.imagePublicId) {
+        await deleteImageFromCloudinary(formData.imagePublicId)
+        console.log('Image deleted from Cloudinary:', formData.imagePublicId)
+      }
+
+      // Limpiar estado local
+      setImageFile(null)
+      setImagePreview('')
+      setFormData({
+        ...formData,
+        imageUrl: '',
+        imagePublicId: ''
+      })
+    } catch (error) {
+      console.error('Error deleting image from Cloudinary:', error)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   // Handlers para drag & drop
@@ -274,9 +290,10 @@ export default function CategoryModal({
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
+                          disabled={isDeleting}
+                          className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {t('modal.removeImage')}
+                          {isDeleting ? 'Eliminando...' : t('modal.removeImage')}
                         </button>
                       </div>
                     </div>
