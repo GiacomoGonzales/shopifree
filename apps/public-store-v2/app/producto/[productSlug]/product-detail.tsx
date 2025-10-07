@@ -871,10 +871,38 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
             {/* Información del producto */}
             <div className="nbd-product-info">
               <div className="nbd-product-header">
+                <div className="nbd-product-header-content">
           <h1 className="nbd-product-title">{product.name}</h1>
                 {product.brand && (
                   <span className="nbd-product-brand">por {product.brand}</span>
                 )}
+                </div>
+                <button
+                  className="nbd-btn-share-icon"
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: product.name,
+                        text: `Mira este producto: ${product.name}`,
+                        url: window.location.href
+                      });
+                    } else {
+                      // Fallback para navegadores que no soportan Web Share API
+                      navigator.clipboard.writeText(window.location.href);
+                      alert('Enlace copiado al portapapeles');
+                    }
+                  }}
+                  aria-label="Compartir producto"
+                  title="Compartir"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                  </svg>
+                </button>
               </div>
 
           {typeof product.price === 'number' ? (
@@ -1088,29 +1116,6 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
                       Seguir explorando
                     </button>
                   )}
-                  <button 
-                    className="nbd-btn nbd-btn--outline nbd-btn--secondary"
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: product.name,
-                          text: `Mira este producto: ${product.name}`,
-                          url: window.location.href
-                        });
-                      } else {
-                        // Fallback para navegadores que no soportan Web Share API
-                        navigator.clipboard.writeText(window.location.href);
-                        alert('Enlace copiado al portapapeles');
-                      }
-                    }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 12V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V12"/>
-                      <path d="M16 6L12 2L8 6"/>
-                      <path d="M12 2V15"/>
-                    </svg>
-                    Compartir
-                  </button>
                 </div>
               </div>
             </div>

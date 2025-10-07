@@ -4520,6 +4520,45 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     text-align: left;
 }
 
+/* Botón de compartir como ícono */
+.nbd-btn-share-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: var(--nbd-neutral-100);
+    border: 2px solid var(--nbd-neutral-200);
+    color: var(--nbd-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.nbd-btn-share-icon:hover {
+    background: var(--nbd-neutral-200);
+    border-color: var(--nbd-neutral-300);
+    color: var(--nbd-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.nbd-btn-share-icon:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.nbd-btn-share-icon svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
+}
+
+.nbd-btn-share-icon:hover svg {
+    transform: scale(1.05);
+}
+
 .nbd-product-detail .nbd-product-title {
     font-size: var(--nbd-font-size-4xl);
     font-weight: 700;
@@ -4539,6 +4578,20 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     display: flex;
     flex-direction: column;
     gap: var(--nbd-space-sm);
+}
+
+.nbd-product-pricing-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nbd-space-lg);
+}
+
+.nbd-product-pricing-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nbd-space-sm);
+    flex: 1;
 }
 
 .nbd-price-comparison {
@@ -4749,6 +4802,21 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
     .nbd-product-header {
         text-align: left;
+    }
+
+    .nbd-product-pricing-content {
+        align-items: flex-start;
+    }
+
+    .nbd-btn-share-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .nbd-btn-share-icon svg {
+        width: 18px;
+        height: 18px;
     }
 
     .nbd-product-detail .nbd-product-title {
