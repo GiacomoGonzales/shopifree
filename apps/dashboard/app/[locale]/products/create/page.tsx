@@ -2336,9 +2336,20 @@ export default function CreateProductPage() {
                               ) : (
                                 <div className="space-y-2">
                                   {group.options.map((option) => (
-                                    <div key={option.id} className="p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
+                                    <div key={option.id} className="relative p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
+                                      {/* Botón eliminar en esquina superior derecha */}
+                                      <button
+                                        onClick={() => removeModifierOption(group.id, option.id)}
+                                        className="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
+                                        title="Eliminar opción"
+                                      >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                      </button>
+
                                       {/* Nombre de la opción */}
-                                      <div>
+                                      <div className="pr-8">
                                         <label className="block text-xs font-medium text-gray-600 mb-1">
                                           Nombre
                                         </label>
@@ -2351,7 +2362,7 @@ export default function CreateProductPage() {
                                         />
                                       </div>
 
-                                      {/* Precio, default y eliminar */}
+                                      {/* Precio y checkbox preseleccionada */}
                                       <div className="flex items-end gap-2">
                                         <div className="flex-1">
                                           <label className="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">
@@ -2375,15 +2386,6 @@ export default function CreateProductPage() {
                                           />
                                           <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
                                         </label>
-                                        <button
-                                          onClick={() => removeModifierOption(group.id, option.id)}
-                                          className="text-red-600 hover:text-red-700 pb-2 px-2"
-                                          title="Eliminar opción"
-                                        >
-                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                          </svg>
-                                        </button>
                                       </div>
                                     </div>
                                   ))}
