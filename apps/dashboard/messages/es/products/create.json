@@ -90,6 +90,28 @@
     "chooseCategoryPlaceholder": "Elige una categoría de producto",
     "categorySelected": "✓ Categoría seleccionada"
   },
+  "modifiers": {
+    "title": "Modificadores y extras",
+    "subtitle": "Agrega opciones como tamaños, ingredientes extras, salsas, etc.",
+    "emptyState": "No hay grupos de modificadores. Agrega uno para empezar.",
+    "addGroup": "Agregar grupo de modificadores",
+    "removeGroup": "Eliminar grupo",
+    "groupLabel": "Grupo",
+    "groupName": "Nombre del grupo",
+    "groupNamePlaceholder": "Ej: Elige el tamaño, Ingredientes extras, Cremas",
+    "selectionType": "Tipo de selección",
+    "singleRequired": "Única obligatoria (debe elegir exactamente 1)",
+    "singleOptional": "Única opcional (puede elegir 0 o 1)",
+    "multiple": "Múltiple (puede elegir varios)",
+    "minSelections": "Mínimo",
+    "maxSelections": "Máximo",
+    "options": "Opciones",
+    "noOptions": "No hay opciones. Agrega una para empezar.",
+    "addOption": "Agregar opción",
+    "optionNamePlaceholder": "Ej: Extra queso, Tamaño personal",
+    "defaultOption": "Marcar como opción por defecto",
+    "default": "Por defecto"
+  },
   "inventory": {
     "title": "Inventario y variaciones",
     "subtitle": "Configura el stock y las variaciones de tu producto",

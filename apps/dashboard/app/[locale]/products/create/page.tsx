@@ -51,6 +51,26 @@ interface CategoryNode {
   isLeaf?: boolean
 }
 
+interface ModifierOption {
+  id: string
+  name: string
+  priceModifier: number  // +$0, +$2, -$1
+  isDefault: boolean
+  isActive: boolean
+  order: number
+}
+
+interface ModifierGroup {
+  id: string
+  name: string
+  selectionType: 'single_required' | 'single_optional' | 'multiple'
+  minSelections: number
+  maxSelections: number
+  order: number
+  required: boolean
+  options: ModifierOption[]
+}
+
 export default function CreateProductPage() {
   const router = useRouter()
   const { store, loading: storeLoading, currency, currencySymbol, currencyName, formatPrice } = useStore()
@@ -129,6 +149,8 @@ export default function CreateProductPage() {
   const [showInventory, setShowInventory] = useState(false)
   const [showSEO, setShowSEO] = useState(false)
   const [showCategorization, setShowCategorization] = useState(false)
+  const [showModifiers, setShowModifiers] = useState(false)
+  const [modifierGroups, setModifierGroups] = useState<ModifierGroup[]>([])
   const [countryOrigin, setCountryOrigin] = useState('')
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [productStatus, setProductStatus] = useState<'draft' | 'active' | 'archived'>('draft')
@@ -432,6 +454,96 @@ export default function CreateProductPage() {
     setCustomShoeSizes(prev => prev.filter(s => s !== size))
   }
 
+  // Funciones para manejar modificadores
+  const addModifierGroup = () => {
+    const newGroup: ModifierGroup = {
+      id: `group-${Date.now()}`,
+      name: '',
+      selectionType: 'single_required',
+      minSelections: 1,
+      maxSelections: 1,
+      order: modifierGroups.length,
+      required: true,
+      options: []
+    }
+    setModifierGroups(prev => [...prev, newGroup])
+  }
+
+  const removeModifierGroup = (groupId: string) => {
+    setModifierGroups(prev => prev.filter(g => g.id !== groupId))
+  }
+
+  const updateModifierGroup = (groupId: string, field: keyof ModifierGroup, value: any) => {
+    setModifierGroups(prev => prev.map(g => {
+      if (g.id === groupId) {
+        const updated = { ...g, [field]: value }
+
+        // Ajustar automáticamente min/max según el tipo
+        if (field === 'selectionType') {
+          if (value === 'single_required' || value === 'single_optional') {
+            updated.minSelections = value === 'single_required' ? 1 : 0
+            updated.maxSelections = 1
+            updated.required = value === 'single_required'
+          } else if (value === 'multiple') {
+            updated.minSelections = 0
+            updated.maxSelections = 999
+          }
+        }
+
+        return updated
+      }
+      return g
+    }))
+  }
+
+  const addModifierOption = (groupId: string) => {
+    const newOption: ModifierOption = {
+      id: `option-${Date.now()}`,
+      name: '',
+      priceModifier: 0,
+      isDefault: false,
+      isActive: true,
+      order: 0
+    }
+
+    setModifierGroups(prev => prev.map(g => {
+      if (g.id === groupId) {
+        const order = g.options.length
+        return {
+          ...g,
+          options: [...g.options, { ...newOption, order }]
+        }
+      }
+      return g
+    }))
+  }
+
+  const removeModifierOption = (groupId: string, optionId: string) => {
+    setModifierGroups(prev => prev.map(g => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          options: g.options.filter(o => o.id !== optionId)
+        }
+      }
+      return g
+    }))
+  }
+
+  const updateModifierOption = (groupId: string, optionId: string, field: keyof ModifierOption, value: any) => {
+    setModifierGroups(prev => prev.map(g => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          options: g.options.map(o =>
+            o.id === optionId ? { ...o, [field]: value } : o
+          )
+        }
+      }
+      return g
+    }))
+  }
+
   const getMetaFieldsForCategory = () => {
     const metadata = getMetadataForCategory(selectedCategory)
     console.log('🔍 Raw metadata for category:', selectedCategory, metadata)
@@ -638,7 +750,10 @@ export default function CreateProductPage() {
         // Variantes
         hasVariants,
         variants: hasVariants ? variants : [], // Guardar todas las variantes creadas
-        
+
+        // Modificadores
+        modifierGroups: modifierGroups || [],
+
         // Envío
         requiresShipping,
         weight: weight ? parseFloat(weight) : null,
@@ -2074,6 +2189,205 @@ export default function CreateProductPage() {
                     onChange={(e) => setUrlSlug(e.target.value)}
                   />
                 </div>
+                  </div>
+                )}
+              </Card>
+
+              {/* 8. Modificadores y extras */}
+              <Card className="p-6">
+                <button
+                  onClick={() => setShowModifiers(!showModifiers)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('modifiers.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('modifiers.subtitle')}
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showModifiers ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showModifiers && (
+                  <div className="mt-6 space-y-6">
+                    {modifierGroups.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="mb-4">{t('modifiers.emptyState')}</p>
+                        <Button onClick={addModifierGroup} variant="secondary">
+                          {t('modifiers.addGroup')}
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        {modifierGroups.map((group, groupIndex) => (
+                          <div key={group.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                            {/* Header del grupo */}
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-gray-500">
+                                  {t('modifiers.groupLabel')} {groupIndex + 1}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => removeModifierGroup(group.id)}
+                                className="text-red-600 hover:text-red-700 text-sm"
+                              >
+                                🗑️ {t('modifiers.removeGroup')}
+                              </button>
+                            </div>
+
+                            {/* Nombre del grupo */}
+                            <div className="mb-4">
+                              <Input
+                                label={t('modifiers.groupName')}
+                                placeholder={t('modifiers.groupNamePlaceholder')}
+                                value={group.name}
+                                onChange={(e) => updateModifierGroup(group.id, 'name', e.target.value)}
+                              />
+                            </div>
+
+                            {/* Tipo de selección */}
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t('modifiers.selectionType')}
+                              </label>
+                              <div className="space-y-2">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    checked={group.selectionType === 'single_required'}
+                                    onChange={() => updateModifierGroup(group.id, 'selectionType', 'single_required')}
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-900">
+                                    {t('modifiers.singleRequired')}
+                                  </span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    checked={group.selectionType === 'single_optional'}
+                                    onChange={() => updateModifierGroup(group.id, 'selectionType', 'single_optional')}
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-900">
+                                    {t('modifiers.singleOptional')}
+                                  </span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    checked={group.selectionType === 'multiple'}
+                                    onChange={() => updateModifierGroup(group.id, 'selectionType', 'multiple')}
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-900">
+                                    {t('modifiers.multiple')}
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Min/Max selecciones */}
+                            {group.selectionType === 'multiple' && (
+                              <div className="mb-4 grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('modifiers.minSelections')}
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={group.minSelections}
+                                    onChange={(e) => updateModifierGroup(group.id, 'minSelections', parseInt(e.target.value) || 0)}
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    {t('modifiers.maxSelections')}
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={group.maxSelections}
+                                    onChange={(e) => updateModifierGroup(group.id, 'maxSelections', parseInt(e.target.value) || 1)}
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Opciones del grupo */}
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t('modifiers.options')}
+                              </label>
+
+                              {group.options.length === 0 ? (
+                                <div className="text-center py-4 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                                  {t('modifiers.noOptions')}
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {group.options.map((option) => (
+                                    <div key={option.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded border border-gray-200">
+                                      <div className="flex-1">
+                                        <input
+                                          type="text"
+                                          placeholder={t('modifiers.optionNamePlaceholder')}
+                                          value={option.name}
+                                          onChange={(e) => updateModifierOption(group.id, option.id, 'name', e.target.value)}
+                                          className="block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                        />
+                                      </div>
+                                      <div className="w-28">
+                                        <input
+                                          type="number"
+                                          placeholder="0"
+                                          step="0.01"
+                                          value={option.priceModifier}
+                                          onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', parseFloat(e.target.value) || 0)}
+                                          className="block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                        />
+                                      </div>
+                                      <label className="flex items-center cursor-pointer" title={t('modifiers.defaultOption')}>
+                                        <input
+                                          type="checkbox"
+                                          checked={option.isDefault}
+                                          onChange={(e) => updateModifierOption(group.id, option.id, 'isDefault', e.target.checked)}
+                                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                        />
+                                        <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
+                                      </label>
+                                      <button
+                                        onClick={() => removeModifierOption(group.id, option.id)}
+                                        className="text-red-600 hover:text-red-700"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              <button
+                                onClick={() => addModifierOption(group.id)}
+                                className="mt-2 text-sm text-primary-600 hover:text-primary-700"
+                              >
+                                + {t('modifiers.addOption')}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+
+                        <Button onClick={addModifierGroup} variant="secondary" className="w-full">
+                          + {t('modifiers.addGroup')}
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </Card>

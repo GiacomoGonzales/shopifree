@@ -90,6 +90,28 @@
     "chooseCategoryPlaceholder": "Choose a product category",
     "categorySelected": "✓ Category selected"
   },
+  "modifiers": {
+    "title": "Modifiers and extras",
+    "subtitle": "Add options like sizes, extra ingredients, sauces, etc.",
+    "emptyState": "No modifier groups. Add one to get started.",
+    "addGroup": "Add modifier group",
+    "removeGroup": "Remove group",
+    "groupLabel": "Group",
+    "groupName": "Group name",
+    "groupNamePlaceholder": "E.g.: Choose size, Extra ingredients, Sauces",
+    "selectionType": "Selection type",
+    "singleRequired": "Single required (must choose exactly 1)",
+    "singleOptional": "Single optional (can choose 0 or 1)",
+    "multiple": "Multiple (can choose several)",
+    "minSelections": "Minimum",
+    "maxSelections": "Maximum",
+    "options": "Options",
+    "noOptions": "No options. Add one to get started.",
+    "addOption": "Add option",
+    "optionNamePlaceholder": "E.g.: Extra cheese, Personal size",
+    "defaultOption": "Mark as default option",
+    "default": "Default"
+  },
   "inventory": {
     "title": "Inventory and variations",
     "subtitle": "Configure stock and variations for your product",
