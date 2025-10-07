@@ -346,6 +346,7 @@
         },
         "shipping": {
           "title": "Shipping",
+          "subtitle": "Configure product shipping options",
           "requiresShipping": "This product requires shipping",
           "weight": "Weight (kg)",
           "weightPlaceholder": "0.5",
@@ -356,6 +357,7 @@
         },
         "seo": {
           "title": "SEO",
+          "subtitle": "Optimize product for search engines",
           "pageTitle": "Page title",
           "pageTitlePlaceholder": "Title that will appear on Google",
           "metaDescription": "Meta description",

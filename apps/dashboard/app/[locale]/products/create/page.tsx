@@ -1951,7 +1951,12 @@ export default function CreateProductPage() {
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h2 className="text-lg font-semibold text-gray-900">{t('shipping.title')}</h2>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('shipping.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('shipping.subtitle')}
+                    </p>
+                  </div>
                   <span className="text-gray-400">
                     {showAdvanced ? '−' : '+'}
                   </span>
@@ -2004,7 +2009,12 @@ export default function CreateProductPage() {
                   onClick={() => setShowSEO(!showSEO)}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h2 className="text-lg font-semibold text-gray-900">{t('seo.title')}</h2>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('seo.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('seo.subtitle')}
+                    </p>
+                  </div>
                   <span className="text-gray-400">
                     {showSEO ? '−' : '+'}
                   </span>
