@@ -2354,7 +2354,7 @@ export default function CreateProductPage() {
                                       {/* Precio, default y eliminar */}
                                       <div className="flex items-end gap-2">
                                         <div className="flex-1">
-                                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                                          <label className="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">
                                             Precio modificador ({currencySymbol})
                                           </label>
                                           <input
