@@ -368,11 +368,28 @@ export default function BrandingSection() {
                           <button
                             type="button"
                             onClick={async () => {
+                              if (!store?.id) return
+
+                              // Eliminar de Cloudinary
                               if (formData.logoPublicId) {
                                 await deleteImageFromCloudinary(formData.logoPublicId)
                               }
+
+                              // Actualizar estado local
                               handleChange('logoUrl', '')
                               handleChange('logoPublicId', '')
+
+                              // Guardar inmediatamente en la base de datos
+                              try {
+                                await updateStore(store.id, {
+                                  logoUrl: '',
+                                  logoPublicId: ''
+                                })
+                                showToast('Imagen eliminada correctamente', 'success')
+                              } catch (error) {
+                                console.error('Error updating store after deletion:', error)
+                                showToast('Error al actualizar la tienda', 'error')
+                              }
                             }}
                             className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
                           >
@@ -475,11 +492,28 @@ export default function BrandingSection() {
                             <button
                               type="button"
                               onClick={async () => {
+                                if (!store?.id) return
+
+                                // Eliminar de Cloudinary
                                 if (formData.storefrontImagePublicId) {
                                   await deleteImageFromCloudinary(formData.storefrontImagePublicId)
                                 }
+
+                                // Actualizar estado local
                                 handleChange('storefrontImageUrl', '')
                                 handleChange('storefrontImagePublicId', '')
+
+                                // Guardar inmediatamente en la base de datos
+                                try {
+                                  await updateStore(store.id, {
+                                    storefrontImageUrl: '',
+                                    storefrontImagePublicId: ''
+                                  })
+                                  showToast('Imagen eliminada correctamente', 'success')
+                                } catch (error) {
+                                  console.error('Error updating store after deletion:', error)
+                                  showToast('Error al actualizar la tienda', 'error')
+                                }
                               }}
                               className="px-3 py-1 bg-red-500 text-white text-xs rounded shadow hover:bg-red-600 transition-colors"
                             >
