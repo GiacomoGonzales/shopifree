@@ -126,6 +126,7 @@ export default function CreateProductPage() {
   const [metaDescription, setMetaDescription] = useState('')
   const [urlSlug, setUrlSlug] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showInventory, setShowInventory] = useState(false)
   const [countryOrigin, setCountryOrigin] = useState('')
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [productStatus, setProductStatus] = useState<'draft' | 'active' | 'archived'>('draft')
@@ -1220,15 +1221,25 @@ export default function CreateProductPage() {
 
               {/* 5. Inventario y Variantes */}
               <Card className="p-6">
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('inventory.title')}</h2>
-                  <p className="text-sm text-gray-500">
-                    {t('inventory.subtitle')}
-                  </p>
-                </div>
+                <button
+                  onClick={() => setShowInventory(!showInventory)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('inventory.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('inventory.subtitle')}
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showInventory ? '−' : '+'}
+                  </span>
+                </button>
 
-                {/* Primera pregunta: Rastrear inventario */}
-                <div className="mb-6">
+                {showInventory && (
+                  <div className="mt-6">
+                    {/* Primera pregunta: Rastrear inventario */}
+                    <div className="mb-6">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
@@ -1927,6 +1938,8 @@ export default function CreateProductPage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
                   </div>
                 )}
               </Card>
