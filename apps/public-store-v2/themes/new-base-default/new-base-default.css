@@ -5960,9 +5960,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-cart-item-price {
-    font-size: var(--nbd-font-size-xs);
-    color: var(--nbd-neutral-700);
-    font-weight: 500;
+    display: none;
 }
 
 /* Cart Item Controls */
