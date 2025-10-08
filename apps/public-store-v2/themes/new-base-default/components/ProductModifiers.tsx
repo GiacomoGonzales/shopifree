@@ -7,31 +7,46 @@ import './product-modifiers.css';
 
 interface ProductModifiersProps {
   modifierGroups: ModifierGroup[];
-  onSelectionChange: (selections: Record<string, string[]>, totalModifier: number) => void;
+  onSelectionChange: (selections: Record<string, string[]>, totalModifier: number, quantities: Record<string, Record<string, number>>) => void;
   currency?: string;
 }
 
 export default function ProductModifiers({ modifierGroups, onSelectionChange, currency }: ProductModifiersProps) {
-  // Estado: { groupId: [optionId, optionId, ...] }
+  // Estado para modo allowMultiple: { groupId: { optionId: quantity } }
+  // Estado para modo radio: { groupId: [optionId] }
   const [selections, setSelections] = useState<Record<string, string[]>>({});
+  const [quantities, setQuantities] = useState<Record<string, Record<string, number>>>({});
 
   // Inicializar opciones por defecto
   useEffect(() => {
     const defaultSelections: Record<string, string[]> = {};
+    const defaultQuantities: Record<string, Record<string, number>> = {};
 
     modifierGroups.forEach(group => {
       const activeOptions = group.options.filter(opt => opt.isActive);
       const defaultOptions = activeOptions.filter(opt => opt.isDefault);
 
-      if (defaultOptions.length > 0) {
-        defaultSelections[group.id] = defaultOptions.map(opt => opt.id);
-      } else if (group.required && activeOptions.length > 0) {
-        // Si es requerido pero no hay default, seleccionar la primera opción activa
-        defaultSelections[group.id] = [activeOptions[0].id];
+      if (group.allowMultiple) {
+        defaultQuantities[group.id] = {};
+
+        if (defaultOptions.length > 0) {
+          defaultOptions.forEach(opt => {
+            defaultQuantities[group.id][opt.id] = 1;
+          });
+          defaultSelections[group.id] = defaultOptions.map(opt => opt.id);
+        }
+      } else {
+        if (defaultOptions.length > 0) {
+          defaultSelections[group.id] = [defaultOptions[0].id];
+        } else if (group.required && activeOptions.length > 0) {
+          // Si es requerido pero no hay default, seleccionar la primera opción activa
+          defaultSelections[group.id] = [activeOptions[0].id];
+        }
       }
     });
 
     setSelections(defaultSelections);
+    setQuantities(defaultQuantities);
   }, [modifierGroups]);
 
   // Calcular el modificador de precio total
@@ -45,60 +60,140 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
       optionIds.forEach(optionId => {
         const option = group.options.find(opt => opt.id === optionId);
         if (option) {
-          totalModifier += option.priceModifier;
+          if (group.allowMultiple) {
+            // Multiplicar por la cantidad seleccionada
+            const quantity = quantities[groupId]?.[optionId] || 1;
+            totalModifier += option.priceModifier * quantity;
+          } else {
+            totalModifier += option.priceModifier;
+          }
         }
       });
     });
 
-    onSelectionChange(selections, totalModifier);
-  }, [selections, modifierGroups, onSelectionChange]);
+    onSelectionChange(selections, totalModifier, quantities);
+  }, [selections, quantities, modifierGroups, onSelectionChange]);
 
-  const handleOptionChange = (groupId: string, optionId: string, checked: boolean) => {
+  const handleOptionChange = (groupId: string, optionId: string) => {
     const group = modifierGroups.find(g => g.id === groupId);
     if (!group) return;
 
+    if (group.allowMultiple) {
+      // No hacer nada aquí, el manejo se hace con + y -
+      return;
+    } else {
+      // Modo radio: solo una selección
+      setSelections(prev => ({ ...prev, [groupId]: [optionId] }));
+    }
+  };
+
+  // Incrementar cantidad de una opción
+  const handleIncrement = (groupId: string, optionId: string) => {
+    const group = modifierGroups.find(g => g.id === groupId);
+    if (!group || !group.allowMultiple) return;
+
+    setQuantities(prev => {
+      const groupQuantities = prev[groupId] || {};
+      const currentQuantity = groupQuantities[optionId] || 0;
+      const newQuantity = currentQuantity + 1;
+
+      // Verificar que no exceda maxSelections (suma total de cantidades)
+      const totalQuantity = Object.values({ ...groupQuantities, [optionId]: newQuantity })
+        .reduce((sum, qty) => sum + qty, 0);
+
+      if (totalQuantity > group.maxSelections) {
+        return prev; // No permitir exceder maxSelections
+      }
+
+      return {
+        ...prev,
+        [groupId]: {
+          ...groupQuantities,
+          [optionId]: newQuantity
+        }
+      };
+    });
+
+    // Agregar a selections si no está
     setSelections(prev => {
       const current = prev[groupId] || [];
+      if (!current.includes(optionId)) {
+        return { ...prev, [groupId]: [...current, optionId] };
+      }
+      return prev;
+    });
+  };
 
-      if (group.allowMultiple) {
-        // Modo checkbox: permitir múltiples selecciones
-        let newSelection: string[];
+  // Decrementar cantidad de una opción
+  const handleDecrement = (groupId: string, optionId: string) => {
+    const group = modifierGroups.find(g => g.id === groupId);
+    if (!group || !group.allowMultiple) return;
 
-        if (checked) {
-          // Agregar opción
-          newSelection = [...current, optionId];
+    setQuantities(prev => {
+      const groupQuantities = prev[groupId] || {};
+      const currentQuantity = groupQuantities[optionId] || 0;
 
-          // Respetar maxSelections
-          if (newSelection.length > group.maxSelections) {
-            return prev; // No permitir más de maxSelections
-          }
-        } else {
-          // Remover opción
-          newSelection = current.filter(id => id !== optionId);
+      if (currentQuantity <= 0) return prev;
 
-          // Si es requerido, no permitir deseleccionar todas
-          if (group.required && newSelection.length < group.minSelections) {
-            return prev; // Mantener al menos minSelections
-          }
+      const newQuantity = currentQuantity - 1;
+
+      // Si llega a 0, remover de quantities y selections
+      if (newQuantity === 0) {
+        const { [optionId]: removed, ...restQuantities } = groupQuantities;
+
+        // Verificar minSelections
+        const totalQuantity = Object.values(restQuantities).reduce((sum, qty) => sum + qty, 0);
+        if (group.required && totalQuantity < group.minSelections) {
+          return prev; // No permitir bajar de minSelections
         }
 
-        return { ...prev, [groupId]: newSelection };
-      } else {
-        // Modo radio: solo una selección
-        return { ...prev, [groupId]: [optionId] };
+        // Remover de selections
+        setSelections(prevSel => {
+          const current = prevSel[groupId] || [];
+          return { ...prevSel, [groupId]: current.filter(id => id !== optionId) };
+        });
+
+        return {
+          ...prev,
+          [groupId]: restQuantities
+        };
       }
+
+      return {
+        ...prev,
+        [groupId]: {
+          ...groupQuantities,
+          [optionId]: newQuantity
+        }
+      };
     });
+  };
+
+  // Obtener cantidad de una opción
+  const getQuantity = (groupId: string, optionId: string): number => {
+    return quantities[groupId]?.[optionId] || 0;
   };
 
   // Validar si el grupo cumple los requisitos
   const isGroupValid = (group: ModifierGroup): boolean => {
-    const selectedCount = (selections[group.id] || []).length;
+    if (group.allowMultiple) {
+      const groupQuantities = quantities[group.id] || {};
+      const totalQuantity = Object.values(groupQuantities).reduce((sum, qty) => sum + qty, 0);
 
-    if (group.required && selectedCount < group.minSelections) {
-      return false;
+      if (group.required && totalQuantity < group.minSelections) {
+        return false;
+      }
+
+      return true;
+    } else {
+      const selectedCount = (selections[group.id] || []).length;
+
+      if (group.required && selectedCount < group.minSelections) {
+        return false;
+      }
+
+      return true;
     }
-
-    return true;
   };
 
   // Obtener el texto de ayuda para el grupo
@@ -109,16 +204,17 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
 
     const min = group.minSelections;
     const max = group.maxSelections;
-    const selectedCount = (selections[group.id] || []).length;
+    const groupQuantities = quantities[group.id] || {};
+    const totalQuantity = Object.values(groupQuantities).reduce((sum, qty) => sum + qty, 0);
 
     if (group.required) {
       if (min === max) {
-        return `Selecciona ${min}`;
+        return `Selecciona ${min} ${totalQuantity > 0 ? `(${totalQuantity}/${min})` : ''}`;
       }
-      return `Selecciona entre ${min} y ${max}`;
+      return `Selecciona entre ${min} y ${max} ${totalQuantity > 0 ? `(${totalQuantity})` : ''}`;
     }
 
-    return `Selecciona hasta ${max} opciones`;
+    return `Hasta ${max} opciones ${totalQuantity > 0 ? `(${totalQuantity}/${max})` : ''}`;
   };
 
   if (!modifierGroups || modifierGroups.length === 0) return null;
@@ -149,34 +245,83 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
 
             <div className="nbd-modifier-options">
               {sortedOptions.map(option => {
-                const isSelected = (selections[group.id] || []).includes(option.id);
-                const inputType = group.allowMultiple ? 'checkbox' : 'radio';
+                const quantity = getQuantity(group.id, option.id);
+                const isSelected = quantity > 0 || (selections[group.id] || []).includes(option.id);
                 const inputName = `modifier-group-${group.id}`;
 
-                return (
-                  <label
-                    key={option.id}
-                    className={`nbd-modifier-option ${isSelected ? 'nbd-modifier-option--selected' : ''}`}
-                  >
-                    <input
-                      type={inputType}
-                      name={inputName}
-                      checked={isSelected}
-                      onChange={(e) => handleOptionChange(group.id, option.id, e.target.checked)}
-                      className="nbd-modifier-input"
-                    />
-                    <span className="nbd-modifier-radio"></span>
-                    <span className="nbd-modifier-option-content">
-                      <span className="nbd-modifier-option-name">{option.name}</span>
-                      {option.priceModifier !== 0 && (
-                        <span className="nbd-modifier-option-price">
-                          {option.priceModifier > 0 ? '+' : ''}
-                          {formatPrice(option.priceModifier, currency)}
+                if (group.allowMultiple) {
+                  // Modo con contadores + y -
+                  return (
+                    <div
+                      key={option.id}
+                      className={`nbd-modifier-option nbd-modifier-option--quantity ${quantity > 0 ? 'nbd-modifier-option--selected' : ''}`}
+                    >
+                      <div className="nbd-modifier-option-content">
+                        <span className="nbd-modifier-option-name">{option.name}</span>
+                        <span className="nbd-modifier-option-price-info">
+                          {option.priceModifier !== 0 && (
+                            <span className="nbd-modifier-option-price">
+                              {option.priceModifier > 0 ? '+' : ''}
+                              {formatPrice(option.priceModifier, currency)}
+                              {quantity > 1 && <span className="nbd-modifier-multiplier"> x{quantity}</span>}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
-                  </label>
-                );
+                      </div>
+                      <div className="nbd-modifier-quantity-controls">
+                        <button
+                          type="button"
+                          className="nbd-modifier-btn nbd-modifier-btn--minus"
+                          onClick={() => handleDecrement(group.id, option.id)}
+                          disabled={quantity === 0}
+                          aria-label="Disminuir cantidad"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                        </button>
+                        <span className="nbd-modifier-quantity">{quantity}</span>
+                        <button
+                          type="button"
+                          className="nbd-modifier-btn nbd-modifier-btn--plus"
+                          onClick={() => handleIncrement(group.id, option.id)}
+                          aria-label="Aumentar cantidad"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  // Modo radio tradicional
+                  return (
+                    <label
+                      key={option.id}
+                      className={`nbd-modifier-option ${isSelected ? 'nbd-modifier-option--selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name={inputName}
+                        checked={isSelected}
+                        onChange={() => handleOptionChange(group.id, option.id)}
+                        className="nbd-modifier-input"
+                      />
+                      <span className="nbd-modifier-radio"></span>
+                      <span className="nbd-modifier-option-content">
+                        <span className="nbd-modifier-option-name">{option.name}</span>
+                        {option.priceModifier !== 0 && (
+                          <span className="nbd-modifier-option-price">
+                            {option.priceModifier > 0 ? '+' : ''}
+                            {formatPrice(option.priceModifier, currency)}
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  );
+                }
               })}
             </div>
 

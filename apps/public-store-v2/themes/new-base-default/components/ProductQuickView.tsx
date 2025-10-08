@@ -25,6 +25,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
   const [isLoading, setIsLoading] = useState(false);
   const [modifierSelections, setModifierSelections] = useState<Record<string, string[]>>({});
   const [modifierPriceTotal, setModifierPriceTotal] = useState<number>(0);
+  const [modifierQuantities, setModifierQuantities] = useState<Record<string, Record<string, number>>>({});
 
   // Hook de promociones - obtiene el precio original del producto o variante seleccionada
   const originalPrice = selectedVariant ? selectedVariant.price : product.price;
@@ -36,12 +37,14 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
       setSelectedVariant(null);
       setModifierSelections({});
       setModifierPriceTotal(0);
+      setModifierQuantities({});
     }
   }, [isOpen, product.id]);
 
-  const handleModifierChange = (selections: Record<string, string[]>, totalModifier: number) => {
+  const handleModifierChange = (selections: Record<string, string[]>, totalModifier: number, quantities: Record<string, Record<string, number>>) => {
     setModifierSelections(selections);
     setModifierPriceTotal(totalModifier);
+    setModifierQuantities(quantities);
   };
 
   // Close modal on escape key
@@ -160,7 +163,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
       }
 
       // Preparar información de modificadores
-      let modifiersInfo: Array<{ groupId: string; groupName: string; options: Array<{ id: string; name: string; price: number }> }> = [];
+      let modifiersInfo: Array<{ groupId: string; groupName: string; options: Array<{ id: string; name: string; price: number; quantity: number }> }> = [];
 
       if (product.modifierGroups && Object.keys(modifierSelections).length > 0) {
         modifiersInfo = Object.entries(modifierSelections)
@@ -173,13 +176,18 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
               .map(optionId => {
                 const option = group.options.find(opt => opt.id === optionId);
                 if (!option) return null;
+
+                // Obtener cantidad (1 para radio, valor real para allowMultiple)
+                const quantity = group.allowMultiple ? (modifierQuantities[groupId]?.[optionId] || 1) : 1;
+
                 return {
                   id: option.id,
                   name: option.name,
-                  price: option.priceModifier
+                  price: option.priceModifier,
+                  quantity
                 };
               })
-              .filter(Boolean) as Array<{ id: string; name: string; price: number }>;
+              .filter(Boolean) as Array<{ id: string; name: string; price: number; quantity: number }>;
 
             return {
               groupId: group.id,
@@ -187,7 +195,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
               options: selectedOptions
             };
           })
-          .filter(Boolean) as Array<{ groupId: string; groupName: string; options: Array<{ id: string; name: string; price: number }> }>;
+          .filter(Boolean) as Array<{ groupId: string; groupName: string; options: Array<{ id: string; name: string; price: number; quantity: number }> }>;
 
         // Agregar modificadores al itemId para crear ítems únicos
         const modifierHash = JSON.stringify(modifiersInfo);

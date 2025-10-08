@@ -161,6 +161,12 @@
   color: #111827;
 }
 
+.nbd-modifier-option-price-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .nbd-modifier-option-price {
   font-size: 0.85rem;
   color: #6b7280;
@@ -169,6 +175,90 @@
 }
 
 .nbd-modifier-option--selected .nbd-modifier-option-price {
+  color: #374151;
+}
+
+.nbd-modifier-multiplier {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* ========================================
+   Controles de cantidad (+ y -)
+   ======================================== */
+
+.nbd-modifier-option--quantity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: default;
+}
+
+.nbd-modifier-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.nbd-modifier-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.nbd-modifier-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.nbd-modifier-btn:active:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #6b7280;
+}
+
+.nbd-modifier-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
+.nbd-modifier-btn svg {
+  color: #6b7280;
+}
+
+.nbd-modifier-btn:hover:not(:disabled) svg {
+  color: #374151;
+}
+
+.nbd-modifier-btn--plus {
+  border-color: #9ca3af;
+}
+
+.nbd-modifier-btn--plus:hover:not(:disabled) {
+  background: #6b7280;
+  border-color: #6b7280;
+}
+
+.nbd-modifier-btn--plus:hover:not(:disabled) svg {
+  color: #ffffff;
+}
+
+.nbd-modifier-quantity {
+  min-width: 24px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: #374151;
 }
 
