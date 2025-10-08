@@ -354,7 +354,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                 handleAddToCart={handleAddToCart}
                                 loadMoreProducts={loadMoreProducts}
                                 buildUrl={buildUrl}
-                                toCloudinarySquare={toCloudinarySquare}
+                                toCloudinarySquare={toCloudinarySquareWrapper}
                                 formatPrice={formatPrice}
                                 additionalText={additionalText}
                                 storeInfo={storeInfo || undefined}
@@ -382,7 +382,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                             }, 100);
                                         }}
                                         formatPrice={formatPrice}
-                                        toCloudinarySquare={toCloudinarySquare}
+                                        toCloudinarySquare={toCloudinarySquareWrapper}
                                         storeInfo={storeInfo}
                                         storeId={resolvedStoreId}
                                         maxProducts={10}
