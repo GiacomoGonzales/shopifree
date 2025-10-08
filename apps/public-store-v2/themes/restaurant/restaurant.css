@@ -9108,6 +9108,11 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     padding-bottom: 0 !important;
 }
 
+/* Ocultar botones CTA del hero en tema restaurant */
+[data-theme="restaurant"] .nbd-hero-cta {
+    display: none !important;
+}
+
 /* ===================================================
    RESTAURANT THEME - PREVENT HORIZONTAL SCROLL
    =================================================== */
