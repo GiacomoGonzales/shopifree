@@ -5853,11 +5853,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 .nbd-cart-item {
     display: grid;
-    grid-template-columns: 60px 1fr auto auto auto;
-    grid-template-areas: 
-        "image info controls total remove";
+    grid-template-columns: 60px 1fr auto;
+    grid-template-areas:
+        "image info remove"
+        "image controls total";
     gap: var(--nbd-space-md);
-    align-items: center;
+    align-items: start;
     padding: var(--nbd-space-md);
     border: 1px solid var(--nbd-neutral-200);
     border-radius: var(--nbd-radius-lg);
@@ -6032,6 +6033,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     display: flex;
     align-items: center;
     justify-content: center;
+    justify-self: end;
     width: 32px;
     height: 32px;
     border: 1px solid var(--nbd-error);
