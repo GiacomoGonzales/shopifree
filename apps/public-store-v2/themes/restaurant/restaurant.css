@@ -9107,3 +9107,27 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
 [data-theme="restaurant"] .nbd-hero-content {
     padding-bottom: 0 !important;
 }
+
+/* ===================================================
+   RESTAURANT THEME - PREVENT HORIZONTAL SCROLL
+   =================================================== */
+
+/* Prevenir scroll horizontal en toda la página */
+[data-theme="restaurant"] {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+[data-theme="restaurant"] body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Asegurar que ningún contenedor cause overflow horizontal */
+[data-theme="restaurant"] .nbd-container,
+[data-theme="restaurant"] .nbd-hero,
+[data-theme="restaurant"] .nbd-products,
+[data-theme="restaurant"] .nbd-footer {
+    max-width: 100%;
+    overflow-x: hidden;
+}
