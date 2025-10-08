@@ -9109,7 +9109,7 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
 }
 
 /* Ocultar botones CTA del hero en tema restaurant */
-[data-theme="restaurant"] .nbd-hero-cta {
+[data-theme="restaurant"] .nbd-hero-actions {
     display: none !important;
 }
 
