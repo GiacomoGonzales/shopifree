@@ -63,11 +63,11 @@ interface ModifierOption {
 interface ModifierGroup {
   id: string
   name: string
-  selectionType: 'single_required' | 'single_optional' | 'multiple'
-  minSelections: number | string
-  maxSelections: number | string
+  required: boolean           // ¿Es obligatorio elegir?
+  allowMultiple: boolean      // ¿Permite múltiples opciones?
+  minSelections: number | string  // Solo si allowMultiple = true
+  maxSelections: number | string  // Solo si allowMultiple = true
   order: number
-  required: boolean
   options: ModifierOption[]
 }
 
@@ -459,11 +459,11 @@ export default function CreateProductPage() {
     const newGroup: ModifierGroup = {
       id: `group-${Date.now()}`,
       name: '',
-      selectionType: 'single_required',
-      minSelections: 1,
-      maxSelections: 1,
+      required: false,
+      allowMultiple: false,
+      minSelections: '',
+      maxSelections: '',
       order: modifierGroups.length,
-      required: true,
       options: []
     }
     setModifierGroups(prev => [...prev, newGroup])
@@ -474,26 +474,9 @@ export default function CreateProductPage() {
   }
 
   const updateModifierGroup = (groupId: string, field: keyof ModifierGroup, value: any) => {
-    setModifierGroups(prev => prev.map(g => {
-      if (g.id === groupId) {
-        const updated = { ...g, [field]: value }
-
-        // Ajustar automáticamente min/max según el tipo
-        if (field === 'selectionType') {
-          if (value === 'single_required' || value === 'single_optional') {
-            updated.minSelections = value === 'single_required' ? 1 : 0
-            updated.maxSelections = 1
-            updated.required = value === 'single_required'
-          } else if (value === 'multiple') {
-            updated.minSelections = ''
-            updated.maxSelections = ''
-          }
-        }
-
-        return updated
-      }
-      return g
-    }))
+    setModifierGroups(prev => prev.map(g =>
+      g.id === groupId ? { ...g, [field]: value } : g
+    ))
   }
 
   const addModifierOption = (groupId: string) => {
@@ -2259,50 +2242,37 @@ export default function CreateProductPage() {
                               />
                             </div>
 
-                            {/* Tipo de selección */}
-                            <div className="mb-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                {t('modifiers.selectionType')}
+                            {/* Configuración del grupo */}
+                            <div className="mb-4 space-y-3">
+                              {/* 1. ¿Es obligatorio? */}
+                              <label className="flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={group.required}
+                                  onChange={(e) => updateModifierGroup(group.id, 'required', e.target.checked)}
+                                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                />
+                                <span className="ml-2 text-sm text-gray-900">
+                                  {t('modifiers.required')}
+                                </span>
                               </label>
-                              <div className="space-y-2">
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    checked={group.selectionType === 'single_required'}
-                                    onChange={() => updateModifierGroup(group.id, 'selectionType', 'single_required')}
-                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-900">
-                                    {t('modifiers.singleRequired')}
-                                  </span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    checked={group.selectionType === 'single_optional'}
-                                    onChange={() => updateModifierGroup(group.id, 'selectionType', 'single_optional')}
-                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-900">
-                                    {t('modifiers.singleOptional')}
-                                  </span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    checked={group.selectionType === 'multiple'}
-                                    onChange={() => updateModifierGroup(group.id, 'selectionType', 'multiple')}
-                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-900">
-                                    {t('modifiers.multiple')}
-                                  </span>
-                                </label>
-                              </div>
+
+                              {/* 2. ¿Permite múltiples opciones? */}
+                              <label className="flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={group.allowMultiple}
+                                  onChange={(e) => updateModifierGroup(group.id, 'allowMultiple', e.target.checked)}
+                                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                />
+                                <span className="ml-2 text-sm text-gray-900">
+                                  {t('modifiers.allowMultiple')}
+                                </span>
+                              </label>
                             </div>
 
-                            {/* Min/Max selecciones */}
-                            {group.selectionType === 'multiple' && (
+                            {/* 3. Min/Max (solo si permite múltiples) */}
+                            {group.allowMultiple && (
                               <div className="mb-4 grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
