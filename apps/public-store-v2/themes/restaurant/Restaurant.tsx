@@ -216,8 +216,15 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         // Buscar el carrusel de la categoría por su slug
         const categoryCarousel = document.querySelector(`[data-category-slug="${categorySlug}"]`);
         if (categoryCarousel) {
-            // Hacer scroll suave al carrusel
-            categoryCarousel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Obtener la posición del elemento
+            const elementPosition = categoryCarousel.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - 100; // 100px de offset para el header
+
+            // Hacer scroll suave con offset
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
         }
     };
 
