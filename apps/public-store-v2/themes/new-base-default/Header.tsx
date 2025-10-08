@@ -15,9 +15,10 @@ type Props = {
     storeSubdomain: string;
     products: PublicProduct[];
     onProductClick?: (product: PublicProduct) => void; // Callback opcional para search
+    onCategoryClick?: (categorySlug: string) => void; // Callback opcional para categorías
 };
 
-export default function Header({ storeInfo, categories, storeSubdomain, products, onProductClick }: Props) {
+export default function Header({ storeInfo, categories, storeSubdomain, products, onProductClick, onCategoryClick }: Props) {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, openCart } = useCart();
     const { t } = useStoreLanguage();
@@ -101,6 +102,12 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                                 key={category.id}
                                 href={getSubdomainUrl(`/categoria/${category.slug}`)}
                                 className="nbd-nav-link"
+                                onClick={(e) => {
+                                    if (onCategoryClick) {
+                                        e.preventDefault();
+                                        onCategoryClick(category.slug);
+                                    }
+                                }}
                             >
                                 {category.name}
                             </a>
@@ -190,7 +197,13 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                                     key={category.id}
                                     href={getSubdomainUrl(`/categoria/${category.slug}`)}
                                     className="nbd-mobile-nav-link"
-                                    onClick={() => setMobileMenuOpen(false)}
+                                    onClick={(e) => {
+                                        setMobileMenuOpen(false);
+                                        if (onCategoryClick) {
+                                            e.preventDefault();
+                                            onCategoryClick(category.slug);
+                                        }
+                                    }}
                                 >
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                         <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8M16 4V2M16 4V6M8 4V2M8 4V6M8 8H16M8 12H16M8 16H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

@@ -211,6 +211,16 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         return '#';
     };
 
+    // Función para hacer scroll a una categoría específica
+    const handleCategoryClick = (categorySlug: string) => {
+        // Buscar el carrusel de la categoría por su slug
+        const categoryCarousel = document.querySelector(`[data-category-slug="${categorySlug}"]`);
+        if (categoryCarousel) {
+            // Hacer scroll suave al carrusel
+            categoryCarousel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
     // Interceptar clicks en productos del grid (cuando hay filtro activo) para abrir modal
     useEffect(() => {
         // Solo si hay categoría activa (modo grid)
@@ -289,6 +299,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                 storeSubdomain={storeSubdomain}
                 products={products || []}
                 onProductClick={handleAddToCart}
+                onCategoryClick={handleCategoryClick}
             />
 
             {/* Hero Section - Mismo que tema base */}

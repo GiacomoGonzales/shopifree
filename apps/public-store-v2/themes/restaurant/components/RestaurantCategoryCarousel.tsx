@@ -143,7 +143,7 @@ export default function RestaurantCategoryCarousel({
     };
 
     return (
-        <section className="restaurant-category-carousel">
+        <section className="restaurant-category-carousel" data-category-slug={category.slug}>
             <div className="restaurant-carousel-header">
                 <h3 className="restaurant-carousel-title">{category.name}</h3>
                 {category.description && (
