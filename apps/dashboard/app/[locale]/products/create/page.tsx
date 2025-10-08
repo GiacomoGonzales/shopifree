@@ -54,7 +54,7 @@ interface CategoryNode {
 interface ModifierOption {
   id: string
   name: string
-  priceModifier: number  // +$0, +$2, -$1
+  priceModifier: number | string  // +$0, +$2, -$1, o string vacío en UI
   isDefault: boolean
   isActive: boolean
   order: number
@@ -500,7 +500,7 @@ export default function CreateProductPage() {
     const newOption: ModifierOption = {
       id: `option-${Date.now()}`,
       name: '',
-      priceModifier: 0,
+      priceModifier: '',
       isDefault: false,
       isActive: true,
       order: 0
@@ -751,8 +751,14 @@ export default function CreateProductPage() {
         hasVariants,
         variants: hasVariants ? variants : [], // Guardar todas las variantes creadas
 
-        // Modificadores
-        modifierGroups: modifierGroups || [],
+        // Modificadores - convertir strings vacíos a 0
+        modifierGroups: modifierGroups.map(group => ({
+          ...group,
+          options: group.options.map(option => ({
+            ...option,
+            priceModifier: option.priceModifier === '' ? 0 : parseFloat(option.priceModifier as string) || 0
+          }))
+        })),
 
         // Envío
         requiresShipping,
@@ -2370,10 +2376,10 @@ export default function CreateProductPage() {
                                           </label>
                                           <input
                                             type="number"
-                                            placeholder="0"
+                                            placeholder="0.00"
                                             step="0.01"
-                                            value={option.priceModifier === 0 ? '' : option.priceModifier}
-                                            onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                                            value={option.priceModifier}
+                                            onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value)}
                                             className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                                           />
                                         </div>
