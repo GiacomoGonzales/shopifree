@@ -472,11 +472,15 @@ function StoreOnboardingContent() {
         description: formData.description,
         hasPhysicalLocation: formData.hasPhysicalLocation,
         // Solo incluir location si hay coordenadas, sino usar address legacy
-        ...(formData.location.lat !== 0 && formData.location.lng !== 0 
+        ...(formData.location.lat !== 0 && formData.location.lng !== 0
           ? { location: formData.location }
           : { address: formData.address }
         ),
         businessType: formData.businessType,
+        // Determinar tema basado en el tipo de negocio
+        theme: (formData.businessType === 'restaurant' || formData.businessType === 'food')
+          ? 'restaurant'
+          : 'new-base-default',
         phone: phoneCompleto,
         primaryColor: formData.primaryColor,
         secondaryColor: formData.secondaryColor,
