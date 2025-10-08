@@ -9114,25 +9114,37 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
 }
 
 /* ===================================================
-   RESTAURANT THEME - PREVENT HORIZONTAL SCROLL
+   RESTAURANT THEME - PREVENT HORIZONTAL SCROLL (MOBILE ONLY)
    =================================================== */
 
-/* Prevenir scroll horizontal en toda la página */
-[data-theme="restaurant"] {
-    overflow-x: hidden;
-    max-width: 100vw;
-}
+/* Prevenir scroll horizontal solo en mobile */
+@media (max-width: 768px) {
+    [data-theme="restaurant"] {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+    }
 
-[data-theme="restaurant"] body {
-    overflow-x: hidden;
-    max-width: 100vw;
-}
+    /* Asegurar que ningún contenedor cause overflow horizontal */
+    [data-theme="restaurant"] .nbd-container,
+    [data-theme="restaurant"] .nbd-hero,
+    [data-theme="restaurant"] .nbd-hero-container,
+    [data-theme="restaurant"] .nbd-hero-content,
+    [data-theme="restaurant"] .nbd-products,
+    [data-theme="restaurant"] .nbd-footer,
+    [data-theme="restaurant"] .nbd-header,
+    [data-theme="restaurant"] .nbd-header-container,
+    [data-theme="restaurant"] header,
+    [data-theme="restaurant"] main,
+    [data-theme="restaurant"] section {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
 
-/* Asegurar que ningún contenedor cause overflow horizontal */
-[data-theme="restaurant"] .nbd-container,
-[data-theme="restaurant"] .nbd-hero,
-[data-theme="restaurant"] .nbd-products,
-[data-theme="restaurant"] .nbd-footer {
-    max-width: 100%;
-    overflow-x: hidden;
+    /* Asegurar que las imágenes y videos no causen overflow */
+    [data-theme="restaurant"] img,
+    [data-theme="restaurant"] video {
+        max-width: 100% !important;
+        height: auto !important;
+    }
 }
