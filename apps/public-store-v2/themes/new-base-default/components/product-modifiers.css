@@ -1,0 +1,205 @@
+/* ========================================
+   Product Modifiers - Diseño moderno y sutil
+   ======================================== */
+
+.nbd-product-modifiers {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.nbd-product-modifiers-section {
+  margin-top: 20px;
+}
+
+/* Grupo de modificadores */
+.nbd-modifier-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Header del grupo */
+.nbd-modifier-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.nbd-modifier-group-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nbd-modifier-required {
+  color: #6b7280;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.nbd-modifier-group-help {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* Lista de opciones */
+.nbd-modifier-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Opción individual */
+.nbd-modifier-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nbd-modifier-option:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.nbd-modifier-option--selected {
+  background: #ffffff;
+  border-color: #9ca3af;
+}
+
+.nbd-modifier-option--selected:hover {
+  border-color: #6b7280;
+}
+
+/* Input (checkbox/radio) - oculto */
+.nbd-modifier-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+/* Custom radio/checkbox */
+.nbd-modifier-radio {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+/* Radio para allowMultiple (checkbox) */
+.nbd-modifier-input[type="checkbox"] + .nbd-modifier-radio {
+  border-radius: 4px;
+}
+
+/* Estado seleccionado */
+.nbd-modifier-input:checked + .nbd-modifier-radio {
+  border-color: #6b7280;
+  background: #6b7280;
+}
+
+/* Checkmark para radio */
+.nbd-modifier-input:checked + .nbd-modifier-radio::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+/* Checkmark para checkbox */
+.nbd-modifier-input[type="checkbox"]:checked + .nbd-modifier-radio::after {
+  width: 10px;
+  height: 6px;
+  border-radius: 0;
+  background: transparent;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: translate(-50%, -60%) rotate(-45deg);
+}
+
+/* Contenido de la opción */
+.nbd-modifier-option-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.nbd-modifier-option-name {
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: 400;
+}
+
+.nbd-modifier-option--selected .nbd-modifier-option-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.nbd-modifier-option-price {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nbd-modifier-option--selected .nbd-modifier-option-price {
+  color: #374151;
+}
+
+/* Mensaje de error */
+.nbd-modifier-error {
+  font-size: 0.8rem;
+  color: #dc2626;
+  padding: 6px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .nbd-modifier-group-header {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .nbd-modifier-option {
+    padding: 10px 12px;
+  }
+
+  .nbd-modifier-option-name {
+    font-size: 0.875rem;
+  }
+
+  .nbd-modifier-option-price {
+    font-size: 0.8rem;
+  }
+}

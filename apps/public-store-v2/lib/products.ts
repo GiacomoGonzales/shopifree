@@ -3,6 +3,26 @@ import { getFirebaseDb } from "./firebase";
 
 export type PublicMediaFile = { id?: string; url: string; type?: "image" | "video" };
 
+export type ModifierOption = {
+	id: string;
+	name: string;
+	priceModifier: number;
+	isDefault: boolean;
+	isActive: boolean;
+	order: number;
+};
+
+export type ModifierGroup = {
+	id: string;
+	name: string;
+	required: boolean;
+	allowMultiple: boolean;
+	minSelections: number;
+	maxSelections: number;
+	order: number;
+	options: ModifierOption[];
+};
+
 export type PublicProduct = {
 	id: string;
 	name: string;
@@ -22,6 +42,7 @@ export type PublicProduct = {
     selectedBrandId?: string;
     tags?: Record<string, any>;        // Solo para variantes reales
     metadata?: Record<string, any>;    // Para metadatos descriptivos (color, material, etc.)
+    modifierGroups?: ModifierGroup[];  // Modificadores y extras
     createdAt?: string;
 };
 
@@ -120,6 +141,7 @@ function transformToPublicProduct(raw: any): PublicProduct {
             
             return cleanedMetadata;
         })(),
+        modifierGroups: Array.isArray(raw.modifierGroups) ? raw.modifierGroups : undefined,
         createdAt: raw.createdAt?.toDate?.()?.toISOString() || raw.createdAt || undefined,
 	};
 }

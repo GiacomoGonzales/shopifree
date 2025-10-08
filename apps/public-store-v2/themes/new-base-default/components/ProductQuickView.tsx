@@ -7,6 +7,7 @@ import { toCloudinarySquare } from '../../../lib/images';
 import { formatPrice } from '../../../lib/currency';
 import SimpleVariantSelector from '../../../components/SimpleVariantSelector';
 import { usePromotions } from '../../../lib/hooks/usePromotions';
+import ProductModifiers from './ProductModifiers';
 
 interface ProductQuickViewProps {
   product: PublicProduct;
@@ -22,17 +23,26 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
   const { addItem, openCart } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [modifierSelections, setModifierSelections] = useState<Record<string, string[]>>({});
+  const [modifierPriceTotal, setModifierPriceTotal] = useState<number>(0);
 
   // Hook de promociones - obtiene el precio original del producto o variante seleccionada
   const originalPrice = selectedVariant ? selectedVariant.price : product.price;
   const promotionsData = usePromotions(storeId || null, product.id || '', originalPrice);
 
-  // Reset variants when modal opens with new product
+  // Reset variants and modifiers when modal opens with new product
   useEffect(() => {
     if (isOpen) {
       setSelectedVariant(null);
+      setModifierSelections({});
+      setModifierPriceTotal(0);
     }
   }, [isOpen, product.id]);
+
+  const handleModifierChange = (selections: Record<string, string[]>, totalModifier: number) => {
+    setModifierSelections(selections);
+    setModifierPriceTotal(totalModifier);
+  };
 
   // Close modal on escape key
   useEffect(() => {
@@ -86,11 +96,31 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
   };
 
   const isReadyToAdd = () => {
-    // Si el producto no tiene variantes, siempre está listo
-    if (!hasVariants()) return true;
-    
-    // Si tiene variantes, debe tener una seleccionada
-    return selectedVariant !== null;
+    // Verificar variantes
+    if (hasVariants() && !selectedVariant) {
+      return false;
+    }
+
+    // Verificar modificadores requeridos
+    if (product.modifierGroups && product.modifierGroups.length > 0) {
+      const requiredGroups = product.modifierGroups.filter(g => g.required);
+
+      for (const group of requiredGroups) {
+        const selectedCount = (modifierSelections[group.id] || []).length;
+
+        if (selectedCount < group.minSelections) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  // Calcular precio final (base + modificadores)
+  const getFinalPrice = () => {
+    const basePrice = promotionsData.finalPrice || (selectedVariant?.price || product.price);
+    return basePrice + modifierPriceTotal;
   };
 
   // Función para sanitizar HTML básicamente (mantener formato pero remover elementos peligrosos)
@@ -114,10 +144,10 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
       // Add delay for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Usar el mismo formato que la página de producto
+      // Preparar información de variante
       let variantInfo: { id: string; name: string; price: number } | undefined = undefined;
       let itemId = product.id;
-      
+
       if (selectedVariant) {
         // Formato completo de variante con atributos
         const attributeNames = Object.values(selectedVariant.attributes || {}).join(', ');
@@ -129,15 +159,53 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
         itemId = `${product.id}-${selectedVariant.id}`;
       }
 
+      // Preparar información de modificadores
+      let modifiersInfo: Array<{ groupId: string; groupName: string; options: Array<{ id: string; name: string; price: number }> }> = [];
+
+      if (product.modifierGroups && Object.keys(modifierSelections).length > 0) {
+        modifiersInfo = Object.entries(modifierSelections)
+          .filter(([_, optionIds]) => optionIds.length > 0)
+          .map(([groupId, optionIds]) => {
+            const group = product.modifierGroups?.find(g => g.id === groupId);
+            if (!group) return null;
+
+            const selectedOptions = optionIds
+              .map(optionId => {
+                const option = group.options.find(opt => opt.id === optionId);
+                if (!option) return null;
+                return {
+                  id: option.id,
+                  name: option.name,
+                  price: option.priceModifier
+                };
+              })
+              .filter(Boolean) as Array<{ id: string; name: string; price: number }>;
+
+            return {
+              groupId: group.id,
+              groupName: group.name,
+              options: selectedOptions
+            };
+          })
+          .filter(Boolean) as Array<{ groupId: string; groupName: string; options: Array<{ id: string; name: string; price: number }> }>;
+
+        // Agregar modificadores al itemId para crear ítems únicos
+        const modifierHash = JSON.stringify(modifiersInfo);
+        itemId = `${itemId}-${btoa(modifierHash).substring(0, 10)}`;
+      }
+
+      const finalPrice = getFinalPrice();
+
       addItem({
         id: itemId,
         productId: product.id,
         name: product.name,
-        price: promotionsData.finalPrice || (selectedVariant?.price || product.price),
+        price: finalPrice,
         currency: storeInfo?.currency || 'COP',
         image: product.image || '',
         slug: product.slug || product.id,
         variant: variantInfo,
+        modifiers: modifiersInfo.length > 0 ? modifiersInfo : undefined,
         incomplete: false
       }, 1);
 
@@ -146,7 +214,8 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
       console.log(`✅ [ProductQuickView] Agregado al carrito: ${product.name}`, {
         selectedVariant,
         variantInfo,
-        finalPrice: selectedVariant?.price || product.price
+        modifiers: modifiersInfo,
+        finalPrice
       });
     } finally {
       setIsLoading(false);
@@ -227,11 +296,22 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
 
           {/* Selector de variantes usando SimpleVariantSelector */}
           <div className="nbd-product-variants-section">
-            <SimpleVariantSelector 
+            <SimpleVariantSelector
               product={product}
               onVariantChange={handleVariantChange}
             />
           </div>
+
+          {/* Modificadores y extras */}
+          {product.modifierGroups && product.modifierGroups.length > 0 && (
+            <div className="nbd-product-modifiers-section">
+              <ProductModifiers
+                modifierGroups={product.modifierGroups}
+                onSelectionChange={handleModifierChange}
+                currency={storeInfo?.currency}
+              />
+            </div>
+          )}
         </div>
 
         {/* Footer del modal - FIJO */}
@@ -258,7 +338,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                Agregar al carrito • {formatPrice(promotionsData.finalPrice || (selectedVariant?.price || product.price), storeInfo?.currency)}
+                Agregar al carrito • {formatPrice(getFinalPrice(), storeInfo?.currency)}
               </>
             )}
           </button>
