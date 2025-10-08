@@ -218,7 +218,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         if (categoryCarousel) {
             // Obtener la posición del elemento
             const elementPosition = categoryCarousel.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - 100; // 100px de offset para el header
+            const offsetPosition = elementPosition + window.pageYOffset - 120; // 120px de offset para el header y espacio adicional
 
             // Hacer scroll suave con offset
             window.scrollTo({
