@@ -2242,9 +2242,9 @@ export default function CreateProductPage() {
                               />
                             </div>
 
-                            {/* Configuración del grupo */}
-                            <div className="mb-4 space-y-3">
-                              {/* 1. ¿Es obligatorio? */}
+                            {/* Configuración del grupo - 3 opciones siempre visibles */}
+                            <div className="mb-4 space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                              {/* 1. ¿Es obligatorio seleccionar? */}
                               <label className="flex items-center cursor-pointer">
                                 <input
                                   type="checkbox"
@@ -2252,12 +2252,12 @@ export default function CreateProductPage() {
                                   onChange={(e) => updateModifierGroup(group.id, 'required', e.target.checked)}
                                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                 />
-                                <span className="ml-2 text-sm text-gray-900">
-                                  {t('modifiers.required')}
+                                <span className="ml-2 text-sm font-medium text-gray-900">
+                                  Obligatorio (el cliente debe elegir al menos una opción)
                                 </span>
                               </label>
 
-                              {/* 2. ¿Permite múltiples opciones? */}
+                              {/* 2. ¿Permitir cantidad por opción? */}
                               <label className="flex items-center cursor-pointer">
                                 <input
                                   type="checkbox"
@@ -2265,18 +2265,16 @@ export default function CreateProductPage() {
                                   onChange={(e) => updateModifierGroup(group.id, 'allowMultiple', e.target.checked)}
                                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                 />
-                                <span className="ml-2 text-sm text-gray-900">
-                                  {t('modifiers.allowMultiple')}
+                                <span className="ml-2 text-sm font-medium text-gray-900">
+                                  Permitir cantidad por opción (ej: Coca Cola x2, x3...)
                                 </span>
                               </label>
-                            </div>
 
-                            {/* 3. Min/Max (solo si permite múltiples) */}
-                            {group.allowMultiple && (
-                              <div className="mb-4 grid grid-cols-2 gap-4">
+                              {/* 3. Cantidad mínima y máxima - SIEMPRE VISIBLE */}
+                              <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('modifiers.minSelections')}
+                                    Cantidad mínima
                                   </label>
                                   <input
                                     type="text"
@@ -2284,17 +2282,18 @@ export default function CreateProductPage() {
                                     value={group.minSelections}
                                     onChange={(e) => {
                                       const value = e.target.value
-                                      if (value === '' || /^\d+$/.test(value)) {
+                                      if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 99)) {
                                         updateModifierGroup(group.id, 'minSelections', value)
                                       }
                                     }}
                                     placeholder="0"
                                     className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                   />
+                                  <p className="mt-1 text-xs text-gray-500">De 0 a 99</p>
                                 </div>
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('modifiers.maxSelections')}
+                                    Cantidad máxima
                                   </label>
                                   <input
                                     type="text"
@@ -2302,16 +2301,17 @@ export default function CreateProductPage() {
                                     value={group.maxSelections}
                                     onChange={(e) => {
                                       const value = e.target.value
-                                      if (value === '' || /^\d+$/.test(value)) {
+                                      if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 99)) {
                                         updateModifierGroup(group.id, 'maxSelections', value)
                                       }
                                     }}
-                                    placeholder="5"
+                                    placeholder="99"
                                     className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                   />
+                                  <p className="mt-1 text-xs text-gray-500">De 0 a 99</p>
                                 </div>
                               </div>
-                            )}
+                            </div>
 
                             {/* Opciones del grupo */}
                             <div className="mb-4">
@@ -2320,79 +2320,96 @@ export default function CreateProductPage() {
                               </label>
 
                               {group.options.length === 0 ? (
-                                <div className="text-center py-4 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-lg">
-                                  {t('modifiers.noOptions')}
+                                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                                  <button
+                                    onClick={() => addModifierOption(group.id)}
+                                    className="inline-flex flex-col items-center justify-center text-gray-500 hover:text-primary-600 transition-colors"
+                                  >
+                                    <div className="mb-2 w-12 h-12 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center">
+                                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                      </svg>
+                                    </div>
+                                    <span className="text-sm font-medium">Agregar primera opción</span>
+                                    <span className="text-xs text-gray-400 mt-1">Ej: Coca Cola, Pepsi, Fanta...</span>
+                                  </button>
                                 </div>
                               ) : (
-                                <div className="space-y-2">
-                                  {group.options.map((option) => (
-                                    <div key={option.id} className="relative p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
-                                      {/* Botón eliminar en esquina superior derecha */}
-                                      <button
-                                        onClick={() => removeModifierOption(group.id, option.id)}
-                                        className="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
-                                        title="Eliminar opción"
-                                      >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                      </button>
+                                <>
+                                  <div className="space-y-2">
+                                    {group.options.map((option) => (
+                                      <div key={option.id} className="relative p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
+                                        {/* Botón eliminar en esquina superior derecha */}
+                                        <button
+                                          onClick={() => removeModifierOption(group.id, option.id)}
+                                          className="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
+                                          title="Eliminar opción"
+                                        >
+                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                          </svg>
+                                        </button>
 
-                                      {/* Nombre de la opción */}
-                                      <div className="pr-8">
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                                          Nombre
-                                        </label>
-                                        <input
-                                          type="text"
-                                          placeholder={t('modifiers.optionNamePlaceholder')}
-                                          value={option.name}
-                                          onChange={(e) => updateModifierOption(group.id, option.id, 'name', e.target.value)}
-                                          className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                                        />
-                                      </div>
-
-                                      {/* Precio y checkbox preseleccionada */}
-                                      <div className="flex items-end gap-2">
-                                        <div className="flex-1">
-                                          <label className="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">
-                                            Precio modificador
+                                        {/* Nombre de la opción */}
+                                        <div className="pr-8">
+                                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                                            Nombre
                                           </label>
-                                          <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                              <span className="text-gray-500 text-sm">{currencySymbol}</span>
-                                            </div>
-                                            <input
-                                              type="number"
-                                              value={option.priceModifier}
-                                              onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value)}
-                                              placeholder="5.00"
-                                              step="0.01"
-                                              className="block w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                                            />
-                                          </div>
-                                        </div>
-                                        <label className="flex items-center cursor-pointer pb-2 whitespace-nowrap" title={t('modifiers.defaultOption')}>
                                           <input
-                                            type="checkbox"
-                                            checked={option.isDefault}
-                                            onChange={(e) => updateModifierOption(group.id, option.id, 'isDefault', e.target.checked)}
-                                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                            type="text"
+                                            placeholder={t('modifiers.optionNamePlaceholder')}
+                                            value={option.name}
+                                            onChange={(e) => updateModifierOption(group.id, option.id, 'name', e.target.value)}
+                                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                                           />
-                                          <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
-                                        </label>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                                        </div>
 
-                              <button
-                                onClick={() => addModifierOption(group.id)}
-                                className="mt-2 text-sm text-primary-600 hover:text-primary-700"
-                              >
-                                + {t('modifiers.addOption')}
-                              </button>
+                                        {/* Precio y checkbox preseleccionada */}
+                                        <div className="flex items-end gap-2">
+                                          <div className="flex-1">
+                                            <label className="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">
+                                              Precio modificador
+                                            </label>
+                                            <div className="relative">
+                                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span className="text-gray-500 text-sm">{currencySymbol}</span>
+                                              </div>
+                                              <input
+                                                type="number"
+                                                value={option.priceModifier}
+                                                onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value)}
+                                                placeholder="5.00"
+                                                step="0.01"
+                                                className="block w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                              />
+                                            </div>
+                                          </div>
+                                          <label className="flex items-center cursor-pointer pb-2 whitespace-nowrap" title={t('modifiers.defaultOption')}>
+                                            <input
+                                              type="checkbox"
+                                              checked={option.isDefault}
+                                              onChange={(e) => updateModifierOption(group.id, option.id, 'isDefault', e.target.checked)}
+                                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                            />
+                                            <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Botón agregar más opciones */}
+                                  <button
+                                    onClick={() => addModifierOption(group.id)}
+                                    className="mt-3 w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:border-primary-300 hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    {t('modifiers.addOption')}
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </div>
                         ))}
