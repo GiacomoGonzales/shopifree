@@ -8249,7 +8249,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-product-title {
-    font-size: var(--nbd-font-size-xl);
+    font-size: 1.5rem;  /* 24px - aumentado de 20px */
     font-weight: 600;
     color: var(--nbd-primary);
     margin: 0 0 var(--nbd-space-sm) 0;
@@ -8257,7 +8257,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 }
 
 .nbd-product-price-large {
-    font-size: var(--nbd-font-size-lg);
+    font-size: 1.375rem;  /* 22px - aumentado de 18px */
     font-weight: 700;
     color: var(--nbd-secondary);
     margin-bottom: var(--nbd-space-md);
@@ -8272,7 +8272,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     color: var(--nbd-neutral-600);
     line-height: 1.6;
     margin: 0;
-    font-size: var(--nbd-font-size-sm);
+    font-size: 0.9375rem;  /* 15px - aumentado de 14px */
 }
 
 /* Estilos para contenido HTML rico en descripción */
@@ -8459,11 +8459,11 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
     
     .nbd-product-title {
-        font-size: var(--nbd-font-size-lg);
+        font-size: 1.25rem;  /* 20px en móvil - aumentado de 18px */
     }
-    
+
     .nbd-product-price-large {
-        font-size: var(--nbd-font-size-md);
+        font-size: 1.125rem;  /* 18px en móvil - aumentado de 16px */
     }
     
     .nbd-variant-options {
