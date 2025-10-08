@@ -376,11 +376,35 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                             {item.variant && (
                                                 <p className="nbd-cart-item-variant">{item.variant.name}</p>
                                             )}
+                                            {/* Modificadores seleccionados */}
+                                            {item.modifiers && item.modifiers.length > 0 && (
+                                                <div className="nbd-cart-item-modifiers">
+                                                    {item.modifiers.map((group, groupIndex) => (
+                                                        <div key={groupIndex} className="nbd-cart-modifier-group">
+                                                            <span className="nbd-cart-modifier-group-name">{group.groupName}:</span>
+                                                            {group.options.map((option, optionIndex) => (
+                                                                <span key={optionIndex} className="nbd-cart-modifier-option">
+                                                                    {option.name}
+                                                                    {option.quantity > 1 && (
+                                                                        <span className="nbd-cart-modifier-qty"> x{option.quantity}</span>
+                                                                    )}
+                                                                    {option.price !== 0 && (
+                                                                        <span className="nbd-cart-modifier-price">
+                                                                            {' '}({option.price > 0 ? '+' : ''}{formatPrice(option.price * option.quantity, item.currency)})
+                                                                        </span>
+                                                                    )}
+                                                                    {optionIndex < group.options.length - 1 && ', '}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                             {item.incomplete && (
                                                 <div className="nbd-cart-item-incomplete">
                                                     <span className="nbd-incomplete-message">
-                                                        ⚠ Seleccionar {getMissingOptions(item).join(', ')} - 
-                                                        <a 
+                                                        ⚠ Seleccionar {getMissingOptions(item).join(', ')} -
+                                                        <a
                                                             href={buildProductUrl(item.slug)}
                                                             className="nbd-complete-options-link"
                                                             onClick={() => closeCart()}

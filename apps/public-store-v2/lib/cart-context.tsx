@@ -12,6 +12,11 @@ export interface CartItem {
   slug: string;
   quantity: number;
   variant?: { id: string; name: string; price: number };
+  modifiers?: Array<{
+    groupId: string;
+    groupName: string;
+    options: Array<{ id: string; name: string; price: number; quantity: number }>
+  }>;
   incomplete?: boolean;
   missingVariants?: string[];
 }

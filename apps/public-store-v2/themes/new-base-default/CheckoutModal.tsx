@@ -3491,6 +3491,31 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             {item.variant && (
                                                 <span className="nbd-summary-item-variant">{item.variant.name}</span>
                                             )}
+                                            {/* Modificadores seleccionados */}
+                                            {item.modifiers && item.modifiers.length > 0 && (
+                                                <div className="nbd-summary-item-modifiers">
+                                                    {item.modifiers.map((group, groupIndex) => (
+                                                        <div key={groupIndex} className="nbd-summary-modifier-group">
+                                                            <span className="nbd-summary-modifier-group-name">{group.groupName}:</span>
+                                                            {' '}
+                                                            {group.options.map((option, optionIndex) => (
+                                                                <span key={optionIndex}>
+                                                                    {option.name}
+                                                                    {option.quantity > 1 && (
+                                                                        <span className="nbd-summary-modifier-qty"> x{option.quantity}</span>
+                                                                    )}
+                                                                    {option.price !== 0 && (
+                                                                        <span className="nbd-summary-modifier-price">
+                                                                            {' '}({option.price > 0 ? '+' : ''}{formatPrice(option.price * option.quantity, currency)})
+                                                                        </span>
+                                                                    )}
+                                                                    {optionIndex < group.options.length - 1 && ', '}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                             <span className="nbd-summary-item-qty">{t('quantity')} {item.quantity}</span>
                                         </div>
                                         <div className="nbd-summary-item-price">
