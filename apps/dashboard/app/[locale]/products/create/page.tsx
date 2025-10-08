@@ -64,8 +64,8 @@ interface ModifierGroup {
   id: string
   name: string
   selectionType: 'single_required' | 'single_optional' | 'multiple'
-  minSelections: number
-  maxSelections: number
+  minSelections: number | string
+  maxSelections: number | string
   order: number
   required: boolean
   options: ModifierOption[]
@@ -485,8 +485,8 @@ export default function CreateProductPage() {
             updated.maxSelections = 1
             updated.required = value === 'single_required'
           } else if (value === 'multiple') {
-            updated.minSelections = 0
-            updated.maxSelections = 999
+            updated.minSelections = ''
+            updated.maxSelections = ''
           }
         }
 
@@ -751,9 +751,11 @@ export default function CreateProductPage() {
         hasVariants,
         variants: hasVariants ? variants : [], // Guardar todas las variantes creadas
 
-        // Modificadores - convertir strings vacíos a 0
+        // Modificadores - convertir strings vacíos a números
         modifierGroups: modifierGroups.map(group => ({
           ...group,
+          minSelections: group.minSelections === '' ? 0 : parseInt(group.minSelections as string) || 0,
+          maxSelections: group.maxSelections === '' ? 999 : parseInt(group.maxSelections as string) || 999,
           options: group.options.map(option => ({
             ...option,
             priceModifier: option.priceModifier === '' ? 0 : parseFloat(option.priceModifier as string) || 0
@@ -2307,11 +2309,17 @@ export default function CreateProductPage() {
                                     {t('modifiers.minSelections')}
                                   </label>
                                   <input
-                                    type="number"
-                                    min="0"
+                                    type="text"
+                                    inputMode="numeric"
                                     value={group.minSelections}
-                                    onChange={(e) => updateModifierGroup(group.id, 'minSelections', parseInt(e.target.value) || 0)}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                    onChange={(e) => {
+                                      const value = e.target.value
+                                      if (value === '' || /^\d+$/.test(value)) {
+                                        updateModifierGroup(group.id, 'minSelections', value)
+                                      }
+                                    }}
+                                    placeholder="0"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                   />
                                 </div>
                                 <div>
@@ -2319,11 +2327,17 @@ export default function CreateProductPage() {
                                     {t('modifiers.maxSelections')}
                                   </label>
                                   <input
-                                    type="number"
-                                    min="1"
+                                    type="text"
+                                    inputMode="numeric"
                                     value={group.maxSelections}
-                                    onChange={(e) => updateModifierGroup(group.id, 'maxSelections', parseInt(e.target.value) || 1)}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                    onChange={(e) => {
+                                      const value = e.target.value
+                                      if (value === '' || /^\d+$/.test(value)) {
+                                        updateModifierGroup(group.id, 'maxSelections', value)
+                                      }
+                                    }}
+                                    placeholder="5"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                   />
                                 </div>
                               </div>
@@ -2372,16 +2386,21 @@ export default function CreateProductPage() {
                                       <div className="flex items-end gap-2">
                                         <div className="flex-1">
                                           <label className="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">
-                                            Precio modificador ({currencySymbol})
+                                            Precio modificador
                                           </label>
-                                          <input
-                                            type="number"
-                                            placeholder="0.00"
-                                            step="0.01"
-                                            value={option.priceModifier}
-                                            onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value)}
-                                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                                          />
+                                          <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                              <span className="text-gray-500 text-sm">{currencySymbol}</span>
+                                            </div>
+                                            <input
+                                              type="number"
+                                              value={option.priceModifier}
+                                              onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value)}
+                                              placeholder="5.00"
+                                              step="0.01"
+                                              className="block w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                            />
+                                          </div>
                                         </div>
                                         <label className="flex items-center cursor-pointer pb-2 whitespace-nowrap" title={t('modifiers.defaultOption')}>
                                           <input
