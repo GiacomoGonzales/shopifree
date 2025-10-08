@@ -340,7 +340,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    ← {t('viewAllProducts') || 'Ver todos los productos'}
+                                    ← {tWrapper('viewAllProducts') || 'Ver todos los productos'}
                                 </button>
                             </div>
 
