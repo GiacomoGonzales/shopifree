@@ -179,6 +179,18 @@
             "sophisticatedNav": "Sophisticated navigation",
             "subtleAnimations": "Subtle animations"
           }
+        },
+        "restaurant": {
+          "name": "Restaurant",
+          "description": "Theme optimized for restaurants with single-page experience like a digital menu. Perfect for food businesses with catalogs of 30-60 products.",
+          "features": {
+            "singlePage": "Single-page experience",
+            "instantFilters": "Instant category filters",
+            "quickView": "QuickView modal for all products",
+            "mobileFirst": "Optimized mobile-first design",
+            "fastCheckout": "Fast checkout (2-3 min)",
+            "menuStyle": "Modern digital menu style"
+          }
         }
       }
     }

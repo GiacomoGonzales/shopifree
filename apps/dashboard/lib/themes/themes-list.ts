@@ -12,6 +12,17 @@ export const availableThemes: Theme[] = [
       primary: '#171717', // Modern dark
       secondary: '#737373'  // Modern gray
     }
+  },
+  {
+    id: 'restaurant',
+    translationKey: 'restaurant',
+    preview: '/themes/restaurant/preview.svg',
+    category: 'modern',
+    recommended: false,
+    colors: {
+      primary: '#dc2626', // Restaurant red
+      secondary: '#ea580c'  // Orange accent
+    }
   }
   // TODO: Agregar más temas aquí conforme se vayan creando
   // {

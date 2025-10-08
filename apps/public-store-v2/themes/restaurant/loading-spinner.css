@@ -1,0 +1,96 @@
+/* ===== SIMPLE LOADING SPINNER ===== */
+
+.nbd-simple-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.nbd-simple-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nbd-favicon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  z-index: 2;
+}
+
+.nbd-favicon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.nbd-fallback-icon,
+.nbd-center-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nbd-simple-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #6366f1;
+  border-radius: 50%;
+  animation: nbd-simple-spin 1s linear infinite;
+}
+
+@keyframes nbd-simple-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .nbd-simple-spinner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .nbd-favicon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .nbd-simple-ring {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Respeta preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .nbd-simple-ring {
+    animation-duration: 2s;
+  }
+}

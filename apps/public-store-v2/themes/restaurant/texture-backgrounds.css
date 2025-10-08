@@ -1,0 +1,625 @@
+/* ===================================================
+   TEXTURAS DE FONDO DISPONIBLES
+   =================================================== */
+
+/* Variable para fondos semi-transparentes que permiten ver texturas */
+:root {
+  --nbd-bg-overlay: rgba(255, 255, 255, 0.75);
+  --nbd-bg-overlay-strong: rgba(255, 255, 255, 0.90);
+  --nbd-bg-overlay-light: rgba(255, 255, 255, 0.65);
+  --nbd-shadow-texture: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  --nbd-shadow-texture-hover: 0 8px 25px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Textura: Puntos Sutiles */
+.texture-subtle-dots {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Cuadrícula Geométrica */
+.texture-geometric-grid {
+  background-image: 
+    linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Ondas Orgánicas */
+.texture-organic-waves {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Soporte para modo oscuro */
+[data-theme="dark"] .texture-subtle-dots {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-geometric-grid {
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-organic-waves {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-color: var(--nbd-neutral-900);
+}
+
+/* Optimizaciones para que las texturas sean más visibles */
+/* Cuando hay texturas aplicadas, hacer algunos fondos semi-transparentes */
+.texture-subtle-dots .nbd-search-input,
+.texture-geometric-grid .nbd-search-input,
+.texture-organic-waves .nbd-search-input {
+  background: var(--nbd-bg-overlay-strong);
+  backdrop-filter: blur(2px);
+}
+
+.texture-subtle-dots .nbd-brand-select,
+.texture-geometric-grid .nbd-brand-select,
+.texture-organic-waves .nbd-brand-select {
+  background: var(--nbd-bg-overlay-strong);
+  backdrop-filter: blur(2px);
+}
+
+/* Productos más sutiles para ver texturas */
+.texture-subtle-dots .nbd-product-card,
+.texture-geometric-grid .nbd-product-card,
+.texture-organic-waves .nbd-product-card,
+.texture-diagonal-lines .nbd-product-card,
+.texture-fabric-weave .nbd-product-card,
+.texture-hexagon-pattern .nbd-product-card,
+.texture-noise-texture .nbd-product-card,
+.texture-floating-bubbles .nbd-product-card,
+.texture-asymmetric-waves .nbd-product-card,
+.texture-scattered-leaves .nbd-product-card,
+.texture-paper-texture .nbd-product-card {
+  /* Usar exactamente los mismos estilos que tarjetas sin textura */
+  background: var(--nbd-neutral-0);
+  border: 1px solid var(--nbd-neutral-200);
+  /* Eliminar backdrop-filter para que se vea igual que sin textura */
+  /* Eliminar box-shadow para que se vea igual que sin textura */
+  position: relative;
+}
+
+/* Optimizaciones específicas para móvil con texturas - mejor aprovechamiento del espacio */
+@media (max-width: 640px) {
+  .texture-subtle-dots .nbd-mobile-grid .nbd-product-card,
+  .texture-geometric-grid .nbd-mobile-grid .nbd-product-card,
+  .texture-organic-waves .nbd-mobile-grid .nbd-product-card,
+  .texture-diagonal-lines .nbd-mobile-grid .nbd-product-card,
+  .texture-fabric-weave .nbd-mobile-grid .nbd-product-card,
+  .texture-hexagon-pattern .nbd-mobile-grid .nbd-product-card,
+  .texture-noise-texture .nbd-mobile-grid .nbd-product-card,
+  .texture-floating-bubbles .nbd-mobile-grid .nbd-product-card,
+  .texture-asymmetric-waves .nbd-mobile-grid .nbd-product-card,
+  .texture-scattered-leaves .nbd-mobile-grid .nbd-product-card,
+  .texture-paper-texture .nbd-mobile-grid .nbd-product-card {
+    /* Mantener el padding original para mejor uso del espacio */
+    min-height: auto;
+  }
+  
+  /* Asegurar que el contenido de la tarjeta mantenga un buen padding en móvil */
+  .texture-subtle-dots .nbd-mobile-grid .nbd-product-content,
+  .texture-geometric-grid .nbd-mobile-grid .nbd-product-content,
+  .texture-organic-waves .nbd-mobile-grid .nbd-product-content,
+  .texture-diagonal-lines .nbd-mobile-grid .nbd-product-content,
+  .texture-fabric-weave .nbd-mobile-grid .nbd-product-content,
+  .texture-hexagon-pattern .nbd-mobile-grid .nbd-product-content,
+  .texture-noise-texture .nbd-mobile-grid .nbd-product-content,
+  .texture-floating-bubbles .nbd-mobile-grid .nbd-product-content,
+  .texture-asymmetric-waves .nbd-mobile-grid .nbd-product-content,
+  .texture-scattered-leaves .nbd-mobile-grid .nbd-product-content,
+  .texture-paper-texture .nbd-mobile-grid .nbd-product-content {
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+  }
+}
+
+/* Añadir un sutil outline interno para más contraste */
+.texture-subtle-dots .nbd-product-card::before,
+.texture-geometric-grid .nbd-product-card::before,
+.texture-organic-waves .nbd-product-card::before,
+.texture-diagonal-lines .nbd-product-card::before,
+.texture-fabric-weave .nbd-product-card::before,
+.texture-hexagon-pattern .nbd-product-card::before,
+.texture-noise-texture .nbd-product-card::before,
+.texture-floating-bubbles .nbd-product-card::before,
+.texture-asymmetric-waves .nbd-product-card::before,
+.texture-scattered-leaves .nbd-product-card::before,
+.texture-paper-texture .nbd-product-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+}
+
+/* Mejorar hover con texturas aplicadas */
+.texture-subtle-dots .nbd-product-card:hover,
+.texture-geometric-grid .nbd-product-card:hover,
+.texture-organic-waves .nbd-product-card:hover,
+.texture-diagonal-lines .nbd-product-card:hover,
+.texture-fabric-weave .nbd-product-card:hover,
+.texture-hexagon-pattern .nbd-product-card:hover,
+.texture-noise-texture .nbd-product-card:hover,
+.texture-floating-bubbles .nbd-product-card:hover,
+.texture-asymmetric-waves .nbd-product-card:hover,
+.texture-scattered-leaves .nbd-product-card:hover,
+.texture-paper-texture .nbd-product-card:hover {
+  /* Usar exactamente los mismos estilos de hover que tarjetas sin textura */
+  transform: translateY(-8px);
+  box-shadow: none; /* Eliminado para integrar imagen como parte de la tarjeta */
+  border-color: var(--nbd-neutral-300);
+  transition: transform var(--nbd-transition-base), border-color var(--nbd-transition-base);
+}
+
+/* Sección de productos transparente con texturas */
+.texture-subtle-dots .nbd-products,
+.texture-geometric-grid .nbd-products,
+.texture-organic-waves .nbd-products,
+.texture-diagonal-lines .nbd-products,
+.texture-fabric-weave .nbd-products,
+.texture-hexagon-pattern .nbd-products,
+.texture-noise-texture .nbd-products,
+.texture-floating-bubbles .nbd-products,
+.texture-asymmetric-waves .nbd-products,
+.texture-scattered-leaves .nbd-products,
+.texture-paper-texture .nbd-products {
+  background: transparent;
+}
+
+/* Container principal también transparente */
+.texture-subtle-dots .nbd-container,
+.texture-geometric-grid .nbd-container,
+.texture-organic-waves .nbd-container,
+.texture-diagonal-lines .nbd-container,
+.texture-fabric-weave .nbd-container,
+.texture-hexagon-pattern .nbd-container,
+.texture-noise-texture .nbd-container,
+.texture-floating-bubbles .nbd-container,
+.texture-asymmetric-waves .nbd-container,
+.texture-scattered-leaves .nbd-container,
+.texture-paper-texture .nbd-container {
+  background: transparent;
+}
+
+/* Títulos flotantes sin contenedor sobre texturas */
+.texture-subtle-dots .nbd-section-title,
+.texture-geometric-grid .nbd-section-title,
+.texture-organic-waves .nbd-section-title,
+.texture-diagonal-lines .nbd-section-title,
+.texture-fabric-weave .nbd-section-title,
+.texture-hexagon-pattern .nbd-section-title,
+.texture-noise-texture .nbd-section-title,
+.texture-floating-bubbles .nbd-section-title,
+.texture-asymmetric-waves .nbd-section-title,
+.texture-scattered-leaves .nbd-section-title,
+.texture-paper-texture .nbd-section-title {
+  color: var(--nbd-primary);
+  font-weight: 600;
+}
+
+/* Subtítulos también flotantes */
+.texture-subtle-dots .nbd-section-subtitle,
+.texture-geometric-grid .nbd-section-subtitle,
+.texture-organic-waves .nbd-section-subtitle,
+.texture-diagonal-lines .nbd-section-subtitle,
+.texture-fabric-weave .nbd-section-subtitle,
+.texture-hexagon-pattern .nbd-section-subtitle,
+.texture-noise-texture .nbd-section-subtitle,
+.texture-floating-bubbles .nbd-section-subtitle,
+.texture-asymmetric-waves .nbd-section-subtitle,
+.texture-scattered-leaves .nbd-section-subtitle,
+.texture-paper-texture .nbd-section-subtitle {
+  color: var(--nbd-secondary);
+}
+
+/* Headers sin fondo, flotando sobre texturas */
+.texture-subtle-dots .nbd-section-header,
+.texture-geometric-grid .nbd-section-header,
+.texture-organic-waves .nbd-section-header,
+.texture-diagonal-lines .nbd-section-header,
+.texture-fabric-weave .nbd-section-header,
+.texture-hexagon-pattern .nbd-section-header,
+.texture-noise-texture .nbd-section-header,
+.texture-floating-bubbles .nbd-section-header,
+.texture-asymmetric-waves .nbd-section-header,
+.texture-scattered-leaves .nbd-section-header,
+.texture-paper-texture .nbd-section-header {
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  padding: 0 0 0 var(--nbd-space-lg); /* Mantener padding-left para alineación con página */
+}
+
+/* Excepción: alinear título de productos con tarjetas en móvil con texturas */
+@media (max-width: 768px) {
+  .texture-subtle-dots .nbd-products .nbd-section-header,
+  .texture-geometric-grid .nbd-products .nbd-section-header,
+  .texture-organic-waves .nbd-products .nbd-section-header,
+  .texture-diagonal-lines .nbd-products .nbd-section-header,
+  .texture-fabric-weave .nbd-products .nbd-section-header,
+  .texture-hexagon-pattern .nbd-products .nbd-section-header,
+  .texture-noise-texture .nbd-products .nbd-section-header,
+  .texture-floating-bubbles .nbd-products .nbd-section-header,
+  .texture-asymmetric-waves .nbd-products .nbd-section-header,
+  .texture-scattered-leaves .nbd-products .nbd-section-header,
+  .texture-paper-texture .nbd-products .nbd-section-header {
+    padding-left: 0; /* Alinear directamente con las tarjetas de productos */
+  }
+}
+
+/* Controles de productos sin efecto glassmorphism */
+.texture-subtle-dots .nbd-product-controls,
+.texture-geometric-grid .nbd-product-controls,
+.texture-organic-waves .nbd-product-controls,
+.texture-diagonal-lines .nbd-product-controls,
+.texture-fabric-weave .nbd-product-controls,
+.texture-hexagon-pattern .nbd-product-controls,
+.texture-noise-texture .nbd-product-controls,
+.texture-floating-bubbles .nbd-product-controls,
+.texture-asymmetric-waves .nbd-product-controls,
+.texture-scattered-leaves .nbd-product-controls,
+.texture-paper-texture .nbd-product-controls {
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  padding: 0;
+  margin: var(--nbd-space-sm) 0;
+}
+
+/* Botones individuales sin glassmorphism cuando hay texturas */
+.texture-subtle-dots .nbd-control-btn,
+.texture-geometric-grid .nbd-control-btn,
+.texture-organic-waves .nbd-control-btn,
+.texture-diagonal-lines .nbd-control-btn,
+.texture-fabric-weave .nbd-control-btn,
+.texture-hexagon-pattern .nbd-control-btn,
+.texture-noise-texture .nbd-control-btn,
+.texture-floating-bubbles .nbd-control-btn,
+.texture-asymmetric-waves .nbd-control-btn,
+.texture-scattered-leaves .nbd-control-btn,
+.texture-paper-texture .nbd-control-btn {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.texture-subtle-dots .nbd-control-btn:hover,
+.texture-geometric-grid .nbd-control-btn:hover,
+.texture-organic-waves .nbd-control-btn:hover,
+.texture-diagonal-lines .nbd-control-btn:hover,
+.texture-fabric-weave .nbd-control-btn:hover,
+.texture-hexagon-pattern .nbd-control-btn:hover,
+.texture-noise-texture .nbd-control-btn:hover,
+.texture-floating-bubbles .nbd-control-btn:hover,
+.texture-asymmetric-waves .nbd-control-btn:hover,
+.texture-scattered-leaves .nbd-control-btn:hover,
+.texture-paper-texture .nbd-control-btn:hover {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Botón de ordenar específicamente cuando hay texturas */
+.texture-subtle-dots .nbd-sort-dropdown .nbd-control-btn,
+.texture-geometric-grid .nbd-sort-dropdown .nbd-control-btn,
+.texture-organic-waves .nbd-sort-dropdown .nbd-control-btn,
+.texture-diagonal-lines .nbd-sort-dropdown .nbd-control-btn,
+.texture-fabric-weave .nbd-sort-dropdown .nbd-control-btn,
+.texture-hexagon-pattern .nbd-sort-dropdown .nbd-control-btn,
+.texture-noise-texture .nbd-sort-dropdown .nbd-control-btn,
+.texture-floating-bubbles .nbd-sort-dropdown .nbd-control-btn,
+.texture-asymmetric-waves .nbd-sort-dropdown .nbd-control-btn,
+.texture-scattered-leaves .nbd-sort-dropdown .nbd-control-btn,
+.texture-paper-texture .nbd-sort-dropdown .nbd-control-btn {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Grid de productos optimizado para móvil con texturas */
+.texture-subtle-dots .nbd-products-grid,
+.texture-geometric-grid .nbd-products-grid,
+.texture-organic-waves .nbd-products-grid,
+.texture-diagonal-lines .nbd-products-grid,
+.texture-fabric-weave .nbd-products-grid,
+.texture-hexagon-pattern .nbd-products-grid,
+.texture-noise-texture .nbd-products-grid,
+.texture-floating-bubbles .nbd-products-grid,
+.texture-asymmetric-waves .nbd-products-grid,
+.texture-scattered-leaves .nbd-products-grid,
+.texture-paper-texture .nbd-products-grid {
+  gap: var(--nbd-space-2xl);
+}
+
+/* Optimización específica para móvil - mantener espacio aprovechado */
+@media (max-width: 1024px) {
+  .texture-subtle-dots .nbd-products-grid,
+  .texture-geometric-grid .nbd-products-grid,
+  .texture-organic-waves .nbd-products-grid,
+  .texture-diagonal-lines .nbd-products-grid,
+  .texture-fabric-weave .nbd-products-grid,
+  .texture-hexagon-pattern .nbd-products-grid,
+  .texture-noise-texture .nbd-products-grid,
+  .texture-floating-bubbles .nbd-products-grid,
+  .texture-asymmetric-waves .nbd-products-grid,
+  .texture-scattered-leaves .nbd-products-grid,
+  .texture-paper-texture .nbd-products-grid {
+    gap: var(--nbd-space-xl);
+  }
+}
+
+/* Para móviles pequeños, usar el mismo gap que sin texturas */
+@media (max-width: 640px) {
+  .texture-subtle-dots .nbd-products-grid,
+  .texture-geometric-grid .nbd-products-grid,
+  .texture-organic-waves .nbd-products-grid,
+  .texture-diagonal-lines .nbd-products-grid,
+  .texture-fabric-weave .nbd-products-grid,
+  .texture-hexagon-pattern .nbd-products-grid,
+  .texture-noise-texture .nbd-products-grid,
+  .texture-floating-bubbles .nbd-products-grid,
+  .texture-asymmetric-waves .nbd-products-grid,
+  .texture-scattered-leaves .nbd-products-grid,
+  .texture-paper-texture .nbd-products-grid {
+    gap: var(--nbd-space-md);
+  }
+}
+
+/* Header con textura visible */
+.texture-subtle-dots .nbd-header,
+.texture-geometric-grid .nbd-header,
+.texture-organic-waves .nbd-header {
+  background: var(--nbd-bg-overlay-strong);
+  backdrop-filter: blur(4px);
+}
+
+/* Hero section libre - igual que sin texturas */
+.texture-subtle-dots .nbd-hero-text,
+.texture-geometric-grid .nbd-hero-text,
+.texture-organic-waves .nbd-hero-text,
+.texture-diagonal-lines .nbd-hero-text,
+.texture-fabric-weave .nbd-hero-text,
+.texture-hexagon-pattern .nbd-hero-text,
+.texture-noise-texture .nbd-hero-text,
+.texture-floating-bubbles .nbd-hero-text,
+.texture-asymmetric-waves .nbd-hero-text,
+.texture-scattered-leaves .nbd-hero-text,
+.texture-paper-texture .nbd-hero-text {
+  /* Eliminar todos los estilos de contenedor para que flote libre como sin texturas */
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* ===================================================
+   NUEVAS TEXTURAS AGREGADAS
+   =================================================== */
+
+/* Textura: Líneas Diagonales */
+.texture-diagonal-lines {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.05) 10px,
+    rgba(0,0,0,0.05) 11px
+  );
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Tejido Sutil */
+.texture-fabric-weave {
+  background-image: 
+    linear-gradient(45deg, rgba(0,0,0,0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0,0,0,0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.03) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.03) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Hexágonos */
+.texture-hexagon-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.06'%3E%3Cpath d='M20 0l15.5 9v18L20 36 4.5 27V9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 40px 40px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Ruido Suave */
+.texture-noise-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0.02 0 0.025 0 0.015 0 0.022'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Soporte para modo oscuro - NUEVAS TEXTURAS */
+[data-theme="dark"] .texture-diagonal-lines {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255,255,255,0.07) 10px,
+    rgba(255,255,255,0.07) 11px
+  );
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-fabric-weave {
+  background-image: 
+    linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.04) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-hexagon-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.08'%3E%3Cpath d='M20 0l15.5 9v18L20 36 4.5 27V9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 40px 40px;
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-noise-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilterDark'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0.04 0 0.045 0 0.035 0 0.042'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noiseFilterDark)' opacity='1' fill='%23FFFFFF'/%3E%3C/svg%3E");
+  background-color: var(--nbd-neutral-900);
+}
+
+/* ===================================================
+   SEGUNDA TANDA DE TEXTURAS NUEVAS
+   =================================================== */
+
+/* Textura: Burbujas Flotantes */
+.texture-floating-bubbles {
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(0,0,0,0.04) 2px, transparent 2px),
+    radial-gradient(circle at 60% 70%, rgba(0,0,0,0.055) 3px, transparent 3px),
+    radial-gradient(circle at 80% 20%, rgba(0,0,0,0.025) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 40% 80%, rgba(0,0,0,0.045) 2.5px, transparent 2.5px),
+    radial-gradient(circle at 10% 90%, rgba(0,0,0,0.035) 1px, transparent 1px),
+    radial-gradient(circle at 90% 50%, rgba(0,0,0,0.06) 4px, transparent 4px);
+  background-size: 120px 120px, 180px 180px, 90px 90px, 150px 150px, 60px 60px, 200px 200px;
+  background-position: 0 0, 30px 40px, 70px 10px, 100px 80px, 20px 70px, 150px 20px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Ondas Asimétricas */
+.texture-asymmetric-waves {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.04'%3E%3Cpath d='M0 40c8-12 20-8 25-2s18 8 25-2 12-18 25-15c8 2 15 12 5 20-8 6-18 2-25 8s-15 12-25 5c-8-5-12-15-5-20 5-3 12 1 15-8s-8-15-15-10c-5 3-8 12-15 8s-10-15-10-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Hojas Dispersas */
+.texture-scattered-leaves {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.045'%3E%3Cpath d='M15 25c3-8 12-5 8 2-2 4-8 3-8-2zm35 10c5-6 10-2 6 4-3 4-8 1-6-4zm60 15c4-7 11-3 7 3-3 4-9 2-7-3zm20 35c6-5 9 0 5 5-3 3-8 1-5-5zm45 20c3-6 8-2 5 3-2 3-7 1-5-3z'/%3E%3Cpath d='M25 60c-2 5-8 3-6-2 1-3 6-2 6 2zm70 5c-3 6-9 2-6-3 2-3 7-1 6 3zm10 25c-4 4-8 0-5-4 2-2 6-1 5 4zm55 10c-2 4-6 1-4-2 1-2 5-1 4 2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100px 100px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Textura: Papel Artesanal */
+.texture-paper-texture {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(0,0,0,0.025) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.032) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 50% 10%, rgba(0,0,0,0.018) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 10% 60%, rgba(0,0,0,0.022) 0.8px, transparent 0.8px),
+    radial-gradient(circle at 90% 40%, rgba(0,0,0,0.028) 1.2px, transparent 1.2px);
+  background-size: 8px 8px, 12px 12px, 15px 15px, 6px 6px, 10px 10px;
+  background-position: 0 0, 4px 4px, 7px 2px, 2px 8px, 5px 6px;
+  background-color: var(--nbd-neutral-0);
+}
+
+/* Soporte para modo oscuro - SEGUNDA TANDA */
+[data-theme="dark"] .texture-floating-bubbles {
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.055) 2px, transparent 2px),
+    radial-gradient(circle at 60% 70%, rgba(255,255,255,0.07) 3px, transparent 3px),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.06) 2.5px, transparent 2.5px),
+    radial-gradient(circle at 10% 90%, rgba(255,255,255,0.045) 1px, transparent 1px),
+    radial-gradient(circle at 90% 50%, rgba(255,255,255,0.08) 4px, transparent 4px);
+  background-size: 120px 120px, 180px 180px, 90px 90px, 150px 150px, 60px 60px, 200px 200px;
+  background-position: 0 0, 30px 40px, 70px 10px, 100px 80px, 20px 70px, 150px 20px;
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-asymmetric-waves {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.055'%3E%3Cpath d='M0 40c8-12 20-8 25-2s18 8 25-2 12-18 25-15c8 2 15 12 5 20-8 6-18 2-25 8s-15 12-25 5c-8-5-12-15-5-20 5-3 12 1 15-8s-8-15-15-10c-5 3-8 12-15 8s-10-15-10-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-scattered-leaves {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.06'%3E%3Cpath d='M15 25c3-8 12-5 8 2-2 4-8 3-8-2zm35 10c5-6 10-2 6 4-3 4-8 1-6-4zm60 15c4-7 11-3 7 3-3 4-9 2-7-3zm20 35c6-5 9 0 5 5-3 3-8 1-5-5zm45 20c3-6 8-2 5 3-2 3-7 1-5-3z'/%3E%3Cpath d='M25 60c-2 5-8 3-6-2 1-3 6-2 6 2zm70 5c-3 6-9 2-6-3 2-3 7-1 6 3zm10 25c-4 4-8 0-5-4 2-2 6-1 5 4zm55 10c-2 4-6 1-4-2 1-2 5-1 4 2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100px 100px;
+  background-color: var(--nbd-neutral-900);
+}
+
+[data-theme="dark"] .texture-paper-texture {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.035) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.045) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 50% 10%, rgba(255,255,255,0.025) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 10% 60%, rgba(255,255,255,0.03) 0.8px, transparent 0.8px),
+    radial-gradient(circle at 90% 40%, rgba(255,255,255,0.04) 1.2px, transparent 1.2px);
+  background-size: 8px 8px, 12px 12px, 15px 15px, 6px 6px, 10px 10px;
+  background-position: 0 0, 4px 4px, 7px 2px, 2px 8px, 5px 6px;
+  background-color: var(--nbd-neutral-900);
+}
+
+/* ===================================================
+   🍎 HEADER INMERSIVO iOS CON TEXTURAS
+   =================================================== */
+
+/* Header inmersivo con texturas - mantiene la transparencia para iOS */
+.texture-subtle-dots .nbd-header,
+.texture-geometric-grid .nbd-header,
+.texture-organic-waves .nbd-header,
+.texture-diagonal-lines .nbd-header,
+.texture-fabric-weave .nbd-header,
+.texture-hexagon-pattern .nbd-header,
+.texture-noise-texture .nbd-header,
+.texture-floating-bubbles .nbd-header,
+.texture-asymmetric-waves .nbd-header,
+.texture-scattered-leaves .nbd-header,
+.texture-paper-texture .nbd-header {
+  background: var(--nbd-bg-overlay-strong);
+  backdrop-filter: blur(8px);
+  /* En iOS Safari, esto se fundirá perfectamente con la status bar */
+}
+
+/* Header con scroll y texturas - más opaco para mejor legibilidad */
+.texture-subtle-dots .nbd-header--scrolled,
+.texture-geometric-grid .nbd-header--scrolled,
+.texture-organic-waves .nbd-header--scrolled,
+.texture-diagonal-lines .nbd-header--scrolled,
+.texture-fabric-weave .nbd-header--scrolled,
+.texture-hexagon-pattern .nbd-header--scrolled,
+.texture-noise-texture .nbd-header--scrolled,
+.texture-floating-bubbles .nbd-header--scrolled,
+.texture-asymmetric-waves .nbd-header--scrolled,
+.texture-scattered-leaves .nbd-header--scrolled,
+.texture-paper-texture .nbd-header--scrolled {
+  background: var(--nbd-bg-overlay);
+  backdrop-filter: blur(12px);
+}
+
+/* ========================================
+   ANULACIÓN MÓVIL: Igualar hover en móvil para tarjetas con texturas
+   ======================================== */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+    .texture-subtle-dots .nbd-product-card:hover,
+    .texture-geometric-grid .nbd-product-card:hover,
+    .texture-organic-waves .nbd-product-card:hover,
+    .texture-diagonal-lines .nbd-product-card:hover,
+    .texture-fabric-weave .nbd-product-card:hover,
+    .texture-hexagon-pattern .nbd-product-card:hover,
+    .texture-noise-texture .nbd-product-card:hover,
+    .texture-floating-bubbles .nbd-product-card:hover,
+    .texture-asymmetric-waves .nbd-product-card:hover,
+    .texture-scattered-leaves .nbd-product-card:hover,
+    .texture-paper-texture .nbd-product-card:hover {
+        /* Usar exactamente los mismos estilos móvil que tarjetas sin textura */
+        transform: none !important;
+        box-shadow: none !important;
+        border-color: var(--nbd-neutral-200) !important;
+        transition: none !important;
+    }
+}

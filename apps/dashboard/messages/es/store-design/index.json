@@ -179,6 +179,18 @@
             "sophisticatedNav": "Navegación sofisticada",
             "subtleAnimations": "Animaciones sutiles"
           }
+        },
+        "restaurant": {
+          "name": "Restaurant",
+          "description": "Tema optimizado para restaurantes con experiencia single-page tipo menú digital. Perfecto para negocios de comida con catálogos de 30-60 productos.",
+          "features": {
+            "singlePage": "Experiencia single-page",
+            "instantFilters": "Filtros instantáneos por categoría",
+            "quickView": "Modal QuickView para todos los productos",
+            "mobileFirst": "Diseño mobile-first optimizado",
+            "fastCheckout": "Checkout rápido (2-3 min)",
+            "menuStyle": "Estilo menú digital moderno"
+          }
         }
       }
     }

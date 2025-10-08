@@ -477,6 +477,8 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     
     // APLICAR VARIABLES CSS PRINCIPALES para botones, selectores de variantes, etc.
     document.documentElement.style.setProperty('--nbd-primary', primaryColor);
+    document.documentElement.style.setProperty('--nbd-primary-color', primaryColor);
+    document.documentElement.style.setProperty('--nbd-primary-dark', darkerColor);
     document.documentElement.style.setProperty('--nbd-secondary', darkerColor);
 
     // CONVERTIR COLORES A RGB PARA USAR CON rgba()
