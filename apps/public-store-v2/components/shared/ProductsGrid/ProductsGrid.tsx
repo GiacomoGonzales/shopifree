@@ -142,6 +142,7 @@ const ProductCard = memo(({
   storeId,
   loadingCartButton,
   handleAddToCart,
+  onProductClick,
   buildUrl,
   toCloudinarySquare,
   formatPrice,
@@ -152,6 +153,7 @@ const ProductCard = memo(({
   storeId: string | null
   loadingCartButton: string | null
   handleAddToCart: (product: PublicProduct, finalPrice?: number) => Promise<void>
+  onProductClick?: (product: PublicProduct) => void
   buildUrl: (path: string) => string
   toCloudinarySquare: (url: string, size: number) => string
   formatPrice: (price: number, currency?: string) => string
@@ -169,8 +171,14 @@ const ProductCard = memo(({
   return (
     <div
       className="nbd-product-card"
-      onClick={() => {
-        window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
+      onClick={(e) => {
+        if (onProductClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          onProductClick(product);
+        } else {
+          window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
+        }
       }}
       style={{ cursor: 'pointer' }}
     >
@@ -236,6 +244,7 @@ interface ProductsGridProps {
   // Event handlers
   handleAddToCart: (product: PublicProduct, finalPrice?: number) => Promise<void>
   loadMoreProducts: () => void
+  onProductClick?: (product: PublicProduct) => void
 
   // Utils
   buildUrl: (path: string) => string
@@ -259,6 +268,7 @@ export function ProductsGrid({
   hasMoreProducts,
   handleAddToCart,
   loadMoreProducts,
+  onProductClick,
   buildUrl,
   toCloudinarySquare,
   formatPrice,
@@ -278,6 +288,7 @@ export function ProductsGrid({
               storeId={storeId || null}
               loadingCartButton={loadingCartButton}
               handleAddToCart={handleAddToCart}
+              onProductClick={onProductClick}
               buildUrl={buildUrl}
               toCloudinarySquare={toCloudinarySquare}
               formatPrice={formatPrice}

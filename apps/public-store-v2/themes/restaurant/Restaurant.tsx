@@ -258,42 +258,6 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         }
     };
 
-    // Interceptar clicks en productos del grid (cuando hay filtro activo) para abrir modal
-    useEffect(() => {
-        // Solo si hay categoría activa (modo grid)
-        if (!activeCategory || activeCategory === 'todos') return;
-
-        const handleProductClick = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            const productCard = target.closest('.nbd-product-card') as HTMLElement;
-
-            if (productCard && !target.closest('.nbd-add-to-cart-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                // Buscar el producto por el índice del card
-                const cards = Array.from(document.querySelectorAll('.nbd-product-card'));
-                const index = cards.indexOf(productCard);
-
-                if (index !== -1 && displayedProducts[index]) {
-                    setQuickViewProduct(displayedProducts[index]);
-                    setIsQuickViewOpen(true);
-                }
-            }
-        };
-
-        // Agregar listener al contenedor de productos
-        const productsGrid = document.querySelector('.nbd-products-grid');
-        if (productsGrid) {
-            productsGrid.addEventListener('click', handleProductClick as EventListener);
-        }
-
-        return () => {
-            if (productsGrid) {
-                productsGrid.removeEventListener('click', handleProductClick as EventListener);
-            }
-        };
-    }, [displayedProducts, activeCategory]);
 
     if (loading) {
         return (
@@ -414,6 +378,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                 hasMoreProducts={hasMoreProducts}
                                 handleAddToCart={handleAddToCart}
                                 loadMoreProducts={loadMoreProducts}
+                                onProductClick={handleAddToCart}
                                 buildUrl={buildUrl}
                                 toCloudinarySquare={toCloudinarySquareWrapper}
                                 formatPrice={formatPrice}
@@ -497,6 +462,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         hasMoreProducts={hasMoreProducts}
                                         handleAddToCart={handleAddToCart}
                                         loadMoreProducts={loadMoreProducts}
+                                        onProductClick={handleAddToCart}
                                         buildUrl={buildUrl}
                                         toCloudinarySquare={toCloudinarySquareWrapper}
                                         formatPrice={formatPrice}
