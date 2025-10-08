@@ -69,7 +69,8 @@ const reducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
       const { item, quantity } = action.payload;
-      const id = itemId(item.productId, item.variant?.id);
+      // Usar el id del item si ya existe (incluye hash de modificadores), sino generarlo
+      const id = item.id || itemId(item.productId, item.variant?.id);
       const idx = state.items.findIndex(i => i.id === id);
       const items = idx >= 0 ? state.items.map((i, k) => (k === idx ? { ...i, quantity: i.quantity + quantity } : i)) : [...state.items, { ...item, id, quantity }];
       return { ...state, items, ...calculateTotals(items) };
