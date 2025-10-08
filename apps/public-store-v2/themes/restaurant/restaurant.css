@@ -8898,19 +8898,19 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
 .restaurant-carousel-card {
     min-width: 200px;
     max-width: 200px;
-    background: white;
-    border-radius: var(--nbd-radius-lg, 12px);
+    background: var(--nbd-neutral-0);
+    border: 1px solid var(--nbd-neutral-200);
+    border-radius: var(--nbd-radius-xl);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    transition: transform var(--nbd-transition-base), border-color var(--nbd-transition-base);
     cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
 .restaurant-carousel-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-8px);
+    border-color: var(--nbd-neutral-300);
 }
 
 .restaurant-carousel-card-image {
