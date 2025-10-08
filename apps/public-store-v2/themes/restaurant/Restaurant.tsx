@@ -19,7 +19,7 @@ import Footer from "../new-base-default/Footer";
 import CartModal from "../new-base-default/CartModal";
 import ProductQuickView from "../new-base-default/components/ProductQuickView";
 import AnnouncementBar from "../new-base-default/AnnouncementBar";
-import { HeroSection, ProductsGrid, CategoriesSection, ProductSectionHeader } from "../../components/shared";
+import { HeroSection, ProductsGrid, CategoriesSection, ProductSectionHeader, SimpleCarousel } from "../../components/shared";
 import RestaurantCategoryCarousel from "./components/RestaurantCategoryCarousel";
 import RestaurantCollectionCarousel from "./components/RestaurantCollectionCarousel";
 
@@ -350,6 +350,12 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                     collectionsCount={0}
                     brandsCount={0}
                 />
+            )}
+
+            {/* Carrusel de imágenes publicitarias - SimpleCarousel */}
+            {storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 &&
+             (storeInfo?.sections?.carousel?.enabled !== false) && (
+                <SimpleCarousel images={storeInfo.carouselImages} />
             )}
 
             {/* Carruseles de productos por categoría - SOLO RESTAURANT */}
