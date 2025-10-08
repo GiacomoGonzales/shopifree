@@ -36,6 +36,11 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         return toCloudinarySquare(url, size) || url;
     };
 
+    // Wrapper para t que acepta cualquier string
+    const tWrapper = (key: string): string => {
+        return t(key as any);
+    };
+
     const [storeIdState, setStoreIdState] = useState<string | null>(null);
     const resolvedStoreId = storeId || storeIdState;
     const [loading, setLoading] = useState<boolean>(true);
@@ -318,7 +323,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                 isOnBrandPage={false}
                                 activeCategory={activeCategory}
                                 categories={categories?.map(cat => ({ slug: cat.slug, name: cat.name })) || undefined}
-                                t={t}
+                                t={tWrapper}
                             />
 
                             {/* Botón para ver todos */}
