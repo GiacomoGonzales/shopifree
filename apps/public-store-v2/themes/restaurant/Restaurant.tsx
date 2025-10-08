@@ -360,12 +360,6 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                 />
             )}
 
-            {/* Carrusel de imágenes publicitarias - SimpleCarousel */}
-            {storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 &&
-             (storeInfo?.sections?.carousel?.enabled !== false) && (
-                <SimpleCarousel images={storeInfo.carouselImages} />
-            )}
-
             {/* Carruseles de productos por categoría - SOLO RESTAURANT */}
             <section id="menu" className="nbd-products">
                 <div className="nbd-container">
@@ -457,6 +451,12 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         maxProducts={10}
                                     />
                                 ))
+                            )}
+
+                            {/* Carrusel de imágenes publicitarias - SimpleCarousel */}
+                            {storeInfo?.carouselImages && storeInfo.carouselImages.length > 0 &&
+                             (storeInfo?.sections?.carousel?.enabled !== false) && (
+                                <SimpleCarousel images={storeInfo.carouselImages} />
                             )}
 
                             {/* Carruseles de categorías después */}
