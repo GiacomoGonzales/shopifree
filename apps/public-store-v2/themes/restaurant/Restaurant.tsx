@@ -288,6 +288,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                 categories={categories}
                 storeSubdomain={storeSubdomain}
                 products={products || []}
+                onProductClick={handleAddToCart}
             />
 
             {/* Hero Section - Mismo que tema base */}

@@ -15,6 +15,7 @@ interface SearchComponentProps {
     storeSubdomain?: string;
     storeInfo?: StoreBasicInfo | null;
     storeId?: string | null;
+    onProductClick?: (product: PublicProduct) => void; // Callback opcional para temas que quieren custom behavior
 }
 
 export default function SearchComponent({
@@ -24,7 +25,8 @@ export default function SearchComponent({
     isCustomDomain = false,
     storeSubdomain = '',
     storeInfo = null,
-    storeId = null
+    storeId = null,
+    onProductClick
 }: SearchComponentProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobile, setIsMobile] = useState(false);
@@ -134,12 +136,23 @@ export default function SearchComponent({
         const finalPrice = hasPromotion ? promotionData.finalPrice : product.price;
         const originalPrice = product.price;
 
+        // Manejar click: si hay callback custom, usarlo; si no, navegar normalmente
+        const handleClick = (e: React.MouseEvent) => {
+            if (onProductClick) {
+                e.preventDefault();
+                onProductClick(product);
+                onClose();
+            } else {
+                onClose();
+            }
+        };
+
         return (
             <a
                 key={product.id}
                 href={getProductUrl(product.slug || product.id)}
                 className="nbd-search-result-item"
-                onClick={onClose}
+                onClick={handleClick}
             >
                 <div className="nbd-search-result-image">
                     {product.image ? (

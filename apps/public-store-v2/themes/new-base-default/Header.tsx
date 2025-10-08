@@ -14,9 +14,10 @@ type Props = {
     categories: Category[] | null;
     storeSubdomain: string;
     products: PublicProduct[];
+    onProductClick?: (product: PublicProduct) => void; // Callback opcional para search
 };
 
-export default function Header({ storeInfo, categories, storeSubdomain, products }: Props) {
+export default function Header({ storeInfo, categories, storeSubdomain, products, onProductClick }: Props) {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, openCart } = useCart();
     const { t } = useStoreLanguage();
@@ -211,6 +212,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                 storeSubdomain={storeSubdomain}
                 storeInfo={storeInfo}
                 storeId={storeInfo?.id || null}
+                onProductClick={onProductClick}
             />
         </>
     );
