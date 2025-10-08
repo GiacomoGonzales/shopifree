@@ -9,6 +9,7 @@ import "./announcement-bar-animations.css";
 import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture, applyStoreColors } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreParentCategories, Category } from "../../lib/categories";
+import { getStoreCollections, PublicCollection } from "../../lib/collections";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
 import { useCart } from "../../lib/cart-context";
@@ -20,6 +21,7 @@ import ProductQuickView from "../new-base-default/components/ProductQuickView";
 import AnnouncementBar from "../new-base-default/AnnouncementBar";
 import { HeroSection, ProductsGrid, CategoriesSection, ProductSectionHeader } from "../../components/shared";
 import RestaurantCategoryCarousel from "./components/RestaurantCategoryCarousel";
+import RestaurantCollectionCarousel from "./components/RestaurantCollectionCarousel";
 
 type Props = {
     storeSubdomain: string;
@@ -47,6 +49,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
     const [products, setProducts] = useState<PublicProduct[] | null>(null);
     const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
+    const [collections, setCollections] = useState<PublicCollection[] | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>('todos'); // Categoría activa para filtrar
     const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
@@ -112,15 +115,17 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                 if (!alive) return;
                 setStoreIdState(id);
                 if (id) {
-                    const [items, info, cats] = await Promise.all([
+                    const [items, info, cats, colls] = await Promise.all([
                         getStoreProducts(id),
                         getStoreBasicInfo(id),
-                        getStoreParentCategories(id) // Solo categorías padre para filtros
+                        getStoreParentCategories(id), // Solo categorías padre para filtros
+                        getStoreCollections(id) // Colecciones visibles
                     ]);
                     if (!alive) return;
                     startTransition(() => {
                         setProducts(items);
                         setCategories(cats);
+                        setCollections(colls);
                         setStoreInfo(info);
                     });
                 }
@@ -218,6 +223,23 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         if (categoryCarousel) {
             // Obtener la posición del elemento
             const elementPosition = categoryCarousel.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - 120; // 120px de offset para el header y espacio adicional
+
+            // Hacer scroll suave con offset
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    // Función para hacer scroll a una colección específica
+    const handleCollectionClick = (collectionSlug: string) => {
+        // Buscar el carrusel de la colección por su slug
+        const collectionCarousel = document.querySelector(`[data-collection-slug="${collectionSlug}"]`);
+        if (collectionCarousel) {
+            // Obtener la posición del elemento
+            const elementPosition = collectionCarousel.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - 120; // 120px de offset para el header y espacio adicional
 
             // Hacer scroll suave con offset
@@ -381,8 +403,27 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                             />
                         </>
                     ) : (
-                        /* Carruseles por categoría */
+                        /* Carruseles por categoría y colección */
                         <>
+                            {/* Carruseles de colecciones primero */}
+                            {collections && collections.length > 0 && (
+                                collections.map(collection => (
+                                    <RestaurantCollectionCarousel
+                                        key={collection.id}
+                                        collection={collection}
+                                        products={products || []}
+                                        onProductClick={handleAddToCart}
+                                        onViewAll={handleCollectionClick}
+                                        formatPrice={formatPrice}
+                                        toCloudinarySquare={toCloudinarySquareWrapper}
+                                        storeInfo={storeInfo}
+                                        storeId={resolvedStoreId}
+                                        maxProducts={10}
+                                    />
+                                ))
+                            )}
+
+                            {/* Carruseles de categorías después */}
                             {categories && categories.length > 0 ? (
                                 categories.map(category => (
                                     <RestaurantCategoryCarousel
@@ -408,9 +449,11 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                     />
                                 ))
                             ) : (
-                                <div style={{ textAlign: 'center', padding: 'var(--nbd-space-3xl)' }}>
-                                    <p style={{ color: 'var(--nbd-text-secondary)' }}>No hay categorías disponibles</p>
-                                </div>
+                                !collections?.length && (
+                                    <div style={{ textAlign: 'center', padding: 'var(--nbd-space-3xl)' }}>
+                                        <p style={{ color: 'var(--nbd-text-secondary)' }}>No hay categorías ni colecciones disponibles</p>
+                                    </div>
+                                )
                             )}
                         </>
                     )}
