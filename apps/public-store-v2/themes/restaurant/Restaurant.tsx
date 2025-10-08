@@ -486,10 +486,24 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                     />
                                 ))
                             ) : (
-                                !collections?.length && (
-                                    <div style={{ textAlign: 'center', padding: 'var(--nbd-space-3xl)' }}>
-                                        <p style={{ color: 'var(--nbd-text-secondary)' }}>No hay categorías ni colecciones disponibles</p>
-                                    </div>
+                                /* Si no hay categorías ni colecciones, mostrar grid de productos */
+                                !collections?.length && products && products.length > 0 && (
+                                    <ProductsGrid
+                                        displayedProducts={displayedProducts}
+                                        filteredProducts={filteredProducts}
+                                        mobileViewMode={mobileViewMode}
+                                        loadingCartButton={loadingCartButton}
+                                        productsToShow={productsToShow}
+                                        hasMoreProducts={hasMoreProducts}
+                                        handleAddToCart={handleAddToCart}
+                                        loadMoreProducts={loadMoreProducts}
+                                        buildUrl={buildUrl}
+                                        toCloudinarySquare={toCloudinarySquareWrapper}
+                                        formatPrice={formatPrice}
+                                        additionalText={additionalText}
+                                        storeInfo={storeInfo || undefined}
+                                        storeId={resolvedStoreId}
+                                    />
                                 )
                             )}
                         </>
