@@ -2061,130 +2061,7 @@ export default function CreateProductPage() {
                 )}
               </Card>
 
-              {/* 6. Configuraciones avanzadas */}
-              <Card className="p-6">
-                <button
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="flex items-center justify-between w-full text-left"
-                >
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('shipping.title')}</h2>
-                    <p className="text-sm text-gray-500">
-                      {t('shipping.subtitle')}
-                    </p>
-                  </div>
-                  <span className="text-gray-400">
-                    {showAdvanced ? '−' : '+'}
-                  </span>
-                </button>
-
-                {showAdvanced && (
-                  <div className="mt-4 space-y-4">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={requiresShipping}
-                        onChange={(e) => setRequiresShipping(e.target.checked)}
-                        className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{t('shipping.requiresShipping')}</span>
-                    </label>
-
-                    {requiresShipping && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <Input
-                          label={t('shipping.weight')}
-                          type="number"
-                          placeholder={t('shipping.weightPlaceholder')}
-                          value={weight}
-                          onChange={(e) => setWeight(e.target.value)}
-                        />
-                        <Input
-                          label={t('shipping.countryOrigin')}
-                          placeholder={t('shipping.countryOriginPlaceholder')}
-                          value={countryOrigin}
-                          onChange={(e) => setCountryOrigin(e.target.value)}
-                        />
-                        <div className="md:col-span-2">
-                          <Input
-                            label={t('shipping.harmonizedCode')}
-                            placeholder={t('shipping.harmonizedCodePlaceholder')}
-                            value={harmonizedCode}
-                            onChange={(e) => setHarmonizedCode(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
-
-              {/* 7. SEO */}
-              <Card className="p-6">
-                <button
-                  onClick={() => setShowSEO(!showSEO)}
-                  className="flex items-center justify-between w-full text-left"
-                >
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('seo.title')}</h2>
-                    <p className="text-sm text-gray-500">
-                      {t('seo.subtitle')}
-                    </p>
-                  </div>
-                  <span className="text-gray-400">
-                    {showSEO ? '−' : '+'}
-                  </span>
-                </button>
-
-                {showSEO && (
-                  <div className="mt-4">
-                    {/* Vista previa de Google */}
-                    <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Vista previa de la búsqueda de Google</h3>
-                  <div className="space-y-1">
-                    <div className="text-blue-600 text-lg hover:underline cursor-pointer break-words">
-                      {seoTitle || productName || 'Título del producto'}
-                    </div>
-                    <div className="text-green-700 text-sm break-all overflow-hidden">
-                      https://{store?.subdomain || 'mi-tienda'}.shopifree.app/products/{urlSlug || 'producto-123'}
-                    </div>
-                    <div className="text-gray-600 text-sm break-words">
-                      {metaDescription || 'Descripción del producto que aparecerá en los resultados de búsqueda...'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Input
-                    label={t('seo.pageTitle')}
-                    placeholder={t('seo.pageTitlePlaceholder')}
-                    value={seoTitle}
-                    onChange={(e) => setSeoTitle(e.target.value)}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('seo.metaDescription')}
-                    </label>
-                    <textarea
-                      rows={3}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
-                      placeholder={t('seo.metaDescriptionPlaceholder')}
-                      value={metaDescription}
-                      onChange={(e) => setMetaDescription(e.target.value)}
-                    />
-                  </div>
-                  <Input
-                    label={t('seo.urlHandle')}
-                    placeholder={t('seo.urlHandlePlaceholder')}
-                    value={urlSlug}
-                    onChange={(e) => setUrlSlug(e.target.value)}
-                  />
-                </div>
-                  </div>
-                )}
-              </Card>
-
-              {/* 8. Modificadores y extras */}
+              {/* 6. Modificadores y extras */}
               <Card className="p-6">
                 <button
                   onClick={() => setShowModifiers(!showModifiers)}
@@ -2419,6 +2296,129 @@ export default function CreateProductPage() {
                         </Button>
                       </>
                     )}
+                  </div>
+                )}
+              </Card>
+
+              {/* 7. Configuraciones avanzadas (Envío) */}
+              <Card className="p-6">
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('shipping.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('shipping.subtitle')}
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showAdvanced ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showAdvanced && (
+                  <div className="mt-4 space-y-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={requiresShipping}
+                        onChange={(e) => setRequiresShipping(e.target.checked)}
+                        className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">{t('shipping.requiresShipping')}</span>
+                    </label>
+
+                    {requiresShipping && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <Input
+                          label={t('shipping.weight')}
+                          type="number"
+                          placeholder={t('shipping.weightPlaceholder')}
+                          value={weight}
+                          onChange={(e) => setWeight(e.target.value)}
+                        />
+                        <Input
+                          label={t('shipping.countryOrigin')}
+                          placeholder={t('shipping.countryOriginPlaceholder')}
+                          value={countryOrigin}
+                          onChange={(e) => setCountryOrigin(e.target.value)}
+                        />
+                        <div className="md:col-span-2">
+                          <Input
+                            label={t('shipping.harmonizedCode')}
+                            placeholder={t('shipping.harmonizedCodePlaceholder')}
+                            value={harmonizedCode}
+                            onChange={(e) => setHarmonizedCode(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+
+              {/* 8. SEO */}
+              <Card className="p-6">
+                <button
+                  onClick={() => setShowSEO(!showSEO)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('seo.title')}</h2>
+                    <p className="text-sm text-gray-500">
+                      {t('seo.subtitle')}
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showSEO ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showSEO && (
+                  <div className="mt-4">
+                    {/* Vista previa de Google */}
+                    <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">Vista previa de la búsqueda de Google</h3>
+                  <div className="space-y-1">
+                    <div className="text-blue-600 text-lg hover:underline cursor-pointer break-words">
+                      {seoTitle || productName || 'Título del producto'}
+                    </div>
+                    <div className="text-green-700 text-sm break-all overflow-hidden">
+                      https://{store?.subdomain || 'mi-tienda'}.shopifree.app/products/{urlSlug || 'producto-123'}
+                    </div>
+                    <div className="text-gray-600 text-sm break-words">
+                      {metaDescription || 'Descripción del producto que aparecerá en los resultados de búsqueda...'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Input
+                    label={t('seo.pageTitle')}
+                    placeholder={t('seo.pageTitlePlaceholder')}
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('seo.metaDescription')}
+                    </label>
+                    <textarea
+                      rows={3}
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
+                      placeholder={t('seo.metaDescriptionPlaceholder')}
+                      value={metaDescription}
+                      onChange={(e) => setMetaDescription(e.target.value)}
+                    />
+                  </div>
+                  <Input
+                    label={t('seo.urlHandle')}
+                    placeholder={t('seo.urlHandlePlaceholder')}
+                    value={urlSlug}
+                    onChange={(e) => setUrlSlug(e.target.value)}
+                  />
+                </div>
                   </div>
                 )}
               </Card>
