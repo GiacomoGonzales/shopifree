@@ -199,7 +199,11 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
 
         // Agregar modificadores al itemId para crear ítems únicos
         const modifierHash = JSON.stringify(modifiersInfo);
-        itemId = `${itemId}-${btoa(modifierHash).substring(0, 10)}`;
+        // Usar hash simple en lugar de btoa para evitar errores con caracteres UTF-8
+        const hash = modifierHash.split('').reduce((acc, char) => {
+          return ((acc << 5) - acc) + char.charCodeAt(0);
+        }, 0);
+        itemId = `${itemId}-${Math.abs(hash).toString(36).substring(0, 10)}`;
       }
 
       const finalPrice = getFinalPrice();

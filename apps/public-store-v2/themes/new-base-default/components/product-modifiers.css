@@ -262,11 +262,13 @@
   }
 
   .nbd-modifier-options {
-    gap: 12px;
+    gap: 14px !important;
   }
 
   .nbd-modifier-option {
-    padding: 16px;
+    padding: 18px 16px !important;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .nbd-modifier-option-name {
@@ -281,5 +283,11 @@
     width: 34px;
     height: 34px;
     min-width: 34px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .nbd-modifier-quantity-controls {
+    gap: 10px !important;
   }
 }
