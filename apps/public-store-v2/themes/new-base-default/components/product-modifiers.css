@@ -63,26 +63,32 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  background: #f9fafb;
-  border: 1.5px solid #e5e7eb;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: none;
+  outline: none;
 }
 
 .nbd-modifier-option:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  border-color: #e5e7eb;
+}
+
+.nbd-modifier-option:focus {
+  outline: none;
+  border-color: #e5e7eb;
+}
+
+.nbd-modifier-option:active {
+  outline: none;
+  border-color: #e5e7eb;
 }
 
 .nbd-modifier-option--selected {
   background: #ffffff;
-  border-color: #9ca3af;
-}
-
-.nbd-modifier-option--selected:hover {
-  border-color: #6b7280;
+  border-color: #e5e7eb;
 }
 
 /* Input (checkbox/radio) - oculto */
@@ -92,6 +98,7 @@
   width: 0;
   height: 0;
   margin: 0;
+  pointer-events: none;
 }
 
 /* Custom radio/checkbox */
@@ -103,7 +110,7 @@
   border: 2px solid #d1d5db;
   border-radius: 50%;
   background: #ffffff;
-  transition: all 0.15s ease;
+  transition: none;
 }
 
 /* Radio para allowMultiple (checkbox) */
@@ -113,8 +120,8 @@
 
 /* Estado seleccionado */
 .nbd-modifier-input:checked + .nbd-modifier-radio {
-  border-color: #6b7280;
-  background: #6b7280;
+  border-color: #374151;
+  background: #374151;
 }
 
 /* Checkmark para radio */
@@ -156,11 +163,6 @@
   font-weight: 400;
 }
 
-.nbd-modifier-option--selected .nbd-modifier-option-name {
-  font-weight: 500;
-  color: #111827;
-}
-
 .nbd-modifier-option-price-info {
   display: flex;
   align-items: center;
@@ -172,10 +174,6 @@
   color: #6b7280;
   font-weight: 500;
   white-space: nowrap;
-}
-
-.nbd-modifier-option--selected .nbd-modifier-option-price {
-  color: #374151;
 }
 
 .nbd-modifier-multiplier {
@@ -206,52 +204,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  border: 1.5px solid #d1d5db;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
   background: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: none;
   padding: 0;
 }
 
 .nbd-modifier-btn:hover:not(:disabled) {
-  background: #f9fafb;
   border-color: #9ca3af;
 }
 
 .nbd-modifier-btn:active:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #6b7280;
+  background: #f9fafb;
 }
 
 .nbd-modifier-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
-  background: #f9fafb;
 }
 
 .nbd-modifier-btn svg {
   color: #6b7280;
-}
-
-.nbd-modifier-btn:hover:not(:disabled) svg {
-  color: #374151;
-}
-
-.nbd-modifier-btn--plus {
-  border-color: #9ca3af;
-}
-
-.nbd-modifier-btn--plus:hover:not(:disabled) {
-  background: #6b7280;
-  border-color: #6b7280;
-}
-
-.nbd-modifier-btn--plus:hover:not(:disabled) svg {
-  color: #ffffff;
+  width: 16px;
+  height: 16px;
 }
 
 .nbd-modifier-quantity {
@@ -281,8 +261,12 @@
     align-items: flex-start;
   }
 
+  .nbd-modifier-options {
+    gap: 12px;
+  }
+
   .nbd-modifier-option {
-    padding: 10px 12px;
+    padding: 16px;
   }
 
   .nbd-modifier-option-name {
@@ -291,5 +275,11 @@
 
   .nbd-modifier-option-price {
     font-size: 0.8rem;
+  }
+
+  .nbd-modifier-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
   }
 }
