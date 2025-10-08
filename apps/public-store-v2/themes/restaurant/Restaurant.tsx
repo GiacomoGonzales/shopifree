@@ -51,6 +51,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
     const [categories, setCategories] = useState<Category[] | null>(null);
     const [collections, setCollections] = useState<PublicCollection[] | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>('todos'); // Categoría activa para filtrar
+    const [activeCollection, setActiveCollection] = useState<string | null>(null); // Colección activa para filtrar
     const [backgroundTexture, setBackgroundTexture] = useState<string>('default');
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
     const [productsToShow, setProductsToShow] = useState<number>(8);
@@ -138,15 +139,22 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         };
     }, [storeSubdomain]);
 
-    // Productos filtrados por categoría (solo cuando hay filtro activo - "Ver todos")
+    // Productos filtrados por categoría o colección (solo cuando hay filtro activo - "Ver todos")
     const filteredProducts = useMemo(() => {
         const hasProducts = Array.isArray(products) && products.length > 0;
         if (!hasProducts) return [];
 
         let base = [...products];
 
+        // Filtrar por colección activa (prioridad sobre categoría)
+        if (activeCollection) {
+            const collection = collections?.find(c => c.slug === activeCollection);
+            if (collection) {
+                base = base.filter(p => collection.productIds?.includes(p.id || ''));
+            }
+        }
         // Filtrar por categoría activa
-        if (activeCategory && activeCategory !== 'todos') {
+        else if (activeCategory && activeCategory !== 'todos') {
             const cat = categories?.find(c => c.slug === activeCategory);
 
             if (cat) {
@@ -161,7 +169,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         }
 
         return base;
-    }, [products, categories, activeCategory]);
+    }, [products, categories, activeCategory, collections, activeCollection]);
 
     // Productos a mostrar con paginación
     const displayedProducts = useMemo(() => {
@@ -361,22 +369,34 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
             {/* Carruseles de productos por categoría - SOLO RESTAURANT */}
             <section id="menu" className="nbd-products">
                 <div className="nbd-container">
-                    {/* Si hay filtro activo, mostrar solo esa categoría con grid */}
-                    {activeCategory && activeCategory !== 'todos' ? (
+                    {/* Si hay filtro activo (categoría o colección), mostrar con grid */}
+                    {(activeCategory && activeCategory !== 'todos') || activeCollection ? (
                         <>
                             <ProductSectionHeader
                                 isOnCategoryPage={false}
-                                isOnCollectionPage={false}
+                                isOnCollectionPage={!!activeCollection}
                                 isOnBrandPage={false}
                                 activeCategory={activeCategory}
                                 categories={categories?.map(cat => ({ slug: cat.slug, name: cat.name })) || undefined}
                                 t={tWrapper}
                             />
 
+                            {/* Título de la colección si hay colección activa */}
+                            {activeCollection && (
+                                <div style={{ marginBottom: 'var(--nbd-space-md)', textAlign: 'center' }}>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: '600', color: 'var(--nbd-text-color)' }}>
+                                        {collections?.find(c => c.slug === activeCollection)?.title || activeCollection}
+                                    </h2>
+                                </div>
+                            )}
+
                             {/* Botón para ver todos */}
                             <div style={{ marginBottom: 'var(--nbd-space-md)', textAlign: 'center' }}>
                                 <button
-                                    onClick={() => setActiveCategory('todos')}
+                                    onClick={() => {
+                                        setActiveCategory('todos');
+                                        setActiveCollection(null);
+                                    }}
                                     className="nbd-btn nbd-btn--secondary"
                                     style={{
                                         padding: '8px 20px',
@@ -419,7 +439,17 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         collection={collection}
                                         products={products || []}
                                         onProductClick={handleAddToCart}
-                                        onViewAll={handleCollectionClick}
+                                        onViewAll={(slug) => {
+                                            setActiveCollection(slug);
+                                            setActiveCategory('todos'); // Resetear categoría
+                                            // Scroll a la sección de productos
+                                            setTimeout(() => {
+                                                const productsSection = document.querySelector('#menu');
+                                                if (productsSection) {
+                                                    productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }
+                                            }, 100);
+                                        }}
                                         formatPrice={formatPrice}
                                         toCloudinarySquare={toCloudinarySquareWrapper}
                                         storeInfo={storeInfo}
@@ -439,6 +469,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         onProductClick={handleAddToCart}
                                         onViewAll={(slug) => {
                                             setActiveCategory(slug);
+                                            setActiveCollection(null); // Resetear colección
                                             // Scroll a la sección de productos
                                             setTimeout(() => {
                                                 const productsSection = document.querySelector('#menu');
