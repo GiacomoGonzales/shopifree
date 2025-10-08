@@ -8852,6 +8852,7 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
 
 .restaurant-category-carousel {
     margin-bottom: var(--nbd-space-3xl);
+    padding-bottom: 10px;
 }
 
 .restaurant-carousel-header {
