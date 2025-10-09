@@ -2196,21 +2196,30 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         windowWidth: window.innerWidth
                     });
 
-                    // Abrir WhatsApp en nueva pestaña (móvil y desktop)
+                    // Abrir WhatsApp según el dispositivo
                     console.log('[WhatsApp] Opening WhatsApp - using wa.me');
 
-                    const whatsappWindow = window.open(whatsappPersonalUrl, '_blank', 'noopener,noreferrer');
+                    if (isMobileDevice) {
+                        // En móvil: redirigir directamente usando location.href
+                        // Esto funciona mejor en iOS y Android
+                        console.log('[WhatsApp] Mobile device detected - using direct redirect');
+                        window.location.href = whatsappPersonalUrl;
+                    } else {
+                        // En desktop: abrir en nueva ventana
+                        console.log('[WhatsApp] Desktop detected - opening new window');
+                        const whatsappWindow = window.open(whatsappPersonalUrl, '_blank', 'noopener,noreferrer');
 
-                    // Fallback si se bloquea el popup
-                    if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed === 'undefined') {
-                        console.log('[WhatsApp] Popup blocked, creating fallback link');
-                        const fallbackLink = document.createElement('a');
-                        fallbackLink.href = whatsappPersonalUrl;
-                        fallbackLink.target = '_blank';
-                        fallbackLink.rel = 'noopener noreferrer';
-                        document.body.appendChild(fallbackLink);
-                        fallbackLink.click();
-                        document.body.removeChild(fallbackLink);
+                        // Fallback si se bloquea el popup
+                        if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed === 'undefined') {
+                            console.log('[WhatsApp] Popup blocked, creating fallback link');
+                            const fallbackLink = document.createElement('a');
+                            fallbackLink.href = whatsappPersonalUrl;
+                            fallbackLink.target = '_blank';
+                            fallbackLink.rel = 'noopener noreferrer';
+                            document.body.appendChild(fallbackLink);
+                            fallbackLink.click();
+                            document.body.removeChild(fallbackLink);
+                        }
                     }
 
                     // Limpiar carrito después de un breve delay para que el usuario vea que se procesó
