@@ -105,7 +105,7 @@ export default function CheckoutSuccessPage() {
                 mercadoPagoData: {
                   paymentId: collectionId,
                   status: collectionStatus,
-                  orderId: orderDoc.id
+                  orderId: orderId
                 }
               });
             } else {
