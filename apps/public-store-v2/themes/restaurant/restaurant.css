@@ -8908,9 +8908,16 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     flex-direction: column;
 }
 
-.restaurant-carousel-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--nbd-neutral-300);
+/* Solo aplicar hover en desktop (no touch) */
+@media (hover: hover) and (pointer: fine) {
+    .restaurant-carousel-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--nbd-neutral-300);
+    }
+
+    .restaurant-carousel-card:hover .restaurant-carousel-card-image img {
+        transform: scale(1.05);
+    }
 }
 
 .restaurant-carousel-card-image {
@@ -8926,10 +8933,6 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
-}
-
-.restaurant-carousel-card:hover .restaurant-carousel-card-image img {
-    transform: scale(1.05);
 }
 
 .restaurant-carousel-card-placeholder {
