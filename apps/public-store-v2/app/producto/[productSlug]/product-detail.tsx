@@ -99,12 +99,12 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     console.log('✅ [ProductDetail] Hook usePromotions ejecutado correctamente');
   } catch (error) {
     console.error('❌ [ProductDetail] Error en hook usePromotions:', error);
-    promotionsDataFromHook = { originalPrice: 0, finalPrice: 0, discount: 0, hasDiscountBadge: false };
+    promotionsDataFromHook = { originalPrice: 0, finalPrice: 0, discount: 0, badgeStyle: 'none' };
   }
   */
 
   // Fallback temporal
-  const promotionsDataFromHook = { originalPrice: 0, finalPrice: 0, discount: 0, hasDiscountBadge: false };
+  const promotionsDataFromHook = { originalPrice: 0, finalPrice: 0, discount: 0, badgeStyle: 'none' as const };
   console.log('✅ [ProductDetail] Hook usePromotions COMENTADO - usando fallback');
 
   // Estado para promociones (TEMPORAL - para comparar)
@@ -112,7 +112,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
     originalPrice: 0,
     finalPrice: 0,
     discount: 0,
-    hasDiscountBadge: false,
+    badgeStyle: 'none' as 'none' | 'badge' | 'ribbon',
     appliedPromotion: undefined as any
   });
 
@@ -135,20 +135,20 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
       // Cargar promociones de manera asíncrona
       const loadPromotions = async () => {
         try {
-          const { getActivePromotionsForProduct, calculateDiscountedPrice, hasPromotionBadge } = await import('../../../lib/promotions');
+          const { getActivePromotionsForProduct, calculateDiscountedPrice, getPromotionBadgeStyle } = await import('../../../lib/promotions');
 
           const activePromotions = await getActivePromotionsForProduct(storeId, product.id);
           console.log('📊 [ProductDetail] Active promotions found:', activePromotions);
 
           if (activePromotions.length > 0) {
             const discountResult = calculateDiscountedPrice(originalPrice, activePromotions);
-            const showBadge = hasPromotionBadge(activePromotions);
+            const badgeStyle = getPromotionBadgeStyle(activePromotions);
 
             const promotionResult = {
               originalPrice,
               finalPrice: discountResult.finalPrice,
               discount: discountResult.discount,
-              hasDiscountBadge: showBadge,
+              badgeStyle,
               appliedPromotion: discountResult.appliedPromotion
             };
 
@@ -160,7 +160,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
               originalPrice,
               finalPrice: originalPrice,
               discount: 0,
-              hasDiscountBadge: false,
+              badgeStyle: 'none',
               appliedPromotion: undefined
             });
           }
@@ -171,7 +171,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
             originalPrice,
             finalPrice: originalPrice,
             discount: 0,
-            hasDiscountBadge: false,
+            badgeStyle: 'none',
             appliedPromotion: undefined
           });
         }
@@ -925,7 +925,7 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
             </p>
 
             {/* Mostrar badge de promoción si está habilitado */}
-            {promotionsData.hasDiscountBadge && promotionsData.appliedPromotion && (
+            {promotionsData.badgeStyle !== 'none' && promotionsData.appliedPromotion && (
               <div className="nbd-promotion-badge">
                 🎉 {promotionsData.appliedPromotion.name}
               </div>
