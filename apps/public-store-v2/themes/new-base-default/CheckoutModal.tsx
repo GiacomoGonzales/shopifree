@@ -794,7 +794,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                         paymentType: 'online_payment',
                         transactionId: chargeResult.id
                     });
-                    const orderId = orderDoc?.id || null;
+                    const orderId = (orderDoc as any)?.id || null;
 
                     if (orderId) {
                         console.log('🔔 [Culqi] Pedido guardado exitosamente en Firestore:', orderId);
@@ -2094,7 +2094,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
 
             // Guardar pedido en Firestore
             const orderDoc = await createOrder(storeId, orderData);
-            const orderId = orderDoc?.id || null;
+            const orderId = (orderDoc as any)?.id || null;
             const orderNumber = (orderDoc as any)?.orderNumber || null;
 
             if (orderId) {
