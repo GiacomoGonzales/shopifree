@@ -2095,9 +2095,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             // Guardar pedido en Firestore
             const orderDoc = await createOrder(storeId, orderData);
             const orderId = orderDoc?.id || null;
+            const orderNumber = (orderDoc as any)?.orderNumber || null;
 
             if (orderId) {
                 console.log('[Checkout] Order saved successfully:', orderId);
+                console.log('[Checkout] Order number:', orderNumber);
 
                 // 🎁 Redimir puntos de lealtad (si se aplicaron puntos)
                 if (pointsToRedeem > 0) {
@@ -2159,7 +2161,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 // Para WhatsApp: usar nueva función con ID del pedido
                 // Obtener el idioma de la tienda
                 const storeLanguage = storeInfo?.language || 'es';
-                const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo, storeLanguage);
+                const { message, phone } = generateWhatsAppMessageWithId(orderData, orderId, storeInfo, storeLanguage, orderNumber);
 
                 if (phone) {
                     // Limpiar número de teléfono y asegurar formato correcto para WhatsApp

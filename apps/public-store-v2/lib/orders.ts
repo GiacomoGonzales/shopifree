@@ -237,6 +237,7 @@ export async function createOrder(
     const docRef = await addDoc(ordersRef, newOrder);
     console.log('[Orders] ✅ Order created successfully! Doc ID:', docRef.id);
     console.log('[Orders] ✅ Order path: stores/' + storeId + '/orders/' + docRef.id);
+    console.log('[Orders] ✅ Order number:', orderNumber);
 
     // 🆕 ENVIAR EMAILS DE CONFIRMACIÓN - Solo para método tradicional
     if (orderData.checkoutMethod !== 'whatsapp') {
@@ -264,7 +265,8 @@ export async function createOrder(
       console.log('[Orders] 📧 Pedido por WhatsApp - No se envían emails automáticos');
     }
 
-    return docRef;
+    // Retornar documento con número de orden
+    return { ...docRef, orderNumber };
   } catch (error) {
     console.error('[Orders] ❌ Error creating order:', error);
     console.error('[Orders] ❌ Error details:', {
@@ -432,7 +434,8 @@ export function generateWhatsAppMessageWithId(
   orderData: OrderData,
   orderId: string | null,
   storeInfo: any,
-  language: string = 'es'
+  language: string = 'es',
+  orderNumber?: number
 ): { message: string; phone: string | null } {
   const storeName = storeInfo?.storeName || 'Tienda';
   const whatsappPhone = storeInfo?.socialMedia?.whatsapp || storeInfo?.phone;
@@ -440,20 +443,42 @@ export function generateWhatsAppMessageWithId(
 
   let message = t.greeting(storeName);
 
-  // Agregar ID del pedido si existe
-  if (orderId) {
+  // Agregar número de orden si existe, sino usar ID del pedido
+  if (orderNumber) {
+    message += `${t.order} #${orderNumber}\n\n`;
+  } else if (orderId) {
     message += `${t.order} #${orderId.slice(-6).toUpperCase()}\n\n`;
   }
 
   // Agregar productos (sin emojis problemáticos)
   message += `${t.products}:\n`;
   orderData.items.forEach((item, index) => {
-    const itemTotal = (item.variant?.price || item.price) * item.quantity;
+    const basePrice = item.variant?.price || item.price;
+    const itemTotal = basePrice * item.quantity;
+
     message += `${index + 1}. ${item.name}`;
     if (item.variant) {
       message += ` (${item.variant.name})`;
     }
-    message += `\n   ${t.quantity}: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+    message += `\n   ${t.quantity}: ${item.quantity} x ${formatPrice(basePrice, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+
+    // Agregar modificadores si existen
+    if (item.modifiers && item.modifiers.length > 0) {
+      item.modifiers.forEach(modifierGroup => {
+        if (modifierGroup.options && modifierGroup.options.length > 0) {
+          message += `   ${modifierGroup.groupName}:\n`;
+          modifierGroup.options.forEach(option => {
+            const optionPriceText = option.price !== 0
+              ? ` (+${formatPrice(option.price, orderData.currency)})`
+              : '';
+            const optionQuantityText = option.quantity > 1
+              ? ` x${option.quantity}`
+              : '';
+            message += `      - ${option.name}${optionQuantityText}${optionPriceText}\n`;
+          });
+        }
+      });
+    }
   });
 
   // Agregar información del cliente
@@ -528,12 +553,32 @@ export function generateConfirmationWhatsAppMessage(
   // Agregar productos
   message += `${t.products}:\n`;
   orderData.items.forEach((item, index) => {
-    const itemTotal = (item.variant?.price || item.price) * item.quantity;
+    const basePrice = item.variant?.price || item.price;
+    const itemTotal = basePrice * item.quantity;
+
     message += `${index + 1}. ${item.name}`;
     if (item.variant) {
       message += ` (${item.variant.name})`;
     }
-    message += `\n   ${t.quantity}: ${item.quantity} x ${formatPrice(item.variant?.price || item.price, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+    message += `\n   ${t.quantity}: ${item.quantity} x ${formatPrice(basePrice, orderData.currency)} = ${formatPrice(itemTotal, orderData.currency)}\n`;
+
+    // Agregar modificadores si existen
+    if (item.modifiers && item.modifiers.length > 0) {
+      item.modifiers.forEach(modifierGroup => {
+        if (modifierGroup.options && modifierGroup.options.length > 0) {
+          message += `   ${modifierGroup.groupName}:\n`;
+          modifierGroup.options.forEach(option => {
+            const optionPriceText = option.price !== 0
+              ? ` (+${formatPrice(option.price, orderData.currency)})`
+              : '';
+            const optionQuantityText = option.quantity > 1
+              ? ` x${option.quantity}`
+              : '';
+            message += `      - ${option.name}${optionQuantityText}${optionPriceText}\n`;
+          });
+        }
+      });
+    }
   });
 
   // Agregar información del cliente
