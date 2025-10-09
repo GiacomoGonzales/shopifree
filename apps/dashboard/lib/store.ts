@@ -207,6 +207,11 @@ export interface StoreConfig {
   ownerId: string
   createdAt: Date | unknown
   updatedAt: Date | unknown
+  // Soft delete fields
+  deleted?: boolean
+  deletedAt?: unknown
+  scheduledDeletionDate?: unknown
+  restoredAt?: unknown
 }
 
 export type SectionConfig = {

@@ -23,6 +23,10 @@ export default function AccountPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [changingPassword, setChangingPassword] = useState(false)
   const [creatingPassword, setCreatingPassword] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // Verificar si el usuario tiene contraseña (no es OAuth)
   const hasPassword = user?.providerData?.some(provider => provider.providerId === 'password')
@@ -157,6 +161,67 @@ export default function AccountPage() {
       }
     } finally {
       setCreatingPassword(false)
+    }
+  }
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setDeleteError(null)
+
+    // Validar contraseña si tiene cuenta de email/password
+    if (hasPassword && !deletePassword) {
+      setDeleteError('Debes ingresar tu contraseña para confirmar')
+      return
+    }
+
+    setDeleting(true)
+
+    try {
+      const { EmailAuthProvider, reauthenticateWithCredential, signOut } = await import('firebase/auth')
+      const { softDeleteUserAndStore } = await import('../../../lib/user')
+      const { getFirebaseAuth } = await import('../../../lib/firebase')
+
+      if (!user) {
+        throw new Error('Usuario no autenticado')
+      }
+
+      // Re-autenticar si tiene contraseña
+      if (hasPassword && user.email) {
+        const credential = EmailAuthProvider.credential(user.email, deletePassword)
+        await reauthenticateWithCredential(user, credential)
+      }
+
+      // Marcar cuenta como eliminada (soft delete)
+      await softDeleteUserAndStore(user.uid)
+
+      // Cerrar sesión
+      const auth = getFirebaseAuth()
+      if (auth) {
+        await signOut(auth)
+      }
+
+      // Mostrar mensaje
+      showToast('Cuenta marcada para eliminación. Recibirás un email con instrucciones de recuperación.', 'success')
+
+      // Esperar y redirigir
+      setTimeout(() => {
+        window.location.href = '/login'
+      }, 2500)
+
+    } catch (error: any) {
+      console.error('Error al eliminar cuenta:', error)
+
+      if (error.code === 'auth/wrong-password') {
+        setDeleteError('La contraseña es incorrecta')
+      } else if (error.code === 'auth/requires-recent-login') {
+        setDeleteError('Por seguridad, debes cerrar sesión y volver a iniciar sesión antes de eliminar tu cuenta')
+      } else if (error.code === 'auth/too-many-requests') {
+        setDeleteError('Demasiados intentos. Intenta más tarde')
+      } else {
+        setDeleteError('Error al eliminar la cuenta. Intenta de nuevo')
+      }
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -339,6 +404,7 @@ export default function AccountPage() {
 
                       <button
                         type="button"
+                        onClick={() => setShowDeleteModal(true)}
                         className="w-full inline-flex items-center justify-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                       >
                         {t('actions.deleteAccount')}
@@ -359,6 +425,94 @@ export default function AccountPage() {
           type={toast.type}
           onClose={hideToast}
         />
+      )}
+
+      {/* Modal de eliminación de cuenta */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+              onClick={() => {
+                setShowDeleteModal(false)
+                setDeleteError(null)
+                setDeletePassword('')
+              }}
+            />
+
+            {/* Modal */}
+            <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <div className="mb-4">
+                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 text-center">
+                  Eliminar Cuenta
+                </h3>
+                <p className="mt-2 text-sm text-gray-500 text-center">
+                  Tu cuenta y tienda serán marcadas para eliminación. Tendrás 30 días para recuperarlas antes de que se eliminen permanentemente.
+                </p>
+              </div>
+
+              <form onSubmit={handleDeleteAccount} className="space-y-4">
+                {hasPassword && (
+                  <div>
+                    <label htmlFor="deletePassword" className="block text-sm font-medium text-gray-700">
+                      Confirma tu contraseña para continuar
+                    </label>
+                    <input
+                      type="password"
+                      id="deletePassword"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-600 focus:border-red-600 sm:text-sm"
+                      required
+                      placeholder="Ingresa tu contraseña"
+                    />
+                  </div>
+                )}
+
+                {!hasPassword && (
+                  <div className="rounded-md bg-yellow-50 p-3">
+                    <p className="text-sm text-yellow-800">
+                      ¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.
+                    </p>
+                  </div>
+                )}
+
+                {deleteError && (
+                  <div className="rounded-md bg-red-50 p-3">
+                    <p className="text-sm text-red-800">{deleteError}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDeleteModal(false)
+                      setDeleteError(null)
+                      setDeletePassword('')
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={deleting}
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                  >
+                    {deleting ? 'Eliminando...' : 'Sí, eliminar mi cuenta'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal de cambio de contraseña */}

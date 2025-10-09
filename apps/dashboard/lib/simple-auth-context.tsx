@@ -62,14 +62,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (userDocSnap.exists()) {
         const data = userDocSnap.data()
         console.log('✅ User document found:', data)
-        
-        setDebugInfo((prev: DebugInfo) => ({ 
-          ...prev, 
+
+        // 🚫 Verificar si la cuenta está marcada como eliminada
+        if (data.deleted === true) {
+          console.warn('🚫 Account is marked for deletion')
+
+          setDebugInfo((prev: DebugInfo) => ({
+            ...prev,
+            userDocExists: true,
+            accountDeleted: true,
+            deletedAt: data.deletedAt,
+            scheduledDeletionDate: data.scheduledDeletionDate,
+            timestamp: new Date().toISOString()
+          }))
+
+          // Redirigir a página de recuperación solo si no estamos ya ahí
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/account/recover')) {
+            console.log('🔄 Redirecting to account recovery page...')
+            window.location.href = '/es/account/recover'
+          }
+
+          // Retornar los datos del usuario para permitir acceso temporal
+          return {
+            uid: user.uid,
+            email: user.email,
+            ...data
+          }
+        }
+
+        setDebugInfo((prev: DebugInfo) => ({
+          ...prev,
           userDocExists: true,
           userDocData: data,
           timestamp: new Date().toISOString()
         }))
-        
+
         // Update last login without overwriting other data
         try {
           await setDoc(userDocRef, {

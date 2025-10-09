@@ -88,7 +88,15 @@ export const useStore = (): UseStoreReturn => {
         setLoading(true)
         setError(null)
         const userStore = await getUserStore(user.uid)
-        setStore(userStore)
+
+        // 🚫 Verificar si la tienda está marcada como eliminada
+        if (userStore && (userStore as any).deleted === true) {
+          console.warn('🚫 Store is marked for deletion')
+          setStore(null)
+          setError('Tu tienda ha sido marcada para eliminación. Tienes 30 días para recuperarla.')
+        } else {
+          setStore(userStore)
+        }
       } catch (err) {
         console.error('Error loading store:', err)
         setError('Error al cargar la configuración de la tienda')
