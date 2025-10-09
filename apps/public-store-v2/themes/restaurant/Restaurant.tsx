@@ -19,7 +19,7 @@ import Footer from "../new-base-default/Footer";
 import CartModal from "../new-base-default/CartModal";
 import ProductQuickView from "../new-base-default/components/ProductQuickView";
 import AnnouncementBar from "../new-base-default/AnnouncementBar";
-import { HeroSection, ProductsGrid, CategoriesSection, ProductSectionHeader, SimpleCarousel } from "../../components/shared";
+import { HeroSection, ProductsGrid, CategoriesSection, ProductSectionHeader, SimpleCarousel, ProductFilters } from "../../components/shared";
 import RestaurantCategoryCarousel from "./components/RestaurantCategoryCarousel";
 import RestaurantCollectionCarousel from "./components/RestaurantCollectionCarousel";
 
@@ -56,6 +56,8 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
     const [mobileViewMode, setMobileViewMode] = useState<'expanded' | 'grid' | 'list'>('grid');
     const [productsToShow, setProductsToShow] = useState<number>(8);
     const [loadingCartButton, setLoadingCartButton] = useState<string | null>(null);
+    const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+    const [currentSort, setCurrentSort] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc'>('newest');
 
     // Estados para el modal de vista rápida de producto
     const [quickViewProduct, setQuickViewProduct] = useState<PublicProduct | null>(null);
@@ -171,16 +173,59 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         return base;
     }, [products, categories, activeCategory, collections, activeCollection]);
 
+    // Productos ordenados
+    const sortedProducts = useMemo(() => {
+        if (!filteredProducts || filteredProducts.length === 0) return [];
+
+        const sorted = [...filteredProducts];
+
+        switch (currentSort) {
+            case 'newest':
+                return sorted.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || 0).getTime();
+                    const dateB = new Date(b.createdAt || 0).getTime();
+                    return dateB - dateA; // Más reciente primero
+                });
+            case 'oldest':
+                return sorted.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || 0).getTime();
+                    const dateB = new Date(b.createdAt || 0).getTime();
+                    return dateA - dateB; // Más antiguo primero
+                });
+            case 'price-low':
+                return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+            case 'price-high':
+                return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+            case 'name-asc':
+                return sorted.sort((a, b) => a.name.localeCompare(b.name));
+            case 'name-desc':
+                return sorted.sort((a, b) => b.name.localeCompare(a.name));
+            default:
+                return sorted;
+        }
+    }, [filteredProducts, currentSort]);
+
     // Productos a mostrar con paginación
     const displayedProducts = useMemo(() => {
-        return filteredProducts.slice(0, productsToShow);
-    }, [filteredProducts, productsToShow]);
+        return sortedProducts.slice(0, productsToShow);
+    }, [sortedProducts, productsToShow]);
 
-    const hasMoreProducts = filteredProducts.length > productsToShow;
+    const hasMoreProducts = sortedProducts.length > productsToShow;
 
     // Función para cargar más productos
     const loadMoreProducts = () => {
         setProductsToShow(prev => prev + 8);
+    };
+
+    // Función para alternar dropdown de ordenamiento
+    const toggleSortDropdown = () => {
+        setSortDropdownOpen(prev => !prev);
+    };
+
+    // Función para manejar cambio de ordenamiento
+    const handleSortChange = (sortType: 'newest' | 'oldest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc') => {
+        setCurrentSort(sortType);
+        setSortDropdownOpen(false);
     };
 
     // Helper para textos adicionales
@@ -191,21 +236,39 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                 'showing': 'Mostrando',
                 'of': 'de',
                 'products': 'productos',
-                'noProductsCategory': 'No hay productos en esta categoría'
+                'noProductsCategory': 'No hay productos en esta categoría',
+                'newest': 'Más reciente',
+                'oldest': 'Más antiguo',
+                'priceLowHigh': 'Precio: Menor a Mayor',
+                'priceHighLow': 'Precio: Mayor a Menor',
+                'nameAZ': 'Nombre: A-Z',
+                'nameZA': 'Nombre: Z-A'
             },
             en: {
                 'loadMore': 'Load more products',
                 'showing': 'Showing',
                 'of': 'of',
                 'products': 'products',
-                'noProductsCategory': 'No products in this category'
+                'noProductsCategory': 'No products in this category',
+                'newest': 'Newest',
+                'oldest': 'Oldest',
+                'priceLowHigh': 'Price: Low to High',
+                'priceHighLow': 'Price: High to Low',
+                'nameAZ': 'Name: A-Z',
+                'nameZA': 'Name: Z-A'
             },
             pt: {
                 'loadMore': 'Carregar mais produtos',
                 'showing': 'Mostrando',
                 'of': 'de',
                 'products': 'produtos',
-                'noProductsCategory': 'Nenhum produto nesta categoria'
+                'noProductsCategory': 'Nenhum produto nesta categoria',
+                'newest': 'Mais recente',
+                'oldest': 'Mais antigo',
+                'priceLowHigh': 'Preço: Menor para Maior',
+                'priceHighLow': 'Preço: Maior para Menor',
+                'nameAZ': 'Nome: A-Z',
+                'nameZA': 'Nome: Z-A'
             }
         };
         return texts[language]?.[key] || texts['es']?.[key] || key;
@@ -453,23 +516,50 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                             ) : (
                                 /* Si no hay categorías ni colecciones, mostrar grid de productos */
                                 !collections?.length && products && products.length > 0 && (
-                                    <ProductsGrid
-                                        displayedProducts={displayedProducts}
-                                        filteredProducts={filteredProducts}
-                                        mobileViewMode={mobileViewMode}
-                                        loadingCartButton={loadingCartButton}
-                                        productsToShow={productsToShow}
-                                        hasMoreProducts={hasMoreProducts}
-                                        handleAddToCart={handleAddToCart}
-                                        loadMoreProducts={loadMoreProducts}
-                                        onProductClick={handleAddToCart}
-                                        buildUrl={buildUrl}
-                                        toCloudinarySquare={toCloudinarySquareWrapper}
-                                        formatPrice={formatPrice}
-                                        additionalText={additionalText}
-                                        storeInfo={storeInfo || undefined}
-                                        storeId={resolvedStoreId}
-                                    />
+                                    <>
+                                        <ProductSectionHeader
+                                            isOnCategoryPage={false}
+                                            isOnCollectionPage={false}
+                                            isOnBrandPage={false}
+                                            activeCategory={null}
+                                            t={tWrapper}
+                                        />
+                                        <ProductFilters
+                                            filtersModalOpen={false}
+                                            sortDropdownOpen={sortDropdownOpen}
+                                            currentSort={currentSort}
+                                            mobileViewMode={mobileViewMode}
+                                            selectedFilters={{}}
+                                            filters={[]}
+                                            toggleFiltersModal={() => {}}
+                                            toggleSortDropdown={toggleSortDropdown}
+                                            handleSortChange={handleSortChange}
+                                            handleFilterChange={() => {}}
+                                            clearAllFilters={() => {}}
+                                            setMobileViewMode={setMobileViewMode}
+                                            getActiveFiltersCount={() => 0}
+                                            t={tWrapper}
+                                            additionalText={additionalText}
+                                            showFiltersButton={false}
+                                        />
+                                        <ProductsGrid
+                                            displayedProducts={displayedProducts}
+                                            filteredProducts={sortedProducts}
+                                            mobileViewMode={mobileViewMode}
+                                            loadingCartButton={loadingCartButton}
+                                            productsToShow={productsToShow}
+                                            hasMoreProducts={hasMoreProducts}
+                                            handleAddToCart={handleAddToCart}
+                                            loadMoreProducts={loadMoreProducts}
+                                            onProductClick={handleAddToCart}
+                                            buildUrl={buildUrl}
+                                            toCloudinarySquare={toCloudinarySquareWrapper}
+                                            formatPrice={formatPrice}
+                                            additionalText={additionalText}
+                                            storeInfo={storeInfo || undefined}
+                                            storeId={resolvedStoreId}
+                                        />
+                                    </>
                                 )
                             )}
                         </>

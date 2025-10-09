@@ -11,7 +11,7 @@ interface ProductFiltersProps {
   mobileViewMode: ViewMode
   selectedFilters: Record<string, string[]>
   filters: Filter[]
-  
+
   // Event handlers
   toggleFiltersModal: () => void
   toggleSortDropdown: () => void
@@ -19,13 +19,16 @@ interface ProductFiltersProps {
   handleFilterChange: (filterKey: string, optionValue: string, checked: boolean) => void
   clearAllFilters: () => void
   setMobileViewMode: (mode: ViewMode | ((prev: ViewMode) => ViewMode)) => void
-  
+
   // Utilities
   getActiveFiltersCount: () => number
-  
+
   // Texts
   t: (key: string) => string
   additionalText: (key: string) => string
+
+  // Optional
+  showFiltersButton?: boolean
 }
 
 interface SortOption {
@@ -35,7 +38,7 @@ interface SortOption {
 
 export function ProductFilters({
   filtersModalOpen,
-  sortDropdownOpen, 
+  sortDropdownOpen,
   currentSort,
   mobileViewMode,
   selectedFilters,
@@ -48,7 +51,8 @@ export function ProductFilters({
   setMobileViewMode,
   getActiveFiltersCount,
   t,
-  additionalText
+  additionalText,
+  showFiltersButton = true
 }: ProductFiltersProps) {
   
   const sortOptions: SortOption[] = [
@@ -64,20 +68,22 @@ export function ProductFilters({
     <>
       {/* Controles de productos */}
       <div className="nbd-product-controls">
-        
+
         {/* Filtros */}
-        <button 
-          className={`nbd-control-btn ${getActiveFiltersCount() > 0 ? 'nbd-control-btn--active' : ''}`}
-          onClick={toggleFiltersModal}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <span>{t('filters')}</span>
-          {getActiveFiltersCount() > 0 && (
-            <span className="nbd-filter-badge">{getActiveFiltersCount()}</span>
-          )}
-        </button>
+        {showFiltersButton && (
+          <button
+            className={`nbd-control-btn ${getActiveFiltersCount() > 0 ? 'nbd-control-btn--active' : ''}`}
+            onClick={toggleFiltersModal}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span>{t('filters')}</span>
+            {getActiveFiltersCount() > 0 && (
+              <span className="nbd-filter-badge">{getActiveFiltersCount()}</span>
+            )}
+          </button>
+        )}
 
         {/* Ordenar */}
         <div className="nbd-sort-dropdown">
