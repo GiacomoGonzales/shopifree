@@ -13,11 +13,18 @@ import { uploadMediaToCloudinary, getFileType } from '../../../../lib/cloudinary
 import { Card } from '../../../../../../packages/ui/src/components/Card'
 import { Button } from '../../../../../../packages/ui/src/components/Button'
 import { Input } from '../../../../../../packages/ui/src/components/Input'
-import { 
-  SIMPLIFIED_CATEGORIES, 
-  getMetadataForCategory, 
-  findCategoryById 
+import {
+  SIMPLIFIED_CATEGORIES,
+  getMetadataForCategory,
+  findCategoryById
 } from './simplifiedCategorization'
+import {
+  getModifierTemplates,
+  createModifierTemplate,
+  updateModifierTemplate,
+  deleteModifierTemplate,
+  type ModifierTemplate
+} from '../../../../lib/modifier-templates'
 
 // Usar las categorías simplificadas
 const CATEGORY_OPTIONS = SIMPLIFIED_CATEGORIES
@@ -151,6 +158,23 @@ export default function CreateProductPage() {
   const [showCategorization, setShowCategorization] = useState(false)
   const [showModifiers, setShowModifiers] = useState(false)
   const [modifierGroups, setModifierGroups] = useState<ModifierGroup[]>([])
+  const [modifierTemplates, setModifierTemplates] = useState<ModifierTemplate[]>([])
+  const [loadingTemplates, setLoadingTemplates] = useState(false)
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([])
+  const [draggedTemplateId, setDraggedTemplateId] = useState<string | null>(null)
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<ModifierGroup | null>(null)
+  const [templateForm, setTemplateForm] = useState<ModifierGroup>({
+    id: '',
+    name: '',
+    required: false,
+    allowMultiple: false,
+    minSelections: '',
+    maxSelections: '',
+    order: 0,
+    options: []
+  })
+  const [savingTemplate, setSavingTemplate] = useState(false)
   const [countryOrigin, setCountryOrigin] = useState('')
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [productStatus, setProductStatus] = useState<'draft' | 'active' | 'archived'>('draft')
@@ -164,7 +188,7 @@ export default function CreateProductPage() {
   useEffect(() => {
     const loadData = async () => {
       if (!store?.id) return
-      
+
       // Cargar marcas
       setLoadingBrands(true)
       try {
@@ -185,6 +209,17 @@ export default function CreateProductPage() {
         console.error('Error cargando categorías:', error)
       } finally {
         setLoadingCategories(false)
+      }
+
+      // Cargar plantillas de modificadores
+      setLoadingTemplates(true)
+      try {
+        const templatesList = await getModifierTemplates(store.id)
+        setModifierTemplates(templatesList)
+      } catch (error) {
+        console.error('Error cargando plantillas:', error)
+      } finally {
+        setLoadingTemplates(false)
       }
     }
 
@@ -527,6 +562,179 @@ export default function CreateProductPage() {
     }))
   }
 
+  // Funciones para manejar plantillas en el modal
+  const updateTemplateForm = (field: keyof ModifierGroup, value: any) => {
+    setTemplateForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const addTemplateOption = () => {
+    const newOption: ModifierOption = {
+      id: `option-${Date.now()}`,
+      name: '',
+      priceModifier: '',
+      isDefault: false,
+      isActive: true,
+      order: templateForm.options.length
+    }
+    setTemplateForm(prev => ({
+      ...prev,
+      options: [...prev.options, newOption]
+    }))
+  }
+
+  const removeTemplateOption = (optionId: string) => {
+    setTemplateForm(prev => ({
+      ...prev,
+      options: prev.options.filter(o => o.id !== optionId)
+    }))
+  }
+
+  const updateTemplateOption = (optionId: string, field: keyof ModifierOption, value: any) => {
+    setTemplateForm(prev => ({
+      ...prev,
+      options: prev.options.map(o =>
+        o.id === optionId ? { ...o, [field]: value } : o
+      )
+    }))
+  }
+
+  const handleSaveTemplate = async () => {
+    if (!store?.id) return
+    if (!templateForm.name.trim()) {
+      alert('Por favor ingresa un nombre para la plantilla')
+      return
+    }
+    if (templateForm.options.length === 0) {
+      alert('Agrega al menos una opción')
+      return
+    }
+
+    setSavingTemplate(true)
+    try {
+      const templateData = {
+        name: templateForm.name,
+        required: templateForm.required,
+        allowMultiple: templateForm.allowMultiple,
+        minSelections: typeof templateForm.minSelections === 'string' && templateForm.minSelections === '' ? 0 : Number(templateForm.minSelections),
+        maxSelections: typeof templateForm.maxSelections === 'string' && templateForm.maxSelections === '' ? 99 : Number(templateForm.maxSelections),
+        options: templateForm.options.map(opt => ({
+          ...opt,
+          priceModifier: typeof opt.priceModifier === 'string' && opt.priceModifier === '' ? 0 : Number(opt.priceModifier)
+        }))
+      }
+
+      if (editingTemplate) {
+        // Editar plantilla existente
+        await updateModifierTemplate(store.id, editingTemplate.id, templateData)
+      } else {
+        // Crear nueva plantilla
+        await createModifierTemplate(store.id, templateData)
+      }
+
+      // Recargar plantillas
+      const updatedTemplates = await getModifierTemplates(store.id)
+      setModifierTemplates(updatedTemplates)
+
+      // Cerrar modal y resetear formulario
+      setShowTemplateModal(false)
+      setTemplateForm({
+        id: '',
+        name: '',
+        required: false,
+        allowMultiple: false,
+        minSelections: '',
+        maxSelections: '',
+        order: 0,
+        options: []
+      })
+      setEditingTemplate(null)
+    } catch (error) {
+      console.error('Error guardando plantilla:', error)
+      alert('Error guardando la plantilla')
+    } finally {
+      setSavingTemplate(false)
+    }
+  }
+
+  // Funciones para drag and drop de plantillas seleccionadas
+  const handleDragStart = (templateId: string) => {
+    setDraggedTemplateId(templateId)
+  }
+
+  const handleDragOver = (e: React.DragEvent, targetTemplateId: string) => {
+    e.preventDefault()
+    if (!draggedTemplateId || draggedTemplateId === targetTemplateId) return
+
+    const draggedIndex = selectedTemplateIds.indexOf(draggedTemplateId)
+    const targetIndex = selectedTemplateIds.indexOf(targetTemplateId)
+
+    if (draggedIndex === -1 || targetIndex === -1) return
+
+    const newOrder = [...selectedTemplateIds]
+    newOrder.splice(draggedIndex, 1)
+    newOrder.splice(targetIndex, 0, draggedTemplateId)
+    setSelectedTemplateIds(newOrder)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedTemplateId(null)
+  }
+
+  // Función para editar plantilla
+  const handleEditTemplate = (template: ModifierTemplate) => {
+    // Convertir ModifierTemplate a ModifierGroup para el formulario
+    setTemplateForm({
+      id: template.id,
+      name: template.name,
+      required: template.required,
+      allowMultiple: template.allowMultiple,
+      minSelections: template.minSelections.toString(),
+      maxSelections: template.maxSelections.toString(),
+      order: 0,
+      options: template.options.map(opt => ({
+        ...opt,
+        priceModifier: opt.priceModifier.toString()
+      }))
+    })
+    setEditingTemplate({
+      id: template.id,
+      name: template.name,
+      required: template.required,
+      allowMultiple: template.allowMultiple,
+      minSelections: template.minSelections.toString(),
+      maxSelections: template.maxSelections.toString(),
+      order: 0,
+      options: template.options.map(opt => ({
+        ...opt,
+        priceModifier: opt.priceModifier.toString()
+      }))
+    })
+    setShowTemplateModal(true)
+  }
+
+  // Función para eliminar plantilla
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (!store?.id) return
+
+    if (!confirm('¿Estás seguro de eliminar esta plantilla? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    try {
+      await deleteModifierTemplate(store.id, templateId)
+
+      // Recargar plantillas
+      const updatedTemplates = await getModifierTemplates(store.id)
+      setModifierTemplates(updatedTemplates)
+
+      // Quitar de seleccionados si estaba
+      setSelectedTemplateIds(prev => prev.filter(id => id !== templateId))
+    } catch (error) {
+      console.error('Error eliminando plantilla:', error)
+      alert('Error eliminando la plantilla')
+    }
+  }
+
   const getMetaFieldsForCategory = () => {
     const metadata = getMetadataForCategory(selectedCategory)
     console.log('🔍 Raw metadata for category:', selectedCategory, metadata)
@@ -734,16 +942,32 @@ export default function CreateProductPage() {
         hasVariants,
         variants: hasVariants ? variants : [], // Guardar todas las variantes creadas
 
-        // Modificadores - convertir strings vacíos a números
-        modifierGroups: modifierGroups.map(group => ({
-          ...group,
-          minSelections: group.minSelections === '' ? 0 : parseInt(group.minSelections as string) || 0,
-          maxSelections: group.maxSelections === '' ? 999 : parseInt(group.maxSelections as string) || 999,
-          options: group.options.map(option => ({
-            ...option,
-            priceModifier: option.priceModifier === '' ? 0 : parseFloat(option.priceModifier as string) || 0
-          }))
-        })),
+        // Modificadores - resolver plantillas seleccionadas y convertir a modifierGroups
+        modifierGroups: selectedTemplateIds.length > 0
+          ? selectedTemplateIds.map((templateId, index) => {
+              const template = modifierTemplates.find(t => t.id === templateId)
+              if (!template) return null
+
+              return {
+                id: template.id,
+                name: template.name,
+                required: template.required,
+                allowMultiple: template.allowMultiple,
+                minSelections: template.minSelections,
+                maxSelections: template.maxSelections,
+                order: index,
+                options: template.options
+              }
+            }).filter(Boolean)
+          : modifierGroups.map(group => ({
+              ...group,
+              minSelections: group.minSelections === '' ? 0 : parseInt(group.minSelections as string) || 0,
+              maxSelections: group.maxSelections === '' ? 999 : parseInt(group.maxSelections as string) || 999,
+              options: group.options.map(option => ({
+                ...option,
+                priceModifier: option.priceModifier === '' ? 0 : parseFloat(option.priceModifier as string) || 0
+              }))
+            })),
 
         // Envío
         requiresShipping,
@@ -2079,226 +2303,432 @@ export default function CreateProductPage() {
                 </button>
 
                 {showModifiers && (
-                  <div className="mt-6 space-y-6">
-                    {modifierGroups.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <p className="mb-4">{t('modifiers.emptyState')}</p>
-                        <Button onClick={addModifierGroup} variant="secondary">
-                          {t('modifiers.addGroup')}
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        {modifierGroups.map((group, groupIndex) => (
-                          <div key={group.id} className="border border-gray-200 rounded-lg p-4 bg-white">
-                            {/* Header del grupo */}
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm font-medium text-gray-500">
-                                  {t('modifiers.groupLabel')} {groupIndex + 1}
-                                </span>
-                              </div>
-                              <button
-                                onClick={() => removeModifierGroup(group.id)}
-                                className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                {t('modifiers.removeGroup')}
-                              </button>
-                            </div>
+                  <div className="mt-6">
+                    {/* Layout: 2 columnas - Plantillas | Selección */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Columna izquierda: Plantillas disponibles */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-semibold text-gray-900">
+                            Plantillas disponibles
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingTemplate(null)
+                              setShowTemplateModal(true)
+                            }}
+                            className="text-xs px-3 py-1.5 bg-primary-600 text-white rounded hover:bg-primary-700 flex items-center gap-1"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Nueva plantilla
+                          </button>
+                        </div>
+                        {loadingTemplates ? (
+                          <p className="text-sm text-gray-500">Cargando plantillas...</p>
+                        ) : modifierTemplates.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <p className="text-sm mb-2">No hay plantillas creadas</p>
+                            <p className="text-xs text-gray-400">Crea tu primera plantilla de modificadores</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {modifierTemplates.map((template) => {
+                              const isSelected = selectedTemplateIds.includes(template.id)
 
-                            {/* Nombre del grupo */}
-                            <div className="mb-4">
-                              <Input
-                                label={t('modifiers.groupName')}
-                                placeholder={t('modifiers.groupNamePlaceholder')}
-                                value={group.name}
-                                onChange={(e) => updateModifierGroup(group.id, 'name', e.target.value)}
-                              />
-                            </div>
-
-                            {/* Configuración del grupo - 3 opciones siempre visibles */}
-                            <div className="mb-4 space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                              {/* 1. ¿Es obligatorio seleccionar? */}
-                              <label className="flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={group.required}
-                                  onChange={(e) => updateModifierGroup(group.id, 'required', e.target.checked)}
-                                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                />
-                                <span className="ml-2 text-sm font-medium text-gray-900">
-                                  Obligatorio (el cliente debe elegir al menos una opción)
-                                </span>
-                              </label>
-
-                              {/* 2. ¿Permitir cantidad por opción? */}
-                              <label className="flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={group.allowMultiple}
-                                  onChange={(e) => updateModifierGroup(group.id, 'allowMultiple', e.target.checked)}
-                                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                />
-                                <span className="ml-2 text-sm font-medium text-gray-900">
-                                  Permitir cantidad por opción (ej: Coca Cola x2, x3...)
-                                </span>
-                              </label>
-
-                              {/* 3. Cantidad mínima y máxima - SIEMPRE VISIBLE */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Cantidad mínima
-                                  </label>
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    value={group.minSelections}
-                                    onChange={(e) => {
-                                      const value = e.target.value
-                                      if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 99)) {
-                                        updateModifierGroup(group.id, 'minSelections', value)
-                                      }
-                                    }}
-                                    placeholder="0"
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                                  />
-                                  <p className="mt-1 text-xs text-gray-500">De 0 a 99</p>
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Cantidad máxima
-                                  </label>
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    value={group.maxSelections}
-                                    onChange={(e) => {
-                                      const value = e.target.value
-                                      if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 99)) {
-                                        updateModifierGroup(group.id, 'maxSelections', value)
-                                      }
-                                    }}
-                                    placeholder="99"
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                                  />
-                                  <p className="mt-1 text-xs text-gray-500">De 0 a 99</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Opciones del grupo */}
-                            <div className="mb-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                {t('modifiers.options')}
-                              </label>
-
-                              {group.options.length === 0 ? (
-                                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                                  <button
-                                    onClick={() => addModifierOption(group.id)}
-                                    className="inline-flex flex-col items-center justify-center text-gray-500 hover:text-primary-600 transition-colors"
-                                  >
-                                    <div className="mb-2 w-12 h-12 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center">
-                                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                      </svg>
+                              return (
+                                <div key={template.id} className="bg-white border border-gray-200 rounded-lg p-3">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium text-gray-900">{template.name}</p>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        {template.options.length} opciones
+                                        {template.required && ' • Obligatorio'}
+                                        {template.allowMultiple && ' • Cantidad'}
+                                      </p>
                                     </div>
-                                    <span className="text-sm font-medium">Agregar primera opción</span>
-                                    <span className="text-xs text-gray-400 mt-1">Ej: Coca Cola, Pepsi, Fanta...</span>
-                                  </button>
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="space-y-2">
-                                    {group.options.map((option) => (
-                                      <div key={option.id} className="relative p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
-                                        {/* Botón eliminar en esquina superior derecha */}
+                                    <div className="flex items-center gap-2 ml-2">
+                                      {/* Botón editar */}
+                                      <button
+                                        type="button"
+                                        onClick={() => handleEditTemplate(template)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                        title="Editar plantilla"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                      </button>
+
+                                      {/* Botón eliminar plantilla */}
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteTemplate(template.id)}
+                                        className="text-gray-400 hover:text-red-600"
+                                        title="Eliminar plantilla"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+
+                                      {/* Botón agregar/quitar del producto */}
+                                      {isSelected ? (
                                         <button
-                                          onClick={() => removeModifierOption(group.id, option.id)}
-                                          className="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
-                                          title="Eliminar opción"
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedTemplateIds(prev => prev.filter(id => id !== template.id))
+                                          }}
+                                          className="text-gray-400 hover:text-gray-600"
+                                          title="Quitar del producto"
                                         >
-                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                           </svg>
                                         </button>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedTemplateIds(prev => [...prev, template.id])
+                                          }}
+                                          className="text-primary-600 hover:text-primary-700"
+                                          title="Agregar al producto"
+                                        >
+                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                {/* Mostrar opciones */}
+                                <div className="text-xs text-gray-600 space-y-0.5 mt-2 pl-2 border-l-2 border-gray-200">
+                                  {template.options.map((opt) => (
+                                    <div key={opt.id} className="flex justify-between">
+                                      <span>{opt.name}</span>
+                                      {opt.priceModifier !== 0 && (
+                                        <span className="text-gray-500">+{currencySymbol}{opt.priceModifier}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
 
-                                        {/* Nombre de la opción */}
-                                        <div className="pr-8">
-                                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                                            Nombre
-                                          </label>
-                                          <input
-                                            type="text"
-                                            placeholder={t('modifiers.optionNamePlaceholder')}
-                                            value={option.name}
-                                            onChange={(e) => updateModifierOption(group.id, option.id, 'name', e.target.value)}
-                                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                                          />
-                                        </div>
+                      {/* Columna derecha: Modificadores seleccionados para este producto */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                          Modificadores de este producto
+                        </h3>
+                        {selectedTemplateIds.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <p className="text-sm">Selecciona plantillas de la columna izquierda</p>
+                            <p className="text-xs text-gray-400 mt-1">Puedes arrastrarlas para ordenarlas</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {selectedTemplateIds.map((templateId, index) => {
+                              const template = modifierTemplates.find(t => t.id === templateId)
+                              if (!template) return null
 
-                                        {/* Precio y checkbox preseleccionada */}
-                                        <div className="flex items-end gap-2">
-                                          <div className="flex-1">
-                                            <label className="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">
-                                              Precio modificador
-                                            </label>
-                                            <div className="relative">
-                                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span className="text-gray-500 text-sm">{currencySymbol}</span>
-                                              </div>
-                                              <input
-                                                type="number"
-                                                value={option.priceModifier}
-                                                onChange={(e) => updateModifierOption(group.id, option.id, 'priceModifier', e.target.value)}
-                                                placeholder="5.00"
-                                                step="0.01"
-                                                className="block w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                                              />
-                                            </div>
-                                          </div>
-                                          <label className="flex items-center cursor-pointer pb-2 whitespace-nowrap" title={t('modifiers.defaultOption')}>
-                                            <input
-                                              type="checkbox"
-                                              checked={option.isDefault}
-                                              onChange={(e) => updateModifierOption(group.id, option.id, 'isDefault', e.target.checked)}
-                                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                            />
-                                            <span className="ml-1 text-xs text-gray-600">{t('modifiers.default')}</span>
-                                          </label>
-                                        </div>
-                                      </div>
-                                    ))}
+                              return (
+                                <div
+                                  key={template.id}
+                                  draggable
+                                  onDragStart={() => handleDragStart(template.id)}
+                                  onDragOver={(e) => handleDragOver(e, template.id)}
+                                  onDragEnd={handleDragEnd}
+                                  className={`flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-move hover:border-gray-300 ${
+                                    draggedTemplateId === template.id ? 'opacity-50' : ''
+                                  }`}
+                                >
+                                  {/* Icono de drag */}
+                                  <div className="text-gray-400 mt-0.5">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                    </svg>
                                   </div>
 
-                                  {/* Botón agregar más opciones */}
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-sm font-medium text-gray-900">{template.name}</p>
+                                      <span className="text-xs text-gray-400">#{index + 1}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                      {template.options.length} opciones
+                                    </p>
+                                  </div>
+
+                                  {/* Botón eliminar */}
                                   <button
-                                    onClick={() => addModifierOption(group.id)}
-                                    className="mt-3 w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:border-primary-300 hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedTemplateIds(prev => prev.filter(id => id !== template.id))
+                                    }}
+                                    className="text-gray-400 hover:text-red-600 mt-0.5"
+                                    title="Quitar"
                                   >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
-                                    {t('modifiers.addOption')}
                                   </button>
-                                </>
-                              )}
-                            </div>
+                                </div>
+                              )
+                            })}
                           </div>
-                        ))}
-
-                        <Button onClick={addModifierGroup} variant="secondary" className="w-full">
-                          + {t('modifiers.addGroup')}
-                        </Button>
-                      </>
-                    )}
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </Card>
+
+              {/* Modal para crear/editar plantilla */}
+              {showTemplateModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 md:p-4">
+                  <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto md:rounded-lg md:max-h-[90vh] max-md:inset-0 max-md:fixed max-md:h-full max-md:max-h-full max-md:rounded-none max-md:max-w-full">
+                    <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {editingTemplate ? 'Editar plantilla' : 'Nueva plantilla'}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowTemplateModal(false)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="p-6 space-y-6">
+                      {/* Nombre de la plantilla */}
+                      <div>
+                        <Input
+                          label="Nombre de la plantilla"
+                          placeholder="Ej: Tamaño de bebidas, Extras para hamburguesa..."
+                          value={templateForm.name}
+                          onChange={(e) => updateTemplateForm('name', e.target.value)}
+                        />
+                      </div>
+
+                      {/* Configuración */}
+                      <div className="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h4 className="text-sm font-medium text-gray-900">Configuración</h4>
+
+                        {/* Obligatorio */}
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={templateForm.required}
+                            onChange={(e) => updateTemplateForm('required', e.target.checked)}
+                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          />
+                          <span className="ml-2 text-sm text-gray-900">
+                            Obligatorio (el cliente debe elegir al menos una opción)
+                          </span>
+                        </label>
+
+                        {/* Permitir cantidad */}
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={templateForm.allowMultiple}
+                            onChange={(e) => updateTemplateForm('allowMultiple', e.target.checked)}
+                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          />
+                          <span className="ml-2 text-sm text-gray-900">
+                            Permitir cantidad por opción (ej: Coca Cola x2, x3...)
+                          </span>
+                        </label>
+
+                        {/* Mínimo y máximo */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Cantidad mínima
+                            </label>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={templateForm.minSelections}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 99)) {
+                                  updateTemplateForm('minSelections', value)
+                                }
+                              }}
+                              placeholder="0"
+                              className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">De 0 a 99</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Cantidad máxima
+                            </label>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={templateForm.maxSelections}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 99)) {
+                                  updateTemplateForm('maxSelections', value)
+                                }
+                              }}
+                              placeholder="99"
+                              className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">De 0 a 99</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Opciones */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Opciones
+                        </label>
+
+                        {templateForm.options.length === 0 ? (
+                          <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                            <button
+                              type="button"
+                              onClick={addTemplateOption}
+                              className="inline-flex flex-col items-center justify-center text-gray-500 hover:text-primary-600"
+                            >
+                              <div className="mb-2 w-12 h-12 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                              </div>
+                              <span className="text-sm font-medium">Agregar primera opción</span>
+                              <span className="text-xs text-gray-400 mt-1">Ej: Coca Cola, Pepsi, Fanta...</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="space-y-2">
+                              {templateForm.options.map((option) => (
+                                <div key={option.id} className="relative p-3 bg-gray-50 rounded border border-gray-200 space-y-2">
+                                  {/* Botón eliminar */}
+                                  <button
+                                    type="button"
+                                    onClick={() => removeTemplateOption(option.id)}
+                                    className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
+                                    title="Eliminar opción"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+
+                                  {/* Nombre */}
+                                  <div className="pr-8">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                                      Nombre
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Ej: Coca Cola"
+                                      value={option.name}
+                                      onChange={(e) => updateTemplateOption(option.id, 'name', e.target.value)}
+                                      className="block w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                  </div>
+
+                                  {/* Precio y default */}
+                                  <div className="flex items-end gap-2">
+                                    <div className="flex-1">
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Precio modificador
+                                      </label>
+                                      <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                          <span className="text-gray-500 text-sm">{currencySymbol}</span>
+                                        </div>
+                                        <input
+                                          type="number"
+                                          value={option.priceModifier}
+                                          onChange={(e) => updateTemplateOption(option.id, 'priceModifier', e.target.value)}
+                                          placeholder="5.00"
+                                          step="0.01"
+                                          className="block w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                        />
+                                      </div>
+                                    </div>
+                                    <label className="flex items-center cursor-pointer pb-2 whitespace-nowrap">
+                                      <input
+                                        type="checkbox"
+                                        checked={option.isDefault}
+                                        onChange={(e) => updateTemplateOption(option.id, 'isDefault', e.target.checked)}
+                                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                      />
+                                      <span className="ml-1 text-xs text-gray-600">Por defecto</span>
+                                    </label>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Botón agregar más */}
+                            <button
+                              type="button"
+                              onClick={addTemplateOption}
+                              className="mt-3 w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-600 hover:border-primary-300 hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              Agregar opción
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Footer con botones */}
+                    <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowTemplateModal(false)
+                          setTemplateForm({
+                            id: '',
+                            name: '',
+                            required: false,
+                            allowMultiple: false,
+                            minSelections: '',
+                            maxSelections: '',
+                            order: 0,
+                            options: []
+                          })
+                          setEditingTemplate(null)
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveTemplate}
+                        disabled={savingTemplate}
+                        className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {savingTemplate ? 'Guardando...' : (editingTemplate ? 'Actualizar' : 'Crear plantilla')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 7. Configuraciones avanzadas (Envío) */}
               <Card className="p-6">

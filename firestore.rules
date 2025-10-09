@@ -163,6 +163,13 @@ service cloud.firestore {
                       request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
 
+      // Reglas para plantillas de modificadores (solo el dueño puede crear/editar)
+      match /modifierTemplates/{templateId} {
+        allow read: if true;
+        allow write: if isAuthenticated() &&
+                      request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+      }
+
       // Reglas para zonas de entrega
       match /deliveryZones/{zoneId} {
         allow read: if true;
