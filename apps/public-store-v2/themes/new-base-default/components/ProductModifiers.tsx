@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ModifierGroup, ModifierOption } from '../../../lib/products';
 import { formatPrice } from '../../../lib/currency';
+import { useStoreLanguage } from '../../../lib/store-language-context';
 import './product-modifiers.css';
 
 interface ProductModifiersProps {
@@ -12,6 +13,7 @@ interface ProductModifiersProps {
 }
 
 export default function ProductModifiers({ modifierGroups, onSelectionChange, currency }: ProductModifiersProps) {
+  const { t } = useStoreLanguage();
   // Estado para modo allowMultiple: { groupId: { optionId: quantity } }
   // Estado para modo radio: { groupId: [optionId] }
   const [selections, setSelections] = useState<Record<string, string[]>>({});
@@ -239,21 +241,21 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
       if (max === 99) {
         if (group.required) {
           if (min > 0) {
-            return `Selecciona al menos ${min}`;
+            return `${t('modifierSelectAtLeast')} ${min}`;
           }
-          return 'Selecciona las opciones que desees';
+          return t('modifierSelectOptions');
         }
-        return 'Opcional';
+        return t('modifierOptional');
       }
 
       if (group.required) {
         if (min === max) {
-          return `Selecciona ${min} ${totalQuantity > 0 ? `(${totalQuantity}/${min})` : ''}`;
+          return `${t('modifierSelectExactly')} ${min} ${totalQuantity > 0 ? `(${totalQuantity}/${min})` : ''}`;
         }
-        return `Selecciona entre ${min} y ${max} ${totalQuantity > 0 ? `(${totalQuantity})` : ''}`;
+        return `${t('modifierSelectBetween')} ${min} ${t('and')} ${max} ${totalQuantity > 0 ? `(${totalQuantity})` : ''}`;
       }
 
-      return `Hasta ${max} opciones ${totalQuantity > 0 ? `(${totalQuantity}/${max})` : ''}`;
+      return `${t('modifierUpTo')} ${max} ${t('modifierOptions')} ${totalQuantity > 0 ? `(${totalQuantity}/${max})` : ''}`;
     } else {
       // Modo checkbox o radio
       if (group.maxSelections > 1) {
@@ -265,23 +267,23 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
         if (max === 99) {
           if (group.required) {
             if (min > 0) {
-              return `Selecciona al menos ${min}`;
+              return `${t('modifierSelectAtLeast')} ${min}`;
             }
-            return 'Selecciona las opciones que desees';
+            return t('modifierSelectOptions');
           }
-          return 'Opcional';
+          return t('modifierOptional');
         }
 
         if (group.required) {
           if (min === max) {
-            return `Selecciona ${min} ${selectedCount > 0 ? `(${selectedCount}/${min})` : ''}`;
+            return `${t('modifierSelectExactly')} ${min} ${selectedCount > 0 ? `(${selectedCount}/${min})` : ''}`;
           }
-          return `Selecciona entre ${min} y ${max} ${selectedCount > 0 ? `(${selectedCount})` : ''}`;
+          return `${t('modifierSelectBetween')} ${min} ${t('and')} ${max} ${selectedCount > 0 ? `(${selectedCount})` : ''}`;
         }
 
-        return `Hasta ${max} opciones ${selectedCount > 0 ? `(${selectedCount}/${max})` : ''}`;
+        return `${t('modifierUpTo')} ${max} ${t('modifierOptions')} ${selectedCount > 0 ? `(${selectedCount}/${max})` : ''}`;
       } else {
-        return group.required ? 'Selecciona una opción' : 'Opcional';
+        return group.required ? t('modifierSelectOne') : t('modifierOptional');
       }
     }
   };
@@ -305,7 +307,7 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
             <div className="nbd-modifier-group-header">
               <h4 className="nbd-modifier-group-title">
                 {group.name}
-                {group.required && <span className="nbd-modifier-required">*</span>}
+                {group.required && <span className="nbd-modifier-required">{t('modifierRequired')}</span>}
               </h4>
               <span className="nbd-modifier-group-help">
                 {getGroupHelpText(group)}
@@ -343,7 +345,7 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
                           className="nbd-modifier-btn nbd-modifier-btn--minus"
                           onClick={() => handleDecrement(group.id, option.id)}
                           disabled={quantity === 0}
-                          aria-label="Disminuir cantidad"
+                          aria-label={t('modifierDecreaseQuantity')}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -354,7 +356,7 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
                           type="button"
                           className="nbd-modifier-btn nbd-modifier-btn--plus"
                           onClick={() => handleIncrement(group.id, option.id)}
-                          aria-label="Aumentar cantidad"
+                          aria-label={t('modifierIncreaseQuantity')}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -398,7 +400,7 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
 
             {!isValid && (
               <div className="nbd-modifier-error">
-                Selecciona al menos {group.minSelections} opción{group.minSelections > 1 ? 'es' : ''}
+                {t('modifierSelectAtLeast')} {group.minSelections} {group.minSelections > 1 ? t('modifierOptionsPlural') : t('modifierOption')}
               </div>
             )}
           </div>

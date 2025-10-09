@@ -9,17 +9,20 @@ import { useToast } from '../../lib/hooks/useToast'
 
 export default function ThemeGallery() {
   const t = useTranslations('storeDesign')
-  const { store } = useStore()
+  const { store, loading } = useStore()
   const { toast, showToast, hideToast } = useToast()
-  const [selectedThemeId, setSelectedThemeId] = useState<string>(DEFAULT_THEME_ID)
+  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null)
   const [loadingThemeId, setLoadingThemeId] = useState<string | null>(null)
 
   // Update selectedThemeId when store data loads
   useEffect(() => {
     if (store?.theme) {
       setSelectedThemeId(store.theme)
+    } else if (store && !store.theme) {
+      // Si la tienda existe pero no tiene tema, usar el por defecto
+      setSelectedThemeId(DEFAULT_THEME_ID)
     }
-  }, [store?.theme])
+  }, [store?.theme, store])
 
 
   const handleThemeSelect = async (themeId: string) => {
@@ -35,8 +38,8 @@ export default function ThemeGallery() {
       return
     }
 
-    if (loadingThemeId) {
-      return // Evitar múltiples actualizaciones simultáneas
+    if (loadingThemeId || loading || selectedThemeId === null) {
+      return // Evitar múltiples actualizaciones simultáneas o mientras carga
     }
 
     if (!isValidTheme(themeId)) {
@@ -62,13 +65,13 @@ export default function ThemeGallery() {
 
       // Mostrar mensaje de éxito
       showToast(t('notifications.success', { themeName }), 'success')
-      
+
     } catch (error) {
       console.error('Error al actualizar el tema:', error)
-      
+
       // Revertir el estado local si hay error
       setSelectedThemeId(store?.theme || DEFAULT_THEME_ID)
-      
+
       showToast(t('notifications.error'), 'error')
     } finally {
       setLoadingThemeId(null)
@@ -93,17 +96,39 @@ export default function ThemeGallery() {
       )}
 
       {/* Grid de temas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {availableThemes.map((theme) => (
-          <ThemeCard
-            key={theme.id}
-            theme={theme}
-            isSelected={theme.id === selectedThemeId}
-            isLoading={theme.id === loadingThemeId}
-            onSelect={() => handleThemeSelect(theme.id)}
-          />
-        ))}
-      </div>
+      {loading || selectedThemeId === null ? (
+        // Skeleton loader mientras carga
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {availableThemes.map((theme) => (
+            <div key={theme.id} className="animate-pulse">
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                {/* Image skeleton */}
+                <div className="aspect-video bg-gray-200"></div>
+                {/* Content skeleton */}
+                <div className="p-4 space-y-3">
+                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-10 bg-gray-200 rounded w-full mt-4"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Grid de temas real
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {availableThemes.map((theme) => (
+            <ThemeCard
+              key={theme.id}
+              theme={theme}
+              isSelected={theme.id === selectedThemeId}
+              isLoading={theme.id === loadingThemeId}
+              onSelect={() => handleThemeSelect(theme.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 } 

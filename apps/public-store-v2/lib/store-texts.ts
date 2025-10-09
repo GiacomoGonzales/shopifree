@@ -211,6 +211,27 @@ export interface StoreTexts {
   // Textos de dirección sugerida
   useThisAddress: string;
   keepMine: string;
+
+  // ProductQuickView
+  selectOptions: string;
+  addingToCart: string;
+  noImage: string;
+
+  // ProductModifiers
+  modifierRequired: string;
+  modifierOptional: string;
+  modifierSelectAtLeast: string;
+  modifierSelectOptions: string;
+  modifierSelectBetween: string;
+  modifierSelectExactly: string;
+  modifierUpTo: string;
+  modifierOptions: string;
+  modifierSelectOne: string;
+  modifierDecreaseQuantity: string;
+  modifierIncreaseQuantity: string;
+  modifierOption: string; // singular
+  modifierOptionsPlural: string; // plural
+  and: string; // "y" / "and" / "e"
 }
 
 const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
@@ -419,7 +440,28 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
 
     // Textos de dirección sugerida
     useThisAddress: 'Usar esta dirección',
-    keepMine: 'Mantener la mía'
+    keepMine: 'Mantener la mía',
+
+    // ProductQuickView
+    selectOptions: 'Selecciona opciones',
+    addingToCart: 'Agregando...',
+    noImage: 'Sin imagen',
+
+    // ProductModifiers
+    modifierRequired: '*',
+    modifierOptional: 'Opcional',
+    modifierSelectAtLeast: 'Selecciona al menos',
+    modifierSelectOptions: 'Selecciona las opciones que desees',
+    modifierSelectBetween: 'Selecciona entre',
+    modifierSelectExactly: 'Selecciona',
+    modifierUpTo: 'Hasta',
+    modifierOptions: 'opciones',
+    modifierSelectOne: 'Selecciona una opción',
+    modifierDecreaseQuantity: 'Disminuir cantidad',
+    modifierIncreaseQuantity: 'Aumentar cantidad',
+    modifierOption: 'opción',
+    modifierOptionsPlural: 'opciones',
+    and: 'y'
   },
   
   en: {
@@ -627,7 +669,28 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
 
     // Textos de dirección sugerida
     useThisAddress: 'Use this address',
-    keepMine: 'Keep mine'
+    keepMine: 'Keep mine',
+
+    // ProductQuickView
+    selectOptions: 'Select options',
+    addingToCart: 'Adding...',
+    noImage: 'No image',
+
+    // ProductModifiers
+    modifierRequired: '*',
+    modifierOptional: 'Optional',
+    modifierSelectAtLeast: 'Select at least',
+    modifierSelectOptions: 'Select the options you want',
+    modifierSelectBetween: 'Select between',
+    modifierSelectExactly: 'Select',
+    modifierUpTo: 'Up to',
+    modifierOptions: 'options',
+    modifierSelectOne: 'Select one option',
+    modifierDecreaseQuantity: 'Decrease quantity',
+    modifierIncreaseQuantity: 'Increase quantity',
+    modifierOption: 'option',
+    modifierOptionsPlural: 'options',
+    and: 'and'
   },
   
   pt: {
@@ -835,7 +898,28 @@ const STORE_TEXTS: Record<StoreLanguage, StoreTexts> = {
 
     // Textos de dirección sugerida
     useThisAddress: 'Usar este endereço',
-    keepMine: 'Manter o meu'
+    keepMine: 'Manter o meu',
+
+    // ProductQuickView
+    selectOptions: 'Selecionar opções',
+    addingToCart: 'Adicionando...',
+    noImage: 'Sem imagem',
+
+    // ProductModifiers
+    modifierRequired: '*',
+    modifierOptional: 'Opcional',
+    modifierSelectAtLeast: 'Selecione pelo menos',
+    modifierSelectOptions: 'Selecione as opções que desejar',
+    modifierSelectBetween: 'Selecione entre',
+    modifierSelectExactly: 'Selecione',
+    modifierUpTo: 'Até',
+    modifierOptions: 'opções',
+    modifierSelectOne: 'Selecione uma opção',
+    modifierDecreaseQuantity: 'Diminuir quantidade',
+    modifierIncreaseQuantity: 'Aumentar quantidade',
+    modifierOption: 'opção',
+    modifierOptionsPlural: 'opções',
+    and: 'e'
   }
 };
 

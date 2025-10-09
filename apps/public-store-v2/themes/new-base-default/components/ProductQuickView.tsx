@@ -8,6 +8,7 @@ import { formatPrice } from '../../../lib/currency';
 import SimpleVariantSelector from '../../../components/SimpleVariantSelector';
 import { usePromotions } from '../../../lib/hooks/usePromotions';
 import ProductModifiers from './ProductModifiers';
+import { useStoreLanguage } from '../../../lib/store-language-context';
 
 interface ProductQuickViewProps {
   product: PublicProduct;
@@ -21,6 +22,7 @@ interface ProductQuickViewProps {
 
 export default function ProductQuickView({ product, isOpen, onClose, storeInfo, storeId }: ProductQuickViewProps) {
   const { addItem, openCart } = useCart();
+  const { t } = useStoreLanguage();
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modifierSelections, setModifierSelections] = useState<Record<string, string[]>>({});
@@ -245,11 +247,11 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
       <div className="nbd-cart-modal nbd-product-modal">
         {/* Header del modal - FIJO */}
         <div className="nbd-cart-header">
-          <h2 className="nbd-cart-title">Selecciona opciones</h2>
-          <button 
+          <h2 className="nbd-cart-title">{t('selectOptions')}</h2>
+          <button
             onClick={onClose}
             className="nbd-cart-close"
-            aria-label="Cerrar"
+            aria-label={t('close')}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -275,7 +277,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
                   <circle cx="9" cy="9" r="2"/>
                   <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
                 </svg>
-                <span>Sin imagen</span>
+                <span>{t('noImage')}</span>
               </div>
             )}
           </div>
@@ -341,7 +343,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
                     <animate attributeName="stroke-dashoffset" dur="2s" values="0;-16;-32;-32" repeatCount="indefinite"/>
                   </circle>
                 </svg>
-                Agregando...
+                {t('addingToCart')}
               </span>
             ) : (
               <>
@@ -350,7 +352,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                Agregar al carrito • {formatPrice(getFinalPrice(), storeInfo?.currency)}
+                {t('addToCart')} • {formatPrice(getFinalPrice(), storeInfo?.currency)}
               </>
             )}
           </button>
