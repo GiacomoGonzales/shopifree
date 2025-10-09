@@ -33,9 +33,9 @@ function ProductCard({ product, onAddToCart, formatPrice, toCloudinarySquare, st
                         alt={product.name}
                         loading="lazy"
                     />
-                    {promotionsData.discount > 0 && (
-                        <div className="restaurant-product-badge">
-                            -{promotionsData.discount}%
+                    {promotionsData.discount > 0 && promotionsData.badgeStyle !== 'none' && (
+                        <div className={promotionsData.badgeStyle === 'ribbon' ? 'restaurant-product-ribbon' : 'restaurant-product-badge'}>
+                            OFERTA
                         </div>
                     )}
                 </div>

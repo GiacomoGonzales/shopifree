@@ -49,7 +49,7 @@ export default function PromotionsPage() {
     targetType: 'all_products',
     targetIds: [],
     priority: 1,
-    showBadge: true
+    badgeStyle: 'badge'
   })
 
   // Función helper para formatear precios con la moneda de la tienda
@@ -171,7 +171,7 @@ export default function PromotionsPage() {
         targetType: 'all_products',
         targetIds: [],
         priority: 1,
-        showBadge: true
+        badgeStyle: 'badge'
       })
     } catch (error) {
       console.error('Error creating/updating promotion:', error)
@@ -236,7 +236,7 @@ export default function PromotionsPage() {
       targetType: promotion.targetType,
       targetIds: promotion.targetIds,
       priority: promotion.priority,
-      showBadge: promotion.showBadge
+      badgeStyle: promotion.badgeStyle
     })
     setShowCreateModal(true)
     setDropdownOpen(null)
@@ -854,17 +854,71 @@ export default function PromotionsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showBadge"
-                    checked={formData.showBadge}
-                    onChange={(e) => setFormData({ ...formData, showBadge: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="showBadge" className="ml-2 text-sm text-gray-700">
-                    Mostrar badge "Oferta" en la tienda
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Estilo de badge en la tienda
                   </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Opción: Sin badge */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, badgeStyle: 'none' })}
+                      className={`relative p-4 border-2 rounded-lg transition-all ${
+                        formData.badgeStyle === 'none'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center mb-2">
+                          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                          </svg>
+                        </div>
+                        <p className="text-xs font-medium text-gray-700">Sin badge</p>
+                      </div>
+                    </button>
+
+                    {/* Opción: Badge etiqueta */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, badgeStyle: 'badge' })}
+                      className={`relative p-4 border-2 rounded-lg transition-all ${
+                        formData.badgeStyle === 'badge'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center mb-2 relative">
+                          <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                            OFERTA
+                          </div>
+                        </div>
+                        <p className="text-xs font-medium text-gray-700">Etiqueta</p>
+                      </div>
+                    </button>
+
+                    {/* Opción: Ribbon cinta diagonal */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, badgeStyle: 'ribbon' })}
+                      className={`relative p-4 border-2 rounded-lg transition-all ${
+                        formData.badgeStyle === 'ribbon'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center mb-2 relative overflow-hidden">
+                          <div className="absolute top-2 right-[-30px] bg-red-500 text-white text-[8px] font-bold px-8 py-0.5 rotate-45 shadow-md">
+                            OFERTA
+                          </div>
+                        </div>
+                        <p className="text-xs font-medium text-gray-700">Cinta diagonal</p>
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex space-x-3 pt-4">
@@ -1027,17 +1081,71 @@ export default function PromotionsPage() {
                           </p>
                         </div>
 
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="showBadgeDesktop"
-                            checked={formData.showBadge}
-                            onChange={(e) => setFormData({ ...formData, showBadge: e.target.checked })}
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                          <label htmlFor="showBadgeDesktop" className="ml-3 text-sm text-gray-700">
-                            Mostrar badge "Oferta" en la tienda
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Estilo de badge en la tienda
                           </label>
+                          <div className="grid grid-cols-3 gap-3">
+                            {/* Opción: Sin badge */}
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, badgeStyle: 'none' })}
+                              className={`relative p-4 border-2 rounded-lg transition-all ${
+                                formData.badgeStyle === 'none'
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <div className="text-center">
+                                <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center mb-2">
+                                  <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                  </svg>
+                                </div>
+                                <p className="text-xs font-medium text-gray-700">Sin badge</p>
+                              </div>
+                            </button>
+
+                            {/* Opción: Badge etiqueta */}
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, badgeStyle: 'badge' })}
+                              className={`relative p-4 border-2 rounded-lg transition-all ${
+                                formData.badgeStyle === 'badge'
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <div className="text-center">
+                                <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center mb-2 relative">
+                                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                                    OFERTA
+                                  </div>
+                                </div>
+                                <p className="text-xs font-medium text-gray-700">Etiqueta</p>
+                              </div>
+                            </button>
+
+                            {/* Opción: Ribbon cinta diagonal */}
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, badgeStyle: 'ribbon' })}
+                              className={`relative p-4 border-2 rounded-lg transition-all ${
+                                formData.badgeStyle === 'ribbon'
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <div className="text-center">
+                                <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center mb-2 relative overflow-hidden">
+                                  <div className="absolute top-2 right-[-30px] bg-red-500 text-white text-[8px] font-bold px-8 py-0.5 rotate-45 shadow-md">
+                                    OFERTA
+                                  </div>
+                                </div>
+                                <p className="text-xs font-medium text-gray-700">Cinta diagonal</p>
+                              </div>
+                            </button>
+                          </div>
                         </div>
                       </div>
 

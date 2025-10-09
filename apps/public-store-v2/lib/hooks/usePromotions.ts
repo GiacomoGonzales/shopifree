@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { getActivePromotionsForProduct, calculateDiscountedPrice, hasPromotionBadge, Promotion } from '../promotions';
+import { getActivePromotionsForProduct, calculateDiscountedPrice, getPromotionBadgeStyle, Promotion, BadgeStyle } from '../promotions';
 
 interface PromotionData {
   originalPrice: number;
   finalPrice: number;
   discount: number;
-  hasDiscountBadge: boolean;
+  badgeStyle: BadgeStyle;
   appliedPromotion?: Promotion;
   isLoading: boolean;
 }
@@ -80,7 +80,7 @@ export function usePromotions(storeId: string | null, productId: string, origina
       originalPrice,
       finalPrice,
       discount,
-      hasDiscountBadge: hasPromotionBadge(promotions),
+      badgeStyle: getPromotionBadgeStyle(promotions),
       appliedPromotion,
       isLoading: loading
     };

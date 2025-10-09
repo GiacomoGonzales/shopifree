@@ -1,6 +1,9 @@
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 
+// Tipos de badge para promociones
+export type BadgeStyle = 'none' | 'badge' | 'ribbon';
+
 // Tipos de promociones
 export interface Promotion {
   id: string;
@@ -19,13 +22,11 @@ export interface Promotion {
 
   // Configuración adicional
   priority: number; // Para resolver conflictos entre promociones
-  showBadge: boolean; // Mostrar badge "Oferta" en tienda
-
-  // Métricas
-  totalUses: number;
-  totalRevenue: number;
+  badgeStyle: BadgeStyle; // Estilo del badge: none, badge (etiqueta), ribbon (cinta diagonal)
 
   // Metadata
+  totalUses: number;
+  totalRevenue: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -41,7 +42,7 @@ export interface CreatePromotionData {
   targetType: 'all_products' | 'specific_products' | 'categories' | 'brands';
   targetIds: string[];
   priority: number;
-  showBadge: boolean;
+  badgeStyle: BadgeStyle;
 }
 
 /**
@@ -81,6 +82,16 @@ export async function getPromotions(storeId: string): Promise<Promotion[]> {
         }
       }
 
+      // Migración de showBadge (boolean) a badgeStyle (string)
+      let badgeStyle: BadgeStyle = 'badge'; // default
+      if (data.badgeStyle) {
+        badgeStyle = data.badgeStyle;
+      } else if (data.showBadge === false) {
+        badgeStyle = 'none';
+      } else if (data.showBadge === true) {
+        badgeStyle = 'badge';
+      }
+
       promotions.push({
         id: doc.id,
         name: data.name,
@@ -94,7 +105,7 @@ export async function getPromotions(storeId: string): Promise<Promotion[]> {
         targetType: data.targetType,
         targetIds: data.targetIds || [],
         priority: data.priority || 0,
-        showBadge: data.showBadge !== false, // default true
+        badgeStyle,
         totalUses: data.totalUses || 0,
         totalRevenue: data.totalRevenue || 0,
         createdAt: data.createdAt,
@@ -280,5 +291,13 @@ export function calculateDiscountedPrice(originalPrice: number, promotions: Prom
  * Verificar si un producto tiene promociones activas con badge
  */
 export function hasPromotionBadge(promotions: Promotion[]): boolean {
-  return promotions.some(promotion => promotion.showBadge);
+  return promotions.some(promotion => promotion.badgeStyle !== 'none');
+}
+
+/**
+ * Obtener el estilo de badge de la promoción con mayor prioridad
+ */
+export function getPromotionBadgeStyle(promotions: Promotion[]): BadgeStyle {
+  const promotionWithBadge = promotions.find(p => p.badgeStyle !== 'none');
+  return promotionWithBadge?.badgeStyle || 'none';
 }

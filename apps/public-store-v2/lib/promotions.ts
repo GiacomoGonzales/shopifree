@@ -1,6 +1,9 @@
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
 
+// Tipos de badge para promociones
+export type BadgeStyle = 'none' | 'badge' | 'ribbon';
+
 // Tipos de promociones (mismo que dashboard)
 export interface Promotion {
   id: string;
@@ -14,7 +17,7 @@ export interface Promotion {
   targetType: 'all_products' | 'specific_products' | 'categories' | 'brands';
   targetIds: string[];
   priority: number;
-  showBadge: boolean;
+  badgeStyle: BadgeStyle;
   totalUses: number;
   totalRevenue: number;
 }
@@ -59,6 +62,16 @@ export async function getActivePromotionsForProduct(storeId: string, productId: 
 
 
         if (isTargeted) {
+          // Migración de showBadge (boolean) a badgeStyle (string)
+          let badgeStyle: BadgeStyle = 'badge'; // default
+          if (data.badgeStyle) {
+            badgeStyle = data.badgeStyle;
+          } else if (data.showBadge === false) {
+            badgeStyle = 'none';
+          } else if (data.showBadge === true) {
+            badgeStyle = 'badge';
+          }
+
           activePromotions.push({
             id: doc.id,
             name: data.name,
@@ -71,7 +84,7 @@ export async function getActivePromotionsForProduct(storeId: string, productId: 
             targetType: data.targetType,
             targetIds: data.targetIds || [],
             priority: data.priority || 0,
-            showBadge: data.showBadge !== false,
+            badgeStyle,
             totalUses: data.totalUses || 0,
             totalRevenue: data.totalRevenue || 0
           });
@@ -127,5 +140,13 @@ export function calculateDiscountedPrice(originalPrice: number, promotions: Prom
  * Verificar si un producto tiene promociones activas con badge
  */
 export function hasPromotionBadge(promotions: Promotion[]): boolean {
-  return promotions.some(promotion => promotion.showBadge);
+  return promotions.some(promotion => promotion.badgeStyle !== 'none');
+}
+
+/**
+ * Obtener el estilo de badge de la promoción con mayor prioridad
+ */
+export function getPromotionBadgeStyle(promotions: Promotion[]): BadgeStyle {
+  const promotionWithBadge = promotions.find(p => p.badgeStyle !== 'none');
+  return promotionWithBadge?.badgeStyle || 'none';
 }

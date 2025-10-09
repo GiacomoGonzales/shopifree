@@ -63,14 +63,31 @@ ProductImage.displayName = 'ProductImage';
 
 // Componente memoizado para badge que evita re-renders innecesarios
 const ProductBadge = memo(({
-  showBadge,
+  badgeStyle,
   badgeText
 }: {
-  showBadge: boolean
+  badgeStyle: 'none' | 'badge' | 'ribbon'
   badgeText: string
 }) => {
-  if (!showBadge) return null;
+  if (badgeStyle === 'none') return null;
 
+  if (badgeStyle === 'ribbon') {
+    return (
+      <div
+        className="nbd-product-ribbon"
+        style={{
+          opacity: 1,
+          transition: 'none',
+          WebkitTransition: 'none',
+          willChange: 'auto'
+        }}
+      >
+        {badgeText}
+      </div>
+    );
+  }
+
+  // badgeStyle === 'badge' (etiqueta por defecto)
   return (
     <div
       className="nbd-product-badge"
@@ -85,8 +102,8 @@ const ProductBadge = memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Solo re-renderizar si showBadge o badgeText cambian
-  return prevProps.showBadge === nextProps.showBadge &&
+  // Solo re-renderizar si badgeStyle o badgeText cambian
+  return prevProps.badgeStyle === nextProps.badgeStyle &&
          prevProps.badgeText === nextProps.badgeText;
 });
 
@@ -166,7 +183,7 @@ const ProductCard = memo(({
   const hasPromotion = promotionData.discount > 0;
   const finalPrice = hasPromotion ? promotionData.finalPrice : product.price;
   const originalPrice = product.price;
-  const showBadge = hasPromotion && promotionData.hasDiscountBadge;
+  const badgeStyle = hasPromotion ? promotionData.badgeStyle : 'none';
 
   return (
     <div
@@ -191,7 +208,7 @@ const ProductCard = memo(({
         />
 
         <ProductBadge
-          showBadge={showBadge}
+          badgeStyle={badgeStyle}
           badgeText={additionalText('offer')}
         />
 

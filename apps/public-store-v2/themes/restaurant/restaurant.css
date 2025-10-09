@@ -2353,6 +2353,14 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         pointer-events: none !important;
     }
 
+    .nbd-mobile-grid .nbd-product-ribbon {
+        top: 8px;
+        right: -28px;
+        padding: 3px 32px;
+        font-size: 8px;
+        letter-spacing: 0.3px;
+    }
+
     .nbd-mobile-list .nbd-product-badge {
         top: var(--nbd-space-xs);
         left: var(--nbd-space-xs);
@@ -2364,6 +2372,14 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         transition: none !important;
         will-change: auto !important;
         pointer-events: none !important;
+    }
+
+    .nbd-mobile-list .nbd-product-ribbon {
+        top: 6px;
+        right: -26px;
+        padding: 2px 30px;
+        font-size: 7px;
+        letter-spacing: 0.2px;
     }
 }
 
@@ -2462,7 +2478,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     }
 
     /* Prevenir parpadeo del badge en móvil */
-    .nbd-product-badge {
+    .nbd-product-badge,
+    .nbd-product-ribbon {
         animation: none !important;
         transition: none !important;
         will-change: auto !important;
@@ -2557,6 +2574,24 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
             contain: layout style paint !important;
             isolation: isolate !important;
         }
+
+        /* Estabilizar ribbon para prevenir parpadeo en iOS */
+        .nbd-product-ribbon {
+            animation: none !important;
+            transition: none !important;
+            -webkit-transition: none !important;
+            will-change: auto !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: none !important;
+            backface-visibility: hidden !important;
+            -webkit-backface-visibility: hidden !important;
+            contain: layout style paint !important;
+            isolation: isolate !important;
+            /* Mantener el transform rotate para el ribbon */
+            transform: rotate(45deg) translateZ(0) !important;
+            -webkit-transform: rotate(45deg) translateZ(0) !important;
+        }
     }
 }
 
@@ -2593,6 +2628,25 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.nbd-product-ribbon {
+    position: absolute;
+    top: 12px;
+    right: -32px;
+    background: #dc2626;
+    color: white;
+    padding: 4px 40px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    will-change: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
 /* Etiqueta OFERTA más pequeña en desktop */
 @media (min-width: 1024px) {
     .nbd-product-badge {
@@ -2600,6 +2654,11 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
         font-size: 8px;
         letter-spacing: 0.2px;
         font-weight: 600;
+    }
+
+    .nbd-product-ribbon {
+        font-size: 9px;
+        padding: 3px 38px;
     }
 }
 
@@ -8702,6 +8761,22 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     border-radius: 50px;
     font-size: 0.75rem;
     font-weight: 600;
+}
+
+.restaurant-product-ribbon {
+    position: absolute;
+    top: 12px;
+    right: -32px;
+    background: #dc2626;
+    color: white;
+    padding: 4px 40px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
 }
 
 .restaurant-product-image-placeholder {

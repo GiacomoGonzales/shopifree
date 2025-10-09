@@ -79,8 +79,10 @@ export default function CheckoutSuccessPage() {
               transactionId: collectionId
             });
 
-            if (orderDoc?.id) {
-              console.log('✅ [MercadoPago] Pedido creado exitosamente:', orderDoc.id);
+            const orderId = (orderDoc as any)?.id || null;
+
+            if (orderId) {
+              console.log('✅ [MercadoPago] Pedido creado exitosamente:', orderId);
 
               // Limpiar localStorage
               localStorage.removeItem('pendingMercadoPagoOrder');
@@ -88,7 +90,7 @@ export default function CheckoutSuccessPage() {
               // Crear token de confirmación simulado para mostrar el resumen
               const mockToken: ConfirmationToken = {
                 id: `mp_${Date.now()}`,
-                orderId: orderDoc.id,
+                orderId: orderId,
                 orderData: pendingOrder.orderData,
                 expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutos
                 createdAt: Date.now(),
