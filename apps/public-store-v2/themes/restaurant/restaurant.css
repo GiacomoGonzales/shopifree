@@ -5853,11 +5853,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 
 .nbd-cart-item {
     display: grid;
-    grid-template-columns: 60px 1fr auto auto auto;
-    grid-template-areas: 
-        "image info controls total remove";
-    gap: var(--nbd-space-md);
-    align-items: center;
+    grid-template-columns: 80px 1fr auto;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "image info remove"
+        "image controls total";
+    gap: var(--nbd-space-sm) var(--nbd-space-md);
     padding: var(--nbd-space-md);
     border: 1px solid var(--nbd-neutral-200);
     border-radius: var(--nbd-radius-lg);
@@ -5873,8 +5874,8 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Cart Item Image */
 .nbd-cart-item-image {
     grid-area: image;
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: var(--nbd-radius-lg);
     overflow: hidden;
     background: var(--nbd-neutral-200);
@@ -5902,6 +5903,9 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-cart-item-info {
     grid-area: info;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--nbd-space-xs);
 }
 
 .nbd-cart-item-name {
@@ -5932,7 +5936,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 .nbd-cart-item-controls {
     grid-area: controls;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 
@@ -6004,6 +6008,7 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
     cursor: pointer;
     border-radius: var(--nbd-radius-lg);
     transition: all var(--nbd-transition-base);
+    align-self: start;
 }
 
 .nbd-remove-item:hover {
@@ -6018,10 +6023,12 @@ button.nbd-dropdown-option.nbd-dropdown-option--active:hover,
 /* Cart Item Total */
 .nbd-cart-item-total {
     grid-area: total;
-    font-size: var(--nbd-font-size-sm);
-    font-weight: 600;
+    font-size: var(--nbd-font-size-base);
+    font-weight: 700;
     color: var(--nbd-primary);
     text-align: right;
+    justify-self: end;
+    align-self: center;
 }
 
 /* Cart Footer */

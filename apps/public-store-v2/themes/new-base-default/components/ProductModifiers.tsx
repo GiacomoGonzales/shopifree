@@ -82,8 +82,39 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
       // No hacer nada aquí, el manejo se hace con + y -
       return;
     } else {
-      // Modo radio: solo una selección
-      setSelections(prev => ({ ...prev, [groupId]: [optionId] }));
+      // Determinar si es checkbox (maxSelections > 1) o radio (maxSelections = 1)
+      if (group.maxSelections > 1) {
+        // Modo checkbox: permitir múltiples selecciones
+        setSelections(prev => {
+          const current = prev[groupId] || [];
+          const isSelected = current.includes(optionId);
+
+          if (isSelected) {
+            // Deseleccionar
+            const newSelections = current.filter(id => id !== optionId);
+
+            // Verificar minSelections
+            if (group.required && newSelections.length < group.minSelections) {
+              return prev; // No permitir bajar de minSelections
+            }
+
+            return { ...prev, [groupId]: newSelections };
+          } else {
+            // Seleccionar
+            const newSelections = [...current, optionId];
+
+            // Verificar maxSelections
+            if (newSelections.length > group.maxSelections) {
+              return prev; // No permitir exceder maxSelections
+            }
+
+            return { ...prev, [groupId]: newSelections };
+          }
+        });
+      } else {
+        // Modo radio: solo una selección
+        setSelections(prev => ({ ...prev, [groupId]: [optionId] }));
+      }
     }
   };
 
@@ -198,23 +229,61 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
 
   // Obtener el texto de ayuda para el grupo
   const getGroupHelpText = (group: ModifierGroup): string => {
-    if (!group.allowMultiple) {
-      return group.required ? 'Selecciona una opción' : 'Opcional';
-    }
+    if (group.allowMultiple) {
+      const min = group.minSelections;
+      const max = group.maxSelections;
+      const groupQuantities = quantities[group.id] || {};
+      const totalQuantity = Object.values(groupQuantities).reduce((sum, qty) => sum + qty, 0);
 
-    const min = group.minSelections;
-    const max = group.maxSelections;
-    const groupQuantities = quantities[group.id] || {};
-    const totalQuantity = Object.values(groupQuantities).reduce((sum, qty) => sum + qty, 0);
-
-    if (group.required) {
-      if (min === max) {
-        return `Selecciona ${min} ${totalQuantity > 0 ? `(${totalQuantity}/${min})` : ''}`;
+      // Si max es 99 (valor por defecto), no mostrar el límite
+      if (max === 99) {
+        if (group.required) {
+          if (min > 0) {
+            return `Selecciona al menos ${min}`;
+          }
+          return 'Selecciona las opciones que desees';
+        }
+        return 'Opcional';
       }
-      return `Selecciona entre ${min} y ${max} ${totalQuantity > 0 ? `(${totalQuantity})` : ''}`;
-    }
 
-    return `Hasta ${max} opciones ${totalQuantity > 0 ? `(${totalQuantity}/${max})` : ''}`;
+      if (group.required) {
+        if (min === max) {
+          return `Selecciona ${min} ${totalQuantity > 0 ? `(${totalQuantity}/${min})` : ''}`;
+        }
+        return `Selecciona entre ${min} y ${max} ${totalQuantity > 0 ? `(${totalQuantity})` : ''}`;
+      }
+
+      return `Hasta ${max} opciones ${totalQuantity > 0 ? `(${totalQuantity}/${max})` : ''}`;
+    } else {
+      // Modo checkbox o radio
+      if (group.maxSelections > 1) {
+        const selectedCount = (selections[group.id] || []).length;
+        const min = group.minSelections;
+        const max = group.maxSelections;
+
+        // Si max es 99 (valor por defecto), no mostrar el límite
+        if (max === 99) {
+          if (group.required) {
+            if (min > 0) {
+              return `Selecciona al menos ${min}`;
+            }
+            return 'Selecciona las opciones que desees';
+          }
+          return 'Opcional';
+        }
+
+        if (group.required) {
+          if (min === max) {
+            return `Selecciona ${min} ${selectedCount > 0 ? `(${selectedCount}/${min})` : ''}`;
+          }
+          return `Selecciona entre ${min} y ${max} ${selectedCount > 0 ? `(${selectedCount})` : ''}`;
+        }
+
+        return `Hasta ${max} opciones ${selectedCount > 0 ? `(${selectedCount}/${max})` : ''}`;
+      } else {
+        return group.required ? 'Selecciona una opción' : 'Opcional';
+      }
+    }
   };
 
   if (!modifierGroups || modifierGroups.length === 0) return null;
@@ -296,14 +365,16 @@ export default function ProductModifiers({ modifierGroups, onSelectionChange, cu
                     </div>
                   );
                 } else {
-                  // Modo radio tradicional
+                  // Modo checkbox (maxSelections > 1) o radio (maxSelections = 1)
+                  const inputType = group.maxSelections > 1 ? 'checkbox' : 'radio';
+
                   return (
                     <label
                       key={option.id}
                       className={`nbd-modifier-option ${isSelected ? 'nbd-modifier-option--selected' : ''}`}
                     >
                       <input
-                        type="radio"
+                        type={inputType}
                         name={inputName}
                         checked={isSelected}
                         onChange={() => handleOptionChange(group.id, option.id)}
