@@ -100,27 +100,74 @@ export default function ContactSection() {
   // Configurar el autocompletado cuando Google Maps esté cargado y el input esté disponible
   useEffect(() => {
     if (isGoogleMapsLoaded && autocompleteRef && formData.hasPhysicalLocation) {
-      const autocomplete = new window.google.maps.places.Autocomplete(autocompleteRef, {
-        types: ['address'],
-        componentRestrictions: { country: ['mx', 'ar', 'co', 'pe', 'cl', 've', 'ec', 'bo', 'py', 'uy', 'br', 'es', 'us'] }
-      })
-
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace()
-        
-        if (place.geometry && place.geometry.location) {
-          const lat = place.geometry.location.lat()
-          const lng = place.geometry.location.lng()
-          const address = place.formatted_address || place.name || ''
-          
-          handleChange('location.address', address)
-          handleChange('location.lat', lat)
-          handleChange('location.lng', lng)
+      // Intentar obtener ubicación del usuario para priorizar resultados cercanos
+      const setupAutocomplete = (userLocation?: google.maps.LatLng) => {
+        const autocompleteOptions: google.maps.places.AutocompleteOptions = {
+          types: ['address']
         }
-      })
 
-      return () => {
-        window.google.maps.event.clearInstanceListeners(autocomplete)
+        // Si tenemos la ubicación del usuario, priorizar resultados cercanos
+        if (userLocation) {
+          autocompleteOptions.location = userLocation
+          autocompleteOptions.radius = 50000 // 50km de radio para priorizar resultados locales
+          console.log('📍 Autocomplete configurado con ubicación del usuario:', userLocation.lat(), userLocation.lng())
+        } else {
+          console.log('🌍 Autocomplete configurado para búsqueda global (sin restricciones)')
+        }
+
+        const autocomplete = new window.google.maps.places.Autocomplete(autocompleteRef, autocompleteOptions)
+
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace()
+
+          if (place.geometry && place.geometry.location) {
+            const lat = place.geometry.location.lat()
+            const lng = place.geometry.location.lng()
+            const address = place.formatted_address || place.name || ''
+
+            handleChange('location.address', address)
+            handleChange('location.lat', lat)
+            handleChange('location.lng', lng)
+          }
+        })
+
+        return autocomplete
+      }
+
+      // Intentar obtener la ubicación del usuario
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLocation = new window.google.maps.LatLng(
+              position.coords.latitude,
+              position.coords.longitude
+            )
+            const autocomplete = setupAutocomplete(userLocation)
+
+            return () => {
+              window.google.maps.event.clearInstanceListeners(autocomplete)
+            }
+          },
+          (error) => {
+            console.log('⚠️ No se pudo obtener ubicación del usuario, usando búsqueda global:', error.message)
+            const autocomplete = setupAutocomplete()
+
+            return () => {
+              window.google.maps.event.clearInstanceListeners(autocomplete)
+            }
+          },
+          {
+            timeout: 5000,
+            maximumAge: 600000 // Cache de 10 minutos
+          }
+        )
+      } else {
+        console.log('⚠️ Geolocalización no disponible, usando búsqueda global')
+        const autocomplete = setupAutocomplete()
+
+        return () => {
+          window.google.maps.event.clearInstanceListeners(autocomplete)
+        }
       }
     }
   }, [isGoogleMapsLoaded, autocompleteRef, formData.hasPhysicalLocation])

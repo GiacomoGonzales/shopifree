@@ -499,6 +499,14 @@ function StoreOnboardingContent() {
         heroImageUrl: formData.storefrontImageUrl || '',
         heroImagePublicId: formData.storefrontImagePublicId || '',
         socialMedia: formData.socialMedia,
+        // Configuración de pagos por defecto
+        advanced: {
+          payments: {
+            acceptCashOnDelivery: true,
+            cashOnDeliveryMethods: ['cash', 'card'],
+            acceptOnlinePayment: false
+          }
+        },
         ownerId: user.uid
       }
       
