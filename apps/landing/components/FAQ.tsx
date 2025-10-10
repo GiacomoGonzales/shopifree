@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 interface FAQItem {
   id: string
@@ -11,7 +11,6 @@ interface FAQItem {
 
 export default function FAQ() {
   const t = useTranslations('faq')
-  const locale = useLocale()
 
   const faqData: FAQItem[] = [
     {
