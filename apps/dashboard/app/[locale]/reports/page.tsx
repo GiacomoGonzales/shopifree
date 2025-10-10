@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../components/DashboardLayout'
 import { useStore } from '../../../lib/hooks/useStore'
 import { subscribeToStoreOrders, Order } from '../../../lib/orders'
@@ -21,7 +20,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 type DateRange = '7d' | '30d' | '90d' | '1y' | 'custom'
 
 export default function ReportsPage() {
-  const t = useTranslations('reports')
   const { store } = useStore()
 
   const [orders, setOrders] = useState<Order[]>([])
@@ -143,10 +141,10 @@ export default function ReportsPage() {
           <div className="md:flex md:items-center md:justify-between mb-6">
             <div className="flex-1 min-w-0">
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                {t('title')}
+                Reportes
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                {t('subtitle')}
+                Análisis y estadísticas de tu tienda
               </p>
             </div>
             <div className="mt-4 flex md:mt-0 md:ml-4">
