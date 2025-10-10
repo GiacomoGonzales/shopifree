@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface FAQItem {
   id: string
@@ -8,40 +9,43 @@ interface FAQItem {
   answer: string
 }
 
-const faqData: FAQItem[] = [
-  {
-    id: 'what-is-shopifree',
-    question: '¿Qué es Shopifree?',
-    answer: 'Shopifree es una plataforma completa para crear y gestionar tu tienda online sin conocimientos técnicos. Te permite vender productos, gestionar pedidos, personalizar tu tienda y mucho más, todo desde un panel intuitivo.'
-  },
-  {
-    id: 'technical-knowledge',
-    question: '¿Necesito conocimientos técnicos para usarlo?',
-    answer: 'No, Shopifree está diseñado para ser extremadamente fácil de usar. Nuestro editor visual te permite crear y personalizar tu tienda simplemente arrastrando y soltando elementos, sin necesidad de programar.'
-  },
-  {
-    id: 'custom-domain',
-    question: '¿Puedo conectar mi propio dominio?',
-    answer: 'Sí, puedes conectar tu dominio personalizado a tu tienda Shopifree. Te proporcionamos guías paso a paso para configurar tu dominio y asegurarnos de que todo funcione perfectamente.'
-  },
-  {
-    id: 'payment-methods',
-    question: '¿Qué métodos de pago puedo habilitar en mi tienda?',
-    answer: 'Shopifree soporta múltiples métodos de pago incluyendo tarjetas de crédito/débito, PayPal, transferencias bancarias y más. Puedes habilitar los métodos que prefieras según tu ubicación y necesidades.'
-  },
-  {
-    id: 'order-management',
-    question: '¿Puedo gestionar pedidos y clientes desde el panel?',
-    answer: 'Absolutamente. El panel de administración de Shopifree te permite gestionar todos tus pedidos, ver información detallada de clientes, controlar inventario, generar reportes y mucho más, todo desde un lugar centralizado.'
-  },
-  {
-    id: 'costs-commissions',
-    question: '¿Tiene algún costo o comisión por venta?',
-    answer: 'Shopifree ofrece planes flexibles sin comisiones por venta. Solo pagas una suscripción mensual fija que incluye todas las funcionalidades, hosting, soporte técnico y actualizaciones constantes.'
-  }
-]
-
 export default function FAQ() {
+  const t = useTranslations('faq')
+  const locale = useLocale()
+
+  const faqData: FAQItem[] = [
+    {
+      id: 'what-is-shopifree',
+      question: t('whatIsShopifree.question'),
+      answer: t('whatIsShopifree.answer')
+    },
+    {
+      id: 'technical-knowledge',
+      question: t('technicalKnowledge.question'),
+      answer: t('technicalKnowledge.answer')
+    },
+    {
+      id: 'custom-domain',
+      question: t('customDomain.question'),
+      answer: t('customDomain.answer')
+    },
+    {
+      id: 'payment-methods',
+      question: t('paymentMethods.question'),
+      answer: t('paymentMethods.answer')
+    },
+    {
+      id: 'whatsapp-sales',
+      question: t('whatsappSales.question'),
+      answer: t('whatsappSales.answer')
+    },
+    {
+      id: 'costs-commissions',
+      question: t('costsCommissions.question'),
+      answer: t('costsCommissions.answer')
+    }
+  ]
+
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
 
   const toggleItem = (id: string) => {
@@ -61,10 +65,10 @@ export default function FAQ() {
           {/* Left Column - Title */}
           <div className="text-center lg:text-left">
             <h2 id="faq-heading" className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
-              Preguntas Frecuentes sobre Shopifree
+              {t('title')}
             </h2>
             <p className="text-lg text-gray-600 max-w-lg">
-              Resolvemos las dudas más comunes sobre Shopifree para que puedas empezar con confianza.
+              {t('subtitle')}
             </p>
           </div>
 

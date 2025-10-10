@@ -20,6 +20,7 @@ export default function HomePage() {
   const [isAnnual, setIsAnnual] = useState(true) // Start with annual pricing as default
   const [carouselPosition, setCarouselPosition] = useState(0)
   const carouselRef = useRef<HTMLDivElement>(null)
+  const [currentDemoStore, setCurrentDemoStore] = useState(0)
 
   const dynamicPhrases = t.raw('dynamicPhrases') as string[]
 
@@ -35,7 +36,71 @@ export default function HomePage() {
     'Instagram Shopping',
     'Google Ads'
   ]
-  
+
+  // Demo stores data
+  const demoStores = [
+    {
+      name: "Restaurante El Buen Sabor",
+      category: "Restaurante",
+      theme: "Restaurant",
+      icon: "🍕",
+      url: "https://demo-restaurant.shopifree.app",
+      description: "Menú digital con checkout rápido",
+      mobileColor: "bg-gradient-to-br from-orange-400 to-red-500",
+      desktopColor: "bg-gradient-to-br from-orange-300 to-red-400"
+    },
+    {
+      name: "Boutique Elegante",
+      category: "Moda",
+      theme: "Elegant Boutique",
+      icon: "👗",
+      url: "https://demo-fashion.shopifree.app",
+      description: "Tienda de moda premium",
+      mobileColor: "bg-gradient-to-br from-pink-400 to-purple-500",
+      desktopColor: "bg-gradient-to-br from-pink-300 to-purple-400"
+    },
+    {
+      name: "Pet Paradise",
+      category: "Mascotas",
+      theme: "Pet Friendly",
+      icon: "🐾",
+      url: "https://demo-pets.shopifree.app",
+      description: "Todo para tu mascota",
+      mobileColor: "bg-gradient-to-br from-green-400 to-teal-500",
+      desktopColor: "bg-gradient-to-br from-green-300 to-teal-400"
+    },
+    {
+      name: "TechZone",
+      category: "Tecnología",
+      theme: "Mobile Modern",
+      icon: "📱",
+      url: "https://demo-tech.shopifree.app",
+      description: "Lo último en tecnología y gadgets",
+      mobileColor: "bg-gradient-to-br from-blue-400 to-indigo-500",
+      desktopColor: "bg-gradient-to-br from-blue-300 to-indigo-400"
+    },
+    {
+      name: "FitLife Store",
+      category: "Deportes",
+      theme: "Shopifree Default",
+      icon: "💪",
+      url: "https://demo-fitness.shopifree.app",
+      description: "Equipamiento deportivo y fitness",
+      mobileColor: "bg-gradient-to-br from-cyan-400 to-blue-600",
+      desktopColor: "bg-gradient-to-br from-cyan-300 to-blue-500"
+    },
+    {
+      name: "Glow Beauty",
+      category: "Belleza",
+      theme: "Minimal Clean",
+      icon: "💄",
+      url: "https://demo-beauty.shopifree.app",
+      description: "Cosmética y cuidado personal",
+      mobileColor: "bg-gradient-to-br from-rose-400 to-amber-400",
+      desktopColor: "bg-gradient-to-br from-rose-300 to-amber-300"
+    }
+  ]
+
   const pricingPlans = [
     // Plan Gratis (index 0)
     {
@@ -55,8 +120,7 @@ export default function HomePage() {
         t('pricing.freeFeatures.advancedSeo'),
         t('pricing.freeFeatures.unlimitedHosting'),
         t('pricing.freeFeatures.freeSSL'),
-        t('pricing.freeFeatures.adminPanel'),
-        t('pricing.freeFeatures.zeroCommission')
+        t('pricing.freeFeatures.adminPanel')
       ],
       cta: t('pricing.startNowFree'),
       colors: {
@@ -73,13 +137,15 @@ export default function HomePage() {
     {
       id: 'premium',
       name: t('pricing.premiumPlan'),
-      monthlyPrice: 19,
-      annualPrice: 99,
+      monthlyPrice: 15,
+      annualPrice: 120,
       description: t('pricing.premiumDescription'),
       includesFrom: t('pricing.freePlan'),
       features: [
         t('pricing.premiumFeatures.products50'),
         t('pricing.premiumFeatures.traditionalCheckout'),
+        t('pricing.proFeatures.integratedPayments'),
+        t('pricing.premiumFeatures.cartRecovery'),
         t('pricing.premiumFeatures.autoEmails'),
         t('pricing.premiumFeatures.completeReports'),
         t('pricing.premiumFeatures.googleAnalytics'),
@@ -103,14 +169,12 @@ export default function HomePage() {
     {
       id: 'pro',
       name: t('pricing.proPlan'),
-      monthlyPrice: 49,
-      annualPrice: 399,
+      monthlyPrice: 30,
+      annualPrice: 300,
       description: t('pricing.proDescription'),
       includesFrom: t('pricing.premiumPlan'),
       features: [
         t('pricing.proFeatures.unlimitedProducts'),
-        t('pricing.proFeatures.integratedPayments'),
-        t('pricing.premiumFeatures.cartRecovery'),
         t('pricing.proFeatures.customerSegmentation'),
         t('pricing.proFeatures.advancedMarketing'),
         t('pricing.proFeatures.exclusiveThemes'),
@@ -152,6 +216,19 @@ export default function HomePage() {
 
   const goToPlan = (index: number) => {
     setCurrentPlan(index)
+  }
+
+  // Demo stores navigation
+  const nextDemoStore = () => {
+    setCurrentDemoStore((prev) => (prev + 1) % demoStores.length)
+  }
+
+  const prevDemoStore = () => {
+    setCurrentDemoStore((prev) => (prev - 1 + demoStores.length) % demoStores.length)
+  }
+
+  const goToDemoStore = (index: number) => {
+    setCurrentDemoStore(index)
   }
 
   // Helper functions for pricing
@@ -270,16 +347,16 @@ export default function HomePage() {
 
   const renderAnimatedText = () => {
     if (!dynamicPhrases.length) return null
-    
+
     const currentPhrase = dynamicPhrases[currentPhraseIndex]
     const words = currentPhrase.split(' ')
-    
+
     return words.map((word, index) => (
       <span
         key={`${currentPhraseIndex}-${index}`}
         className={`inline-block mr-2 transition-all duration-500 ease-out ${
-          index < visibleWords 
-            ? 'opacity-100 transform translate-y-0' 
+          index < visibleWords
+            ? 'opacity-100 transform translate-y-0'
             : 'opacity-0 transform translate-y-4'
         }`}
         style={{ transitionDelay: `${index * 50}ms` }}
@@ -291,22 +368,22 @@ export default function HomePage() {
 
   const renderPlanCard = (plan: typeof pricingPlans[0], isMobile = false) => {
     return (
-      <div className={`${plan.background} rounded-2xl ${isMobile ? 'shadow-lg' : plan.isRecommended ? 'shadow-xl' : 'shadow-lg'} ${isMobile ? 'p-8' : 'p-8'} relative border-2 ${plan.colors.border} ${plan.isRecommended && !isMobile ? 'transform md:scale-105 ring-2 ring-blue-200' : ''} w-full ${isMobile ? 'h-[750px]' : ''} flex flex-col text-left`}>
-        <div className="absolute -top-4 left-6 z-10">
-          <span className={`${plan.colors.badge} text-white px-5 py-2 rounded-full ${isMobile ? 'text-base' : 'text-sm'} font-medium whitespace-nowrap`}>
+      <div className={`${plan.background} rounded-2xl ${isMobile ? 'shadow-lg' : plan.isRecommended ? 'shadow-xl' : 'shadow-lg'} ${isMobile ? 'p-6' : 'p-6'} relative border-2 ${plan.colors.border} ${plan.isRecommended && !isMobile ? 'ring-2 ring-blue-200' : ''} w-full ${isMobile ? 'h-[650px]' : ''} flex flex-col text-left`}>
+        <div className="absolute -top-3 left-4 z-10">
+          <span className={`${plan.colors.badge} text-white px-4 py-1.5 rounded-full ${isMobile ? 'text-sm' : 'text-xs'} font-medium whitespace-nowrap`}>
             {plan.name}
           </span>
         </div>
-        <div className={`mt-6 ${isMobile ? 'mb-6' : 'mb-6'} text-left`}>
-          <div className="flex items-baseline gap-2 mb-2 justify-start">
-            <div className={`${isMobile ? 'text-4xl' : 'text-4xl'} font-light ${plan.colors.price}`}>{formatPrice(plan)}</div>
+        <div className={`mt-4 ${isMobile ? 'mb-4' : 'mb-4'} text-left`}>
+          <div className="flex items-baseline gap-2 mb-1 justify-start">
+            <div className={`${isMobile ? 'text-3xl' : 'text-3xl'} font-light ${plan.colors.price}`}>{formatPrice(plan)}</div>
             {isAnnual && plan.annualPrice && plan.monthlyPrice && (
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium">
                 {calculateDiscount(plan.monthlyPrice, plan.annualPrice)}% OFF
               </span>
             )}
           </div>
-          <div className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-600 font-medium text-left`}>
+          <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 font-medium text-left`}>
             {formatPeriod(plan)}
             {isAnnual && plan.annualPrice && plan.id !== 'free' && (
               <span className="text-xs text-gray-500 block">
@@ -315,39 +392,56 @@ export default function HomePage() {
             )}
           </div>
           {isAnnual && plan.annualPrice && plan.monthlyPrice && (
-            <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-500 line-through mt-1 text-left`}>
+            <div className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 line-through mt-1 text-left`}>
               ${plan.monthlyPrice}/mes
             </div>
           )}
         </div>
-        <p className={`text-gray-600 ${isMobile ? 'mb-6 text-base' : 'mb-6'} text-left`}>{plan.description}</p>
-        
+        <p className={`text-gray-600 ${isMobile ? 'mb-4 text-sm' : 'mb-4 text-sm'} text-left`}>{plan.description}</p>
+
         {plan.includesFrom && (
-          <div className={`${isMobile ? 'mb-6' : 'mb-4'}`}>
-            <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-700 font-medium`}>
+          <div className={`${isMobile ? 'mb-3' : 'mb-3'}`}>
+            <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-700 font-medium`}>
               {t('pricing.includesEverything')} {plan.includesFrom}{t('pricing.plus')}
             </p>
           </div>
         )}
-        
+
         <div className="flex-1">
-          <ul className={`text-left ${isMobile ? 'space-y-3 mb-8' : 'space-y-3 mb-8'}`}>
+          <ul className={`text-left ${isMobile ? 'space-y-2 mb-4' : 'space-y-2 mb-4'}`}>
             {plan.features.map((feature, index) => (
               <li key={index} className="flex items-start">
-                <svg className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'} ${plan.colors.check} ${isMobile ? 'mr-3' : 'mr-3'} mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
+                <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} ${plan.colors.check} ${isMobile ? 'mr-2' : 'mr-2'} mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span className={`${isMobile ? 'text-sm' : 'text-sm'} leading-relaxed`}>{feature}</span>
+                <span className={`${isMobile ? 'text-xs' : 'text-xs'} leading-relaxed`}>{feature}</span>
               </li>
             ))}
           </ul>
         </div>
-        
+
         <div className="mt-auto">
           <a href={`https://dashboard.shopifree.app/${locale}/register`}>
-            <Button className={`w-full ${plan.colors.button} text-white font-medium ${isMobile ? 'py-4 text-base' : 'py-3'}`}>
-              {plan.cta}
-            </Button>
+            {plan.isRecommended ? (
+              <button className="w-full group relative overflow-hidden rounded-full bg-emerald-600 hover:bg-emerald-700 px-6 py-3 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-white">
+                  {plan.cta}
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </span>
+              </button>
+            ) : (
+              <button className="w-full group relative overflow-hidden rounded-full border-2 border-gray-300 hover:border-emerald-600 px-6 py-3 transition-all duration-300">
+                <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-gray-700 group-hover:text-white transition-colors duration-300">
+                  {plan.cta}
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </span>
+              </button>
+            )}
           </a>
         </div>
       </div>
@@ -358,27 +452,27 @@ export default function HomePage() {
   const faqData = [
     {
       question: '¿Qué es Shopifree?',
-      answer: 'Shopifree es una plataforma completa para crear y gestionar tu tienda online sin conocimientos técnicos. Te permite vender productos, gestionar pedidos, personalizar tu tienda y mucho más, todo desde un panel intuitivo.'
+      answer: 'Shopifree es una plataforma gratuita para crear y gestionar tu tienda online sin conocimientos técnicos. Con nuestro plan gratis puedes comenzar a vender inmediatamente con hasta 12 productos, ventas ilimitadas y sin comisiones por venta. Incluye hosting gratuito, SSL, subdominio y todas las herramientas esenciales para vender en línea.'
     },
     {
       question: '¿Necesito conocimientos técnicos para usarlo?',
-      answer: 'No, Shopifree está diseñado para ser extremadamente fácil de usar. Nuestro editor visual te permite crear y personalizar tu tienda simplemente arrastrando y soltando elementos, sin necesidad de programar.'
+      answer: 'No necesitas ningún conocimiento técnico. Shopifree funciona con formularios simples donde solo completas la información de tus productos, subes imágenes y configuras tus preferencias. Elige uno de nuestros temas profesionales prediseñados y tu tienda estará lista para vender. Todo es tan simple como completar campos y hacer clic en guardar.'
     },
     {
       question: '¿Puedo conectar mi propio dominio?',
-      answer: 'Sí, puedes conectar tu dominio personalizado a tu tienda Shopifree. Te proporcionamos guías paso a paso para configurar tu dominio y asegurarnos de que todo funcione perfectamente.'
+      answer: 'Sí, con el plan Premium o superior puedes conectar tu dominio personalizado (ej: tutienda.com). El plan gratis incluye un subdominio de Shopifree (ej: tutienda.shopifree.app). Te proporcionamos guías paso a paso para configurar tu dominio personalizado de manera fácil.'
     },
     {
       question: '¿Qué métodos de pago puedo habilitar en mi tienda?',
-      answer: 'Shopifree soporta múltiples métodos de pago incluyendo tarjetas de crédito/débito, PayPal, transferencias bancarias y más. Puedes habilitar los métodos que prefieras según tu ubicación y necesidades.'
+      answer: 'El plan gratis incluye pagos manuales (transferencias bancarias, efectivo). Con el plan Premium y superior puedes integrar pasarelas de pago como Mercado Pago, PayPal y Stripe para aceptar tarjetas de crédito/débito directamente en tu tienda. También soportamos ventas por WhatsApp en todos los planes.'
     },
     {
-      question: '¿Puedo gestionar pedidos y clientes desde el panel?',
-      answer: 'Absolutamente. El panel de administración de Shopifree te permite gestionar todos tus pedidos, ver información detallada de clientes, controlar inventario, generar reportes y mucho más, todo desde un lugar centralizado.'
+      question: '¿Cómo funciona el sistema de ventas por WhatsApp?',
+      answer: 'Todos los planes incluyen ventas por WhatsApp. Tus clientes pueden navegar tu catálogo online y al realizar un pedido, se genera automáticamente un mensaje de WhatsApp con los detalles de su orden. El cliente solo debe enviarlo para completar la compra. Es la forma más rápida de vender sin necesidad de pasarelas de pago.'
     },
     {
-      question: '¿Tiene algún costo o comisión por venta?',
-      answer: 'Shopifree ofrece planes flexibles sin comisiones por venta. Solo pagas una suscripción mensual fija que incluye todas las funcionalidades, hosting, soporte técnico y actualizaciones constantes.'
+      question: '¿Shopifree cobra comisiones por venta?',
+      answer: 'No, Shopifree no cobra ninguna comisión por venta. Solo pagas tu plan mensual o anual y todas las ventas que realices son 100% tuyas. El plan gratis es completamente gratis de por vida con ventas ilimitadas y sin comisiones.'
     }
   ]
 
@@ -600,51 +694,215 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Features Section */}
-      <section id="features" className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-light text-gray-900 mb-8 text-center">
-          {t('feature1.title')}, {t('feature2.title')}, {t('feature3.title')}
-        </h2>
-        {/* Features Grid */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature1.title')}</h3>
-            <p className="text-gray-600">{t('feature1.description')}</p>
+      {/* Demo Stores Carousel */}
+      <section className="bg-gradient-to-b from-gray-50 to-white py-8 md:py-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-6 md:mb-8 px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-2">
+              Explora Tiendas Demo
+            </h2>
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+              Ve ejemplos reales de tiendas creadas con Shopifree. Haz clic para explorar cada demo.
+            </p>
           </div>
-          
-          <div className="text-center">
-            <div className="bg-gray-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
+
+          {/* Carousel Container */}
+          <div className="relative px-4 sm:px-6 lg:px-8">
+            {/* Desktop View - Slide carousel with arrows */}
+            <div className="hidden md:block">
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-500 ease-in-out"
+                  style={{ transform: `translateX(-${currentDemoStore * 100}%)` }}
+                >
+                  {demoStores.map((store, index) => (
+                    <div key={index} className="w-full flex-shrink-0 px-4">
+                      <div className="flex items-center justify-center gap-8 max-w-6xl mx-auto">
+                        {/* Mobile Mockup */}
+                        <div className="flex-shrink-0">
+                          <div className="relative">
+                            {/* Phone frame */}
+                            <div className="relative mx-auto border-gray-800 bg-gray-800 border-[10px] rounded-[2rem] h-[450px] w-[225px] shadow-2xl">
+                              {/* Phone buttons */}
+                              <div className="h-[24px] w-[2px] bg-gray-800 absolute -left-[12px] top-[54px] rounded-l-lg"></div>
+                              <div className="h-[34px] w-[2px] bg-gray-800 absolute -left-[12px] top-[93px] rounded-l-lg"></div>
+                              <div className="h-[34px] w-[2px] bg-gray-800 absolute -left-[12px] top-[133px] rounded-l-lg"></div>
+                              <div className="h-[48px] w-[2px] bg-gray-800 absolute -right-[12px] top-[106px] rounded-r-lg"></div>
+
+                              {/* Screen content */}
+                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${store.mobileColor} cursor-pointer`}
+                                   onClick={() => window.open(store.url, '_blank')}>
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="text-5xl">{store.icon}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Desktop Mockup */}
+                        <div className="flex-1 max-w-3xl">
+                          <div className="relative">
+                            {/* Browser chrome */}
+                            <div className="bg-gray-200 rounded-t-lg px-3 py-2 flex items-center space-x-2">
+                              <div className="flex space-x-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                              </div>
+                              <div className="flex-1 ml-3">
+                                <div className="bg-white rounded px-2 py-0.5 text-xs text-gray-600 max-w-md">
+                                  {store.url}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Browser content */}
+                            <div className={`${store.desktopColor} h-[350px] cursor-pointer shadow-2xl`}
+                                 onClick={() => window.open(store.url, '_blank')}>
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-7xl">{store.icon}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Store Info */}
+                          <div className="mt-4 text-center md:text-left">
+                            <h3 className="text-xl font-medium text-gray-900 mb-1">
+                              {store.name}
+                            </h3>
+                            <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600 mb-2">
+                              <span className="text-lg">{store.icon}</span>
+                              <span className="font-medium text-sm">{store.category}</span>
+                              <span className="text-gray-400">•</span>
+                              <span className="text-xs">Tema: {store.theme}</span>
+                            </div>
+                            <p className="text-gray-600 text-sm mb-3">{store.description}</p>
+                            <button
+                              onClick={() => window.open(store.url, '_blank')}
+                              className="group relative overflow-hidden rounded-full border-2 border-emerald-600 px-6 py-2.5 transition-all duration-300 hover:border-emerald-700"
+                            >
+                              <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                              <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 group-hover:text-white transition-colors duration-300">
+                                Ver Demo Completo
+                                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Navigation Arrows - Desktop */}
+              <button
+                onClick={prevDemoStore}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white shadow-xl rounded-full p-3 hover:bg-gray-50 transition-all z-10"
+                aria-label="Previous demo"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <button
+                onClick={nextDemoStore}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white shadow-xl rounded-full p-3 hover:bg-gray-50 transition-all z-10"
+                aria-label="Next demo"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
-            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature2.title')}</h3>
-            <p className="text-gray-600">{t('feature2.description')}</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="bg-gray-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
-              </svg>
+
+            {/* Mobile View - Horizontal scroll carousel */}
+            <div className="md:hidden">
+              <div className="overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory -mx-4">
+                <div className="flex gap-6 pb-4 px-4">
+                  {demoStores.map((store, index) => (
+                    <div key={index} className="flex-shrink-0 w-[280px] snap-center">
+                      <div className="flex flex-col items-center w-full">
+                        {/* Mobile Mockup */}
+                        <div className="relative mb-4">
+                          <div className="relative mx-auto border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[500px] w-[250px] shadow-2xl">
+                            <div className="h-[32px] w-[3px] bg-gray-800 absolute -left-[17px] top-[72px] rounded-l-lg"></div>
+                            <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[124px] rounded-l-lg"></div>
+                            <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
+                            <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
+
+                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${store.mobileColor} cursor-pointer`}
+                                 onClick={() => window.open(store.url, '_blank')}>
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-6xl">{store.icon}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Store Info */}
+                        <div className="text-center w-full px-2">
+                          <h3 className="text-xl font-medium text-gray-900 mb-2">
+                            {store.name}
+                          </h3>
+                          <div className="flex items-center justify-center gap-2 text-gray-600 mb-3">
+                            <span className="text-lg">{store.icon}</span>
+                            <span className="font-medium text-sm">{store.category}</span>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{store.description}</p>
+                          <button
+                            onClick={() => window.open(store.url, '_blank')}
+                            className="w-full max-w-[250px] mx-auto group relative overflow-hidden rounded-full border-2 border-emerald-600 px-6 py-3 transition-all duration-300 hover:border-emerald-700"
+                          >
+                            <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                            <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 group-hover:text-white transition-colors duration-300">
+                              Ver Demo
+                              <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Scroll hint - Mobile only */}
+              <div className="text-center mt-4 text-sm text-gray-500">
+                ← Desliza para ver más demos →
+              </div>
             </div>
-            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature3.title')}</h3>
-            <p className="text-gray-600">{t('feature3.description')}</p>
+
+            {/* Dots Indicator - Desktop only */}
+            <div className="hidden md:flex justify-center mt-4 space-x-2">
+              {demoStores.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToDemoStore(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentDemoStore
+                      ? 'bg-emerald-600 w-8'
+                      : 'bg-gray-300 w-2 hover:bg-gray-400'
+                  }`}
+                  aria-label={`Go to demo ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
         </div>
       </section>
 
       {/* Integrations Carousel */}
       <section className="bg-gray-50 py-12" aria-labelledby="integrations-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+        <div className="mx-auto">
+          <div className="text-center mb-12 px-4 sm:px-6 lg:px-8">
             <h2 id="integrations-heading" className="text-3xl font-light text-gray-900 mb-4">
               Integraciones con las Mejores Plataformas de Pago y Marketing
             </h2>
@@ -652,7 +910,7 @@ export default function HomePage() {
               Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más
             </p>
           </div>
-          
+
           <div className="overflow-hidden">
             <div 
               ref={carouselRef}
@@ -678,18 +936,18 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="bg-gray-50 py-20" aria-labelledby="pricing-heading">
+      <section id="pricing" className="bg-gray-50 py-8 md:py-12" aria-labelledby="pricing-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 id="pricing-heading" className="text-3xl font-light text-gray-900 mb-4">
+            <h2 id="pricing-heading" className="text-2xl md:text-3xl font-light text-gray-900 mb-2 md:mb-3">
               Planes y Precios para tu Tienda Online
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-base md:text-lg text-gray-600 mb-4 md:mb-6">
               {t('pricing.subtitle')}
             </p>
 
             {/* Billing Toggle */}
-            <div className="flex items-center justify-center mb-12">
+            <div className="flex items-center justify-center mb-6 md:mb-8">
               <div className="bg-gray-100 rounded-full p-1 relative">
                 <div className="flex items-center space-x-1">
                   <button
@@ -712,7 +970,7 @@ export default function HomePage() {
                   >
                     Anual
                     <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      Ahorra 57%
+                      Ahorra 33%
                     </span>
                   </button>
                 </div>
@@ -732,7 +990,7 @@ export default function HomePage() {
             <div className="md:hidden">
               <div className="relative max-w-md mx-auto">
                 {/* Carousel Container */}
-                <div className="overflow-hidden pt-6">
+                <div className="overflow-hidden pt-4">
                   <div 
                     className="flex transition-transform duration-300 ease-in-out"
                     style={{ transform: `translateX(-${currentPlan * 100}%)` }}
@@ -768,7 +1026,7 @@ export default function HomePage() {
               </div>
 
               {/* Dots Indicator */}
-              <div className="flex justify-center mt-8 space-x-2">
+              <div className="flex justify-center mt-4 space-x-2">
                 {pricingPlans.map((_, index) => (
                   <button
                     key={index}
@@ -784,6 +1042,47 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-light text-gray-900 mb-8 text-center">
+          {t('feature1.title')}, {t('feature2.title')}, {t('feature3.title')}
+        </h2>
+        {/* Features Grid */}
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature1.title')}</h3>
+            <p className="text-gray-600">{t('feature1.description')}</p>
+          </div>
+
+          <div className="text-center">
+            <div className="bg-gray-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature2.title')}</h3>
+            <p className="text-gray-600">{t('feature2.description')}</p>
+          </div>
+
+          <div className="text-center">
+            <div className="bg-gray-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature3.title')}</h3>
+            <p className="text-gray-600">{t('feature3.description')}</p>
+          </div>
+        </div>
         </div>
       </section>
 
@@ -815,7 +1114,7 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="text-sm text-gray-500">
-              © 2024 Shopifree
+              © 2025 Shopifree
             </div>
           </div>
         </div>

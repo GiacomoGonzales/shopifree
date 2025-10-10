@@ -149,5 +149,33 @@
     "keywords": "free online store, no commission ecommerce, create online store, sell on whatsapp, virtual store, shopify alternative, shopifree, free ecommerce platform",
     "ogImage": "/og-image.png",
     "twitterHandle": "@shopifree"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions about Shopifree",
+    "subtitle": "We answer the most common questions about Shopifree so you can start with confidence.",
+    "whatIsShopifree": {
+      "question": "What is Shopifree?",
+      "answer": "Shopifree is a free platform to create and manage your online store without technical knowledge. With our free plan you can start selling immediately with up to 12 products, unlimited sales and no sales commissions. It includes free hosting, SSL, subdomain and all the essential tools to sell online."
+    },
+    "technicalKnowledge": {
+      "question": "Do I need technical knowledge to use it?",
+      "answer": "You don't need any technical knowledge. Shopifree works with simple forms where you just fill in your product information, upload images and configure your preferences. Choose one of our professional pre-designed themes and your store will be ready to sell. Everything is as simple as filling in fields and clicking save."
+    },
+    "customDomain": {
+      "question": "Can I connect my own domain?",
+      "answer": "Yes, with the Premium plan or higher you can connect your custom domain (e.g.: yourstore.com). The free plan includes a Shopifree subdomain (e.g.: yourstore.shopifree.app). We provide step-by-step guides to set up your custom domain easily."
+    },
+    "paymentMethods": {
+      "question": "What payment methods can I enable in my store?",
+      "answer": "The free plan includes manual payments (bank transfers, cash). With the Premium plan and higher you can integrate payment gateways like Mercado Pago, PayPal and Stripe to accept credit/debit cards directly in your store. We also support WhatsApp sales on all plans."
+    },
+    "whatsappSales": {
+      "question": "How does the WhatsApp sales system work?",
+      "answer": "All plans include WhatsApp sales. Your customers can browse your online catalog and when placing an order, a WhatsApp message with their order details is automatically generated. The customer just needs to send it to complete the purchase. It's the fastest way to sell without needing payment gateways."
+    },
+    "costsCommissions": {
+      "question": "Does Shopifree charge sales commissions?",
+      "answer": "No, Shopifree does not charge any sales commission. You only pay for your monthly or annual plan and all the sales you make are 100% yours. The free plan is completely free for life with unlimited sales and no commissions."
+    }
   }
 } 

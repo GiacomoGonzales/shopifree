@@ -149,5 +149,33 @@
     "keywords": "tienda online gratis, ecommerce sin comisiones, crear tienda online, vender por whatsapp, tienda virtual, shopify alternativa, shopifree, plataforma ecommerce gratis",
     "ogImage": "/og-image.png",
     "twitterHandle": "@shopifree"
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes sobre Shopifree",
+    "subtitle": "Resolvemos las dudas más comunes sobre Shopifree para que puedas empezar con confianza.",
+    "whatIsShopifree": {
+      "question": "¿Qué es Shopifree?",
+      "answer": "Shopifree es una plataforma gratuita para crear y gestionar tu tienda online sin conocimientos técnicos. Con nuestro plan gratis puedes comenzar a vender inmediatamente con hasta 12 productos, ventas ilimitadas y sin comisiones por venta. Incluye hosting gratuito, SSL, subdominio y todas las herramientas esenciales para vender en línea."
+    },
+    "technicalKnowledge": {
+      "question": "¿Necesito conocimientos técnicos para usarlo?",
+      "answer": "No necesitas ningún conocimiento técnico. Shopifree funciona con formularios simples donde solo completas la información de tus productos, subes imágenes y configuras tus preferencias. Elige uno de nuestros temas profesionales prediseñados y tu tienda estará lista para vender. Todo es tan simple como completar campos y hacer clic en guardar."
+    },
+    "customDomain": {
+      "question": "¿Puedo conectar mi propio dominio?",
+      "answer": "Sí, con el plan Premium o superior puedes conectar tu dominio personalizado (ej: tutienda.com). El plan gratis incluye un subdominio de Shopifree (ej: tutienda.shopifree.app). Te proporcionamos guías paso a paso para configurar tu dominio personalizado de manera fácil."
+    },
+    "paymentMethods": {
+      "question": "¿Qué métodos de pago puedo habilitar en mi tienda?",
+      "answer": "El plan gratis incluye pagos manuales (transferencias bancarias, efectivo). Con el plan Premium y superior puedes integrar pasarelas de pago como Mercado Pago, PayPal y Stripe para aceptar tarjetas de crédito/débito directamente en tu tienda. También soportamos ventas por WhatsApp en todos los planes."
+    },
+    "whatsappSales": {
+      "question": "¿Cómo funciona el sistema de ventas por WhatsApp?",
+      "answer": "Todos los planes incluyen ventas por WhatsApp. Tus clientes pueden navegar tu catálogo online y al realizar un pedido, se genera automáticamente un mensaje de WhatsApp con los detalles de su orden. El cliente solo debe enviarlo para completar la compra. Es la forma más rápida de vender sin necesidad de pasarelas de pago."
+    },
+    "costsCommissions": {
+      "question": "¿Shopifree cobra comisiones por venta?",
+      "answer": "No, Shopifree no cobra ninguna comisión por venta. Solo pagas tu plan mensual o anual y todas las ventas que realices son 100% tuyas. El plan gratis es completamente gratis de por vida con ventas ilimitadas y sin comisiones."
+    }
   }
 } 
