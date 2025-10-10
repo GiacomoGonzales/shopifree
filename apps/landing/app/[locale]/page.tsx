@@ -34,7 +34,8 @@ export default function HomePage() {
     'WhatsApp Business',
     'Mailchimp',
     'Instagram Shopping',
-    'Google Ads'
+    'Google Ads',
+    'Sendgrid'
   ]
 
   // Demo stores data
@@ -50,11 +51,11 @@ export default function HomePage() {
       desktopColor: "bg-gradient-to-br from-orange-300 to-red-400"
     },
     {
-      name: "Boutique Elegante",
+      name: "Lunara Store - Moda y accesorios",
       category: "Moda",
-      theme: "Elegant Boutique",
+      theme: "Shopifree Theme",
       icon: "👗",
-      url: "https://demo-fashion.shopifree.app",
+      url: "https://lunara-store.xyz",
       description: "Tienda de moda premium",
       mobileColor: "bg-gradient-to-br from-pink-400 to-purple-500",
       desktopColor: "bg-gradient-to-br from-pink-300 to-purple-400"
@@ -325,12 +326,12 @@ export default function HomePage() {
       }
       
       const containerWidth = carouselRef.current.scrollWidth
-      const singleSetWidth = containerWidth / 2 // Since we have 2 sets of 9 images
-      
+      const singleSetWidth = containerWidth / 2 // Since we have 2 sets of 10 images
+
       setCarouselPosition(prev => {
         const newPosition = prev - 1.5 // Smooth movement speed
-        
-        // Reset when we've moved exactly one full set (9 images)
+
+        // Reset when we've moved exactly one full set (10 images)
         if (Math.abs(newPosition) >= singleSetWidth) {
           return 0
         }
@@ -731,7 +732,7 @@ export default function HomePage() {
                               <div className="h-[48px] w-[2px] bg-gray-800 absolute -right-[12px] top-[106px] rounded-r-lg"></div>
 
                               {/* Screen content */}
-                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 ? '' : store.mobileColor} cursor-pointer`}
+                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 ? '' : store.mobileColor} cursor-pointer`}
                                    onClick={() => window.open(store.url, '_blank')}>
                                 {index === 0 ? (
                                   <video
@@ -739,9 +740,19 @@ export default function HomePage() {
                                     loop
                                     muted
                                     playsInline
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                   >
                                     <source src="/images/restaurant-movil.mp4" type="video/mp4" />
+                                  </video>
+                                ) : index === 1 ? (
+                                  <video
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-contain"
+                                  >
+                                    <source src="/images/ropa-movil.mp4" type="video/mp4" />
                                   </video>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -771,13 +782,19 @@ export default function HomePage() {
                             </div>
 
                             {/* Browser content */}
-                            <div className={`${index === 0 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
+                            <div className={`${index === 0 || index === 1 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <img
                                   src="/images/restaurant-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover object-top"
+                                />
+                              ) : index === 1 ? (
+                                <img
+                                  src="/images/ropa-desktop.png"
+                                  alt={`${store.name} - Vista desktop`}
+                                  className="w-full h-full object-cover object-top"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
@@ -856,7 +873,7 @@ export default function HomePage() {
                             <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
                             <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
 
-                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 ? '' : store.mobileColor} cursor-pointer`}
+                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 ? '' : store.mobileColor} cursor-pointer`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <video
@@ -864,9 +881,19 @@ export default function HomePage() {
                                   loop
                                   muted
                                   playsInline
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-contain"
                                 >
                                   <source src="/images/restaurant-movil.mp4" type="video/mp4" />
+                                </video>
+                              ) : index === 1 ? (
+                                <video
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                  className="w-full h-full object-contain"
+                                >
+                                  <source src="/images/ropa-movil.mp4" type="video/mp4" />
                                 </video>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
@@ -953,7 +980,7 @@ export default function HomePage() {
               }}
             >
               {/* Integration images - duplicated for seamless loop */}
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num, index) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num, index) => (
                 <img
                   key={index}
                   src={`/integraciones/integracion${num}.png`}
