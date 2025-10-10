@@ -9238,3 +9238,41 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
         height: auto !important;
     }
 }
+
+/* ===================================================
+   RESTAURANT THEME - FIX PRODUCT MODIFIERS DESKTOP
+   =================================================== */
+
+/* Corregir padding y gap de modificadores en desktop para tema Restaurant */
+@media (min-width: 641px) {
+    [data-theme="restaurant"] .nbd-product-modifiers-section {
+        margin-top: 12px;
+    }
+
+    [data-theme="restaurant"] .nbd-modifier-options {
+        gap: 8px;
+    }
+
+    [data-theme="restaurant"] .nbd-modifier-option {
+        padding: 10px 14px;
+    }
+
+    [data-theme="restaurant"] .nbd-modifier-quantity-controls {
+        gap: 6px;
+    }
+}
+
+/* Corregir padding y gap de modificadores en mobile para tema Restaurant */
+@media (max-width: 640px) {
+    [data-theme="restaurant"] .nbd-modifier-options {
+        gap: 8px !important;
+    }
+
+    [data-theme="restaurant"] .nbd-modifier-option {
+        padding: 10px 14px !important;
+    }
+
+    [data-theme="restaurant"] .nbd-modifier-quantity-controls {
+        gap: 6px !important;
+    }
+}
