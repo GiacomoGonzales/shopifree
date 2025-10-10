@@ -213,6 +213,17 @@ service cloud.firestore {
                                        request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
       }
 
+      // Reglas para analytics (tracking de visitas)
+      match /analytics/{dateDoc} {
+        // Permitir lectura solo al dueño de la tienda (para ver reportes)
+        allow read: if isAuthenticated() &&
+                      request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+
+        // Permitir escritura pública para tracking de visitantes anónimos
+        // Solo permitir crear o actualizar (merge), no eliminar
+        allow create, update: if true;
+      }
+
       // Reglas para configuraciones de la tienda (settings)
       match /settings/{settingId} {
         // TEMPORAL: Permitir lectura y escritura para testing de dominios
