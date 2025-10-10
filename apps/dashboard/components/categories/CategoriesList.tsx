@@ -41,16 +41,16 @@ interface SortableItemProps {
   onToggleExpand?: () => void
 }
 
-function SortableItem({ 
-  category, 
-  onEdit, 
-  onDelete, 
+function SortableItem({
+  category,
+  onEdit,
+  onDelete,
   isSubcategory = false,
   hasSubcategories = false,
   isExpanded = false,
   onToggleExpand
 }: SortableItemProps) {
-  const t = useTranslations('categories')
+  const t = useTranslations('pages.categories')
   
   const {
     attributes,
@@ -182,7 +182,7 @@ export default function CategoriesList({
   onReorder,
   loading = false
 }: CategoriesListProps) {
-  const t = useTranslations('categories')
+  const t = useTranslations('pages.categories')
   
   // Estado para controlar qué categorías están expandidas
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
@@ -263,15 +263,36 @@ export default function CategoriesList({
     }
   }
 
-  // Mostrar spinner durante la carga
+  // Mostrar skeleton durante la carga
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <svg className="animate-spin h-8 w-8 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p className="mt-2 text-sm text-gray-500">Cargando categorías...</p>
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white border rounded-lg shadow-sm p-4 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4 flex-1">
+                {/* Drag handle skeleton */}
+                <div className="w-3 h-6 bg-gray-200 rounded"></div>
+
+                {/* Imagen skeleton */}
+                <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+
+                {/* Información skeleton */}
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              </div>
+
+              {/* Acciones skeleton */}
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                <div className="w-8 h-8 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     )
   }

@@ -140,10 +140,10 @@ export default function ReportsPage() {
           {/* Header con filtros */}
           <div className="md:flex md:items-center md:justify-between mb-6">
             <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+              <h1 className="text-2xl font-light text-gray-900">
                 Reportes
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              </h1>
+              <p className="mt-1 text-sm text-gray-600">
                 Análisis y estadísticas de tu tienda
               </p>
             </div>
@@ -423,73 +423,78 @@ export default function ReportsPage() {
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
                     Ventas en el Tiempo
                   </h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart
-                      data={dailySales}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) => formatDate(new Date(value), 'MMM dd')}
-                        stroke="#9CA3AF"
-                        style={{ fontSize: '12px' }}
-                      />
-                      <YAxis
-                        yAxisId="left"
-                        stroke="#9CA3AF"
-                        style={{ fontSize: '12px' }}
-                        tickFormatter={(value) => formatCurrency(value, currency).replace(/\s/g, '')}
-                      />
-                      <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        stroke="#9CA3AF"
-                        style={{ fontSize: '12px' }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#fff',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                        }}
-                        formatter={(value: any, name: string) => {
-                          if (name === 'revenue') {
-                            return [formatCurrency(value, currency), 'Ingresos']
-                          }
-                          return [value, 'Pedidos']
-                        }}
-                        labelFormatter={(label) => formatDate(new Date(label), 'dd MMM yyyy')}
-                      />
-                      <Legend
-                        wrapperStyle={{ paddingTop: '20px' }}
-                        formatter={(value) => {
-                          if (value === 'revenue') return 'Ingresos'
-                          if (value === 'orders') return 'Pedidos'
-                          return value
-                        }}
-                      />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="revenue"
-                        stroke="#111827"
-                        strokeWidth={2}
-                        dot={{ fill: '#111827', r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="orders"
-                        stroke="#9CA3AF"
-                        strokeWidth={2}
-                        dot={{ fill: '#9CA3AF', r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  {/* Contenedor con scroll horizontal en móvil */}
+                  <div className="overflow-x-auto -mx-6 px-6">
+                    <div className="min-w-[600px]">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart
+                          data={dailySales}
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis
+                            dataKey="date"
+                            tickFormatter={(value) => formatDate(new Date(value), 'MMM dd')}
+                            stroke="#9CA3AF"
+                            style={{ fontSize: '12px' }}
+                          />
+                          <YAxis
+                            yAxisId="left"
+                            stroke="#9CA3AF"
+                            style={{ fontSize: '12px' }}
+                            tickFormatter={(value) => formatCurrency(value, currency).replace(/\s/g, '')}
+                          />
+                          <YAxis
+                            yAxisId="right"
+                            orientation="right"
+                            stroke="#9CA3AF"
+                            style={{ fontSize: '12px' }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#fff',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}
+                            formatter={(value: any, name: string) => {
+                              if (name === 'revenue') {
+                                return [formatCurrency(value, currency), 'Ingresos']
+                              }
+                              return [value, 'Pedidos']
+                            }}
+                            labelFormatter={(label) => formatDate(new Date(label), 'dd MMM yyyy')}
+                          />
+                          <Legend
+                            wrapperStyle={{ paddingTop: '20px' }}
+                            formatter={(value) => {
+                              if (value === 'revenue') return 'Ingresos'
+                              if (value === 'orders') return 'Pedidos'
+                              return value
+                            }}
+                          />
+                          <Line
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="revenue"
+                            stroke="#111827"
+                            strokeWidth={2}
+                            dot={{ fill: '#111827', r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                          <Line
+                            yAxisId="right"
+                            type="monotone"
+                            dataKey="orders"
+                            stroke="#9CA3AF"
+                            strokeWidth={2}
+                            dot={{ fill: '#9CA3AF', r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </div>
               )}
             </>

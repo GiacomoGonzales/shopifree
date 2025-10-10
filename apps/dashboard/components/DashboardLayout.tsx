@@ -350,6 +350,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const newPath = pathname.replace(`/${currentLocale}`, `/${locale}`)
     router.push(newPath)
     setLanguageDropdownOpen(false)
+    setSidebarOpen(false) // Cerrar sidebar móvil al cambiar idioma
   }, [pathname, currentLocale, router])
 
   const isActiveRoute = (href: string) => {
@@ -597,6 +598,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <MenuIcons.Logout />
               <span className="ml-3">{t('logout')}</span>
             </button>
+
+            {/* Selector de idioma */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="text-xs font-medium text-gray-500 px-2 mb-2">
+                {currentLocale === 'es' ? 'Idioma' : 'Language'}
+              </div>
+              <div className="space-y-1">
+                <button
+                  onClick={() => handleLanguageChange('es')}
+                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
+                    currentLocale === 'es'
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <MenuIcons.Globe />
+                  <span className="ml-3">Español</span>
+                </button>
+                <button
+                  onClick={() => handleLanguageChange('en')}
+                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
+                    currentLocale === 'en'
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <MenuIcons.Globe />
+                  <span className="ml-3">English</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -645,6 +677,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <MenuIcons.Logout />
               <span className="ml-3">{t('logout')}</span>
             </button>
+
+            {/* Selector de idioma */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="text-xs font-medium text-gray-500 px-2 mb-2">
+                {currentLocale === 'es' ? 'Idioma' : 'Language'}
+              </div>
+              <div className="space-y-1">
+                <button
+                  onClick={() => handleLanguageChange('es')}
+                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
+                    currentLocale === 'es'
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <MenuIcons.Globe />
+                  <span className="ml-3">Español</span>
+                </button>
+                <button
+                  onClick={() => handleLanguageChange('en')}
+                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
+                    currentLocale === 'en'
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <MenuIcons.Globe />
+                  <span className="ml-3">English</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -673,82 +736,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
-              {/* Información del usuario */}
-              <div className="relative">
-                {/* Versión móvil: dropdown con ícono */}
-                <div className="block lg:hidden">
-                  <button
-                    type="button"
-                    className="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setLanguageDropdownOpen(false) // Cerrar dropdown de idioma
-                      setUserDropdownOpen(!userDropdownOpen)
-                    }}
-                  >
-                    <MenuIcons.Account />
-                  </button>
-
-                  {userDropdownOpen && (
-                    <div 
-                      className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transform transition-transform duration-200 ease-out animate-in"
-                      style={{
-                        transformOrigin: 'top right',
-                        animation: 'dropdownOpen 0.2s ease-out forwards'
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="py-1">
-                        <button
-                          onClick={() => {
-                            handleNavigation(`/${currentLocale}/account`, true)
-                            setUserDropdownOpen(false)
-                          }}
-                          className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          <MenuIcons.Account />
-                          <span className="ml-3">{t('account')}</span>
-                        </button>
-                        <button
-                          onClick={async () => {
-                            setUserDropdownOpen(false)
-                            // Obtener la tienda del usuario y abrir en nueva pestaña
-                            try {
-                              const { getUserStore } = await import('../lib/store')
-                              if (user?.uid) {
-                                const userStore = await getUserStore(user.uid)
-                                if (userStore?.subdomain) {
-                                  window.open(`https://${userStore.subdomain}.shopifree.app`, '_blank')
-                                } else {
-                                  console.error('No se encontró el subdominio de la tienda')
-                                }
-                              }
-                            } catch (error) {
-                              console.error('Error al obtener información de la tienda:', error)
-                            }
-                          }}
-                          className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          <MenuIcons.Globe />
-                          <span className="ml-3">{currentLocale === 'es' ? 'Visitar Tienda' : 'Visit Store'}</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setUserDropdownOpen(false)
-                            handleSignOut()
-                          }}
-                          className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          <MenuIcons.Logout />
-                          <span className="ml-3">{t('logout')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
+              {/* Información del usuario - solo en escritorio */}
+              <div className="relative hidden lg:block">
                 {/* Versión escritorio: texto completo */}
-                <div className="hidden lg:flex items-center">
+                <div className="flex items-center">
                   {userData?.displayName && (
                     <span className="text-sm font-medium text-gray-700">
                       {t('hello')}, {userData.displayName}
@@ -762,15 +753,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault()
-                  
+
                   // Verificar que tenemos los datos de la tienda disponibles
                   if (store?.subdomain) {
                     // Abrir directamente la tienda - esto funciona en móviles
                     window.open(`https://${store.subdomain}.shopifree.app`, '_blank')
                   } else {
                     // Si no hay datos de tienda disponibles, mostrar mensaje
-                    const message = currentLocale === 'es' 
-                      ? 'Cargando información de la tienda...' 
+                    const message = currentLocale === 'es'
+                      ? 'Cargando información de la tienda...'
                       : 'Loading store information...'
                     alert(message)
                     console.warn('Store data not available yet')
@@ -784,54 +775,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   {currentLocale === 'es' ? 'Mi tienda' : 'My store'}
                 </span>
               </button>
-              
-              {/* Selector de idioma */}
-              <div className="relative ml-3">
-                <button
-                  type="button"
-                  className="bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setUserDropdownOpen(false) // Cerrar dropdown de usuario
-                    setLanguageDropdownOpen(!languageDropdownOpen)
-                  }}
-                >
-                  <MenuIcons.Globe />
-                  <span className="ml-2 text-sm font-medium text-gray-700">
-                    {currentLocale.toUpperCase()}
-                  </span>
-                </button>
-
-                {languageDropdownOpen && (
-                  <div 
-                    className="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transform transition-transform duration-200 ease-out animate-in"
-                    style={{
-                      transformOrigin: 'top right',
-                      animation: 'dropdownOpen 0.2s ease-out forwards'
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="py-1">
-                      <button
-                        onClick={() => handleLanguageChange('es')}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          currentLocale === 'es' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        Español
-                      </button>
-                      <button
-                        onClick={() => handleLanguageChange('en')}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          currentLocale === 'en' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        English
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>

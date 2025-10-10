@@ -351,6 +351,7 @@
       "deleteCategory": "Eliminar Categoría",
       "noCategories": "No tienes categorías aún",
       "noCategoriesMessage": "Crea tu primera categoría para organizar tus productos.",
+      "loadingCategories": "Cargando categorías...",
       "dragToReorder": "Arrastra para reordenar",
       "subcategory": "Subcategoría",
       "parentCategory": "Categoría padre",

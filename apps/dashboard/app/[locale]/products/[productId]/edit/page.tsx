@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import DashboardLayout from '../../../../../components/DashboardLayout'
 import { RichTextEditor } from '../../../../../components/RichTextEditor'
 import { useStore } from '../../../../../lib/hooks/useStore'
@@ -34,6 +35,7 @@ interface MediaFile {
 }
 
 export default function EditProductPage() {
+  const t = useTranslations('pages.categories')
   const router = useRouter()
   const params = useParams()
   const productId = params.productId as string
@@ -1422,7 +1424,7 @@ export default function EditProductPage() {
                       Categorías ({selectedParentCategoryIds.length} seleccionadas)
                     </label>
                     {loadingCategories ? (
-                      <p className="text-sm text-gray-500">Cargando categorías...</p>
+                      <p className="text-sm text-gray-500">{t('loadingCategories')}</p>
                     ) : (
                       <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
                         {dynamicParentCategories.length === 0 ? (

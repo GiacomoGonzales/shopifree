@@ -576,11 +576,72 @@ export default function ProductsPage() {
       <DashboardLayout>
         <div className="min-h-screen bg-gray-50 py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-600">{t('loading')}</p>
+            {/* Header skeleton */}
+            <div className="mb-6 animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-48 mb-4"></div>
+              <div className="flex gap-2">
+                <div className="h-10 bg-gray-200 rounded w-32"></div>
+                <div className="h-10 bg-gray-200 rounded w-32"></div>
               </div>
+            </div>
+
+            {/* Table skeleton - Desktop */}
+            <div className="hidden lg:block bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+              {/* Table header */}
+              <div className="bg-gray-50 border-b border-gray-200 px-6 py-3">
+                <div className="flex items-center space-x-6">
+                  <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-32"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24"></div>
+                  <div className="h-3 bg-gray-200 rounded w-28"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24"></div>
+                  <div className="h-3 bg-gray-200 rounded w-32"></div>
+                </div>
+              </div>
+              {/* Table rows */}
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="border-b border-gray-200 px-6 py-4">
+                  <div className="flex items-center space-x-6">
+                    <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-40"></div>
+                        <div className="h-3 bg-gray-200 rounded w-32"></div>
+                      </div>
+                    </div>
+                    <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+                    <div className="flex space-x-2">
+                      <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                      <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Cards skeleton - Mobile */}
+            <div className="lg:hidden space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-4 h-4 bg-gray-200 rounded mt-1"></div>
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-full"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="flex gap-2">
+                        <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                        <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -945,10 +1006,66 @@ export default function ProductsPage() {
 
             {/* Loading state */}
             {loading && (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                  <p className="mt-2 text-sm text-gray-600">{t('loading')}</p>
+              <div>
+                {/* Table skeleton - Desktop */}
+                <div className="hidden lg:block bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+                  {/* Table header */}
+                  <div className="bg-gray-50 border-b border-gray-200 px-6 py-3">
+                    <div className="flex items-center space-x-6">
+                      <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded w-32"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                      <div className="h-3 bg-gray-200 rounded w-28"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                      <div className="h-3 bg-gray-200 rounded w-32"></div>
+                    </div>
+                  </div>
+                  {/* Table rows */}
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="border-b border-gray-200 px-6 py-4">
+                      <div className="flex items-center space-x-6">
+                        <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                          <div className="space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-40"></div>
+                            <div className="h-3 bg-gray-200 rounded w-32"></div>
+                          </div>
+                        </div>
+                        <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                        <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+                        <div className="flex space-x-2">
+                          <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                          <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Cards skeleton - Mobile */}
+                <div className="lg:hidden bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="divide-y divide-gray-200">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="p-4 animate-pulse">
+                        <div className="flex items-start space-x-4">
+                          <div className="w-4 h-4 bg-gray-200 rounded mt-1"></div>
+                          <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                          <div className="flex-1 space-y-3">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-3 bg-gray-200 rounded w-full"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            <div className="flex gap-2">
+                              <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                              <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

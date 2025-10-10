@@ -139,7 +139,81 @@ export default function ContentPrivacyPolicyPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <LoadingAnimation />
+        <div className="py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Tabs skeleton */}
+            <div className="mb-6 animate-pulse">
+              <div className="flex space-x-4 border-b border-gray-200 pb-4">
+                <div className="h-8 bg-gray-200 rounded w-32"></div>
+                <div className="h-8 bg-gray-200 rounded w-40"></div>
+                <div className="h-8 bg-gray-200 rounded w-36"></div>
+              </div>
+            </div>
+
+            {/* Form skeleton */}
+            <div className="space-y-6">
+              {/* Card 1 - Privacy policy fields */}
+              <div className="bg-white shadow rounded-lg p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-6"></div>
+
+                <div className="space-y-6">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+                    <div key={i}>
+                      <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+                      <div className="h-20 bg-gray-200 rounded w-full"></div>
+                      <div className="h-3 bg-gray-200 rounded w-64 mt-2"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card 2 - Dates */}
+              <div className="bg-white shadow rounded-lg p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-56 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-4"></div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+                    <div className="h-10 bg-gray-200 rounded w-full"></div>
+                  </div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
+                    <div className="h-10 bg-gray-200 rounded w-full"></div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded w-48 ml-2"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card 3 - Preview */}
+              <div className="bg-white shadow rounded-lg p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-4"></div>
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 h-96">
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="h-4 bg-gray-200 rounded w-full"></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Save button skeleton */}
+              <div className="flex justify-end">
+                <div className="h-10 bg-gray-200 rounded w-40"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </DashboardLayout>
     )
   }
