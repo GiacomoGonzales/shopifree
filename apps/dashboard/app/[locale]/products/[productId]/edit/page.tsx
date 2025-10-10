@@ -99,6 +99,11 @@ export default function EditProductPage() {
   const [harmonizedCode, setHarmonizedCode] = useState('')
   const [status, setStatus] = useState<'draft' | 'active' | 'archived'>('draft')
 
+  // Estados para secciones colapsables
+  const [showInventory, setShowInventory] = useState(false)
+  const [showSEO, setShowSEO] = useState(false)
+  const [showShipping, setShowShipping] = useState(false)
+
   // Ref para el input de archivos
   const fileInputRef = useRef<HTMLInputElement>(null)
 
