@@ -9,6 +9,7 @@ import AuthGuard from '../../../../components/AuthGuard'
 import { uploadImageToCloudinary, validateImageFile } from '../../../../lib/cloudinary'
 import { brandColors } from '@shopifree/ui'
 import { googleMapsLoader } from '../../../../lib/google-maps'
+import { sendWelcomeEmail } from '../../../../lib/email-welcome'
 
 interface StoreFormData {
   storeName: string
@@ -132,7 +133,7 @@ const getCreationSteps = (t: (key: string) => string) => [
 function StoreOnboardingContent() {
   const t = useTranslations('onboarding.store')
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, userData } = useAuth()
   
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 3
@@ -511,10 +512,31 @@ function StoreOnboardingContent() {
       }
       
       await createStore(storeData)
-      
+
+      // Enviar email de bienvenida (no bloquear si falla)
+      try {
+        const userName = userData?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Usuario'
+        const userEmail = user?.email || ''
+        const dashboardUrl = typeof window !== 'undefined' ? window.location.origin : 'https://dashboard.shopifree.app'
+
+        if (userEmail) {
+          await sendWelcomeEmail({
+            userName,
+            userEmail,
+            storeName: formData.storeName,
+            storeSubdomain: formData.subdomain,
+            dashboardUrl
+          })
+          console.log('✅ Welcome email sent successfully')
+        }
+      } catch (emailError) {
+        console.error('⚠️ Error sending welcome email (non-blocking):', emailError)
+        // No bloquear el flujo si el email falla
+      }
+
       // Pausa final antes de redireccionar
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       setIsRedirecting(true)
       router.push('/')
     } catch (error) {

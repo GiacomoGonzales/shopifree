@@ -27,6 +27,7 @@ export default function AccountPage() {
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [deleteStep, setDeleteStep] = useState<'password' | 'confirm'>('password') // Nuevo estado para controlar el paso
 
   // Verificar si el usuario tiene contraseña (no es OAuth)
   const hasPassword = user?.providerData?.some(provider => provider.providerId === 'password')
@@ -164,7 +165,8 @@ export default function AccountPage() {
     }
   }
 
-  const handleDeleteAccount = async (e: React.FormEvent) => {
+  // Paso 1: Validar contraseña
+  const handleValidatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setDeleteError(null)
 
@@ -177,18 +179,44 @@ export default function AccountPage() {
     setDeleting(true)
 
     try {
-      const { EmailAuthProvider, reauthenticateWithCredential, signOut } = await import('firebase/auth')
+      if (hasPassword && user && user.email) {
+        const { EmailAuthProvider, reauthenticateWithCredential } = await import('firebase/auth')
+
+        // Re-autenticar para validar contraseña
+        const credential = EmailAuthProvider.credential(user.email, deletePassword)
+        await reauthenticateWithCredential(user, credential)
+      }
+
+      // Si llegamos aquí, la contraseña es correcta o no hay contraseña
+      // Avanzar al paso de confirmación final
+      setDeleteStep('confirm')
+      setDeleting(false)
+
+    } catch (error: any) {
+      console.error('Error al validar contraseña:', error)
+
+      if (error.code === 'auth/wrong-password') {
+        setDeleteError('La contraseña es incorrecta')
+      } else if (error.code === 'auth/too-many-requests') {
+        setDeleteError('Demasiados intentos. Intenta más tarde')
+      } else {
+        setDeleteError('Error al validar la contraseña. Intenta de nuevo')
+      }
+      setDeleting(false)
+    }
+  }
+
+  // Paso 2: Confirmar y ejecutar eliminación
+  const handleConfirmDelete = async () => {
+    setDeleting(true)
+
+    try {
+      const { signOut } = await import('firebase/auth')
       const { softDeleteUserAndStore } = await import('../../../lib/user')
       const { getFirebaseAuth } = await import('../../../lib/firebase')
 
       if (!user) {
         throw new Error('Usuario no autenticado')
-      }
-
-      // Re-autenticar si tiene contraseña
-      if (hasPassword && user.email) {
-        const credential = EmailAuthProvider.credential(user.email, deletePassword)
-        await reauthenticateWithCredential(user, credential)
       }
 
       // Marcar cuenta como eliminada (soft delete)
@@ -211,16 +239,11 @@ export default function AccountPage() {
     } catch (error: any) {
       console.error('Error al eliminar cuenta:', error)
 
-      if (error.code === 'auth/wrong-password') {
-        setDeleteError('La contraseña es incorrecta')
-      } else if (error.code === 'auth/requires-recent-login') {
+      if (error.code === 'auth/requires-recent-login') {
         setDeleteError('Por seguridad, debes cerrar sesión y volver a iniciar sesión antes de eliminar tu cuenta')
-      } else if (error.code === 'auth/too-many-requests') {
-        setDeleteError('Demasiados intentos. Intenta más tarde')
       } else {
         setDeleteError('Error al eliminar la cuenta. Intenta de nuevo')
       }
-    } finally {
       setDeleting(false)
     }
   }
@@ -438,78 +461,155 @@ export default function AccountPage() {
                 setShowDeleteModal(false)
                 setDeleteError(null)
                 setDeletePassword('')
+                setDeleteStep('password') // Resetear al cerrar
               }}
             />
 
             {/* Modal */}
             <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <div className="mb-4">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 text-center">
-                  Eliminar Cuenta
-                </h3>
-                <p className="mt-2 text-sm text-gray-500 text-center">
-                  Tu cuenta y tienda serán marcadas para eliminación. Tendrás 30 días para recuperarlas antes de que se eliminen permanentemente.
-                </p>
-              </div>
-
-              <form onSubmit={handleDeleteAccount} className="space-y-4">
-                {hasPassword && (
-                  <div>
-                    <label htmlFor="deletePassword" className="block text-sm font-medium text-gray-700">
-                      Confirma tu contraseña para continuar
-                    </label>
-                    <input
-                      type="password"
-                      id="deletePassword"
-                      value={deletePassword}
-                      onChange={(e) => setDeletePassword(e.target.value)}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-600 focus:border-red-600 sm:text-sm"
-                      required
-                      placeholder="Ingresa tu contraseña"
-                    />
-                  </div>
-                )}
-
-                {!hasPassword && (
-                  <div className="rounded-md bg-yellow-50 p-3">
-                    <p className="text-sm text-yellow-800">
-                      ¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.
+              {deleteStep === 'password' ? (
+                // Paso 1: Validar contraseña
+                <>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 text-center">
+                      Eliminar Cuenta
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-500 text-center">
+                      Tu cuenta y tienda serán marcadas para eliminación. Tendrás 30 días para recuperarlas antes de que se eliminen permanentemente.
                     </p>
                   </div>
-                )}
 
-                {deleteError && (
-                  <div className="rounded-md bg-red-50 p-3">
-                    <p className="text-sm text-red-800">{deleteError}</p>
+                  <form onSubmit={handleValidatePassword} className="space-y-4">
+                    {hasPassword && (
+                      <div>
+                        <label htmlFor="deletePassword" className="block text-sm font-medium text-gray-700">
+                          Confirma tu contraseña para continuar
+                        </label>
+                        <input
+                          type="password"
+                          id="deletePassword"
+                          value={deletePassword}
+                          onChange={(e) => setDeletePassword(e.target.value)}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-600 focus:border-red-600 sm:text-sm"
+                          required
+                          placeholder="Ingresa tu contraseña"
+                        />
+                      </div>
+                    )}
+
+                    {!hasPassword && (
+                      <div className="rounded-md bg-yellow-50 p-3">
+                        <p className="text-sm text-yellow-800">
+                          Para eliminar tu cuenta, primero debes verificar tu identidad.
+                        </p>
+                      </div>
+                    )}
+
+                    {deleteError && (
+                      <div className="rounded-md bg-red-50 p-3">
+                        <p className="text-sm text-red-800">{deleteError}</p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowDeleteModal(false)
+                          setDeleteError(null)
+                          setDeletePassword('')
+                          setDeleteStep('password')
+                        }}
+                        className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={deleting}
+                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                      >
+                        {deleting ? 'Validando...' : 'Continuar'}
+                      </button>
+                    </div>
+                  </form>
+                </>
+              ) : (
+                // Paso 2: Confirmación final
+                <>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 text-center">
+                      ¿Estás completamente seguro?
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-500 text-center">
+                      Esta es tu última oportunidad para cambiar de opinión.
+                    </p>
                   </div>
-                )}
 
-                <div className="flex justify-end space-x-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowDeleteModal(false)
-                      setDeleteError(null)
-                      setDeletePassword('')
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={deleting}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                  >
-                    {deleting ? 'Eliminando...' : 'Sí, eliminar mi cuenta'}
-                  </button>
-                </div>
-              </form>
+                  <div className="rounded-md bg-red-50 p-4 mb-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">
+                          Se eliminará:
+                        </h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>Tu cuenta de usuario</li>
+                            <li>Tu tienda y todos sus productos</li>
+                            <li>Toda tu configuración personalizada</li>
+                          </ul>
+                        </div>
+                        <p className="mt-3 text-sm text-red-700">
+                          <strong>Tendrás 30 días</strong> para recuperar tu cuenta antes de que se elimine permanentemente.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {deleteError && (
+                    <div className="rounded-md bg-red-50 p-3 mb-4">
+                      <p className="text-sm text-red-800">{deleteError}</p>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end space-x-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteStep('password')
+                        setDeleteError(null)
+                      }}
+                      disabled={deleting}
+                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 disabled:opacity-50"
+                    >
+                      Volver
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmDelete}
+                      disabled={deleting}
+                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                    >
+                      {deleting ? 'Eliminando...' : 'Sí, eliminar definitivamente'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

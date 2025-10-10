@@ -8,7 +8,7 @@ import { Toast } from '../../../../components/shared/Toast'
 import { useToast } from '../../../../lib/hooks/useToast'
 
 export default function RecoverAccountPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const { toast, showToast, hideToast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -17,6 +17,12 @@ export default function RecoverAccountPage() {
 
   useEffect(() => {
     const checkDeletionStatus = async () => {
+      // Esperar a que auth termine de cargar
+      if (authLoading) {
+        return
+      }
+
+      // Si no hay usuario después de cargar, redirigir a login
       if (!user?.uid) {
         router.push('/login')
         return
@@ -48,7 +54,7 @@ export default function RecoverAccountPage() {
     }
 
     checkDeletionStatus()
-  }, [user, router])
+  }, [user, router, authLoading])
 
   const handleRestore = async () => {
     if (!user?.uid) return
@@ -106,33 +112,32 @@ export default function RecoverAccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-lg shadow-xl overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full bg-white rounded-lg shadow-sm border border-gray-200">
         {/* Header */}
-        <div className="bg-orange-600 text-white p-6 text-center">
-          <div className="w-16 h-16 mx-auto bg-orange-500 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
+        <div className="border-b border-gray-200 p-8">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Cuenta Marcada para Eliminación</h1>
-          <p className="opacity-90">Aún estás a tiempo de recuperar tu cuenta</p>
+          <h1 className="text-2xl font-semibold text-gray-900 text-center mb-2">Cuenta Marcada para Eliminación</h1>
+          <p className="text-gray-600 text-center">Aún estás a tiempo de recuperar tu cuenta</p>
         </div>
 
-        <div className="p-6">
+        <div className="p-8">
           {/* Información de eliminación */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-              <svg className="w-5 h-5 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+          <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-100">
+            <h3 className="font-medium text-gray-900 mb-4 text-sm uppercase tracking-wide">
               Información de Eliminación
             </h3>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Fecha de eliminación:</span>
-                <span className="font-medium">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                <span className="text-sm text-gray-600">Fecha de eliminación</span>
+                <span className="text-sm font-medium text-gray-900">
                   {deletionInfo.deletedAt ? new Date(deletionInfo.deletedAt).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
@@ -141,9 +146,9 @@ export default function RecoverAccountPage() {
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-gray-600">Eliminación permanente programada:</span>
-                <span className="font-medium">
+              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                <span className="text-sm text-gray-600">Eliminación permanente programada</span>
+                <span className="text-sm font-medium text-gray-900">
                   {deletionInfo.scheduledDeletionDate ? new Date(deletionInfo.scheduledDeletionDate).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
@@ -152,32 +157,45 @@ export default function RecoverAccountPage() {
                 </span>
               </div>
 
-              <div className="flex justify-between pt-3 border-t">
-                <span className="text-gray-600">Días restantes para recuperar:</span>
-                <span className={`font-bold text-lg ${
-                  deletionInfo.daysRemaining > 7 ? 'text-green-600' :
-                  deletionInfo.daysRemaining > 3 ? 'text-orange-600' :
-                  'text-red-600'
-                }`}>
-                  {deletionInfo.daysRemaining} día{deletionInfo.daysRemaining !== 1 ? 's' : ''}
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-sm font-medium text-gray-900">Días restantes para recuperar</span>
+                <span className="text-2xl font-bold text-gray-900">
+                  {deletionInfo.daysRemaining}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Información importante */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-6">
+            <h4 className="font-medium text-gray-900 mb-3 text-sm">
               ¿Qué sucederá al recuperar tu cuenta?
             </h4>
-            <ul className="text-blue-800 text-sm space-y-2 ml-7">
-              <li>• Tu cuenta de usuario será completamente restaurada</li>
-              <li>• Tu tienda volverá a estar activa y accesible</li>
-              <li>• Todos tus productos, pedidos y configuraciones permanecerán intactos</li>
-              <li>• Podrás acceder al dashboard inmediatamente</li>
+            <ul className="text-gray-600 text-sm space-y-2">
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Tu cuenta de usuario será completamente restaurada
+              </li>
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Tu tienda volverá a estar activa y accesible
+              </li>
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Todos tus productos, pedidos y configuraciones permanecerán intactos
+              </li>
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Podrás acceder al dashboard inmediatamente
+              </li>
             </ul>
           </div>
 
@@ -186,7 +204,7 @@ export default function RecoverAccountPage() {
             <button
               onClick={handleRestore}
               disabled={restoring}
-              className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {restoring ? (
                 <>
@@ -211,14 +229,13 @@ export default function RecoverAccountPage() {
                 }
                 router.push('/login')
               }}
-              className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               Cerrar Sesión
             </button>
 
             <p className="text-center text-xs text-gray-500 pt-2">
-              Si no recuperas tu cuenta en {deletionInfo.daysRemaining} día{deletionInfo.daysRemaining !== 1 ? 's' : ''},
-              todos tus datos serán eliminados permanentemente.
+              Si no recuperas tu cuenta en {deletionInfo.daysRemaining} día{deletionInfo.daysRemaining !== 1 ? 's' : ''}, todos tus datos serán eliminados permanentemente.
             </p>
           </div>
         </div>

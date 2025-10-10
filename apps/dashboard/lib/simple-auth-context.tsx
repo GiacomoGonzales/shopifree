@@ -39,6 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [authInitialized, setAuthInitialized] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({})
+  const [hasRedirectedToRecover, setHasRedirectedToRecover] = useState(false)
 
   // Simple function to get user data - compatible with existing structure
   const getUserData = async (user: User): Promise<UserData | null> => {
@@ -75,12 +76,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             scheduledDeletionDate: data.scheduledDeletionDate,
             timestamp: new Date().toISOString()
           }))
-
-          // Redirigir a página de recuperación solo si no estamos ya ahí
-          if (typeof window !== 'undefined' && !window.location.pathname.includes('/account/recover')) {
-            console.log('🔄 Redirecting to account recovery page...')
-            window.location.href = '/es/account/recover'
-          }
 
           // Retornar los datos del usuario para permitir acceso temporal
           return {
@@ -241,6 +236,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('✅ Loading state:', loading)
     console.log('✅ Is authenticated:', !!user)
   }, [user, authInitialized, loading])
+
+  // 🚫 Redirigir a página de recuperación si la cuenta está eliminada
+  useEffect(() => {
+    if (!loading && userData && (userData as any).deleted === true) {
+      // Solo redirigir si no estamos en la página de recover y no hemos redirigido ya
+      if (typeof window !== 'undefined' &&
+          !window.location.pathname.includes('/account/recover') &&
+          !hasRedirectedToRecover) {
+        console.log('🔄 Redirecting to account recovery page...')
+        setHasRedirectedToRecover(true)
+        // Usar un pequeño timeout para evitar conflictos con otros efectos
+        setTimeout(() => {
+          window.location.href = '/es/account/recover'
+        }, 100)
+      }
+    }
+  }, [loading, userData, hasRedirectedToRecover])
 
   const value: AuthContextType = {
     user,
