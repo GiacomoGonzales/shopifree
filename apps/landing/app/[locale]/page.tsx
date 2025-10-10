@@ -40,11 +40,11 @@ export default function HomePage() {
   // Demo stores data
   const demoStores = [
     {
-      name: "Restaurante El Buen Sabor",
+      name: "Fast Bite - fast food delivery",
       category: "Restaurante",
       theme: "Restaurant",
-      icon: "🍕",
-      url: "https://demo-restaurant.shopifree.app",
+      icon: "🍔",
+      url: "https://fastbite.shopifree.app",
       description: "Menú digital con checkout rápido",
       mobileColor: "bg-gradient-to-br from-orange-400 to-red-500",
       desktopColor: "bg-gradient-to-br from-orange-300 to-red-400"
@@ -110,17 +110,17 @@ export default function HomePage() {
       period: t('pricing.freeForLife'),
       description: t('pricing.freeDescription'),
       features: [
-        t('pricing.freeFeatures.products12'),
         t('pricing.freeFeatures.unlimitedSales'),
-        t('pricing.freeFeatures.whatsappSales'),
         t('pricing.freeFeatures.manualPayments'),
+        t('pricing.freeFeatures.whatsappSales'),
         t('pricing.freeFeatures.freeSubdomain'),
+        t('pricing.freeFeatures.freeSSL'),
+        t('pricing.freeFeatures.adminPanel'),
+        t('pricing.freeFeatures.products12'),
         t('pricing.freeFeatures.discountCoupons'),
         t('pricing.freeFeatures.basicReports'),
         t('pricing.freeFeatures.advancedSeo'),
-        t('pricing.freeFeatures.unlimitedHosting'),
-        t('pricing.freeFeatures.freeSSL'),
-        t('pricing.freeFeatures.adminPanel')
+        t('pricing.freeFeatures.unlimitedHosting')
       ],
       cta: t('pricing.startNowFree'),
       colors: {
@@ -142,16 +142,16 @@ export default function HomePage() {
       description: t('pricing.premiumDescription'),
       includesFrom: t('pricing.freePlan'),
       features: [
-        t('pricing.premiumFeatures.products50'),
-        t('pricing.premiumFeatures.traditionalCheckout'),
         t('pricing.proFeatures.integratedPayments'),
+        t('pricing.premiumFeatures.traditionalCheckout'),
         t('pricing.premiumFeatures.cartRecovery'),
         t('pricing.premiumFeatures.autoEmails'),
+        t('pricing.premiumFeatures.customDomain'),
+        t('pricing.premiumFeatures.products50'),
         t('pricing.premiumFeatures.completeReports'),
         t('pricing.premiumFeatures.googleAnalytics'),
         t('pricing.premiumFeatures.searchConsole'),
-        t('pricing.premiumFeatures.metaTikTokPixel'),
-        t('pricing.premiumFeatures.customDomain')
+        t('pricing.premiumFeatures.metaTikTokPixel')
       ],
       cta: t('pricing.growBusiness'),
       colors: {
@@ -175,14 +175,14 @@ export default function HomePage() {
       includesFrom: t('pricing.premiumPlan'),
       features: [
         t('pricing.proFeatures.unlimitedProducts'),
+        t('pricing.proFeatures.internationalSales'),
+        t('pricing.proFeatures.multipleLanguages'),
+        t('pricing.proFeatures.automaticTranslation'),
         t('pricing.proFeatures.customerSegmentation'),
         t('pricing.proFeatures.advancedMarketing'),
+        t('pricing.proFeatures.countryAnalytics'),
         t('pricing.proFeatures.exclusiveThemes'),
-        t('pricing.proFeatures.prioritySupport'),
-        t('pricing.proFeatures.automaticTranslation'),
-        t('pricing.proFeatures.multipleLanguages'),
-        t('pricing.proFeatures.internationalSales'),
-        t('pricing.proFeatures.countryAnalytics')
+        t('pricing.proFeatures.prioritySupport')
       ],
       cta: t('pricing.scaleUp'),
       colors: {
