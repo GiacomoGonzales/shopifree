@@ -734,11 +734,15 @@ export default function HomePage() {
                               <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 ? '' : store.mobileColor} cursor-pointer`}
                                    onClick={() => window.open(store.url, '_blank')}>
                                 {index === 0 ? (
-                                  <img
-                                    src="/images/restaurant-movil.png"
-                                    alt={`${store.name} - Vista móvil`}
+                                  <video
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
                                     className="w-full h-full object-cover"
-                                  />
+                                  >
+                                    <source src="/images/restaurant-movil.mp4" type="video/mp4" />
+                                  </video>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <span className="text-5xl">{store.icon}</span>
@@ -855,11 +859,15 @@ export default function HomePage() {
                             <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 ? '' : store.mobileColor} cursor-pointer`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
-                                <img
-                                  src="/images/restaurant-movil.png"
-                                  alt={`${store.name} - Vista móvil`}
+                                <video
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
                                   className="w-full h-full object-cover"
-                                />
+                                >
+                                  <source src="/images/restaurant-movil.mp4" type="video/mp4" />
+                                </video>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <span className="text-6xl">{store.icon}</span>
