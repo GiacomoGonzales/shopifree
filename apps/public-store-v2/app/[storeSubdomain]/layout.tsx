@@ -9,6 +9,7 @@ import { extractGoogleVerificationToken, isValidGoogleToken } from "../../lib/go
 import { getCanonicalHost } from "../../lib/canonical-resolver";
 import { getStorePrimaryLocale, type ValidLocale } from "../../lib/store";
 import { StoreLanguageRoot } from "../../lib/store-language-root";
+import PageViewTracker from "../../components/PageViewTracker";
 
 export async function generateMetadata({ params }: { params: { storeSubdomain: string } }): Promise<Metadata> {
     const subdomain = params?.storeSubdomain ?? "store";
@@ -276,6 +277,8 @@ export default async function StoreLocaleLayout({
             />
             
             <StoreLanguageRoot language={effectiveLocale as any}>
+                {/* Analytics - Trackear page views automáticamente */}
+                <PageViewTracker storeId={canonical.storeId} />
                 {children}
             </StoreLanguageRoot>
         </>

@@ -14,6 +14,7 @@ import {
   ReportMetrics,
   DailySalesData
 } from '../../../lib/reports'
+import { getStoreAnalytics, AnalyticsMetrics } from '../../../lib/analytics'
 import { subDays, startOfDay, endOfDay, format as formatDate } from 'date-fns'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
@@ -28,6 +29,8 @@ export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [metrics, setMetrics] = useState<ReportMetrics | null>(null)
   const [dailySales, setDailySales] = useState<DailySalesData[]>([])
+  const [analyticsMetrics, setAnalyticsMetrics] = useState<AnalyticsMetrics | null>(null)
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true)
 
   // Calcular fechas según el rango seleccionado
   const getDateRange = (range: DateRange) => {
@@ -88,6 +91,27 @@ export default function ReportsPage() {
     setMetrics(calculatedMetrics)
     setDailySales(calculatedDailySales)
   }, [orders, dateRange])
+
+  // Obtener analytics cuando cambia el rango de fecha
+  useEffect(() => {
+    if (!store?.id) return
+
+    const fetchAnalytics = async () => {
+      setLoadingAnalytics(true)
+      try {
+        const { start, end } = getDateRange(dateRange)
+        const data = await getStoreAnalytics(store.id, start, end)
+        setAnalyticsMetrics(data)
+      } catch (error) {
+        console.error('Error fetching analytics:', error)
+        setAnalyticsMetrics(null)
+      } finally {
+        setLoadingAnalytics(false)
+      }
+    }
+
+    fetchAnalytics()
+  }, [store?.id, dateRange])
 
   const currency = store?.currency || 'USD'
 
@@ -155,7 +179,7 @@ export default function ReportsPage() {
           ) : (
             <>
               {/* Grid de KPIs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {/* Ventas del período */}
                 <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
                   <div className="p-5">
@@ -275,6 +299,69 @@ export default function ReportsPage() {
                         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
                           <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vistas de página */}
+                <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                  <div className="p-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Vistas de Página
+                        </dt>
+                        <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                          {loadingAnalytics ? (
+                            <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+                          ) : (
+                            formatNumber(analyticsMetrics?.totalPageViews || 0)
+                          )}
+                        </dd>
+                        <dd className="mt-1 text-sm text-gray-500">
+                          Total del período
+                        </dd>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                          <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Visitantes únicos */}
+                <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                  <div className="p-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Visitantes Únicos
+                        </dt>
+                        <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                          {loadingAnalytics ? (
+                            <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+                          ) : (
+                            formatNumber(analyticsMetrics?.totalUniqueVisitors || 0)
+                          )}
+                        </dd>
+                        <dd className="mt-1 text-sm text-gray-500">
+                          {analyticsMetrics?.totalPageViews && analyticsMetrics.totalUniqueVisitors
+                            ? `${(analyticsMetrics.totalPageViews / analyticsMetrics.totalUniqueVisitors).toFixed(1)} páginas/visitante`
+                            : 'Del período'}
+                        </dd>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                          <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                         </div>
                       </div>

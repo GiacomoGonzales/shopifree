@@ -16,6 +16,7 @@ import UnifiedLoading from '../../../../components/UnifiedLoading';
 import SimpleLoadingSpinner from '../../../../components/SimpleLoadingSpinner';
 import { usePromotions } from '../../../../lib/hooks/usePromotions';
 import { useStoreLanguage } from '../../../../lib/store-language-context';
+import { trackProductView } from '../../../../lib/analytics-tracker';
 
 // Helper function para optimizar URLs de video de Cloudinary
 function optimizeCloudinaryVideo(url: string): string {
@@ -392,11 +393,19 @@ export default function ProductDetail({ storeSubdomain, productSlug }: Props) {
           console.log(`🔍 [ProductDetail] Buscando producto con slug: "${productSlug}" en store: ${id}`);
           const p = await getProduct(id, productSlug);
           console.log(`🔍 [ProductDetail] Resultado de getProduct:`, p);
-          
+
 
 
           if (!alive) return;
           setProduct(p);
+
+          // Trackear vista de producto si existe
+          if (p && id) {
+            trackProductView(id, p.id, p.name).catch(err => {
+              console.error('[Analytics] Error tracking product view:', err);
+            });
+          }
+
           // cargar info base para header/footer y configuración de locale
           const [info, cats, prods, primaryLocale, checkoutCfg] = await Promise.all([
             getStoreBasicInfo(id),
