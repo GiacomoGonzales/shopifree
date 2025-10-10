@@ -35,7 +35,7 @@ interface MediaFile {
 }
 
 export default function EditProductPage() {
-  const t = useTranslations('pages.categories')
+  const t = useTranslations('pages.products.edit')
   const router = useRouter()
   const params = useParams()
   const productId = params.productId as string
