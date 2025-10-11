@@ -1268,7 +1268,7 @@ export default function EditProductPage() {
                                 variationType1 === 'color'
                                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                   : variationType2 === 'color'
-                                    ? 'bg-blue-500 text-white shadow-md'
+                                    ? 'bg-primary-600 text-white shadow-md'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
@@ -1287,7 +1287,7 @@ export default function EditProductPage() {
                                 variationType1 === 'talla'
                                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                   : variationType2 === 'talla'
-                                    ? 'bg-blue-500 text-white shadow-md'
+                                    ? 'bg-primary-600 text-white shadow-md'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
@@ -1303,7 +1303,7 @@ export default function EditProductPage() {
                               }}
                               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                                 variationType2 === 'otro'
-                                  ? 'bg-blue-500 text-white shadow-md'
+                                  ? 'bg-primary-600 text-white shadow-md'
                                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                             >
