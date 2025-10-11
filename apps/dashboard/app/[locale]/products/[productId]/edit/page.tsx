@@ -957,14 +957,24 @@ export default function EditProductPage() {
 
               {/* 4. Inventario y variaciones */}
               <Card className="p-6">
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Inventario y variaciones</h2>
-                  <p className="text-sm text-gray-500">
-                    Configura el stock y las variaciones de tu producto
-                  </p>
-                </div>
+                <button
+                  onClick={() => setShowInventory(!showInventory)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">Inventario y variaciones</h2>
+                    <p className="text-sm text-gray-500">
+                      Configura el stock y las variaciones de tu producto
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showInventory ? '−' : '+'}
+                  </span>
+                </button>
 
-                {/* Primera pregunta: Rastrear inventario */}
+                {showInventory && (
+                  <div className="mt-6">
+                    {/* Primera pregunta: Rastrear inventario */}
                 <div className="mb-6">
                   <label className="flex items-center">
                     <input
@@ -1354,8 +1364,10 @@ export default function EditProductPage() {
                     )}
                   </div>
                 )}
+                  </div>
+                )}
               </Card>
-              
+
               {/* 5. SEO */}
               <Card className="p-6">
                 <button
