@@ -576,9 +576,9 @@ export default function HomePage() {
           </div>
 
           {/* Menu Content */}
-          <div className="px-8 py-4 h-full flex flex-col">
+          <div className="px-8 py-6 h-full flex flex-col overflow-y-auto">
             {/* Logo */}
-            <div className="mb-12">
+            <div className="mb-10">
               <Image
                 src="/logo-primary.png"
                 alt="Shopifree - Plataforma de ecommerce gratuita"
@@ -589,7 +589,7 @@ export default function HomePage() {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex-1 space-y-4">
+            <nav className="space-y-4 mb-10">
               <Link
                 href={`/${locale}#features`}
                 className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
@@ -613,20 +613,18 @@ export default function HomePage() {
               </Link>
             </nav>
 
-            {/* Bottom Section */}
-            <div className="space-y-4 pb-8">
-              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
-                <Button variant="secondary" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
-                  {t('login')}
-                </Button>
-              </a>
-
-              {/* Language Selector - Full Width */}
-              <div className="pt-2">
-                <div className="text-white/60 text-xs uppercase tracking-wide mb-2 px-2">Idioma</div>
-                <LanguageSelector variant="sidebar" />
-              </div>
+            {/* Language Selector */}
+            <div className="mb-6">
+              <div className="text-white/60 text-xs uppercase tracking-wide mb-2 px-2">Idioma</div>
+              <LanguageSelector variant="sidebar" />
             </div>
+
+            {/* Login Button */}
+            <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
+              <Button variant="secondary" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
+                {t('login')}
+              </Button>
+            </a>
           </div>
         </div>
       </header>
