@@ -21,12 +21,18 @@
       "blog": "Blog"
     },
     "pricing": {
+      "title": "Planes y Precios para tu Tienda Online",
       "subtitle": "Precios simples y transparentes para tu tienda online",
       "freePlan": "Plan Gratis",
-      "premiumPlan": "Plan Premium", 
+      "premiumPlan": "Plan Premium",
       "proPlan": "Plan Pro",
+      "free": "Gratis",
       "freeForLife": "Gratis de por vida",
       "perMonth": "/mes",
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "savePercent": "Ahorra 33%",
+      "billedAnnually": "facturado anualmente",
       "freeDescription": "Ideal para comenzar sin riesgos.",
       "premiumDescription": "Haz crecer tu negocio con más funciones.",
       "proDescription": "El plan más completo para negocios que quieren escalar.",
@@ -91,6 +97,18 @@
     "feature3": {
       "title": "Analíticas incluidas",
       "description": "Visualiza el rendimiento de tu tienda con reportes detallados"
+    },
+    "demoStores": {
+      "title": "Explora Tiendas Demo",
+      "subtitle": "Ve ejemplos reales de tiendas creadas con Shopifree. Haz clic para explorar cada demo.",
+      "theme": "Tema:",
+      "viewFullDemo": "Ver Demo Completo",
+      "viewDemo": "Ver Demo",
+      "swipeHint": "← Desliza para ver más demos →"
+    },
+    "integrations": {
+      "title": "Integraciones con las Mejores Plataformas de Pago y Marketing",
+      "subtitle": "Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más"
     },
     "footer": {
       "description": "La plataforma completa para crear tu tienda online exitosa.",

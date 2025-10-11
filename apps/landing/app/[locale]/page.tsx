@@ -41,7 +41,7 @@ export default function HomePage() {
   // Demo stores data
   const demoStores = [
     {
-      name: "Fast Bite - fast food delivery",
+      name: "Fast Bite - Comida rápida a domicilio",
       category: "Restaurante",
       theme: "Restaurant",
       icon: "🍔",
@@ -61,11 +61,11 @@ export default function HomePage() {
       desktopColor: "bg-gradient-to-br from-pink-300 to-purple-400"
     },
     {
-      name: "Pet Paradise",
+      name: "La Patota Shop - Vet & Spa para mascotas",
       category: "Mascotas",
       theme: "Pet Friendly",
       icon: "🐾",
-      url: "https://demo-pets.shopifree.app",
+      url: "https://lapatotashop.com",
       description: "Todo para tu mascota",
       mobileColor: "bg-gradient-to-br from-green-400 to-teal-500",
       desktopColor: "bg-gradient-to-br from-green-300 to-teal-400"
@@ -107,7 +107,7 @@ export default function HomePage() {
     {
       id: 'free',
       name: t('pricing.freePlan'),
-      price: 'Gratis',
+      price: t('pricing.free'),
       period: t('pricing.freeForLife'),
       description: t('pricing.freeDescription'),
       features: [
@@ -240,8 +240,8 @@ export default function HomePage() {
   }
 
   const formatPrice = (plan: typeof pricingPlans[0]) => {
-    if (plan.id === 'free') return 'Gratis'
-    
+    if (plan.id === 'free') return t('pricing.free')
+
     if (isAnnual && plan.annualPrice) {
       const monthlyEquivalent = (plan.annualPrice / 12).toFixed(2)
       return `$${monthlyEquivalent}`
@@ -388,13 +388,13 @@ export default function HomePage() {
             {formatPeriod(plan)}
             {isAnnual && plan.annualPrice && plan.id !== 'free' && (
               <span className="text-xs text-gray-500 block">
-                facturado anualmente
+                {t('pricing.billedAnnually')}
               </span>
             )}
           </div>
           {isAnnual && plan.annualPrice && plan.monthlyPrice && (
             <div className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 line-through mt-1 text-left`}>
-              ${plan.monthlyPrice}/mes
+              ${plan.monthlyPrice}{t('pricing.perMonth')}
             </div>
           )}
         </div>
@@ -701,10 +701,10 @@ export default function HomePage() {
           {/* Section Header */}
           <div className="text-center mb-6 md:mb-8 px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-2">
-              Explora Tiendas Demo
+              {t('demoStores.title')}
             </h2>
             <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-              Ve ejemplos reales de tiendas creadas con Shopifree. Haz clic para explorar cada demo.
+              {t('demoStores.subtitle')}
             </p>
           </div>
 
@@ -732,7 +732,7 @@ export default function HomePage() {
                               <div className="h-[48px] w-[2px] bg-gray-800 absolute -right-[12px] top-[106px] rounded-r-lg"></div>
 
                               {/* Screen content */}
-                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 ? '' : store.mobileColor} cursor-pointer`}
+                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
                                    onClick={() => window.open(store.url, '_blank')}>
                                 {index === 0 ? (
                                   <video
@@ -753,6 +753,16 @@ export default function HomePage() {
                                     className="w-full h-full object-contain"
                                   >
                                     <source src="/images/ropa-movil.mp4" type="video/mp4" />
+                                  </video>
+                                ) : index === 2 ? (
+                                  <video
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-contain"
+                                  >
+                                    <source src="/images/mascotas-movil.mp4" type="video/mp4" />
                                   </video>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -782,7 +792,7 @@ export default function HomePage() {
                             </div>
 
                             {/* Browser content */}
-                            <div className={`${index === 0 || index === 1 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
+                            <div className={`${index === 0 || index === 1 || index === 2 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <img
@@ -793,6 +803,12 @@ export default function HomePage() {
                               ) : index === 1 ? (
                                 <img
                                   src="/images/ropa-desktop.png"
+                                  alt={`${store.name} - Vista desktop`}
+                                  className="w-full h-full object-cover object-top"
+                                />
+                              ) : index === 2 ? (
+                                <img
+                                  src="/images/mascotas-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
                                   className="w-full h-full object-cover object-top"
                                 />
@@ -813,7 +829,7 @@ export default function HomePage() {
                               <span className="text-lg">{store.icon}</span>
                               <span className="font-medium text-sm">{store.category}</span>
                               <span className="text-gray-400">•</span>
-                              <span className="text-xs">Tema: {store.theme}</span>
+                              <span className="text-xs">{t('demoStores.theme')} {store.theme}</span>
                             </div>
                             <p className="text-gray-600 text-sm mb-3">{store.description}</p>
                             <button
@@ -822,7 +838,7 @@ export default function HomePage() {
                             >
                               <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
                               <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 group-hover:text-white transition-colors duration-300">
-                                Ver Demo Completo
+                                {t('demoStores.viewFullDemo')}
                                 <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
@@ -873,7 +889,7 @@ export default function HomePage() {
                             <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
                             <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
 
-                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 ? '' : store.mobileColor} cursor-pointer`}
+                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <video
@@ -894,6 +910,16 @@ export default function HomePage() {
                                   className="w-full h-full object-contain"
                                 >
                                   <source src="/images/ropa-movil.mp4" type="video/mp4" />
+                                </video>
+                              ) : index === 2 ? (
+                                <video
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                  className="w-full h-full object-contain"
+                                >
+                                  <source src="/images/mascotas-movil.mp4" type="video/mp4" />
                                 </video>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
@@ -920,7 +946,7 @@ export default function HomePage() {
                           >
                             <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
                             <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 group-hover:text-white transition-colors duration-300">
-                              Ver Demo
+                              {t('demoStores.viewDemo')}
                               <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                               </svg>
@@ -935,7 +961,7 @@ export default function HomePage() {
 
               {/* Scroll hint - Mobile only */}
               <div className="text-center mt-4 text-sm text-gray-500">
-                ← Desliza para ver más demos →
+                {t('demoStores.swipeHint')}
               </div>
             </div>
 
@@ -963,10 +989,10 @@ export default function HomePage() {
         <div className="mx-auto">
           <div className="text-center mb-12 px-4 sm:px-6 lg:px-8">
             <h2 id="integrations-heading" className="text-3xl font-light text-gray-900 mb-4">
-              Integraciones con las Mejores Plataformas de Pago y Marketing
+              {t('integrations.title')}
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              Conecta tu tienda con pasarelas de pago, herramientas de analytics, marketing y más
+              {t('integrations.subtitle')}
             </p>
           </div>
 
@@ -999,7 +1025,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 id="pricing-heading" className="text-2xl md:text-3xl font-light text-gray-900 mb-2 md:mb-3">
-              Planes y Precios para tu Tienda Online
+              {t('pricing.title')}
             </h2>
             <p className="text-base md:text-lg text-gray-600 mb-4 md:mb-6">
               {t('pricing.subtitle')}
@@ -1017,7 +1043,7 @@ export default function HomePage() {
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    Mensual
+                    {t('pricing.monthly')}
                   </button>
                   <button
                     onClick={() => setIsAnnual(true)}
@@ -1027,9 +1053,9 @@ export default function HomePage() {
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    Anual
+                    {t('pricing.annual')}
                     <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      Ahorra 33%
+                      {t('pricing.savePercent')}
                     </span>
                   </button>
                 </div>
