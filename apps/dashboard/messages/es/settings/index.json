@@ -66,8 +66,8 @@
     "checkoutMethod": "Método de venta",
     "whatsappSales": "Ventas por WhatsApp",
     "whatsappSalesDescription": "Los clientes te contactan por WhatsApp para realizar pedidos",
-    "traditionalCheckout": "Checkout tradicional",
-    "traditionalCheckoutDescription": "Carrito de compras integrado (Próximamente)",
+    "traditionalCheckout": "Ventas automatizadas",
+    "traditionalCheckoutDescription": "Proceso automatizado con confirmación por email",
     "checkoutMethodSaved": "Método de venta guardado correctamente"
   },
   "paymentMethods": {
@@ -132,7 +132,7 @@
       "title": "Método de Checkout",
       "description": "Configura cómo recibir los pedidos",
       "whatsappCheckout": "Venta por WhatsApp (Plan Free)",
-      "traditionalCheckout": "Checkout tradicional (Planes Premium/Pro)",
+      "traditionalCheckout": "Ventas automatizadas (Planes Premium/Pro)",
       "language": {
         "title": "Idioma de la tienda",
         "description": "Selecciona el idioma por defecto para elementos comunes de la tienda",

@@ -331,7 +331,7 @@ export default function SalesSection() {
                     <label htmlFor="whatsapp-sales" className="font-medium text-gray-700">
                       {t('sales.whatsappSales')}
                     </label>
-                    <p className="text-gray-500">Proceso completo de compra, el pedido es enviado por WhatsApp para coordinación manual de envío y pago</p>
+                    <p className="text-gray-500">{t('sales.whatsappSalesDescription')}</p>
                   </div>
                 </div>
                 
@@ -350,7 +350,7 @@ export default function SalesSection() {
                     <label htmlFor="traditional-checkout" className="font-medium text-gray-700">
                       {t('sales.traditionalCheckout')}
                     </label>
-                    <p className="text-gray-500">Proceso automatizado con confirmación por email/WhatsApp (requiere plan de suscripción)</p>
+                    <p className="text-gray-500">{t('sales.traditionalCheckoutDescription')}</p>
                   </div>
                 </div>
               </div>
