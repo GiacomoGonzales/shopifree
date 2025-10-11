@@ -599,35 +599,61 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="ml-3">{t('logout')}</span>
             </button>
 
-            {/* Selector de idioma */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="text-xs font-medium text-gray-500 px-2 mb-2">
-                {currentLocale === 'es' ? 'Idioma' : 'Language'}
-              </div>
-              <div className="space-y-1">
-                <button
-                  onClick={() => handleLanguageChange('es')}
-                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
-                    currentLocale === 'es'
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+            {/* Selector de idioma - Dropdown moderno */}
+            <div className="mt-3 pt-3 border-t border-gray-200 relative px-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setLanguageDropdownOpen(!languageDropdownOpen)
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
+              >
+                <div className="flex items-center">
+                  <span className="text-lg mr-2">{currentLocale === 'es' ? '🇪🇸' : '🇬🇧'}</span>
+                  <span>{currentLocale === 'es' ? 'Español' : 'English'}</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform ${languageDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <MenuIcons.Globe />
-                  <span className="ml-3">Español</span>
-                </button>
-                <button
-                  onClick={() => handleLanguageChange('en')}
-                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
-                    currentLocale === 'en'
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <MenuIcons.Globe />
-                  <span className="ml-3">English</span>
-                </button>
-              </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {languageDropdownOpen && (
+                <div className="absolute bottom-full left-2 right-2 mb-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <button
+                    onClick={() => handleLanguageChange('es')}
+                    className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-50 ${
+                      currentLocale === 'es' ? 'text-gray-900 font-medium bg-gray-50' : 'text-gray-600'
+                    }`}
+                  >
+                    <span className="text-lg mr-2">🇪🇸</span>
+                    <span>Español</span>
+                    {currentLocale === 'es' && (
+                      <svg className="ml-auto w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('en')}
+                    className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-50 ${
+                      currentLocale === 'en' ? 'text-gray-900 font-medium bg-gray-50' : 'text-gray-600'
+                    }`}
+                  >
+                    <span className="text-lg mr-2">🇬🇧</span>
+                    <span>English</span>
+                    {currentLocale === 'en' && (
+                      <svg className="ml-auto w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -678,35 +704,61 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="ml-3">{t('logout')}</span>
             </button>
 
-            {/* Selector de idioma */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="text-xs font-medium text-gray-500 px-2 mb-2">
-                {currentLocale === 'es' ? 'Idioma' : 'Language'}
-              </div>
-              <div className="space-y-1">
-                <button
-                  onClick={() => handleLanguageChange('es')}
-                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
-                    currentLocale === 'es'
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+            {/* Selector de idioma - Dropdown moderno */}
+            <div className="mt-3 pt-3 border-t border-gray-200 relative px-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setLanguageDropdownOpen(!languageDropdownOpen)
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
+              >
+                <div className="flex items-center">
+                  <span className="text-lg mr-2">{currentLocale === 'es' ? '🇪🇸' : '🇬🇧'}</span>
+                  <span>{currentLocale === 'es' ? 'Español' : 'English'}</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform ${languageDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <MenuIcons.Globe />
-                  <span className="ml-3">Español</span>
-                </button>
-                <button
-                  onClick={() => handleLanguageChange('en')}
-                  className={`w-full flex items-center px-2 py-1.5 text-sm font-medium rounded-md ${
-                    currentLocale === 'en'
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <MenuIcons.Globe />
-                  <span className="ml-3">English</span>
-                </button>
-              </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {languageDropdownOpen && (
+                <div className="absolute bottom-full left-2 right-2 mb-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <button
+                    onClick={() => handleLanguageChange('es')}
+                    className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-50 ${
+                      currentLocale === 'es' ? 'text-gray-900 font-medium bg-gray-50' : 'text-gray-600'
+                    }`}
+                  >
+                    <span className="text-lg mr-2">🇪🇸</span>
+                    <span>Español</span>
+                    {currentLocale === 'es' && (
+                      <svg className="ml-auto w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('en')}
+                    className={`w-full flex items-center px-3 py-2 text-sm hover:bg-gray-50 ${
+                      currentLocale === 'en' ? 'text-gray-900 font-medium bg-gray-50' : 'text-gray-600'
+                    }`}
+                  >
+                    <span className="text-lg mr-2">🇬🇧</span>
+                    <span>English</span>
+                    {currentLocale === 'en' && (
+                      <svg className="ml-auto w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
