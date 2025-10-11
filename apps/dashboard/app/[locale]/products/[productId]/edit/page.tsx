@@ -1159,10 +1159,10 @@ export default function EditProductPage() {
                     </div>
 
                     {/* Paso 2: Opciones del tipo principal */}
-                    {((variationType1 && variationType1 !== 'otro') || (variationType1 === 'otro' && variationType1Custom.trim())) && (
+                    {variationType1 && (
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
-                          Paso 2: Define las opciones de {variationType1 === 'otro' ? variationType1Custom : variationType1}
+                          Paso 2: Define las opciones de {variationType1 === 'otro' ? (variationType1Custom || 'otro') : variationType1}
                         </label>
                         <div className="space-y-2">
                           {variationType1Options.map((option, index) => (
@@ -1388,18 +1388,17 @@ export default function EditProductPage() {
                     )}
 
                     {/* Botón generar matriz */}
-                    {variationType1Options.filter(opt => opt.trim() !== '').length > 0 && 
-                     (!hasSecondVariation || 
-                      (((variationType2 && variationType2 !== 'otro') || (variationType2 === 'otro' && variationType2Custom.trim())) && 
-                       variationType2Options.filter(opt => opt.trim() !== '').length > 0)) && (
+                    {variationType1Options.filter(opt => opt.trim() !== '').length > 0 &&
+                     (!hasSecondVariation ||
+                      (variationType2 && variationType2Options.filter(opt => opt.trim() !== '').length > 0)) && (
                       <div className="pt-4 border-t border-gray-200">
-                        <Button 
+                        <Button
                           onClick={generateVariantMatrix}
                           className="w-full"
                         >
-                          Generar matriz de variaciones 
-                          ({hasSecondVariation ? 
-                            variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length : 
+                          Generar matriz de variaciones
+                          ({hasSecondVariation ?
+                            variationType1Options.filter(opt => opt.trim() !== '').length * variationType2Options.filter(opt => opt.trim() !== '').length :
                             variationType1Options.filter(opt => opt.trim() !== '').length} combinaciones)
                         </Button>
                       </div>
