@@ -1368,7 +1368,65 @@ export default function EditProductPage() {
                 )}
               </Card>
 
-              {/* 5. SEO */}
+              {/* 5. Envío */}
+              <Card className="p-6">
+                <button
+                  onClick={() => setShowShipping(!showShipping)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">Envío</h2>
+                    <p className="text-sm text-gray-500">
+                      Configura las opciones de envío de tu producto
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showShipping ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showShipping && (
+                  <div className="mt-6 space-y-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={requiresShipping}
+                        onChange={(e) => setRequiresShipping(e.target.checked)}
+                        className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Este producto requiere envío</span>
+                    </label>
+
+                    {requiresShipping && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <Input
+                          label="Peso (kg)"
+                          type="number"
+                          placeholder="0.5"
+                          value={weight}
+                          onChange={(e) => setWeight(e.target.value)}
+                        />
+                        <Input
+                          label="País de origen"
+                          placeholder="Perú"
+                          value={countryOrigin}
+                          onChange={(e) => setCountryOrigin(e.target.value)}
+                        />
+                        <div className="md:col-span-2">
+                          <Input
+                            label="Código armonizado (HS)"
+                            placeholder="6109.10.00"
+                            value={harmonizedCode}
+                            onChange={(e) => setHarmonizedCode(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+
+              {/* 6. SEO */}
               <Card className="p-6">
                 <button
                   onClick={() => setShowSEO(!showSEO)}
