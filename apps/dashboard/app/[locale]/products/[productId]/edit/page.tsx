@@ -1423,6 +1423,13 @@ export default function EditProductPage() {
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
+                              {/* Checkbox de disponibilidad */}
+                              <th className="w-16 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div className="flex items-center justify-center">
+                                  <span className="sr-only">Activar/Desactivar</span>
+                                  ✓
+                                </div>
+                              </th>
                               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Variante
                               </th>
@@ -1440,6 +1447,17 @@ export default function EditProductPage() {
                           <tbody className="bg-white divide-y divide-gray-200">
                             {variants.map(variant => (
                               <tr key={variant.id} className={variant.available === false ? 'bg-gray-50 opacity-60' : ''}>
+                                {/* Checkbox para activar/desactivar variante */}
+                                <td className="px-3 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={variant.available !== false}
+                                    onChange={() => toggleVariantAvailability(variant.id)}
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                    title={variant.available !== false ? "Variante activa" : "Variante inactiva"}
+                                  />
+                                </td>
+
                                 {/* Nombre de variante */}
                                 <td className="px-4 py-3">
                                   {variant.attributes ? (
