@@ -1213,6 +1213,174 @@ export default function EditProductPage() {
                       </div>
                     )}
 
+                    {/* Paso 3: Pregunta por segundo tipo */}
+                    {variationType1 && variationType1Options.filter(opt => opt.trim() !== '').length > 0 && (
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Paso 3: ¿Quieres agregar un segundo tipo de variación?
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="hasSecondVariation"
+                              checked={!hasSecondVariation}
+                              onChange={() => {
+                                setHasSecondVariation(false)
+                                setVariationType2('')
+                                setVariationType2Options([])
+                              }}
+                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">No, solo {variationType1 === 'otro' ? variationType1Custom : variationType1}</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="hasSecondVariation"
+                              checked={hasSecondVariation}
+                              onChange={() => setHasSecondVariation(true)}
+                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Sí, agregar otro tipo</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Paso 4: Segundo tipo de variación */}
+                    {hasSecondVariation && (
+                      <div className="space-y-4">
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Paso 4: Selecciona el segundo tipo de variación
+                          </label>
+                          <div className="flex flex-wrap gap-3">
+                            {/* Pastilla Color - deshabilitada si ya está seleccionada */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVariationType2('color')
+                                setVariationType2Custom('')
+                              }}
+                              disabled={variationType1 === 'color'}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                variationType1 === 'color'
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : variationType2 === 'color'
+                                    ? 'bg-blue-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Color {variationType1 === 'color' && '(seleccionado en paso 1)'}
+                            </button>
+
+                            {/* Pastilla Talla - deshabilitada si ya está seleccionada */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVariationType2('talla')
+                                setVariationType2Custom('')
+                              }}
+                              disabled={variationType1 === 'talla'}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                variationType1 === 'talla'
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : variationType2 === 'talla'
+                                    ? 'bg-blue-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Talla {variationType1 === 'talla' && '(seleccionado en paso 1)'}
+                            </button>
+
+                            {/* Pastilla Otro */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVariationType2('otro')
+                                setVariationType2Custom('')
+                              }}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                variationType2 === 'otro'
+                                  ? 'bg-blue-500 text-white shadow-md'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              Otro
+                            </button>
+                          </div>
+
+                          {/* Input para segundo tipo personalizado */}
+                          {variationType2 === 'otro' && (
+                            <div className="mt-3">
+                              <input
+                                type="text"
+                                value={variationType2Custom}
+                                onChange={(e) => setVariationType2Custom(e.target.value)}
+                                placeholder="Escribe el nombre del segundo tipo (ej: Material, Estilo)"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {variationType2 && (
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Define las opciones de {variationType2 === 'otro' ? (variationType2Custom || 'otro') : variationType2}
+                            </label>
+                            <div className="space-y-2">
+                              {variationType2Options.map((option, index) => (
+                                <div key={index} className="flex gap-2 items-center">
+                                  <input
+                                    ref={(el) => inputRefs2.current[index] = el}
+                                    type="text"
+                                    value={option}
+                                    onChange={(e) => {
+                                      const newOptions = [...variationType2Options]
+                                      newOptions[index] = e.target.value
+                                      setVariationType2Options(newOptions)
+                                      // Mantener el foco después del cambio
+                                      setTimeout(() => {
+                                        inputRefs2.current[index]?.focus()
+                                      }, 0)
+                                    }}
+                                    placeholder="Ej: S"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                                  />
+                                  {variationType2Options.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newOptions = variationType2Options.filter((_, i) => i !== index)
+                                        setVariationType2Options(newOptions)
+                                      }}
+                                      className="px-2 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                      title="Eliminar opción"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                      </svg>
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+
+                              {/* Botón para agregar más opciones */}
+                              <button
+                                type="button"
+                                onClick={() => setVariationType2Options([...variationType2Options, ''])}
+                                className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-md text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
+                              >
+                                + Agregar opción
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Botón generar matriz */}
                     {variationType1Options.filter(opt => opt.trim() !== '').length > 0 && 
                      (!hasSecondVariation || 
