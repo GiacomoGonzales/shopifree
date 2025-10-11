@@ -590,22 +590,22 @@ export default function HomePage() {
 
             {/* Navigation Links */}
             <nav className="flex-1 space-y-4">
-              <Link 
-                href={`/${locale}#features`} 
+              <Link
+                href={`/${locale}#features`}
                 className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('nav.features')}
               </Link>
-              <Link 
-                href={`/${locale}#pricing`} 
+              <Link
+                href={`/${locale}#pricing`}
                 className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('nav.pricing')}
               </Link>
-              <Link 
-                href={`/${locale}/blog`} 
+              <Link
+                href={`/${locale}/blog`}
                 className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -620,10 +620,11 @@ export default function HomePage() {
                   {t('login')}
                 </Button>
               </a>
-              <div className="flex justify-center pt-2">
-                <div className="scale-90">
-                  <LanguageSelector />
-                </div>
+
+              {/* Language Selector - Full Width */}
+              <div className="pt-2">
+                <div className="text-white/60 text-xs uppercase tracking-wide mb-2 px-2">Idioma</div>
+                <LanguageSelector variant="sidebar" />
               </div>
             </div>
           </div>

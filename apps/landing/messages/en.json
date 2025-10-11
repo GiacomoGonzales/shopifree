@@ -21,12 +21,18 @@
       "blog": "Blog"
     },
     "pricing": {
+      "title": "Plans and Pricing for Your Online Store",
       "subtitle": "Simple and transparent pricing for your online store",
       "freePlan": "Free Plan",
-      "premiumPlan": "Premium Plan", 
+      "premiumPlan": "Premium Plan",
       "proPlan": "Pro Plan",
+      "free": "Free",
       "freeForLife": "Free for life",
       "perMonth": "/month",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "savePercent": "Save 33%",
+      "billedAnnually": "billed annually",
       "freeDescription": "Perfect for getting started without risks.",
       "premiumDescription": "Grow your business with more features.",
       "proDescription": "The most complete plan for scaling businesses.",
@@ -91,6 +97,18 @@
     "feature3": {
       "title": "Analytics included",
       "description": "View your store's performance with detailed reports"
+    },
+    "demoStores": {
+      "title": "Explore Demo Stores",
+      "subtitle": "See real examples of stores created with Shopifree. Click to explore each demo.",
+      "theme": "Theme:",
+      "viewFullDemo": "View Full Demo",
+      "viewDemo": "View Demo",
+      "swipeHint": "← Swipe to see more demos →"
+    },
+    "integrations": {
+      "title": "Integrations with the Best Payment and Marketing Platforms",
+      "subtitle": "Connect your store with payment gateways, analytics tools, marketing and more"
     },
     "footer": {
       "description": "The complete platform to create your successful online store.",
