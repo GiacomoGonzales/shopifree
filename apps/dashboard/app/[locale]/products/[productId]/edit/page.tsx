@@ -1358,10 +1358,25 @@ export default function EditProductPage() {
               
               {/* 5. SEO */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Optimización para motores de búsqueda</h2>
-                
-                {/* Vista previa de Google */}
-                <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <button
+                  onClick={() => setShowSEO(!showSEO)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">Optimización para motores de búsqueda</h2>
+                    <p className="text-sm text-gray-500">
+                      Mejora el posicionamiento de tu producto en buscadores
+                    </p>
+                  </div>
+                  <span className="text-gray-400">
+                    {showSEO ? '−' : '+'}
+                  </span>
+                </button>
+
+                {showSEO && (
+                  <div className="mt-4">
+                    {/* Vista previa de Google */}
+                    <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <h3 className="text-sm font-medium text-gray-700 mb-3">Vista previa de la búsqueda de Google</h3>
                   <div className="space-y-1">
                     <div className="text-blue-600 text-lg hover:underline cursor-pointer">
@@ -1402,6 +1417,8 @@ export default function EditProductPage() {
                     onChange={(e) => setUrlSlug(e.target.value)}
                   />
                 </div>
+                  </div>
+                )}
               </Card>
             </div>
 
