@@ -162,8 +162,8 @@
           "checkoutMethod": "Método de checkout",
           "whatsappSales": "Ventas por WhatsApp",
           "whatsappSalesDescription": "Proceso completo de compra, pero el pedido final se envía por WhatsApp para coordinación manual",
-          "traditionalCheckout": "Checkout tradicional",
-          "traditionalCheckoutDescription": "Proceso automatizado con confirmación por email/WhatsApp (requiere plan de suscripción)"
+          "traditionalCheckout": "Ventas automatizadas",
+          "traditionalCheckoutDescription": "Proceso automatizado con confirmación por email"
         },
         "socialMedia": {
           "title": "Redes Sociales",
@@ -193,7 +193,7 @@
         "description": "Configura cómo recibir los pedidos",
         "whatsappCheckout": "Venta por WhatsApp",
         "whatsappDescription": "Los clientes envían pedidos por WhatsApp (Plan Free)",
-        "traditionalCheckout": "Checkout tradicional",
+        "traditionalCheckout": "Ventas automatizadas",
         "traditionalDescription": "Carrito y checkout integrado (Planes Premium/Pro)",
         "premiumRequired": "Requiere plan de pago",
         "whatsappMessage": "Mensaje predefinido WhatsApp",
