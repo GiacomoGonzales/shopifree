@@ -1012,31 +1012,28 @@ export default function EditProductPage() {
         hasVariants,
         variants: hasVariants ? variants : [], // Guardar todas las variantes creadas
 
-        // Modificadores - resolver plantillas seleccionadas y convertir a modifierGroups
+        // Modificadores - guardar referencias a plantillas o grupos personalizados
         modifierGroups: selectedTemplateIds.length > 0
-          ? selectedTemplateIds.map((templateId, index) => {
-              const template = modifierTemplates.find(t => t.id === templateId)
-              if (!template) return null
-
-              return {
-                id: template.id,
-                name: template.name,
-                required: template.required,
-                allowMultiple: template.allowMultiple,
-                minSelections: template.minSelections,
-                maxSelections: template.maxSelections,
-                order: index,
-                options: template.options
+          ? selectedTemplateIds.map((templateId, index) => ({
+              templateId: templateId, // Solo guardar referencia
+              order: index,
+              customData: null // No hay datos personalizados si usa plantilla
+            }))
+          : modifierGroups.map((group, index) => ({
+              templateId: null, // No usa plantilla
+              order: index,
+              customData: {
+                id: group.id,
+                name: group.name,
+                required: group.required,
+                allowMultiple: group.allowMultiple,
+                minSelections: group.minSelections === '' ? 0 : parseInt(group.minSelections as string) || 0,
+                maxSelections: group.maxSelections === '' ? 999 : parseInt(group.maxSelections as string) || 999,
+                options: group.options.map(option => ({
+                  ...option,
+                  priceModifier: option.priceModifier === '' ? 0 : parseFloat(option.priceModifier as string) || 0
+                }))
               }
-            }).filter(Boolean)
-          : modifierGroups.map(group => ({
-              ...group,
-              minSelections: group.minSelections === '' ? 0 : parseInt(group.minSelections as string) || 0,
-              maxSelections: group.maxSelections === '' ? 999 : parseInt(group.maxSelections as string) || 999,
-              options: group.options.map(option => ({
-                ...option,
-                priceModifier: option.priceModifier === '' ? 0 : parseFloat(option.priceModifier as string) || 0
-              }))
             })),
 
         // Envío

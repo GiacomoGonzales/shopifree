@@ -158,3 +158,61 @@ export async function deleteModifierTemplate(storeId: string, templateId: string
   const templateRef = doc(db, 'stores', storeId, 'modifierTemplates', templateId)
   await deleteDoc(templateRef)
 }
+
+/**
+ * Resolver referencias de modificadores a sus datos completos
+ * Compatible con formato antiguo (datos copiados) y nuevo (referencias)
+ */
+export async function resolveModifierReferences(
+  storeId: string,
+  modifierGroups: any[]
+): Promise<any[]> {
+  if (!modifierGroups || modifierGroups.length === 0) return []
+
+  const resolved = await Promise.all(
+    modifierGroups.map(async (group) => {
+      // Formato nuevo: tiene templateId
+      if (group.templateId) {
+        const template = await getModifierTemplate(storeId, group.templateId)
+        if (!template) {
+          console.warn(`Template ${group.templateId} not found, skipping modifier group`)
+          return null
+        }
+        return {
+          id: template.id,
+          name: template.name,
+          required: template.required,
+          allowMultiple: template.allowMultiple,
+          minSelections: template.minSelections,
+          maxSelections: template.maxSelections,
+          options: template.options,
+          order: group.order
+        }
+      }
+
+      // Formato nuevo: tiene customData
+      if (group.customData) {
+        return {
+          id: group.customData.id,
+          name: group.customData.name,
+          required: group.customData.required,
+          allowMultiple: group.customData.allowMultiple,
+          minSelections: group.customData.minSelections,
+          maxSelections: group.customData.maxSelections,
+          options: group.customData.options,
+          order: group.order
+        }
+      }
+
+      // Formato antiguo: datos directamente en el grupo (compatibilidad)
+      // Si tiene 'name' y 'options' directamente, es formato antiguo
+      if (group.name && group.options) {
+        return group
+      }
+
+      return null
+    })
+  )
+
+  return resolved.filter(Boolean).sort((a, b) => a.order - b.order)
+}

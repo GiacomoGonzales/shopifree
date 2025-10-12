@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { getFirebaseDb } from "./firebase";
 
 export type PublicMediaFile = { id?: string; url: string; type?: "image" | "video" };
@@ -45,6 +45,75 @@ export type PublicProduct = {
     modifierGroups?: ModifierGroup[];  // Modificadores y extras
     createdAt?: string;
 };
+
+/**
+ * Resolver referencias de modificadores a sus datos completos
+ * Compatible con formato antiguo (datos copiados) y nuevo (referencias)
+ */
+async function resolveModifierReferences(
+	storeId: string,
+	modifierGroups: any[]
+): Promise<ModifierGroup[]> {
+	if (!modifierGroups || modifierGroups.length === 0) return []
+
+	const db = getFirebaseDb()
+	if (!db) return []
+
+	const resolved = await Promise.all(
+		modifierGroups.map(async (group) => {
+			// Formato nuevo: tiene templateId
+			if (group.templateId) {
+				try {
+					const templateRef = doc(db, 'stores', storeId, 'modifierTemplates', group.templateId)
+					const templateSnap = await getDoc(templateRef)
+
+					if (!templateSnap.exists()) {
+						console.warn(`Template ${group.templateId} not found, skipping modifier group`)
+						return null
+					}
+
+					const template = templateSnap.data()
+					return {
+						id: templateSnap.id,
+						name: template.name,
+						required: template.required,
+						allowMultiple: template.allowMultiple,
+						minSelections: template.minSelections,
+						maxSelections: template.maxSelections,
+						options: template.options,
+						order: group.order ?? 0
+					}
+				} catch (error) {
+					console.error(`Error resolving template ${group.templateId}:`, error)
+					return null
+				}
+			}
+
+			// Formato nuevo: tiene customData
+			if (group.customData) {
+				return {
+					id: group.customData.id,
+					name: group.customData.name,
+					required: group.customData.required,
+					allowMultiple: group.customData.allowMultiple,
+					minSelections: group.customData.minSelections,
+					maxSelections: group.customData.maxSelections,
+					options: group.customData.options,
+					order: group.order ?? 0
+				}
+			}
+
+			// Formato antiguo: datos directamente en el grupo (compatibilidad)
+			if (group.name && group.options) {
+				return group
+			}
+
+			return null
+		})
+	)
+
+	return resolved.filter((g): g is ModifierGroup => g !== null).sort((a, b) => a.order - b.order)
+}
 
 function transformToPublicProduct(raw: any): PublicProduct {
 	const mediaFiles: PublicMediaFile[] = Array.isArray(raw.mediaFiles) ? raw.mediaFiles : [];
@@ -161,14 +230,29 @@ export async function getStoreProducts(storeId: string): Promise<PublicProduct[]
 			snap = await getDocs(ref);
 		}
 		const items: PublicProduct[] = [];
-		snap.forEach((doc) => {
-			const data = { id: doc.id, ...doc.data() } as any;
+
+		// Procesar productos en paralelo con resolución de modificadores
+		const productPromises = snap.docs.map(async (docSnap) => {
+			const data = { id: docSnap.id, ...docSnap.data() } as any;
 			const p = transformToPublicProduct(data);
+
+			// Resolver modificadores si existen
+			if (p.modifierGroups && p.modifierGroups.length > 0) {
+				p.modifierGroups = await resolveModifierReferences(storeId, p.modifierGroups);
+			}
+
+			return p;
+		});
+
+		const products = await Promise.all(productPromises);
+
+		// Filtrar solo productos activos
+		for (const p of products) {
 			if (p.status === "active") {
 				items.push(p);
-			} else {
 			}
-		});
+		}
+
 		return items;
 	} catch (e) {
 		console.warn("[public-store-v2] getStoreProducts fallo", e);
@@ -185,6 +269,12 @@ export async function getProductBySlug(storeId: string, slug: string): Promise<P
         if (snap.empty) return null;
         const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
         const p = transformToPublicProduct(data);
+
+        // Resolver modificadores si existen
+        if (p.modifierGroups && p.modifierGroups.length > 0) {
+            p.modifierGroups = await resolveModifierReferences(storeId, p.modifierGroups);
+        }
+
         return p.status === 'active' ? p : null;
     } catch (e) {
         console.warn("[public-store-v2] getProductBySlug fallo", e);
@@ -202,16 +292,27 @@ export async function getProduct(storeId: string, slugOrId: string): Promise<Pub
         if (!snap.empty) {
             const data = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
             const p = transformToPublicProduct(data);
+
+            // Resolver modificadores si existen
+            if (p.modifierGroups && p.modifierGroups.length > 0) {
+                p.modifierGroups = await resolveModifierReferences(storeId, p.modifierGroups);
+            }
+
             const result = p.status === 'active' ? p : null;
             return result;
         }
         // 2) fallback por ID de documento
-        const { doc, getDoc } = await import('firebase/firestore');
         const pRef = doc(db, "stores", storeId, "products", slugOrId);
         const pSnap = await getDoc(pRef);
         if (!pSnap.exists()) return null;
         const data = { id: pSnap.id, ...pSnap.data() } as any;
         const p = transformToPublicProduct(data);
+
+        // Resolver modificadores si existen
+        if (p.modifierGroups && p.modifierGroups.length > 0) {
+            p.modifierGroups = await resolveModifierReferences(storeId, p.modifierGroups);
+        }
+
         return p.status === 'active' ? p : null;
     } catch (e) {
         console.warn("[public-store-v2] getProduct fallo", e);
