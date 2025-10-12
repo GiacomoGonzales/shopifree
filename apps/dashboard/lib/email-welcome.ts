@@ -3,8 +3,9 @@ import sgMail from '@sendgrid/mail';
 // Configurar SendGrid con la API key
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('[Email] ✅ SendGrid configured');
 } else {
-  console.warn('[Email] SENDGRID_API_KEY not configured');
+  console.log('[Email] ℹ️ SendGrid not configured - email features disabled');
 }
 
 export interface WelcomeEmailData {
@@ -31,6 +32,12 @@ function getEmailConfig() {
 export async function sendWelcomeEmail(
   data: WelcomeEmailData
 ): Promise<boolean> {
+  // Validar si SendGrid está configurado
+  if (!process.env.SENDGRID_API_KEY) {
+    console.log('[Email] ℹ️ SendGrid not configured - skipping welcome email');
+    return false;
+  }
+
   try {
     const config = getEmailConfig();
 
