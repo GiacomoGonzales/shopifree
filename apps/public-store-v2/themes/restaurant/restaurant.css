@@ -9180,10 +9180,16 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
         display: none; /* Ocultar botones en móvil, scroll táctil */
     }
 
-    /* Remove padding from container in menu section for edge-to-edge carousels */
-    #menu .nbd-container {
+    /* Remove padding from container in menu section ONLY when showing carousels */
+    #menu .nbd-container.show-carousels {
         padding-left: 0;
         padding-right: 0;
+    }
+
+    /* Keep normal padding when showing grid */
+    #menu .nbd-container.show-grid {
+        padding-left: var(--nbd-space-md);
+        padding-right: var(--nbd-space-md);
     }
 
     .restaurant-category-carousel {
@@ -9197,9 +9203,18 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
         padding-right: var(--nbd-space-md);
     }
 
-    /* Add padding to carousel track for proper spacing */
+    /* Add padding to carousel track - left padding and vertical */
     .restaurant-carousel-track {
-        padding: var(--nbd-space-xs) var(--nbd-space-md);
+        padding: var(--nbd-space-xs) 0 var(--nbd-space-xs) var(--nbd-space-md);
+    }
+
+    /* Add right spacing using ::after pseudo-element as spacer */
+    .restaurant-carousel-track::after {
+        content: '';
+        display: block;
+        flex-shrink: 0;
+        width: 1px; /* Minimal width to trigger gap spacing */
+        min-width: 1px;
     }
 }
 
