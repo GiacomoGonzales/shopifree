@@ -60,7 +60,7 @@ function ProductCarouselCard({
                 )}
                 {hasPromotion && (
                     <div className="restaurant-carousel-badge">
-                        -{promotionsData.discount}%
+                        OFERTA
                     </div>
                 )}
             </div>

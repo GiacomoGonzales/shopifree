@@ -9031,16 +9031,24 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     color: var(--nbd-text-tertiary, #9ca3af);
 }
 
+/* Ribbon badge for carousel cards - diagonal corner banner */
 .restaurant-carousel-badge {
     position: absolute;
-    top: var(--nbd-space-sm);
-    right: var(--nbd-space-sm);
+    top: 10px;
+    right: -30px;
     background: #dc2626;
     color: white;
-    padding: var(--nbd-space-xs) var(--nbd-space-sm);
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    padding: 4px 32px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    will-change: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .restaurant-carousel-card-content {
@@ -9172,8 +9180,26 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
         display: none; /* Ocultar botones en móvil, scroll táctil */
     }
 
+    /* Remove padding from container in menu section for edge-to-edge carousels */
+    #menu .nbd-container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
     .restaurant-category-carousel {
         margin-bottom: var(--nbd-space-2xl);
+        /* No negative margins needed since container has no padding */
+    }
+
+    /* Add padding to header so text doesn't touch edges */
+    .restaurant-carousel-header {
+        padding-left: var(--nbd-space-md);
+        padding-right: var(--nbd-space-md);
+    }
+
+    /* Add padding to carousel track for proper spacing */
+    .restaurant-carousel-track {
+        padding: var(--nbd-space-xs) var(--nbd-space-md);
     }
 }
 
