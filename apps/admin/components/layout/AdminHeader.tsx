@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import { useAdminAuth } from '../../lib/admin-auth-context'
-import { useState } from 'react'
+import { useAdminAuth } from "../../lib/admin-auth-context"
+import { useState } from "react"
 
 interface AdminHeaderProps {
   onMenuClick: () => void
@@ -15,7 +15,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     try {
       await signOut()
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error("Error signing out:", error)
     }
   }
 
@@ -44,21 +44,21 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
         >
           {/* Avatar */}
           <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
-            {user?.email?.charAt(0).toUpperCase() || 'A'}
+            {user?.email?.charAt(0).toUpperCase() || "A"}
           </div>
 
           {/* User info - oculto en móvil */}
           <div className="text-left hidden sm:block">
             <p className="text-sm font-medium text-white">
-              {user?.displayName || user?.email?.split('@')[0] || 'Admin'}
+              {user?.displayName || user?.email?.split("@")[0] || "Admin"}
             </p>
-            <p className="text-xs text-slate-400 capitalize">{user?.role || 'admin'}</p>
+            <p className="text-xs text-slate-400 capitalize">{user?.role || "admin"}</p>
           </div>
 
           {/* Dropdown icon */}
           <svg
             className={`w-4 h-4 text-slate-400 transition-transform hidden sm:block ${
-              showDropdown ? 'rotate-180' : ''
+              showDropdown ? "rotate-180" : ""
             }`}
             fill="none"
             stroke="currentColor"

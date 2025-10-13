@@ -1,20 +1,20 @@
-'use client'
+"use client"
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from "react"
 import {
   User,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut
-} from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
-import { getFirebaseAuth, getFirebaseDb } from './firebase'
+} from "firebase/auth"
+import { doc, getDoc } from "firebase/firestore"
+import { getFirebaseAuth, getFirebaseDb } from "./firebase"
 
 interface AdminUser {
   uid: string
   email: string | null
   displayName: string | null
-  role: 'admin' | 'superadmin'
+  role: "admin" | "superadmin"
   permissions?: string[]
 }
 
@@ -41,15 +41,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const db = getFirebaseDb()
       if (!db) {
-        console.error('[Admin Auth] Firebase DB not available')
+        console.error("[Admin Auth] Firebase DB not available")
         return null
       }
 
       // Primero verificar en la colección users el campo role
-      const userDoc = await getDoc(doc(db, 'users', uid))
+      const userDoc = await getDoc(doc(db, "users", uid))
 
       if (!userDoc.exists()) {
-        console.log('[Admin Auth] User document not found')
+        console.log("[Admin Auth] User document not found")
         return null
       }
 
@@ -57,22 +57,22 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       const userRole = userData.role
 
       // Verificar si es admin o superadmin
-      if (userRole !== 'admin' && userRole !== 'superadmin') {
-        console.log('[Admin Auth] User is not an admin. Role:', userRole)
+      if (userRole !== "admin" && userRole !== "superadmin") {
+        console.log("[Admin Auth] User is not an admin. Role:", userRole)
         return null
       }
 
-      console.log('[Admin Auth] ✅ Admin verified. Role:', userRole)
+      console.log("[Admin Auth] ✅ Admin verified. Role:", userRole)
 
       return {
         uid,
         email: userData.email || null,
         displayName: userData.displayName || null,
-        role: userRole as 'admin' | 'superadmin',
+        role: userRole as "admin" | "superadmin",
         permissions: userData.permissions || []
       }
     } catch (error) {
-      console.error('[Admin Auth] Error checking admin role:', error)
+      console.error("[Admin Auth] Error checking admin role:", error)
       return null
     }
   }
@@ -80,13 +80,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const auth = getFirebaseAuth()
     if (!auth) {
-      console.warn('[Admin Auth] Firebase Auth not available')
+      console.warn("[Admin Auth] Firebase Auth not available")
       setLoading(false)
       return
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
-      console.log('[Admin Auth] Auth state changed:', firebaseUser?.uid)
+      console.log("[Admin Auth] Auth state changed:", firebaseUser?.uid)
 
       if (firebaseUser) {
         // Verificar que sea admin
@@ -94,16 +94,16 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
         if (adminUser) {
           setUser(adminUser)
-          console.log('[Admin Auth] ✅ Admin logged in:', adminUser.email)
+          console.log("[Admin Auth] ✅ Admin logged in:", adminUser.email)
         } else {
           // No es admin, cerrar sesión
-          console.log('[Admin Auth] ❌ User is not admin, signing out')
+          console.log("[Admin Auth] ❌ User is not admin, signing out")
           await firebaseSignOut(auth)
           setUser(null)
         }
       } else {
         setUser(null)
-        console.log('[Admin Auth] No user logged in')
+        console.log("[Admin Auth] No user logged in")
       }
 
       setLoading(false)
@@ -116,10 +116,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const auth = getFirebaseAuth()
       if (!auth) {
-        throw new Error('Firebase Auth not available')
+        throw new Error("Firebase Auth not available")
       }
 
-      console.log('[Admin Auth] Attempting login for:', email)
+      console.log("[Admin Auth] Attempting login for:", email)
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
 
       // Verificar rol de admin
@@ -128,12 +128,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       if (!adminUser) {
         // No es admin, cerrar sesión inmediatamente
         await firebaseSignOut(auth)
-        throw new Error('Access denied. Admin privileges required.')
+        throw new Error("Access denied. Admin privileges required.")
       }
 
-      console.log('[Admin Auth] ✅ Login successful')
+      console.log("[Admin Auth] ✅ Login successful")
     } catch (error) {
-      console.error('[Admin Auth] ❌ Login error:', error)
+      console.error("[Admin Auth] ❌ Login error:", error)
       throw error
     }
   }
@@ -142,14 +142,14 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const auth = getFirebaseAuth()
       if (!auth) {
-        throw new Error('Firebase Auth not available')
+        throw new Error("Firebase Auth not available")
       }
 
       await firebaseSignOut(auth)
       setUser(null)
-      console.log('[Admin Auth] ✅ Signed out')
+      console.log("[Admin Auth] ✅ Signed out")
     } catch (error) {
-      console.error('[Admin Auth] ❌ Sign out error:', error)
+      console.error("[Admin Auth] ❌ Sign out error:", error)
       throw error
     }
   }
@@ -164,7 +164,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 export function useAdminAuth() {
   const context = useContext(AdminAuthContext)
   if (!context) {
-    throw new Error('useAdminAuth must be used within AdminAuthProvider')
+    throw new Error("useAdminAuth must be used within AdminAuthProvider")
   }
   return context
 }

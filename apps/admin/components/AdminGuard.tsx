@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAdminAuth } from '../lib/admin-auth-context'
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAdminAuth } from "../lib/admin-auth-context"
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAdminAuth()
@@ -10,8 +10,8 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!loading && !user) {
-      console.log('[AdminGuard] No admin user, redirecting to login')
-      router.push('/login')
+      console.log("[AdminGuard] No admin user, redirecting to login")
+      router.push("/login")
     }
   }, [user, loading, router])
 

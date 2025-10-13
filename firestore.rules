@@ -245,5 +245,25 @@ service cloud.firestore {
             request.auth.uid == get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId) ||
            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalUses']);
     }
+
+    // Función helper para verificar si el usuario es administrador
+    function isAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
+    // Reglas para configuración de la plataforma (Admin Panel)
+    match /platformConfig/{configId} {
+      // TEMPORAL: Permitir acceso a usuarios autenticados para setup inicial
+      // TODO: Cambiar a isAdmin() después de crear usuarios admin
+      allow read, write: if isAuthenticated();
+    }
+
+    // Reglas para usuarios administradores (Admin Panel)
+    match /adminUsers/{adminId} {
+      // TEMPORAL: Permitir acceso a usuarios autenticados para setup inicial
+      // TODO: Cambiar a isAdmin() después de crear usuarios admin
+      allow read, write: if isAuthenticated();
+    }
   }
 }

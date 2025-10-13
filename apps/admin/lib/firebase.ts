@@ -1,6 +1,6 @@
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app'
-import { getAuth, Auth, setPersistence, browserLocalPersistence } from 'firebase/auth'
-import { getFirestore, Firestore } from 'firebase/firestore'
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app"
+import { getAuth, Auth, setPersistence, browserLocalPersistence } from "firebase/auth"
+import { getFirestore, Firestore } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,24 +11,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Check if we're in the browser and have valid config
+// Check if we"re in the browser and have valid config
 const isValidConfig = () => {
   return (
-    typeof window !== 'undefined' &&
+    typeof window !== "undefined" &&
     firebaseConfig.apiKey &&
     firebaseConfig.authDomain &&
     firebaseConfig.projectId
   )
 }
 
-// Initialize Firebase only if we have valid config and we're in the browser
+// Initialize Firebase only if we have valid config and we"re in the browser
 let app: FirebaseApp | null = null
 let auth: Auth | null = null
 let db: Firestore | null = null
 
 const initializeFirebase = async () => {
   if (!isValidConfig()) {
-    console.warn('[Admin] Firebase config is invalid or not available')
+    console.warn("[Admin] Firebase config is invalid or not available")
     return null
   }
 
@@ -36,10 +36,10 @@ const initializeFirebase = async () => {
     // Check if Firebase is already initialized
     if (getApps().length === 0) {
       app = initializeApp(firebaseConfig)
-      console.log('[Admin] ✅ Firebase initialized')
+      console.log("[Admin] ✅ Firebase initialized")
     } else {
       app = getApp()
-      console.log('[Admin] ✅ Firebase already initialized')
+      console.log("[Admin] ✅ Firebase already initialized")
     }
 
     auth = getAuth(app)
@@ -49,15 +49,15 @@ const initializeFirebase = async () => {
     if (auth) {
       try {
         await setPersistence(auth, browserLocalPersistence)
-        console.log('[Admin] ✅ Firebase persistence configured')
+        console.log("[Admin] ✅ Firebase persistence configured")
       } catch (persistenceError) {
-        console.warn('[Admin] ⚠️ Could not configure persistence:', persistenceError)
+        console.warn("[Admin] ⚠️ Could not configure persistence:", persistenceError)
       }
     }
 
     return app
   } catch (error) {
-    console.error('[Admin] ❌ Error initializing Firebase:', error)
+    console.error("[Admin] ❌ Error initializing Firebase:", error)
     return null
   }
 }

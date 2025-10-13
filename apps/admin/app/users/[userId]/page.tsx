@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useCallback } from 'react'
-import { useParams } from 'next/navigation'
-import { doc, getDoc, collection, query, where, getDocs, updateDoc, Timestamp } from 'firebase/firestore'
-import { getFirebaseDb } from '../../../lib/firebase'
-import AdminLayout from '../../../components/layout/AdminLayout'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from "react"
+import { useParams } from "next/navigation"
+import { doc, getDoc, collection, query, where, getDocs, updateDoc, Timestamp } from "firebase/firestore"
+import { getFirebaseDb } from "../../../lib/firebase"
+import AdminLayout from "../../../components/layout/AdminLayout"
+import Link from "next/link"
 
 interface User {
   uid: string
   email: string | null
   displayName: string | null
   photoURL: string | null
-  role: 'user' | 'admin' | 'superadmin'
+  role: "user" | "admin" | "superadmin"
   isActive: boolean
   createdAt: Timestamp
   updatedAt: Timestamp
@@ -40,28 +40,28 @@ export default function UserDetailPage() {
   const [ordersCount, setOrdersCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [editRole, setEditRole] = useState<'user' | 'admin' | 'superadmin'>('user')
+  const [editRole, setEditRole] = useState<"user" | "admin" | "superadmin">("user")
 
   const loadUserData = useCallback(async () => {
     try {
       setLoading(true)
       const db = getFirebaseDb()
       if (!db) {
-        console.error('Firebase DB not available')
+        console.error("Firebase DB not available")
         return
       }
 
       // Cargar datos del usuario
-      const userDoc = await getDoc(doc(db, 'users', userId))
+      const userDoc = await getDoc(doc(db, "users", userId))
       if (userDoc.exists()) {
         setUser({ uid: userDoc.id, ...userDoc.data() } as User)
-        setEditRole((userDoc.data().role || 'user') as 'user' | 'admin' | 'superadmin')
+        setEditRole((userDoc.data().role || "user") as "user" | "admin" | "superadmin")
       }
 
       // Cargar tiendas del usuario
       const storesQuery = query(
-        collection(db, 'stores'),
-        where('ownerId', '==', userId)
+        collection(db, "stores"),
+        where("ownerId", "==", userId)
       )
       const storesSnapshot = await getDocs(storesQuery)
       const storesData = storesSnapshot.docs.map(doc => ({
@@ -75,12 +75,12 @@ export default function UserDetailPage() {
       let totalOrders = 0
       for (const store of storesData) {
         // Contar productos
-        const productsQuery = query(collection(db, 'stores', store.id, 'products'))
+        const productsQuery = query(collection(db, "stores", store.id, "products"))
         const productsSnapshot = await getDocs(productsQuery)
         totalProducts += productsSnapshot.size
 
         // Contar órdenes
-        const ordersQuery = query(collection(db, 'stores', store.id, 'orders'))
+        const ordersQuery = query(collection(db, "stores", store.id, "orders"))
         const ordersSnapshot = await getDocs(ordersQuery)
         totalOrders += ordersSnapshot.size
       }
@@ -88,7 +88,7 @@ export default function UserDetailPage() {
       setOrdersCount(totalOrders)
 
     } catch (error) {
-      console.error('Error loading user data:', error)
+      console.error("Error loading user data:", error)
     } finally {
       setLoading(false)
     }
@@ -108,15 +108,15 @@ export default function UserDetailPage() {
       if (!db) return
 
       const newStatus = !user.isActive
-      await updateDoc(doc(db, 'users', userId), {
+      await updateDoc(doc(db, "users", userId), {
         isActive: newStatus,
         updatedAt: Timestamp.now()
       })
 
       setUser({ ...user, isActive: newStatus })
     } catch (error) {
-      console.error('Error updating user status:', error)
-      alert('Error updating user status')
+      console.error("Error updating user status:", error)
+      alert("Error updating user status")
     }
   }
 
@@ -127,7 +127,7 @@ export default function UserDetailPage() {
       const db = getFirebaseDb()
       if (!db) return
 
-      await updateDoc(doc(db, 'users', userId), {
+      await updateDoc(doc(db, "users", userId), {
         role: editRole,
         updatedAt: Timestamp.now()
       })
@@ -135,29 +135,29 @@ export default function UserDetailPage() {
       setUser({ ...user, role: editRole })
       setShowEditModal(false)
     } catch (error) {
-      console.error('Error updating user role:', error)
-      alert('Error updating user role')
+      console.error("Error updating user role:", error)
+      alert("Error updating user role")
     }
   }
 
   const formatDate = (timestamp: Timestamp) => {
-    return timestamp?.toDate().toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return timestamp?.toDate().toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     })
   }
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'superadmin':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-      case 'admin':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+      case "superadmin":
+        return "bg-purple-500/10 text-purple-400 border-purple-500/20"
+      case "admin":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       default:
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20"
     }
   }
 
@@ -240,16 +240,16 @@ export default function UserDetailPage() {
                   <img
                     className="h-16 w-16 sm:h-24 sm:w-24 rounded-full border-4 border-slate-800 flex-shrink-0"
                     src={user.photoURL}
-                    alt={user.displayName || 'User'}
+                    alt={user.displayName || "User"}
                   />
                 ) : (
                   <div className="h-16 w-16 sm:h-24 sm:w-24 rounded-full bg-emerald-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold border-4 border-slate-800 flex-shrink-0">
-                    {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                    {(user.displayName || user.email || "U")[0].toUpperCase()}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 truncate">
-                    {user.displayName || 'No name'}
+                    {user.displayName || "No name"}
                   </h2>
                   <p className="text-sm sm:text-base text-slate-300 mb-3 truncate">{user.email}</p>
                   <div className="flex items-center gap-3">
@@ -284,8 +284,8 @@ export default function UserDetailPage() {
                   onClick={handleToggleStatus}
                   className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm ${
                     user.isActive
-                      ? 'bg-red-500 hover:bg-red-600 text-white'
-                      : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                      ? "bg-red-500 hover:bg-red-600 text-white"
+                      : "bg-emerald-500 hover:bg-emerald-600 text-white"
                   }`}
                 >
                   {user.isActive ? (
@@ -316,15 +316,15 @@ export default function UserDetailPage() {
             </div>
             <div>
               <p className="text-sm text-slate-400 mb-1">Phone Number</p>
-              <p className="text-white">{user.phoneNumber || 'Not provided'}</p>
+              <p className="text-white">{user.phoneNumber || "Not provided"}</p>
             </div>
             <div>
               <p className="text-sm text-slate-400 mb-1">Registered</p>
-              <p className="text-white">{user.createdAt ? formatDate(user.createdAt) : 'Unknown'}</p>
+              <p className="text-white">{user.createdAt ? formatDate(user.createdAt) : "Unknown"}</p>
             </div>
             <div>
               <p className="text-sm text-slate-400 mb-1">Last Updated</p>
-              <p className="text-white">{user.updatedAt ? formatDate(user.updatedAt) : 'Unknown'}</p>
+              <p className="text-white">{user.updatedAt ? formatDate(user.updatedAt) : "Unknown"}</p>
             </div>
           </div>
         </div>
@@ -396,12 +396,12 @@ export default function UserDetailPage() {
                     </div>
                     <div>
                       <p className="text-white font-medium">{store.storeName}</p>
-                      <p className="text-slate-400 text-sm">{store.subdomain}.shopifree.com</p>
+                      <p className="text-slate-400 text-sm">{store.subdomain}.shopifree.app</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <a
-                      href={`https://${store.subdomain}.shopifree.com`}
+                      href={`https://${store.subdomain}.shopifree.app`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-emerald-400 hover:text-emerald-300 transition-colors"
@@ -432,7 +432,7 @@ export default function UserDetailPage() {
                 </label>
                 <select
                   value={editRole}
-                  onChange={(e) => setEditRole(e.target.value as 'user' | 'admin' | 'superadmin')}
+                  onChange={(e) => setEditRole(e.target.value as "user" | "admin" | "superadmin")}
                   className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="user">User</option>

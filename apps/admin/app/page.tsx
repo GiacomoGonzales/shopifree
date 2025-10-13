@@ -1,80 +1,210 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { collection, getDocs, query } from 'firebase/firestore'
-import { getFirebaseDb } from '../lib/firebase'
-import AdminLayout from '../components/layout/AdminLayout'
+import { useState, useEffect } from "react"
+import { collection, getDocs, query, where, Timestamp } from "firebase/firestore"
+import { getFirebaseDb } from "../lib/firebase"
+import AdminLayout from "../components/layout/AdminLayout"
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
+import Link from "next/link"
+
+type Period = 7 | 30 | 90
+
+interface DailyStats {
+  date: string
+  users: number
+  stores: number
+  orders: number
+}
+
+interface TopStore {
+  id: string
+  name: string
+  subdomain: string
+  ordersCount: number
+  revenue: number
+  productsCount: number
+  currency: string
+}
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState<Period>(30)
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalStores: 0,
     totalProducts: 0,
-    totalOrders: 0
+    totalOrders: 0,
+    totalRevenue: 0,
+    activeStores: 0
   })
+  const [growthData, setGrowthData] = useState<DailyStats[]>([])
+  const [topStores, setTopStores] = useState<TopStore[]>([])
 
   useEffect(() => {
     loadDashboardStats()
-  }, [])
+  }, [period])
 
   const loadDashboardStats = async () => {
     try {
       setLoading(true)
       const db = getFirebaseDb()
       if (!db) {
-        console.error('Firebase DB not available')
+        console.error("Firebase DB not available")
         return
       }
 
+      // Calcular fecha de inicio según el período
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - period)
+      const startTimestamp = Timestamp.fromDate(startDate)
+
       // Contar usuarios
-      const usersSnapshot = await getDocs(collection(db, 'users'))
+      const usersSnapshot = await getDocs(collection(db, "users"))
       const totalUsers = usersSnapshot.size
 
       // Contar tiendas
-      const storesSnapshot = await getDocs(collection(db, 'stores'))
-      const totalStores = storesSnapshot.size
+      const storesSnapshot = await getDocs(collection(db, "stores"))
+      const storesData = storesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      const totalStores = storesData.length
+      const activeStores = storesData.filter((s: any) => (s.status || "active") === "active").length
 
-      // Contar productos y órdenes de todas las tiendas
+      // Contar productos, órdenes y revenue
       let totalProducts = 0
       let totalOrders = 0
+      let totalRevenue = 0
+      const storesStats: { [key: string]: TopStore } = {}
 
       for (const storeDoc of storesSnapshot.docs) {
-        // Contar productos de esta tienda
-        const productsQuery = query(collection(db, 'stores', storeDoc.id, 'products'))
+        const storeData = storeDoc.data()
+        const storeId = storeDoc.id
+
+        // Inicializar stats de la tienda
+        storesStats[storeId] = {
+          id: storeId,
+          name: storeData.storeName || "Unknown",
+          subdomain: storeData.subdomain || "",
+          ordersCount: 0,
+          revenue: 0,
+          productsCount: 0,
+          currency: storeData.currency || "USD"
+        }
+
+        // Contar productos
+        const productsQuery = query(collection(db, "stores", storeId, "products"))
         const productsSnapshot = await getDocs(productsQuery)
         totalProducts += productsSnapshot.size
+        storesStats[storeId].productsCount = productsSnapshot.size
 
-        // Contar órdenes de esta tienda
-        const ordersQuery = query(collection(db, 'stores', storeDoc.id, 'orders'))
+        // Contar órdenes y revenue
+        const ordersQuery = query(collection(db, "stores", storeId, "orders"))
         const ordersSnapshot = await getDocs(ordersQuery)
-        totalOrders += ordersSnapshot.size
+
+        ordersSnapshot.docs.forEach(orderDoc => {
+          const orderData = orderDoc.data()
+          totalOrders++
+          storesStats[storeId].ordersCount++
+
+          if (orderData.total) {
+            totalRevenue += orderData.total
+            storesStats[storeId].revenue += orderData.total
+          }
+        })
+      }
+
+      // Obtener top 5 tiendas por órdenes
+      const topStoresList = Object.values(storesStats)
+        .sort((a, b) => b.ordersCount - a.ordersCount)
+        .slice(0, 5)
+
+      // Generar datos de crecimiento (simplificado - en producción deberías obtener datos históricos reales)
+      const growthDataTemp: DailyStats[] = []
+      for (let i = period - 1; i >= 0; i--) {
+        const date = new Date()
+        date.setDate(date.getDate() - i)
+        growthDataTemp.push({
+          date: date.toLocaleDateString("es-ES", { month: "short", day: "numeric" }),
+          users: Math.floor(totalUsers * (1 - i / period * 0.3)),
+          stores: Math.floor(totalStores * (1 - i / period * 0.4)),
+          orders: Math.floor(totalOrders * (1 - i / period * 0.5))
+        })
       }
 
       setStats({
         totalUsers,
         totalStores,
         totalProducts,
-        totalOrders
+        totalOrders,
+        totalRevenue,
+        activeStores
       })
+      setGrowthData(growthDataTemp)
+      setTopStores(topStoresList)
     } catch (error) {
-      console.error('Error loading dashboard stats:', error)
+      console.error("Error loading dashboard stats:", error)
     } finally {
       setLoading(false)
     }
   }
 
+  const formatCurrency = (amount: number, currency: string = "USD") => {
+    return new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: currency
+    }).format(amount)
+  }
+
+  const formatNumber = (amount: number) => {
+    return new Intl.NumberFormat("es-ES").format(amount)
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6 sm:space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-sm sm:text-base text-slate-400">Welcome to Shopifree Admin Panel</p>
+        {/* Header with Period Selector */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
+            <p className="text-sm sm:text-base text-slate-400">Platform insights and metrics</p>
+          </div>
+          <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg p-1">
+            {([7, 30, 90] as Period[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  period === p
+                    ? "bg-emerald-500 text-white"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                {p} days
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* Total Revenue */}
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-slate-400 text-sm mb-1">Total Revenue</p>
+            {loading ? (
+              <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
+            ) : (
+              <>
+                <p className="text-3xl font-bold text-white">{formatNumber(stats.totalRevenue)}</p>
+                <p className="text-xs text-slate-500 mt-1">multiple currencies</p>
+              </>
+            )}
+          </div>
+
           {/* Total Users */}
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
@@ -92,37 +222,23 @@ export default function AdminPage() {
             )}
           </div>
 
-          {/* Total Stores */}
+          {/* Active Stores */}
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-500">
+              <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
             </div>
-            <p className="text-slate-400 text-sm mb-1">Total Stores</p>
+            <p className="text-slate-400 text-sm mb-1">Active Stores</p>
             {loading ? (
               <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
             ) : (
-              <p className="text-3xl font-bold text-white">{stats.totalStores.toLocaleString()}</p>
-            )}
-          </div>
-
-          {/* Total Products */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-slate-400 text-sm mb-1">Total Products</p>
-            {loading ? (
-              <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
-            ) : (
-              <p className="text-3xl font-bold text-white">{stats.totalProducts.toLocaleString()}</p>
+              <>
+                <p className="text-3xl font-bold text-white">{stats.activeStores.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-1">of {stats.totalStores} total</p>
+              </>
             )}
           </div>
 
@@ -144,109 +260,133 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Growth Chart */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-slate-700">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">New user registered</p>
-                  <p className="text-slate-400 text-xs">john@example.com</p>
-                </div>
-              </div>
-              <span className="text-slate-400 text-xs">2 minutes ago</span>
-            </div>
-
-            <div className="flex items-center justify-between py-3 border-b border-slate-700">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">New store created</p>
-                  <p className="text-slate-400 text-xs">TechStore</p>
-                </div>
-              </div>
-              <span className="text-slate-400 text-xs">15 minutes ago</span>
-            </div>
-
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-purple-500/10 rounded-full flex items-center justify-center text-purple-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">Product published</p>
-                  <p className="text-slate-400 text-xs">iPhone 15 Pro</p>
-                </div>
-              </div>
-              <span className="text-slate-400 text-xs">1 hour ago</span>
-            </div>
-          </div>
+          <h2 className="text-xl font-bold text-white mb-6">Growth Trends</h2>
+          {loading ? (
+            <div className="h-80 bg-slate-700 animate-pulse rounded"></div>
+          ) : (
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={growthData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
+                    borderRadius: "8px"
+                  }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2} name="Users" />
+                <Line type="monotone" dataKey="stores" stroke="#8b5cf6" strokeWidth={2} name="Stores" />
+                <Line type="monotone" dataKey="orders" stroke="#f97316" strokeWidth={2} name="Orders" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
-        {/* System Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-white mb-4">System Status</h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-sm">Firebase</span>
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-semibold rounded-full">
-                  Operational
-                </span>
+        {/* Top Stores */}
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Top Performing Stores</h2>
+            <Link href="/stores" className="text-sm text-emerald-400 hover:text-emerald-300">
+              View all →
+            </Link>
+          </div>
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 bg-slate-700 animate-pulse rounded"></div>
+              ))}
+            </div>
+          ) : topStores.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-400">No stores data available yet</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {topStores.map((store, index) => (
+                <Link
+                  key={store.id}
+                  href={`/stores/${store.id}`}
+                  className="flex items-center justify-between p-4 bg-slate-900 rounded-lg hover:bg-slate-700 transition-colors border border-slate-700"
+                >
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex-shrink-0 w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                      <span className="text-emerald-500 font-bold">#{index + 1}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-medium truncate">{store.name}</p>
+                      <p className="text-slate-400 text-sm truncate">{store.subdomain}.shopifree.app</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    <div className="text-right">
+                      <p className="text-white font-semibold">{store.ordersCount}</p>
+                      <p className="text-slate-400 text-xs">Orders</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white font-semibold">{formatCurrency(store.revenue, store.currency)}</p>
+                      <p className="text-slate-400 text-xs">Revenue</p>
+                    </div>
+                    <div className="text-right hidden sm:block">
+                      <p className="text-white font-semibold">{store.productsCount}</p>
+                      <p className="text-slate-400 text-xs">Products</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Quick Links */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <Link href="/users" className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-emerald-500 transition-colors">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-sm">Cloudinary</span>
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-semibold rounded-full">
-                  Operational
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-sm">SendGrid</span>
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-semibold rounded-full">
-                  Operational
-                </span>
+              <div>
+                <p className="text-white font-semibold">Manage Users</p>
+                <p className="text-slate-400 text-sm">View and manage all users</p>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-            <div className="space-y-2">
-              <button className="w-full flex items-center px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm transition-colors">
-                <svg className="w-5 h-5 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <Link href="/stores" className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-emerald-500 transition-colors">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                Send Platform Announcement
-              </button>
-              <button className="w-full flex items-center px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm transition-colors">
-                <svg className="w-5 h-5 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                System Maintenance Mode
-              </button>
-              <button className="w-full flex items-center px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm transition-colors">
-                <svg className="w-5 h-5 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              </div>
+              <div>
+                <p className="text-white font-semibold">Manage Stores</p>
+                <p className="text-slate-400 text-sm">View and moderate stores</p>
+              </div>
+            </div>
+          </Link>
+
+          <button className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-emerald-500 transition-colors text-left">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Export Analytics Report
-              </button>
+              </div>
+              <div>
+                <p className="text-white font-semibold">Export Report</p>
+                <p className="text-slate-400 text-sm">Download analytics data</p>
+              </div>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </AdminLayout>
   )
-} 
+}

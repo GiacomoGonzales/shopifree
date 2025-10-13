@@ -1,64 +1,64 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useCallback } from 'react'
-import { collection, query, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore'
-import { getFirebaseDb } from '../../lib/firebase'
-import AdminLayout from '../../components/layout/AdminLayout'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from "react"
+import { collection, query, orderBy, limit, getDocs, where, Timestamp } from "firebase/firestore"
+import { getFirebaseDb } from "../../lib/firebase"
+import AdminLayout from "../../components/layout/AdminLayout"
+import Link from "next/link"
 
 interface User {
   uid: string
   email: string | null
   displayName: string | null
   photoURL: string | null
-  role: 'user' | 'admin' | 'superadmin'
+  role: "user" | "admin" | "superadmin"
   isActive: boolean
   createdAt: Timestamp
   updatedAt: Timestamp
 }
 
-type RoleFilter = 'all' | 'user' | 'admin' | 'superadmin'
-type StatusFilter = 'all' | 'active' | 'inactive'
+type RoleFilter = "all" | "user" | "admin" | "superadmin"
+type StatusFilter = "all" | "active" | "inactive"
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [searchTerm, setSearchTerm] = useState("")
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
 
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true)
       const db = getFirebaseDb()
       if (!db) {
-        console.error('Firebase DB not available')
+        console.error("Firebase DB not available")
         return
       }
 
       let q = query(
-        collection(db, 'users'),
-        orderBy('createdAt', 'desc'),
+        collection(db, "users"),
+        orderBy("createdAt", "desc"),
         limit(100)
       )
 
       // Aplicar filtro de rol
-      if (roleFilter !== 'all') {
+      if (roleFilter !== "all") {
         q = query(
-          collection(db, 'users'),
-          where('role', '==', roleFilter),
-          orderBy('createdAt', 'desc'),
+          collection(db, "users"),
+          where("role", "==", roleFilter),
+          orderBy("createdAt", "desc"),
           limit(100)
         )
       }
 
       // Aplicar filtro de estado
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active'
+      if (statusFilter !== "all") {
+        const isActive = statusFilter === "active"
         q = query(
-          collection(db, 'users'),
-          where('isActive', '==', isActive),
-          orderBy('createdAt', 'desc'),
+          collection(db, "users"),
+          where("isActive", "==", isActive),
+          orderBy("createdAt", "desc"),
           limit(100)
         )
       }
@@ -71,7 +71,7 @@ export default function UsersPage() {
 
       setUsers(usersData)
     } catch (error) {
-      console.error('Error loading users:', error)
+      console.error("Error loading users:", error)
     } finally {
       setLoading(false)
     }
@@ -92,32 +92,32 @@ export default function UsersPage() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'superadmin':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-      case 'admin':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+      case "superadmin":
+        return "bg-purple-500/10 text-purple-400 border-purple-500/20"
+      case "admin":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       default:
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20"
     }
   }
 
   const formatDate = (timestamp: Timestamp) => {
-    return timestamp?.toDate().toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return timestamp?.toDate().toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
     })
   }
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'superadmin':
+      case "superadmin":
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
           </svg>
         )
-      case 'admin':
+      case "admin":
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -267,17 +267,17 @@ export default function UsersPage() {
                               <img
                                 className="h-10 w-10 rounded-full"
                                 src={user.photoURL}
-                                alt={user.displayName || 'User'}
+                                alt={user.displayName || "User"}
                               />
                             ) : (
                               <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-semibold">
-                                {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                                {(user.displayName || user.email || "U")[0].toUpperCase()}
                               </div>
                             )}
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-white">
-                              {user.displayName || 'No name'}
+                              {user.displayName || "No name"}
                             </div>
                             <div className="text-xs text-slate-400">
                               {user.uid.substring(0, 12)}...
@@ -286,7 +286,7 @@ export default function UsersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-300">{user.email || 'No email'}</div>
+                        <div className="text-sm text-slate-300">{user.email || "No email"}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(user.role)}`}>
@@ -308,7 +308,7 @@ export default function UsersPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                        {user.createdAt ? formatDate(user.createdAt) : 'Unknown'}
+                        {user.createdAt ? formatDate(user.createdAt) : "Unknown"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
@@ -347,18 +347,18 @@ export default function UsersPage() {
                         <img
                           className="h-12 w-12 rounded-full flex-shrink-0"
                           src={user.photoURL}
-                          alt={user.displayName || 'User'}
+                          alt={user.displayName || "User"}
                         />
                       ) : (
                         <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-semibold flex-shrink-0">
-                          {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                          {(user.displayName || user.email || "U")[0].toUpperCase()}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-white truncate">
-                          {user.displayName || 'No name'}
+                          {user.displayName || "No name"}
                         </p>
-                        <p className="text-xs text-slate-400 truncate">{user.email || 'No email'}</p>
+                        <p className="text-xs text-slate-400 truncate">{user.email || "No email"}</p>
                       </div>
                     </div>
                     <Link
@@ -387,7 +387,7 @@ export default function UsersPage() {
                       </span>
                     )}
                     <span className="text-xs text-slate-400">
-                      {user.createdAt ? formatDate(user.createdAt) : 'Unknown'}
+                      {user.createdAt ? formatDate(user.createdAt) : "Unknown"}
                     </span>
                   </div>
                 </div>
@@ -401,7 +401,7 @@ export default function UsersPage() {
         {filteredUsers.length > 0 && (
           <div className="flex items-center justify-between text-sm text-slate-400">
             <span>
-              Showing <span className="font-semibold text-white">{filteredUsers.length}</span> of{' '}
+              Showing <span className="font-semibold text-white">{filteredUsers.length}</span> of{" "}
               <span className="font-semibold text-white">{users.length}</span> users
             </span>
           </div>

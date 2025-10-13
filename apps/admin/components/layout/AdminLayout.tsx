@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import AdminSidebar from './AdminSidebar'
-import AdminHeader from './AdminHeader'
-import AdminGuard from '../AdminGuard'
+import { useState } from "react"
+import AdminSidebar from "./AdminSidebar"
+import AdminHeader from "./AdminHeader"
+import AdminGuard from "../AdminGuard"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
