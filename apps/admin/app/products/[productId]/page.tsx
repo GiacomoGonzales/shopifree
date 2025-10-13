@@ -309,7 +309,7 @@ export default function ProductDetailPage() {
               <h2 className="text-lg font-semibold text-white mb-4">Product Images</h2>
               {(() => {
                 // Construir array de todas las imágenes disponibles
-                const allImages = [];
+                const allImages: string[] = [];
                 if (product.image) allImages.push(product.image);
                 if (product.images) allImages.push(...product.images);
                 if (product.mediaFiles) {
