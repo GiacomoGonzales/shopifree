@@ -59,9 +59,9 @@ export default function AdminPage() {
 
       // Contar tiendas
       const storesSnapshot = await getDocs(collection(db, "stores"))
-      const storesData = storesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      const storesData = storesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Array<{ id: string; status?: string; [key: string]: unknown }>
       const totalStores = storesData.length
-      const activeStores = storesData.filter((s: { status?: string }) => (s.status || "active") === "active").length
+      const activeStores = storesData.filter(s => (s.status || "active") === "active").length
 
       // Contar productos, órdenes y revenue
       let totalProducts = 0
