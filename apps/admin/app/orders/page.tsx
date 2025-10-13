@@ -135,8 +135,8 @@ export default function OrdersPage() {
 
       // Ordenar por fecha de creación (más recientes primero)
       allOrders.sort((a, b) => {
-        const aTime = a.createdAt && typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : 0
-        const bTime = b.createdAt && typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : 0
+        const aTime = a.createdAt && typeof a.createdAt === 'object' && 'toMillis' in a.createdAt && typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : 0
+        const bTime = b.createdAt && typeof b.createdAt === 'object' && 'toMillis' in b.createdAt && typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : 0
         return bTime - aTime
       })
 
