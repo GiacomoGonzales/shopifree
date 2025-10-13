@@ -520,14 +520,19 @@ function StoreOnboardingContent() {
         const dashboardUrl = typeof window !== 'undefined' ? window.location.origin : 'https://dashboard.shopifree.app'
 
         if (userEmail) {
-          await sendWelcomeEmail({
+          const emailSent = await sendWelcomeEmail({
             userName,
             userEmail,
             storeName: formData.storeName,
             storeSubdomain: formData.subdomain,
             dashboardUrl
           })
-          console.log('✅ Welcome email sent successfully')
+
+          if (emailSent) {
+            console.log('✅ Welcome email sent successfully')
+          } else {
+            console.log('ℹ️ Welcome email not sent (SendGrid not configured or failed)')
+          }
         }
       } catch (emailError) {
         console.error('⚠️ Error sending welcome email (non-blocking):', emailError)
