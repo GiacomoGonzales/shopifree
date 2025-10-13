@@ -1,6 +1,69 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { collection, getDocs, query } from 'firebase/firestore'
+import { getFirebaseDb } from '../lib/firebase'
 import AdminLayout from '../components/layout/AdminLayout'
 
 export default function AdminPage() {
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalStores: 0,
+    totalProducts: 0,
+    totalOrders: 0
+  })
+
+  useEffect(() => {
+    loadDashboardStats()
+  }, [])
+
+  const loadDashboardStats = async () => {
+    try {
+      setLoading(true)
+      const db = getFirebaseDb()
+      if (!db) {
+        console.error('Firebase DB not available')
+        return
+      }
+
+      // Contar usuarios
+      const usersSnapshot = await getDocs(collection(db, 'users'))
+      const totalUsers = usersSnapshot.size
+
+      // Contar tiendas
+      const storesSnapshot = await getDocs(collection(db, 'stores'))
+      const totalStores = storesSnapshot.size
+
+      // Contar productos y órdenes de todas las tiendas
+      let totalProducts = 0
+      let totalOrders = 0
+
+      for (const storeDoc of storesSnapshot.docs) {
+        // Contar productos de esta tienda
+        const productsQuery = query(collection(db, 'stores', storeDoc.id, 'products'))
+        const productsSnapshot = await getDocs(productsQuery)
+        totalProducts += productsSnapshot.size
+
+        // Contar órdenes de esta tienda
+        const ordersQuery = query(collection(db, 'stores', storeDoc.id, 'orders'))
+        const ordersSnapshot = await getDocs(ordersQuery)
+        totalOrders += ordersSnapshot.size
+      }
+
+      setStats({
+        totalUsers,
+        totalStores,
+        totalProducts,
+        totalOrders
+      })
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6 sm:space-y-8">
@@ -20,10 +83,13 @@ export default function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <span className="text-xs text-emerald-500 font-semibold">+12.5%</span>
             </div>
             <p className="text-slate-400 text-sm mb-1">Total Users</p>
-            <p className="text-3xl font-bold text-white">1,234</p>
+            {loading ? (
+              <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
+            ) : (
+              <p className="text-3xl font-bold text-white">{stats.totalUsers.toLocaleString()}</p>
+            )}
           </div>
 
           {/* Total Stores */}
@@ -34,10 +100,13 @@ export default function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
-              <span className="text-xs text-emerald-500 font-semibold">+8.2%</span>
             </div>
-            <p className="text-slate-400 text-sm mb-1">Active Stores</p>
-            <p className="text-3xl font-bold text-white">567</p>
+            <p className="text-slate-400 text-sm mb-1">Total Stores</p>
+            {loading ? (
+              <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
+            ) : (
+              <p className="text-3xl font-bold text-white">{stats.totalStores.toLocaleString()}</p>
+            )}
           </div>
 
           {/* Total Products */}
@@ -48,10 +117,13 @@ export default function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <span className="text-xs text-emerald-500 font-semibold">+15.3%</span>
             </div>
             <p className="text-slate-400 text-sm mb-1">Total Products</p>
-            <p className="text-3xl font-bold text-white">12,890</p>
+            {loading ? (
+              <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
+            ) : (
+              <p className="text-3xl font-bold text-white">{stats.totalProducts.toLocaleString()}</p>
+            )}
           </div>
 
           {/* Total Orders */}
@@ -62,10 +134,13 @@ export default function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <span className="text-xs text-red-500 font-semibold">-2.4%</span>
             </div>
             <p className="text-slate-400 text-sm mb-1">Total Orders</p>
-            <p className="text-3xl font-bold text-white">8,456</p>
+            {loading ? (
+              <div className="h-9 bg-slate-700 animate-pulse rounded"></div>
+            ) : (
+              <p className="text-3xl font-bold text-white">{stats.totalOrders.toLocaleString()}</p>
+            )}
           </div>
         </div>
 
