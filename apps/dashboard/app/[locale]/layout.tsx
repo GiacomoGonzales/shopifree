@@ -260,6 +260,7 @@ export default function LocaleLayout({
               }
             `
           }} />
+          <script src="//code.tidio.co/ngh6o0nmm6mgmjwl57omwqfr2ki2h1xl.js" async></script>
         </head>
         <body>
           <div style={{ 
@@ -323,6 +324,7 @@ export default function LocaleLayout({
             }
           `
         }} />
+        <script src="//code.tidio.co/ngh6o0nmm6mgmjwl57omwqfr2ki2h1xl.js" async></script>
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
