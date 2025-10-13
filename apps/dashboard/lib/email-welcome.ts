@@ -87,9 +87,9 @@ export async function sendWelcomeEmail(
           <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
 
             <!-- Header -->
-            <div style="padding: 40px 32px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-              <div style="background-color: white; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
-                <span style="font-size: 32px;">🎉</span>
+            <div style="padding: 40px 32px; text-align: center; background: linear-gradient(135deg, #10B981 0%, #047857 100%);">
+              <div style="background-color: white; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+                <span style="font-size: 32px; display: block; line-height: 1;">🎉</span>
               </div>
               <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
                 ¡Bienvenido a Shopifree!
@@ -112,14 +112,14 @@ export async function sendWelcomeEmail(
               </div>
 
               <!-- Store Link -->
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; border-radius: 12px; margin-bottom: 32px; text-align: center;">
+              <div style="background: linear-gradient(135deg, #10B981 0%, #047857 100%); padding: 24px; border-radius: 12px; margin-bottom: 32px; text-align: center;">
                 <p style="margin: 0 0 12px 0; font-size: 14px; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
                   Tu Tienda Online
                 </p>
                 <p style="margin: 0 0 16px 0; font-size: 16px; color: #ffffff; word-break: break-all;">
                   ${storeUrl}
                 </p>
-                <a href="${storeUrl}" style="display: inline-block; background-color: #ffffff; color: #667eea; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+                <a href="${storeUrl}" style="display: inline-block; background-color: #ffffff; color: #059669; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
                   Ver mi tienda
                 </a>
               </div>
@@ -130,7 +130,7 @@ export async function sendWelcomeEmail(
                   Próximos pasos 🎯
                 </h2>
 
-                <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 16px 20px; margin-bottom: 12px; border-radius: 4px;">
+                <div style="background-color: #f8f9fa; border-left: 4px solid #10B981; padding: 16px 20px; margin-bottom: 12px; border-radius: 4px;">
                   <p style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #212529;">
                     1. Agrega tus productos
                   </p>
@@ -139,7 +139,7 @@ export async function sendWelcomeEmail(
                   </p>
                 </div>
 
-                <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 16px 20px; margin-bottom: 12px; border-radius: 4px;">
+                <div style="background-color: #f8f9fa; border-left: 4px solid #10B981; padding: 16px 20px; margin-bottom: 12px; border-radius: 4px;">
                   <p style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #212529;">
                     2. Personaliza tu tienda
                   </p>
@@ -148,7 +148,7 @@ export async function sendWelcomeEmail(
                   </p>
                 </div>
 
-                <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 16px 20px; margin-bottom: 12px; border-radius: 4px;">
+                <div style="background-color: #f8f9fa; border-left: 4px solid #10B981; padding: 16px 20px; margin-bottom: 12px; border-radius: 4px;">
                   <p style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #212529;">
                     3. Configura pagos y envíos
                   </p>
@@ -157,7 +157,7 @@ export async function sendWelcomeEmail(
                   </p>
                 </div>
 
-                <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 16px 20px; border-radius: 4px;">
+                <div style="background-color: #f8f9fa; border-left: 4px solid #10B981; padding: 16px 20px; border-radius: 4px;">
                   <p style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #212529;">
                     4. ¡Comparte y vende! 📢
                   </p>
