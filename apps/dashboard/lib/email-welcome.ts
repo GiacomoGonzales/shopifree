@@ -18,7 +18,7 @@ export interface WelcomeEmailData {
 
 // Función para obtener configuración de email desde variables de entorno
 function getEmailConfig() {
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@shopifree.app';
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@em6537.shopifree.app';
 
   return {
     from: {
