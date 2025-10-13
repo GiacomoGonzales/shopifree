@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { collection, query, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore'
 import { getFirebaseDb } from '../../lib/firebase'
 import AdminLayout from '../../components/layout/AdminLayout'
@@ -27,11 +27,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 
-  useEffect(() => {
-    loadUsers()
-  }, [roleFilter, statusFilter])
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true)
       const db = getFirebaseDb()
@@ -79,7 +75,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [roleFilter, statusFilter])
+
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
 
   const filteredUsers = users.filter(user => {
     if (!searchTerm) return true

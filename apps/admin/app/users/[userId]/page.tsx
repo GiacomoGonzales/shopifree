@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import { doc, getDoc, collection, query, where, getDocs, updateDoc, Timestamp } from 'firebase/firestore'
 import { getFirebaseDb } from '../../../lib/firebase'
 import AdminLayout from '../../../components/layout/AdminLayout'
@@ -32,7 +32,6 @@ interface Store {
 
 export default function UserDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const userId = params?.userId as string
 
   const [user, setUser] = useState<User | null>(null)
@@ -43,13 +42,7 @@ export default function UserDetailPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editRole, setEditRole] = useState<'user' | 'admin' | 'superadmin'>('user')
 
-  useEffect(() => {
-    if (userId) {
-      loadUserData()
-    }
-  }, [userId])
-
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
       setLoading(true)
       const db = getFirebaseDb()
@@ -99,7 +92,13 @@ export default function UserDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
+
+  useEffect(() => {
+    if (userId) {
+      loadUserData()
+    }
+  }, [userId, loadUserData])
 
   const handleToggleStatus = async () => {
     if (!user) return
@@ -444,7 +443,7 @@ export default function UserDetailPage() {
 
               <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-xs text-yellow-400">
-                  ⚠️ Changing a user's role will affect their permissions and access to the platform.
+                  ⚠️ Changing a user&apos;s role will affect their permissions and access to the platform.
                 </p>
               </div>
             </div>
