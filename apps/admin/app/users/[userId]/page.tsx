@@ -22,10 +22,12 @@ interface User {
 
 interface Store {
   id: string
-  name: string
+  storeName: string
   description: string
-  isActive: boolean
+  subdomain: string
+  ownerId: string
   createdAt: Timestamp
+  updatedAt: Timestamp
 }
 
 export default function UserDetailPage() {
@@ -35,6 +37,8 @@ export default function UserDetailPage() {
 
   const [user, setUser] = useState<User | null>(null)
   const [stores, setStores] = useState<Store[]>([])
+  const [productsCount, setProductsCount] = useState(0)
+  const [ordersCount, setOrdersCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editRole, setEditRole] = useState<'user' | 'admin' | 'superadmin'>('user')
@@ -64,7 +68,7 @@ export default function UserDetailPage() {
       // Cargar tiendas del usuario
       const storesQuery = query(
         collection(db, 'stores'),
-        where('userId', '==', userId)
+        where('ownerId', '==', userId)
       )
       const storesSnapshot = await getDocs(storesQuery)
       const storesData = storesSnapshot.docs.map(doc => ({
@@ -72,6 +76,23 @@ export default function UserDetailPage() {
         ...doc.data()
       })) as Store[]
       setStores(storesData)
+
+      // Contar productos y órdenes de todas las tiendas del usuario
+      let totalProducts = 0
+      let totalOrders = 0
+      for (const store of storesData) {
+        // Contar productos
+        const productsQuery = query(collection(db, 'stores', store.id, 'products'))
+        const productsSnapshot = await getDocs(productsQuery)
+        totalProducts += productsSnapshot.size
+
+        // Contar órdenes
+        const ordersQuery = query(collection(db, 'stores', store.id, 'orders'))
+        const ordersSnapshot = await getDocs(ordersQuery)
+        totalOrders += ordersSnapshot.size
+      }
+      setProductsCount(totalProducts)
+      setOrdersCount(totalOrders)
 
     } catch (error) {
       console.error('Error loading user data:', error)
@@ -194,46 +215,44 @@ export default function UserDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/users"
-              className="text-slate-400 hover:text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-white">User Details</h1>
-              <p className="text-slate-400 mt-1">View and manage user information</p>
-            </div>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Link
+            href="/users"
+            className="text-slate-400 hover:text-white transition-colors flex-shrink-0"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </Link>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">User Details</h1>
+            <p className="text-sm sm:text-base text-slate-400 mt-1">View and manage user information</p>
           </div>
         </div>
 
         {/* User Profile Card */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 px-6 py-8">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-6">
+          <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 px-4 sm:px-6 py-6 sm:py-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
+              <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
                 {user.photoURL ? (
                   <img
-                    className="h-24 w-24 rounded-full border-4 border-slate-800"
+                    className="h-16 w-16 sm:h-24 sm:w-24 rounded-full border-4 border-slate-800 flex-shrink-0"
                     src={user.photoURL}
                     alt={user.displayName || 'User'}
                   />
                 ) : (
-                  <div className="h-24 w-24 rounded-full bg-emerald-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-slate-800">
+                  <div className="h-16 w-16 sm:h-24 sm:w-24 rounded-full bg-emerald-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold border-4 border-slate-800 flex-shrink-0">
                     {(user.displayName || user.email || 'U')[0].toUpperCase()}
                   </div>
                 )}
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 truncate">
                     {user.displayName || 'No name'}
                   </h2>
-                  <p className="text-slate-300 mb-3">{user.email}</p>
+                  <p className="text-sm sm:text-base text-slate-300 mb-3 truncate">{user.email}</p>
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(user.role)}`}>
                       {user.role}
@@ -252,19 +271,19 @@ export default function UserDetailPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   Edit Role
                 </button>
                 <button
                   onClick={handleToggleStatus}
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm ${
                     user.isActive
                       ? 'bg-red-500 hover:bg-red-600 text-white'
                       : 'bg-emerald-500 hover:bg-emerald-600 text-white'
@@ -272,14 +291,14 @@ export default function UserDetailPage() {
                 >
                   {user.isActive ? (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                       </svg>
                       Deactivate
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Activate
@@ -291,7 +310,7 @@ export default function UserDetailPage() {
           </div>
 
           {/* User Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
             <div>
               <p className="text-sm text-slate-400 mb-1">User ID</p>
               <p className="text-white font-mono text-sm">{user.uid}</p>
@@ -312,7 +331,7 @@ export default function UserDetailPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -331,7 +350,7 @@ export default function UserDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-sm mb-1">Products</p>
-                <p className="text-3xl font-bold text-white">0</p>
+                <p className="text-3xl font-bold text-white">{productsCount}</p>
               </div>
               <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,7 +364,7 @@ export default function UserDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-sm mb-1">Orders</p>
-                <p className="text-3xl font-bold text-white">0</p>
+                <p className="text-3xl font-bold text-white">{ordersCount}</p>
               </div>
               <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,20 +396,22 @@ export default function UserDetailPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-white font-medium">{store.name}</p>
-                      <p className="text-slate-400 text-sm">{store.description}</p>
+                      <p className="text-white font-medium">{store.storeName}</p>
+                      <p className="text-slate-400 text-sm">{store.subdomain}.shopifree.com</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {store.isActive ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
-                        Inactive
-                      </span>
-                    )}
+                    <a
+                      href={`https://${store.subdomain}.shopifree.com`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                      title="Visit store"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
                   </div>
                 </div>
               ))}

@@ -85,11 +85,31 @@ const navigation: NavItem[] = [
   },
 ]
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-slate-800 border-r border-slate-700">
+    <>
+      {/* Overlay para móvil */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-slate-800 border-r border-slate-700
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0
+      `}>
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b border-slate-700">
         <h1 className="text-2xl font-bold text-emerald-500">
@@ -130,6 +150,7 @@ export default function AdminSidebar() {
           Admin Panel v1.0
         </p>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

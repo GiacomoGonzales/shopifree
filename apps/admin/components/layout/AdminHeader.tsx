@@ -3,7 +3,11 @@
 import { useAdminAuth } from '../../lib/admin-auth-context'
 import { useState } from 'react'
 
-export default function AdminHeader() {
+interface AdminHeaderProps {
+  onMenuClick: () => void
+}
+
+export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   const { user, signOut } = useAdminAuth()
   const [showDropdown, setShowDropdown] = useState(false)
 
@@ -16,10 +20,20 @@ export default function AdminHeader() {
   }
 
   return (
-    <header className="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-8">
-      {/* Breadcrumb o título de página */}
-      <div>
-        <h2 className="text-xl font-semibold text-white">Admin Panel</h2>
+    <header className="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      {/* Mobile menu button + Title */}
+      <div className="flex items-center gap-4">
+        {/* Botón hamburguesa - solo visible en móvil */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <h2 className="text-lg sm:text-xl font-semibold text-white">Admin Panel</h2>
       </div>
 
       {/* User menu */}
@@ -33,8 +47,8 @@ export default function AdminHeader() {
             {user?.email?.charAt(0).toUpperCase() || 'A'}
           </div>
 
-          {/* User info */}
-          <div className="text-left">
+          {/* User info - oculto en móvil */}
+          <div className="text-left hidden sm:block">
             <p className="text-sm font-medium text-white">
               {user?.displayName || user?.email?.split('@')[0] || 'Admin'}
             </p>
@@ -43,7 +57,7 @@ export default function AdminHeader() {
 
           {/* Dropdown icon */}
           <svg
-            className={`w-4 h-4 text-slate-400 transition-transform ${
+            className={`w-4 h-4 text-slate-400 transition-transform hidden sm:block ${
               showDropdown ? 'rotate-180' : ''
             }`}
             fill="none"

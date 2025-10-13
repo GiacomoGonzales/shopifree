@@ -3,15 +3,15 @@ import AdminLayout from '../components/layout/AdminLayout'
 export default function AdminPage() {
   return (
     <AdminLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-slate-400">Welcome to Shopifree Admin Panel</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Dashboard</h1>
+          <p className="text-sm sm:text-base text-slate-400">Welcome to Shopifree Admin Panel</p>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Total Users */}
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
@@ -121,7 +121,7 @@ export default function AdminPage() {
         </div>
 
         {/* System Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <h2 className="text-xl font-bold text-white mb-4">System Status</h2>
             <div className="space-y-3">

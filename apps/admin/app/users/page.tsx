@@ -134,23 +134,23 @@ export default function UsersPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Users Management</h1>
-            <p className="text-slate-400 mt-1">Manage all registered users</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Users Management</h1>
+            <p className="text-sm sm:text-base text-slate-400 mt-1">Manage all registered users</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-sm">
+            <span className="px-3 sm:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-xs sm:text-sm">
               Total: <span className="font-bold text-white">{users.length}</span>
             </span>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
@@ -167,43 +167,46 @@ export default function UsersPage() {
               </div>
             </div>
 
-            {/* Role Filter */}
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
-              className="px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            >
-              <option value="all">All Roles</option>
-              <option value="user">Users</option>
-              <option value="admin">Admins</option>
-              <option value="superadmin">Super Admins</option>
-            </select>
+            {/* Filters row */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              {/* Role Filter */}
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
+                className="flex-1 px-3 sm:px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="all">All Roles</option>
+                <option value="user">Users</option>
+                <option value="admin">Admins</option>
+                <option value="superadmin">Super Admins</option>
+              </select>
 
-            {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                className="flex-1 px-3 sm:px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
 
-            {/* Refresh Button */}
-            <button
-              onClick={loadUsers}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-white transition-colors flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh
-            </button>
+              {/* Refresh Button */}
+              <button
+                onClick={loadUsers}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-white transition-colors flex items-center justify-center gap-2 text-sm"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table - Desktop / Cards - Mobile */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -240,19 +243,21 @@ export default function UsersPage() {
               <p className="text-slate-500 text-sm">Try adjusting your filters or search term</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-900 border-b border-slate-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Registered</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700">
+            <>
+              {/* Vista de tabla para desktop */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-900 border-b border-slate-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">User</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Registered</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700">
                   {filteredUsers.map((user) => (
                     <tr key={user.uid} className="hover:bg-slate-700/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -331,6 +336,64 @@ export default function UsersPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Vista de tarjetas para móvil */}
+            <div className="md:hidden divide-y divide-slate-700">
+              {filteredUsers.map((user) => (
+                <div key={user.uid} className="p-4 hover:bg-slate-700/50 transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {user.photoURL ? (
+                        <img
+                          className="h-12 w-12 rounded-full flex-shrink-0"
+                          src={user.photoURL}
+                          alt={user.displayName || 'User'}
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-semibold flex-shrink-0">
+                          {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-white truncate">
+                          {user.displayName || 'No name'}
+                        </p>
+                        <p className="text-xs text-slate-400 truncate">{user.email || 'No email'}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/users/${user.uid}`}
+                      className="text-emerald-400 hover:text-emerald-300 transition-colors flex-shrink-0 ml-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(user.role)}`}>
+                      {getRoleIcon(user.role)}
+                      {user.role}
+                    </span>
+                    {user.isActive ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                        <span className="w-1.5 h-1.5 bg-red-400 rounded-full"></span>
+                        Inactive
+                      </span>
+                    )}
+                    <span className="text-xs text-slate-400">
+                      {user.createdAt ? formatDate(user.createdAt) : 'Unknown'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
           )}
         </div>
 
