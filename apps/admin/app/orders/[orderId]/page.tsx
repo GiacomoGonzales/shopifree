@@ -21,6 +21,12 @@ interface OrderItem {
   }
 }
 
+type FirebaseTimestamp = {
+  toDate: () => Date
+  seconds: number
+  nanoseconds: number
+} | { seconds: number } | string | Date
+
 interface Order {
   id: string
   userId: string
@@ -42,8 +48,8 @@ interface Order {
     country?: string
   }
   notes?: string
-  createdAt: any
-  updatedAt: any
+  createdAt: FirebaseTimestamp
+  updatedAt: FirebaseTimestamp
 }
 
 interface Store {
@@ -139,11 +145,11 @@ export default function OrderDetailPage() {
     }).format(amount)
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: FirebaseTimestamp) => {
     if (!timestamp) return "Sin fecha"
 
     try {
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
         return timestamp.toDate().toLocaleDateString("es-ES", {
           year: "numeric",
           month: "long",
@@ -153,7 +159,7 @@ export default function OrderDetailPage() {
         })
       }
 
-      if (timestamp && timestamp.seconds) {
+      if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
         const date = new Date(timestamp.seconds * 1000)
         return date.toLocaleDateString("es-ES", {
           year: "numeric",
@@ -178,7 +184,7 @@ export default function OrderDetailPage() {
       }
 
       return "Sin fecha"
-    } catch (error) {
+    } catch {
       return "Sin fecha"
     }
   }
@@ -253,7 +259,7 @@ export default function OrderDetailPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
           <h2 className="text-xl font-bold text-white mb-2">Order Not Found</h2>
-          <p className="text-slate-400 mb-6">The order you're looking for doesn't exist</p>
+          <p className="text-slate-400 mb-6">The order you&apos;re looking for doesn&apos;t exist</p>
           <Link
             href="/orders"
             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"

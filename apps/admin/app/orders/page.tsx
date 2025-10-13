@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { collection, getDocs, query, Timestamp } from "firebase/firestore"
+import { collection, getDocs, query } from "firebase/firestore"
 import { getFirebaseDb } from "../../lib/firebase"
 import AdminLayout from "../../components/layout/AdminLayout"
 import Link from "next/link"
@@ -18,6 +18,21 @@ interface OrderItem {
   }
 }
 
+type FirebaseTimestamp = {
+  toDate: () => Date
+  toMillis: () => number
+  seconds: number
+  nanoseconds: number
+} | { seconds: number } | string | Date
+
+interface ShippingAddress {
+  street?: string
+  city?: string
+  state?: string
+  zipCode?: string
+  country?: string
+}
+
 interface Order {
   id: string
   userId: string
@@ -32,9 +47,9 @@ interface Order {
   currency: string
   status: string
   paymentMethod?: string
-  shippingAddress?: any
-  createdAt: any
-  updatedAt: any
+  shippingAddress?: ShippingAddress
+  createdAt: FirebaseTimestamp
+  updatedAt: FirebaseTimestamp
 }
 
 interface Store {
@@ -86,9 +101,6 @@ export default function OrdersPage() {
       // Cargar tiendas primero
       const storesData = await loadStores()
       setStores(storesData)
-
-      // Crear un mapa de tiendas para acceso rápido
-      const storesMap = new Map(storesData.map(s => [s.id, s]))
 
       // Cargar órdenes de todas las tiendas (están en subcolecciones)
       const allOrders: Order[] = []
@@ -183,11 +195,11 @@ export default function OrdersPage() {
     }).format(amount)
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: FirebaseTimestamp) => {
     if (!timestamp) return "Sin fecha"
 
     try {
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
         return timestamp.toDate().toLocaleDateString("es-ES", {
           year: "numeric",
           month: "short",
@@ -197,7 +209,7 @@ export default function OrdersPage() {
         })
       }
 
-      if (timestamp && timestamp.seconds) {
+      if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
         const date = new Date(timestamp.seconds * 1000)
         return date.toLocaleDateString("es-ES", {
           year: "numeric",
@@ -222,7 +234,7 @@ export default function OrdersPage() {
       }
 
       return "Sin fecha"
-    } catch (error) {
+    } catch {
       return "Sin fecha"
     }
   }

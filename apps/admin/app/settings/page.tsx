@@ -5,6 +5,12 @@ import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase
 import { getFirebaseDb } from "../../lib/firebase"
 import AdminLayout from "../../components/layout/AdminLayout"
 
+type FirebaseTimestamp = {
+  toDate: () => Date
+  seconds: number
+  nanoseconds: number
+} | { seconds: number } | string | Date
+
 interface PlatformConfig {
   id: string
   siteName: string
@@ -21,8 +27,8 @@ interface AdminUser {
   email: string
   name: string
   role: "super_admin" | "admin" | "moderator"
-  createdAt: any
-  lastLogin?: any
+  createdAt: FirebaseTimestamp
+  lastLogin?: FirebaseTimestamp
 }
 
 export default function SettingsPage() {
@@ -218,18 +224,18 @@ export default function SettingsPage() {
     }
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: FirebaseTimestamp) => {
     if (!timestamp) return "−"
 
     try {
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
         return timestamp.toDate().toLocaleDateString("es-ES", {
           year: "numeric",
           month: "short",
           day: "numeric"
         })
       }
-      if (timestamp && timestamp.seconds) {
+      if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
         const date = new Date(timestamp.seconds * 1000)
         return date.toLocaleDateString("es-ES", {
           year: "numeric",
@@ -237,8 +243,25 @@ export default function SettingsPage() {
           day: "numeric"
         })
       }
+      if (typeof timestamp === 'string') {
+        const date = new Date(timestamp)
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString("es-ES", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          })
+        }
+      }
+      if (timestamp instanceof Date) {
+        return timestamp.toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        })
+      }
       return "−"
-    } catch (error) {
+    } catch {
       return "−"
     }
   }
@@ -486,7 +509,7 @@ export default function SettingsPage() {
                   <label className="block text-sm font-medium text-slate-300 mb-2">Rol</label>
                   <select
                     value={newAdmin.role}
-                    onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value as any })}
+                    onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value as "super_admin" | "admin" | "moderator" })}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="moderator">Moderador</option>
@@ -539,7 +562,7 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-2">
                     <select
                       value={admin.role}
-                      onChange={(e) => updateAdminRole(admin.id, e.target.value as any)}
+                      onChange={(e) => updateAdminRole(admin.id, e.target.value as "super_admin" | "admin" | "moderator")}
                       className="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
                       <option value="moderator">Moderador</option>

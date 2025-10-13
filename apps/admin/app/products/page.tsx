@@ -1,10 +1,27 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { collection, getDocs, query, where, Timestamp } from "firebase/firestore"
+import { collection, getDocs, query } from "firebase/firestore"
 import { getFirebaseDb } from "../../lib/firebase"
 import AdminLayout from "../../components/layout/AdminLayout"
 import Link from "next/link"
+
+type FirebaseTimestamp = {
+  toDate: () => Date
+  toMillis: () => number
+  seconds: number
+  nanoseconds: number
+} | { seconds: number } | string | Date
+
+interface MediaFile {
+  url: string
+  type?: string
+}
+
+interface Variation {
+  stock?: number
+  [key: string]: unknown
+}
 
 interface Product {
   id: string
@@ -15,16 +32,16 @@ interface Product {
   stock: number
   image?: string
   images?: string[]
-  mediaFiles?: any[]
+  mediaFiles?: MediaFile[]
   storeId: string
   storeName?: string
   storeSubdomain?: string
   status: string
   hasVariations: boolean
-  variations?: any[]
+  variations?: Variation[]
   categoryId?: string
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  createdAt: FirebaseTimestamp
+  updatedAt: FirebaseTimestamp
 }
 
 interface Store {
@@ -77,9 +94,6 @@ export default function ProductsPage() {
       const storesData = await loadStores()
       setStores(storesData)
 
-      // Crear un mapa de tiendas para acceso rápido
-      const storesMap = new Map(storesData.map(s => [s.id, s]))
-
       // Cargar productos de todas las tiendas (están en subcolecciones)
       const allProducts: Product[] = []
 
@@ -98,7 +112,7 @@ export default function ProductsPage() {
             stockValue = data.stock;
           } else if (data.hasVariations && data.variations && data.variations.length > 0) {
             // Si tiene variaciones, sumar el stock de todas
-            stockValue = data.variations.reduce((total: number, v: any) => {
+            stockValue = data.variations.reduce((total: number, v: Variation) => {
               return total + (v.stock || 0);
             }, 0);
           }
@@ -194,12 +208,12 @@ export default function ProductsPage() {
     }).format(amount)
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: FirebaseTimestamp) => {
     if (!timestamp) return "Sin fecha"
 
     try {
       // Si es un Timestamp de Firestore
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
         return timestamp.toDate().toLocaleDateString("es-ES", {
           year: "numeric",
           month: "short",
@@ -208,7 +222,7 @@ export default function ProductsPage() {
       }
 
       // Si es un objeto con seconds (formato Firestore serializado)
-      if (timestamp && timestamp.seconds) {
+      if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
         const date = new Date(timestamp.seconds * 1000)
         return date.toLocaleDateString("es-ES", {
           year: "numeric",
@@ -229,9 +243,17 @@ export default function ProductsPage() {
         }
       }
 
+      // Si es un Date object
+      if (timestamp instanceof Date) {
+        return timestamp.toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        })
+      }
+
       return "Sin fecha"
-    } catch (error) {
-      console.error('Error formatting date:', error, timestamp)
+    } catch {
       return "Sin fecha"
     }
   }
@@ -375,7 +397,7 @@ export default function ProductsPage() {
 
                                 if (!imageUrl && product.mediaFiles && product.mediaFiles.length > 0) {
                                   // Buscar primera imagen en mediaFiles
-                                  const firstImage = product.mediaFiles.find((m: any) => m.type === 'image' || !m.type);
+                                  const firstImage = product.mediaFiles.find((m: MediaFile) => m.type === 'image' || !m.type);
                                   imageUrl = firstImage?.url;
 
                                   // Si aún no hay, intentar con el primer elemento sin importar tipo
@@ -510,7 +532,7 @@ export default function ProductsPage() {
 
                           if (!imageUrl && product.mediaFiles && product.mediaFiles.length > 0) {
                             // Buscar primera imagen en mediaFiles
-                            const firstImage = product.mediaFiles.find((m: any) => m.type === 'image' || !m.type);
+                            const firstImage = product.mediaFiles.find((m: MediaFile) => m.type === 'image' || !m.type);
                             imageUrl = firstImage?.url;
 
                             // Si aún no hay, intentar con el primer elemento sin importar tipo

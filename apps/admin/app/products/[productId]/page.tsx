@@ -1,11 +1,22 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { doc, getDoc, Timestamp } from "firebase/firestore"
+import { doc, getDoc, collection, getDocs } from "firebase/firestore"
 import { getFirebaseDb } from "../../../lib/firebase"
 import AdminLayout from "../../../components/layout/AdminLayout"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+
+type FirebaseTimestamp = {
+  toDate: () => Date
+  seconds: number
+  nanoseconds: number
+} | { seconds: number } | string | Date
+
+interface MediaFile {
+  url: string
+  type?: string
+}
 
 interface Variation {
   id: string
@@ -25,7 +36,7 @@ interface Product {
   stock: number
   image?: string
   images?: string[]
-  mediaFiles?: any[]
+  mediaFiles?: MediaFile[]
   storeId: string
   status: string
   hasVariations: boolean
@@ -39,8 +50,8 @@ interface Product {
     width: number
     height: number
   }
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  createdAt: FirebaseTimestamp
+  updatedAt: FirebaseTimestamp
 }
 
 interface Store {
@@ -99,7 +110,7 @@ export default function ProductDetailPage() {
               stockValue = data.stock;
             } else if (data.hasVariations && data.variations && data.variations.length > 0) {
               // Si tiene variaciones, sumar el stock de todas
-              stockValue = data.variations.reduce((total: number, v: any) => {
+              stockValue = data.variations.reduce((total: number, v: Variation) => {
                 return total + (v.stock || 0);
               }, 0);
             }
@@ -155,12 +166,12 @@ export default function ProductDetailPage() {
     }).format(amount)
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: FirebaseTimestamp) => {
     if (!timestamp) return "Sin fecha"
 
     try {
       // Si es un Timestamp de Firestore
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
         return timestamp.toDate().toLocaleDateString("es-ES", {
           year: "numeric",
           month: "long",
@@ -171,7 +182,7 @@ export default function ProductDetailPage() {
       }
 
       // Si es un objeto con seconds (formato Firestore serializado)
-      if (timestamp && timestamp.seconds) {
+      if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
         const date = new Date(timestamp.seconds * 1000)
         return date.toLocaleDateString("es-ES", {
           year: "numeric",
@@ -197,8 +208,7 @@ export default function ProductDetailPage() {
       }
 
       return "Sin fecha"
-    } catch (error) {
-      console.error('Error formatting date:', error, timestamp)
+    } catch {
       return "Sin fecha"
     }
   }
@@ -243,7 +253,7 @@ export default function ProductDetailPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
           <h2 className="text-xl font-bold text-white mb-2">Product Not Found</h2>
-          <p className="text-slate-400 mb-6">The product you're looking for doesn't exist</p>
+          <p className="text-slate-400 mb-6">The product you&apos;re looking for doesn&apos;t exist</p>
           <Link
             href="/products"
             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
