@@ -9,7 +9,6 @@ import AuthGuard from '../../../../components/AuthGuard'
 import { uploadImageToCloudinary, validateImageFile } from '../../../../lib/cloudinary'
 import { brandColors } from '@shopifree/ui'
 import { googleMapsLoader } from '../../../../lib/google-maps'
-import { sendWelcomeEmail } from '../../../../lib/email-welcome'
 
 interface StoreFormData {
   storeName: string
@@ -513,25 +512,34 @@ function StoreOnboardingContent() {
       
       await createStore(storeData)
 
-      // Enviar email de bienvenida (no bloquear si falla)
+      // Enviar email de bienvenida desde el servidor (no bloquear si falla)
       try {
         const userName = userData?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Usuario'
         const userEmail = user?.email || ''
         const dashboardUrl = typeof window !== 'undefined' ? window.location.origin : 'https://dashboard.shopifree.app'
 
         if (userEmail) {
-          const emailSent = await sendWelcomeEmail({
-            userName,
-            userEmail,
-            storeName: formData.storeName,
-            storeSubdomain: formData.subdomain,
-            dashboardUrl
+          // Llamar a la API route del servidor para enviar el email
+          const response = await fetch('/api/send-welcome-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userName,
+              userEmail,
+              storeName: formData.storeName,
+              storeSubdomain: formData.subdomain,
+              dashboardUrl
+            })
           })
 
-          if (emailSent) {
+          const result = await response.json()
+
+          if (result.success) {
             console.log('✅ Welcome email sent successfully')
           } else {
-            console.log('ℹ️ Welcome email not sent (SendGrid not configured or failed)')
+            console.log('ℹ️ Welcome email not sent:', result.message || result.error)
           }
         }
       } catch (emailError) {
