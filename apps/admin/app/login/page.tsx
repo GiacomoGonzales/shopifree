@@ -28,17 +28,19 @@ export default function AdminLoginPage() {
     try {
       await signIn(email, password)
       // La redirección se manejará por el useEffect cuando user cambie
-    } catch (err: any) {
+    } catch (err) {
       console.error('Login error:', err)
 
-      if (err.message.includes('Admin privileges required')) {
+      const error = err as { message?: string; code?: string }
+
+      if (error.message?.includes('Admin privileges required')) {
         setError('Access denied. This account does not have admin privileges.')
-      } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         setError('Invalid email or password')
-      } else if (err.code === 'auth/invalid-credential') {
+      } else if (error.code === 'auth/invalid-credential') {
         setError('Invalid credentials')
       } else {
-        setError(err.message || 'An error occurred during login')
+        setError(error.message || 'An error occurred during login')
       }
     } finally {
       setLoading(false)

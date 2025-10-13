@@ -132,7 +132,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('[Admin Auth] ✅ Login successful')
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Admin Auth] ❌ Login error:', error)
       throw error
     }
