@@ -268,11 +268,11 @@ service cloud.firestore {
 
     // Reglas para captura de leads (email marketing)
     match /leads/{leadId} {
-      // Permitir creación pública (landing page)
-      allow create: if true;
+      // Permitir creación y lectura pública (necesario para verificar duplicados)
+      allow create, read: if true;
 
-      // Solo administradores pueden leer/actualizar/eliminar leads
-      allow read, update, delete: if isAuthenticated();
+      // Solo administradores pueden actualizar/eliminar leads
+      allow update, delete: if isAuthenticated();
     }
 
     // Reglas para jobs de mejora de imágenes
