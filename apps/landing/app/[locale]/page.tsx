@@ -36,7 +36,8 @@ export default function HomePage() {
     'Mailchimp',
     'Instagram Shopping',
     'Google Ads',
-    'Sendgrid'
+    'Sendgrid',
+    'Google Gemini AI'
   ]
 
   // Demo stores data
@@ -355,12 +356,12 @@ export default function HomePage() {
       }
       
       const containerWidth = carouselRef.current.scrollWidth
-      const singleSetWidth = containerWidth / 2 // Since we have 2 sets of 10 images
+      const singleSetWidth = containerWidth / 2 // Since we have 2 sets of 11 images
 
       setCarouselPosition(prev => {
         const newPosition = prev - 1.5 // Smooth movement speed
 
-        // Reset when we've moved exactly one full set (10 images)
+        // Reset when we've moved exactly one full set (11 images)
         if (Math.abs(newPosition) >= singleSetWidth) {
           return 0
         }
@@ -1041,7 +1042,7 @@ export default function HomePage() {
               }}
             >
               {/* Integration images - duplicated for seamless loop */}
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num, index) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, index) => (
                 <img
                   key={index}
                   src={`/integraciones/integracion${num}.png`}
