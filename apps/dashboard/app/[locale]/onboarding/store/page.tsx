@@ -9,6 +9,7 @@ import AuthGuard from '../../../../components/AuthGuard'
 import { uploadImageToCloudinary, validateImageFile } from '../../../../lib/cloudinary'
 import { brandColors } from '@shopifree/ui'
 import { googleMapsLoader } from '../../../../lib/google-maps'
+import { AITextImprover } from '../../../../components/products/AITextImprover'
 
 interface StoreFormData {
   storeName: string
@@ -34,6 +35,7 @@ interface StoreFormData {
   primaryColor: string
   secondaryColor: string
   currency: string
+  language?: string
   socialMedia: {
     facebook: string
     instagram: string
@@ -137,6 +139,16 @@ function StoreOnboardingContent() {
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 3
   
+  // Detectar idioma del navegador
+  const detectBrowserLanguage = (): string => {
+    if (typeof window === 'undefined') return 'es'
+    const browserLang = navigator.language || 'es-ES'
+    const langCode = browserLang.split('-')[0] // 'es', 'en', 'pt', 'fr', etc.
+    // Limitar a idiomas soportados
+    const supportedLanguages = ['es', 'en', 'pt', 'fr', 'de', 'it']
+    return supportedLanguages.includes(langCode) ? langCode : 'es'
+  }
+
   const [formData, setFormData] = useState<StoreFormData>({
     storeName: '',
     subdomain: '',
@@ -184,6 +196,15 @@ function StoreOnboardingContent() {
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingStorefront, setUploadingStorefront] = useState(false)
+
+  // Detectar y establecer idioma del navegador al montar el componente
+  useEffect(() => {
+    const detectedLanguage = detectBrowserLanguage()
+    setFormData(prev => ({
+      ...prev,
+      language: detectedLanguage
+    }))
+  }, [])
 
   // Validación de subdominio simplificada (sin estado de loading)
   const validateSubdomain = useCallback(async (subdomain: string) => {
@@ -485,7 +506,7 @@ function StoreOnboardingContent() {
         primaryColor: formData.primaryColor,
         secondaryColor: formData.secondaryColor,
         currency: formData.currency,
-        language: 'es', // Mantener el valor por defecto
+        language: formData.language || 'es', // Usar idioma detectado del navegador
         // Usar los campos de Cloudinary si existen, sino usar los legacy para compatibilidad
         logoUrl: formData.logoUrl,
         logoPublicId: formData.logoPublicId,
@@ -704,36 +725,56 @@ function StoreOnboardingContent() {
               {errors.subdomain && <p className="text-red-500 text-sm mt-1">{errors.subdomain}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('steps.info.fields.slogan.label')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.slogan}
-                onChange={(e) => handleInputChange('slogan', e.target.value)}
-                placeholder={t('steps.info.fields.slogan.placeholder')}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.slogan ? 'border-red-500' : 'border-gray-300'
-                }`}
+            <div className="space-y-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('steps.info.fields.slogan.label')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.slogan}
+                  onChange={(e) => handleInputChange('slogan', e.target.value)}
+                  placeholder={t('steps.info.fields.slogan.placeholder')}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                    errors.slogan ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.slogan && <p className="text-red-500 text-sm mt-1">{errors.slogan}</p>}
+              </div>
+              <AITextImprover
+                type="slogan"
+                currentText={formData.slogan}
+                onImprovedText={(text) => handleInputChange('slogan', text)}
+                productName={formData.storeName}
+                productDescription={formData.description}
+                language={formData.language}
               />
-              {errors.slogan && <p className="text-red-500 text-sm mt-1">{errors.slogan}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('steps.info.fields.description.label')} <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder={t('steps.info.fields.description.placeholder')}
-                rows={4}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
+            <div className="space-y-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('steps.info.fields.description.label')} <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder={t('steps.info.fields.description.placeholder')}
+                  rows={4}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 ${
+                    errors.description ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+              </div>
+              <AITextImprover
+                type="description"
+                currentText={formData.description}
+                onImprovedText={(text) => handleInputChange('description', text)}
+                productName={formData.storeName}
+                productDescription={formData.slogan}
+                language={formData.language}
               />
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
           </div>
         )

@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
+ * Convertir código de idioma a nombre completo
+ */
+function getLanguageName(langCode: string): string {
+  const languages: Record<string, string> = {
+    'es': 'Spanish',
+    'en': 'English',
+    'pt': 'Portuguese',
+    'fr': 'French',
+    'de': 'German',
+    'it': 'Italian'
+  }
+  return languages[langCode] || 'Spanish'
+}
+
+/**
  * API Route para mejorar textos de productos con Gemini AI
  * Mejora nombres y descripciones de productos para e-commerce
  */
@@ -10,17 +25,18 @@ export async function POST(request: NextRequest) {
 
     // 1. Obtener datos del request
     const body = await request.json()
-    const { type, currentText, productName, productDescription } = body
+    const { type, currentText, productName, productDescription, language = 'es' } = body
 
-    if (!type || !['name', 'description', 'seoTitle', 'metaDescription', 'urlSlug'].includes(type)) {
+    if (!type || !['name', 'description', 'seoTitle', 'metaDescription', 'urlSlug', 'slogan'].includes(type)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid type parameter. Must be "name", "description", "seoTitle", "metaDescription", or "urlSlug"' },
+        { success: false, error: 'Invalid type parameter. Must be "name", "description", "seoTitle", "metaDescription", "urlSlug", or "slogan"' },
         { status: 400 }
       )
     }
 
     console.log('📝 Type:', type)
     console.log('📝 Current text:', currentText)
+    console.log('🌍 Language:', language)
     console.log('📦 Context:', { productName, productDescription })
 
     // 2. Obtener API key de Gemini
@@ -47,6 +63,7 @@ export async function POST(request: NextRequest) {
     })
 
     // 4. Construir prompt según el tipo
+    const targetLanguage = getLanguageName(language)
     let prompt = ''
 
     if (type === 'name') {
@@ -67,18 +84,13 @@ TASK: Transform this product name into a compelling, professional e-commerce pro
 GUIDELINES:
 - Make it attractive and marketable
 - Keep it concise but descriptive (3-8 words ideal)
-- Add relevant adjectives that highlight quality (e.g., "Artesanal", "Premium", "Natural", "Orgánico")
+- Add relevant adjectives that highlight quality
 - Capitalize properly (title case)
 - Make it SEO-friendly
 - Sound professional but approachable
 - The name should make customers want to click and buy
 
-IMPORTANT: Return ONLY the improved product name, nothing else. No explanations, no quotes, no extra text.
-
-Example transformations:
-- "mantequilla mani" → "Mantequilla de Maní Artesanal Orgánica"
-- "jabon natural" → "Jabón Natural de Aceites Esenciales Premium"
-- "cafe" → "Café Gourmet de Origen Selecto"
+IMPORTANT: Return ONLY the improved product name in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
 
 Now improve this product name:`
     } else if (type === 'description') {
@@ -100,13 +112,13 @@ GUIDELINES:
 - Make it persuasive and benefit-focused
 - Highlight key features and benefits
 - Use engaging, natural language
-- Keep it between 3-5 sentences (80-150 words)
+- Keep it between 2-3 sentences (40-75 words)
 - Focus on what makes the customer want to buy
 - Include sensory details and emotional appeals when relevant
 - Make it SEO-friendly with natural keyword integration
 - End with a subtle call-to-action feeling
 
-IMPORTANT: Return ONLY the improved description in Spanish, nothing else. No titles, no quotes, no extra formatting.
+IMPORTANT: Return ONLY the improved description in ${targetLanguage}, nothing else. No titles, no quotes, no extra formatting.
 
 Now improve this product description:`
       } else {
@@ -125,7 +137,7 @@ PRODUCT NAME: "${contextName}"
 TASK: Create a compelling, professional product description from scratch based on the product name.
 
 GUIDELINES:
-- Write 3-5 sentences (80-150 words)
+- Write 2-3 sentences (40-75 words)
 - Make it persuasive and benefit-focused
 - Highlight likely key features based on the product name
 - Use engaging, natural language
@@ -135,9 +147,65 @@ GUIDELINES:
 - Sound authentic and trustworthy
 - End with a subtle call-to-action feeling
 
-IMPORTANT: Return ONLY the complete description in Spanish, nothing else. No titles, no quotes, no extra formatting.
+IMPORTANT: Return ONLY the complete description in ${targetLanguage}, nothing else. No titles, no quotes, no extra formatting.
 
 Now create a product description:`
+      }
+    } else if (type === 'slogan') {
+      // Mejorar o generar slogan
+      const contextName = productName || currentText
+      const hasCurrentSlogan = currentText && currentText.trim().length > 0
+
+      if (!contextName || contextName.trim().length < 3) {
+        return NextResponse.json(
+          { success: false, error: 'Need at least a store/product name to generate slogan' },
+          { status: 400 }
+        )
+      }
+
+      if (hasCurrentSlogan) {
+        prompt = `You are an expert brand copywriter specializing in creating memorable slogans and taglines.
+
+BRAND/PRODUCT NAME: "${contextName}"
+CURRENT SLOGAN: "${currentText}"
+${productDescription ? `DESCRIPTION: "${productDescription}"` : ''}
+
+TASK: Transform this slogan into a short, memorable, and impactful brand tagline.
+
+GUIDELINES:
+- Keep it VERY SHORT: 3-7 words maximum
+- Make it catchy and memorable
+- Focus on the main benefit or unique value proposition
+- Use powerful, emotional words
+- Make it easy to remember and repeat
+- Sound natural in ${targetLanguage}
+- Avoid clichés and generic phrases
+- Create something that stands out
+
+IMPORTANT: Return ONLY the improved slogan in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
+
+Now improve this slogan:`
+      } else {
+        prompt = `You are an expert brand copywriter specializing in creating memorable slogans and taglines.
+
+BRAND/PRODUCT NAME: "${contextName}"
+${productDescription ? `DESCRIPTION: "${productDescription}"` : ''}
+
+TASK: Create a short, memorable, and impactful brand tagline from scratch.
+
+GUIDELINES:
+- Keep it VERY SHORT: 3-7 words maximum
+- Make it catchy and memorable
+- Focus on the main benefit or unique value proposition
+- Use powerful, emotional words
+- Make it easy to remember and repeat
+- Sound natural in ${targetLanguage}
+- Avoid clichés and generic phrases
+- Create something that stands out
+
+IMPORTANT: Return ONLY the slogan in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
+
+Now create a slogan:`
       }
     } else if (type === 'seoTitle') {
       // Mejorar o generar SEO Title
@@ -168,7 +236,7 @@ GUIDELINES:
 - Make it accurate to the product
 - Sound natural, not stuffed with keywords
 
-IMPORTANT: Return ONLY the optimized SEO title, nothing else. No explanations, no quotes, no extra text.
+IMPORTANT: Return ONLY the optimized SEO title in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
 
 Now optimize this SEO title:`
       } else {
@@ -188,7 +256,7 @@ GUIDELINES:
 - Make it accurate to the product
 - Sound natural, not stuffed with keywords
 
-IMPORTANT: Return ONLY the SEO title, nothing else. No explanations, no quotes, no extra text.
+IMPORTANT: Return ONLY the SEO title in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
 
 Now create an SEO title:`
       }
@@ -221,7 +289,7 @@ GUIDELINES:
 - Make searchers want to click
 - Sound natural and engaging
 
-IMPORTANT: Return ONLY the optimized meta description, nothing else. No explanations, no quotes, no extra text.
+IMPORTANT: Return ONLY the optimized meta description in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
 
 Now optimize this meta description:`
       } else {
@@ -241,7 +309,7 @@ GUIDELINES:
 - Make searchers want to click
 - Sound natural and engaging
 
-IMPORTANT: Return ONLY the meta description in Spanish, nothing else. No explanations, no quotes, no extra text.
+IMPORTANT: Return ONLY the meta description in ${targetLanguage}, nothing else. No explanations, no quotes, no extra text.
 
 Now create a meta description:`
       }

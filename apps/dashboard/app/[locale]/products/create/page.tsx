@@ -1064,6 +1064,7 @@ export default function CreateProductPage() {
                       onImprovedText={setProductName}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
 
@@ -1082,6 +1083,7 @@ export default function CreateProductPage() {
                       onImprovedText={setDescription}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
                 </div>
@@ -2736,6 +2738,7 @@ export default function CreateProductPage() {
                       onImprovedText={setSeoTitle}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
 
@@ -2759,6 +2762,7 @@ export default function CreateProductPage() {
                       onImprovedText={setMetaDescription}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
 
@@ -2776,6 +2780,7 @@ export default function CreateProductPage() {
                       onImprovedText={setUrlSlug}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
                 </div>

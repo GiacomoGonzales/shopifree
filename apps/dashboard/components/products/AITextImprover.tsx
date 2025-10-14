@@ -3,11 +3,12 @@
 import { useState } from 'react'
 
 interface AITextImproverProps {
-  type: 'name' | 'description' | 'seoTitle' | 'metaDescription' | 'urlSlug'
+  type: 'name' | 'description' | 'seoTitle' | 'metaDescription' | 'urlSlug' | 'slogan'
   currentText: string
   onImprovedText: (text: string) => void
   productName?: string
   productDescription?: string
+  language?: string
   className?: string
 }
 
@@ -17,6 +18,7 @@ export function AITextImprover({
   onImprovedText,
   productName,
   productDescription,
+  language = 'es',
   className = ''
 }: AITextImproverProps) {
   const [improving, setImproving] = useState(false)
@@ -28,6 +30,9 @@ export function AITextImprover({
       return currentText.trim().length >= 3
     } else if (type === 'description') {
       // Para descripción: puede generar si hay nombre, o mejorar si hay descripción
+      return (currentText.trim().length > 0) || (productName && productName.trim().length >= 3)
+    } else if (type === 'slogan') {
+      // Para slogan: puede generar si hay nombre, o mejorar si hay slogan
       return (currentText.trim().length > 0) || (productName && productName.trim().length >= 3)
     } else {
       // Para campos SEO: puede generar si hay nombre, o mejorar si hay contenido
@@ -48,6 +53,8 @@ export function AITextImprover({
       } else {
         return 'Generar con IA'
       }
+    } else if (type === 'slogan') {
+      return currentText.trim().length > 0 ? 'Mejorar' : 'Generar con IA'
     } else if (type === 'seoTitle') {
       return currentText.trim().length > 0 ? 'Optimizar' : 'Generar'
     } else if (type === 'metaDescription') {
@@ -80,7 +87,8 @@ export function AITextImprover({
           type,
           currentText,
           productName,
-          productDescription
+          productDescription,
+          language
         })
       })
 

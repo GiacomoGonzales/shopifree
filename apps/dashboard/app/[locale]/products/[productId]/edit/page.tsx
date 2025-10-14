@@ -1133,6 +1133,7 @@ export default function EditProductPage() {
                       onImprovedText={setProductName}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
 
@@ -1151,6 +1152,7 @@ export default function EditProductPage() {
                       onImprovedText={setDescription}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
                 </div>
@@ -2805,6 +2807,7 @@ export default function EditProductPage() {
                       onImprovedText={setSeoTitle}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
 
@@ -2828,6 +2831,7 @@ export default function EditProductPage() {
                       onImprovedText={setMetaDescription}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
 
@@ -2845,6 +2849,7 @@ export default function EditProductPage() {
                       onImprovedText={setUrlSlug}
                       productName={productName}
                       productDescription={description}
+                      language={store?.language}
                     />
                   </div>
                 </div>
