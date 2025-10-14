@@ -203,7 +203,8 @@ export default function HomePage() {
     if (email) {
       try {
         // Guardar email en colección leads para email marketing
-        await fetch('/api/leads/capture', {
+        console.log('📧 Enviando email a API:', email)
+        const response = await fetch('/api/leads/capture', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -214,8 +215,15 @@ export default function HomePage() {
             source: 'landing-hero'
           })
         })
+
+        const data = await response.json()
+        console.log('✅ Respuesta de API:', data)
+
+        if (!response.ok) {
+          console.error('❌ Error en API:', data)
+        }
       } catch (error) {
-        console.error('Error capturing lead:', error)
+        console.error('❌ Error capturing lead:', error)
         // No bloquear el flujo si falla la captura del lead
       }
 
