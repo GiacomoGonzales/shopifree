@@ -76,13 +76,13 @@ export async function POST(request: NextRequest) {
       isNew: true
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Error capturing lead:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to capture lead',
-        details: error.message
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )
