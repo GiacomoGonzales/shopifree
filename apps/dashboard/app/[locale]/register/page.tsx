@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { registerWithEmail, signInWithGoogle } from '../../../lib/auth'
 import { useAuth } from '../../../lib/simple-auth-context'
+import { markLeadAsConverted } from '../../../lib/leads'
 
 export default function RegisterPage({ params: { locale } }: { params: { locale: string } }) {
   const router = useRouter()
@@ -66,13 +67,16 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
     }
 
     const { user, error: authError } = await registerWithEmail(email, password)
-    
+
     if (user) {
+      // Marcar conversión de lead a usuario registrado
+      await markLeadAsConverted(email, user.uid)
+
       router.replace(`/${locale}`)
     } else {
       setError(getErrorMessage(authError || 'Error al crear la cuenta'))
     }
-    
+
     setLoading(false)
   }
 
@@ -81,13 +85,18 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
     setError('')
 
     const { user, error: authError } = await signInWithGoogle()
-    
-    if (user) {
+
+    if (user && user.email) {
+      // Marcar conversión de lead a usuario registrado
+      await markLeadAsConverted(user.email, user.uid)
+
+      router.replace(`/${locale}`)
+    } else if (user) {
       router.replace(`/${locale}`)
     } else {
       setError(getErrorMessage(authError || 'Error al registrarse con Google'))
     }
-    
+
     setLoading(false)
   }
 

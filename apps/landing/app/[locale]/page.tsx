@@ -198,9 +198,27 @@ export default function HomePage() {
     }
   ]
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email) {
+      try {
+        // Guardar email en colección leads para email marketing
+        await fetch('/api/leads/capture', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            locale,
+            source: 'landing-hero'
+          })
+        })
+      } catch (error) {
+        console.error('Error capturing lead:', error)
+        // No bloquear el flujo si falla la captura del lead
+      }
+
       // Redirigir a registro con el email como parámetro
       const encodedEmail = encodeURIComponent(email)
       window.location.href = `https://dashboard.shopifree.app/${locale}/register?email=${encodedEmail}`

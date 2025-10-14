@@ -266,6 +266,15 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // Reglas para captura de leads (email marketing)
+    match /leads/{leadId} {
+      // Permitir creación pública (landing page)
+      allow create: if true;
+
+      // Solo administradores pueden leer/actualizar/eliminar leads
+      allow read, update, delete: if isAuthenticated();
+    }
+
     // Reglas para jobs de mejora de imágenes
     match /imageJobs/{jobId} {
       // Permitir a usuarios autenticados crear jobs con su propio userId

@@ -32,4 +32,9 @@ if (isFirebaseConfigured) {
 }
 
 export { auth, db }
-export default app 
+export default app
+
+// Helper function to get Firestore instance
+export function getFirebaseDb(): Firestore | null {
+  return db
+} 
