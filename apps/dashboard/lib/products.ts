@@ -24,6 +24,10 @@ export interface MediaFile {
   id: string
   url: string
   cloudinaryPublicId?: string | null
+  type?: 'image' | 'video'
+  isEnhanced?: boolean
+  enhancedFrom?: string
+  enhancedAt?: any
 }
 
 export interface MetaField {

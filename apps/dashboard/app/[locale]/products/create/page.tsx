@@ -25,6 +25,8 @@ import {
   deleteModifierTemplate,
   type ModifierTemplate
 } from '../../../../lib/modifier-templates'
+import { MediaGalleryWithAI } from '../../../../components/products/MediaGalleryWithAI'
+import { AITextImprover } from '../../../../components/products/AITextImprover'
 
 // Usar las categorías simplificadas
 const CATEGORY_OPTIONS = SIMPLIFIED_CATEGORIES
@@ -48,6 +50,10 @@ interface MediaFile {
   cloudinaryPublicId?: string
   uploading: boolean
   type: 'image' | 'video'
+  isEnhanced?: boolean
+  enhancing?: boolean
+  enhancedFrom?: string
+  enhancedAt?: any
   resourceType?: 'image' | 'video' | 'raw'
 }
 
@@ -180,9 +186,6 @@ export default function CreateProductPage() {
   const [productStatus, setProductStatus] = useState<'draft' | 'active' | 'archived'>('draft')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-
-  // Ref para el input de archivos
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Cargar marcas y categorías cuando se monta el componente
   useEffect(() => {
@@ -1046,154 +1049,52 @@ export default function CreateProductPage() {
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('productInfo')}</h2>
                 <div className="space-y-4">
-                  <Input
-                    label={t('productName')}
-                    placeholder={t('productNamePlaceholder')}
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    required
-                  />
-                  <RichTextEditor
-                    label={t('description')}
-                    value={description}
-                    onChange={setDescription}
-                    placeholder={t('descriptionPlaceholder')}
-                    required={false}
-                  />
+                  {/* Campo de Nombre con botón de IA */}
+                  <div className="space-y-2">
+                    <Input
+                      label={t('productName')}
+                      placeholder={t('productNamePlaceholder')}
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      required
+                    />
+                    <AITextImprover
+                      type="name"
+                      currentText={productName}
+                      onImprovedText={setProductName}
+                      productName={productName}
+                      productDescription={description}
+                    />
+                  </div>
+
+                  {/* Campo de Descripción con botón de IA */}
+                  <div className="space-y-2">
+                    <RichTextEditor
+                      label={t('description')}
+                      value={description}
+                      onChange={setDescription}
+                      placeholder={t('descriptionPlaceholder')}
+                      required={false}
+                    />
+                    <AITextImprover
+                      type="description"
+                      currentText={description}
+                      onImprovedText={setDescription}
+                      productName={productName}
+                      productDescription={description}
+                    />
+                  </div>
                 </div>
               </Card>
 
               {/* 2. Multimedia */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('multimedia')}</h2>
-                
-                {mediaFiles.length === 0 ? (
-                  // Vista inicial sin imágenes
-                  <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault()
-                      if (e.dataTransfer.files) {
-                        handleFileUpload(e.dataTransfer.files)
-                      }
-                    }}
-                  >
-                    <div className="space-y-2">
-                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">{t('uploadHint')}</span>
-                      </p>
-                      <p className="text-xs text-gray-500">{t('uploadFormats')}</p>
-                    </div>
-                  </div>
-                ) : (
-                  // Vista con imágenes tipo Shopify
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="flex gap-4">
-                      {/* Media principal */}
-                      <div className="relative group flex-shrink-0">
-                        {mediaFiles[0].type === 'video' ? (
-                          <video
-                            src={mediaFiles[0].url}
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                            controls
-                            muted
-                            preload="metadata"
-                          />
-                        ) : (
-                          <img
-                            src={mediaFiles[0].url}
-                            alt="Imagen principal"
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                          />
-                        )}
-                        {mediaFiles[0].uploading && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                            <span className="text-white text-xs">Procesando...</span>
-                          </div>
-                        )}
-                        {/* Indicador de tipo de archivo */}
-                        {mediaFiles[0].type === 'video' && (
-                          <div className="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-[10px] px-1 rounded">
-                            VIDEO
-                          </div>
-                        )}
-                        <button
-                          onClick={() => removeFile(mediaFiles[0].id)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          ×
-                        </button>
-                      </div>
-
-                      {/* Miniaturas adicionales */}
-                      <div className="flex gap-2 flex-wrap">
-                        {mediaFiles.slice(1).map(file => (
-                          <div key={file.id} className="relative group">
-                            {file.type === 'video' ? (
-                              <video
-                                src={file.url}
-                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                                muted
-                                preload="metadata"
-                              />
-                            ) : (
-                              <img
-                                src={file.url}
-                                alt="Media adicional"
-                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                              />
-                            )}
-                            {file.uploading && (
-                              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                                <span className="text-white text-[10px]">...</span>
-                              </div>
-                            )}
-                            {/* Indicador de tipo de archivo */}
-                            {file.type === 'video' && (
-                              <div className="absolute top-0 left-0 bg-black bg-opacity-70 text-white text-[8px] px-1 rounded">
-                                VID
-                              </div>
-                            )}
-                            <button
-                              onClick={() => removeFile(file.id)}
-                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                        
-                        {/* Botón para agregar más media */}
-                        <div
-                          className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Texto indicativo */}
-                    <p className="text-xs text-gray-500 mt-3">
-                      Acepta imágenes, videos o modelos 3D
-                    </p>
-                  </div>
-                )}
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*,video/*"
-                  className="hidden"
-                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                <MediaGalleryWithAI
+                  mediaFiles={mediaFiles}
+                  onMediaFilesChange={setMediaFiles}
+                  onFileUpload={handleFileUpload}
+                  productName={productName}
+                  productDescription={description}
                 />
               </Card>
 
@@ -2821,30 +2722,62 @@ export default function CreateProductPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <Input
-                    label={t('seo.pageTitle')}
-                    placeholder={t('seo.pageTitlePlaceholder')}
-                    value={seoTitle}
-                    onChange={(e) => setSeoTitle(e.target.value)}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('seo.metaDescription')}
-                    </label>
-                    <textarea
-                      rows={3}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
-                      placeholder={t('seo.metaDescriptionPlaceholder')}
-                      value={metaDescription}
-                      onChange={(e) => setMetaDescription(e.target.value)}
+                  {/* SEO Title con botón de IA */}
+                  <div className="space-y-2">
+                    <Input
+                      label={t('seo.pageTitle')}
+                      placeholder={t('seo.pageTitlePlaceholder')}
+                      value={seoTitle}
+                      onChange={(e) => setSeoTitle(e.target.value)}
+                    />
+                    <AITextImprover
+                      type="seoTitle"
+                      currentText={seoTitle}
+                      onImprovedText={setSeoTitle}
+                      productName={productName}
+                      productDescription={description}
                     />
                   </div>
-                  <Input
-                    label={t('seo.urlHandle')}
-                    placeholder={t('seo.urlHandlePlaceholder')}
-                    value={urlSlug}
-                    onChange={(e) => setUrlSlug(e.target.value)}
-                  />
+
+                  {/* Meta Description con botón de IA */}
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('seo.metaDescription')}
+                      </label>
+                      <textarea
+                        rows={3}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
+                        placeholder={t('seo.metaDescriptionPlaceholder')}
+                        value={metaDescription}
+                        onChange={(e) => setMetaDescription(e.target.value)}
+                      />
+                    </div>
+                    <AITextImprover
+                      type="metaDescription"
+                      currentText={metaDescription}
+                      onImprovedText={setMetaDescription}
+                      productName={productName}
+                      productDescription={description}
+                    />
+                  </div>
+
+                  {/* URL Slug con botón de IA */}
+                  <div className="space-y-2">
+                    <Input
+                      label={t('seo.urlHandle')}
+                      placeholder={t('seo.urlHandlePlaceholder')}
+                      value={urlSlug}
+                      onChange={(e) => setUrlSlug(e.target.value)}
+                    />
+                    <AITextImprover
+                      type="urlSlug"
+                      currentText={urlSlug}
+                      onImprovedText={setUrlSlug}
+                      productName={productName}
+                      productDescription={description}
+                    />
+                  </div>
                 </div>
                   </div>
                 )}

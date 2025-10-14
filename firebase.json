@@ -5,5 +5,12 @@
   },
   "storage": {
     "rules": "(storage.rules)"
+  },
+  "functions": {
+    "source": "apps/functions",
+    "runtime": "nodejs18",
+    "predeploy": [
+      "cd apps/functions && npm run build"
+    ]
   }
 }

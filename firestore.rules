@@ -265,5 +265,22 @@ service cloud.firestore {
       // TODO: Cambiar a isAdmin() después de crear usuarios admin
       allow read, write: if isAuthenticated();
     }
+
+    // Reglas para jobs de mejora de imágenes
+    match /imageJobs/{jobId} {
+      // Permitir a usuarios autenticados crear jobs con su propio userId
+      allow create: if isAuthenticated() &&
+                      request.resource.data.userId == request.auth.uid;
+
+      // Permitir a usuarios leer solo sus propios jobs
+      // TAMBIÉN permitir lectura pública temporalmente para debugging
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Permitir actualizaciones sin autenticación (para Cloud Functions)
+      // Cloud Functions usa Firebase Admin SDK que debe bypasear reglas,
+      // pero agregamos esta regla permisiva por si acaso
+      allow update: if true;
+    }
   }
 }
