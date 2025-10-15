@@ -18,7 +18,6 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   themeColor: '#059669',
   appleWebApp: {
-    capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Shopifree',
   },
@@ -61,6 +60,7 @@ export default function RootLayout({
       <head>
         {/* Theme color for browsers and mobile devices */}
         <meta name="theme-color" content="#059669" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
         {/* Preconnect to external domains for faster loading */}
@@ -68,9 +68,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://dashboard.shopifree.app" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-
-        {/* Performance hints */}
-        <link rel="preload" href="/logo-primary.png" as="image" />
       </head>
       <body className={inter.className}>
         {children}
