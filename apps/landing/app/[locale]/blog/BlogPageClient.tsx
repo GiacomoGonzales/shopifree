@@ -187,7 +187,7 @@ export default function BlogPageClient({ posts, locale, searchParams }: BlogPage
                   onClick={() => setSelectedCategory('')}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     selectedCategory === ''
-                      ? 'bg-primary-600 text-white'
+                      ? 'bg-emerald-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -199,7 +199,7 @@ export default function BlogPageClient({ posts, locale, searchParams }: BlogPage
                     onClick={() => setSelectedCategory(category)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       selectedCategory === category
-                        ? 'bg-primary-600 text-white'
+                        ? 'bg-emerald-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -215,7 +215,7 @@ export default function BlogPageClient({ posts, locale, searchParams }: BlogPage
                   placeholder={locale === 'es' ? 'Buscar...' : 'Search...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
                 <svg
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"

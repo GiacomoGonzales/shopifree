@@ -23,7 +23,7 @@ export default function BlogCard({ post, locale }: BlogCardProps) {
       </div>
       <div className="p-6">
         <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
-          <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-medium">
+          <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-medium">
             {post.category}
           </span>
           <time dateTime={post.date}>
@@ -36,7 +36,7 @@ export default function BlogCard({ post, locale }: BlogCardProps) {
           <span>·</span>
           <span>{post.readingTime}</span>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
           {post.title}
         </h3>
         <p className="text-gray-600 mb-4 line-clamp-2">
@@ -46,7 +46,7 @@ export default function BlogCard({ post, locale }: BlogCardProps) {
           <span className="text-sm text-gray-500">
             {post.author}
           </span>
-          <span className="text-primary-600 font-medium group-hover:gap-2 flex items-center transition-all">
+          <span className="text-emerald-600 font-medium group-hover:gap-2 flex items-center transition-all">
             {locale === 'es' ? 'Leer más' : 'Read more'}
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

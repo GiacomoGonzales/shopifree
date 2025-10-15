@@ -25,7 +25,7 @@ const components = {
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <Link
       href={props.href || '#'}
-      className="text-primary-600 hover:text-primary-700 underline"
+      className="text-emerald-600 hover:text-emerald-700 underline"
       {...props}
     />
   ),
@@ -40,7 +40,7 @@ const components = {
   ),
   blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
     <blockquote
-      className="border-l-4 border-primary-500 pl-4 py-2 mb-4 italic text-gray-700 bg-gray-50"
+      className="border-l-4 border-emerald-500 pl-4 py-2 mb-4 italic text-gray-700 bg-gray-50"
       {...props}
     />
   ),
@@ -49,7 +49,7 @@ const components = {
     if (isInline) {
       return (
         <code
-          className="bg-gray-100 text-primary-600 px-1.5 py-0.5 rounded text-sm font-mono"
+          className="bg-gray-100 text-emerald-600 px-1.5 py-0.5 rounded text-sm font-mono"
           {...props}
         />
       )
