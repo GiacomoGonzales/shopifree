@@ -325,42 +325,26 @@ export function MediaGalleryWithAI({
                   {index === 0 ? 'Principal' : `#${index + 1}`}
                 </div>
 
-                {/* Badge sutil de "mejorada" en esquina superior derecha */}
+                {/* Botón eliminar (X) - siempre visible en móvil, hover en desktop - color más suave */}
+                <button
+                  onClick={() => handleRemoveFile(file.id)}
+                  disabled={file.uploading || file.enhancing}
+                  className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 z-10 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg backdrop-blur-sm"
+                  title="Eliminar"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                {/* Badge de "mejorada con IA" en esquina inferior derecha */}
                 {file.isEnhanced && (
-                  <div className="absolute top-3 right-3 bg-white bg-opacity-90 backdrop-blur-sm text-gray-700 text-[10px] px-2 py-1 rounded-full flex items-center gap-1 z-10 shadow-sm">
+                  <div className="absolute bottom-3 right-3 bg-white bg-opacity-95 backdrop-blur-sm text-gray-700 text-[10px] px-2 py-1 rounded-full flex items-center gap-1 z-10 shadow-md">
                     <svg className="h-3 w-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
                     <span className="font-medium">IA</span>
                   </div>
-                )}
-
-                {/* Botón eliminar (X) - solo visible sin mejorada badge */}
-                {!file.isEnhanced && (
-                  <button
-                    onClick={() => handleRemoveFile(file.id)}
-                    disabled={file.uploading || file.enhancing}
-                    className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                    title="Eliminar"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-
-                {/* Si está mejorada, botón eliminar abajo a la derecha del badge */}
-                {file.isEnhanced && (
-                  <button
-                    onClick={() => handleRemoveFile(file.id)}
-                    disabled={file.uploading || file.enhancing}
-                    className="absolute top-3 right-12 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                    title="Eliminar"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
                 )}
 
                 {/* Imagen/Video - sin botones dentro */}

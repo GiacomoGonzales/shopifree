@@ -21,7 +21,16 @@ PRODUCT CONTEXT:
 
   const baseInstructions = `You are a professional product photographer specializing in e-commerce catalog photography.${contextInfo}
 
-Transform this product image into a professional e-commerce catalog photo.`
+Transform this product image into a professional e-commerce catalog photo.
+
+🔴 CRITICAL REQUIREMENT - PRODUCT FIDELITY:
+- The PRODUCT ITSELF must remain EXACTLY as it appears in the original image
+- DO NOT change the product's design, colors, patterns, textures, or any visual characteristics
+- DO NOT alter logos, text, labels, or branding on the product
+- DO NOT modify the product's shape, size, or proportions
+- The product must be 100% recognizable as the same item from the original photo
+- You may ONLY enhance: lighting, sharpness, and the surrounding context (background, props, models)
+- Think of it as: "Same exact product, better presentation"`
 
   switch (preset) {
     case 'white-bg':
@@ -45,7 +54,7 @@ Specifications:
    - Accurate color representation
    - Bright and clear
 
-IMPORTANT: Pure white background, product centered, catalog-ready.`
+IMPORTANT: Pure white background, product centered, catalog-ready. Remember - keep the product EXACTLY as it appears in the original!`
 
     case 'lifestyle-bg':
       return `${baseInstructions}
@@ -62,6 +71,7 @@ Specifications:
    - Background should be slightly blurred to keep focus on product
    - Colors and elements should match the product's character
    - Create an aspirational, inviting atmosphere
+   - ADD background elements around the product - do NOT change the product itself
 
 3. LIGHTING & QUALITY:
    - Natural-looking, soft lighting
@@ -69,7 +79,7 @@ Specifications:
    - Warm, inviting tones
    - Professional but approachable aesthetic
 
-IMPORTANT: Natural lifestyle context that enhances the product's appeal.`
+IMPORTANT: Natural lifestyle context that enhances the product's appeal. The product itself remains EXACTLY identical to the original - only the background changes.`
 
     case 'with-model':
       return `${baseInstructions}
@@ -81,30 +91,39 @@ Specifications:
    - Product should be clearly visible and prominent
    - Person should be contextually appropriate for the product type
 
-2. MODEL & CONTEXT:
+2. 🔴 ABSOLUTE PRIORITY - PRESERVE THE EXACT PRODUCT:
+   - Use the EXACT SAME product from the original image
+   - If it's a shirt with a specific design/color - keep that EXACT shirt
+   - If it's food with specific appearance - keep that EXACT food item
+   - If it's a supplement bottle with specific label - keep that EXACT bottle
+   - DO NOT create a "similar" or "generic" version - use the IDENTICAL product
+   - The product in the final image must be pixel-perfect identical to the original
+   - ONLY add the model around/with the product - NEVER replace or alter the product itself
+
+3. MODEL & CONTEXT:
    - Add a realistic model appropriate for the product:
-     * Clothing/Fashion: Model wearing the item
-     * Food/Beverages: Person enjoying or holding the product
-     * Fitness/Supplements: Athletic person using the product
-     * Accessories: Person wearing or displaying the item
-     * Beauty products: Model applying or showing the product
+     * Clothing/Fashion: Model wearing the EXACT item from the original image
+     * Food/Beverages: Person enjoying or holding the EXACT food item
+     * Fitness/Supplements: Athletic person holding/displaying the EXACT product
+     * Accessories: Person wearing or displaying the EXACT item
+     * Beauty products: Model with the EXACT product from original image
    - Model should match the product's target demographic
    - Natural, authentic pose and expression
-   - Focus remains on the product
+   - Focus remains on the product - model is secondary
 
-3. BACKGROUND & STYLING:
+4. BACKGROUND & STYLING:
    - Appropriate lifestyle setting for product and model
    - Clean, professional composition
    - Slightly blurred background
    - Modern, appealing aesthetic
 
-4. LIGHTING & QUALITY:
+5. LIGHTING & QUALITY:
    - Professional lighting on both product and model
    - Enhanced sharpness and detail
    - Natural, flattering tones
    - Commercial photography quality
 
-IMPORTANT: The product must remain clearly visible and be the focal point, with the model enhancing its presentation.`
+🔴 CRITICAL: Think of this as photoshopping a model INTO the existing product photo, NOT creating a new product photo. The product stays 100% identical.`
 
     case 'lighting':
       return `${baseInstructions}
@@ -198,6 +217,7 @@ Specifications:
    - Create a lifestyle context that enhances the product's appeal (e.g., wooden table, complementary props, natural elements)
    - Keep the background slightly blurred to maintain focus on the product
    - Use colors and elements that match the product's character and target market
+   - ADD these elements AROUND the product - the product stays untouched
 
 4. OVERALL AESTHETIC:
    - The final image should look like professional product photography
@@ -205,7 +225,7 @@ Specifications:
    - Maintain the product's authenticity while maximizing its visual appeal
    - Ensure the image is suitable for an e-commerce catalog or online store
 
-IMPORTANT: The product must remain the clear focal point. The background and styling should enhance, not distract from, the product itself.`
+🔴 CRITICAL REMINDER: The product must remain the clear focal point AND must be IDENTICAL to the original. You are enhancing the PRESENTATION (lighting, background, composition) - NOT redesigning the product. Same exact product, professional presentation.`
   }
 }
 
