@@ -14,7 +14,7 @@ export interface BlogPost {
   tags: string[]
   content: string
   readingTime: string
-  published?: boolean
+  published: boolean
 }
 
 const postsDirectory = path.join(process.cwd(), 'content/blog')
