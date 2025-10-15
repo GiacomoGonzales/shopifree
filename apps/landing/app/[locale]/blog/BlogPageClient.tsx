@@ -102,45 +102,82 @@ export default function BlogPageClient({ posts, locale, searchParams }: BlogPage
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Mobile Menu Sidebar */}
         <div
-          className={`md:hidden bg-gray-800 border-t border-gray-700 shadow-lg overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-          <div className="px-4 py-4 space-y-4">
-            <Link
-              href={`/${locale}#features`}
-              className="block text-gray-300 hover:text-emerald-400 py-2 transition-colors duration-200 transform hover:translate-x-1"
+          {/* Close Button */}
+          <div className="flex justify-end p-6">
+            <button
               onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
             >
-              {t('nav.features')}
-            </Link>
-            <Link
-              href={`/${locale}#pricing`}
-              className="block text-gray-300 hover:text-emerald-400 py-2 transition-colors duration-200 transform hover:translate-x-1"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {t('nav.pricing')}
-            </Link>
-            <Link
-              href={`/${locale}/blog`}
-              className="block text-emerald-400 font-medium py-2 transition-colors duration-200 transform hover:translate-x-1"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {t('nav.blog')}
-            </Link>
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
-            <div className="border-t border-gray-700 pt-4 space-y-4">
-              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
-                <Button variant="secondary" size="sm" className="w-full bg-white hover:bg-gray-100 text-gray-900 transition-all duration-200 hover:scale-105">
-                  {t('login')}
-                </Button>
-              </a>
-              <div className="flex justify-center">
-                <LanguageSelector />
-              </div>
+          {/* Menu Content */}
+          <div className="px-8 py-6 h-full flex flex-col overflow-y-auto">
+            {/* Logo */}
+            <div className="mb-10">
+              <Image
+                src="/logo-primary.png"
+                alt="Shopifree - Plataforma de ecommerce gratuita"
+                width={160}
+                height={45}
+                className="h-10 w-auto object-contain"
+              />
             </div>
+
+            {/* Navigation Links */}
+            <nav className="space-y-4 mb-10">
+              <Link
+                href={`/${locale}#features`}
+                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.features')}
+              </Link>
+              <Link
+                href={`/${locale}#pricing`}
+                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.pricing')}
+              </Link>
+              <Link
+                href={`/${locale}/blog`}
+                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.blog')}
+              </Link>
+            </nav>
+
+            {/* Language Selector */}
+            <div className="mb-6">
+              <div className="text-white/60 text-xs uppercase tracking-wide mb-2 px-2">Idioma</div>
+              <LanguageSelector variant="sidebar" />
+            </div>
+
+            {/* Login Button */}
+            <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
+              <Button variant="secondary" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
+                {t('login')}
+              </Button>
+            </a>
           </div>
         </div>
       </header>
