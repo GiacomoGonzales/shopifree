@@ -206,6 +206,16 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
     const [appliedPoints, setAppliedPoints] = useState<{points: number; discount: number} | null>(null);
     const [pointsError, setPointsError] = useState<string>('');
 
+    // 📦 Estados para reglas de pedidos (pedido mínimo, envío gratuito)
+    const [orderRules, setOrderRules] = useState<{
+        minimumOrderValue: number;
+        enableMinimumOrder: boolean;
+        freeShippingThreshold: number;
+        enableFreeShipping: boolean;
+        customMessage: string;
+        enableCustomMessage: boolean;
+    } | null>(null);
+
     // Estado del formulario de checkout
     const [formData, setFormData] = useState<CheckoutData>({
         email: '',
@@ -974,6 +984,47 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
         }
     }, [isOpen, storeId]);
 
+    // 📦 Consultar reglas de pedidos (pedido mínimo, envío gratuito)
+    useEffect(() => {
+        const fetchOrderRules = async () => {
+            if (!storeId) return;
+
+            try {
+                console.log('[Checkout OrderRules] 📦 Fetching order rules configuration');
+                const { getFirebaseDb } = await import('../../lib/firebase');
+                const { doc, getDoc } = await import('firebase/firestore');
+
+                const db = getFirebaseDb();
+                if (!db) {
+                    console.log('[Checkout OrderRules] ℹ️  Firebase not available');
+                    return;
+                }
+
+                const storeRef = doc(db, 'stores', storeId);
+                const storeDoc = await getDoc(storeRef);
+
+                if (storeDoc.exists()) {
+                    const storeData = storeDoc.data();
+                    if (storeData.orderRules) {
+                        console.log('[Checkout OrderRules] ✅ Rules found:', storeData.orderRules);
+                        setOrderRules(storeData.orderRules);
+                    } else {
+                        console.log('[Checkout OrderRules] ℹ️  No rules configured');
+                        setOrderRules(null);
+                    }
+                } else {
+                    console.log('[Checkout OrderRules] ⚠️  Store not found');
+                    setOrderRules(null);
+                }
+            } catch (error) {
+                console.error('[Checkout OrderRules] ❌ Error fetching rules:', error);
+                setOrderRules(null);
+            }
+        };
+
+        fetchOrderRules();
+    }, [storeId]);
+
     // Si express está deshabilitado y el usuario lo tenía seleccionado, cambiar a standard
     useEffect(() => {
         if (shippingConfig && formData.shippingMethod === 'express' && !shippingConfig.localDelivery?.express?.enabled) {
@@ -1027,12 +1078,19 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                 fixedSurcharge: shippingConfig.localDelivery.express.fixedSurcharge
             } : undefined;
 
-            const calculatedShipping = calculateShippingCost(
+            let calculatedShipping = calculateShippingCost(
                 userCoordinates,
                 deliveryZones,
                 formData.shippingMethod,
                 expressConfig
             );
+
+            // 📦 Aplicar envío gratuito si se cumple la condición
+            if (orderRules?.enableFreeShipping && subtotal >= orderRules.freeShippingThreshold) {
+                console.log('[Checkout OrderRules] 🎉 Free shipping applied! Subtotal:', subtotal, 'Threshold:', orderRules.freeShippingThreshold);
+                calculatedShipping = 0;
+            }
+
             setShippingCost(calculatedShipping);
 
             // Mostrar notificación cuando se encuentra una zona de reparto (con o sin costo)
@@ -1118,7 +1176,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
             setShippingCost(0);
             setIsOutsideCoverage(false);
         }
-    }, [userCoordinates, deliveryZones, formData.shippingMethod, shippingConfig]);
+    }, [userCoordinates, deliveryZones, formData.shippingMethod, shippingConfig, orderRules, subtotal]);
 
     // Reset al abrir/cerrar
     useEffect(() => {
@@ -3558,6 +3616,15 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess, storeInfo, s
                                             if (isOutsideCoverage) {
                                                 const isWhatsAppCheckout = checkoutConfig?.checkout?.method === 'whatsapp';
                                                 return isWhatsAppCheckout ? 'A coordinar' : '--';
+                                            }
+
+                                            // Mostrar "GRATIS" si se aplicó envío gratuito
+                                            if (shipping === 0 && orderRules?.enableFreeShipping && subtotal >= orderRules.freeShippingThreshold) {
+                                                return (
+                                                    <span style={{ color: '#10b981', fontWeight: '600' }}>
+                                                        ¡GRATIS!
+                                                    </span>
+                                                );
                                             }
 
                                             return formatPrice(shipping, currency);
