@@ -111,7 +111,10 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 'continueShopping': 'Continuar Comprando',
                 'shippingCalculated': 'Envío calculado al finalizar',
                 'minimumOrderRequired': 'El pedido mínimo es',
-                'addMore': 'Agrega más productos'
+                'addMore': 'Agrega más productos',
+                'freeShippingProgress': 'Te faltan',
+                'forFreeShipping': 'para envío gratis',
+                'freeShippingUnlocked': '¡Tienes envío gratis!'
             },
             en: {
                 'shoppingCart': 'Shopping Cart',
@@ -130,7 +133,10 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 'continueShopping': 'Continue Shopping',
                 'shippingCalculated': 'Shipping calculated at checkout',
                 'minimumOrderRequired': 'Minimum order is',
-                'addMore': 'Add more products'
+                'addMore': 'Add more products',
+                'freeShippingProgress': 'You need',
+                'forFreeShipping': 'more for free shipping',
+                'freeShippingUnlocked': 'You have free shipping!'
             },
             pt: {
                 'shoppingCart': 'Carrinho de Compras',
@@ -149,7 +155,10 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 'continueShopping': 'Continuar Comprando',
                 'shippingCalculated': 'Frete calculado no checkout',
                 'minimumOrderRequired': 'Pedido mínimo é',
-                'addMore': 'Adicione mais produtos'
+                'addMore': 'Adicione mais produtos',
+                'freeShippingProgress': 'Você precisa de',
+                'forFreeShipping': 'mais para frete grátis',
+                'freeShippingUnlocked': 'Você tem frete grátis!'
             }
         };
         return texts[language]?.[key] || texts['es']?.[key] || key;
@@ -540,16 +549,66 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                         </span>
                                     </div>
 
+                                    {/* Barra de progreso para envío gratuito */}
+                                    {orderRules?.enableFreeShipping && (
+                                        <div style={{
+                                            marginTop: '12px',
+                                            padding: '12px',
+                                            backgroundColor: state.totalPrice >= orderRules.freeShippingThreshold ? '#d1fae5' : '#f3f4f6',
+                                            borderRadius: '8px',
+                                            border: `1px solid ${state.totalPrice >= orderRules.freeShippingThreshold ? '#10b981' : '#e5e7eb'}`
+                                        }}>
+                                            {state.totalPrice >= orderRules.freeShippingThreshold ? (
+                                                // Ya alcanzó el envío gratuito
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    color: '#10b981',
+                                                    fontWeight: '600',
+                                                    fontSize: '14px'
+                                                }}>
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        <polyline points="22 4 12 14.01 9 11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                    {additionalText('freeShippingUnlocked')}
+                                                </div>
+                                            ) : (
+                                                // Aún no alcanza el envío gratuito
+                                                <>
+                                                    <div style={{
+                                                        fontSize: '13px',
+                                                        color: '#6b7280',
+                                                        marginBottom: '8px',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        {additionalText('freeShippingProgress')} {formatPrice(orderRules.freeShippingThreshold - state.totalPrice, state.items[0]?.currency || 'COP')} {additionalText('forFreeShipping')}
+                                                    </div>
+                                                    <div style={{
+                                                        width: '100%',
+                                                        height: '8px',
+                                                        backgroundColor: '#e5e7eb',
+                                                        borderRadius: '999px',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <div style={{
+                                                            width: `${Math.min((state.totalPrice / orderRules.freeShippingThreshold) * 100, 100)}%`,
+                                                            height: '100%',
+                                                            backgroundColor: '#10b981',
+                                                            transition: 'width 0.3s ease',
+                                                            borderRadius: '999px'
+                                                        }} />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {hasIncompleteItems ? (
                                         <div className="nbd-cart-incomplete-warning">
                                             <p className="nbd-incomplete-warning-text">
                                                 ⚠ {additionalText('incompleteProducts')}
-                                            </p>
-                                        </div>
-                                    ) : minimumOrderNotMet ? (
-                                        <div className="nbd-cart-incomplete-warning">
-                                            <p className="nbd-incomplete-warning-text">
-                                                ⚠ {additionalText('minimumOrderRequired')} {formatPrice(orderRules?.minimumOrderValue || 0, state.items[0]?.currency || 'COP')}. {additionalText('addMore')}.
                                             </p>
                                         </div>
                                     ) : (
@@ -564,6 +623,16 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                                     marginTop: '4px'
                                                 }}>
                                                     Acumularás {Math.floor(state.totalPrice * loyaltyProgram.pointsPerCurrency)} puntos al finalizar la compra
+                                                </p>
+                                            )}
+                                            {/* Mensaje de pedido mínimo */}
+                                            {minimumOrderNotMet && (
+                                                <p className="nbd-cart-shipping-note" style={{
+                                                    color: '#b91c1c',
+                                                    marginTop: '4px',
+                                                    fontWeight: '500'
+                                                }}>
+                                                    ⚠ {additionalText('minimumOrderRequired')} {formatPrice(orderRules?.minimumOrderValue || 0, state.items[0]?.currency || 'COP')}. {additionalText('addMore')}.
                                                 </p>
                                             )}
                                         </>
