@@ -552,11 +552,7 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                     {/* Barra de progreso para envío gratuito */}
                                     {orderRules?.enableFreeShipping && (
                                         <div style={{
-                                            marginTop: '12px',
-                                            padding: '12px',
-                                            backgroundColor: state.totalPrice >= orderRules.freeShippingThreshold ? '#d1fae5' : '#f3f4f6',
-                                            borderRadius: '8px',
-                                            border: `1px solid ${state.totalPrice >= orderRules.freeShippingThreshold ? '#10b981' : '#e5e7eb'}`
+                                            marginTop: '12px'
                                         }}>
                                             {state.totalPrice >= orderRules.freeShippingThreshold ? (
                                                 // Ya alcanzó el envío gratuito
@@ -564,9 +560,10 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '8px',
-                                                    color: '#10b981',
+                                                    color: storeInfo?.secondaryColor || '#10b981',
                                                     fontWeight: '600',
-                                                    fontSize: '14px'
+                                                    fontSize: '14px',
+                                                    marginBottom: '8px'
                                                 }}>
                                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -585,23 +582,23 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                                     }}>
                                                         {additionalText('freeShippingProgress')} {formatPrice(orderRules.freeShippingThreshold - state.totalPrice, state.items[0]?.currency || 'COP')} {additionalText('forFreeShipping')}
                                                     </div>
-                                                    <div style={{
-                                                        width: '100%',
-                                                        height: '8px',
-                                                        backgroundColor: '#e5e7eb',
-                                                        borderRadius: '999px',
-                                                        overflow: 'hidden'
-                                                    }}>
-                                                        <div style={{
-                                                            width: `${Math.min((state.totalPrice / orderRules.freeShippingThreshold) * 100, 100)}%`,
-                                                            height: '100%',
-                                                            backgroundColor: '#10b981',
-                                                            transition: 'width 0.3s ease',
-                                                            borderRadius: '999px'
-                                                        }} />
-                                                    </div>
                                                 </>
                                             )}
+                                            <div style={{
+                                                width: '100%',
+                                                height: '8px',
+                                                backgroundColor: '#e5e7eb',
+                                                borderRadius: '999px',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <div style={{
+                                                    width: `${Math.min((state.totalPrice / orderRules.freeShippingThreshold) * 100, 100)}%`,
+                                                    height: '100%',
+                                                    backgroundColor: storeInfo?.secondaryColor || '#10b981',
+                                                    transition: 'width 0.3s ease',
+                                                    borderRadius: '999px'
+                                                }} />
+                                            </div>
                                         </div>
                                     )}
 
