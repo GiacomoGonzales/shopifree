@@ -768,7 +768,7 @@ export default function HomePage() {
                               <div className="h-[48px] w-[2px] bg-gray-800 absolute -right-[12px] top-[106px] rounded-r-lg"></div>
 
                               {/* Screen content */}
-                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
+                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 || index === 3 ? '' : store.mobileColor} cursor-pointer`}
                                    onClick={() => window.open(store.url, '_blank')}>
                                 {index === 0 ? (
                                   <video
@@ -800,6 +800,16 @@ export default function HomePage() {
                                   >
                                     <source src="/images/mascotas-movil.mp4" type="video/mp4" />
                                   </video>
+                                ) : index === 3 ? (
+                                  <video
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-contain"
+                                  >
+                                    <source src="/images/tech-movil.mp4" type="video/mp4" />
+                                  </video>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <span className="text-5xl">{store.icon}</span>
@@ -828,7 +838,7 @@ export default function HomePage() {
                             </div>
 
                             {/* Browser content */}
-                            <div className={`${index === 0 || index === 1 || index === 2 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
+                            <div className={`${index === 0 || index === 1 || index === 2 || index === 3 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <img
@@ -845,6 +855,12 @@ export default function HomePage() {
                               ) : index === 2 ? (
                                 <img
                                   src="/images/mascotas-desktop.png"
+                                  alt={`${store.name} - Vista desktop`}
+                                  className="w-full h-full object-cover object-top"
+                                />
+                              ) : index === 3 ? (
+                                <img
+                                  src="/images/tech-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
                                   className="w-full h-full object-cover object-top"
                                 />
@@ -925,7 +941,7 @@ export default function HomePage() {
                             <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
                             <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
 
-                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
+                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 || index === 3 ? '' : store.mobileColor} cursor-pointer`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <video
@@ -956,6 +972,16 @@ export default function HomePage() {
                                   className="w-full h-full object-contain"
                                 >
                                   <source src="/images/mascotas-movil.mp4" type="video/mp4" />
+                                </video>
+                              ) : index === 3 ? (
+                                <video
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                  className="w-full h-full object-contain"
+                                >
+                                  <source src="/images/tech-movil.mp4" type="video/mp4" />
                                 </video>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
