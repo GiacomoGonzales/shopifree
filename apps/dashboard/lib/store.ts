@@ -59,6 +59,15 @@ export interface StoreConfig {
     youtube?: string
     pinterest?: string
   }
+  // Reglas de pedidos (pedido mínimo, envío gratuito, mensajes personalizados)
+  orderRules?: {
+    minimumOrderValue: number
+    enableMinimumOrder: boolean
+    freeShippingThreshold: number
+    enableFreeShipping: boolean
+    customMessage: string
+    enableCustomMessage: boolean
+  }
   // Configuración avanzada
   advanced?: {
     language?: 'es' | 'en' | 'pt' // Idioma de la tienda pública
@@ -285,6 +294,15 @@ export interface StoreWithId {
     telegram?: string
     youtube?: string
     pinterest?: string
+  }
+  // Reglas de pedidos (pedido mínimo, envío gratuito, mensajes personalizados)
+  orderRules?: {
+    minimumOrderValue: number
+    enableMinimumOrder: boolean
+    freeShippingThreshold: number
+    enableFreeShipping: boolean
+    customMessage: string
+    enableCustomMessage: boolean
   }
   advanced?: {
     seo?: {

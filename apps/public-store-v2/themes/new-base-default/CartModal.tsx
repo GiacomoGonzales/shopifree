@@ -78,6 +78,16 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
         minPurchaseAmount: number;
     } | null>(null);
 
+    // 📦 Estados para reglas de pedidos (pedido mínimo, envío gratuito)
+    const [orderRules, setOrderRules] = useState<{
+        minimumOrderValue: number;
+        enableMinimumOrder: boolean;
+        freeShippingThreshold: number;
+        enableFreeShipping: boolean;
+        customMessage: string;
+        enableCustomMessage: boolean;
+    } | null>(null);
+
     // Hook de idioma para traducciones
     const { language } = useStoreLanguage();
 
@@ -99,7 +109,9 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 'options': 'opciones',
                 'completeThe': 'Completa las',
                 'continueShopping': 'Continuar Comprando',
-                'shippingCalculated': 'Envío calculado al finalizar'
+                'shippingCalculated': 'Envío calculado al finalizar',
+                'minimumOrderRequired': 'El pedido mínimo es',
+                'addMore': 'Agrega más productos'
             },
             en: {
                 'shoppingCart': 'Shopping Cart',
@@ -116,7 +128,9 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 'options': 'options',
                 'completeThe': 'Complete the',
                 'continueShopping': 'Continue Shopping',
-                'shippingCalculated': 'Shipping calculated at checkout'
+                'shippingCalculated': 'Shipping calculated at checkout',
+                'minimumOrderRequired': 'Minimum order is',
+                'addMore': 'Add more products'
             },
             pt: {
                 'shoppingCart': 'Carrinho de Compras',
@@ -133,7 +147,9 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 'options': 'opções',
                 'completeThe': 'Complete as',
                 'continueShopping': 'Continuar Comprando',
-                'shippingCalculated': 'Frete calculado no checkout'
+                'shippingCalculated': 'Frete calculado no checkout',
+                'minimumOrderRequired': 'Pedido mínimo é',
+                'addMore': 'Adicione mais produtos'
             }
         };
         return texts[language]?.[key] || texts['es']?.[key] || key;
@@ -141,6 +157,9 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     
     // Detectar si hay productos incompletos
     const hasIncompleteItems = state.items.some(item => item.incomplete);
+
+    // Detectar si no alcanza el pedido mínimo
+    const minimumOrderNotMet = orderRules?.enableMinimumOrder && state.totalPrice < orderRules.minimumOrderValue;
 
     // 🎁 Consultar configuración del programa de lealtad
     useEffect(() => {
@@ -170,6 +189,47 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
         };
 
         fetchLoyaltyProgram();
+    }, [storeId]);
+
+    // 📦 Consultar reglas de pedidos (pedido mínimo, envío gratuito)
+    useEffect(() => {
+        const fetchOrderRules = async () => {
+            if (!storeId) return;
+
+            try {
+                console.log('[Cart OrderRules] 📦 Fetching order rules configuration');
+                const { getFirebaseDb } = await import('../../lib/firebase');
+                const { doc, getDoc } = await import('firebase/firestore');
+
+                const db = getFirebaseDb();
+                if (!db) {
+                    console.log('[Cart OrderRules] ℹ️  Firebase not available');
+                    return;
+                }
+
+                const storeRef = doc(db, 'stores', storeId);
+                const storeDoc = await getDoc(storeRef);
+
+                if (storeDoc.exists()) {
+                    const storeData = storeDoc.data();
+                    if (storeData.orderRules) {
+                        console.log('[Cart OrderRules] ✅ Rules found:', storeData.orderRules);
+                        setOrderRules(storeData.orderRules);
+                    } else {
+                        console.log('[Cart OrderRules] ℹ️  No rules configured');
+                        setOrderRules(null);
+                    }
+                } else {
+                    console.log('[Cart OrderRules] ⚠️  Store not found');
+                    setOrderRules(null);
+                }
+            } catch (error) {
+                console.error('[Cart OrderRules] ❌ Error fetching rules:', error);
+                setOrderRules(null);
+            }
+        };
+
+        fetchOrderRules();
     }, [storeId]);
 
     // Función para obtener las opciones faltantes de un producto
@@ -246,6 +306,9 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const handleCheckout = () => {
         if (hasIncompleteItems) {
             return; // No permitir checkout si hay productos incompletos
+        }
+        if (minimumOrderNotMet) {
+            return; // No permitir checkout si no alcanza el pedido mínimo
         }
         setIsCheckoutOpen(true);
     };
@@ -483,6 +546,12 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                                 ⚠ {additionalText('incompleteProducts')}
                                             </p>
                                         </div>
+                                    ) : minimumOrderNotMet ? (
+                                        <div className="nbd-cart-incomplete-warning">
+                                            <p className="nbd-incomplete-warning-text">
+                                                ⚠ {additionalText('minimumOrderRequired')} {formatPrice(orderRules?.minimumOrderValue || 0, state.items[0]?.currency || 'COP')}. {additionalText('addMore')}.
+                                            </p>
+                                        </div>
                                     ) : (
                                         <>
                                             <p className="nbd-cart-shipping-note">
@@ -509,12 +578,15 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                                     >
                                         {additionalText('continueShopping')}
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={handleCheckout}
-                                        className={`nbd-btn nbd-btn--primary nbd-cart-checkout ${hasIncompleteItems ? 'nbd-btn--disabled' : ''}`}
-                                        disabled={hasIncompleteItems}
+                                        className={`nbd-btn nbd-btn--primary nbd-cart-checkout ${(hasIncompleteItems || minimumOrderNotMet) ? 'nbd-btn--disabled' : ''}`}
+                                        disabled={hasIncompleteItems || minimumOrderNotMet}
                                     >
-                                        {hasIncompleteItems ? `${additionalText('completeThe')} ${additionalText('options')}` : additionalText('proceedToCheckout')}
+                                        {hasIncompleteItems
+                                            ? `${additionalText('completeThe')} ${additionalText('options')}`
+                                            : additionalText('proceedToCheckout')
+                                        }
                                     </button>
                                 </div>
                             </div>

@@ -47,11 +47,10 @@ export default function AdditionalRulesPage() {
       try {
         const userStore = await getUserStore(user.uid)
         setStore(userStore)
-        if (userStore?.advanced?.shipping?.additionalRules) {
-          const rules = userStore.advanced.shipping.additionalRules
+        if (userStore?.orderRules) {
           setFormData(prev => ({
             ...prev,
-            ...rules
+            ...userStore.orderRules
           }))
         }
       } catch (error) {
@@ -77,15 +76,9 @@ export default function AdditionalRulesPage() {
     setSaving(true)
     try {
       await updateStore(store.id, {
-        advanced: {
-          ...store?.advanced,
-          shipping: {
-            ...store?.advanced?.shipping,
-            additionalRules: formData
-          }
-        }
+        orderRules: formData
       })
-      
+
       showToast('Reglas adicionales guardadas exitosamente', 'success')
     } catch (error) {
       console.error('Error saving additional rules:', error)
@@ -140,11 +133,14 @@ export default function AdditionalRulesPage() {
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Valor mínimo del pedido (S/)</label>
                   <input
-                    type="number"
-                    value={formData.minimumOrderValue}
-                    onChange={(e) => handleChange('minimumOrderValue', Number(e.target.value))}
-                    min="0"
-                    step="0.1"
+                    type="text"
+                    inputMode="decimal"
+                    value={formData.minimumOrderValue || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9.]/g, '')
+                      handleChange('minimumOrderValue', value === '' ? 0 : Number(value))
+                    }}
+                    placeholder="Ej: 50"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                   />
                   <p className="mt-1 text-sm text-gray-500">
@@ -172,11 +168,14 @@ export default function AdditionalRulesPage() {
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Monto para envío gratuito (S/)</label>
                   <input
-                    type="number"
-                    value={formData.freeShippingThreshold}
-                    onChange={(e) => handleChange('freeShippingThreshold', Number(e.target.value))}
-                    min="0"
-                    step="0.1"
+                    type="text"
+                    inputMode="decimal"
+                    value={formData.freeShippingThreshold || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9.]/g, '')
+                      handleChange('freeShippingThreshold', value === '' ? 0 : Number(value))
+                    }}
+                    placeholder="Ej: 100"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                   />
                   <p className="mt-1 text-sm text-gray-500">
