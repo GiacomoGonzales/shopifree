@@ -77,6 +77,11 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
   const { toast, showToast, hideToast } = useToast()
   const [isDraggingOgImage, setIsDraggingOgImage] = useState(false)
   const [isDraggingFavicon, setIsDraggingFavicon] = useState(false)
+  const [generatingMetaTitle, setGeneratingMetaTitle] = useState(false)
+  const [generatingMetaDescription, setGeneratingMetaDescription] = useState(false)
+  const [generatingKeywords, setGeneratingKeywords] = useState(false)
+  const [generatingOgTitle, setGeneratingOgTitle] = useState(false)
+  const [generatingOgDescription, setGeneratingOgDescription] = useState(false)
 
   // Cargar datos existentes
   useEffect(() => {
@@ -392,18 +397,80 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
     }
   }
 
+  // Función para generar contenido SEO con IA
+  const handleGenerateSEOContent = async (field: 'metaTitle' | 'metaDescription' | 'keywords' | 'ogTitle' | 'ogDescription') => {
+    // Establecer estado de loading según el campo
+    if (field === 'metaTitle') setGeneratingMetaTitle(true)
+    else if (field === 'metaDescription') setGeneratingMetaDescription(true)
+    else if (field === 'keywords') setGeneratingKeywords(true)
+    else if (field === 'ogTitle') setGeneratingOgTitle(true)
+    else if (field === 'ogDescription') setGeneratingOgDescription(true)
+
+    try {
+      console.log('🤖 Generating SEO content for field:', field)
+
+      // Preparar datos de la tienda
+      const storeData = {
+        name: store?.storeName || '',
+        slogan: store?.slogan || '',
+        description: store?.description || '',
+        businessType: store?.businessType || '',
+        timezone: store?.timezone || ''
+      }
+
+      // Llamar a la API
+      const response = await fetch('/api/ai/generate-seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field, storeData })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate SEO content')
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('✅ SEO content generated:', data.content)
+
+        // Actualizar el campo correspondiente
+        if (field === 'keywords') {
+          handleInputChange('keywords', data.content) // Array de keywords
+        } else {
+          handleInputChange(field, data.content) // String para title y description
+        }
+
+        showToast('Contenido generado exitosamente', 'success')
+      } else {
+        throw new Error(data.error || 'Failed to generate content')
+      }
+
+    } catch (error) {
+      console.error('❌ Error generating SEO content:', error)
+      showToast('Error al generar contenido con IA', 'error')
+    } finally {
+      // Limpiar estados de loading
+      if (field === 'metaTitle') setGeneratingMetaTitle(false)
+      else if (field === 'metaDescription') setGeneratingMetaDescription(false)
+      else if (field === 'keywords') setGeneratingKeywords(false)
+      else if (field === 'ogTitle') setGeneratingOgTitle(false)
+      else if (field === 'ogDescription') setGeneratingOgDescription(false)
+    }
+  }
+
   // Calcular puntuación SEO
   const calculateSeoScore = (): number => {
     let score = 0
     const maxScore = 6
-    
+
     if (seoData.metaTitle && seoData.metaTitle.length >= 30 && seoData.metaTitle.length <= 60) score++
     if (seoData.metaDescription && seoData.metaDescription.length >= 120 && seoData.metaDescription.length <= 160) score++
     if (seoData.ogImage) score++
     if (seoData.keywords.length > 0) score++
     if (seoData.googleAnalytics) score++
     if (seoData.favicon) score++
-    
+
     return Math.round((score / maxScore) * 100)
   }
 
@@ -411,9 +478,35 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
     <div className="space-y-6">
       {/* Meta Title */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('fields.metaTitle.label')}
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t('fields.metaTitle.label')}
+          </label>
+          <button
+            type="button"
+            onClick={() => handleGenerateSEOContent('metaTitle')}
+            disabled={generatingMetaTitle || !store?.storeName}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+            title="Generar con IA"
+          >
+            {generatingMetaTitle ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Generar con IA
+              </>
+            )}
+          </button>
+        </div>
         <input
           type="text"
           value={seoData.metaTitle}
@@ -433,9 +526,35 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
 
       {/* Meta Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('fields.metaDescription.label')}
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t('fields.metaDescription.label')}
+          </label>
+          <button
+            type="button"
+            onClick={() => handleGenerateSEOContent('metaDescription')}
+            disabled={generatingMetaDescription || !store?.storeName}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+            title="Generar con IA"
+          >
+            {generatingMetaDescription ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Generar con IA
+              </>
+            )}
+          </button>
+        </div>
         <textarea
           value={seoData.metaDescription}
           onChange={(e) => handleInputChange('metaDescription', e.target.value)}
@@ -455,9 +574,35 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
 
       {/* Keywords */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('fields.keywords.label')}
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t('fields.keywords.label')}
+          </label>
+          <button
+            type="button"
+            onClick={() => handleGenerateSEOContent('keywords')}
+            disabled={generatingKeywords || !store?.storeName}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+            title="Generar con IA"
+          >
+            {generatingKeywords ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Generar con IA
+              </>
+            )}
+          </button>
+        </div>
         <div className="flex gap-2 mb-2">
           <input
             type="text"
@@ -521,9 +666,35 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
     <div className="space-y-6">
       {/* Open Graph Title */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('fields.ogTitle.label')}
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t('fields.ogTitle.label')}
+          </label>
+          <button
+            type="button"
+            onClick={() => handleGenerateSEOContent('ogTitle')}
+            disabled={generatingOgTitle || !store?.storeName}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+            title="Generar con IA"
+          >
+            {generatingOgTitle ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Generar con IA
+              </>
+            )}
+          </button>
+        </div>
         <input
           type="text"
           value={seoData.ogTitle}
@@ -537,9 +708,35 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
 
       {/* Open Graph Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('fields.ogDescription.label')}
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t('fields.ogDescription.label')}
+          </label>
+          <button
+            type="button"
+            onClick={() => handleGenerateSEOContent('ogDescription')}
+            disabled={generatingOgDescription || !store?.storeName}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+            title="Generar con IA"
+          >
+            {generatingOgDescription ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generando...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Generar con IA
+              </>
+            )}
+          </button>
+        </div>
         <textarea
           value={seoData.ogDescription}
           onChange={(e) => handleInputChange('ogDescription', e.target.value)}
