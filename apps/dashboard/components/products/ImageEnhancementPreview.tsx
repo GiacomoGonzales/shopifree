@@ -21,6 +21,9 @@ export function ImageEnhancementPreview({
   const [enhancedImageUrl, setEnhancedImageUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState<'original' | 'enhanced' | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
+  const [modalImageType, setModalImageType] = useState<'original' | 'enhanced' | null>(null)
 
   const handleEnhance = async () => {
     setEnhancing(true)
@@ -90,6 +93,40 @@ export function ImageEnhancementPreview({
     onImageSelected(imageUrl, type === 'enhanced')
   }
 
+  const openModal = (imageUrl: string, type: 'original' | 'enhanced') => {
+    setModalImageUrl(imageUrl)
+    setModalImageType(type)
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setModalImageUrl(null)
+    setModalImageType(null)
+  }
+
+  const downloadImage = async () => {
+    if (!modalImageUrl) return
+
+    try {
+      // Convertir data URL a blob
+      const response = await fetch(modalImageUrl)
+      const blob = await response.blob()
+
+      // Crear enlace de descarga
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `producto-${modalImageType === 'enhanced' ? 'mejorada' : 'original'}-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading image:', error)
+    }
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Botón de mejora (si aún no hay imagen mejorada) */}
@@ -140,18 +177,22 @@ export function ImageEnhancementPreview({
           <div className="grid grid-cols-2 gap-4">
             {/* Imagen Original */}
             <div
-              className={`relative border-2 rounded-lg overflow-hidden cursor-pointer transition-all ${
+              className={`relative border-2 rounded-lg overflow-hidden transition-all ${
                 selectedImage === 'original'
                   ? 'border-blue-500 ring-2 ring-blue-200'
                   : 'border-gray-300 hover:border-gray-400'
               }`}
-              onClick={() => handleSelectImage('original')}
             >
-              <img
-                src={originalImageUrl}
-                alt="Original"
-                className="w-full h-48 object-cover"
-              />
+              <div
+                className="cursor-pointer"
+                onClick={() => openModal(originalImageUrl, 'original')}
+              >
+                <img
+                  src={originalImageUrl}
+                  alt="Original"
+                  className="w-full h-48 object-cover"
+                />
+              </div>
               <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
                 Original
               </div>
@@ -176,18 +217,22 @@ export function ImageEnhancementPreview({
 
             {/* Imagen Mejorada */}
             <div
-              className={`relative border-2 rounded-lg overflow-hidden cursor-pointer transition-all ${
+              className={`relative border-2 rounded-lg overflow-hidden transition-all ${
                 selectedImage === 'enhanced'
                   ? 'border-purple-500 ring-2 ring-purple-200'
                   : 'border-gray-300 hover:border-gray-400'
               }`}
-              onClick={() => handleSelectImage('enhanced')}
             >
-              <img
-                src={enhancedImageUrl}
-                alt="Mejorada con IA"
-                className="w-full h-48 object-cover"
-              />
+              <div
+                className="cursor-pointer"
+                onClick={() => openModal(enhancedImageUrl, 'enhanced')}
+              >
+                <img
+                  src={enhancedImageUrl}
+                  alt="Mejorada con IA"
+                  className="w-full h-48 object-cover"
+                />
+              </div>
               <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
                 <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -224,6 +269,68 @@ export function ImageEnhancementPreview({
             </svg>
             Mejorar de nuevo
           </button>
+        </div>
+      )}
+
+      {/* Modal de vista ampliada */}
+      {modalOpen && modalImageUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4"
+          onClick={closeModal}
+        >
+          <div className="relative max-w-7xl max-h-screen w-full h-full flex items-center justify-center">
+            {/* Botones superiores */}
+            <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+              {/* Botón de descarga */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  downloadImage()
+                }}
+                className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                title="Descargar imagen"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+
+              {/* Botón de cerrar */}
+              <button
+                onClick={closeModal}
+                className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                title="Cerrar"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Etiqueta del tipo de imagen */}
+            <div className="absolute top-4 left-4 z-10">
+              {modalImageType === 'enhanced' ? (
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Mejorada con IA
+                </div>
+              ) : (
+                <div className="bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg">
+                  Original
+                </div>
+              )}
+            </div>
+
+            {/* Imagen ampliada */}
+            <img
+              src={modalImageUrl}
+              alt={modalImageType === 'enhanced' ? 'Imagen mejorada con IA' : 'Imagen original'}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </div>
