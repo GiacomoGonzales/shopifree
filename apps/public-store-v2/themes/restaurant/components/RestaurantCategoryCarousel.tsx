@@ -36,6 +36,9 @@ function ProductCarouselCard({
     const hasPromotion = promotionsData.discount > 0;
     const finalPrice = hasPromotion ? promotionsData.finalPrice : product.price;
 
+    // Detectar iOS para mejorar carga de imágenes en carruseles
+    const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     return (
         <div
             className="restaurant-carousel-card"
@@ -47,7 +50,8 @@ function ProductCarouselCard({
                     <img
                         src={toCloudinarySquare(product.image, 400)}
                         alt={product.name}
-                        loading="lazy"
+                        loading={isIOS ? "eager" : "lazy"}
+                        decoding={isIOS ? "sync" : "async"}
                     />
                 ) : (
                     <div className="restaurant-carousel-card-placeholder">
