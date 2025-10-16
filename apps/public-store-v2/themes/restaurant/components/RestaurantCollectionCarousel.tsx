@@ -123,10 +123,14 @@ export default function RestaurantCollectionCarousel({
 }: Props) {
     const carouselRef = useRef<HTMLDivElement>(null);
 
-    // Productos de esta colección (limitados)
-    const collectionProducts = products
-        .filter(p => collection.productIds?.includes(p.id || ''))
-        .slice(0, maxProducts);
+    // Todos los productos de esta colección (sin limitar)
+    const allCollectionProducts = products.filter(p => collection.productIds?.includes(p.id || ''));
+
+    // Productos limitados a mostrar
+    const collectionProducts = allCollectionProducts.slice(0, maxProducts);
+
+    // Determinar si hay más productos de los que se muestran
+    const hasMoreProducts = allCollectionProducts.length > maxProducts;
 
     // No mostrar si no hay productos
     if (collectionProducts.length === 0) return null;
@@ -177,8 +181,8 @@ export default function RestaurantCollectionCarousel({
                             />
                         ))}
 
-                        {/* Tarjeta "Ver todos" */}
-                        <ViewAllCard onViewAll={() => onViewAll(collection.slug)} />
+                        {/* Tarjeta "Ver todos" - solo si hay más productos */}
+                        {hasMoreProducts && <ViewAllCard onViewAll={() => onViewAll(collection.slug)} />}
                     </div>
                 </div>
 

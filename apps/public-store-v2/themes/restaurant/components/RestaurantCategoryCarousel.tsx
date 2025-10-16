@@ -123,15 +123,19 @@ export default function RestaurantCategoryCarousel({
 }: Props) {
     const carouselRef = useRef<HTMLDivElement>(null);
 
-    // Productos de esta categoría (limitados)
-    const categoryProducts = products
-        .filter(p => {
-            const matchesById = p.categoryId === category.id;
-            const matchesBySlug = p.categoryId === category.slug;
-            const matchesByParentCategories = p.selectedParentCategoryIds?.includes(category.id) || false;
-            return matchesById || matchesBySlug || matchesByParentCategories;
-        })
-        .slice(0, maxProducts);
+    // Todos los productos de esta categoría (sin limitar)
+    const allCategoryProducts = products.filter(p => {
+        const matchesById = p.categoryId === category.id;
+        const matchesBySlug = p.categoryId === category.slug;
+        const matchesByParentCategories = p.selectedParentCategoryIds?.includes(category.id) || false;
+        return matchesById || matchesBySlug || matchesByParentCategories;
+    });
+
+    // Productos limitados a mostrar
+    const categoryProducts = allCategoryProducts.slice(0, maxProducts);
+
+    // Determinar si hay más productos de los que se muestran
+    const hasMoreProducts = allCategoryProducts.length > maxProducts;
 
     // No mostrar si no hay productos
     if (categoryProducts.length === 0) return null;
@@ -182,8 +186,8 @@ export default function RestaurantCategoryCarousel({
                             />
                         ))}
 
-                        {/* Tarjeta "Ver todos" */}
-                        <ViewAllCard onViewAll={() => onViewAll(category.slug)} />
+                        {/* Tarjeta "Ver todos" - solo si hay más productos */}
+                        {hasMoreProducts && <ViewAllCard onViewAll={() => onViewAll(category.slug)} />}
                     </div>
                 </div>
 

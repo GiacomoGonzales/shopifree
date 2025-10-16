@@ -109,6 +109,46 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
         }
     }, [storeInfo?.announcementBar?.enabled]);
 
+    // Interceptar click del botón "Explorar productos" para scroll dinámico
+    useEffect(() => {
+        const handleExploreClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            const link = target.closest('a[href="#productos"]');
+
+            if (link) {
+                e.preventDefault();
+
+                let targetElement = null;
+
+                // Buscar el PRIMER carrusel de CATEGORÍAS
+                const hasCategories = categories && categories.length > 0;
+
+                if (hasCategories) {
+                    // Buscar el primer carrusel de categoría
+                    targetElement = document.querySelector('[data-category-slug]');
+                }
+
+                // Si no hay carruseles de categorías, ir al grid de productos
+                if (!targetElement) {
+                    targetElement = document.querySelector('#productos');
+                }
+
+                if (targetElement) {
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - 110; // 110px de offset para header
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        };
+
+        document.addEventListener('click', handleExploreClick);
+        return () => document.removeEventListener('click', handleExploreClick);
+    }, [categories, collections]);
+
     // Cargar datos de la tienda
     useEffect(() => {
         let alive = true;
@@ -476,7 +516,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         toCloudinarySquare={toCloudinarySquareWrapper}
                                         storeInfo={storeInfo}
                                         storeId={resolvedStoreId}
-                                        maxProducts={10}
+                                        maxProducts={6}
                                     />
                                 ))
                             )}
@@ -510,7 +550,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
                                         toCloudinarySquare={toCloudinarySquareWrapper}
                                         storeInfo={storeInfo}
                                         storeId={resolvedStoreId}
-                                        maxProducts={10}
+                                        maxProducts={6}
                                     />
                                 ))
                             ) : (

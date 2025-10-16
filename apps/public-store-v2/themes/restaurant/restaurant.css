@@ -8937,7 +8937,7 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
    =================================================== */
 
 .restaurant-category-carousel {
-    margin-bottom: var(--nbd-space-3xl);
+    margin-bottom: 10px;
     padding-bottom: 10px;
 }
 
@@ -9193,7 +9193,7 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     }
 
     .restaurant-category-carousel {
-        margin-bottom: var(--nbd-space-2xl);
+        margin-bottom: 10px;
         /* No negative margins needed since container has no padding */
     }
 
@@ -9239,8 +9239,13 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     padding-bottom: 0 !important;
 }
 
-/* Ocultar botones CTA del hero en tema restaurant */
+/* Mostrar solo el primer botón CTA del hero en tema restaurant */
 [data-theme="restaurant"] .nbd-hero-actions {
+    display: flex !important;
+}
+
+/* Ocultar el segundo botón (categorías/colecciones/marcas) */
+[data-theme="restaurant"] .nbd-hero-actions .nbd-btn:nth-child(2) {
     display: none !important;
 }
 
