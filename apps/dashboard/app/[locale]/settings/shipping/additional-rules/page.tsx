@@ -131,7 +131,7 @@ export default function AdditionalRulesPage() {
 
               {formData.enableMinimumOrder && (
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">Valor mínimo del pedido (S/)</label>
+                  <label className="block text-sm text-gray-600 mb-1">Valor mínimo del pedido ({store.currency || 'S/'})</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -166,7 +166,7 @@ export default function AdditionalRulesPage() {
 
               {formData.enableFreeShipping && (
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">Monto para envío gratuito (S/)</label>
+                  <label className="block text-sm text-gray-600 mb-1">Monto para envío gratuito ({store.currency || 'S/'})</label>
                   <input
                     type="text"
                     inputMode="decimal"
