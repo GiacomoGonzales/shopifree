@@ -423,18 +423,45 @@ export default function CheckoutSuccessPage() {
             <h4 className="font-semibold text-gray-900 mb-3">Productos:</h4>
             <div className="space-y-2">
               {orderData.items.map((item, index) => (
-                <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{item.name}</p>
-                    {item.variant?.name && (
-                      <p className="text-xs text-gray-500">{item.variant.name}</p>
-                    )}
-                  </div>
-                  <div className="text-right text-sm">
-                    <span className="text-gray-600">{item.quantity}x</span>
-                    <span className="font-medium ml-2">
-                      {formatPrice((item.variant?.price || item.price) * item.quantity, currency)}
-                    </span>
+                <div key={index} className="py-2 border-b border-gray-100 last:border-b-0">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{item.name}</p>
+                      {item.variant?.name && (
+                        <p className="text-xs text-gray-500">{item.variant.name}</p>
+                      )}
+                      {/* Modificadores seleccionados */}
+                      {item.modifiers && item.modifiers.length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          {item.modifiers.map((group: any, groupIndex: number) => (
+                            <div key={groupIndex} className="text-xs text-gray-600">
+                              <span className="font-medium">{group.groupName}:</span>
+                              {' '}
+                              {group.options.map((option: any, optionIndex: number) => (
+                                <span key={optionIndex}>
+                                  {option.name}
+                                  {option.quantity > 1 && (
+                                    <span> x{option.quantity}</span>
+                                  )}
+                                  {option.price !== 0 && (
+                                    <span>
+                                      {' '}({option.price > 0 ? '+' : ''}{formatPrice(option.price * option.quantity, currency)})
+                                    </span>
+                                  )}
+                                  {optionIndex < group.options.length - 1 && ', '}
+                                </span>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right text-sm ml-4">
+                      <span className="text-gray-600">{item.quantity}x</span>
+                      <span className="font-medium ml-2">
+                        {formatPrice((item.variant?.price || item.price) * item.quantity, currency)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
