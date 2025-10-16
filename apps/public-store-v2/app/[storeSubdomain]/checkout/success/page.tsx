@@ -293,7 +293,7 @@ export default function CheckoutSuccessPage() {
   };
 
   const handleGoHome = () => {
-    router.push('/');
+    window.location.href = window.location.origin + buildStoreUrl('/');
   };
 
   // Renderizado principal basado en el estado
