@@ -139,9 +139,18 @@ export async function sendCustomerOrderConfirmation(
         PEDIDO ${displayOrderNumber}
 
         PRODUCTOS:
-        ${orderData.items.map(item =>
-          `- ${item.name}${item.variant ? ` (${item.variant.name})` : ''} x${item.quantity} = ${formatPrice((item.variant?.price || item.price) * item.quantity, orderData.currency)}`
-        ).join('\n')}
+        ${orderData.items.map(item => {
+          let itemText = `- ${item.name}${item.variant ? ` (${item.variant.name})` : ''}`;
+          if (item.modifiers && item.modifiers.length > 0) {
+            item.modifiers.forEach((group: any) => {
+              itemText += `\n  ${group.groupName}: ${group.options.map((option: any) =>
+                `${option.name}${option.quantity > 1 ? ` x${option.quantity}` : ''}${option.price !== 0 ? ` (${option.price > 0 ? '+' : ''}${formatPrice(option.price * option.quantity, orderData.currency)})` : ''}`
+              ).join(', ')}`;
+            });
+          }
+          itemText += ` x${item.quantity} = ${formatPrice((item.variant?.price || item.price) * item.quantity, orderData.currency)}`;
+          return itemText;
+        }).join('\n')}
 
         RESUMEN:
         Subtotal: ${formatPrice(orderData.totals.subtotal, orderData.currency)}
@@ -219,7 +228,19 @@ export async function sendCustomerOrderConfirmation(
                         <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 500; color: #212529;">
                           ${item.name}
                         </p>
-                        ${item.variant ? `<p style="margin: 0; font-size: 13px; color: #6c757d;">${item.variant.name}</p>` : ''}
+                        ${item.variant ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #6c757d;">${item.variant.name}</p>` : ''}
+                        ${item.modifiers && item.modifiers.length > 0 ? `
+                          <div style="margin-top: 6px;">
+                            ${item.modifiers.map((group: any) => `
+                              <p style="margin: 0 0 2px 0; font-size: 12px; color: #868e96;">
+                                <span style="font-weight: 500;">${group.groupName}:</span>
+                                ${group.options.map((option: any) => `
+                                  ${option.name}${option.quantity > 1 ? ` x${option.quantity}` : ''}${option.price !== 0 ? ` (${option.price > 0 ? '+' : ''}${formatPrice(option.price * option.quantity, orderData.currency)})` : ''}
+                                `).join(', ')}
+                              </p>
+                            `).join('')}
+                          </div>
+                        ` : ''}
                       </div>
                       <div style="text-align: right;">
                         <p style="margin: 0; font-size: 14px; color: #212529;">
@@ -371,9 +392,18 @@ export async function sendAdminOrderNotification(
         Teléfono: ${orderData.customer.phone}
 
         PRODUCTOS:
-        ${orderData.items.map(item =>
-          `- ${item.name}${item.variant ? ` (${item.variant.name})` : ''} x${item.quantity} = ${formatPrice((item.variant?.price || item.price) * item.quantity, orderData.currency)}`
-        ).join('\n')}
+        ${orderData.items.map(item => {
+          let itemText = `- ${item.name}${item.variant ? ` (${item.variant.name})` : ''}`;
+          if (item.modifiers && item.modifiers.length > 0) {
+            item.modifiers.forEach((group: any) => {
+              itemText += `\n  ${group.groupName}: ${group.options.map((option: any) =>
+                `${option.name}${option.quantity > 1 ? ` x${option.quantity}` : ''}${option.price !== 0 ? ` (${option.price > 0 ? '+' : ''}${formatPrice(option.price * option.quantity, orderData.currency)})` : ''}`
+              ).join(', ')}`;
+            });
+          }
+          itemText += ` x${item.quantity} = ${formatPrice((item.variant?.price || item.price) * item.quantity, orderData.currency)}`;
+          return itemText;
+        }).join('\n')}
 
         ENTREGA:
         Método: ${translateShippingMethod(orderData.shipping.method, 'es')}
@@ -465,7 +495,19 @@ export async function sendAdminOrderNotification(
                         <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 500; color: #212529;">
                           ${item.name}
                         </p>
-                        ${item.variant ? `<p style="margin: 0; font-size: 13px; color: #6c757d;">${item.variant.name}</p>` : ''}
+                        ${item.variant ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #6c757d;">${item.variant.name}</p>` : ''}
+                        ${item.modifiers && item.modifiers.length > 0 ? `
+                          <div style="margin-top: 6px;">
+                            ${item.modifiers.map((group: any) => `
+                              <p style="margin: 0 0 2px 0; font-size: 12px; color: #868e96;">
+                                <span style="font-weight: 500;">${group.groupName}:</span>
+                                ${group.options.map((option: any) => `
+                                  ${option.name}${option.quantity > 1 ? ` x${option.quantity}` : ''}${option.price !== 0 ? ` (${option.price > 0 ? '+' : ''}${formatPrice(option.price * option.quantity, orderData.currency)})` : ''}
+                                `).join(', ')}
+                              </p>
+                            `).join('')}
+                          </div>
+                        ` : ''}
                       </div>
                       <div style="text-align: right;">
                         <p style="margin: 0; font-size: 14px; color: #212529;">
