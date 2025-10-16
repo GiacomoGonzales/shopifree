@@ -405,12 +405,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const Icon = settingsItem.icon
     const isInSettingsPage = pathname.includes('/settings')
     const hasActiveSubitem = settingsItem.subitems.some(sub => isActiveRoute(sub.href))
-    
+
     return (
       <div key={settingsItem.key}>
         {/* Elemento principal de Settings - ahora es un toggle */}
         <button
           onClick={() => {
+            // Cerrar Products si está abierto
+            if (!settingsExpanded && productsExpanded) {
+              setProductsExpanded(false)
+            }
             setSettingsExpanded(!settingsExpanded)
           }}
           className={`w-full group flex items-center justify-between px-2 py-1.5 text-sm font-medium rounded-md ${
@@ -463,15 +467,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Función para renderizar el elemento Products con submenú
   const renderProductsMenu = (isMobile: boolean = false) => {
     const Icon = productsItem.icon
-    const isInProductsPage = pathname.includes('/products') || pathname.includes('/categories') || 
+    const isInProductsPage = pathname.includes('/products') || pathname.includes('/categories') ||
                             pathname.includes('/brands') || pathname.includes('/collections')
     const hasActiveSubitem = productsItem.subitems.some(sub => isActiveRoute(sub.href))
-    
+
     return (
       <div key={productsItem.key}>
         {/* Elemento principal de Products - ahora es un toggle */}
         <button
           onClick={() => {
+            // Cerrar Settings si está abierto
+            if (!productsExpanded && settingsExpanded) {
+              setSettingsExpanded(false)
+            }
             setProductsExpanded(!productsExpanded)
           }}
           className={`w-full group flex items-center justify-between px-2 py-1.5 text-sm font-medium rounded-md ${
