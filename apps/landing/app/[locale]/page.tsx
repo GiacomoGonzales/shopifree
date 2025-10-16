@@ -77,7 +77,7 @@ export default function HomePage() {
       category: "Tecnología",
       theme: "Mobile Modern",
       icon: "📱",
-      url: "https://demo-tech.shopifree.app",
+      url: "https://technova.shopifree.app",
       description: "Lo último en tecnología y gadgets",
       mobileColor: "bg-gradient-to-br from-blue-400 to-indigo-500",
       desktopColor: "bg-gradient-to-br from-blue-300 to-indigo-400"
@@ -806,6 +806,7 @@ export default function HomePage() {
                                     loop
                                     muted
                                     playsInline
+                                    preload="auto"
                                     className="w-full h-full object-contain"
                                   >
                                     <source src="/images/tech-movil.mp4" type="video/mp4" />
@@ -979,6 +980,7 @@ export default function HomePage() {
                                   loop
                                   muted
                                   playsInline
+                                  preload="auto"
                                   className="w-full h-full object-contain"
                                 >
                                   <source src="/images/tech-movil.mp4" type="video/mp4" />
