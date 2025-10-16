@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface MediaFile {
   id: string
@@ -45,6 +46,10 @@ export function MediaGalleryWithAI({
   const [customPrompt, setCustomPrompt] = useState('')
   const [customFileId, setCustomFileId] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Estados para modal de vista ampliada
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
 
   // Preset options
   const presetOptions: PresetOption[] = [
@@ -161,6 +166,37 @@ export function MediaGalleryWithAI({
     setShowCustomModal(false)
     setCustomPrompt('')
     setCustomFileId(null)
+  }
+
+  // Funciones para modal de vista ampliada
+  const openModal = (imageUrl: string) => {
+    console.log('🖼️ Opening image modal')
+    setModalImageUrl(imageUrl)
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setModalImageUrl(null)
+  }
+
+  const downloadImage = async () => {
+    if (!modalImageUrl) return
+
+    try {
+      const response = await fetch(modalImageUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `producto-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading image:', error)
+    }
   }
 
   const toggleDropdown = (fileId: string) => {
@@ -316,7 +352,7 @@ export function MediaGalleryWithAI({
               {/* Contenedor de la imagen - completamente separado */}
               <div className="relative group rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300">
                 {/* Badge de posición */}
-                <div className="absolute top-3 left-3 bg-gray-900 bg-opacity-80 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 z-10">
+                <div className="absolute top-3 left-3 bg-gray-900 bg-opacity-80 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 z-10 pointer-events-none">
                   {index === 0 && (
                     <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -327,7 +363,10 @@ export function MediaGalleryWithAI({
 
                 {/* Botón eliminar (X) - siempre visible en móvil, hover en desktop - color más suave */}
                 <button
-                  onClick={() => handleRemoveFile(file.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleRemoveFile(file.id)
+                  }}
                   disabled={file.uploading || file.enhancing}
                   className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 z-10 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg backdrop-blur-sm"
                   title="Eliminar"
@@ -339,7 +378,7 @@ export function MediaGalleryWithAI({
 
                 {/* Badge de "mejorada con IA" en esquina inferior derecha */}
                 {file.isEnhanced && (
-                  <div className="absolute bottom-3 right-3 bg-white bg-opacity-95 backdrop-blur-sm text-gray-700 text-[10px] px-2 py-1 rounded-full flex items-center gap-1 z-10 shadow-md">
+                  <div className="absolute bottom-3 right-3 bg-white bg-opacity-95 backdrop-blur-sm text-gray-700 text-[10px] px-2 py-1 rounded-full flex items-center gap-1 z-10 shadow-md pointer-events-none">
                     <svg className="h-3 w-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
@@ -348,7 +387,11 @@ export function MediaGalleryWithAI({
                 )}
 
                 {/* Imagen/Video - sin botones dentro */}
-                <div className="aspect-square bg-gray-100 relative">
+                <div
+                  className="aspect-square bg-gray-100 relative cursor-pointer"
+                  onClick={() => file.type === 'image' && !file.uploading && !file.enhancing && openModal(file.url)}
+                  title={file.type === 'image' ? 'Click para ver en grande' : ''}
+                >
                   {file.type === 'video' ? (
                     <video
                       src={file.url}
@@ -633,6 +676,53 @@ export function MediaGalleryWithAI({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de vista ampliada de imagen */}
+      {modalOpen && modalImageUrl && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-90 p-4"
+          onClick={closeModal}
+        >
+          <div className="relative max-w-7xl max-h-screen w-full h-full flex items-center justify-center">
+            {/* Botones superiores */}
+            <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+              {/* Botón de descarga */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  downloadImage()
+                }}
+                className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                title="Descargar imagen"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+
+              {/* Botón de cerrar */}
+              <button
+                onClick={closeModal}
+                className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                title="Cerrar"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Imagen ampliada */}
+            <img
+              src={modalImageUrl}
+              alt="Imagen del producto ampliada"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   )
