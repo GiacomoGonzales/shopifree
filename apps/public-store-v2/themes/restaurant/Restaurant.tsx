@@ -429,7 +429,7 @@ export default function Restaurant({ storeSubdomain, effectiveLocale, storeId }:
 
             {/* Carruseles de productos por categoría - SOLO RESTAURANT */}
             <section id="menu" className="nbd-products">
-                <div className={`nbd-container ${(activeCategory && activeCategory !== 'todos') || activeCollection ? 'show-grid' : 'show-carousels'}`}>
+                <div className={`nbd-container ${(activeCategory && activeCategory !== 'todos') || activeCollection || (!categories?.length && !collections?.length) ? 'show-grid' : 'show-carousels'}`}>
                     {/* Si hay filtro activo (categoría o colección), mostrar con grid */}
                     {(activeCategory && activeCategory !== 'todos') || activeCollection ? (
                         <>

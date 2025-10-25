@@ -40,7 +40,7 @@ export default function HomePage() {
     'Google Gemini AI'
   ]
 
-  // Demo stores data
+  // Demo stores data - Optimized to 3 stores for better performance
   const demoStores = [
     {
       name: "Fast Bite - Comida rápida a domicilio",
@@ -71,36 +71,6 @@ export default function HomePage() {
       description: "Todo para tu mascota",
       mobileColor: "bg-gradient-to-br from-green-400 to-teal-500",
       desktopColor: "bg-gradient-to-br from-green-300 to-teal-400"
-    },
-    {
-      name: "TechZone",
-      category: "Tecnología",
-      theme: "Mobile Modern",
-      icon: "📱",
-      url: "https://technova.shopifree.app",
-      description: "Lo último en tecnología y gadgets",
-      mobileColor: "bg-gradient-to-br from-blue-400 to-indigo-500",
-      desktopColor: "bg-gradient-to-br from-blue-300 to-indigo-400"
-    },
-    {
-      name: "FitLife Store",
-      category: "Deportes",
-      theme: "Shopifree Default",
-      icon: "💪",
-      url: "https://demo-fitness.shopifree.app",
-      description: "Equipamiento deportivo y fitness",
-      mobileColor: "bg-gradient-to-br from-cyan-400 to-blue-600",
-      desktopColor: "bg-gradient-to-br from-cyan-300 to-blue-500"
-    },
-    {
-      name: "Glow Beauty",
-      category: "Belleza",
-      theme: "Minimal Clean",
-      icon: "💄",
-      url: "https://demo-beauty.shopifree.app",
-      description: "Cosmética y cuidado personal",
-      mobileColor: "bg-gradient-to-br from-rose-400 to-amber-400",
-      desktopColor: "bg-gradient-to-br from-rose-300 to-amber-300"
     }
   ]
 
@@ -668,11 +638,12 @@ export default function HomePage() {
             loop
             muted
             playsInline
+            preload="metadata"
             className="w-full h-full object-cover"
           >
             <source src="/videos/herovideo.mp4" type="video/mp4" />
           </video>
-          
+
           {/* Overlay for better text contrast */}
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
@@ -768,7 +739,7 @@ export default function HomePage() {
                               <div className="h-[48px] w-[2px] bg-gray-800 absolute -right-[12px] top-[106px] rounded-r-lg"></div>
 
                               {/* Screen content */}
-                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 || index === 3 ? '' : store.mobileColor} cursor-pointer`}
+                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
                                    onClick={() => window.open(store.url, '_blank')}>
                                 {index === 0 ? (
                                   <video
@@ -776,6 +747,7 @@ export default function HomePage() {
                                     loop
                                     muted
                                     playsInline
+                                    preload="metadata"
                                     className="w-full h-full object-contain"
                                   >
                                     <source src="/images/restaurant-movil.mp4" type="video/mp4" />
@@ -786,6 +758,7 @@ export default function HomePage() {
                                     loop
                                     muted
                                     playsInline
+                                    preload="metadata"
                                     className="w-full h-full object-contain"
                                   >
                                     <source src="/images/ropa-movil.mp4" type="video/mp4" />
@@ -796,20 +769,10 @@ export default function HomePage() {
                                     loop
                                     muted
                                     playsInline
+                                    preload="metadata"
                                     className="w-full h-full object-contain"
                                   >
                                     <source src="/images/mascotas-movil.mp4" type="video/mp4" />
-                                  </video>
-                                ) : index === 3 ? (
-                                  <video
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="auto"
-                                    className="w-full h-full object-contain"
-                                  >
-                                    <source src="/images/tech-movil.mp4" type="video/mp4" />
                                   </video>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -839,31 +802,28 @@ export default function HomePage() {
                             </div>
 
                             {/* Browser content */}
-                            <div className={`${index === 0 || index === 1 || index === 2 || index === 3 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
+                            <div className={`${index === 0 || index === 1 || index === 2 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <img
                                   src="/images/restaurant-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
                                   className="w-full h-full object-cover object-top"
+                                  loading="lazy"
                                 />
                               ) : index === 1 ? (
                                 <img
                                   src="/images/ropa-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
                                   className="w-full h-full object-cover object-top"
+                                  loading="lazy"
                                 />
                               ) : index === 2 ? (
                                 <img
                                   src="/images/mascotas-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
                                   className="w-full h-full object-cover object-top"
-                                />
-                              ) : index === 3 ? (
-                                <img
-                                  src="/images/tech-desktop.png"
-                                  alt={`${store.name} - Vista desktop`}
-                                  className="w-full h-full object-cover object-top"
+                                  loading="lazy"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
@@ -942,7 +902,7 @@ export default function HomePage() {
                             <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
                             <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
 
-                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 || index === 3 ? '' : store.mobileColor} cursor-pointer`}
+                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
                                  onClick={() => window.open(store.url, '_blank')}>
                               {index === 0 ? (
                                 <video
@@ -950,6 +910,7 @@ export default function HomePage() {
                                   loop
                                   muted
                                   playsInline
+                                  preload="metadata"
                                   className="w-full h-full object-contain"
                                 >
                                   <source src="/images/restaurant-movil.mp4" type="video/mp4" />
@@ -960,6 +921,7 @@ export default function HomePage() {
                                   loop
                                   muted
                                   playsInline
+                                  preload="metadata"
                                   className="w-full h-full object-contain"
                                 >
                                   <source src="/images/ropa-movil.mp4" type="video/mp4" />
@@ -970,20 +932,10 @@ export default function HomePage() {
                                   loop
                                   muted
                                   playsInline
+                                  preload="metadata"
                                   className="w-full h-full object-contain"
                                 >
                                   <source src="/images/mascotas-movil.mp4" type="video/mp4" />
-                                </video>
-                              ) : index === 3 ? (
-                                <video
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                  preload="auto"
-                                  className="w-full h-full object-contain"
-                                >
-                                  <source src="/images/tech-movil.mp4" type="video/mp4" />
                                 </video>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
