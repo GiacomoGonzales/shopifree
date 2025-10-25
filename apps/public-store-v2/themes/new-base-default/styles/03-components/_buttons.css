@@ -31,13 +31,14 @@
 /* 1. PRIMARIO - Para acciones principales */
 .nbd-btn--primary {
     background: var(--nbd-primary, #3b82f6);
-    color: white;
+    color: var(--nbd-primary-text, white); /* Contraste automático */
     border-color: var(--nbd-primary, #3b82f6);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .nbd-btn--primary:hover {
     background: var(--nbd-secondary, #2563eb);
+    color: var(--nbd-secondary-text, white); /* Contraste automático para hover */
     border-color: var(--nbd-secondary, #2563eb);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -52,7 +53,7 @@
 
 .nbd-btn--secondary:hover {
     background: var(--nbd-primary, #3b82f6);
-    color: white;
+    color: var(--nbd-primary-text, white); /* Contraste automático para hover */
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }

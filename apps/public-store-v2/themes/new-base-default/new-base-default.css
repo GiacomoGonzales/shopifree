@@ -641,7 +641,7 @@ body.has-announcement-bar .nbd-hero-content {
 /* 1. PRIMARIO - Para acciones principales */
 .nbd-btn--primary {
     background: var(--nbd-primary, #3b82f6);
-    color: white;
+    color: var(--nbd-primary-text, white); /* Contraste automático */
     border-color: var(--nbd-primary, #3b82f6);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

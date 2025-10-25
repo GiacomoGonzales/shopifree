@@ -456,6 +456,28 @@ export async function getStoreBackgroundTexture(storeId: string): Promise<string
   }
 }
 
+// Función para calcular el color de texto con mejor contraste (negro o blanco)
+// Usa la fórmula YIQ para determinar si un color es claro u oscuro
+function getTextColorForBackground(backgroundColor: string): string {
+  const hex = backgroundColor.replace('#', '');
+
+  // Validar que sea un hex válido de 6 caracteres
+  if (hex.length !== 6) {
+    return '#ffffff'; // Fallback a blanco
+  }
+
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+
+  // Fórmula YIQ para calcular luminosidad percibida
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+  // Si YIQ >= 128, el color es claro, usar texto oscuro
+  // Si YIQ < 128, el color es oscuro, usar texto claro
+  return yiq >= 128 ? '#000000' : '#ffffff';
+}
+
 // Función para aplicar colores dinámicos de la tienda al tema
 export function applyStoreColors(primaryColor: string, secondaryColor?: string): void {
   if (typeof document === 'undefined') return; // SSR safety
@@ -475,11 +497,20 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     document.documentElement.style.setProperty('--nbd-success-dark', darkerColor);
     document.documentElement.style.setProperty('--nbd-success-darker', muchDarkerColor);
     
+    // CALCULAR COLOR DE TEXTO CON MEJOR CONTRASTE
+    const primaryTextColor = getTextColorForBackground(primaryColor);
+    const secondaryTextColor = getTextColorForBackground(darkerColor);
+
     // APLICAR VARIABLES CSS PRINCIPALES para botones, selectores de variantes, etc.
     document.documentElement.style.setProperty('--nbd-primary', primaryColor);
     document.documentElement.style.setProperty('--nbd-primary-color', primaryColor);
     document.documentElement.style.setProperty('--nbd-primary-dark', darkerColor);
     document.documentElement.style.setProperty('--nbd-secondary', darkerColor);
+
+    // APLICAR COLORES DE TEXTO DINÁMICOS CON CONTRASTE AUTOMÁTICO
+    document.documentElement.style.setProperty('--nbd-primary-text', primaryTextColor);
+    document.documentElement.style.setProperty('--nbd-secondary-text', secondaryTextColor);
+    console.log(`✨ Auto-contrast text colors: primary-text=${primaryTextColor}, secondary-text=${secondaryTextColor}`);
 
     // CONVERTIR COLORES A RGB PARA USAR CON rgba()
     const hexToRgb = (hex: string) => {
@@ -522,7 +553,7 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
       activeDropdownOptions.forEach(option => {
         option.style.setProperty('background', primaryColor, 'important');
         option.style.setProperty('background-color', primaryColor, 'important');
-        option.style.setProperty('color', 'white', 'important');
+        option.style.setProperty('color', primaryTextColor, 'important'); // Color dinámico con contraste
       });
     };
     
