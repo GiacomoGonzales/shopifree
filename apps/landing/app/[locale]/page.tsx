@@ -63,14 +63,14 @@ export default function HomePage() {
       desktopColor: "bg-gradient-to-br from-pink-300 to-purple-400"
     },
     {
-      name: "La Patota Shop - Vet & Spa para mascotas",
-      category: "Mascotas",
-      theme: "Pet Friendly",
-      icon: "🐾",
-      url: "https://lapatotashop.com",
-      description: "Todo para tu mascota",
-      mobileColor: "bg-gradient-to-br from-green-400 to-teal-500",
-      desktopColor: "bg-gradient-to-br from-green-300 to-teal-400"
+      name: "TechZone",
+      category: "Tecnología",
+      theme: "Mobile Modern",
+      icon: "📱",
+      url: "https://technova.shopifree.app",
+      description: "Lo último en tecnología y gadgets",
+      mobileColor: "bg-gradient-to-br from-blue-400 to-indigo-500",
+      desktopColor: "bg-gradient-to-br from-blue-300 to-indigo-400"
     }
   ]
 
@@ -772,7 +772,7 @@ export default function HomePage() {
                                     preload="metadata"
                                     className="w-full h-full object-contain"
                                   >
-                                    <source src="/images/mascotas-movil.mp4" type="video/mp4" />
+                                    <source src="/images/tech-movil.mp4" type="video/mp4" />
                                   </video>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -820,7 +820,7 @@ export default function HomePage() {
                                 />
                               ) : index === 2 ? (
                                 <img
-                                  src="/images/mascotas-desktop.png"
+                                  src="/images/tech-desktop.png"
                                   alt={`${store.name} - Vista desktop`}
                                   className="w-full h-full object-cover object-top"
                                   loading="lazy"
@@ -935,7 +935,7 @@ export default function HomePage() {
                                   preload="metadata"
                                   className="w-full h-full object-contain"
                                 >
-                                  <source src="/images/mascotas-movil.mp4" type="video/mp4" />
+                                  <source src="/images/tech-movil.mp4" type="video/mp4" />
                                 </video>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
