@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
+import CookieBanner from './components/CookieBanner'
 import './globals.css'
 
 const inter = Inter({ 
@@ -71,6 +72,34 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className={inter.className}>
+        {/* Google Consent Mode v2 - Debe cargarse ANTES de Google Analytics */}
+        <Script id="google-consent-mode" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+
+            // Configuración por defecto: denied (cumple GDPR)
+            gtag('consent', 'default', {
+              'analytics_storage': 'denied',
+              'ad_storage': 'denied',
+              'ad_user_data': 'denied',
+              'ad_personalization': 'denied',
+              'wait_for_update': 500
+            });
+
+            // Si el usuario ya dio consentimiento, actualizarlo
+            const consent = localStorage.getItem('cookie-consent');
+            if (consent === 'accepted') {
+              gtag('consent', 'update', {
+                'analytics_storage': 'granted',
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted'
+              });
+            }
+          `}
+        </Script>
+
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-X9V7EC38N9"
@@ -81,11 +110,16 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-X9V7EC38N9');
+            gtag('config', 'G-X9V7EC38N9', {
+              'anonymize_ip': true
+            });
           `}
         </Script>
 
         {children}
+
+        {/* Cookie Banner */}
+        <CookieBanner />
       </body>
     </html>
   )
