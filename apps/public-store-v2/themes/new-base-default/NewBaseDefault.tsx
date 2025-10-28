@@ -841,7 +841,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             {/* Announcement Bar */}
             <AnnouncementBar storeInfo={storeInfo} />
 
-            <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products || []} onHomeHover={prefetchHomePage} />
+            <Header storeInfo={storeInfo || null} categories={categories} storeSubdomain={storeSubdomain} products={products || []} onHomeHover={prefetchHomePage} />
             
             <NewBaseDefaultPageHeaders
                 isOnCategoryPage={isOnCategoryPage}
