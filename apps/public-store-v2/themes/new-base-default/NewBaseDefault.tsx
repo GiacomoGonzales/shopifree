@@ -987,10 +987,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 </div>
             )}
 
-            <Footer storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} storeId={storeId || undefined} />
-            
+            <Footer storeInfo={storeInfo || null} categories={categories} storeSubdomain={storeSubdomain} storeId={storeId || undefined} />
+
             {/* Modal del carrito */}
-            <CartModal storeInfo={storeInfo} storeId={resolvedStoreId || undefined} />
+            <CartModal storeInfo={storeInfo || null} storeId={resolvedStoreId || undefined} />
             
             {/* Modal de vista rápida de producto */}
             {quickViewProduct && (
