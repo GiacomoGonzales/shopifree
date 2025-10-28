@@ -7,8 +7,8 @@ import "./texture-backgrounds.css";
 import "./utilities.css";
 import UnifiedLoading from "../../components/UnifiedLoading";
 // 🚀 OPTIMIZACIÓN FASE 2: applyStoreColors se importa dinámicamente para code splitting
-import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture } from "../../lib/store";
-import { getStoreProducts, PublicProduct } from "../../lib/products";
+import { getStoreBackgroundTexture, StoreBasicInfo } from "../../lib/store";
+import { PublicProduct } from "../../lib/products";
 import { getStoreCategories, getStoreParentCategories, getCategorySubcategories, Category } from "../../lib/categories";
 import { NewBaseDefaultHero } from "./components/NewBaseDefaultHero";
 import { AddToCartButton } from "../../components/shared";
@@ -19,13 +19,15 @@ import { NewBaseDefaultSimpleCarousel } from "./components/NewBaseDefaultSimpleC
 import { NewBaseDefaultPageHeaders } from "./components/NewBaseDefaultPageHeaders";
 import { NewBaseDefaultSubcategoriesSection } from "./components/NewBaseDefaultSubcategoriesSection";
 import { NewBaseDefaultProductSectionHeader } from "./components/NewBaseDefaultProductSectionHeader";
-import { getStoreBrands, PublicBrand, getBrandBySlug } from "../../lib/brands";
-import { getStoreFilters, Filter } from "../../lib/filters";
-import { getStoreCollections, PublicCollection, getCollectionBySlug } from "../../lib/collections";
+import { PublicBrand, getBrandBySlug } from "../../lib/brands";
+import { Filter } from "../../lib/filters";
+import { PublicCollection, getCollectionBySlug } from "../../lib/collections";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
 import { useCart } from "../../lib/cart-context";
 import { useStoreLanguage } from "../../lib/store-language-context";
+// 🚀 OPTIMIZACIÓN FASE 4: React Query hooks para cache automático
+import { useAllStoreData } from "../../hooks/useStoreData";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
@@ -193,14 +195,27 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     
 
 
-    const [storeIdState, setStoreIdState] = useState<string | null>(null);
-    const resolvedStoreId = storeId || storeIdState;
-    const [loading, setLoading] = useState<boolean>(true);
-    const [products, setProducts] = useState<PublicProduct[] | null>(null);
-    const [storeInfo, setStoreInfo] = useState<StoreBasicInfo | null>(null);
-    const [categories, setCategories] = useState<Category[] | null>(null);
-    const [brands, setBrands] = useState<PublicBrand[] | null>(null);
-    const [collections, setCollections] = useState<PublicCollection[] | null>(null);
+    // 🚀 OPTIMIZACIÓN FASE 4: Usar React Query para obtener todos los datos con cache automático
+    const {
+        storeId: storeIdFromHook,
+        storeInfo: storeInfoFromHook,
+        products: productsFromHook,
+        categories: categoriesFromHook,
+        brands: brandsFromHook,
+        filters: filtersFromHook,
+        collections: collectionsFromHook,
+        isLoading: loadingFromHook,
+        error: errorFromHook,
+    } = useAllStoreData(storeSubdomain);
+
+    // Usar datos del hook o del prop
+    const resolvedStoreId = storeId || storeIdFromHook;
+    const loading = loadingFromHook;
+    const products = productsFromHook;
+    const storeInfo = storeInfoFromHook;
+    const categories = categoriesFromHook;
+    const brands = brandsFromHook;
+    const collections = collectionsFromHook;
     const [currentCollection, setCurrentCollection] = useState<PublicCollection | null>(null);
     const [currentBrand, setCurrentBrand] = useState<PublicBrand | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(categorySlugFromUrl);
@@ -210,7 +225,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
     const [currentSort, setCurrentSort] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc'>('newest');
     const [isMobile, setIsMobile] = useState(false);
-    const [filters, setFilters] = useState<Filter[]>([]);
+    const filters = filtersFromHook; // Ya no necesitamos useState, viene del hook
     const [loadingCartButton, setLoadingCartButton] = useState<string | null>(null); // ID del producto que está siendo agregado
     const [filtersModalOpen, setFiltersModalOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
@@ -302,51 +317,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
     }, [cartState.isOpen, loadingCartButton]);
 
-    // Cargar datos de la tienda
-    useEffect(() => {
-        let alive = true;
-        (async () => {
-            try {
-                const id = await getStoreIdBySubdomain(storeSubdomain);
-                if (!alive) return;
-                setStoreIdState(id);
-                if (id) {
-                    // Usar función optimizada si estamos en home page, función completa si estamos en página de categoría
-                    const isOnHomePage = !categorySlug && !collectionSlug && !brandSlug;
-                    const categoryLoadFunction = isOnHomePage ? getStoreParentCategories : getStoreCategories;
-
-                    // 🚀 OPTIMIZACIÓN FASE 1: Cargar solo 16 productos inicialmente para mejorar tiempo de carga
-                    const [items, info, cats, brandList, filterList, collectionsList] = await Promise.all([
-                        getStoreProducts(id, 16),
-                        getStoreBasicInfo(id),
-                        categoryLoadFunction(id),
-                        getStoreBrands(id),
-                        getStoreFilters(id),
-                        getStoreCollections(id)
-                    ]);
-                    if (!alive) return;
-                    // Actualizar todos los estados en una transición para evitar renders intermedios
-                    startTransition(() => {
-                        setProducts(items);
-                        setCategories(cats);
-                        setBrands(brandList);
-                        setFilters(filterList);
-                        setCollections(collectionsList);
-
-                        setStoreInfo(info);
-                    });
-                    
-                    
-
-                }
-            } finally {
-                if (alive) setLoading(false);
-            }
-        })();
-        return () => {
-            alive = false;
-        };
-    }, [storeSubdomain]);
+    // 🚀 OPTIMIZACIÓN FASE 4: Ya no necesitamos este useEffect
+    // Los datos ahora se cargan con React Query en el hook useAllStoreData
+    // Esto proporciona cache automático y navegación instantánea
 
     // Asegurar que activeCategory se setee correctamente al recibir categorySlug prop
     useEffect(() => {

@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import { CartProvider } from "../lib/cart-context";
 import { ToastProvider } from "../components/ui/Toast";
+import { QueryProvider } from "../components/QueryProvider";
 // import "../styles/tokens.css"; // no existía en el commit base
 // import "../styles/fonts.css";  // no existían fuentes locales en el commit base
 // 🚀 CORREGIDO: Metadata eliminado del layout raíz para evitar duplicación
@@ -14,11 +15,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     return (
         <html suppressHydrationWarning lang="es">
             <body>
-                <ToastProvider>
-                    <CartProvider>
-                        {children}
-                    </CartProvider>
-                </ToastProvider>
+                <QueryProvider>
+                    <ToastProvider>
+                        <CartProvider>
+                            {children}
+                        </CartProvider>
+                    </ToastProvider>
+                </QueryProvider>
             </body>
         </html>
     );

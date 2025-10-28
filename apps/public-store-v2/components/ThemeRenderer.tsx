@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { getStoreIdBySubdomain, getStoreTheme, getStorePrimaryLocale } from "../lib/store";
+import { Suspense } from "react";
+import { getStoreTheme, getStorePrimaryLocale } from "../lib/store";
+import { useStoreId } from "../hooks/useStoreData";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import UnifiedLoading from "./UnifiedLoading";
 import CartRecovery from "./CartRecovery";
@@ -103,47 +105,31 @@ type Props = {
 };
 
 export default function ThemeRenderer({ storeSubdomain, categorySlug, collectionSlug, brandSlug }: Props) {
-    const [theme, setTheme] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [effectiveLocale, setEffectiveLocale] = useState<string>('es');
-    const [storeId, setStoreId] = useState<string | null>(null);
+    // 🚀 OPTIMIZACIÓN: Usar React Query para cache automático
+    const { data: storeId, isLoading: isLoadingStoreId } = useStoreId(storeSubdomain);
 
-    useEffect(() => {
-        let alive = true;
-        (async () => {
-            try {
-                const storeIdResult = await getStoreIdBySubdomain(storeSubdomain);
-                if (!alive) return;
-                
-                if (storeIdResult) {
-                    const [storeTheme, primaryLocale] = await Promise.all([
-                        getStoreTheme(storeIdResult),
-                        getStorePrimaryLocale(storeIdResult)
-                    ]);
-                    if (!alive) return;
-                    setStoreId(storeIdResult);
-                    setTheme(storeTheme);
-                    setEffectiveLocale(primaryLocale || 'es');
-                } else {
-                    // Si no encuentra la tienda, usar tema por defecto
-                    setTheme('new-base-default');
-                    setEffectiveLocale('es');
-                }
-            } catch (error) {
-                // Error loading theme, using default
-                if (alive) {
-                    setTheme('new-base-default');
-                    setEffectiveLocale('es');
-                }
-            } finally {
-                if (alive) setLoading(false);
-            }
-        })();
-        
-        return () => {
-            alive = false;
-        };
-    }, [storeSubdomain]);
+    // Obtener tema y locale con React Query
+    const { data: theme } = useQuery({
+        queryKey: ['storeTheme', storeId],
+        queryFn: () => {
+            if (!storeId) return 'new-base-default';
+            return getStoreTheme(storeId);
+        },
+        enabled: !!storeId,
+        staleTime: 10 * 60 * 1000, // 10 minutos - tema rara vez cambia
+        placeholderData: 'new-base-default', // Mostrar tema default mientras carga
+    });
+
+    const { data: effectiveLocale } = useQuery({
+        queryKey: ['storePrimaryLocale', storeId],
+        queryFn: () => {
+            if (!storeId) return 'es';
+            return getStorePrimaryLocale(storeId);
+        },
+        enabled: !!storeId,
+        staleTime: 10 * 60 * 1000, // 10 minutos
+        placeholderData: 'es', // Mostrar 'es' mientras carga
+    });
 
     // No mostrar loading aquí, dejar que el tema maneje toda la carga
 
