@@ -3,6 +3,9 @@ import ThemeRenderer from "../../components/ThemeRenderer";
 import SimpleLoadingSpinner from "../../components/SimpleLoadingSpinner";
 import { getStoreMetadata } from "../../server-only/store-metadata";
 
+// 🚀 OPTIMIZACIÓN FASE 1: Cache ISR - Revalidar cada 1 hora
+export const revalidate = 3600;
+
 export default async function StorePage({ params }: { params: { storeSubdomain: string } }) {
     const subdomain = params?.storeSubdomain ?? 'store';
     

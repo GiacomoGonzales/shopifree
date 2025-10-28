@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState, useMemo, startTransition, useRef } from "react";
+import { useEffect, useState, useMemo, startTransition, useRef, lazy, Suspense } from "react";
 import "./new-base-default.css";
 import "./loading-spinner.css";
 import "./texture-backgrounds.css";
 import "./utilities.css";
 import UnifiedLoading from "../../components/UnifiedLoading";
-import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture, applyStoreColors } from "../../lib/store";
+// 🚀 OPTIMIZACIÓN FASE 2: applyStoreColors se importa dinámicamente para code splitting
+import { getStoreIdBySubdomain, getStoreBasicInfo, StoreBasicInfo, getStoreBackgroundTexture } from "../../lib/store";
 import { getStoreProducts, PublicProduct } from "../../lib/products";
 import { getStoreCategories, getStoreParentCategories, getCategorySubcategories, Category } from "../../lib/categories";
-import { NewBaseDefaultNewsletter } from "./components/NewBaseDefaultNewsletter";
 import { NewBaseDefaultHero } from "./components/NewBaseDefaultHero";
 import { AddToCartButton } from "../../components/shared";
 import { NewBaseDefaultCategories } from "./components/NewBaseDefaultCategories";
-import { NewBaseDefaultBrands } from "./components/NewBaseDefaultBrands";
 import { NewBaseDefaultProductFilters } from "./components/NewBaseDefaultProductFilters";
 import { NewBaseDefaultProductsGrid } from "./components/NewBaseDefaultProductsGrid";
 import { NewBaseDefaultSimpleCarousel } from "./components/NewBaseDefaultSimpleCarousel";
@@ -23,7 +22,6 @@ import { NewBaseDefaultProductSectionHeader } from "./components/NewBaseDefaultP
 import { getStoreBrands, PublicBrand, getBrandBySlug } from "../../lib/brands";
 import { getStoreFilters, Filter } from "../../lib/filters";
 import { getStoreCollections, PublicCollection, getCollectionBySlug } from "../../lib/collections";
-import CollectionsMosaic from "../../components/CollectionsMosaic";
 import { toCloudinarySquare } from "../../lib/images";
 import { formatPrice } from "../../lib/currency";
 import { useCart } from "../../lib/cart-context";
@@ -31,8 +29,14 @@ import { useStoreLanguage } from "../../lib/store-language-context";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
-import ProductQuickView from "./components/ProductQuickView";
 import AnnouncementBar from "./AnnouncementBar";
+
+// 🚀 OPTIMIZACIÓN FASE 3: Lazy loading de componentes no críticos
+// Estos componentes se cargan bajo demanda para reducir el bundle inicial
+const NewBaseDefaultNewsletter = lazy(() => import("./components/NewBaseDefaultNewsletter").then(m => ({ default: m.NewBaseDefaultNewsletter })));
+const NewBaseDefaultBrands = lazy(() => import("./components/NewBaseDefaultBrands").then(m => ({ default: m.NewBaseDefaultBrands })));
+const CollectionsMosaic = lazy(() => import("../../components/CollectionsMosaic"));
+const ProductQuickView = lazy(() => import("./components/ProductQuickView"));
 
 type Props = {
     storeSubdomain: string;
@@ -239,18 +243,23 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         return `texture-${backgroundTexture}`;
     };
 
+    // 🚀 OPTIMIZACIÓN FASE 2: Importación dinámica de colores para reducir bundle inicial
     // Aplicar colores dinámicos de la tienda
     useEffect(() => {
-        
+
         if (storeInfo?.primaryColor) {
-            
-            // Aplicar inmediatamente
-            applyStoreColors(storeInfo.primaryColor, storeInfo.secondaryColor);
-            
-            // También aplicar después de un pequeño delay para asegurar que el DOM esté listo
-            setTimeout(() => {
+            // Importar dinámicamente la función de colores (code splitting)
+            import('../../lib/store-colors').then(({ applyStoreColors }) => {
+                // Aplicar inmediatamente
                 applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
-            }, 100);
+
+                // También aplicar después de un pequeño delay para asegurar que el DOM esté listo
+                setTimeout(() => {
+                    applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
+                }, 100);
+            }).catch((error) => {
+                console.error('Error loading store colors:', error);
+            });
         } else {
         }
     }, [storeInfo?.primaryColor, storeInfo?.secondaryColor]);
@@ -305,9 +314,10 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     // Usar función optimizada si estamos en home page, función completa si estamos en página de categoría
                     const isOnHomePage = !categorySlug && !collectionSlug && !brandSlug;
                     const categoryLoadFunction = isOnHomePage ? getStoreParentCategories : getStoreCategories;
-                    
+
+                    // 🚀 OPTIMIZACIÓN FASE 1: Cargar solo 16 productos inicialmente para mejorar tiempo de carga
                     const [items, info, cats, brandList, filterList, collectionsList] = await Promise.all([
-                        getStoreProducts(id),
+                        getStoreProducts(id, 16),
                         getStoreBasicInfo(id),
                         categoryLoadFunction(id),
                         getStoreBrands(id),
@@ -926,10 +936,12 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                 return (!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 &&
                         (storeInfo?.sections?.collections?.enabled === true)) ? (
                     <div id="colecciones">
-                        <CollectionsMosaic
-                            collections={collections}
-                            storeSubdomain={storeSubdomain}
-                        />
+                        <Suspense fallback={<div className="py-8 text-center text-gray-400">Cargando colecciones...</div>}>
+                            <CollectionsMosaic
+                                collections={collections}
+                                storeSubdomain={storeSubdomain}
+                            />
+                        </Suspense>
                     </div>
                 ) : null;
             })()}
@@ -1005,20 +1017,24 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             {/* Sección de Newsletter */}
             {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage &&
              (storeInfo?.sections?.newsletter?.enabled === true) && (
-                <NewBaseDefaultNewsletter additionalText={additionalText} t={t as (key: string) => string} />
+                <Suspense fallback={<div className="py-8" />}>
+                    <NewBaseDefaultNewsletter additionalText={additionalText} t={t as (key: string) => string} />
+                </Suspense>
             )}
 
             {/* Sección de Marcas Carousel - Solo en home */}
             {!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && brands && brands.length > 0 &&
              (storeInfo?.sections?.brands?.enabled === true) && (
                 <div id="marcas">
-                    <NewBaseDefaultBrands
-                        brands={brands}
-                        isMobile={isMobile}
-                        additionalText={additionalText}
-                        buildUrl={buildUrl}
-                        toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
-                    />
+                    <Suspense fallback={<div className="py-8 text-center text-gray-400">Cargando marcas...</div>}>
+                        <NewBaseDefaultBrands
+                            brands={brands}
+                            isMobile={isMobile}
+                            additionalText={additionalText}
+                            buildUrl={buildUrl}
+                            toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
+                        />
+                    </Suspense>
                 </div>
             )}
 
@@ -1029,16 +1045,18 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             
             {/* Modal de vista rápida de producto */}
             {quickViewProduct && (
-                <ProductQuickView
-                    product={quickViewProduct}
-                    isOpen={isQuickViewOpen}
-                    onClose={() => {
-                        setIsQuickViewOpen(false);
-                        setQuickViewProduct(null);
-                    }}
-                    storeInfo={storeInfo || undefined}
-                    storeId={resolvedStoreId}
-                />
+                <Suspense fallback={null}>
+                    <ProductQuickView
+                        product={quickViewProduct}
+                        isOpen={isQuickViewOpen}
+                        onClose={() => {
+                            setIsQuickViewOpen(false);
+                            setQuickViewProduct(null);
+                        }}
+                        storeInfo={storeInfo || undefined}
+                        storeId={resolvedStoreId}
+                    />
+                </Suspense>
             )}
         </div>
     );

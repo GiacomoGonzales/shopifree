@@ -7,6 +7,9 @@ import { generateAllImageVariants } from "../../../../lib/image-optimization";
 import { getCanonicalHost } from "../../../../lib/canonical-resolver";
 import UnifiedLoading from "../../../../components/UnifiedLoading";
 
+// 🚀 OPTIMIZACIÓN FASE 1: Cache ISR - Revalidar cada 1 hora
+export const revalidate = 3600;
+
 // Generar metadata para SEO
 export async function generateMetadata({ params }: { params: { brandSlug: string; storeSubdomain: string } }): Promise<Metadata> {
     try {

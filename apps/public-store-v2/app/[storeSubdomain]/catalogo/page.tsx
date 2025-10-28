@@ -1,3 +1,6 @@
+// 🚀 OPTIMIZACIÓN FASE 1: Cache ISR - Revalidar cada 1 hora
+export const revalidate = 3600;
+
 export default function CatalogoPage() {
     return (
         <div className="container">

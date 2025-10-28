@@ -215,7 +215,8 @@ function transformToPublicProduct(raw: any): PublicProduct {
 	};
 }
 
-export async function getStoreProducts(storeId: string): Promise<PublicProduct[]> {
+// 🚀 OPTIMIZACIÓN FASE 1: Agregar parámetro limit opcional para cargar menos productos inicialmente
+export async function getStoreProducts(storeId: string, limitCount?: number): Promise<PublicProduct[]> {
 	try {
 		const db = getFirebaseDb();
 		if (!db) {
@@ -225,7 +226,21 @@ export async function getStoreProducts(storeId: string): Promise<PublicProduct[]
 		const ref = collection(db, "stores", storeId, "products");
 		let snap;
 		try {
-			snap = await getDocs(query(ref, where("status", "==", "active")));
+			// Si hay limit, usar orderBy + limit para traer solo los más recientes
+			if (limitCount) {
+				const { orderBy, limit } = await import("firebase/firestore");
+				snap = await getDocs(
+					query(
+						ref,
+						where("status", "==", "active"),
+						orderBy("createdAt", "desc"),
+						limit(limitCount)
+					)
+				);
+			} else {
+				// Sin limit, traer todos como antes
+				snap = await getDocs(query(ref, where("status", "==", "active")));
+			}
 		} catch {
 			snap = await getDocs(ref);
 		}
