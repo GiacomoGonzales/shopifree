@@ -7,6 +7,8 @@ import { getUserStore, updateStore, StoreWithId } from '../../lib/store'
 import PaymentMethodSelector from './PaymentMethodSelector'
 import { Toast } from '../shared/Toast'
 import { useToast } from '../../lib/hooks/useToast'
+import { hasFeatureAccess } from '../../lib/subscription-utils'
+import SubscriptionBlockedModal from '../SubscriptionBlockedModal'
 
 const monedas = [
   { code: 'USD', symbol: '$', name: 'Dólar Americano' },
@@ -48,6 +50,11 @@ export default function SalesSection() {
   const [testingConnection, setTestingConnection] = useState(false)
   const { toast, showToast, hideToast } = useToast()
 
+  // Subscription state
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [hasTraditionalCheckoutAccess, setHasTraditionalCheckoutAccess] = useState(false)
+  const [hasIntegratedPaymentsAccess, setHasIntegratedPaymentsAccess] = useState(false)
+
   const [formData, setFormData] = useState({
     currency: 'USD',
     advanced: {
@@ -71,8 +78,8 @@ export default function SalesSection() {
   useEffect(() => {
     const loadStore = async () => {
       if (!user?.uid) return
-      
-      try {        
+
+      try {
         const userStore = await getUserStore(user.uid)
         setStore(userStore)
         if (userStore) {
@@ -103,6 +110,28 @@ export default function SalesSection() {
     }
 
     loadStore()
+  }, [user?.uid])
+
+  // Check feature access for traditional checkout and integrated payments
+  useEffect(() => {
+    const checkFeatures = async () => {
+      if (!user?.uid) return
+
+      try {
+        const [checkoutAccess, paymentsAccess] = await Promise.all([
+          hasFeatureAccess(user.uid, 'hasTraditionalCheckout'),
+          hasFeatureAccess(user.uid, 'hasIntegratedPayments')
+        ])
+        setHasTraditionalCheckoutAccess(checkoutAccess)
+        setHasIntegratedPaymentsAccess(paymentsAccess)
+      } catch (error) {
+        console.error('Error checking feature access:', error)
+        setHasTraditionalCheckoutAccess(false)
+        setHasIntegratedPaymentsAccess(false)
+      }
+    }
+
+    checkFeatures()
   }, [user?.uid])
 
   const handleChange = (field: string, value: string) => {
@@ -342,15 +371,58 @@ export default function SalesSection() {
                       name="checkout-method"
                       type="radio"
                       checked={formData.advanced?.checkout?.method === 'traditional'}
-                      onChange={() => handleChange('advanced.checkout.method', 'traditional')}
-                      className="focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300"
+                      onChange={() => {
+                        if (!hasTraditionalCheckoutAccess) {
+                          setShowSubscriptionModal(true)
+                        } else {
+                          handleChange('advanced.checkout.method', 'traditional')
+                        }
+                      }}
+                      disabled={!hasTraditionalCheckoutAccess && formData.advanced?.checkout?.method !== 'traditional'}
+                      className={`focus:ring-gray-600 h-4 w-4 text-gray-800 border-gray-300 ${
+                        !hasTraditionalCheckoutAccess && formData.advanced?.checkout?.method !== 'traditional'
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'cursor-pointer'
+                      }`}
                     />
                   </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="traditional-checkout" className="font-medium text-gray-700">
-                      {t('sales.traditionalCheckout')}
-                    </label>
-                    <p className="text-gray-500">{t('sales.traditionalCheckoutDescription')}</p>
+                  <div className="ml-3 text-sm flex-1">
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="traditional-checkout" className={`font-medium ${
+                        !hasTraditionalCheckoutAccess && formData.advanced?.checkout?.method !== 'traditional'
+                          ? 'text-gray-400'
+                          : 'text-gray-700'
+                      }`}>
+                        {t('sales.traditionalCheckout')}
+                      </label>
+                      {!hasTraditionalCheckoutAccess && formData.advanced?.checkout?.method !== 'traditional' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                          </svg>
+                          Premium
+                        </span>
+                      )}
+                    </div>
+                    <p className={`${
+                      !hasTraditionalCheckoutAccess && formData.advanced?.checkout?.method !== 'traditional'
+                        ? 'text-gray-400'
+                        : 'text-gray-500'
+                    }`}>
+                      {t('sales.traditionalCheckoutDescription')}
+                    </p>
+                    {!hasTraditionalCheckoutAccess && formData.advanced?.checkout?.method !== 'traditional' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowSubscriptionModal(true)}
+                        className="mt-2 text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Activar con plan Premium
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -382,11 +454,49 @@ export default function SalesSection() {
       </div>
 
       {/* Configuración de Pasarela de Pago */}
-      <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-        <div className="px-6 py-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">{tPayments('title')}</h3>
-            <p className="mt-1 text-sm text-gray-600">{tPayments('description')}</p>
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200 relative">
+        {/* Overlay para usuarios FREE */}
+        {!hasIntegratedPaymentsAccess && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 rounded-lg flex items-center justify-center">
+            <div className="text-center max-w-md mx-auto px-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Función Premium
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Las pasarelas de pago integradas están disponibles con el plan Premium. Acepta pagos con tarjeta directamente en tu tienda.
+              </p>
+              <button
+                onClick={() => setShowSubscriptionModal(true)}
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Activar con plan Premium
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className={`px-6 py-6 space-y-6 ${!hasIntegratedPaymentsAccess ? 'pointer-events-none select-none' : ''}`}>
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">{tPayments('title')}</h3>
+              <p className="mt-1 text-sm text-gray-600">{tPayments('description')}</p>
+            </div>
+            {!hasIntegratedPaymentsAccess && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+                Premium
+              </span>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -529,6 +639,19 @@ export default function SalesSection() {
           onClose={hideToast}
         />
       )}
+
+      {/* Subscription blocked modal */}
+      <SubscriptionBlockedModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        featureName={!hasIntegratedPaymentsAccess && !hasTraditionalCheckoutAccess
+          ? "Funciones Premium (Checkout Tradicional y Pasarelas de Pago)"
+          : !hasTraditionalCheckoutAccess
+            ? "Checkout Tradicional (Ventas Automatizadas)"
+            : "Pasarelas de Pago Integradas"}
+        requiredPlan="premium"
+        reason="plan_limitation"
+      />
     </div>
   )
 } 

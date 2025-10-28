@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { incrementAIEnhancementUsage } from '../../../../lib/subscription-utils'
 
 type EnhancementPreset = 'auto' | 'white-bg' | 'lifestyle-bg' | 'with-model' | 'lighting' | 'sharpness' | 'custom'
 
@@ -239,7 +240,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Obtener datos del request
     const body = await request.json()
-    const { imageBase64, productName, productDescription, preset = 'auto', customPrompt } = body
+    const { imageBase64, productName, productDescription, preset = 'auto', customPrompt, userId } = body
 
     if (!imageBase64) {
       return NextResponse.json(
@@ -248,9 +249,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Missing userId parameter' },
+        { status: 400 }
+      )
+    }
+
     console.log('📝 Image data length:', imageBase64.length)
     console.log('📦 Product context:', { productName, productDescription })
     console.log('🎯 Enhancement preset:', preset)
+    console.log('👤 User ID:', userId)
+
+    // 1.5. Validar y decrementar límite de uso de IA
+    console.log('🔍 Checking AI enhancement usage limits...')
+    const canUseAI = await incrementAIEnhancementUsage(userId)
+
+    if (!canUseAI) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'AI enhancement limit reached or access denied',
+          details: 'You have reached your monthly AI enhancement limit or do not have access to this feature. Please upgrade your plan to continue.'
+        },
+        { status: 403 }
+      )
+    }
+
+    console.log('✅ AI enhancement usage validated and incremented')
 
     // 2. Obtener API key de Gemini
     const geminiApiKey = process.env.GEMINI_API_KEY

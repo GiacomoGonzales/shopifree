@@ -12,6 +12,8 @@ import { useAuth } from '../../../../../lib/simple-auth-context'
 import { getUserStore, updateStore, StoreWithId } from '../../../../../lib/store'
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { getFirebaseDb } from '../../../../../lib/firebase'
+import { hasFeatureAccess } from '../../../../../lib/subscription-utils'
+import SubscriptionBlockedModal from '../../../../../components/SubscriptionBlockedModal'
 
 // Función auxiliar para actualizar URL canónica cuando se verifica un dominio
 const updateCanonicalUrl = async (storeId: string, customDomain: string) => {
@@ -70,6 +72,10 @@ export default function GeneralSettingsAdvancedPage() {
   const [customDomain, setCustomDomain] = useState('')
   const [domainDoc, setDomainDoc] = useState<any | null>(null)
 
+  // Estado para control de acceso a funcionalidades premium
+  const [hasCustomDomainAccess, setHasCustomDomainAccess] = useState(false)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+
   // Función para actualizar la tienda
   const handleStoreUpdate = async (data: Partial<StoreWithId>): Promise<boolean> => {
     if (!store?.id) return false
@@ -98,6 +104,10 @@ export default function GeneralSettingsAdvancedPage() {
       try {
         const s = await getUserStore(user.uid)
         setStore(s)
+
+        // Verificar acceso a dominio personalizado
+        const customDomainAccess = await hasFeatureAccess(user.uid, 'hasCustomDomain')
+        setHasCustomDomainAccess(customDomainAccess)
 
         // Cargar domain settings desde subcolección: stores/{storeId}/settings/domain
         if (s?.id) {
@@ -327,8 +337,36 @@ export default function GeneralSettingsAdvancedPage() {
             )}
 
             {/* Conectar dominio personalizado */}
-            <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-              <div className="px-6 py-6 space-y-6">
+            <div className="bg-white shadow-sm rounded-lg border border-gray-200 relative">
+              {/* Overlay de bloqueo para usuarios sin acceso */}
+              {!hasCustomDomainAccess && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] rounded-lg z-10 flex items-center justify-center">
+                  <div className="text-center px-6 py-8">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                      <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Función Premium
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-6 max-w-sm">
+                      El dominio personalizado está disponible con el plan Premium. Activa tu periodo de prueba para acceder a esta función.
+                    </p>
+                    <button
+                      onClick={() => setShowSubscriptionModal(true)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md inline-flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Activar con plan Premium
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className={`px-6 py-6 space-y-6 ${!hasCustomDomainAccess ? 'pointer-events-none' : ''}`}>
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">{tAdv('customDomain.title')}</h3>
                   <p className="mt-1 text-sm text-gray-600">{tAdv('customDomain.description')}</p>
@@ -486,6 +524,15 @@ export default function GeneralSettingsAdvancedPage() {
           onClose={hideToast}
         />
       )}
+
+      {/* Modal de suscripción bloqueada */}
+      <SubscriptionBlockedModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        featureName="Dominio Personalizado"
+        requiredPlan="premium"
+        reason="plan_limitation"
+      />
     </DashboardLayout>
   )
 }

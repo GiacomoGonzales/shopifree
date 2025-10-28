@@ -1,6 +1,7 @@
 import { doc, setDoc, getDoc, serverTimestamp, query, collection, where, getDocs, Timestamp } from 'firebase/firestore'
 import { User as FirebaseUser } from 'firebase/auth'
 import { getFirebaseDb } from './firebase'
+import { PLAN_FEATURES } from './subscription-utils'
 
 export interface UserDocument {
   uid: string
@@ -16,6 +17,41 @@ export interface UserDocument {
   phone?: string
   timezone?: string
   onboardingUserCompleted?: boolean
+
+  // Subscription fields
+  subscriptionStatus?: 'trial' | 'active' | 'cancelled' | 'expired' | 'free'
+  subscriptionPlan?: 'free' | 'premium' | 'pro'
+  trialStartDate?: unknown
+  trialEndDate?: unknown
+  subscriptionStartDate?: unknown
+  subscriptionEndDate?: unknown
+
+  // Feature limits (cached from plan for performance)
+  features?: {
+    maxProducts?: number
+    hasCustomDomain?: boolean
+    hasIntegratedPayments?: boolean
+    hasTraditionalCheckout?: boolean
+    hasCartRecovery?: boolean
+    hasAutoEmails?: boolean
+    hasGoogleAnalytics?: boolean
+    hasMetaPixel?: boolean
+    hasCompleteReports?: boolean
+    hasUnlimitedProducts?: boolean
+    hasInternationalSales?: boolean
+    hasMultipleLanguages?: boolean
+    hasCustomerSegmentation?: boolean
+    hasAdvancedMarketing?: boolean
+    hasExclusiveThemes?: boolean
+    hasPrioritySupport?: boolean
+    hasAIImageEnhancement?: boolean
+    aiEnhancementsPerMonth?: number
+  }
+
+  // AI Enhancement tracking
+  aiEnhancementsUsed?: number
+  aiEnhancementsLastReset?: string // Format: "YYYY-MM" (e.g., "2025-01")
+
   // Soft delete fields
   deleted?: boolean
   deletedAt?: unknown
@@ -79,7 +115,7 @@ export const createUserDocument = async (user: FirebaseUser, additionalData?: Re
       await setDoc(userDocRef, updatedData, { merge: true })
       return { uid: user.uid, ...updatedData } as UserDocument
     } else {
-      // Create new user document
+      // Create new user document with FREE plan (no trial yet)
       const userData: Omit<UserDocument, 'uid'> = {
         email: user.email,
         displayName: user.displayName,
@@ -88,10 +124,15 @@ export const createUserDocument = async (user: FirebaseUser, additionalData?: Re
         lastLoginAt: serverTimestamp(),
         isActive: true,
         role: 'user',
+        // Start with FREE plan - user can activate trial manually
+        subscriptionStatus: 'free',
+        subscriptionPlan: 'free',
+        features: PLAN_FEATURES.free,
         ...additionalData
       }
-      
+
       await setDoc(userDocRef, userData)
+      console.log('✅ New user created with FREE plan - can activate 30-day Premium trial')
       return { uid: user.uid, ...userData } as UserDocument
     }
   } catch (error) {

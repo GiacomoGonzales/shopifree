@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useAuth } from '../lib/simple-auth-context'
 import { useStore } from '../lib/hooks/useStore'
 import PageLoadingState from './PageLoadingState'
+import TrialBanner from './TrialBanner'
 
 // Iconos para el menú
 const MenuIcons = {
@@ -838,6 +839,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
         </div>
+
+        {/* Trial Banner */}
+        <TrialBanner />
 
         {/* Contenido de la página con loading overlay */}
         <main className="flex-1 relative">

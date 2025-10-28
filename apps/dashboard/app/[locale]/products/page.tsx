@@ -20,13 +20,21 @@ import {
 import { getBrands, type BrandWithId } from '../../../lib/brands'
 import { getParentCategories, getSubcategories, type CategoryWithId } from '../../../lib/categories'
 import { getActivePromotionsForProduct, type Promotion, calculateDiscountedPrice } from '../../../lib/promotions'
+import { useAuth } from '../../../lib/simple-auth-context'
+import { canCreateMoreProducts } from '../../../lib/subscription-utils'
+import SubscriptionBlockedModal from '../../../components/SubscriptionBlockedModal'
 
 export default function ProductsPage() {
   const router = useRouter()
   const { store, loading: storeLoading } = useStore()
+  const { user } = useAuth()
   const t = useTranslations('products')
   const { toast, showToast, hideToast } = useToast()
-  
+
+  // Subscription state
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [productLimit, setProductLimit] = useState<{ canCreate: boolean; limit: number; current: number } | null>(null)
+
   const [paginatedProducts, setPaginatedProducts] = useState<ProductWithId[]>([])
   const [brands, setBrands] = useState<BrandWithId[]>([])
   const [categories, setCategories] = useState<CategoryWithId[]>([])
@@ -138,6 +146,22 @@ export default function ProductsPage() {
       loadData()
     }
   }, [store?.id, storeLoading, t])
+
+  // Check product limit for subscription
+  useEffect(() => {
+    const checkProductLimit = async () => {
+      if (!user || !totalItems) return
+
+      try {
+        const limitInfo = await canCreateMoreProducts(user.uid, totalItems)
+        setProductLimit(limitInfo)
+      } catch (error) {
+        console.error('Error checking product limit:', error)
+      }
+    }
+
+    checkProductLimit()
+  }, [user, totalItems])
 
   // Cargar productos filtrados
   useEffect(() => {
@@ -673,7 +697,13 @@ export default function ProductsPage() {
                 </svg>
               </button>
               <button
-                onClick={() => router.push('/products/create')}
+                onClick={() => {
+                  if (productLimit && !productLimit.canCreate) {
+                    setShowSubscriptionModal(true)
+                  } else {
+                    router.push('/products/create')
+                  }
+                }}
                 className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1091,7 +1121,13 @@ export default function ProductsPage() {
                       <div className="mt-6">
                         <button
                           type="button"
-                          onClick={() => router.push('/products/create')}
+                          onClick={() => {
+                            if (productLimit && !productLimit.canCreate) {
+                              setShowSubscriptionModal(true)
+                            } else {
+                              router.push('/products/create')
+                            }
+                          }}
                           className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
                         >
                           {t('addProduct')}
@@ -1942,6 +1978,17 @@ export default function ProductsPage() {
           onClose={hideToast}
         />
       )}
+
+      {/* Subscription blocked modal */}
+      <SubscriptionBlockedModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        featureName={t('addProduct')}
+        requiredPlan={productLimit && productLimit.limit === 12 ? 'premium' : 'pro'}
+        reason="product_limit"
+        currentCount={productLimit?.current || 0}
+        maxCount={productLimit?.limit || 0}
+      />
 
     </DashboardLayout>
   )

@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useAuth } from '../../lib/simple-auth-context'
+import { getAIEnhancementUsage } from '../../lib/subscription-utils'
+import SubscriptionBlockedModal from '../SubscriptionBlockedModal'
 
 interface MediaFile {
   id: string
@@ -39,6 +42,7 @@ export function MediaGalleryWithAI({
   productName,
   productDescription
 }: MediaGalleryWithAIProps) {
+  const { user } = useAuth()
   const [enhancingId, setEnhancingId] = useState<string | null>(null)
   const [dropdownOpenFor, setDropdownOpenFor] = useState<string | null>(null)
   const [selectedPreset, setSelectedPreset] = useState<EnhancementPreset>('auto')
@@ -50,6 +54,17 @@ export function MediaGalleryWithAI({
   // Estados para modal de vista ampliada
   const [modalOpen, setModalOpen] = useState(false)
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null)
+
+  // Estados para control de acceso a IA
+  const [aiUsage, setAiUsage] = useState<{
+    hasAccess: boolean
+    used: number
+    limit: number
+    remaining: number
+    isUnlimited: boolean
+  } | null>(null)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [loadingAiUsage, setLoadingAiUsage] = useState(true)
 
   // Preset options
   const presetOptions: PresetOption[] = [
@@ -126,6 +141,27 @@ export function MediaGalleryWithAI({
     }
   ]
 
+  // Load AI usage on mount
+  useEffect(() => {
+    const loadAiUsage = async () => {
+      if (!user?.uid) {
+        setLoadingAiUsage(false)
+        return
+      }
+
+      try {
+        const usage = await getAIEnhancementUsage(user.uid)
+        setAiUsage(usage)
+      } catch (error) {
+        console.error('Error loading AI usage:', error)
+      } finally {
+        setLoadingAiUsage(false)
+      }
+    }
+
+    loadAiUsage()
+  }, [user?.uid])
+
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -142,6 +178,18 @@ export function MediaGalleryWithAI({
 
   const handlePresetSelect = (fileId: string, preset: EnhancementPreset) => {
     setDropdownOpenFor(null)
+
+    // Check access before proceeding
+    if (!aiUsage?.hasAccess) {
+      setShowSubscriptionModal(true)
+      return
+    }
+
+    if (!aiUsage.isUnlimited && aiUsage.remaining <= 0) {
+      alert(`Has alcanzado el límite de ${aiUsage.limit} mejoras de IA este mes. Actualiza a un plan superior para continuar.`)
+      setShowSubscriptionModal(true)
+      return
+    }
 
     if (preset === 'custom') {
       setCustomFileId(fileId)
@@ -240,7 +288,8 @@ export function MediaGalleryWithAI({
           productName: productName || '',
           productDescription: productDescription || '',
           preset: preset,
-          customPrompt: preset === 'custom' ? customPrompt : undefined
+          customPrompt: preset === 'custom' ? customPrompt : undefined,
+          userId: user?.uid
         })
       })
 
@@ -307,6 +356,16 @@ export function MediaGalleryWithAI({
       )
 
       console.log('✅ Image enhanced and uploaded successfully')
+
+      // Reload AI usage after successful enhancement
+      if (user?.uid) {
+        try {
+          const updatedUsage = await getAIEnhancementUsage(user.uid)
+          setAiUsage(updatedUsage)
+        } catch (error) {
+          console.error('Error reloading AI usage:', error)
+        }
+      }
 
     } catch (error) {
       console.error('❌ Error enhancing image:', error)
@@ -430,40 +489,71 @@ export function MediaGalleryWithAI({
 
               {/* Split button "Mejorar con IA" con dropdown de presets */}
               {file.type === 'image' && !file.uploading && !file.isEnhanced && (
-                <div className="relative" ref={dropdownOpenFor === file.id ? dropdownRef : null}>
-                  <div className="flex gap-0.5">
-                    {/* Main action button */}
-                    <button
-                      onClick={() => handleEnhanceImage(file.id, file.url, 'auto')}
-                      disabled={file.enhancing || enhancingId !== null}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-l-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                      </svg>
-                      {file.enhancing ? 'Mejorando...' : 'Mejorar con IA'}
-                    </button>
+                <div className="space-y-2">
+                  {/* AI Usage Counter (si tiene acceso) */}
+                  {aiUsage?.hasAccess && !loadingAiUsage && (
+                    <div className="text-xs text-center text-gray-600">
+                      {aiUsage.isUnlimited ? (
+                        <span className="text-purple-600 font-medium">✨ Mejoras ilimitadas</span>
+                      ) : (
+                        <span>
+                          {aiUsage.remaining} de {aiUsage.limit} mejoras disponibles este mes
+                        </span>
+                      )}
+                    </div>
+                  )}
 
-                    {/* Dropdown trigger button */}
-                    <button
-                      onClick={() => toggleDropdown(file.id)}
-                      disabled={file.enhancing || enhancingId !== null}
-                      className="px-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-r-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border-l border-white/20"
-                      title="Ver opciones"
-                    >
-                      <svg
-                        className={`h-4 w-4 transition-transform duration-200 ${dropdownOpenFor === file.id ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                  <div className="relative" ref={dropdownOpenFor === file.id ? dropdownRef : null}>
+                    <div className="flex gap-0.5">
+                      {/* Main action button */}
+                      <button
+                        onClick={() => {
+                          if (!aiUsage?.hasAccess) {
+                            setShowSubscriptionModal(true)
+                            return
+                          }
+                          if (!aiUsage.isUnlimited && aiUsage.remaining <= 0) {
+                            alert(`Has alcanzado el límite de ${aiUsage.limit} mejoras de IA este mes. Actualiza a un plan superior para continuar.`)
+                            setShowSubscriptionModal(true)
+                            return
+                          }
+                          handleEnhanceImage(file.id, file.url, 'auto')
+                        }}
+                        disabled={file.enhancing || enhancingId !== null || loadingAiUsage || (!aiUsage?.hasAccess)}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-l-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                        {file.enhancing ? 'Mejorando...' : aiUsage?.hasAccess ? 'Mejorar con IA' : '🔒 Premium'}
+                      </button>
 
-                  {/* Dropdown menu */}
-                  {dropdownOpenFor === file.id && (
+                      {/* Dropdown trigger button */}
+                      <button
+                        onClick={() => {
+                          if (!aiUsage?.hasAccess) {
+                            setShowSubscriptionModal(true)
+                            return
+                          }
+                          toggleDropdown(file.id)
+                        }}
+                        disabled={file.enhancing || enhancingId !== null || loadingAiUsage || (!aiUsage?.hasAccess)}
+                        className="px-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-r-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border-l border-white/20"
+                        title="Ver opciones"
+                      >
+                        <svg
+                          className={`h-4 w-4 transition-transform duration-200 ${dropdownOpenFor === file.id ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Dropdown menu */}
+                    {dropdownOpenFor === file.id && (
                     <div className={`absolute z-50 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200 ${
                       index % 2 === 1 ? 'right-0' : 'left-0'
                     }`}>
@@ -500,7 +590,8 @@ export function MediaGalleryWithAI({
                         </button>
                       ))}
                     </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -724,6 +815,15 @@ export function MediaGalleryWithAI({
         </div>,
         document.body
       )}
+
+      {/* Modal de suscripción bloqueada */}
+      <SubscriptionBlockedModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        featureName="Mejora de imágenes con IA"
+        requiredPlan="premium"
+        reason="plan_limitation"
+      />
     </div>
   )
 }
