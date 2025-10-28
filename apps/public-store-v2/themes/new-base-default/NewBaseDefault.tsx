@@ -380,43 +380,8 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         }
     }, [brandSlugFromUrl, resolvedStoreId]);
 
-    // Cargar subcategorías dinámicamente cuando se accede a una página de categoría
-    useEffect(() => {
-        if (isOnCategoryPage && categorySlugFromUrl && resolvedStoreId && categories) {
-            const currentCategory = categories.find(c => c.slug === categorySlugFromUrl);
-            if (currentCategory && !categories.some(c => c.parentCategoryId === currentCategory.id)) {
-                // Solo cargar si no tenemos subcategorías ya cargadas para esta categoría
-                let alive = true;
-                setLoadingSubcategories(true);
-                
-                (async () => {
-                    try {
-                        const subcategories = await getCategorySubcategories(resolvedStoreId, currentCategory.id);
-                        if (!alive) return;
-                        
-                        if (subcategories.length > 0) {
-                            // Agregar las subcategorías al estado de categorías
-                            setCategories(prev => {
-                                if (!prev) return prev;
-                                // Verificar que no estén ya agregadas
-                                const existingSubcategoryIds = prev.filter(c => c.parentCategoryId === currentCategory.id).map(c => c.id);
-                                const newSubcategories = subcategories.filter(sub => !existingSubcategoryIds.includes(sub.id));
-                                return [...prev, ...newSubcategories];
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error loading subcategories:', error);
-                    } finally {
-                        if (alive) setLoadingSubcategories(false);
-                    }
-                })();
-                
-                return () => {
-                    alive = false;
-                };
-            }
-        }
-    }, [isOnCategoryPage, categorySlugFromUrl, resolvedStoreId, categories]);
+    // 🚀 OPTIMIZACIÓN FASE 4: Ya no necesitamos cargar subcategorías manualmente
+    // React Query las trae todas en la query inicial de getStoreCategories
 
     // Resetear paginación cuando cambie la categoría activa
     useEffect(() => {
