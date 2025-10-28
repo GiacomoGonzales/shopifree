@@ -266,23 +266,26 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
     // 🚀 OPTIMIZACIÓN FASE 2: Importación dinámica de colores para reducir bundle inicial
     // Aplicar colores dinámicos de la tienda
     useEffect(() => {
+        if (!storeInfo?.primaryColor) return;
 
-        if (storeInfo?.primaryColor) {
-            // Importar dinámicamente la función de colores (code splitting)
-            import('../../lib/store-colors').then(({ applyStoreColors }) => {
-                // Aplicar inmediatamente
+        // Importar dinámicamente la función de colores (code splitting)
+        import('../../lib/store-colors').then(({ applyStoreColors }) => {
+            // Aplicar inmediatamente
+            applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
+
+            // También aplicar después de un pequeño delay para asegurar que el DOM esté listo
+            setTimeout(() => {
                 applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
+            }, 100);
 
-                // También aplicar después de un pequeño delay para asegurar que el DOM esté listo
-                setTimeout(() => {
-                    applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
-                }, 100);
-            }).catch((error) => {
-                console.error('Error loading store colors:', error);
-            });
-        } else {
-        }
-    }, [storeInfo?.primaryColor, storeInfo?.secondaryColor]);
+            // Aplicar después de 500ms por si hay componentes lazy loading
+            setTimeout(() => {
+                applyStoreColors(storeInfo.primaryColor!, storeInfo.secondaryColor);
+            }, 500);
+        }).catch((error) => {
+            console.error('Error loading store colors:', error);
+        });
+    }, [storeInfo?.primaryColor, storeInfo?.secondaryColor, loading]);
 
     // Manejar espaciado cuando no hay hero visible
     useEffect(() => {
