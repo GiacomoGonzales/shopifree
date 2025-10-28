@@ -136,7 +136,8 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
     // Renderizar el tema correspondiente - usar new-base-default como default
     // mientras se carga el tema real si es diferente
     const themeToRender = theme || 'new-base-default';
-    
+    const locale = effectiveLocale || 'es'; // Asegurar que siempre haya un string
+
     switch (themeToRender) {
         case 'new-base-default':
             return (
@@ -149,7 +150,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                         categorySlug={categorySlug}
                         collectionSlug={collectionSlug}
                         brandSlug={brandSlug}
-                        effectiveLocale={effectiveLocale}
+                        effectiveLocale={locale}
                         storeId={storeId}
                     />
                 </>
@@ -162,7 +163,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                     </Suspense>
                     <Restaurant
                         storeSubdomain={storeSubdomain}
-                        effectiveLocale={effectiveLocale}
+                        effectiveLocale={locale}
                         storeId={storeId}
                     />
                 </>
@@ -180,7 +181,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                         categorySlug={categorySlug}
                         collectionSlug={collectionSlug}
                         brandSlug={brandSlug}
-                        effectiveLocale={effectiveLocale}
+                        effectiveLocale={locale}
                         storeId={storeId}
                     />
                 </>
