@@ -6,6 +6,7 @@ interface NewBaseDefaultBrandsProps {
   additionalText: (key: string) => string
   buildUrl: (path: string) => string
   toCloudinarySquare: (url: string, size: number) => string
+  onBrandHover?: (brandSlug: string) => void
 }
 
 export function NewBaseDefaultBrands({
@@ -13,7 +14,8 @@ export function NewBaseDefaultBrands({
   isMobile,
   additionalText,
   buildUrl,
-  toCloudinarySquare
+  toCloudinarySquare,
+  onBrandHover
 }: NewBaseDefaultBrandsProps) {
   const texts = {
     brandsTitle: additionalText('ourBrands'),
@@ -27,6 +29,7 @@ export function NewBaseDefaultBrands({
       texts={texts}
       buildUrl={buildUrl}
       toCloudinarySquare={toCloudinarySquare}
+      onBrandHover={onBrandHover}
     />
   )
 }

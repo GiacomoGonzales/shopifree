@@ -16,6 +16,7 @@ interface BrandsCarouselProps {
   }
   buildUrl: (path: string) => string
   toCloudinarySquare: (url: string, size: number) => string
+  onBrandHover?: (brandSlug: string) => void
 }
 
 export function BrandsCarousel({
@@ -23,7 +24,8 @@ export function BrandsCarousel({
   isMobile,
   texts,
   buildUrl,
-  toCloudinarySquare
+  toCloudinarySquare,
+  onBrandHover
 }: BrandsCarouselProps) {
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isJumpingRef = useRef(false)
@@ -107,10 +109,11 @@ export function BrandsCarousel({
                } as React.CSSProperties}>
             {/* Duplicar las marcas: 4x para ambos para que funcione con translateX(-50%) */}
             {[...brands, ...brands, ...brands, ...brands].map((brand, index) => (
-              <a 
-                key={`${brand.id}-${index}`} 
+              <a
+                key={`${brand.id}-${index}`}
                 href={buildUrl(`/marca/${brand.slug}`)}
                 className="nbd-brand-item"
+                onMouseEnter={() => onBrandHover?.(brand.slug)}
               >
                 {brand.image ? (
                   <img

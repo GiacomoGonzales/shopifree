@@ -7,6 +7,7 @@ interface NewBaseDefaultCategoriesProps {
   t: (key: string) => string
   buildUrl: (path: string) => string
   toCloudinarySquare: (url: string, size: number) => string
+  onCategoryHover?: (categorySlug: string) => void
 }
 
 export function NewBaseDefaultCategories({
@@ -15,7 +16,8 @@ export function NewBaseDefaultCategories({
   activeCategory,
   t,
   buildUrl,
-  toCloudinarySquare
+  toCloudinarySquare,
+  onCategoryHover
 }: NewBaseDefaultCategoriesProps) {
   const texts = {
     categoriesTitle: t('categories')
@@ -29,6 +31,7 @@ export function NewBaseDefaultCategories({
       texts={texts}
       buildUrl={buildUrl}
       toCloudinarySquare={toCloudinarySquare}
+      onCategoryHover={onCategoryHover}
     />
   )
 }

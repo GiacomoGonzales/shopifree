@@ -21,6 +21,7 @@ interface CategoriesSectionProps {
   }
   buildUrl: (path: string) => string
   toCloudinarySquare: (url: string, size: number) => string
+  onCategoryHover?: (categorySlug: string) => void
 }
 
 export function CategoriesSection({
@@ -29,7 +30,8 @@ export function CategoriesSection({
   activeCategory,
   texts,
   buildUrl,
-  toCloudinarySquare
+  toCloudinarySquare,
+  onCategoryHover
 }: CategoriesSectionProps) {
   // Preparar categorías para mostrar (priorizando padre sobre subcategorías)
   const allCategories = Array.isArray(categories) ? categories : []
@@ -80,6 +82,7 @@ export function CategoriesSection({
                 className={`nbd-mosaic-card ${activeCategory === category.slug ? 'nbd-mosaic-card--active' : ''} ${
                   isFeatured ? 'nbd-mosaic-card--featured' : ''
                 } ${isParent ? 'nbd-mosaic-card--parent' : 'nbd-mosaic-card--sub'}`}
+                onMouseEnter={() => onCategoryHover?.(category.slug)}
               >
                 {/* Imagen de fondo */}
                 <div className="nbd-mosaic-background">

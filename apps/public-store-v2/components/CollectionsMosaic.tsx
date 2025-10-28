@@ -9,9 +9,10 @@ interface CollectionCardProps {
     size: 'normal' | 'wide' | 'tall' | 'large';
     storeSubdomain: string;
     additionalText: (key: string) => string;
+    onCollectionHover?: (collectionSlug: string) => void;
 }
 
-const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: CollectionCardProps) => {
+const CollectionCard = ({ collection, size, storeSubdomain, additionalText, onCollectionHover }: CollectionCardProps) => {
     // Optimizar imagen según el tamaño de la card con diferentes resoluciones para responsive
     const getOptimizedImageUrl = () => {
         // Para desktop usamos tamaños más grandes, para móvil más pequeños
@@ -53,6 +54,7 @@ const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: Co
         <a
             href={getSubdomainUrl(`/coleccion/${collection.slug}`)}
             className={`nbd-collection-card nbd-collection-card--${size}`}
+            onMouseEnter={() => onCollectionHover?.(collection.slug)}
         >
             {/* Imagen de fondo */}
             <div className="nbd-collection-background">
@@ -115,9 +117,10 @@ const CollectionCard = ({ collection, size, storeSubdomain, additionalText }: Co
 interface CollectionsMosaicProps {
     collections: PublicCollection[];
     storeSubdomain: string;
+    onCollectionHover?: (collectionSlug: string) => void;
 }
 
-const CollectionsMosaic = ({ collections, storeSubdomain }: CollectionsMosaicProps) => {
+const CollectionsMosaic = ({ collections, storeSubdomain, onCollectionHover }: CollectionsMosaicProps) => {
     const { language } = useStoreLanguage();
     
     // Helper para textos adicionales
@@ -163,12 +166,13 @@ const CollectionsMosaic = ({ collections, storeSubdomain }: CollectionsMosaicPro
                     {visibleCollections.map((collection, index) => {
                         const cardSize = getCollectionCardSize(index, visibleCollections.length);
                         return (
-                            <CollectionCard 
+                            <CollectionCard
                                 key={collection.id}
                                 collection={collection}
                                 size={cardSize}
                                 storeSubdomain={storeSubdomain}
                                 additionalText={additionalText}
+                                onCollectionHover={onCollectionHover}
                             />
                         );
                     })}

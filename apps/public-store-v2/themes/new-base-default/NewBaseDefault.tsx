@@ -28,6 +28,8 @@ import { useCart } from "../../lib/cart-context";
 import { useStoreLanguage } from "../../lib/store-language-context";
 // 🚀 OPTIMIZACIÓN FASE 4: React Query hooks para cache automático
 import { useAllStoreData } from "../../hooks/useStoreData";
+// 🚀 OPTIMIZACIÓN FASE 5: Prefetch inteligente
+import { usePrefetch } from "../../hooks/usePrefetch";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartModal from "./CartModal";
@@ -207,6 +209,9 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
         isLoading: loadingFromHook,
         error: errorFromHook,
     } = useAllStoreData(storeSubdomain);
+
+    // 🚀 OPTIMIZACIÓN FASE 5: Hook de prefetch inteligente
+    const { prefetchCategoryProducts, prefetchBrandProducts, prefetchCollectionProducts, prefetchHomePage } = usePrefetch(storeIdFromHook);
 
     // Usar datos del hook o del prop
     const resolvedStoreId = storeId || storeIdFromHook;
@@ -868,7 +873,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
             {/* Announcement Bar */}
             <AnnouncementBar storeInfo={storeInfo} />
 
-            <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products || []} />
+            <Header storeInfo={storeInfo} categories={categories} storeSubdomain={storeSubdomain} products={products || []} onHomeHover={prefetchHomePage} />
             
             <NewBaseDefaultPageHeaders
                 isOnCategoryPage={isOnCategoryPage}
@@ -913,6 +918,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                             <CollectionsMosaic
                                 collections={collections}
                                 storeSubdomain={storeSubdomain}
+                                onCollectionHover={prefetchCollectionProducts}
                             />
                         </Suspense>
                     </div>
@@ -929,6 +935,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                     t={t as (key: string) => string}
                     buildUrl={buildUrl}
                     toCloudinarySquare={toCloudinarySquare as (url: string, size: number) => string}
+                    onCategoryHover={prefetchCategoryProducts}
                 />
             )}
 
@@ -1006,6 +1013,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                             additionalText={additionalText}
                             buildUrl={buildUrl}
                             toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
+                            onBrandHover={prefetchBrandProducts}
                         />
                     </Suspense>
                 </div>

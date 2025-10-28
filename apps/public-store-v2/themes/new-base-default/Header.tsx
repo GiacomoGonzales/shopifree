@@ -16,9 +16,10 @@ type Props = {
     products: PublicProduct[];
     onProductClick?: (product: PublicProduct) => void; // Callback opcional para search
     onCategoryClick?: (categorySlug: string) => void; // Callback opcional para categorías
+    onHomeHover?: () => void; // Callback para prefetch del home
 };
 
-export default function Header({ storeInfo, categories, storeSubdomain, products, onProductClick, onCategoryClick }: Props) {
+export default function Header({ storeInfo, categories, storeSubdomain, products, onProductClick, onCategoryClick, onHomeHover }: Props) {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, openCart } = useCart();
     const { t } = useStoreLanguage();
@@ -73,7 +74,7 @@ export default function Header({ storeInfo, categories, storeSubdomain, products
                     
                     {/* Logo y nombre de la tienda */}
                     <div className="nbd-header-brand">
-                        <a href={getSubdomainUrl("")} className="nbd-brand-link" aria-label="Ir al inicio">
+                        <a href={getSubdomainUrl("")} className="nbd-brand-link" aria-label="Ir al inicio" onMouseEnter={() => onHomeHover?.()}>
                             {storeInfo?.logoUrl ? (
                                 <div className="nbd-brand-logo">
                                     <img 
