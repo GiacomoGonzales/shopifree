@@ -2,15 +2,21 @@ import { Suspense } from "react";
 import ThemeRenderer from "../../components/ThemeRenderer";
 import SimpleLoadingSpinner from "../../components/SimpleLoadingSpinner";
 import { getStoreMetadata } from "../../server-only/store-metadata";
+import { getStoreIdBySubdomain } from "../../lib/store";
 
 // 🚀 OPTIMIZACIÓN FASE 1: Cache ISR - Revalidar cada 1 hora
 export const revalidate = 3600;
 
+// 🔥 OPTIMIZACIÓN CRÍTICA: Forzar cache de fetch para que ISR funcione
+export const fetchCache = 'force-cache';
+
 export default async function StorePage({ params }: { params: { storeSubdomain: string } }) {
     const subdomain = params?.storeSubdomain ?? 'store';
-    
-    // 🚀 MEJORADO: Pre-cargar metadatos de la tienda en SSR para mejor SEO/LCP
+
+    // 🚀 MEJORADO: Pre-cargar datos en el servidor para aprovechar ISR cache
     const storeData = await getStoreMetadata(subdomain);
+    // Pre-cargar storeId para que use el cache en memoria
+    await getStoreIdBySubdomain(subdomain);
     
     // 🚀 SSR Content: Mostrar información básica de la tienda inmediatamente
     const StaticStoreContent = () => (

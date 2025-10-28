@@ -28,7 +28,16 @@
       "Read(/C:\\Users\\giaco\\shopifree\\apps\\public-store-v2\\app\\producto\\[productSlug]/**)",
       "Bash(git add:*)",
       "Read(//c/Users/giaco/shopifree/apps/public-store-v2/themes/new-base-default/**)",
-      "Read(//c/Users/giaco/shopifree/apps/public-store-v2/**)"
+      "Read(//c/Users/giaco/shopifree/apps/public-store-v2/**)",
+      "Bash(ls:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx next lint:*)",
+      "Bash(npm run type-check:*)",
+      "Read(//c/**)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

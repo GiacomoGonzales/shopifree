@@ -12,6 +12,9 @@ import UnifiedLoading from '../../../components/UnifiedLoading';
 // 🚀 OPTIMIZACIÓN FASE 1: Cache ISR - Revalidar cada 30 minutos (productos cambian más frecuente)
 export const revalidate = 1800;
 
+// 🔥 OPTIMIZACIÓN CRÍTICA: Forzar cache de fetch para que ISR funcione
+export const fetchCache = 'force-cache';
+
 export default function ProductoPage({ params }: { params: { productSlug: string; storeSubdomain: string } }) {
     const { productSlug, storeSubdomain } = params as any;
     return (

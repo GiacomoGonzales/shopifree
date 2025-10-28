@@ -9,6 +9,7 @@ import UnifiedLoading from "../../../../../components/UnifiedLoading";
 
 // 🚀 OPTIMIZACIÓN FASE 1: Cache ISR - Revalidar cada 1 hora
 export const revalidate = 3600;
+export const fetchCache = 'force-cache';
 
 // Generar metadata para SEO
 export async function generateMetadata({ params }: { params: { categorySlug: string; subCategorySlug: string; storeSubdomain: string } }): Promise<Metadata> {
