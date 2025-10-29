@@ -9,6 +9,7 @@ import { getFilteredProducts } from '../../../lib/products'
 import { getParentCategories } from '../../../lib/categories'
 import { getCoupons } from '../../../lib/coupons'
 import { getPromotions } from '../../../lib/promotions'
+import WhatsNew from '../../../components/WhatsNew'
 
 export default function HomePage() {
   const { userData } = useAuth()
@@ -31,6 +32,19 @@ export default function HomePage() {
   const [analyticsConfigured, setAnalyticsConfigured] = useState(false)
   const [showFirstStepsDetails, setShowFirstStepsDetails] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(false)
+
+  // Verificar localStorage al cargar el componente
+  useEffect(() => {
+    if (!store?.id) return
+
+    const localStorageKey = `welcome-seen-${store.id}`
+    const seenInLocalStorage = localStorage.getItem(localStorageKey) === 'true'
+    const seenInStore = store.hasSeenWelcome ?? false
+
+    // Si ya lo vio (en localStorage O en la base de datos), mostrar novedades
+    setHasSeenWelcome(seenInLocalStorage || seenInStore)
+  }, [store?.id, store?.hasSeenWelcome])
 
   // Cargar el conteo de productos y categorías
   useEffect(() => {
@@ -69,6 +83,35 @@ export default function HomePage() {
 
     loadCounts()
   }, [store?.id])
+
+  // Marcar mensaje de bienvenida como visto si es la primera vez
+  useEffect(() => {
+    if (!store?.id || hasSeenWelcome) return
+
+    // Si es la primera vez que lo ve, marcar como visto después de 3 segundos
+    const timer = setTimeout(async () => {
+      const localStorageKey = `welcome-seen-${store.id}`
+
+      // Guardar inmediatamente en localStorage
+      localStorage.setItem(localStorageKey, 'true')
+      setHasSeenWelcome(true)
+
+      // Guardar en la base de datos en background
+      try {
+        await fetch('/api/store/mark-welcome-seen', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ storeId: store.id }),
+        })
+      } catch (error) {
+        console.error('Error al marcar mensaje de bienvenida como visto:', error)
+      }
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [store?.id, hasSeenWelcome])
 
   // Actualizar conteos basados en los datos de la tienda cuando cambie
   useEffect(() => {
@@ -184,6 +227,7 @@ export default function HomePage() {
     setAllFirstStepsCompleted(firstStepsCompleted)
   }, [store, productCount, categoryCount, paymentMethodsCount, carouselImagesCount, socialMediaCount, shippingMethodsCount, promotionsCount])
 
+
   // Verificar si los datos están listos
   const isDataLoaded = userData && store && !loading
 
@@ -247,39 +291,43 @@ export default function HomePage() {
 
   return (
     <DashboardLayout>
-      {/* Sección de Bienvenida - Fuera del contenedor principal */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="w-full overflow-hidden">
-            <h1 className="text-xl font-semibold text-gray-900 mb-3 break-words overflow-wrap-anywhere flex items-center">
-              {getWelcomeTitle()}
-              <svg className="w-6 h-6 ml-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-              </svg>
-            </h1>
+      {/* Sección de Bienvenida o Novedades - Condicional basado en si ya vio el mensaje inicial */}
+      {!hasSeenWelcome ? (
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="w-full overflow-hidden">
+              <h1 className="text-xl font-semibold text-gray-900 mb-3 break-words overflow-wrap-anywhere flex items-center">
+                {getWelcomeTitle()}
+                <svg className="w-6 h-6 ml-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </h1>
 
-            <p className="text-base font-medium text-gray-700 mb-2 break-words overflow-wrap-anywhere">
-              {getSubtitle()}
-            </p>
+              <p className="text-base font-medium text-gray-700 mb-2 break-words overflow-wrap-anywhere">
+                {getSubtitle()}
+              </p>
 
-            <p className="text-base text-gray-600 mb-4 break-words overflow-wrap-anywhere">
-              {getSubtitle2()}
-            </p>
+              <p className="text-base text-gray-600 mb-4 break-words overflow-wrap-anywhere">
+                {getSubtitle2()}
+              </p>
 
-            <p className="text-sm text-gray-600 leading-relaxed mb-4 break-words overflow-wrap-anywhere">
-              {getMainMessage()}
-            </p>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4 break-words overflow-wrap-anywhere">
+                {getMainMessage()}
+              </p>
 
-            <p className="text-sm text-gray-600 leading-relaxed mb-4 break-words overflow-wrap-anywhere">
-              {getClosingMessage()}
-            </p>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4 break-words overflow-wrap-anywhere">
+                {getClosingMessage()}
+              </p>
 
-            <p className="text-base font-medium text-gray-700 break-words overflow-wrap-anywhere">
-              {getFinalMessage()}
-            </p>
+              <p className="text-base font-medium text-gray-700 break-words overflow-wrap-anywhere">
+                {getFinalMessage()}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <WhatsNew locale={currentLocale} />
+      )}
 
       {/* Sección 2: Primeros Pasos */}
       <div className={`py-6 ${allFirstStepsCompleted ? 'bg-green-50' : ''}`}>
@@ -327,7 +375,50 @@ export default function HomePage() {
 
           {(!allFirstStepsCompleted || showFirstStepsDetails) && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Agregar primer producto */}
+            {/* Crear categorías */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center mb-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                  {categoryCount >= 1 ? (
+                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  )}
+                </div>
+                <h3 className="text-sm font-medium text-gray-900">
+                  {isSpanish ? 'Categorías' : 'Categories'}
+                </h3>
+              </div>
+              <p className="text-xs text-gray-600 mb-2">
+                {Math.min(categoryCount, 1)}/1 {isSpanish ? 'primera categoría' : 'first category'}
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    categoryCount >= 1 ? 'bg-green-600' : 'bg-gray-600'
+                  }`}
+                  style={{ width: `${Math.min((categoryCount / 1) * 100, 100)}%` }}
+                ></div>
+              </div>
+              {categoryCount >= 1 ? (
+                <p className="text-xs text-green-600 font-medium">
+                  {isSpanish ? '¡Objetivo completado!' : 'Goal completed!'}
+                </p>
+              ) : (
+                <a
+                  href="/categories"
+                  className="text-xs text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
+                >
+                  {isSpanish ? 'Crea tu primera categoría' : 'Create your first category'}
+                </a>
+              )}
+            </div>
+
+            {/* Agregar productos */}
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex items-center mb-3">
                 <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
@@ -373,49 +464,6 @@ export default function HomePage() {
                   className="text-xs text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
                 >
                   {isSpanish ? 'Agrega más productos' : 'Add more products'}
-                </a>
-              )}
-            </div>
-
-            {/* Crear categorías */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                  {categoryCount >= 1 ? (
-                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  )}
-                </div>
-                <h3 className="text-sm font-medium text-gray-900">
-                  {isSpanish ? 'Categorías' : 'Categories'}
-                </h3>
-              </div>
-              <p className="text-xs text-gray-600 mb-2">
-                {Math.min(categoryCount, 1)}/1 {isSpanish ? 'primera categoría' : 'first category'}
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    categoryCount >= 1 ? 'bg-green-600' : 'bg-gray-600'
-                  }`}
-                  style={{ width: `${Math.min((categoryCount / 1) * 100, 100)}%` }}
-                ></div>
-              </div>
-              {categoryCount >= 1 ? (
-                <p className="text-xs text-green-600 font-medium">
-                  {isSpanish ? '¡Objetivo completado!' : 'Goal completed!'}
-                </p>
-              ) : (
-                <a
-                  href="/categories"
-                  className="text-xs text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
-                >
-                  {isSpanish ? 'Crea tu primera categoría' : 'Create your first category'}
                 </a>
               )}
             </div>

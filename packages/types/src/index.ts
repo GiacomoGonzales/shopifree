@@ -49,6 +49,7 @@ export interface Store {
   ownerId: string;
   theme: StoreTheme;
   settings: StoreSettings;
+  hasSeenWelcome?: boolean; // Track if user has seen initial welcome message
 }
 
 export interface StoreTheme {
