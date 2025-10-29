@@ -18,7 +18,7 @@ interface CollectionProductsCarouselProps {
     currency?: string;
   };
   storeId?: string | null;
-  onProductClick?: (product: PublicProduct) => void;
+  onOpenQuickView?: (product: PublicProduct) => void;
 }
 
 export function CollectionProductsCarousel({
@@ -32,7 +32,7 @@ export function CollectionProductsCarousel({
   additionalText,
   storeInfo,
   storeId,
-  onProductClick
+  onOpenQuickView
 }: CollectionProductsCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -42,6 +42,46 @@ export function CollectionProductsCarousel({
   const allCollectionProducts = products.filter(p => collection.productIds?.includes(p.id));
   // Mostrar máximo 7 productos en el carrusel
   const collectionProducts = allCollectionProducts.slice(0, 7);
+
+  // Función para verificar si un producto tiene variantes
+  const hasVariants = (product: PublicProduct): boolean => {
+    let variantsData = null;
+
+    if (product.tags && product.tags.variants) {
+      variantsData = product.tags.variants;
+    } else if ((product as any).variants) {
+      variantsData = (product as any).variants;
+    } else if ((product as any).metaFieldValues?.variants) {
+      variantsData = (product as any).metaFieldValues.variants;
+    }
+
+    if (!variantsData) return false;
+
+    try {
+      let parsedVariants = [];
+      if (typeof variantsData === 'string') {
+        parsedVariants = JSON.parse(variantsData);
+      } else if (Array.isArray(variantsData)) {
+        parsedVariants = variantsData;
+      }
+      return parsedVariants.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
+  // Función para manejar el click en el botón +
+  const handleAddButtonClick = (product: PublicProduct, finalPrice: number) => {
+    if (hasVariants(product)) {
+      // Si tiene variantes, abrir QuickView
+      if (onOpenQuickView) {
+        onOpenQuickView(product);
+      }
+    } else {
+      // Si no tiene variantes, agregar al carrito directamente
+      handleAddToCart(product, finalPrice);
+    }
+  };
 
   // Verificar estado de scroll
   const checkScrollButtons = () => {
@@ -122,20 +162,14 @@ export function CollectionProductsCarousel({
 
               return (
                 <div key={product.id} className="collection-carousel-card">
-                  <div
-                    className="nbd-product-card"
-                    onClick={(e) => {
-                      if (onProductClick) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onProductClick(product);
-                      } else {
+                  <div className="nbd-product-card">
+                    <div
+                      className="nbd-product-image"
+                      onClick={() => {
                         window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
-                      }
-                    }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="nbd-product-image">
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       {product.image || product.mediaFiles?.[0]?.url ? (
                         <img
                           src={toCloudinarySquare(product.image || product.mediaFiles?.[0]?.url || '', 800)}
@@ -163,7 +197,7 @@ export function CollectionProductsCarousel({
                         className={`nbd-add-to-cart ${loadingCartButton === product.id ? 'nbd-add-to-cart--loading' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleAddToCart(product, finalPrice);
+                          handleAddButtonClick(product, finalPrice);
                         }}
                         disabled={loadingCartButton === product.id}
                       >
@@ -173,7 +207,13 @@ export function CollectionProductsCarousel({
                       </button>
                     </div>
 
-                    <div className="nbd-product-content">
+                    <div
+                      className="nbd-product-content"
+                      onClick={() => {
+                        window.location.href = buildUrl(`/producto/${product.slug || product.id}`);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <h3 className="nbd-product-name">{product.name}</h3>
                       <div className="nbd-product-footer">
                         <div className="nbd-product-price">

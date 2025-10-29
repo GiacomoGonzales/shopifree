@@ -908,7 +908,7 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
                                         additionalText={additionalText}
                                         storeInfo={storeInfo || undefined}
                                         storeId={resolvedStoreId}
-                                        onProductClick={(product) => {
+                                        onOpenQuickView={(product) => {
                                             setQuickViewProduct(product);
                                             setIsQuickViewOpen(true);
                                         }}
