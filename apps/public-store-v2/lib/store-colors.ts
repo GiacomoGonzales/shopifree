@@ -4,8 +4,9 @@
  * Este código solo se carga cuando es necesario (lazy loading)
  */
 
-// Función para calcular el color de texto con mejor contraste (negro o blanco)
+// Función para calcular el color de texto con mejor contraste
 // Usa la fórmula YIQ para determinar si un color es claro u oscuro
+// Retorna blanco para colores oscuros y gris oscuro para colores claros
 function getTextColorForBackground(backgroundColor: string): string {
   const hex = backgroundColor.replace('#', '');
 
@@ -21,9 +22,9 @@ function getTextColorForBackground(backgroundColor: string): string {
   // Fórmula YIQ para calcular luminosidad percibida
   const yiq = (r * 299 + g * 587 + b * 114) / 1000;
 
-  // Si YIQ >= 128, el color es claro, usar texto oscuro
-  // Si YIQ < 128, el color es oscuro, usar texto claro
-  return yiq >= 128 ? '#000000' : '#ffffff';
+  // Si YIQ >= 128, el color es claro, usar gris oscuro (#1f2937 - gray-800)
+  // Si YIQ < 128, el color es oscuro, usar blanco
+  return yiq >= 128 ? '#1f2937' : '#ffffff';
 }
 
 // Función auxiliar para oscurecer un color
@@ -704,6 +705,37 @@ export function applyStoreColors(primaryColor: string, secondaryColor?: string):
     });
 
     nodeObserver.observe(document.body, { childList: true, subtree: true });
+
+    // APLICAR color dinámico a las tarjetas "Ver todos" de colecciones
+    const applyCollectionViewAllColors = () => {
+      const viewAllCards = document.querySelectorAll('.collection-view-all-card') as NodeListOf<HTMLElement>;
+      viewAllCards.forEach(card => {
+        card.style.backgroundColor = primaryColor;
+      });
+
+      const viewAllIcons = document.querySelectorAll('.collection-view-all-icon') as NodeListOf<HTMLElement>;
+      viewAllIcons.forEach(icon => {
+        icon.style.color = primaryColor;
+      });
+    };
+
+    // Aplicar inmediatamente
+    applyCollectionViewAllColors();
+
+    // Aplicar después de delays para lazy-loaded components
+    setTimeout(applyCollectionViewAllColors, 100);
+    setTimeout(applyCollectionViewAllColors, 500);
+    setTimeout(applyCollectionViewAllColors, 1000);
+
+    // Observer para detectar nuevas tarjetas "Ver todos" cuando se carguen dinámicamente
+    const collectionObserver = new MutationObserver(() => {
+      applyCollectionViewAllColors();
+    });
+
+    collectionObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
 
     // Forzar repaint para asegurar que los cambios se apliquen
     document.documentElement.offsetHeight;

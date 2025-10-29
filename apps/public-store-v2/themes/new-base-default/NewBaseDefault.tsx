@@ -5,6 +5,7 @@ import "./new-base-default.css";
 import "./loading-spinner.css";
 import "./texture-backgrounds.css";
 import "./utilities.css";
+import "./collection-carousel.css";
 import UnifiedLoading from "../../components/UnifiedLoading";
 // 🚀 OPTIMIZACIÓN FASE 2: applyStoreColors se importa dinámicamente para code splitting
 import { getStoreBackgroundTexture, StoreBasicInfo } from "../../lib/store";
@@ -41,6 +42,7 @@ const NewBaseDefaultNewsletter = lazy(() => import("./components/NewBaseDefaultN
 const NewBaseDefaultBrands = lazy(() => import("./components/NewBaseDefaultBrands").then(m => ({ default: m.NewBaseDefaultBrands })));
 const CollectionsMosaic = lazy(() => import("../../components/CollectionsMosaic"));
 const ProductQuickView = lazy(() => import("./components/ProductQuickView"));
+const CollectionProductsCarousel = lazy(() => import("./components/CollectionProductsCarousel").then(m => ({ default: m.CollectionProductsCarousel })));
 
 type Props = {
     storeSubdomain: string;
@@ -878,19 +880,57 @@ export default function NewBaseDefault({ storeSubdomain, categorySlug, collectio
 
             {/* Sección de Colecciones - Solo en home */}
             {(() => {
+                const isHomePage = !isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage;
+                const visibleCollections = collections?.filter(c => c.visible) || [];
+                const collectionsEnabled = storeInfo?.sections?.collections?.enabled === true;
+                const hasCollections = visibleCollections.length > 0;
 
-                return (!isOnCategoryPage && !isOnCollectionPage && !isOnBrandPage && collections && collections.length > 0 &&
-                        (storeInfo?.sections?.collections?.enabled === true)) ? (
-                    <div id="colecciones">
-                        <Suspense fallback={<div className="py-8 text-center text-gray-400">Cargando colecciones...</div>}>
-                            <CollectionsMosaic
-                                collections={collections}
-                                storeSubdomain={storeSubdomain}
-                                onCollectionHover={prefetchCollectionProducts}
-                            />
-                        </Suspense>
-                    </div>
-                ) : null;
+                if (!isHomePage || !collectionsEnabled || !hasCollections) {
+                    return null;
+                }
+
+                // 🎯 NUEVA LÓGICA: Con 1-2 colecciones → mostrar productos en carrusel horizontal
+                // Con 3+ colecciones → mostrar mosaico de colecciones (comportamiento actual)
+                if (visibleCollections.length <= 2) {
+                    return (
+                        <div id="colecciones" className="collections-carousel-section-wrapper">
+                            <Suspense fallback={<div className="py-8 text-center text-gray-400">Cargando productos...</div>}>
+                                {visibleCollections.map((collection) => (
+                                    <CollectionProductsCarousel
+                                        key={collection.id}
+                                        collection={collection}
+                                        products={products || []}
+                                        loadingCartButton={loadingCartButton}
+                                        handleAddToCart={handleAddToCart}
+                                        buildUrl={buildUrl}
+                                        toCloudinarySquare={(url: string, size: number) => toCloudinarySquare(url, size) || url}
+                                        formatPrice={formatPrice}
+                                        additionalText={additionalText}
+                                        storeInfo={storeInfo || undefined}
+                                        storeId={resolvedStoreId}
+                                        onProductClick={(product) => {
+                                            setQuickViewProduct(product);
+                                            setIsQuickViewOpen(true);
+                                        }}
+                                    />
+                                ))}
+                            </Suspense>
+                        </div>
+                    );
+                } else {
+                    // 3+ colecciones: mostrar mosaico (comportamiento actual)
+                    return (
+                        <div id="colecciones">
+                            <Suspense fallback={<div className="py-8 text-center text-gray-400">Cargando colecciones...</div>}>
+                                <CollectionsMosaic
+                                    collections={collections}
+                                    storeSubdomain={storeSubdomain}
+                                    onCollectionHover={prefetchCollectionProducts}
+                                />
+                            </Suspense>
+                        </div>
+                    );
+                }
             })()}
 
             {/* Sección de categorías con mosaico inteligente - Solo en home */}

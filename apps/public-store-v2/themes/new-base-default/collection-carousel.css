@@ -1,0 +1,349 @@
+/* ============================================
+   COLLECTION PRODUCTS CAROUSEL STYLES
+   Estilos para carrusel horizontal de productos por colección
+   ============================================ */
+
+/* Wrapper principal */
+.collections-carousel-section-wrapper {
+  padding: var(--nbd-space-3xl) 0;
+}
+
+/* Sección individual de colección */
+.collection-carousel-section {
+  margin-bottom: var(--nbd-space-3xl);
+}
+
+.collection-carousel-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Header de la colección */
+.collection-carousel-header {
+  margin-bottom: var(--nbd-space-xl);
+}
+
+.collection-carousel-title {
+  font-size: var(--nbd-font-size-2xl);
+  font-weight: 600;
+  color: var(--nbd-neutral-900);
+  margin: 0 0 var(--nbd-space-xs) 0;
+  line-height: 1.2;
+}
+
+.collection-carousel-description {
+  font-size: var(--nbd-font-size-base);
+  color: var(--nbd-neutral-600);
+  margin: 0;
+  max-width: 600px;
+}
+
+/* Wrapper del carrusel */
+.collection-carousel-wrapper {
+  position: relative;
+}
+
+/* Botones de navegación */
+.collection-carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid var(--nbd-neutral-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--nbd-transition-base);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.collection-carousel-nav:hover {
+  background: var(--nbd-neutral-50);
+  border-color: var(--nbd-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.collection-carousel-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.collection-carousel-nav--left {
+  left: -24px;
+}
+
+.collection-carousel-nav--right {
+  right: -24px;
+}
+
+.collection-carousel-nav svg {
+  color: var(--nbd-neutral-700);
+}
+
+.collection-carousel-nav:hover svg {
+  color: var(--nbd-primary);
+}
+
+/* Container del carrusel con scroll */
+.collection-carousel-container {
+  display: flex;
+  gap: var(--nbd-space-lg);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: var(--nbd-space-md) 0;
+
+  /* Ocultar scrollbar pero mantener funcionalidad */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.collection-carousel-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cards individuales */
+.collection-carousel-card {
+  flex: 0 0 auto;
+  width: 280px;
+}
+
+/* Estilos más suaves para texto en el carrusel */
+.collection-carousel-card .nbd-product-name {
+  font-weight: 500;
+  font-size: var(--nbd-font-size-base);
+}
+
+.collection-carousel-card .nbd-price-current {
+  font-weight: 600;
+  font-size: var(--nbd-font-size-lg);
+}
+
+/* Tarjeta "Ver todos" */
+.collection-view-all-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background: var(--nbd-primary, var(--nbd-success, #3b82f6));
+  border-radius: var(--nbd-radius-lg);
+  text-decoration: none;
+  transition: all var(--nbd-transition-base);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.collection-view-all-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
+}
+
+.collection-view-all-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--nbd-space-md);
+  padding: var(--nbd-space-xl);
+  text-align: center;
+}
+
+.collection-view-all-icon {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nbd-primary, var(--nbd-success, #3b82f6));
+  transition: all var(--nbd-transition-base);
+}
+
+.collection-view-all-card:hover .collection-view-all-icon {
+  transform: scale(1.1);
+}
+
+.collection-view-all-text {
+  font-size: var(--nbd-font-size-xl);
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.collection-view-all-count {
+  font-size: var(--nbd-font-size-sm);
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .collections-carousel-section-wrapper {
+    padding: var(--nbd-space-2xl) 0 12px 0;
+  }
+
+  .collection-carousel-section {
+    margin-bottom: 12px;
+  }
+
+  /* En móvil, el header tiene padding pero el carrusel va de borde a borde */
+  .collection-carousel-section .nbd-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .collection-carousel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: var(--nbd-space-lg);
+    padding-left: var(--nbd-space-md);
+    padding-right: var(--nbd-space-md);
+  }
+
+  .collection-carousel-title {
+    font-size: var(--nbd-font-size-xl);
+  }
+
+  .collection-carousel-description {
+    font-size: var(--nbd-font-size-sm);
+  }
+
+  .collection-carousel-wrapper {
+    padding: 0;
+  }
+
+  /* Ocultar botones de navegación en móvil */
+  .collection-carousel-nav {
+    display: none;
+  }
+
+  /* Ajustar tamaño de cards en móvil */
+  .collection-carousel-card {
+    width: 220px;
+  }
+
+  /* El carrusel tiene padding a ambos lados para que las tarjetas no queden pegadas a los bordes */
+  .collection-carousel-container {
+    gap: var(--nbd-space-md);
+    padding: var(--nbd-space-sm) var(--nbd-space-md);
+  }
+
+  /* Nombre del producto: siempre 2 líneas fijas */
+  .collection-carousel-card .nbd-product-name {
+    font-weight: 400;
+    font-size: var(--nbd-font-size-sm);
+    line-height: 1.3;
+    height: calc(var(--nbd-font-size-sm) * 1.3 * 2);
+    margin-bottom: var(--nbd-space-xs);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+  }
+
+  /* Contenedor de precios */
+  .collection-carousel-card .nbd-product-footer {
+    min-height: 24px;
+  }
+
+  /* Precios en línea horizontal (igual que el grid) */
+  .collection-carousel-card .nbd-product-price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--nbd-space-xs);
+    flex-wrap: nowrap;
+  }
+
+  /* Precio actual - primero */
+  .collection-carousel-card .nbd-price-current {
+    font-size: var(--nbd-font-size-base);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Precio tachado - al lado, más pequeño */
+  .collection-carousel-card .nbd-price-original {
+    font-size: var(--nbd-font-size-xs);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  /* Ajustar contenido del producto en móvil */
+  .collection-carousel-card .nbd-product-content {
+    padding: var(--nbd-space-sm);
+  }
+
+  /* Ajustar imagen del producto en móvil */
+  .collection-carousel-card .nbd-product-image {
+    height: 200px;
+  }
+
+  /* Badge de oferta en móvil - rojo fijo, bien posicionado */
+  .collection-carousel-card .nbd-product-badge {
+    background-color: #ef4444 !important;
+    color: white !important;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    top: 8px;
+    left: 8px;
+    right: auto;
+  }
+
+  /* Ribbon en móvil - rojo fijo */
+  .collection-carousel-card .nbd-product-ribbon {
+    background-color: #ef4444 !important;
+    color: white !important;
+    font-size: 9px;
+  }
+
+  /* Ajustar tarjeta "Ver todos" para que tenga la misma altura que las tarjetas de productos en móvil */
+  .collection-view-all-card {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .collection-view-all-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .collection-view-all-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .collection-view-all-text {
+    font-size: var(--nbd-font-size-base);
+  }
+
+  .collection-view-all-count {
+    font-size: var(--nbd-font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .collection-carousel-card {
+    width: 180px;
+  }
+
+  .collection-carousel-container {
+    gap: var(--nbd-space-sm);
+  }
+}
+
+/* Ajustes para tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .collection-carousel-card {
+    width: 240px;
+  }
+}
