@@ -8648,3 +8648,94 @@ body.no-hero .nbd-products:first-of-type .nbd-container {
     }
 }
 
+
+/* ===================================================
+   PRODUCT CAROUSEL IN QUICKVIEW
+   =================================================== */
+
+.nbd-product-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    user-select: none;
+    touch-action: pan-y;
+}
+
+.nbd-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nbd-carousel-arrow:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.nbd-carousel-arrow--left {
+    left: 10px;
+}
+
+.nbd-carousel-arrow--right {
+    right: 10px;
+}
+
+.nbd-carousel-arrow svg {
+    color: #333;
+}
+
+.nbd-carousel-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.nbd-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.nbd-carousel-dot--active {
+    background: white;
+    width: 24px;
+    border-radius: 4px;
+}
+
+.nbd-carousel-dot:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .nbd-carousel-arrow {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .nbd-carousel-arrow svg {
+        width: 18px;
+        height: 18px;
+    }
+}

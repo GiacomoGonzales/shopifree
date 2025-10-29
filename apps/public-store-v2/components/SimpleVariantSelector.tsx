@@ -39,13 +39,13 @@ export default function SimpleVariantSelector({ product, onVariantChange }: Simp
   const additionalText = (key: string) => {
     const texts: Record<string, Record<string, string>> = {
       es: {
-        'selectOptions': 'Selecciona las opciones:'
+        'select': 'Selecciona'
       },
       en: {
-        'selectOptions': 'Select options:'
+        'select': 'Select'
       },
       pt: {
-        'selectOptions': 'Selecione as opções:'
+        'select': 'Selecione'
       }
     };
     return texts[language]?.[key] || texts['es']?.[key] || key;
@@ -222,59 +222,84 @@ export default function SimpleVariantSelector({ product, onVariantChange }: Simp
 
   return (
     <div className="simple-variant-selector">
-        <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: '600' }}>
-          {additionalText('selectOptions')}
-        </h3>
-      
       {Object.entries(availableAttributes).map(([attributeName, values]) => (
-        <div key={attributeName} style={{ marginBottom: '20px' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '8px', 
-            fontWeight: '500',
-            fontSize: '14px'
+        <div key={attributeName} style={{ marginBottom: '24px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '12px',
+            fontWeight: '600',
+            fontSize: '15px',
+            color: '#333'
           }}>
-            {getDisplayName(attributeName)}: 
-            <span style={{ 
-              marginLeft: '8px', 
-              color: '#666',
-              fontWeight: '600'
-            }}>
-              {selectedAttributes[attributeName] || ''}
-            </span>
+            {additionalText('select')} {getDisplayName(attributeName).toLowerCase()}:
           </label>
           
-          <div style={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: '8px' 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
           }}>
             {values.map((value) => {
               const isSelected = selectedAttributes[attributeName] === value;
-              
+
               return (
-                <button
+                <label
                   key={value}
-                  type="button"
-                  onClick={() => handleAttributeSelect(attributeName, value)}
                   style={{
-                    padding: '6px 12px',
-                    margin: '4px 4px 4px 0',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    border: isSelected ? `2px solid ${primaryColor}` : '2px solid #ddd',
-                    borderRadius: '20px',
-                    backgroundColor: isSelected ? primaryColor : '#fff',
-                    color: isSelected ? '#fff' : '#666',
+                    display: 'flex',
+                    alignItems: 'center',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    outline: 'none',
-                    minWidth: 'auto',
-                    height: 'auto'
+                    userSelect: 'none'
                   }}
                 >
-                  {value}
-                </button>
+                  <input
+                    type="radio"
+                    name={attributeName}
+                    value={value}
+                    checked={isSelected}
+                    onChange={() => handleAttributeSelect(attributeName, value)}
+                    style={{
+                      appearance: 'none',
+                      width: '20px',
+                      height: '20px',
+                      border: '2px solid #999',
+                      borderRadius: '50%',
+                      marginRight: '10px',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      flexShrink: 0,
+                      transition: 'all 0.2s ease'
+                    }}
+                  />
+                  <style>
+                    {`
+                      input[type="radio"]:checked {
+                        border-color: #333 !important;
+                      }
+                      input[type="radio"]:checked::before {
+                        content: '';
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 50%;
+                        background-color: #333;
+                      }
+                      input[type="radio"]:hover {
+                        border-color: #555;
+                      }
+                    `}
+                  </style>
+                  <span style={{
+                    fontSize: '14px',
+                    fontWeight: '400',
+                    color: isSelected ? '#333' : '#666'
+                  }}>
+                    {value}
+                  </span>
+                </label>
               );
             })}
           </div>

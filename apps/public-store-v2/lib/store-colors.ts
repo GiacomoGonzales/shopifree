@@ -5,26 +5,9 @@
  */
 
 // Función para calcular el color de texto con mejor contraste
-// Usa la fórmula YIQ para determinar si un color es claro u oscuro
-// Retorna blanco para colores oscuros y gris oscuro para colores claros
+// Siempre retorna blanco para mantener consistencia visual
 function getTextColorForBackground(backgroundColor: string): string {
-  const hex = backgroundColor.replace('#', '');
-
-  // Validar que sea un hex válido de 6 caracteres
-  if (hex.length !== 6) {
-    return '#ffffff'; // Fallback a blanco
-  }
-
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-
-  // Fórmula YIQ para calcular luminosidad percibida
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-
-  // Si YIQ >= 128, el color es claro, usar gris oscuro (#1f2937 - gray-800)
-  // Si YIQ < 128, el color es oscuro, usar blanco
-  return yiq >= 128 ? '#1f2937' : '#ffffff';
+  return '#ffffff';
 }
 
 // Función auxiliar para oscurecer un color

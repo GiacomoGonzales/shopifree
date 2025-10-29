@@ -28,18 +28,46 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
   const [modifierSelections, setModifierSelections] = useState<Record<string, string[]>>({});
   const [modifierPriceTotal, setModifierPriceTotal] = useState<number>(0);
   const [modifierQuantities, setModifierQuantities] = useState<Record<string, Record<string, number>>>({});
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Hook de promociones - obtiene el precio original del producto o variante seleccionada
   const originalPrice = selectedVariant ? selectedVariant.price : product.price;
   const promotionsData = usePromotions(storeId || null, product.id || '', originalPrice);
 
-  // Reset variants and modifiers when modal opens with new product
+  // Get all product images
+  const getProductImages = () => {
+    const images: string[] = [];
+
+    // Add main image
+    if (product.image) {
+      images.push(product.image);
+    }
+
+    // Add media files
+    if (product.mediaFiles && Array.isArray(product.mediaFiles)) {
+      product.mediaFiles.forEach((media: any) => {
+        if (media.url && media.url !== product.image) {
+          images.push(media.url);
+        }
+      });
+    }
+
+    return images;
+  };
+
+  const productImages = getProductImages();
+  const hasMultipleImages = productImages.length > 1;
+
+  // Reset variants, modifiers and image index when modal opens with new product
   useEffect(() => {
     if (isOpen) {
       setSelectedVariant(null);
       setModifierSelections({});
       setModifierPriceTotal(0);
       setModifierQuantities({});
+      setCurrentImageIndex(0);
     }
   }, [isOpen, product.id]);
 
@@ -71,6 +99,46 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
   const handleVariantChange = (variant: any) => {
     console.log('🔄 [ProductQuickView] Variante seleccionada:', variant);
     setSelectedVariant(variant);
+  };
+
+  // Swipe gesture handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentImageIndex < productImages.length - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+
+    if (isRightSwipe && currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
+  };
+
+  const goToNextImage = () => {
+    if (currentImageIndex < productImages.length - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+  };
+
+  const goToPrevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
   };
 
   const hasVariants = () => {
@@ -247,7 +315,7 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
       <div className="nbd-cart-modal nbd-product-modal">
         {/* Header del modal - FIJO */}
         <div className="nbd-cart-header">
-          <h2 className="nbd-cart-title">{t('selectOptions')}</h2>
+          <h2 className="nbd-cart-title">{product.name}</h2>
           <button
             onClick={onClose}
             className="nbd-cart-close"
@@ -262,14 +330,62 @@ export default function ProductQuickView({ product, isOpen, onClose, storeInfo, 
         {/* Contenido scrolleable - TODO en el scroll */}
         <div className="nbd-cart-content nbd-product-scroll-content">
           
-          {/* Imagen del producto */}
+          {/* Carrusel de imágenes del producto */}
           <div className="nbd-product-image-container">
-            {product.image ? (
-              <img
-                src={toCloudinarySquare(product.image, 800) || product.image}
-                alt={product.name}
-                className="nbd-product-image"
-              />
+            {productImages.length > 0 ? (
+              <div
+                className="nbd-product-carousel"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
+                <img
+                  src={toCloudinarySquare(productImages[currentImageIndex], 800) || productImages[currentImageIndex]}
+                  alt={`${product.name} - ${currentImageIndex + 1}`}
+                  className="nbd-product-image"
+                />
+
+                {/* Navigation arrows - only show if multiple images */}
+                {hasMultipleImages && (
+                  <>
+                    {currentImageIndex > 0 && (
+                      <button
+                        className="nbd-carousel-arrow nbd-carousel-arrow--left"
+                        onClick={goToPrevImage}
+                        aria-label="Previous image"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                          <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    )}
+
+                    {currentImageIndex < productImages.length - 1 && (
+                      <button
+                        className="nbd-carousel-arrow nbd-carousel-arrow--right"
+                        onClick={goToNextImage}
+                        aria-label="Next image"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                          <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    )}
+
+                    {/* Dots indicator */}
+                    <div className="nbd-carousel-dots">
+                      {productImages.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`nbd-carousel-dot ${index === currentImageIndex ? 'nbd-carousel-dot--active' : ''}`}
+                          onClick={() => setCurrentImageIndex(index)}
+                          aria-label={`Go to image ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <div className="nbd-product-image-placeholder">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
