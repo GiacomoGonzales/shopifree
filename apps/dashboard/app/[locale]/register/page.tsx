@@ -218,18 +218,6 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
           {t('googleButton')}
         </button>
 
-        {/* Footer Links */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-600">
-            {t('hasAccount')}{' '}
-            <a 
-              href={`/${locale}/login`}
-              className="text-gray-900 font-medium hover:underline"
-            >
-              {t('signIn')}
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   )

@@ -192,16 +192,7 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
         </button>
 
         {/* Footer Links */}
-        <div className="text-center mt-8 space-y-2">
-          <p className="text-sm text-gray-600">
-            {t('noAccount')}{' '}
-            <a 
-              href={`/${locale}/register`}
-              className="text-gray-900 font-medium hover:underline"
-            >
-              {t('register')}
-            </a>
-          </p>
+        <div className="text-center mt-8">
           <p>
             <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
               {t('forgotPassword')}
