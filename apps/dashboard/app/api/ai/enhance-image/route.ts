@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { incrementAIEnhancementUsage } from '../../../../lib/subscription-utils'
+import { verifyAuthToken, checkRateLimit, getClientIp, validateImageSize } from '../../../../lib/auth-middleware'
 
 type EnhancementPreset = 'auto' | 'white-bg' | 'lifestyle-bg' | 'with-model' | 'lighting' | 'sharpness' | 'custom'
 
@@ -233,14 +234,54 @@ Specifications:
 /**
  * API Route para mejorar imágenes con Gemini AI durante la CREACIÓN de productos
  * Este endpoint NO guarda en Firestore, solo procesa y devuelve la imagen mejorada
+ *
+ * SECURITY: Protected with authentication, rate limiting, and image size validation
  */
 export async function POST(request: NextRequest) {
   try {
     console.log('🎨 Starting image enhancement (creation mode)...')
 
+    // SECURITY 1: Verify authentication token
+    console.log('🔐 Verifying authentication...')
+    const authResult = await verifyAuthToken(request)
+
+    if (!authResult.success) {
+      console.error('❌ Authentication failed:', authResult.error)
+      return NextResponse.json(
+        { success: false, error: authResult.error },
+        { status: authResult.status || 401 }
+      )
+    }
+
+    const authenticatedUserId = authResult.uid!
+    console.log('✅ User authenticated:', authenticatedUserId)
+
+    // SECURITY 2: Rate limiting by IP
+    const clientIp = getClientIp(request)
+    console.log('🌐 Client IP:', clientIp)
+
+    const rateLimitResult = checkRateLimit(clientIp, {
+      maxRequests: 10, // 10 requests
+      windowMs: 60000  // per minute
+    })
+
+    if (rateLimitResult.limited) {
+      console.error('❌ Rate limit exceeded for IP:', clientIp)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Too many requests. Please try again later.',
+          resetTime: rateLimitResult.resetTime
+        },
+        { status: 429 }
+      )
+    }
+
+    console.log('✅ Rate limit check passed. Remaining:', rateLimitResult.remaining)
+
     // 1. Obtener datos del request
     const body = await request.json()
-    const { imageBase64, productName, productDescription, preset = 'auto', customPrompt, userId } = body
+    const { imageBase64, productName, productDescription, preset = 'auto', customPrompt } = body
 
     if (!imageBase64) {
       return NextResponse.json(
@@ -249,34 +290,74 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!userId) {
+    // SECURITY 3: Validate image size (max 10MB)
+    console.log('📏 Validating image size...')
+    const sizeValidation = validateImageSize(imageBase64, 10 * 1024 * 1024) // 10MB max
+
+    if (!sizeValidation.valid) {
+      console.error('❌ Image size validation failed:', sizeValidation.error)
       return NextResponse.json(
-        { success: false, error: 'Missing userId parameter' },
+        {
+          success: false,
+          error: sizeValidation.error,
+          sizeBytes: sizeValidation.sizeBytes,
+          sizeMB: sizeValidation.sizeMB
+        },
         { status: 400 }
       )
     }
 
-    console.log('📝 Image data length:', imageBase64.length)
+    console.log('✅ Image size valid:', sizeValidation.sizeMB.toFixed(2), 'MB')
     console.log('📦 Product context:', { productName, productDescription })
     console.log('🎯 Enhancement preset:', preset)
-    console.log('👤 User ID:', userId)
 
-    // 1.5. Validar y decrementar límite de uso de IA
-    console.log('🔍 Checking AI enhancement usage limits...')
-    const canUseAI = await incrementAIEnhancementUsage(userId)
+    // 1.5. Validar límite de uso de IA (solo verificar, no incrementar aquí)
+    console.log('🔍 Checking AI enhancement usage limits for user:', authenticatedUserId)
 
-    if (!canUseAI) {
+    let usageInfo
+    try {
+      const { getAIEnhancementUsage } = await import('../../../../lib/subscription-utils')
+      usageInfo = await getAIEnhancementUsage(authenticatedUserId)
+      console.log('📊 Current usage:', usageInfo)
+    } catch (error) {
+      console.error('❌ Error checking AI usage:', error)
       return NextResponse.json(
         {
           success: false,
-          error: 'AI enhancement limit reached or access denied',
-          details: 'You have reached your monthly AI enhancement limit or do not have access to this feature. Please upgrade your plan to continue.'
+          error: 'Error checking AI usage limits',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        },
+        { status: 500 }
+      )
+    }
+
+    // Verificar si tiene acceso
+    if (!usageInfo.hasAccess) {
+      console.error('❌ User does not have access to AI enhancements')
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'AI enhancement access denied',
+          details: 'Your plan does not include AI image enhancements. Please upgrade to continue.'
         },
         { status: 403 }
       )
     }
 
-    console.log('✅ AI enhancement usage validated and incremented')
+    // Verificar si tiene límites disponibles (si no es ilimitado)
+    if (!usageInfo.isUnlimited && usageInfo.remaining <= 0) {
+      console.error('❌ AI enhancement limit reached:', `${usageInfo.used}/${usageInfo.limit}`)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'AI enhancement limit reached',
+          details: `You have used all ${usageInfo.limit} AI enhancements this month. Please upgrade to continue.`
+        },
+        { status: 403 }
+      )
+    }
+
+    console.log('✅ AI enhancement usage validated. Remaining:', usageInfo.remaining)
 
     // 2. Obtener API key de Gemini
     const geminiApiKey = process.env.GEMINI_API_KEY

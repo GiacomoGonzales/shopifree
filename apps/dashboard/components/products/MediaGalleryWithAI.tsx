@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../../lib/simple-auth-context'
-import { getAIEnhancementUsage } from '../../lib/subscription-utils'
+import { getAIEnhancementUsage, incrementAIEnhancementUsage } from '../../lib/subscription-utils'
 import SubscriptionBlockedModal from '../SubscriptionBlockedModal'
 
 interface MediaFile {
@@ -262,6 +262,14 @@ export function MediaGalleryWithAI({
     try {
       console.log('🎨 Enhancing image:', fileId)
 
+      // 0. Verificar autenticación y obtener token
+      if (!user) {
+        throw new Error('Usuario no autenticado')
+      }
+
+      console.log('🔐 Getting authentication token...')
+      const token = await user.getIdToken()
+
       // 1. Convertir imagen URL a Base64
       const response = await fetch(imageUrl)
       const blob = await response.blob()
@@ -277,11 +285,12 @@ export function MediaGalleryWithAI({
         reader.readAsDataURL(blob)
       })
 
-      // 2. Enviar a API para mejorar (con contexto del producto y preset)
+      // 2. Enviar a API para mejorar (con token de autenticación en header)
       const apiResponse = await fetch('/api/ai/enhance-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           imageBase64: base64,
@@ -289,7 +298,6 @@ export function MediaGalleryWithAI({
           productDescription: productDescription || '',
           preset: preset,
           customPrompt: preset === 'custom' ? customPrompt : undefined,
-          userId: user?.uid
         })
       })
 
@@ -357,13 +365,22 @@ export function MediaGalleryWithAI({
 
       console.log('✅ Image enhanced and uploaded successfully')
 
-      // Reload AI usage after successful enhancement
+      // Increment AI usage counter and reload usage info
       if (user?.uid) {
         try {
-          const updatedUsage = await getAIEnhancementUsage(user.uid)
-          setAiUsage(updatedUsage)
+          console.log('📊 Incrementing AI usage counter...')
+          const success = await incrementAIEnhancementUsage(user.uid)
+
+          if (success) {
+            console.log('✅ AI usage counter incremented successfully')
+            // Reload to get fresh usage data
+            const updatedUsage = await getAIEnhancementUsage(user.uid)
+            setAiUsage(updatedUsage)
+          } else {
+            console.warn('⚠️ Failed to increment AI usage counter')
+          }
         } catch (error) {
-          console.error('Error reloading AI usage:', error)
+          console.error('❌ Error updating AI usage:', error)
         }
       }
 

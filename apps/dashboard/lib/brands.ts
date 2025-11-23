@@ -33,29 +33,24 @@ export const getBrands = async (storeId: string): Promise<BrandWithId[]> => {
       return []
     }
 
-    console.log('Consultando marcas para store:', storeId)
-    
     // Obtener marcas ordenadas
     const brandsQuery = query(
       collection(db, 'stores', storeId, 'brands'),
       orderBy('order', 'asc')
     )
-    
+
     const brandsSnapshot = await getDocs(brandsQuery)
-    console.log('Marcas encontradas:', brandsSnapshot.size)
-    
+
     const brands: BrandWithId[] = []
-    
+
     brandsSnapshot.docs.forEach(doc => {
       const data = doc.data()
-      console.log('Marca:', doc.id, data)
       brands.push({
         id: doc.id,
         ...data
       } as BrandWithId)
     })
-    
-    console.log('Todas las marcas ordenadas:', brands)
+
     return brands
   } catch (error) {
     console.error('Error getting brands:', error)

@@ -86,10 +86,7 @@ export default function HomePage() {
     setPaymentMethodsCount(paymentCount)
 
     // Contar imágenes del carrusel
-    console.log('Store data updated:', store)
-    console.log('Carousel images:', store.carouselImages)
     const carouselCount = store.carouselImages?.length || 0
-    console.log('Carousel count:', carouselCount)
     setCarouselImagesCount(carouselCount)
 
     // Contar redes sociales configuradas
@@ -102,7 +99,6 @@ export default function HomePage() {
         }
       })
     }
-    console.log('Social media count:', socialCount)
     setSocialMediaCount(socialCount)
 
     // Contar métodos de envío configurados
@@ -114,7 +110,6 @@ export default function HomePage() {
       if (shippingModes.nationalShipping) shippingCount++
       if (shippingModes.internationalShipping) shippingCount++
     }
-    console.log('Shipping methods count:', shippingCount)
     setShippingMethodsCount(shippingCount)
 
     // Verificar si la barra de anuncio está configurada
@@ -122,7 +117,6 @@ export default function HomePage() {
       store.announcementBar?.enabled &&
       store.announcementBar?.message?.trim()
     )
-    console.log('Announcement bar configured:', isAnnouncementBarConfigured)
     setAnnouncementBarConfigured(isAnnouncementBarConfigured)
 
     // Verificar si SEO está configurado básicamente
@@ -130,7 +124,6 @@ export default function HomePage() {
       store.advanced?.seo?.title?.trim() ||
       store.advanced?.seo?.metaDescription?.trim()
     )
-    console.log('SEO configured:', isSeoConfigured)
     setSeoConfigured(isSeoConfigured)
 
     // Verificar si el dominio personalizado está configurado
@@ -151,7 +144,6 @@ export default function HomePage() {
             domainData?.customDomain?.trim() &&
             (domainData?.verified || domainData?.vercelData?.verified)
           )
-          console.log('Domain configured:', isConfigured, domainData)
           return isConfigured
         }
         return false
@@ -167,7 +159,6 @@ export default function HomePage() {
     const isAnalyticsConfigured = !!(
       store.advanced?.integrations?.googleAnalytics?.trim()
     )
-    console.log('Analytics configured:', isAnalyticsConfigured)
     setAnalyticsConfigured(isAnalyticsConfigured)
 
     // Verificar si todos los primeros pasos están completados
@@ -181,7 +172,6 @@ export default function HomePage() {
       shippingMethodsCount >= 1 &&
       promotionsCount >= 1
 
-    console.log('All first steps completed:', firstStepsCompleted)
     setAllFirstStepsCompleted(firstStepsCompleted)
   }, [store, productCount, categoryCount, paymentMethodsCount, carouselImagesCount, socialMediaCount, shippingMethodsCount, promotionsCount])
 

@@ -48,29 +48,24 @@ export const getCollections = async (storeId: string): Promise<CollectionWithId[
       return []
     }
 
-    console.log('Consultando colecciones para store:', storeId)
-    
     // Obtener colecciones ordenadas
     const collectionsQuery = query(
       collection(db, 'stores', storeId, 'collections'),
       orderBy('order', 'asc')
     )
-    
+
     const collectionsSnapshot = await getDocs(collectionsQuery)
-    console.log('Colecciones encontradas:', collectionsSnapshot.size)
-    
+
     const collections: CollectionWithId[] = []
-    
+
     collectionsSnapshot.docs.forEach(doc => {
       const data = doc.data()
-      console.log('Colección:', doc.id, data)
       collections.push({
         id: doc.id,
         ...data
       } as CollectionWithId)
     })
-    
-    console.log('Todas las colecciones ordenadas:', collections)
+
     return collections
   } catch (error) {
     console.error('Error getting collections:', error)
@@ -169,42 +164,32 @@ export const createCollection = async (
   collectionData: Omit<Collection, 'createdAt' | 'updatedAt' | 'order' | 'slug' | 'visible'>
 ): Promise<CollectionWithId> => {
   try {
-    console.log('🔥 Iniciando creación de colección:', { storeId, collectionData })
-    
     const db = getFirebaseDb()
     if (!db) {
       console.error('❌ Firebase db no disponible')
       throw new Error('Firebase db not available')
     }
-    console.log('✅ Firebase db disponible')
 
     // Verificar que el título esté disponible
-    console.log('🔍 Verificando disponibilidad del título:', collectionData.title)
     const isTitleAvailable = await checkCollectionTitleAvailability(storeId, collectionData.title)
     if (!isTitleAvailable) {
       console.error('❌ Título ya en uso')
       throw new Error('El título de la colección ya está en uso')
     }
-    console.log('✅ Título disponible')
 
     // Generar slug automáticamente
     const slug = generateSlug(collectionData.title)
-    console.log('🔗 Slug generado:', slug)
-    
+
     // Verificar que el slug esté disponible
-    console.log('🔍 Verificando disponibilidad del slug:', slug)
     const isSlugAvailable = await checkCollectionSlugAvailability(storeId, slug)
     if (!isSlugAvailable) {
       console.error('❌ Slug ya en uso')
       throw new Error('El slug generado ya está en uso')
     }
-    console.log('✅ Slug disponible')
 
     // Obtener el siguiente orden disponible
-    console.log('📊 Obteniendo colecciones existentes para calcular orden')
     const existingCollections = await getCollections(storeId)
     const nextOrder = existingCollections.length + 1
-    console.log('📊 Orden calculado:', nextOrder)
 
     const newCollection: Collection = {
       ...collectionData,
@@ -217,15 +202,11 @@ export const createCollection = async (
       updatedAt: serverTimestamp()
     }
 
-    console.log('📝 Datos de la nueva colección:', newCollection)
-    console.log('💾 Guardando en Firestore path:', `stores/${storeId}/collections`)
-
     const docRef = await addDoc(
-      collection(db, 'stores', storeId, 'collections'), 
+      collection(db, 'stores', storeId, 'collections'),
       newCollection
     )
-    
-    console.log('✅ Colección creada exitosamente con ID:', docRef.id)
+
     return { id: docRef.id, ...newCollection }
   } catch (error) {
     console.error('❌ Error creating collection:', error)

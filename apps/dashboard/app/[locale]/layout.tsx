@@ -18,7 +18,6 @@ export default function LocaleLayout({
     // Cargar mensajes de traducción del lado del cliente
     const loadMessages = async () => {
       try {
-        console.log(`🌐 Cargando traducciones para locale: ${locale}`)
         
         // Cargar el archivo principal de traducciones (contiene todo)
         const messagesModule = await import(`../../messages/${locale}.json`)
@@ -48,7 +47,6 @@ export default function LocaleLayout({
             const productsCreateModule = await import(`../../messages/${locale}/products/create.json`)
             return { section: 'products-create', data: productsCreateModule.default }
           } catch {
-            console.log('⚠️ No se pudo cargar products/create.json, usando fallback')
             return { section: 'products-create', data: {} }
           }
         })()
@@ -59,7 +57,6 @@ export default function LocaleLayout({
             const categoriesModule = await import(`../../messages/${locale}/categories/categories.json`)
             return { section: 'categories-list', data: categoriesModule.default }
           } catch {
-            console.log('⚠️ No se pudo cargar categories/categories.json, usando fallback')
             return { section: 'categories-list', data: {} }
           }
         })()
@@ -70,29 +67,26 @@ export default function LocaleLayout({
             const metadataModule = await import(`../../messages/${locale}/categories/metadata.json`)
             return { section: 'categories-metadata', data: metadataModule.default }
           } catch {
-            console.log('⚠️ No se pudo cargar categories/metadata.json, usando fallback')
             return { section: 'categories-metadata', data: {} }
           }
         })()
-        
+
         // Cargar específicamente settings.seo desde su archivo separado
         const seoPromise = (async () => {
           try {
             const seoModule = await import(`../../messages/${locale}/settings/seo.json`)
             return { section: 'seo', data: seoModule.default }
           } catch {
-            console.log('⚠️ No se pudo cargar settings/seo.json, usando fallback')
             return { section: 'seo', data: {} }
           }
         })()
-        
+
         // Cargar específicamente onboarding/user.json y onboarding/store.json
         const onboardingUserPromise = (async () => {
           try {
             const onboardingUserModule = await import(`../../messages/${locale}/onboarding/user.json`)
             return { section: 'onboarding-user', data: onboardingUserModule.default }
           } catch {
-            console.log('⚠️ No se pudo cargar onboarding/user.json, usando fallback')
             return { section: 'onboarding-user', data: {} }
           }
         })()
@@ -102,7 +96,6 @@ export default function LocaleLayout({
             const onboardingStoreModule = await import(`../../messages/${locale}/onboarding/store.json`)
             return { section: 'onboarding-store', data: onboardingStoreModule.default }
           } catch {
-            console.log('⚠️ No se pudo cargar onboarding/store.json, usando fallback')
             return { section: 'onboarding-store', data: {} }
           }
         })()
@@ -178,40 +171,7 @@ export default function LocaleLayout({
             }
           }
         }
-        
-        console.log('✅ Traducciones cargadas exitosamente. Secciones disponibles:', Object.keys(sectionMessages))
-        console.log('🔧 Settings.seo cargado:', !!finalMessages.settings?.seo)
-        console.log('🔧 Products.create cargado:', !!finalMessages.pages?.products?.create)
-        console.log('🔧 Categorization cargado:', !!finalMessages.categorization)
-        console.log('🔧 Categorization.categories cargado:', !!finalMessages.categorization?.categories)
-        console.log('🔧 Categorization.metadata cargado:', !!finalMessages.categorization?.metadata)
-        console.log('🔧 Onboarding cargado:', !!finalMessages.onboarding)
-        console.log('🔧 Onboarding.user cargado:', !!finalMessages.onboarding?.user)
-        console.log('🔧 Onboarding.store cargado:', !!finalMessages.onboarding?.store)
-        console.log('📋 Traducciones totales cargadas:', Object.keys(finalMessages).length)
-        
-        // Debug específico para categorías
-        console.log('🔍 Categories data:', categoriesResult.data)
-        console.log('🔍 Metadata data:', metadataResult.data)
-        
-        if (finalMessages.categorization?.categories) {
-          console.log('✅ Categories loaded:', Object.keys(finalMessages.categorization.categories).slice(0, 5))
-        } else {
-          console.log('❌ Categories NOT loaded')
-        }
-        
-        if (finalMessages.categorization?.metadata) {
-          console.log('✅ Metadata loaded:', Object.keys(finalMessages.categorization.metadata).slice(0, 3))
-        } else {
-          console.log('❌ Metadata NOT loaded')
-        }
-        
-        // Debug específico para SEO
-        if (finalMessages.settings?.seo) {
-          console.log('✅ SEO translations loaded successfully:', Object.keys(finalMessages.settings.seo).slice(0, 5))
-        } else {
-          console.log('❌ SEO translations NOT loaded')
-        }
+
         setMessages(finalMessages)
         
       } catch (error) {
@@ -307,6 +267,30 @@ export default function LocaleLayout({
       <head>
         <title>Dashboard - Shopifree</title>
         <meta name="description" content="Manage your online store" />
+
+        {/* Google Analytics & Google Ads - IMPORTANTE: Reemplaza los IDs en lib/google-tracking.ts */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_ID"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              // PASO 1: Reemplaza 'YOUR_GA_ID' con tu ID de Google Analytics (formato: G-XXXXXXXXXX)
+              gtag('config', 'YOUR_GA_ID', {
+                page_path: window.location.pathname,
+              });
+
+              // PASO 2: Reemplaza 'YOUR_AW_ID' con tu ID de Google Ads (formato: AW-XXXXXXXXX)
+              gtag('config', 'YOUR_AW_ID');
+            `,
+          }}
+        />
+
         <script dangerouslySetInnerHTML={{
           __html: `
             // Override any CSP restrictions immediately

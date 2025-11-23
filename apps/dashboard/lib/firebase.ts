@@ -11,17 +11,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Check if we're in the browser and have valid config
+// Check if we have valid config (works in both browser and server)
 const isValidConfig = () => {
   return (
-    typeof window !== 'undefined' &&
     firebaseConfig.apiKey &&
     firebaseConfig.authDomain &&
     firebaseConfig.projectId
   )
 }
 
-// Initialize Firebase only if we have valid config and we're in the browser
+// Check if we're in the browser
+const isBrowser = () => typeof window !== 'undefined'
+
+// Initialize Firebase only if we have valid config
 let app: FirebaseApp | null = null
 let auth: Auth | null = null
 let db: Firestore | null = null
@@ -42,17 +44,16 @@ const initializeFirebase = async () => {
 
     auth = getAuth(app)
     db = getFirestore(app)
-    
-    // 🔥 Configurar persistencia explícitamente
-    if (auth) {
+
+    // 🔥 Configurar persistencia solo en el navegador
+    if (auth && isBrowser()) {
       try {
         await setPersistence(auth, browserLocalPersistence)
-        console.log('✅ Firebase persistencia configurada en dashboard')
       } catch (persistenceError) {
         console.warn('⚠️ No se pudo configurar persistencia:', persistenceError)
       }
     }
-    
+
     return app
   } catch (error) {
     console.error('Error initializing Firebase:', error)
@@ -85,4 +86,4 @@ export const getFirebaseApp = () => {
 // For backward compatibility
 export { getFirebaseAuth as auth, getFirebaseDb as db }
 
-export default getFirebaseApp 
+export default getFirebaseApp

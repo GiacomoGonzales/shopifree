@@ -44,8 +44,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Simple function to get user data - compatible with existing structure
   const getUserData = async (user: User): Promise<UserData | null> => {
     try {
-      console.log('🔍 Getting user data for:', user.uid, user.email)
-      
       const db = getFirebaseDb()
       if (!db) {
         console.warn('❌ Firebase db not available')
@@ -56,13 +54,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setDebugInfo((prev: DebugInfo) => ({ ...prev, dbAvailable: true }))
 
       const userDocRef = doc(db, 'users', user.uid)
-      console.log('📄 Fetching user document from Firestore...')
-      
       const userDocSnap = await getDoc(userDocRef)
 
       if (userDocSnap.exists()) {
         const data = userDocSnap.data()
-        console.log('✅ User document found:', data)
 
         // 🚫 Verificar si la cuenta está marcada como eliminada
         if (data.deleted === true) {
@@ -98,7 +93,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             lastLoginAt: serverTimestamp(),
             updatedAt: serverTimestamp()
           }, { merge: true })
-          console.log('✅ Updated last login timestamp')
         } catch (updateError) {
           console.warn('⚠️ Could not update last login:', updateError)
         }
@@ -111,13 +105,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
 
-      console.log('❌ No user document found for:', user.uid)
-      console.log('🔧 Creating user document automatically...')
-      
-      // Create user document automatically
+      // Create user document automatically if not found
       try {
         const newUserData = await createUserDocument(user)
-        console.log('✅ User document created successfully:', newUserData)
         
         setDebugInfo((prev: DebugInfo) => ({ 
           ...prev, 
@@ -153,12 +143,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const refreshUserData = async () => {
-    console.log('🔄 Refreshing user data...')
     if (user) {
       try {
         const freshUserData = await getUserData(user)
         if (freshUserData) {
-          console.log('✅ User data refreshed successfully:', freshUserData)
           setUserData(freshUserData)
         }
       } catch (error) {
@@ -180,10 +168,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   useEffect(() => {
-    console.log('🚀 Initializing auth context...')
-    
     const auth = getFirebaseAuth()
-    
+
     if (!auth) {
       console.warn('❌ Firebase auth not available')
       setDebugInfo({ authAvailable: false })
@@ -192,27 +178,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    console.log('✅ Firebase auth available')
     setDebugInfo((prev: DebugInfo) => ({ ...prev, authAvailable: true }))
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         setError(null)
-        
+
         if (firebaseUser) {
-          console.log('👤 User authenticated:', firebaseUser.uid, firebaseUser.email)
           setUser(firebaseUser)
-          
+
           const userData = await getUserData(firebaseUser)
           if (userData) {
-            console.log('✅ User data loaded successfully')
             setUserData(userData)
           } else {
-            console.log('❌ Could not load or create user data')
             setError('Error al cargar los datos del usuario. Por favor, intenta nuevamente.')
           }
         } else {
-          console.log('👤 No user authenticated')
           setUser(null)
           setUserData(null)
         }
@@ -222,20 +203,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } finally {
         setLoading(false)
         setAuthInitialized(true)
-        console.log('✅ Auth state change complete - Firebase initialized')
       }
     })
 
     return () => unsubscribe()
   }, [])
-
-  // 🔥 Agregar logs para debugging en producción
-  useEffect(() => {
-    console.log('✅ Firebase user:', !!user, user?.uid)
-    console.log('✅ Firebase initialized:', authInitialized)
-    console.log('✅ Loading state:', loading)
-    console.log('✅ Is authenticated:', !!user)
-  }, [user, authInitialized, loading])
 
   // 🚫 Redirigir a página de recuperación si la cuenta está eliminada
   useEffect(() => {

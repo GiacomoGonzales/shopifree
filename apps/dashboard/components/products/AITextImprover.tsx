@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAuth } from '../../lib/simple-auth-context'
 
 interface AITextImproverProps {
   type: 'name' | 'description' | 'seoTitle' | 'metaDescription' | 'urlSlug' | 'slogan'
@@ -21,6 +22,7 @@ export function AITextImprover({
   language = 'es',
   className = ''
 }: AITextImproverProps) {
+  const { user } = useAuth()
   const [improving, setImproving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -78,10 +80,19 @@ export function AITextImprover({
     try {
       console.log('✨ Improving text with AI...')
 
+      // Verificar autenticación y obtener token
+      if (!user) {
+        throw new Error('Usuario no autenticado')
+      }
+
+      console.log('🔐 Getting authentication token...')
+      const token = await user.getIdToken()
+
       const response = await fetch('/api/ai/improve-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           type,

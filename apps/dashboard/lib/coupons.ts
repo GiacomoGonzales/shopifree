@@ -42,16 +42,10 @@ export async function getCoupons(storeId: string): Promise<Coupon[]> {
   }
 
   try {
-    console.log('[Coupons] Fetching coupons for storeId:', storeId);
-    
     const couponsRef = collection(db, 'stores', storeId, 'coupons');
-    console.log('[Coupons] Collection path:', `stores/${storeId}/coupons`);
-    
     const q = query(couponsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
-    
-    console.log('[Coupons] Query successful, found', querySnapshot.docs.length, 'coupons');
-    
+
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()

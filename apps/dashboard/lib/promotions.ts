@@ -56,8 +56,6 @@ export async function getPromotions(storeId: string): Promise<Promotion[]> {
   }
 
   try {
-    console.log('[Promotions] Fetching promotions for storeId:', storeId);
-
     const promotionsRef = collection(db, 'stores', storeId, 'promotions');
     const q = query(promotionsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -113,7 +111,6 @@ export async function getPromotions(storeId: string): Promise<Promotion[]> {
       });
     });
 
-    console.log('[Promotions] Found promotions:', promotions.length);
     return promotions;
 
   } catch (error) {

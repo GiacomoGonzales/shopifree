@@ -8,6 +8,7 @@ import Image from 'next/image'
 import GSCIntegration from './GSCIntegration'
 import { Toast } from '../shared/Toast'
 import { useToast } from '../../lib/hooks/useToast'
+import { useAuth } from '../../lib/simple-auth-context'
 
 interface SEOData {
   // SEO básico
@@ -45,9 +46,10 @@ interface SEOConfigurationProps {
 }
 
 export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigurationProps) {
+  const { user } = useAuth()
   const t = useTranslations('settings.seo')
   const tActions = useTranslations('settings.actions')
-  
+
   const [activeTab, setActiveTab] = useState<'basic' | 'social' | 'advanced'>('basic')
   const [seoData, setSeoData] = useState<SEOData>({
     metaTitle: '',
@@ -418,10 +420,21 @@ export default function SEOConfiguration({ store, onUpdate, saving }: SEOConfigu
         timezone: store?.timezone || ''
       }
 
+      // Verificar autenticación y obtener token
+      if (!user) {
+        throw new Error('Usuario no autenticado')
+      }
+
+      console.log('🔐 Getting authentication token...')
+      const token = await user.getIdToken()
+
       // Llamar a la API
       const response = await fetch('/api/ai/generate-seo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ field, storeData })
       })
 

@@ -43,7 +43,7 @@ export const PLAN_FEATURES = {
     hasExclusiveThemes: false,
     hasPrioritySupport: false,
     hasAIImageEnhancement: true,
-    aiEnhancementsPerMonth: 50
+    aiEnhancementsPerMonth: 5
   },
   pro: {
     name: 'Pro',
@@ -64,7 +64,7 @@ export const PLAN_FEATURES = {
     hasExclusiveThemes: true,
     hasPrioritySupport: true,
     hasAIImageEnhancement: true,
-    aiEnhancementsPerMonth: -1 // -1 = unlimited
+    aiEnhancementsPerMonth: 15
   }
 } as const
 
@@ -317,6 +317,12 @@ export const getAIEnhancementUsage = async (uid: string): Promise<{
     }
 
     const subscriptionStatus = await getSubscriptionStatus(uid)
+    console.log('👤 User subscription:', {
+      uid,
+      status: subscriptionStatus.status,
+      plan: subscriptionStatus.plan
+    })
+
     const limit = subscriptionStatus.features.aiEnhancementsPerMonth
     const hasAccess = subscriptionStatus.features.hasAIImageEnhancement
 
@@ -384,7 +390,15 @@ export const getAIEnhancementUsage = async (uid: string): Promise<{
  */
 export const incrementAIEnhancementUsage = async (uid: string): Promise<boolean> => {
   try {
+    console.log('🔍 Getting AI enhancement usage for user:', uid)
     const usage = await getAIEnhancementUsage(uid)
+    console.log('📊 Current usage:', {
+      hasAccess: usage.hasAccess,
+      used: usage.used,
+      limit: usage.limit,
+      remaining: usage.remaining,
+      isUnlimited: usage.isUnlimited
+    })
 
     // Check if user has access
     if (!usage.hasAccess) {

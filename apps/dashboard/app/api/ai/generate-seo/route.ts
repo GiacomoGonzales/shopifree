@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyAuthToken, checkRateLimit, getClientIp } from '../../../../lib/auth-middleware'
 
 type SEOField = 'metaTitle' | 'metaDescription' | 'keywords' | 'ogTitle' | 'ogDescription'
 
@@ -144,10 +145,47 @@ Example format: "¿Sueñas con tu propia tienda online? Con Shopifree es posible
 
 /**
  * API Route para generar contenido SEO con IA
+ *
+ * SECURITY: Protected with authentication and rate limiting
  */
 export async function POST(request: NextRequest) {
   try {
     console.log('🎯 Starting SEO content generation with AI...')
+
+    // SECURITY 1: Verify authentication token
+    console.log('🔐 Verifying authentication...')
+    const authResult = await verifyAuthToken(request)
+
+    if (!authResult.success) {
+      console.error('❌ Authentication failed:', authResult.error)
+      return NextResponse.json(
+        { success: false, error: authResult.error },
+        { status: authResult.status || 401 }
+      )
+    }
+
+    console.log('✅ User authenticated:', authResult.uid)
+
+    // SECURITY 2: Rate limiting by IP
+    const clientIp = getClientIp(request)
+    const rateLimitResult = checkRateLimit(`generate-seo:${clientIp}`, {
+      maxRequests: 20, // 20 requests
+      windowMs: 60000  // per minute
+    })
+
+    if (rateLimitResult.limited) {
+      console.error('❌ Rate limit exceeded for IP:', clientIp)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Too many requests. Please try again later.',
+          resetTime: rateLimitResult.resetTime
+        },
+        { status: 429 }
+      )
+    }
+
+    console.log('✅ Rate limit check passed. Remaining:', rateLimitResult.remaining)
 
     // 1. Obtener datos del request
     const body = await request.json()

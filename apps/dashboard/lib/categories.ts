@@ -338,30 +338,26 @@ export const deleteCategory = async (storeId: string, categoryId: string, parent
 // Obtener categorías padre (sin parentCategoryId)
 export const getParentCategories = async (storeId: string): Promise<CategoryWithId[]> => {
   try {
-    console.log('Obteniendo categorías padre para store:', storeId)
-    
     const db = getFirebaseDb()
     if (!db) {
       console.warn('Database not available')
       return []
     }
-    
+
     const parentCategoriesQuery = query(
       collection(db, 'stores', storeId, 'categories')
     )
-    
+
     const querySnapshot = await getDocs(parentCategoriesQuery)
-    console.log('Categorías padre encontradas:', querySnapshot.size)
-    
+
     const parentCategories = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as CategoryWithId[]
-    
+
     // Ordenar por orden
     parentCategories.sort((a, b) => (a.order || 0) - (b.order || 0))
-    
-    console.log('Categorías padre ordenadas:', parentCategories)
+
     return parentCategories
   } catch (error) {
     console.error('Error getting parent categories:', error)
