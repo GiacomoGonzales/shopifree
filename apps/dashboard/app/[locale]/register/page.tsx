@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { registerWithEmail, signInWithGoogle } from '../../../lib/auth'
 import { useAuth } from '../../../lib/simple-auth-context'
 import { markLeadAsConverted } from '../../../lib/leads'
+import { trackRegistrationConversion } from '../../../lib/google-tracking'
 
 export default function RegisterPage({ params: { locale } }: { params: { locale: string } }) {
   const router = useRouter()
@@ -72,6 +73,13 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
       // Marcar conversión de lead a usuario registrado
       await markLeadAsConverted(email, user.uid)
 
+      // ✅ TRACKING: Disparar conversión de Google Ads después del registro exitoso
+      trackRegistrationConversion({
+        method: 'email',
+        userId: user.uid,
+        email: email,
+      })
+
       router.replace(`/${locale}`)
     } else {
       setError(getErrorMessage(authError || 'Error al crear la cuenta'))
@@ -90,8 +98,21 @@ export default function RegisterPage({ params: { locale } }: { params: { locale:
       // Marcar conversión de lead a usuario registrado
       await markLeadAsConverted(user.email, user.uid)
 
+      // ✅ TRACKING: Disparar conversión de Google Ads después del registro exitoso
+      trackRegistrationConversion({
+        method: 'google',
+        userId: user.uid,
+        email: user.email,
+      })
+
       router.replace(`/${locale}`)
     } else if (user) {
+      // ✅ TRACKING: Disparar conversión incluso si no hay email
+      trackRegistrationConversion({
+        method: 'google',
+        userId: user.uid,
+      })
+
       router.replace(`/${locale}`)
     } else {
       setError(getErrorMessage(authError || 'Error al registrarse con Google'))

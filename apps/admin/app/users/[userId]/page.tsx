@@ -18,7 +18,104 @@ interface User {
   updatedAt: Timestamp
   phoneNumber?: string
   bio?: string
+  // Subscription fields
+  subscriptionStatus?: "trial" | "active" | "cancelled" | "expired" | "free"
+  subscriptionPlan?: "free" | "premium" | "pro"
+  trialStartDate?: Timestamp
+  trialEndDate?: Timestamp
+  subscriptionStartDate?: Timestamp
+  subscriptionEndDate?: Timestamp
+  features?: {
+    maxProducts: number
+    hasCustomDomain: boolean
+    hasIntegratedPayments: boolean
+    hasTraditionalCheckout: boolean
+    hasCartRecovery: boolean
+    hasAutoEmails: boolean
+    hasGoogleAnalytics: boolean
+    hasMetaPixel: boolean
+    hasCompleteReports: boolean
+    hasUnlimitedProducts: boolean
+    hasInternationalSales: boolean
+    hasMultipleLanguages: boolean
+    hasCustomerSegmentation: boolean
+    hasAdvancedMarketing: boolean
+    hasExclusiveThemes: boolean
+    hasPrioritySupport: boolean
+    hasAIImageEnhancement: boolean
+    aiEnhancementsPerMonth: number
+  }
 }
+
+// Plan features matching dashboard/lib/subscription-utils.ts
+const PLAN_FEATURES = {
+  free: {
+    name: "Free",
+    maxProducts: 12,
+    hasCustomDomain: false,
+    hasIntegratedPayments: false,
+    hasTraditionalCheckout: false,
+    hasCartRecovery: false,
+    hasAutoEmails: false,
+    hasGoogleAnalytics: false,
+    hasMetaPixel: false,
+    hasCompleteReports: false,
+    hasUnlimitedProducts: false,
+    hasInternationalSales: false,
+    hasMultipleLanguages: false,
+    hasCustomerSegmentation: false,
+    hasAdvancedMarketing: false,
+    hasExclusiveThemes: false,
+    hasPrioritySupport: false,
+    hasAIImageEnhancement: false,
+    aiEnhancementsPerMonth: 0
+  },
+  premium: {
+    name: "Premium",
+    maxProducts: 50,
+    hasCustomDomain: true,
+    hasIntegratedPayments: true,
+    hasTraditionalCheckout: true,
+    hasCartRecovery: true,
+    hasAutoEmails: true,
+    hasGoogleAnalytics: true,
+    hasMetaPixel: true,
+    hasCompleteReports: true,
+    hasUnlimitedProducts: false,
+    hasInternationalSales: false,
+    hasMultipleLanguages: false,
+    hasCustomerSegmentation: false,
+    hasAdvancedMarketing: false,
+    hasExclusiveThemes: false,
+    hasPrioritySupport: false,
+    hasAIImageEnhancement: true,
+    aiEnhancementsPerMonth: 5
+  },
+  pro: {
+    name: "Pro",
+    maxProducts: -1,
+    hasCustomDomain: true,
+    hasIntegratedPayments: true,
+    hasTraditionalCheckout: true,
+    hasCartRecovery: true,
+    hasAutoEmails: true,
+    hasGoogleAnalytics: true,
+    hasMetaPixel: true,
+    hasCompleteReports: true,
+    hasUnlimitedProducts: true,
+    hasInternationalSales: true,
+    hasMultipleLanguages: true,
+    hasCustomerSegmentation: true,
+    hasAdvancedMarketing: true,
+    hasExclusiveThemes: true,
+    hasPrioritySupport: true,
+    hasAIImageEnhancement: true,
+    aiEnhancementsPerMonth: 15
+  }
+} as const
+
+type PlanType = keyof typeof PLAN_FEATURES
+type SubscriptionStatus = "trial" | "active" | "cancelled" | "expired" | "free"
 
 interface Store {
   id: string
@@ -41,6 +138,11 @@ export default function UserDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editRole, setEditRole] = useState<"user" | "admin" | "superadmin">("user")
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>("free")
+  const [selectedStatus, setSelectedStatus] = useState<SubscriptionStatus>("free")
+  const [subscriptionDuration, setSubscriptionDuration] = useState<number>(30) // days
+  const [updatingSubscription, setUpdatingSubscription] = useState(false)
 
   const loadUserData = useCallback(async () => {
     try {
@@ -138,6 +240,134 @@ export default function UserDetailPage() {
       console.error("Error updating user role:", error)
       alert("Error updating user role")
     }
+  }
+
+  const openSubscriptionModal = () => {
+    if (user) {
+      setSelectedPlan(user.subscriptionPlan || "free")
+      setSelectedStatus(user.subscriptionStatus || "free")
+      setSubscriptionDuration(30)
+    }
+    setShowSubscriptionModal(true)
+  }
+
+  const handleUpdateSubscription = async () => {
+    if (!user) return
+
+    try {
+      setUpdatingSubscription(true)
+      const db = getFirebaseDb()
+      if (!db) return
+
+      const now = Timestamp.now()
+      const planFeatures = PLAN_FEATURES[selectedPlan]
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updateData: any = {
+        subscriptionPlan: selectedPlan,
+        subscriptionStatus: selectedStatus,
+        features: planFeatures,
+        updatedAt: now
+      }
+
+      // Set dates based on status
+      if (selectedStatus === "active") {
+        updateData.subscriptionStartDate = now
+        if (subscriptionDuration > 0) {
+          updateData.subscriptionEndDate = Timestamp.fromMillis(
+            now.toMillis() + (subscriptionDuration * 24 * 60 * 60 * 1000)
+          )
+        } else {
+          // Permanent/lifetime subscription
+          updateData.subscriptionEndDate = null
+        }
+        // Clear trial dates
+        updateData.trialStartDate = null
+        updateData.trialEndDate = null
+      } else if (selectedStatus === "trial") {
+        updateData.trialStartDate = now
+        updateData.trialEndDate = Timestamp.fromMillis(
+          now.toMillis() + (subscriptionDuration * 24 * 60 * 60 * 1000)
+        )
+        // Clear subscription dates
+        updateData.subscriptionStartDate = null
+        updateData.subscriptionEndDate = null
+      } else if (selectedStatus === "free") {
+        // Reset to free plan
+        updateData.subscriptionPlan = "free"
+        updateData.features = PLAN_FEATURES.free
+        updateData.trialStartDate = null
+        updateData.trialEndDate = null
+        updateData.subscriptionStartDate = null
+        updateData.subscriptionEndDate = null
+      }
+
+      await updateDoc(doc(db, "users", userId), updateData)
+
+      // Update local state
+      setUser({
+        ...user,
+        subscriptionPlan: updateData.subscriptionPlan,
+        subscriptionStatus: updateData.subscriptionStatus,
+        features: updateData.features,
+        trialStartDate: updateData.trialStartDate,
+        trialEndDate: updateData.trialEndDate,
+        subscriptionStartDate: updateData.subscriptionStartDate,
+        subscriptionEndDate: updateData.subscriptionEndDate
+      })
+
+      setShowSubscriptionModal(false)
+      alert(`Subscription updated successfully to ${PLAN_FEATURES[selectedPlan].name} (${selectedStatus})`)
+    } catch (error) {
+      console.error("Error updating subscription:", error)
+      alert("Error updating subscription")
+    } finally {
+      setUpdatingSubscription(false)
+    }
+  }
+
+  const getSubscriptionBadgeColor = (status?: string) => {
+    switch (status) {
+      case "active":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+      case "trial":
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20"
+      case "cancelled":
+        return "bg-orange-500/10 text-orange-400 border-orange-500/20"
+      case "expired":
+        return "bg-red-500/10 text-red-400 border-red-500/20"
+      default:
+        return "bg-slate-500/10 text-slate-400 border-slate-500/20"
+    }
+  }
+
+  const getPlanBadgeColor = (plan?: string) => {
+    switch (plan) {
+      case "pro":
+        return "bg-purple-500/10 text-purple-400 border-purple-500/20"
+      case "premium":
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20"
+      default:
+        return "bg-slate-500/10 text-slate-400 border-slate-500/20"
+    }
+  }
+
+  const getTrialDaysRemaining = () => {
+    if (user?.subscriptionStatus !== "trial" || !user?.trialEndDate) return null
+    const now = Date.now()
+    const trialEnd = user.trialEndDate.toMillis()
+    const diffTime = trialEnd - now
+    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return daysRemaining > 0 ? daysRemaining : 0
+  }
+
+  const getSubscriptionDaysRemaining = () => {
+    if (user?.subscriptionStatus !== "active" || !user?.subscriptionEndDate) return null
+    const now = Date.now()
+    const subEnd = user.subscriptionEndDate.toMillis()
+    const diffTime = subEnd - now
+    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return daysRemaining > 0 ? daysRemaining : 0
   }
 
   const formatDate = (timestamp: Timestamp) => {
@@ -374,6 +604,121 @@ export default function UserDetailPage() {
           </div>
         </div>
 
+        {/* Subscription Management */}
+        <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-purple-500/20 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white">Subscription</h3>
+            </div>
+            <button
+              onClick={openSubscriptionModal}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Manage Subscription
+            </button>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {/* Current Plan */}
+              <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                <p className="text-sm text-slate-400 mb-2">Current Plan</p>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${getPlanBadgeColor(user.subscriptionPlan)}`}>
+                    {PLAN_FEATURES[user.subscriptionPlan || "free"].name}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                <p className="text-sm text-slate-400 mb-2">Status</p>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border capitalize ${getSubscriptionBadgeColor(user.subscriptionStatus)}`}>
+                    {user.subscriptionStatus || "free"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Days Remaining */}
+              <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                <p className="text-sm text-slate-400 mb-2">Days Remaining</p>
+                <p className="text-2xl font-bold text-white">
+                  {user.subscriptionStatus === "trial"
+                    ? (getTrialDaysRemaining() ?? "N/A")
+                    : user.subscriptionStatus === "active" && user.subscriptionEndDate
+                    ? (getSubscriptionDaysRemaining() ?? "Lifetime")
+                    : "N/A"
+                  }
+                </p>
+              </div>
+
+              {/* Max Products */}
+              <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                <p className="text-sm text-slate-400 mb-2">Product Limit</p>
+                <p className="text-2xl font-bold text-white">
+                  {user.features?.maxProducts === -1
+                    ? "Unlimited"
+                    : user.features?.maxProducts || PLAN_FEATURES.free.maxProducts}
+                </p>
+              </div>
+            </div>
+
+            {/* Features Grid */}
+            <div className="border-t border-slate-700 pt-6">
+              <p className="text-sm text-slate-400 mb-4">Plan Features</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {[
+                  { key: "hasCustomDomain", label: "Custom Domain" },
+                  { key: "hasIntegratedPayments", label: "Integrated Payments" },
+                  { key: "hasTraditionalCheckout", label: "Traditional Checkout" },
+                  { key: "hasCartRecovery", label: "Cart Recovery" },
+                  { key: "hasAutoEmails", label: "Auto Emails" },
+                  { key: "hasGoogleAnalytics", label: "Google Analytics" },
+                  { key: "hasMetaPixel", label: "Meta Pixel" },
+                  { key: "hasCompleteReports", label: "Complete Reports" },
+                  { key: "hasAIImageEnhancement", label: "AI Image Enhancement" },
+                  { key: "hasPrioritySupport", label: "Priority Support" },
+                  { key: "hasInternationalSales", label: "International Sales" },
+                  { key: "hasMultipleLanguages", label: "Multiple Languages" },
+                ].map(({ key, label }) => {
+                  const features = user.features || PLAN_FEATURES.free
+                  const hasFeature = features[key as keyof typeof features]
+                  return (
+                    <div
+                      key={key}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                        hasFeature
+                          ? "bg-emerald-500/10 text-emerald-400"
+                          : "bg-slate-800 text-slate-500"
+                      }`}
+                    >
+                      {hasFeature ? (
+                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                      <span className="truncate">{label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* User Stores */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
           <h3 className="text-xl font-bold text-white mb-4">Stores</h3>
@@ -460,6 +805,202 @@ export default function UserDetailPage() {
                 className="flex-1 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Management Modal */}
+      {showSubscriptionModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-purple-500/20 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Manage Subscription</h3>
+                <p className="text-sm text-slate-400">Update plan and status for {user?.displayName || user?.email}</p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              {/* Plan Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Select Plan
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {(["free", "premium", "pro"] as const).map((plan) => (
+                    <button
+                      key={plan}
+                      onClick={() => setSelectedPlan(plan)}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        selectedPlan === plan
+                          ? "border-amber-500 bg-amber-500/10"
+                          : "border-slate-600 bg-slate-900 hover:border-slate-500"
+                      }`}
+                    >
+                      <p className={`font-bold text-lg ${
+                        selectedPlan === plan ? "text-amber-400" : "text-white"
+                      }`}>
+                        {PLAN_FEATURES[plan].name}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {PLAN_FEATURES[plan].maxProducts === -1
+                          ? "Unlimited products"
+                          : `${PLAN_FEATURES[plan].maxProducts} products`}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Subscription Status
+                </label>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value as SubscriptionStatus)}
+                  className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                >
+                  <option value="free">Free (No subscription)</option>
+                  <option value="trial">Trial (Limited time)</option>
+                  <option value="active">Active (Paid subscription)</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="expired">Expired</option>
+                </select>
+              </div>
+
+              {/* Duration (only for trial and active) */}
+              {(selectedStatus === "trial" || selectedStatus === "active") && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Duration (days)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value={subscriptionDuration}
+                      onChange={(e) => setSubscriptionDuration(parseInt(e.target.value) || 0)}
+                      min="0"
+                      className="flex-1 px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      placeholder="30"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setSubscriptionDuration(30)}
+                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm"
+                      >
+                        30d
+                      </button>
+                      <button
+                        onClick={() => setSubscriptionDuration(90)}
+                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm"
+                      >
+                        90d
+                      </button>
+                      <button
+                        onClick={() => setSubscriptionDuration(365)}
+                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm"
+                      >
+                        1y
+                      </button>
+                      {selectedStatus === "active" && (
+                        <button
+                          onClick={() => setSubscriptionDuration(0)}
+                          className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
+                          title="Lifetime subscription (no expiration)"
+                        >
+                          Lifetime
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    {subscriptionDuration === 0
+                      ? "Lifetime subscription - no expiration date"
+                      : `Subscription will expire in ${subscriptionDuration} days from now`}
+                  </p>
+                </div>
+              )}
+
+              {/* Plan Features Preview */}
+              <div className="p-4 bg-slate-900 border border-slate-700 rounded-lg">
+                <p className="text-sm font-medium text-slate-300 mb-3">
+                  {PLAN_FEATURES[selectedPlan].name} Plan Features:
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <span className="text-emerald-400">✓</span>
+                    {PLAN_FEATURES[selectedPlan].maxProducts === -1
+                      ? "Unlimited products"
+                      : `${PLAN_FEATURES[selectedPlan].maxProducts} products`}
+                  </div>
+                  {PLAN_FEATURES[selectedPlan].hasCustomDomain && (
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <span className="text-emerald-400">✓</span>
+                      Custom domain
+                    </div>
+                  )}
+                  {PLAN_FEATURES[selectedPlan].hasIntegratedPayments && (
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <span className="text-emerald-400">✓</span>
+                      Integrated payments
+                    </div>
+                  )}
+                  {PLAN_FEATURES[selectedPlan].hasAIImageEnhancement && (
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <span className="text-emerald-400">✓</span>
+                      AI Enhancement ({PLAN_FEATURES[selectedPlan].aiEnhancementsPerMonth}/mo)
+                    </div>
+                  )}
+                  {PLAN_FEATURES[selectedPlan].hasPrioritySupport && (
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <span className="text-emerald-400">✓</span>
+                      Priority support
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Warning */}
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                <p className="text-xs text-amber-400">
+                  ⚠️ This will immediately update the user&apos;s subscription. They will have access to the new plan features right away.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowSubscriptionModal(false)}
+                disabled={updatingSubscription}
+                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateSubscription}
+                disabled={updatingSubscription}
+                className="flex-1 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {updatingSubscription ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </>
+                ) : (
+                  "Update Subscription"
+                )}
               </button>
             </div>
           </div>

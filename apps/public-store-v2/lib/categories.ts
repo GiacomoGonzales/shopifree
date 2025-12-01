@@ -28,7 +28,6 @@ export async function getStoreParentCategories(storeId: string): Promise<Categor
 			items.push({ id: doc.id, ...data });
 		});
 		
-		console.log(`🔍 Loaded ${items.length} parent categories (optimized)`);
 		items.sort((a, b) => (a.order ?? 999999) - (b.order ?? 999999));
 		return items;
 	} catch (e) {
@@ -56,7 +55,6 @@ export async function getCategorySubcategories(storeId: string, categoryId: stri
 			});
 		});
 		
-		console.log(`🔍 Loaded ${subcategories.length} subcategories for category ${categoryId}`);
 		subcategories.sort((a, b) => (a.order ?? 999999) - (b.order ?? 999999));
 		return subcategories;
 	} catch (e) {

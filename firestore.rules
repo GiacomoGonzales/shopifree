@@ -12,12 +12,18 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Función helper para verificar si el usuario actual es admin o superadmin
+    function isAdminOrSuperadmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin'];
+    }
+
     // Reglas para usuarios globales
     match /users/{userId} {
       // Permitir lectura de datos públicos de usuario a cualquier usuario autenticado
-      // Permitir escritura solo al propio usuario
+      // Permitir escritura al propio usuario O a admins/superadmins
       allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+      allow write: if isOwner(userId) || isAdminOrSuperadmin();
 
       // Reglas para favoritos del usuario
       match /favorites/{favoriteId} {

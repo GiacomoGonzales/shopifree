@@ -37,7 +37,12 @@
       "Bash(npx next lint:*)",
       "Bash(npm run type-check:*)",
       "Read(//c/**)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn install:*)",
+      "Bash(corepack enable:*)",
+      "Bash(git log:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []

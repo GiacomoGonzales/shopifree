@@ -25,30 +25,25 @@ export const getStoreCollections = async (storeId: string): Promise<PublicCollec
             return [];
         }
 
-        console.log('Consultando colecciones para store:', storeId);
-        
         // Obtener colecciones visibles ordenadas
         const collectionsQuery = query(
             collection(db, 'stores', storeId, 'collections'),
             where('visible', '==', true),
             orderBy('order', 'asc')
         );
-        
+
         const collectionsSnapshot = await getDocs(collectionsQuery);
-        console.log('Colecciones encontradas:', collectionsSnapshot.size);
-        
+
         const collections: PublicCollection[] = [];
-        
+
         collectionsSnapshot.docs.forEach(doc => {
             const data = doc.data();
-            console.log('Colección:', doc.id, data);
             collections.push({
                 id: doc.id,
                 ...data
             } as PublicCollection);
         });
-        
-        console.log('Todas las colecciones ordenadas:', collections);
+
         return collections;
     } catch (error) {
         console.error('Error getting collections:', error);
