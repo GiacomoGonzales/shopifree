@@ -416,7 +416,7 @@ export function MediaGalleryWithAI({
           Imágenes y Videos del Producto
         </label>
         <p className="text-xs text-gray-500 mb-4">
-          Sube imágenes de tu producto. Puedes mejorarlas con IA para obtener mejores resultados.
+          Sube imágenes de tu producto. La primera imagen sera la imagen principal.
         </p>
       </div>
 
@@ -504,8 +504,13 @@ export function MediaGalleryWithAI({
                 </div>
               </div>
 
-              {/* Split button "Mejorar con IA" con dropdown de presets */}
-              {file.type === 'image' && !file.uploading && !file.isEnhanced && (
+              {/* Split button "Mejorar con IA" con dropdown de presets - DESACTIVADO TEMPORALMENTE */}
+              {/*
+              NOTA: Funcionalidad de mejora de imágenes con IA desactivada temporalmente
+              para reducir costos de Google Cloud/Gemini API.
+              Para reactivar, descomentar el bloque a continuación.
+              */}
+              {false && file.type === 'image' && !file.uploading && !file.isEnhanced && (
                 <div className="space-y-2">
                   {/* AI Usage Counter (si tiene acceso) */}
                   {aiUsage?.hasAccess && !loadingAiUsage && (
