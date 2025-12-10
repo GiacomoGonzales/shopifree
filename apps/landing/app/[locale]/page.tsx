@@ -36,8 +36,7 @@ export default function HomePage() {
     'Mailchimp',
     'Instagram Shopping',
     'Google Ads',
-    'Sendgrid',
-    'Google Gemini AI'
+    'Sendgrid'
   ]
 
   // Demo stores data - Optimized to 3 stores for better performance

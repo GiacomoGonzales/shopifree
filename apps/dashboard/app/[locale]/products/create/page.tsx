@@ -25,8 +25,7 @@ import {
   deleteModifierTemplate,
   type ModifierTemplate
 } from '../../../../lib/modifier-templates'
-import { MediaGalleryWithAI } from '../../../../components/products/MediaGalleryWithAI'
-import { AITextImprover } from '../../../../components/products/AITextImprover'
+import { MediaGallery } from '../../../../components/products/MediaGallery'
 
 // Usar las categorías simplificadas
 const CATEGORY_OPTIONS = SIMPLIFIED_CATEGORIES
@@ -1049,54 +1048,30 @@ export default function CreateProductPage() {
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('productInfo')}</h2>
                 <div className="space-y-4">
-                  {/* Campo de Nombre con botón de IA */}
-                  <div className="space-y-2">
-                    <Input
-                      label={t('productName')}
-                      placeholder={t('productNamePlaceholder')}
-                      value={productName}
-                      onChange={(e) => setProductName(e.target.value)}
-                      required
-                    />
-                    <AITextImprover
-                      type="name"
-                      currentText={productName}
-                      onImprovedText={setProductName}
-                      productName={productName}
-                      productDescription={description}
-                      language={store?.language}
-                    />
-                  </div>
+                  <Input
+                    label={t('productName')}
+                    placeholder={t('productNamePlaceholder')}
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    required
+                  />
 
-                  {/* Campo de Descripción con botón de IA */}
-                  <div className="space-y-2">
-                    <RichTextEditor
-                      label={t('description')}
-                      value={description}
-                      onChange={setDescription}
-                      placeholder={t('descriptionPlaceholder')}
-                      required={false}
-                    />
-                    <AITextImprover
-                      type="description"
-                      currentText={description}
-                      onImprovedText={setDescription}
-                      productName={productName}
-                      productDescription={description}
-                      language={store?.language}
-                    />
-                  </div>
+                  <RichTextEditor
+                    label={t('description')}
+                    value={description}
+                    onChange={setDescription}
+                    placeholder={t('descriptionPlaceholder')}
+                    required={false}
+                  />
                 </div>
               </Card>
 
               {/* 2. Multimedia */}
               <Card className="p-6">
-                <MediaGalleryWithAI
+                <MediaGallery
                   mediaFiles={mediaFiles}
                   onMediaFilesChange={setMediaFiles}
                   onFileUpload={handleFileUpload}
-                  productName={productName}
-                  productDescription={description}
                 />
               </Card>
 
@@ -2724,65 +2699,32 @@ export default function CreateProductPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {/* SEO Title con botón de IA */}
-                  <div className="space-y-2">
-                    <Input
-                      label={t('seo.pageTitle')}
-                      placeholder={t('seo.pageTitlePlaceholder')}
-                      value={seoTitle}
-                      onChange={(e) => setSeoTitle(e.target.value)}
-                    />
-                    <AITextImprover
-                      type="seoTitle"
-                      currentText={seoTitle}
-                      onImprovedText={setSeoTitle}
-                      productName={productName}
-                      productDescription={description}
-                      language={store?.language}
+                  <Input
+                    label={t('seo.pageTitle')}
+                    placeholder={t('seo.pageTitlePlaceholder')}
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                  />
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('seo.metaDescription')}
+                    </label>
+                    <textarea
+                      rows={3}
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
+                      placeholder={t('seo.metaDescriptionPlaceholder')}
+                      value={metaDescription}
+                      onChange={(e) => setMetaDescription(e.target.value)}
                     />
                   </div>
 
-                  {/* Meta Description con botón de IA */}
-                  <div className="space-y-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {t('seo.metaDescription')}
-                      </label>
-                      <textarea
-                        rows={3}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base sm:text-sm"
-                        placeholder={t('seo.metaDescriptionPlaceholder')}
-                        value={metaDescription}
-                        onChange={(e) => setMetaDescription(e.target.value)}
-                      />
-                    </div>
-                    <AITextImprover
-                      type="metaDescription"
-                      currentText={metaDescription}
-                      onImprovedText={setMetaDescription}
-                      productName={productName}
-                      productDescription={description}
-                      language={store?.language}
-                    />
-                  </div>
-
-                  {/* URL Slug con botón de IA */}
-                  <div className="space-y-2">
-                    <Input
-                      label={t('seo.urlHandle')}
-                      placeholder={t('seo.urlHandlePlaceholder')}
-                      value={urlSlug}
-                      onChange={(e) => setUrlSlug(e.target.value)}
-                    />
-                    <AITextImprover
-                      type="urlSlug"
-                      currentText={urlSlug}
-                      onImprovedText={setUrlSlug}
-                      productName={productName}
-                      productDescription={description}
-                      language={store?.language}
-                    />
-                  </div>
+                  <Input
+                    label={t('seo.urlHandle')}
+                    placeholder={t('seo.urlHandlePlaceholder')}
+                    value={urlSlug}
+                    onChange={(e) => setUrlSlug(e.target.value)}
+                  />
                 </div>
                   </div>
                 )}
