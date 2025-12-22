@@ -7,7 +7,7 @@ import Image from 'next/image'
 import LanguageSelector from '../../components/LanguageSelector'
 
 export default function HomePage() {
-  const t = useTranslations('home')
+  useTranslations('home') // Keep for future use
   const locale = useLocale()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [email, setEmail] = useState('')
@@ -52,7 +52,7 @@ export default function HomePage() {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
     }, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [testimonials.length])
 
   // Carousel animation
   useEffect(() => {
@@ -462,7 +462,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <p className="text-xl md:text-2xl font-light leading-relaxed text-gray-700">
-                    "{testimonial.text}"
+                    &ldquo;{testimonial.text}&rdquo;
                   </p>
                 </div>
               </div>
