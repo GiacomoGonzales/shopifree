@@ -4,1030 +4,479 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Button } from '@shopifree/ui'
 import LanguageSelector from '../../components/LanguageSelector'
-import FAQ from '../../components/FAQ'
-import { OrganizationSchema, SoftwareApplicationSchema, FAQSchema, WebSiteSchema } from '../../components/StructuredData'
 
 export default function HomePage() {
   const t = useTranslations('home')
   const locale = useLocale()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
-  const [visibleWords, setVisibleWords] = useState<number>(0)
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [currentPlan, setCurrentPlan] = useState(1) // Start with Premium plan (index 1)
-  const [isAnnual, setIsAnnual] = useState(true) // Start with annual pricing as default
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
   const [carouselPosition, setCarouselPosition] = useState(0)
   const carouselRef = useRef<HTMLDivElement>(null)
-  const [currentDemoStore, setCurrentDemoStore] = useState(0)
 
-  const dynamicPhrases = t.raw('dynamicPhrases') as string[]
-
-  // Integration names for better SEO
-  const integrationNames = [
-    'Mercado Pago',
-    'PayPal',
-    'Stripe',
-    'Google Analytics',
-    'Meta Pixel',
-    'WhatsApp Business',
-    'Mailchimp',
-    'Instagram Shopping',
-    'Google Ads',
-    'Sendgrid'
-  ]
-
-  // Demo stores data - Optimized to 3 stores for better performance
-  const demoStores = [
+  const testimonials = [
     {
-      name: "Fast Bite - Comida rápida a domicilio",
-      category: "Restaurante",
-      theme: "Restaurant",
-      icon: "🍔",
-      url: "https://fastbite.shopifree.app",
-      description: "Menú digital con checkout rápido",
-      mobileColor: "bg-gradient-to-br from-orange-400 to-red-500",
-      desktopColor: "bg-gradient-to-br from-orange-300 to-red-400"
+      name: 'Maria Garcia',
+      business: 'Dulces Artesanales',
+      location: 'Lima, Peru',
+      text: 'En 10 minutos tenia mi catalogo listo. Ahora recibo pedidos por WhatsApp todos los dias.',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face'
     },
     {
-      name: "Lunara Store - Moda y accesorios",
-      category: "Moda",
-      theme: "Shopifree Theme",
-      icon: "👗",
-      url: "https://lunara-store.xyz",
-      description: "Tienda de moda premium",
-      mobileColor: "bg-gradient-to-br from-pink-400 to-purple-500",
-      desktopColor: "bg-gradient-to-br from-pink-300 to-purple-400"
+      name: 'Carlos Rodriguez',
+      business: 'Accesorios CR',
+      location: 'Bogota, Colombia',
+      text: 'Antes usaba solo Instagram. Con Shopifree mis clientes ven todo el catalogo y hacen pedidos mas facil.',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
     },
     {
-      name: "TechZone",
-      category: "Tecnología",
-      theme: "Mobile Modern",
-      icon: "📱",
-      url: "https://technova.shopifree.app",
-      description: "Lo último en tecnología y gadgets",
-      mobileColor: "bg-gradient-to-br from-blue-400 to-indigo-500",
-      desktopColor: "bg-gradient-to-br from-blue-300 to-indigo-400"
+      name: 'Ana Martinez',
+      business: 'Ropa Vintage',
+      location: 'CDMX, Mexico',
+      text: 'Lo mejor es que es gratis. Empece sin invertir nada y ya tengo ventas constantes.',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
     }
   ]
 
-  const pricingPlans = [
-    // Plan Gratis (index 0)
-    {
-      id: 'free',
-      name: t('pricing.freePlan'),
-      price: t('pricing.free'),
-      period: t('pricing.freeForLife'),
-      description: t('pricing.freeDescription'),
-      features: [
-        t('pricing.freeFeatures.unlimitedSales'),
-        t('pricing.freeFeatures.manualPayments'),
-        t('pricing.freeFeatures.whatsappSales'),
-        t('pricing.freeFeatures.freeSubdomain'),
-        t('pricing.freeFeatures.freeSSL'),
-        t('pricing.freeFeatures.adminPanel'),
-        t('pricing.freeFeatures.products12'),
-        t('pricing.freeFeatures.discountCoupons'),
-        t('pricing.freeFeatures.basicReports'),
-        t('pricing.freeFeatures.advancedSeo'),
-        t('pricing.freeFeatures.unlimitedHosting')
-      ],
-      cta: t('pricing.startNowFree'),
-      colors: {
-        badge: 'bg-gray-600',
-        price: 'text-gray-800',
-        border: 'border-gray-300',
-        button: 'bg-emerald-600 hover:bg-emerald-700',
-        check: 'text-emerald-500'
-      },
-      emoji: '💚',
-      background: 'bg-white'
-    },
-    // Plan Premium (index 1) - Default
-    {
-      id: 'premium',
-      name: t('pricing.premiumPlan'),
-      monthlyPrice: 15,
-      annualPrice: 120,
-      description: t('pricing.premiumDescription'),
-      includesFrom: t('pricing.freePlan'),
-      features: [
-        t('pricing.proFeatures.integratedPayments'),
-        t('pricing.premiumFeatures.traditionalCheckout'),
-        t('pricing.premiumFeatures.cartRecovery'),
-        t('pricing.premiumFeatures.autoEmails'),
-        t('pricing.premiumFeatures.customDomain'),
-        t('pricing.premiumFeatures.products50'),
-        t('pricing.premiumFeatures.completeReports'),
-        t('pricing.premiumFeatures.googleAnalytics'),
-        t('pricing.premiumFeatures.searchConsole'),
-        t('pricing.premiumFeatures.metaTikTokPixel')
-      ],
-      cta: t('pricing.growBusiness'),
-      colors: {
-        badge: 'bg-gray-700',
-        price: 'text-gray-800',
-        border: 'border-gray-400',
-        button: 'bg-emerald-600 hover:bg-emerald-700',
-        check: 'text-emerald-500'
-      },
-      emoji: '💚',
-      background: 'bg-gray-50',
-      isRecommended: true
-    },
-    // Plan Pro (index 2)
-    {
-      id: 'pro',
-      name: t('pricing.proPlan'),
-      monthlyPrice: 30,
-      annualPrice: 300,
-      description: t('pricing.proDescription'),
-      includesFrom: t('pricing.premiumPlan'),
-      features: [
-        t('pricing.proFeatures.unlimitedProducts'),
-        t('pricing.proFeatures.internationalSales'),
-        t('pricing.proFeatures.multipleLanguages'),
-        t('pricing.proFeatures.automaticTranslation'),
-        t('pricing.proFeatures.customerSegmentation'),
-        t('pricing.proFeatures.advancedMarketing'),
-        t('pricing.proFeatures.countryAnalytics'),
-        t('pricing.proFeatures.exclusiveThemes'),
-        t('pricing.proFeatures.prioritySupport')
-      ],
-      cta: t('pricing.scaleUp'),
-      colors: {
-        badge: 'bg-gray-800',
-        price: 'text-gray-800',
-        border: 'border-gray-500',
-        button: 'bg-emerald-600 hover:bg-emerald-700',
-        check: 'text-emerald-500'
-      },
-      emoji: '💚',
-      background: 'bg-white'
-    }
+  const stats = [
+    { number: '500+', label: 'Catalogos creados' },
+    { number: '10k+', label: 'Productos publicados' },
+    { number: '0%', label: 'Comision por venta' }
   ]
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Carousel animation
+  useEffect(() => {
+    let animationId: number
+    const animate = () => {
+      setCarouselPosition(prev => {
+        const newPosition = prev - 1
+        if (Math.abs(newPosition) >= 1200) return 0
+        return newPosition
+      })
+      animationId = requestAnimationFrame(animate)
+    }
+    animationId = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(animationId)
+  }, [])
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email && !isSubmitting) {
       setIsSubmitting(true)
-
       try {
-        // Guardar email en colección leads para email marketing
-        console.log('📧 Enviando email a API:', email)
-        const response = await fetch('/api/leads/capture', {
+        await fetch('/api/leads/capture', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            locale,
-            source: 'landing-hero'
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, locale, source: 'landing-hero' })
         })
-
-        const data = await response.json()
-        console.log('✅ Respuesta de API:', data)
-
-        if (!response.ok) {
-          console.error('❌ Error en API:', data)
-        }
       } catch (error) {
-        console.error('❌ Error capturing lead:', error)
-        // No bloquear el flujo si falla la captura del lead
+        console.error('Error capturing lead:', error)
       }
-
-      // Redirigir a registro con el email como parámetro
       const encodedEmail = encodeURIComponent(email)
       window.location.href = `https://dashboard.shopifree.app/${locale}/register?email=${encodedEmail}`
     }
   }
 
-  const nextPlan = () => {
-    setCurrentPlan((prev) => (prev + 1) % pricingPlans.length)
-  }
-
-  const prevPlan = () => {
-    setCurrentPlan((prev) => (prev - 1 + pricingPlans.length) % pricingPlans.length)
-  }
-
-  const goToPlan = (index: number) => {
-    setCurrentPlan(index)
-  }
-
-  // Demo stores navigation
-  const nextDemoStore = () => {
-    setCurrentDemoStore((prev) => (prev + 1) % demoStores.length)
-  }
-
-  const prevDemoStore = () => {
-    setCurrentDemoStore((prev) => (prev - 1 + demoStores.length) % demoStores.length)
-  }
-
-  const goToDemoStore = (index: number) => {
-    setCurrentDemoStore(index)
-  }
-
-  // Helper functions for pricing
-  const calculateDiscount = (monthlyPrice: number, annualPrice: number) => {
-    const yearlyPriceIfMonthly = monthlyPrice * 12
-    const discount = ((yearlyPriceIfMonthly - annualPrice) / yearlyPriceIfMonthly) * 100
-    return Math.round(discount)
-  }
-
-  const formatPrice = (plan: typeof pricingPlans[0]) => {
-    if (plan.id === 'free') return t('pricing.free')
-
-    if (isAnnual && plan.annualPrice) {
-      const monthlyEquivalent = (plan.annualPrice / 12).toFixed(2)
-      return `$${monthlyEquivalent}`
-    }
-    return `$${plan.monthlyPrice}`
-  }
-
-  const formatPeriod = (plan: typeof pricingPlans[0]) => {
-    if (plan.id === 'free') return t('pricing.freeForLife')
-    
-    if (isAnnual && plan.annualPrice) {
-      return t('pricing.perMonth')
-    }
-    return t('pricing.perMonth')
-  }
-
-  useEffect(() => {
-    const startWordAnimation = () => {
-      const currentPhrase = dynamicPhrases[currentPhraseIndex]
-      const words = currentPhrase.split(' ')
-      
-      // Resetear a 0 palabras visibles al inicio
-      setVisibleWords(0)
-      
-      // Empezar la animación palabra por palabra después de un pequeño delay
-      setTimeout(() => {
-        words.forEach((_, index) => {
-          setTimeout(() => {
-            setVisibleWords(index + 1)
-          }, index * 200)
-        })
-      }, 300) // Delay inicial más largo
-    }
-
-    // Solo ejecutar si tenemos las frases cargadas
-    if (dynamicPhrases.length > 0) {
-      // Primera vez - iniciar inmediatamente
-      if (currentPhraseIndex === 0) {
-        startWordAnimation()
-      }
-      
-      const interval = setInterval(() => {
-        // Primero ocultar todas las palabras
-        setVisibleWords(0)
-        
-        // Cambiar frase después de que se hayan ocultado
-        setTimeout(() => {
-          setCurrentPhraseIndex((prev) => (prev + 1) % dynamicPhrases.length)
-        }, 500) // Tiempo para que se oculten las palabras
-        
-      }, 6000) // Más tiempo total por frase
-
-      return () => clearInterval(interval)
-    }
-  }, [dynamicPhrases, currentPhraseIndex])
-
-  // Efecto separado para cuando cambia el índice de frase
-  useEffect(() => {
-    if (dynamicPhrases.length > 0 && currentPhraseIndex !== 0) {
-      const currentPhrase = dynamicPhrases[currentPhraseIndex]
-      const words = currentPhrase.split(' ')
-      
-      // Animar palabras una por una
-      setTimeout(() => {
-        words.forEach((_, index) => {
-          setTimeout(() => {
-            setVisibleWords(index + 1)
-          }, index * 200)
-        })
-      }, 300)
-    }
-  }, [currentPhraseIndex, dynamicPhrases])
-
-  // Seamless carousel effect with smooth animation
-  useEffect(() => {
-    let animationId: number
-    
-    const animate = () => {
-      if (!carouselRef.current) {
-        animationId = requestAnimationFrame(animate)
-        return
-      }
-      
-      const containerWidth = carouselRef.current.scrollWidth
-      const singleSetWidth = containerWidth / 2 // Since we have 2 sets of 11 images
-
-      setCarouselPosition(prev => {
-        const newPosition = prev - 1.5 // Smooth movement speed
-
-        // Reset when we've moved exactly one full set (11 images)
-        if (Math.abs(newPosition) >= singleSetWidth) {
-          return 0
-        }
-        return newPosition
-      })
-      
-      animationId = requestAnimationFrame(animate)
-    }
-    
-    animationId = requestAnimationFrame(animate)
-
-    return () => cancelAnimationFrame(animationId)
-  }, [])
-
-  const renderAnimatedText = () => {
-    if (!dynamicPhrases.length) return null
-
-    const currentPhrase = dynamicPhrases[currentPhraseIndex]
-    const words = currentPhrase.split(' ')
-
-    return words.map((word, index) => (
-      <span
-        key={`${currentPhraseIndex}-${index}`}
-        className={`inline-block mr-2 transition-all duration-500 ease-out ${
-          index < visibleWords
-            ? 'opacity-100 transform translate-y-0'
-            : 'opacity-0 transform translate-y-4'
-        }`}
-        style={{ transitionDelay: `${index * 50}ms` }}
-      >
-        {word}
-      </span>
-    ))
-  }
-
-  const renderPlanCard = (plan: typeof pricingPlans[0], isMobile = false) => {
-    return (
-      <div className={`${plan.background} rounded-2xl ${isMobile ? 'shadow-lg' : plan.isRecommended ? 'shadow-xl' : 'shadow-lg'} ${isMobile ? 'p-6' : 'p-6'} relative border-2 ${plan.colors.border} ${plan.isRecommended && !isMobile ? 'ring-2 ring-blue-200' : ''} w-full ${isMobile ? 'h-[650px]' : ''} flex flex-col text-left`}>
-        <div className="absolute -top-3 left-4 z-10">
-          <span className={`${plan.colors.badge} text-white px-4 py-1.5 rounded-full ${isMobile ? 'text-sm' : 'text-xs'} font-medium whitespace-nowrap`}>
-            {plan.name}
-          </span>
-        </div>
-        <div className={`mt-4 ${isMobile ? 'mb-4' : 'mb-4'} text-left`}>
-          <div className="flex items-baseline gap-2 mb-1 justify-start">
-            <div className={`${isMobile ? 'text-3xl' : 'text-3xl'} font-light ${plan.colors.price}`}>{formatPrice(plan)}</div>
-            {isAnnual && plan.annualPrice && plan.monthlyPrice && (
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium">
-                {calculateDiscount(plan.monthlyPrice, plan.annualPrice)}% OFF
-              </span>
-            )}
-          </div>
-          <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 font-medium text-left`}>
-            {formatPeriod(plan)}
-            {isAnnual && plan.annualPrice && plan.id !== 'free' && (
-              <span className="text-xs text-gray-500 block">
-                {t('pricing.billedAnnually')}
-              </span>
-            )}
-          </div>
-          {isAnnual && plan.annualPrice && plan.monthlyPrice && (
-            <div className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 line-through mt-1 text-left`}>
-              ${plan.monthlyPrice}{t('pricing.perMonth')}
-            </div>
-          )}
-        </div>
-        <p className={`text-gray-600 ${isMobile ? 'mb-4 text-sm' : 'mb-4 text-sm'} text-left`}>{plan.description}</p>
-
-        {plan.includesFrom && (
-          <div className={`${isMobile ? 'mb-3' : 'mb-3'}`}>
-            <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-700 font-medium`}>
-              {t('pricing.includesEverything')} {plan.includesFrom}{t('pricing.plus')}
-            </p>
-          </div>
-        )}
-
-        <div className="flex-1">
-          <ul className={`text-left ${isMobile ? 'space-y-2 mb-4' : 'space-y-2 mb-4'}`}>
-            {plan.features.map((feature, index) => (
-              <li key={index} className="flex items-start">
-                <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} ${plan.colors.check} ${isMobile ? 'mr-2' : 'mr-2'} mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className={`${isMobile ? 'text-xs' : 'text-xs'} leading-relaxed`}>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mt-auto">
-          <a href={`https://dashboard.shopifree.app/${locale}/register`}>
-            {plan.isRecommended ? (
-              <button className="w-full group relative overflow-hidden rounded-full bg-emerald-600 hover:bg-emerald-700 px-6 py-3 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-white">
-                  {plan.cta}
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </span>
-              </button>
-            ) : (
-              <button className="w-full group relative overflow-hidden rounded-full border-2 border-gray-300 hover:border-emerald-600 px-6 py-3 transition-all duration-300">
-                <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-                <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-gray-700 group-hover:text-white transition-colors duration-300">
-                  {plan.cta}
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </span>
-              </button>
-            )}
-          </a>
-        </div>
-      </div>
-    )
-  }
-
-  // FAQ data for structured data
-  const faqData = [
-    {
-      question: '¿Qué es Shopifree?',
-      answer: 'Shopifree es una plataforma gratuita para crear y gestionar tu tienda online sin conocimientos técnicos. Con nuestro plan gratis puedes comenzar a vender inmediatamente con hasta 12 productos, ventas ilimitadas y sin comisiones por venta. Incluye hosting gratuito, SSL, subdominio y todas las herramientas esenciales para vender en línea.'
-    },
-    {
-      question: '¿Necesito conocimientos técnicos para usarlo?',
-      answer: 'No necesitas ningún conocimiento técnico. Shopifree funciona con formularios simples donde solo completas la información de tus productos, subes imágenes y configuras tus preferencias. Elige uno de nuestros temas profesionales prediseñados y tu tienda estará lista para vender. Todo es tan simple como completar campos y hacer clic en guardar.'
-    },
-    {
-      question: '¿Puedo conectar mi propio dominio?',
-      answer: 'Sí, con el plan Premium o superior puedes conectar tu dominio personalizado (ej: tutienda.com). El plan gratis incluye un subdominio de Shopifree (ej: tutienda.shopifree.app). Te proporcionamos guías paso a paso para configurar tu dominio personalizado de manera fácil.'
-    },
-    {
-      question: '¿Qué métodos de pago puedo habilitar en mi tienda?',
-      answer: 'El plan gratis incluye pagos manuales (transferencias bancarias, efectivo). Con el plan Premium y superior puedes integrar pasarelas de pago como Mercado Pago, PayPal y Stripe para aceptar tarjetas de crédito/débito directamente en tu tienda. También soportamos ventas por WhatsApp en todos los planes.'
-    },
-    {
-      question: '¿Cómo funciona el sistema de ventas por WhatsApp?',
-      answer: 'Todos los planes incluyen ventas por WhatsApp. Tus clientes pueden navegar tu catálogo online y al realizar un pedido, se genera automáticamente un mensaje de WhatsApp con los detalles de su orden. El cliente solo debe enviarlo para completar la compra. Es la forma más rápida de vender sin necesidad de pasarelas de pago.'
-    },
-    {
-      question: '¿Shopifree cobra comisiones por venta?',
-      answer: 'No, Shopifree no cobra ninguna comisión por venta. Solo pagas tu plan mensual o anual y todas las ventas que realices son 100% tuyas. El plan gratis es completamente gratis de por vida con ventas ilimitadas y sin comisiones.'
-    }
-  ]
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Structured Data for SEO */}
-      <OrganizationSchema locale={locale} />
-      <SoftwareApplicationSchema locale={locale} />
-      <WebSiteSchema locale={locale} />
-      <FAQSchema faqs={faqData} />
-
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <Link href={`/${locale}`} className="transition-all duration-200 hover:scale-105">
-                <Image
-                  src="/logo-primary.png"
-                  alt="Shopifree - Crea tu tienda online gratis sin comisiones"
-                  width={224}
-                  height={64}
-                  className="h-12 w-auto object-contain"
-                  priority
-                />
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex justify-between items-center py-4">
+            <Link href={`/${locale}`} className="hover:opacity-80 transition-opacity">
+              <Image
+                src="/footerlogo.png"
+                alt="Shopifree"
+                width={180}
+                height={50}
+                className="h-10 w-auto"
+                priority
+              />
+            </Link>
+
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="#como-funciona" className="text-gray-600 hover:text-emerald-600 text-sm transition-colors">
+                Como funciona
               </Link>
-            </div>
-            
-            {/* Navigation Links - Hidden on mobile, visible on desktop */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href={`/${locale}#features`} className="text-white hover:text-emerald-400 transition-colors drop-shadow-lg">
-                {t('nav.features')}
+              <Link href="#precios" className="text-gray-600 hover:text-emerald-600 text-sm transition-colors">
+                Precios
               </Link>
-              <Link href={`/${locale}#pricing`} className="text-white hover:text-emerald-400 transition-colors drop-shadow-lg">
-                {t('nav.pricing')}
-              </Link>
-              <Link href={`/${locale}/blog`} className="text-white hover:text-emerald-400 transition-colors drop-shadow-lg">
-                {t('nav.blog')}
-              </Link>
-            </nav>
-            
-            <div className="flex items-center space-x-4">
-              {/* Desktop Navigation & Login */}
-              <a href={`https://dashboard.shopifree.app/${locale}/login`} className="hidden md:block">
-                <Button variant="secondary" size="sm" className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30 hover:border-white/50 transition-all duration-200">
-                  {t('login')}
-                </Button>
+              <LanguageSelector />
+              <a href={`https://dashboard.shopifree.app/${locale}/login`}>
+                <button className="text-gray-600 hover:text-emerald-600 text-sm transition-colors">
+                  Iniciar sesion
+                </button>
               </a>
-              <div className="hidden md:block">
-                <LanguageSelector />
-              </div>
-
-              {/* Mobile Menu Button */}
-              <button
-                className="md:hidden p-2 rounded-md text-white hover:text-emerald-400 hover:bg-white/20 focus:outline-none transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                <svg className="h-6 w-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? (
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M6 18L18 6M6 6l12 12"
-                      className="animate-pulse"
-                    />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
+              <a href={`https://dashboard.shopifree.app/${locale}/register`}>
+                <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-emerald-200 hover:-translate-y-0.5">
+                  Crear catalogo gratis
+                </button>
+              </a>
             </div>
-          </div>
-        </div>
 
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
-
-        {/* Mobile Menu Sidebar */}
-        <div 
-          className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          {/* Close Button */}
-          <div className="flex justify-end p-6">
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <button className="md:hidden p-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
               </svg>
             </button>
           </div>
 
-          {/* Menu Content */}
-          <div className="px-8 py-6 h-full flex flex-col overflow-y-auto">
-            {/* Logo */}
-            <div className="mb-10">
-              <Image
-                src="/logo-primary.png"
-                alt="Shopifree - Plataforma de ecommerce gratuita"
-                width={160}
-                height={45}
-                className="h-10 w-auto object-contain"
-              />
+          {isMobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-gray-100 animate-fadeIn">
+              <div className="flex flex-col gap-4">
+                <Link href="#como-funciona" className="text-gray-600 py-2" onClick={() => setIsMobileMenuOpen(false)}>
+                  Como funciona
+                </Link>
+                <Link href="#precios" className="text-gray-600 py-2" onClick={() => setIsMobileMenuOpen(false)}>
+                  Precios
+                </Link>
+                <a href={`https://dashboard.shopifree.app/${locale}/login`} className="text-gray-600 py-2">
+                  Iniciar sesion
+                </a>
+                <a href={`https://dashboard.shopifree.app/${locale}/register`}>
+                  <button className="w-full bg-emerald-600 text-white py-3 rounded-full font-medium">
+                    Crear catalogo gratis
+                  </button>
+                </a>
+              </div>
             </div>
-
-            {/* Navigation Links */}
-            <nav className="space-y-4 mb-10">
-              <Link
-                href={`/${locale}#features`}
-                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t('nav.features')}
-              </Link>
-              <Link
-                href={`/${locale}#pricing`}
-                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t('nav.pricing')}
-              </Link>
-              <Link
-                href={`/${locale}/blog`}
-                className="block text-white text-lg font-light hover:text-emerald-400 py-2 border-b border-white/10 transition-all duration-300 transform hover:translate-x-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t('nav.blog')}
-              </Link>
-            </nav>
-
-            {/* Language Selector */}
-            <div className="mb-6">
-              <div className="text-white/60 text-xs uppercase tracking-wide mb-2 px-2">Idioma</div>
-              <LanguageSelector variant="sidebar" />
-            </div>
-
-            {/* Login Button */}
-            <a href={`https://dashboard.shopifree.app/${locale}/login`} className="block">
-              <Button variant="secondary" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 backdrop-blur-sm text-base py-3 transition-all duration-200 hover:scale-105">
-                {t('login')}
-              </Button>
-            </a>
-          </div>
+          )}
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="relative h-screen overflow-hidden">
-        {/* Video Background */}
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover"
-          >
-            <source src="/videos/herovideo.mp4" type="video/mp4" />
-          </video>
+      <section className="relative pt-28 pb-20 px-4 overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-teal-50"></div>
+        <div className="absolute top-20 right-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/30 rounded-full blur-3xl"></div>
 
-          {/* Overlay for better text contrast */}
-          <div className="absolute inset-0 bg-black/30"></div>
-        </div>
-        
-        <div className="relative h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-          {/* SEO H1 - Hidden visually but readable by search engines */}
-          <h1 className="sr-only">
-            Crea tu Tienda Online Gratis con Shopifree - Ecommerce sin Comisiones
-          </h1>
-
-          {/* Text Content - Left aligned on mobile, centered on desktop */}
-          <div className="text-left md:text-center max-w-6xl mx-auto w-full flex-1 flex flex-col justify-center">
-            <div className="h-[280px] min-[390px]:h-[330px] min-[414px]:h-[360px] sm:h-[380px] md:h-[250px] lg:h-[280px] xl:h-[300px] flex items-center justify-start md:justify-center mb-4 min-[390px]:mb-6 min-[414px]:mb-10 sm:mb-12 md:mb-6 lg:mb-8">
-              <div className="text-4xl min-[390px]:text-5xl min-[414px]:text-6xl sm:text-7xl md:text-5xl lg:text-6xl xl:text-7xl font-thin text-white drop-shadow-xl leading-tight" aria-label="Tu tienda puede conquistar el mundo digital">
-                <span className="block">
-                  {renderAnimatedText()}
-                </span>
+        <div className="relative max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Text content */}
+            <div className="text-center lg:text-left">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm mb-6 animate-bounce-slow">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                Vende por WhatsApp
               </div>
-            </div>
-            <div className="text-left md:text-center mb-6 min-[390px]:mb-8 min-[414px]:mb-12 sm:mb-16 md:mb-8 lg:mb-10">
-              <p className="text-lg min-[390px]:text-xl min-[414px]:text-xl sm:text-2xl md:text-xl lg:text-2xl text-white/90 max-w-4xl md:mx-auto drop-shadow-lg leading-relaxed font-light">
-                {t('subtitle')}
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                Crea tu catalogo
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
+                  en 3 minutos
+                </span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0">
+                Sube tus productos, comparte tu link y recibe pedidos directo a tu WhatsApp.
+                <span className="font-semibold text-gray-800"> Sin complicaciones, sin comisiones.</span>
               </p>
-            </div>
-            <div className="flex flex-col items-start md:items-center mb-4">
-              <form onSubmit={handleEmailSubmit} className="w-full max-w-md mb-3">
-                <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 p-2 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shadow-2xl">
+
+              {/* CTA Form */}
+              <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto lg:mx-0 mb-6">
+                <div className="flex flex-col sm:flex-row gap-3 p-2 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('emailPlaceholder')}
+                    placeholder="tu@email.com"
                     required
-                    className="flex-1 px-4 xs:px-6 py-3 xs:py-4 bg-transparent text-white placeholder-white/70 border-none outline-none focus:outline-none focus:ring-0 focus:border-none rounded-xl transition-all duration-200 text-base xs:text-lg font-light hero-email-input"
+                    className="flex-1 px-5 py-3 bg-transparent outline-none text-gray-800 placeholder-gray-400"
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 xs:px-8 py-3 xs:py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-base xs:text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl whitespace-nowrap disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                    className="bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-medium transition-all disabled:opacity-70 whitespace-nowrap shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5"
                   >
-                    {isSubmitting && (
-                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    )}
-                    {t('startFreeButton')}
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Creando...
+                      </span>
+                    ) : 'Crear gratis'}
                   </button>
                 </div>
               </form>
-              <p className="text-white/80 text-xs max-w-md text-left md:text-center leading-relaxed px-2">
-                {t('emailDisclaimer')}
+
+              <p className="text-sm text-gray-500 flex items-center justify-center lg:justify-start gap-2">
+                <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Gratis para siempre. Sin tarjeta de credito.
               </p>
             </div>
-          </div>
-        </div>
-      </main>
 
-      {/* Demo Stores Carousel */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-8 md:py-12">
-        <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-6 md:mb-8 px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-2">
-              {t('demoStores.title')}
-            </h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-              {t('demoStores.subtitle')}
-            </p>
-          </div>
+            {/* Right: Phone mockup */}
+            <div className="relative flex justify-center lg:justify-end">
+              <div className="relative animate-float">
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-[3rem] blur-2xl opacity-20 scale-110"></div>
 
-          {/* Carousel Container */}
-          <div className="relative px-4 sm:px-6 lg:px-8">
-            {/* Desktop View - Slide carousel with arrows */}
-            <div className="hidden md:block">
-              <div className="overflow-hidden">
-                <div
-                  className="flex transition-transform duration-500 ease-in-out"
-                  style={{ transform: `translateX(-${currentDemoStore * 100}%)` }}
-                >
-                  {demoStores.map((store, index) => (
-                    <div key={index} className="w-full flex-shrink-0 px-4">
-                      <div className="flex items-center justify-center gap-8 max-w-6xl mx-auto">
-                        {/* Mobile Mockup */}
-                        <div className="flex-shrink-0">
-                          <div className="relative">
-                            {/* Phone frame */}
-                            <div className="relative mx-auto border-gray-800 bg-gray-800 border-[10px] rounded-[2rem] h-[450px] w-[225px] shadow-2xl">
-                              {/* Phone buttons */}
-                              <div className="h-[24px] w-[2px] bg-gray-800 absolute -left-[12px] top-[54px] rounded-l-lg"></div>
-                              <div className="h-[34px] w-[2px] bg-gray-800 absolute -left-[12px] top-[93px] rounded-l-lg"></div>
-                              <div className="h-[34px] w-[2px] bg-gray-800 absolute -left-[12px] top-[133px] rounded-l-lg"></div>
-                              <div className="h-[48px] w-[2px] bg-gray-800 absolute -right-[12px] top-[106px] rounded-r-lg"></div>
+                {/* Phone frame */}
+                <div className="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+                  <div className="bg-white rounded-[2.5rem] w-[280px] h-[580px] overflow-hidden relative">
+                    {/* Notch */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-b-2xl z-10"></div>
 
-                              {/* Screen content */}
-                              <div className={`rounded-[1.5rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
-                                   onClick={() => window.open(store.url, '_blank')}>
-                                {index === 0 ? (
-                                  <video
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                    className="w-full h-full object-contain"
-                                  >
-                                    <source src="/images/restaurant-movil.mp4" type="video/mp4" />
-                                  </video>
-                                ) : index === 1 ? (
-                                  <video
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                    className="w-full h-full object-contain"
-                                  >
-                                    <source src="/images/ropa-movil.mp4" type="video/mp4" />
-                                  </video>
-                                ) : index === 2 ? (
-                                  <video
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                    className="w-full h-full object-contain"
-                                  >
-                                    <source src="/images/tech-movil.mp4" type="video/mp4" />
-                                  </video>
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-5xl">{store.icon}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
+                    {/* Status bar */}
+                    <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 flex justify-between items-center text-xs text-white pt-8">
+                      <span className="font-medium">9:41</span>
+                      <div className="flex gap-1 items-center">
+                        <div className="w-4 h-2 bg-white/80 rounded-sm"></div>
+                      </div>
+                    </div>
+
+                    {/* Store header */}
+                    <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+                          <span className="text-2xl">🧁</span>
                         </div>
-
-                        {/* Desktop Mockup */}
-                        <div className="flex-1 max-w-3xl">
-                          <div className="relative">
-                            {/* Browser chrome */}
-                            <div className="bg-gray-200 rounded-t-lg px-3 py-2 flex items-center space-x-2">
-                              <div className="flex space-x-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                              </div>
-                              <div className="flex-1 ml-3">
-                                <div className="bg-white rounded px-2 py-0.5 text-xs text-gray-600 max-w-md">
-                                  {store.url}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Browser content */}
-                            <div className={`${index === 0 || index === 1 || index === 2 ? '' : store.desktopColor} h-[350px] cursor-pointer shadow-2xl overflow-hidden`}
-                                 onClick={() => window.open(store.url, '_blank')}>
-                              {index === 0 ? (
-                                <img
-                                  src="/images/restaurant-desktop.png"
-                                  alt={`${store.name} - Vista desktop`}
-                                  className="w-full h-full object-cover object-top"
-                                  loading="lazy"
-                                />
-                              ) : index === 1 ? (
-                                <img
-                                  src="/images/ropa-desktop.png"
-                                  alt={`${store.name} - Vista desktop`}
-                                  className="w-full h-full object-cover object-top"
-                                  loading="lazy"
-                                />
-                              ) : index === 2 ? (
-                                <img
-                                  src="/images/tech-desktop.png"
-                                  alt={`${store.name} - Vista desktop`}
-                                  className="w-full h-full object-cover object-top"
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-7xl">{store.icon}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Store Info */}
-                          <div className="mt-4 text-center md:text-left">
-                            <h3 className="text-xl font-medium text-gray-900 mb-1">
-                              {store.name}
-                            </h3>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600 mb-2">
-                              <span className="text-lg">{store.icon}</span>
-                              <span className="font-medium text-sm">{store.category}</span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-xs">{t('demoStores.theme')} {store.theme}</span>
-                            </div>
-                            <p className="text-gray-600 text-sm mb-3">{store.description}</p>
-                            <button
-                              onClick={() => window.open(store.url, '_blank')}
-                              className="group relative overflow-hidden rounded-full border-2 border-emerald-600 px-6 py-2.5 transition-all duration-300 hover:border-emerald-700"
-                            >
-                              <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-                              <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 group-hover:text-white transition-colors duration-300">
-                                {t('demoStores.viewFullDemo')}
-                                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
-                              </span>
-                            </button>
-                          </div>
+                        <div className="text-white">
+                          <h3 className="font-bold text-base">Dulces Maria</h3>
+                          <p className="text-emerald-100 text-xs flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                            Abierto ahora
+                          </p>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Navigation Arrows - Desktop */}
-              <button
-                onClick={prevDemoStore}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white shadow-xl rounded-full p-3 hover:bg-gray-50 transition-all z-10"
-                aria-label="Previous demo"
-              >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-
-              <button
-                onClick={nextDemoStore}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white shadow-xl rounded-full p-3 hover:bg-gray-50 transition-all z-10"
-                aria-label="Next demo"
-              >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Mobile View - Horizontal scroll carousel */}
-            <div className="md:hidden">
-              <div className="overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory -mx-4">
-                <div className="flex gap-6 pb-4 px-4">
-                  {demoStores.map((store, index) => (
-                    <div key={index} className="flex-shrink-0 w-[280px] snap-center">
-                      <div className="flex flex-col items-center w-full">
-                        {/* Mobile Mockup */}
-                        <div className="relative mb-4">
-                          <div className="relative mx-auto border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[500px] w-[250px] shadow-2xl">
-                            <div className="h-[32px] w-[3px] bg-gray-800 absolute -left-[17px] top-[72px] rounded-l-lg"></div>
-                            <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[124px] rounded-l-lg"></div>
-                            <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
-                            <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
-
-                            <div className={`rounded-[2rem] overflow-hidden w-full h-full ${index === 0 || index === 1 || index === 2 ? '' : store.mobileColor} cursor-pointer`}
-                                 onClick={() => window.open(store.url, '_blank')}>
-                              {index === 0 ? (
-                                <video
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                  preload="metadata"
-                                  className="w-full h-full object-contain"
-                                >
-                                  <source src="/images/restaurant-movil.mp4" type="video/mp4" />
-                                </video>
-                              ) : index === 1 ? (
-                                <video
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                  preload="metadata"
-                                  className="w-full h-full object-contain"
-                                >
-                                  <source src="/images/ropa-movil.mp4" type="video/mp4" />
-                                </video>
-                              ) : index === 2 ? (
-                                <video
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                  preload="metadata"
-                                  className="w-full h-full object-contain"
-                                >
-                                  <source src="/images/tech-movil.mp4" type="video/mp4" />
-                                </video>
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-6xl">{store.icon}</span>
-                                </div>
-                              )}
-                            </div>
+                    {/* Products grid */}
+                    <div className="p-4 grid grid-cols-2 gap-3 bg-gray-50">
+                      {[
+                        {
+                          name: 'Torta Chocolate',
+                          price: 'S/ 45',
+                          image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&h=200&fit=crop',
+                          sold: '12 vendidos'
+                        },
+                        {
+                          name: 'Cupcakes x6',
+                          price: 'S/ 24',
+                          image: 'https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?w=200&h=200&fit=crop',
+                          sold: '28 vendidos'
+                        },
+                        {
+                          name: 'Galletas Mix',
+                          price: 'S/ 15',
+                          image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=200&h=200&fit=crop',
+                          sold: '45 vendidos'
+                        },
+                        {
+                          name: 'Brownies',
+                          price: 'S/ 12',
+                          image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&h=200&fit=crop',
+                          sold: '33 vendidos'
+                        },
+                      ].map((product, i) => (
+                        <div key={i} className="bg-white rounded-2xl p-2 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="aspect-square rounded-xl overflow-hidden mb-2">
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
+                          <p className="text-xs font-normal text-gray-700 truncate">{product.name}</p>
+                          <p className="text-xs font-light text-gray-900">{product.price}</p>
                         </div>
+                      ))}
+                    </div>
 
-                        {/* Store Info */}
-                        <div className="text-center w-full px-2">
-                          <h3 className="text-xl font-medium text-gray-900 mb-2">
-                            {store.name}
-                          </h3>
-                          <div className="flex items-center justify-center gap-2 text-gray-600 mb-3">
-                            <span className="text-lg">{store.icon}</span>
-                            <span className="font-medium text-sm">{store.category}</span>
-                          </div>
-                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{store.description}</p>
-                          <button
-                            onClick={() => window.open(store.url, '_blank')}
-                            className="w-full max-w-[250px] mx-auto group relative overflow-hidden rounded-full border-2 border-emerald-600 px-6 py-3 transition-all duration-300 hover:border-emerald-700"
-                          >
-                            <span className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-                            <span className="relative flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 group-hover:text-white transition-colors duration-300">
-                              {t('demoStores.viewDemo')}
-                              <svg className="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                              </svg>
-                            </span>
-                          </button>
-                        </div>
+                    {/* WhatsApp button */}
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="bg-[#25D366] text-white py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-200 hover:shadow-xl transition-shadow cursor-pointer">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        <span className="font-semibold">Hacer pedido</span>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                </div>
+
+                {/* Floating elements */}
+                <div className="absolute -right-4 top-20 bg-white rounded-2xl p-3 shadow-xl animate-bounce-slow">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Nuevo pedido!</span>
+                  </div>
+                </div>
+
+                <div className="absolute -left-4 bottom-32 bg-white rounded-2xl p-3 shadow-xl animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">💰</span>
+                    <span className="text-sm font-bold text-gray-700">+S/ 45.00</span>
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Scroll hint - Mobile only */}
-              <div className="text-center mt-4 text-sm text-gray-500">
-                {t('demoStores.swipeHint')}
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 mt-16 max-w-2xl mx-auto">
+            {stats.map((stat, i) => (
+              <div key={i} className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-gray-900">{stat.number}</div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
               </div>
-            </div>
-
-            {/* Dots Indicator - Desktop only */}
-            <div className="hidden md:flex justify-center mt-4 space-x-2">
-              {demoStores.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToDemoStore(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentDemoStore
-                      ? 'bg-emerald-600 w-8'
-                      : 'bg-gray-300 w-2 hover:bg-gray-400'
-                  }`}
-                  aria-label={`Go to demo ${index + 1}`}
-                />
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Integrations Carousel */}
-      <section className="bg-gray-50 py-12" aria-labelledby="integrations-heading">
-        <div className="mx-auto">
-          <div className="text-center mb-12 px-4 sm:px-6 lg:px-8">
-            <h2 id="integrations-heading" className="text-3xl font-light text-gray-900 mb-4">
-              {t('integrations.title')}
+      <section className="py-12 bg-gray-50 overflow-hidden">
+        <div className="text-center mb-8">
+          <p className="text-gray-500 text-sm uppercase tracking-wide">Compatible con las herramientas que ya usas</p>
+        </div>
+        <div className="relative">
+          <div
+            ref={carouselRef}
+            className="flex items-center gap-12"
+            style={{ transform: `translateX(${carouselPosition}px)` }}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, index) => (
+              <img
+                key={index}
+                src={`/integraciones/integracion${num}.png`}
+                alt="Integracion"
+                className="h-8 md:h-12 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="como-funciona" className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wide">Asi de facil</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">
+              3 pasos para empezar a vender
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
-              {t('integrations.subtitle')}
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              No necesitas conocimientos tecnicos. Si sabes usar WhatsApp, puedes crear tu catalogo.
             </p>
           </div>
 
-          <div className="overflow-hidden">
-            <div 
-              ref={carouselRef}
-              className="flex space-x-8 items-center"
-              style={{ 
-                transform: `translateX(${carouselPosition}px)`,
-                transition: carouselPosition === 0 ? 'none' : 'none'
-              }}
-            >
-              {/* Integration images - duplicated for seamless loop */}
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, index) => (
-                <img
-                  key={index}
-                  src={`/integraciones/integracion${num}.png`}
-                  alt={`Integración con ${integrationNames[num - 1]} - Shopifree`}
-                  className="flex-shrink-0 h-10 md:h-20 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300"
-                  loading="lazy"
+          <div className="grid md:grid-cols-3 gap-8 relative">
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-24 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-emerald-200 via-emerald-400 to-emerald-200"></div>
+
+            {[
+              {
+                step: '1',
+                title: 'Sube tus productos',
+                description: 'Solo foto, nombre y precio. En 1 minuto agregas un producto a tu catalogo.',
+                icon: '📸',
+                color: 'from-pink-500 to-rose-500'
+              },
+              {
+                step: '2',
+                title: 'Comparte tu link',
+                description: 'Tu catalogo tiene un link unico. Compartelo por WhatsApp, Instagram o donde quieras.',
+                icon: '🔗',
+                color: 'from-blue-500 to-indigo-500'
+              },
+              {
+                step: '3',
+                title: 'Recibe pedidos',
+                description: 'Tus clientes eligen productos y te contactan directo por WhatsApp. Tu respondes y vendes.',
+                icon: '💬',
+                color: 'from-emerald-500 to-teal-500'
+              }
+            ].map((item, i) => (
+              <div key={i} className="relative text-center group">
+                <div className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${item.color} rounded-3xl mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
+                  <span className="text-4xl">{item.icon}</span>
+                </div>
+                <div className="absolute -top-2 -right-2 md:right-auto md:left-1/2 md:translate-x-8 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">
+                  {item.step}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                <p className="text-gray-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24 bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wide">Testimonios</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+              Lo que dicen nuestros usuarios
+            </h2>
+          </div>
+
+          <div className="relative">
+            {testimonials.map((testimonial, i) => (
+              <div
+                key={i}
+                className={`transition-all duration-500 ${
+                  i === activeTestimonial ? 'opacity-100 translate-x-0' : 'opacity-0 absolute inset-0 translate-x-8'
+                }`}
+              >
+                <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg text-gray-900">{testimonial.name}</h4>
+                      <p className="text-emerald-600 text-sm font-medium">{testimonial.business}</p>
+                      <p className="text-gray-400 text-xs">{testimonial.location}</p>
+                    </div>
+                  </div>
+                  <p className="text-xl md:text-2xl font-light leading-relaxed text-gray-700">
+                    "{testimonial.text}"
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-8">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveTestimonial(i)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    i === activeTestimonial ? 'bg-emerald-600 w-8' : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
                 />
               ))}
             </div>
@@ -1035,321 +484,249 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="bg-gray-50 py-8 md:py-12" aria-labelledby="pricing-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 id="pricing-heading" className="text-2xl md:text-3xl font-light text-gray-900 mb-2 md:mb-3">
-              {t('pricing.title')}
-            </h2>
-            <p className="text-base md:text-lg text-gray-600 mb-4 md:mb-6">
-              {t('pricing.subtitle')}
-            </p>
-
-            {/* Billing Toggle */}
-            <div className="flex items-center justify-center mb-6 md:mb-8">
-              <div className="bg-gray-100 rounded-full p-1 relative">
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={() => setIsAnnual(false)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                      !isAnnual
-                        ? 'bg-white text-gray-900 shadow-md'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    {t('pricing.monthly')}
-                  </button>
-                  <button
-                    onClick={() => setIsAnnual(true)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 relative ${
-                      isAnnual
-                        ? 'bg-white text-gray-900 shadow-md'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    {t('pricing.annual')}
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      {t('pricing.savePercent')}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Desktop View - Grid */}
-            <div className="hidden md:grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {pricingPlans.map((plan) => (
-                <div key={plan.id}>
-                  {renderPlanCard(plan)}
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile View - Carousel */}
-            <div className="md:hidden">
-              <div className="relative max-w-md mx-auto">
-                {/* Carousel Container */}
-                <div className="overflow-hidden pt-4">
-                  <div 
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{ transform: `translateX(-${currentPlan * 100}%)` }}
-                  >
-                    {pricingPlans.map((plan) => (
-                      <div key={plan.id} className="w-full flex-shrink-0 px-2">
-                        {renderPlanCard(plan, true)}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Navigation Arrows */}
-                <button
-                  onClick={prevPlan}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors z-10"
-                  aria-label="Previous plan"
-                >
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button
-                  onClick={nextPlan}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors z-10"
-                  aria-label="Next plan"
-                >
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Dots Indicator */}
-              <div className="flex justify-center mt-4 space-x-2">
-                {pricingPlans.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToPlan(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                      index === currentPlan 
-                        ? 'bg-blue-500 w-8' 
-                        : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
-                    aria-label={`Go to plan ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-light text-gray-900 mb-8 text-center">
-          {t('feature1.title')}, {t('feature2.title')}, {t('feature3.title')}
-        </h2>
-        {/* Features Grid */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature1.title')}</h3>
-            <p className="text-gray-600">{t('feature1.description')}</p>
-          </div>
-
-          <div className="text-center">
-            <div className="bg-gray-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature2.title')}</h3>
-            <p className="text-gray-600">{t('feature2.description')}</p>
-          </div>
-
-          <div className="text-center">
-            <div className="bg-gray-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-normal text-gray-900 mb-2">{t('feature3.title')}</h3>
-            <p className="text-gray-600">{t('feature3.description')}</p>
-          </div>
-        </div>
-        </div>
-      </section>
-
-      {/* Contact Sales Section */}
-      <section className="bg-white py-20 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Pricing */}
+      <section id="precios" className="py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
-              ¿Necesitas ayuda personalizada?
+            <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wide">Precios</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">
+              Empieza gratis, mejora cuando quieras
             </h2>
-            <p className="text-lg text-gray-600 font-light max-w-3xl mx-auto">
-              Nuestro equipo está listo para ayudarte. Ya sea que necesites asesoría para tu tienda
-              o prefieras que nosotros la creemos por ti, estamos aquí para ti.
+            <p className="text-gray-600">
+              Sin sorpresas. Sin comisiones por venta. Precio fijo mensual.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Contactar Ventas */}
-            <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-8 border border-gray-200">
-              <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-xl mb-6 mx-auto">
-                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                </svg>
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Free Plan */}
+            <div className="bg-white rounded-3xl p-6 border-2 border-gray-200 hover:border-emerald-200 transition-colors relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
+
+              <div className="relative">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Catalogo</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-bold text-gray-900">Gratis</span>
+                </div>
+                <p className="text-gray-500 text-sm mb-6">Para siempre</p>
+
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Hasta 20 productos',
+                    '1 foto por producto',
+                    'Pedidos por WhatsApp',
+                    'Link compartible',
+                    'Sin comisiones',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <svg className="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a href={`https://dashboard.shopifree.app/${locale}/register`} className="block">
+                  <button className="w-full py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-emerald-500 hover:text-emerald-600 transition-all text-sm">
+                    Empezar gratis
+                  </button>
+                </a>
               </div>
-
-              <h3 className="text-2xl font-light text-gray-900 mb-4 text-center">
-                Contactar Ventas
-              </h3>
-
-              <p className="text-gray-600 font-light mb-6 text-center">
-                ¿Tienes un proyecto grande? ¿Necesitas funcionalidades especiales?
-                Habla con nuestro equipo de ventas para soluciones empresariales.
-              </p>
-
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 font-light">Asesoría personalizada para tu negocio</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 font-light">Planes empresariales a medida</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 font-light">Soporte prioritario</span>
-                </li>
-              </ul>
-
-              <a
-                href="https://wa.me/51958371017?text=Hola%2C%20quiero%20hablar%20con%20ventas%20sobre%20Shopifree"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-normal py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-                <span>Contactar por WhatsApp</span>
-              </a>
             </div>
 
-            {/* Obtener Asistencia */}
-            <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-8 border border-gray-200">
-              <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-xl mb-6 mx-auto">
-                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+            {/* Starter Plan - $1 */}
+            <div className="bg-white rounded-3xl p-6 border-2 border-gray-900 hover:border-gray-700 transition-colors relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform"></div>
+
+              <div className="relative">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Emprendedor</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-bold text-gray-900">$1</span>
+                  <span className="text-gray-500">/mes</span>
+                </div>
+                <p className="text-gray-500 text-sm mb-6">Para crecer</p>
+
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Hasta 50 productos',
+                    '5 fotos por producto',
+                    'Pedidos por WhatsApp',
+                    'Categorias',
+                    'Sin branding Shopifree',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <svg className="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a href={`https://dashboard.shopifree.app/${locale}/register`} className="block">
+                  <button className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all text-sm">
+                    Comenzar
+                  </button>
+                </a>
+              </div>
+            </div>
+
+            {/* Premium Plan - $5 */}
+            <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl p-6 text-white relative overflow-hidden shadow-2xl shadow-emerald-200">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-20 translate-x-20"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-16 -translate-x-16"></div>
+
+              <div className="absolute -top-1 -right-1">
+                <div className="bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-3xl">
+                  POPULAR
+                </div>
               </div>
 
-              <h3 className="text-2xl font-light text-gray-900 mb-4 text-center">
-                Creación de Tienda
-              </h3>
+              <div className="relative">
+                <h3 className="text-lg font-bold mb-2">Tienda</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-bold">$5</span>
+                  <span className="text-emerald-200">/mes</span>
+                </div>
+                <p className="text-emerald-200 text-sm mb-6">Todo incluido</p>
 
-              <p className="text-gray-600 font-light mb-6 text-center">
-                ¿Prefieres que lo hagamos por ti? Nuestro equipo puede crear y configurar
-                tu tienda virtual completamente lista para vender.
-              </p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Productos ilimitados',
+                    '10 fotos por producto',
+                    'Checkout completo',
+                    'Pagos online (Stripe)',
+                    'Dominio personalizado',
+                    'Cupones y promociones',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <svg className="w-4 h-4 text-emerald-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
 
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 font-light">Te creamos tu tienda completamente</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 font-light">Diseño profesional y personalizado</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 font-light">Capacitación incluida</span>
-                </li>
-              </ul>
-
-              <a
-                href="https://wa.me/51958371017?text=Hola%2C%20quiero%20que%20me%20ayuden%20a%20crear%20mi%20tienda%20en%20Shopifree"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-normal py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-                <span>Solicitar Asistencia</span>
-              </a>
+                <a href={`https://dashboard.shopifree.app/${locale}/register`} className="block">
+                  <button className="w-full py-3 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-colors shadow-lg text-sm">
+                    Comenzar
+                  </button>
+                </a>
+              </div>
             </div>
-          </div>
-
-          {/* CTA Adicional */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 font-light mb-4">
-              ¿Prefieres escribirnos por email?
-            </p>
-            <a
-              href="mailto:admin@shopifree.app"
-              className="text-gray-600 hover:text-gray-900 font-normal inline-flex items-center space-x-2 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span>admin@shopifree.app</span>
-            </a>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <FAQ />
+      {/* FAQ */}
+      <section className="py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wide">FAQ</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+              Preguntas frecuentes
+            </h2>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                q: 'Necesito conocimientos tecnicos?',
+                a: 'No. Solo necesitas saber subir fotos y escribir. Si usas WhatsApp, puedes usar Shopifree. La mayoria de usuarios crean su catalogo en menos de 10 minutos.'
+              },
+              {
+                q: 'Como recibo los pedidos?',
+                a: 'Tus clientes navegan tu catalogo, eligen productos y al hacer clic en "Pedir" se abre WhatsApp con un mensaje pre-escrito. Tu recibes el pedido en tu WhatsApp normal y coordinas pago/entrega.'
+              },
+              {
+                q: 'Hay comisiones por venta?',
+                a: 'No. Shopifree no cobra comisiones. El plan gratis es 100% gratis y el plan Tienda tiene un precio fijo de $5/mes sin importar cuanto vendas.'
+              },
+              {
+                q: 'Puedo usar mi propio dominio?',
+                a: 'Si, con el plan Tienda puedes conectar tu dominio (ej: mitienda.com). El plan gratis usa un subdominio tipo tutienda.shopifree.app que tambien es profesional.'
+              }
+            ].map((item, i) => (
+              <div key={i} className="bg-gray-50 rounded-2xl p-6 hover:bg-emerald-50 transition-colors">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm font-bold">?</span>
+                  {item.q}
+                </h3>
+                <p className="text-gray-600 ml-8">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24 bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 -translate-x-48"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full translate-y-48 translate-x-48"></div>
+
+        <div className="relative max-w-3xl mx-auto px-4 text-center">
+          <span className="inline-block text-4xl mb-4">🚀</span>
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+            Empieza a vender hoy
+          </h2>
+          <p className="text-xl text-emerald-100 mb-10 max-w-xl mx-auto">
+            Unete a cientos de emprendedores que ya venden con Shopifree. Crea tu catalogo gratis en minutos.
+          </p>
+          <a href={`https://dashboard.shopifree.app/${locale}/register`}>
+            <button className="bg-white text-emerald-600 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-emerald-50 transition-all shadow-2xl hover:shadow-3xl hover:-translate-y-1 inline-flex items-center gap-3">
+              Crear mi catalogo gratis
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </a>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex items-center">
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
+            <div className="md:col-span-2">
               <Image
-                src="/footerlogo.png"
-                alt="Shopifree - Crea tu tienda online gratis"
+                src="/logo-primary.png"
+                alt="Shopifree"
                 width={160}
                 height={45}
-                className="h-8 w-auto object-contain"
+                className="h-10 w-auto mb-4"
               />
+              <p className="text-gray-400 max-w-sm">
+                La forma mas simple de vender online. Crea tu catalogo, comparte tu link, recibe pedidos por WhatsApp.
+              </p>
             </div>
-            <div className="flex items-center space-x-8 text-sm text-gray-600">
-              <Link href={`/${locale}/privacy`} className="hover:text-gray-900 transition-colors">
-                {t('footer.privacy')}
-              </Link>
-              <Link href={`/${locale}/terms`} className="hover:text-gray-900 transition-colors">
-                {t('footer.terms')}
-              </Link>
-              <Link href={`/${locale}/contact`} className="hover:text-gray-900 transition-colors">
-                {t('footer.contact')}
-              </Link>
+            <div>
+              <h4 className="font-semibold mb-4">Producto</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="#como-funciona" className="hover:text-white transition-colors">Como funciona</Link></li>
+                <li><Link href="#precios" className="hover:text-white transition-colors">Precios</Link></li>
+              </ul>
             </div>
-            <div className="text-sm text-gray-500">
-              © 2025 Shopifree
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href={`/${locale}/privacy`} className="hover:text-white transition-colors">Privacidad</Link></li>
+                <li><Link href={`/${locale}/terms`} className="hover:text-white transition-colors">Terminos</Link></li>
+                <li><Link href={`/${locale}/contact`} className="hover:text-white transition-colors">Contacto</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-500 text-sm">
+              2025 Shopifree. Todos los derechos reservados.
+            </p>
+            <div className="flex items-center gap-4">
+              <a href="https://wa.me/51958371017" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </a>
             </div>
           </div>
         </div>
@@ -1357,59 +734,28 @@ export default function HomePage() {
 
       {/* Custom Animations */}
       <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
         }
-        
-        @keyframes scroll-fast {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
         }
-        
-        .animate-blob {
-          animation: blob 7s infinite;
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
         }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
+        .animate-bounce-slow {
+          animation: bounce-slow 2s ease-in-out infinite;
         }
-        
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        
-        .hero-email-input:focus {
-          outline: none !important;
-          border: none !important;
-          box-shadow: none !important;
-          ring: none !important;
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
         }
       `}</style>
     </div>
   )
-} 
+}

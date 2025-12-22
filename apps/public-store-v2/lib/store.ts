@@ -98,6 +98,8 @@ export type StoreBasicInfo = {
         showOnDesktop: boolean;
         position: 'top' | 'bottom';
     };
+    // Modo de checkout: 'whatsapp' para catálogos simples, 'traditional' para tiendas completas
+    checkoutMode?: 'whatsapp' | 'traditional';
 };
 
 export type SectionConfig = {
@@ -236,6 +238,9 @@ export async function getStoreBasicInfo(storeId: string): Promise<StoreBasicInfo
             socialMedia: socialFromGroup,
             sections: data.sections || undefined,
             announcementBar: data.announcementBar || undefined,
+            // Determinar modo de checkout: si tiene pagos configurados usa traditional, sino whatsapp
+            checkoutMode: data.checkoutMode ||
+                (data.advanced?.payments?.enabled ? 'traditional' : 'whatsapp'),
         };
 	} catch (e) {
 		console.warn("[public-store-v2] getStoreBasicInfo fallo", e);

@@ -8,6 +8,7 @@ import { useAuth } from '../lib/simple-auth-context'
 import { useStore } from '../lib/hooks/useStore'
 import PageLoadingState from './PageLoadingState'
 import TrialBanner from './TrialBanner'
+import { isInCatalogMode, PlanType } from '../lib/subscription-utils'
 
 // Iconos para el menú
 const MenuIcons = {
@@ -49,6 +50,11 @@ const MenuIcons = {
   StoreDesign: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+    </svg>
+  ),
+  Appearance: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
     </svg>
   ),
   VisitStore: () => (
@@ -129,6 +135,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const t = useTranslations('navigation')
   const { user, userData, signOut } = useAuth()
   const { store } = useStore()
+
+  // Detectar si el usuario está en modo catálogo (gratis) o tienda (premium)
+  const userPlan = (userData?.subscriptionPlan as PlanType) || 'free'
+  const isCatalogMode = isInCatalogMode(userPlan)
 
   // Inicializar estados expandidos basándose en la URL actual para evitar efectos visuales
   const [settingsExpanded, setSettingsExpanded] = useState(() => {
@@ -278,8 +288,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     return 'Dashboard'
   }
 
-  // Elementos del menú de navegación
-  const navigationItems = [
+  // Elementos del menú de navegación - Simplificado para modo catálogo
+  const catalogNavigationItems = [
+    { key: 'catalog', href: `/${currentLocale}/catalog`, icon: MenuIcons.Home, label: 'Mi Catálogo' },
+    { key: 'products', href: `/${currentLocale}/products`, icon: MenuIcons.Products, label: 'Productos' },
+    { key: 'appearance', href: `/${currentLocale}/appearance`, icon: MenuIcons.Appearance, label: 'Apariencia' },
+    { key: 'settings', href: `/${currentLocale}/catalog/settings`, icon: MenuIcons.Settings, label: 'Configuración' },
+  ]
+
+  // Elementos del menú completo para modo tienda (premium)
+  const storeNavigationItems = [
     { key: 'home', href: `/${currentLocale}/home`, icon: MenuIcons.Home },
     { key: 'orders', href: `/${currentLocale}/orders`, icon: MenuIcons.Orders },
     { key: 'customers', href: `/${currentLocale}/customers`, icon: MenuIcons.Customers },
@@ -288,6 +306,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { key: 'storeDesign', href: `/${currentLocale}/store-design/branding`, icon: MenuIcons.StoreDesign },
     { key: 'reports', href: `/${currentLocale}/reports`, icon: MenuIcons.Reports },
   ]
+
+  // Usar menú según el modo
+  const navigationItems = isCatalogMode ? catalogNavigationItems : storeNavigationItems
 
   // Elemento especial para Products con subopciones
   const productsItem = {
@@ -371,11 +392,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Función para renderizar elementos de menú normales con inserción de Products
   const renderMenuItems = (isMobile: boolean = false) => {
     const items: JSX.Element[] = []
-    
-    navigationItems.forEach((item) => {
+
+    navigationItems.forEach((item: any) => {
       const Icon = item.icon
       const isActive = isActiveRoute(item.href)
-      
+
       // Agregar el elemento normal
       items.push(
         <button
@@ -388,16 +409,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           }`}
         >
           <Icon />
-          <span className="ml-3">{t(item.key)}</span>
+          <span className="ml-3">{item.label || t(item.key)}</span>
         </button>
       )
-      
-      // Insertar Products dropdown después de orders
-      if (item.key === 'orders') {
+
+      // Insertar Products dropdown después de orders (solo en modo tienda)
+      if (item.key === 'orders' && !isCatalogMode) {
         items.push(renderProductsMenu(isMobile) as JSX.Element)
       }
     })
-    
+
+    // En modo catálogo, agregar botón de upgrade
+    if (isCatalogMode) {
+      items.push(
+        <button
+          key="upgrade"
+          onClick={() => handleNavigation(`/${currentLocale}/pricing`, isMobile)}
+          className="w-full group flex items-center px-2 py-1.5 text-sm font-medium rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 mt-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          <span className="ml-3">Mejorar Plan</span>
+        </button>
+      )
+    }
+
     return items
   }
 
@@ -589,7 +626,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex-1 h-0 pt-4 pb-4 overflow-y-auto">
             <nav className="px-2 space-y-0.5">
               {renderMenuItems(true)}
-              {renderSettingsMenu(true)}
+              {!isCatalogMode && renderSettingsMenu(true)}
             </nav>
           </div>
           <div className="flex-shrink-0 border-t border-gray-200 p-4">
@@ -692,7 +729,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex-1 flex flex-col pt-4 pb-4 overflow-y-auto">
             <nav className="flex-1 px-2 bg-white space-y-0.5">
               {renderMenuItems(false)}
-              {renderSettingsMenu(false)}
+              {!isCatalogMode && renderSettingsMenu(false)}
             </nav>
           </div>
 
@@ -775,73 +812,89 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Contenido principal */}
       <div className="lg:pl-64 flex flex-col flex-1">
-        {/* Header */}
-        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
-          <button
-            type="button"
-            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-600 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <MenuIcons.Menu />
-          </button>
-          <div className="flex-1 px-4 flex justify-between">
-            <div className="flex-1 flex">
-              <div className="w-full flex md:ml-0">
-                <div className="relative w-full text-gray-400 focus-within:text-gray-600">
-                  <div className="absolute inset-y-0 left-0 flex items-center">
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      {getPageTitle()}
-                    </h2>
+        {/* Header móvil simple - solo botón hamburguesa en modo catálogo */}
+        {isCatalogMode ? (
+          <div className="relative z-10 flex-shrink-0 flex h-14 bg-white border-b border-gray-200 lg:hidden">
+            <button
+              type="button"
+              className="px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-600"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <MenuIcons.Menu />
+            </button>
+            <div className="flex-1 flex items-center justify-center pr-12">
+              <Image
+                src="/logo-primary.png"
+                alt="Shopifree"
+                width={120}
+                height={32}
+                className="h-8 w-auto"
+              />
+            </div>
+          </div>
+        ) : (
+          /* Header completo para modo tienda */
+          <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+            <button
+              type="button"
+              className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-600 lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <MenuIcons.Menu />
+            </button>
+            <div className="flex-1 px-4 flex justify-between">
+              <div className="flex-1 flex">
+                <div className="w-full flex md:ml-0">
+                  <div className="relative w-full text-gray-400 focus-within:text-gray-600">
+                    <div className="absolute inset-y-0 left-0 flex items-center">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {getPageTitle()}
+                      </h2>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="ml-4 flex items-center md:ml-6">
-              {/* Información del usuario - solo en escritorio */}
-              <div className="relative hidden lg:block">
-                {/* Versión escritorio: texto completo */}
-                <div className="flex items-center">
-                  {userData?.displayName && (
-                    <span className="text-sm font-medium text-gray-700">
-                      {t('hello')}, {userData.displayName}
-                    </span>
-                  )}
+              <div className="ml-4 flex items-center md:ml-6">
+                {/* Información del usuario - solo en escritorio */}
+                <div className="relative hidden lg:block">
+                  <div className="flex items-center">
+                    {userData?.displayName && (
+                      <span className="text-sm font-medium text-gray-700">
+                        {t('hello')}, {userData.displayName}
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Botón Visitar mi tienda */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    if (store?.subdomain) {
+                      window.open(`https://${store.subdomain}.shopifree.app`, '_blank')
+                    } else {
+                      const message = currentLocale === 'es'
+                        ? 'Cargando información de la tienda...'
+                        : 'Loading store information...'
+                      alert(message)
+                    }
+                  }}
+                  className="ml-3 bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 transition-colors duration-200"
+                  title={currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
+                >
+                  <MenuIcons.VisitStore />
+                  <span className="ml-2 hidden sm:inline">
+                    {currentLocale === 'es' ? 'Mi tienda' : 'My store'}
+                  </span>
+                </button>
               </div>
-
-              {/* Botón Visitar mi tienda */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-
-                  // Verificar que tenemos los datos de la tienda disponibles
-                  if (store?.subdomain) {
-                    // Abrir directamente la tienda - esto funciona en móviles
-                    window.open(`https://${store.subdomain}.shopifree.app`, '_blank')
-                  } else {
-                    // Si no hay datos de tienda disponibles, mostrar mensaje
-                    const message = currentLocale === 'es'
-                      ? 'Cargando información de la tienda...'
-                      : 'Loading store information...'
-                    alert(message)
-                    console.warn('Store data not available yet')
-                  }
-                }}
-                className="ml-3 bg-white hover:bg-gray-50 border border-gray-300 rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600 transition-colors duration-200"
-                title={currentLocale === 'es' ? 'Visitar mi tienda' : 'Visit my store'}
-              >
-                <MenuIcons.VisitStore />
-                <span className="ml-2 hidden sm:inline">
-                  {currentLocale === 'es' ? 'Mi tienda' : 'My store'}
-                </span>
-              </button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Trial Banner */}
-        <TrialBanner />
+        {/* Trial Banner - solo mostrar en modo tienda (no en catálogo) */}
+        {!isCatalogMode && <TrialBanner />}
 
         {/* Contenido de la página con loading overlay */}
         <main className="flex-1 relative">

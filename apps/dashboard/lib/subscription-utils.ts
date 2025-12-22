@@ -1,11 +1,113 @@
 import { Timestamp } from 'firebase/firestore'
 import { UserDocument, getUserDocument, updateUserDocument } from './user'
 
+// =============================================================================
+// STORE MODE: Catálogo (gratis) vs Tienda (premium)
+// =============================================================================
+
+export type StoreMode = 'catalog' | 'store'
+
+// Features disponibles en modo Catálogo (gratis)
+export const CATALOG_MODE_FEATURES = {
+  maxProducts: 20,
+  maxPhotosPerProduct: 1,
+  hasWhatsAppCheckout: true,
+  hasCategories: false,
+  hasVariants: false,
+  hasBrands: false,
+  hasCollections: false,
+  hasCustomDomain: false,
+  hasIntegratedPayments: false,
+  hasTraditionalCheckout: false,
+  hasCartRecovery: false,
+  hasAutoEmails: false,
+  hasCoupons: false,
+  hasPromotions: false,
+  hasLoyaltyProgram: false,
+  hasGoogleAnalytics: false,
+  hasMetaPixel: false,
+  hasCompleteReports: false,
+  hasAdvancedSEO: false,
+  hasShippingZones: false,
+  showShopifreebranding: true, // Muestra "Creado con Shopifree"
+} as const
+
+// Features disponibles en modo Emprendedor ($1/mes)
+export const STARTER_MODE_FEATURES = {
+  maxProducts: 50,
+  maxPhotosPerProduct: 5,
+  hasWhatsAppCheckout: true,
+  hasCategories: true,
+  hasVariants: false,
+  hasBrands: false,
+  hasCollections: false,
+  hasCustomDomain: false,
+  hasIntegratedPayments: false,
+  hasTraditionalCheckout: false,
+  hasCartRecovery: false,
+  hasAutoEmails: false,
+  hasCoupons: false,
+  hasPromotions: false,
+  hasLoyaltyProgram: false,
+  hasGoogleAnalytics: false,
+  hasMetaPixel: false,
+  hasCompleteReports: false,
+  hasAdvancedSEO: false,
+  hasShippingZones: false,
+  showShopifreebranding: false, // Sin branding
+} as const
+
+// Features disponibles en modo Tienda (premium $5/mes)
+export const STORE_MODE_FEATURES = {
+  maxProducts: -1, // ilimitados
+  maxPhotosPerProduct: 10,
+  hasWhatsAppCheckout: true,
+  hasCategories: true,
+  hasVariants: true,
+  hasBrands: true,
+  hasCollections: true,
+  hasCustomDomain: true,
+  hasIntegratedPayments: true,
+  hasTraditionalCheckout: true,
+  hasCartRecovery: true,
+  hasAutoEmails: true,
+  hasCoupons: true,
+  hasPromotions: true,
+  hasLoyaltyProgram: true,
+  hasGoogleAnalytics: true,
+  hasMetaPixel: true,
+  hasCompleteReports: true,
+  hasAdvancedSEO: true,
+  hasShippingZones: true,
+  showShopifreebranding: false, // Sin branding
+} as const
+
+// Helper para obtener features según el modo
+export const getModeFeatures = (mode: StoreMode) => {
+  return mode === 'catalog' ? CATALOG_MODE_FEATURES : STORE_MODE_FEATURES
+}
+
+// Helper para verificar si una feature está disponible en un modo
+export const hasFeatureInMode = (mode: StoreMode, feature: keyof typeof STORE_MODE_FEATURES): boolean => {
+  const features = getModeFeatures(mode)
+  const value = features[feature]
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value !== 0
+  return false
+}
+
+// =============================================================================
+// PLAN DEFINITIONS (Legacy - mantener compatibilidad)
+// =============================================================================
+
 // Plan definitions matching landing page pricing
 export const PLAN_FEATURES = {
   free: {
-    name: 'Free',
-    maxProducts: 12,
+    name: 'Catalogo',
+    storeMode: 'catalog' as StoreMode,
+    maxProducts: 20,
+    maxPhotosPerProduct: 1,
+    hasCategories: false,
     hasCustomDomain: false,
     hasIntegratedPayments: false,
     hasTraditionalCheckout: false,
@@ -22,11 +124,42 @@ export const PLAN_FEATURES = {
     hasExclusiveThemes: false,
     hasPrioritySupport: false,
     hasAIImageEnhancement: false,
-    aiEnhancementsPerMonth: 0
+    aiEnhancementsPerMonth: 0,
+    showShopifreebranding: true,
+    stripePriceId: null
+  },
+  starter: {
+    name: 'Emprendedor',
+    storeMode: 'catalog' as StoreMode, // Sigue siendo catálogo pero con más features
+    maxProducts: 50,
+    maxPhotosPerProduct: 5,
+    hasCategories: true,
+    hasCustomDomain: false,
+    hasIntegratedPayments: false,
+    hasTraditionalCheckout: false,
+    hasCartRecovery: false,
+    hasAutoEmails: false,
+    hasGoogleAnalytics: false,
+    hasMetaPixel: false,
+    hasCompleteReports: false,
+    hasUnlimitedProducts: false,
+    hasInternationalSales: false,
+    hasMultipleLanguages: false,
+    hasCustomerSegmentation: false,
+    hasAdvancedMarketing: false,
+    hasExclusiveThemes: false,
+    hasPrioritySupport: false,
+    hasAIImageEnhancement: false,
+    aiEnhancementsPerMonth: 0,
+    showShopifreebranding: false,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID || null
   },
   premium: {
-    name: 'Premium',
-    maxProducts: 50,
+    name: 'Tienda',
+    storeMode: 'store' as StoreMode,
+    maxProducts: -1, // ilimitados
+    maxPhotosPerProduct: 10,
+    hasCategories: true,
     hasCustomDomain: true,
     hasIntegratedPayments: true,
     hasTraditionalCheckout: true,
@@ -35,7 +168,7 @@ export const PLAN_FEATURES = {
     hasGoogleAnalytics: true,
     hasMetaPixel: true,
     hasCompleteReports: true,
-    hasUnlimitedProducts: false,
+    hasUnlimitedProducts: true,
     hasInternationalSales: false,
     hasMultipleLanguages: false,
     hasCustomerSegmentation: false,
@@ -43,11 +176,16 @@ export const PLAN_FEATURES = {
     hasExclusiveThemes: false,
     hasPrioritySupport: false,
     hasAIImageEnhancement: true,
-    aiEnhancementsPerMonth: 5
+    aiEnhancementsPerMonth: 5,
+    showShopifreebranding: false,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID || null
   },
   pro: {
     name: 'Pro',
+    storeMode: 'store' as StoreMode,
     maxProducts: -1, // -1 = unlimited
+    maxPhotosPerProduct: 10,
+    hasCategories: true,
     hasCustomDomain: true,
     hasIntegratedPayments: true,
     hasTraditionalCheckout: true,
@@ -64,12 +202,29 @@ export const PLAN_FEATURES = {
     hasExclusiveThemes: true,
     hasPrioritySupport: true,
     hasAIImageEnhancement: true,
-    aiEnhancementsPerMonth: 15
+    aiEnhancementsPerMonth: 15,
+    showShopifreebranding: false,
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || null
   }
 } as const
 
 export type PlanType = keyof typeof PLAN_FEATURES
 export type SubscriptionStatus = 'trial' | 'active' | 'cancelled' | 'expired' | 'free'
+
+// Helper para obtener el modo de tienda según el plan
+export const getStoreModeFromPlan = (plan: PlanType): StoreMode => {
+  return PLAN_FEATURES[plan].storeMode
+}
+
+// Helper para verificar si el usuario está en modo catálogo
+export const isInCatalogMode = (plan: PlanType): boolean => {
+  return getStoreModeFromPlan(plan) === 'catalog'
+}
+
+// Helper para verificar si el usuario está en modo tienda
+export const isInStoreMode = (plan: PlanType): boolean => {
+  return getStoreModeFromPlan(plan) === 'store'
+}
 
 /**
  * Start a 30-day trial of Premium plan for new user

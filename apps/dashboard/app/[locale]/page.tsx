@@ -23,7 +23,8 @@ function DashboardContent() {
       if (user?.uid && userData) {
         // Check if user has completed onboarding
         if (!userData.onboardingUserCompleted) {
-          router.push('/onboarding/user')
+          // Nuevo: redirigir al onboarding simplificado
+          router.push('/onboarding/simple')
           return
         }
 
@@ -35,12 +36,12 @@ function DashboardContent() {
           if (userStore) {
             setOnboardingChecked(true)
 
-            // Redirect to home page
-            const currentLocale = window.location.pathname.split('/')[1] || 'es'
-            router.push(`/${currentLocale}/home`)
+            // Redirigir al catálogo (nuevo home simplificado)
+            router.push('/catalog')
             return
           } else {
-            router.push('/onboarding/store')
+            // Si no tiene tienda, ir al onboarding simple
+            router.push('/onboarding/simple')
             return
           }
         } catch (error) {

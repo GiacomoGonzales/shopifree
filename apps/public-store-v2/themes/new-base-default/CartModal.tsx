@@ -7,6 +7,7 @@ import { toCloudinarySquare } from '../../lib/images';
 import { StoreBasicInfo } from '../../lib/store';
 import CheckoutModal from './CheckoutModal';
 import ConfirmationModal from './ConfirmationModal';
+import WhatsAppCheckoutModal from './WhatsAppCheckoutModal';
 import { OrderData } from '../../lib/orders';
 import { useStoreLanguage } from '../../lib/store-language-context';
 import { generateConfirmationToken } from '../../lib/confirmation-tokens';
@@ -66,6 +67,7 @@ interface CartModalProps {
 export default function CartModal({ storeInfo, storeId }: CartModalProps) {
     const { state, closeCart, updateQuantity, removeItem, clearCart } = useCart();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+    const [isWhatsAppCheckoutOpen, setIsWhatsAppCheckoutOpen] = useState(false);
 
     // Estados para modal de confirmación
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -319,7 +321,12 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
         if (minimumOrderNotMet) {
             return; // No permitir checkout si no alcanza el pedido mínimo
         }
-        setIsCheckoutOpen(true);
+        // Abrir el modal correcto según el modo de checkout
+        if (storeInfo?.checkoutMode === 'whatsapp') {
+            setIsWhatsAppCheckoutOpen(true);
+        } else {
+            setIsCheckoutOpen(true);
+        }
     };
 
     const handleCheckoutClose = () => {
@@ -661,14 +668,21 @@ export default function CartModal({ storeInfo, storeId }: CartModalProps) {
                 </div>
             </div>
 
-            {/* Modal de checkout */}
-            <CheckoutModal 
+            {/* Modal de checkout tradicional */}
+            <CheckoutModal
                 isOpen={isCheckoutOpen}
                 onClose={handleCheckoutClose}
                 onSuccess={handleCheckoutSuccess}
                 storeInfo={storeInfo}
                 storeId={storeId}
                 onShowConfirmation={showConfirmationModalWithData}
+            />
+
+            {/* Modal de checkout WhatsApp (para catálogos) */}
+            <WhatsAppCheckoutModal
+                isOpen={isWhatsAppCheckoutOpen}
+                onClose={() => setIsWhatsAppCheckoutOpen(false)}
+                storeInfo={storeInfo}
             />
 
             {/* Modal de confirmación */}

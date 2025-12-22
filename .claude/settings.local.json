@@ -42,7 +42,11 @@
       "Bash(yarn install:*)",
       "Bash(corepack enable:*)",
       "Bash(git log:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(git -C \"C:\\\\Users\\\\giaco\\\\Shopifree\" log --oneline -30)",
+      "WebSearch",
+      "Bash(tree:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

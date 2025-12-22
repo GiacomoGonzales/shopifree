@@ -97,6 +97,35 @@ const Restaurant = dynamic(() => import("../themes/restaurant/Restaurant"), {
     )
 });
 
+const Minimal = dynamic(() => import("../themes/minimal/Minimal"), {
+    loading: () => (
+        <div className="min-h-screen bg-white">
+            {/* Minimal header skeleton */}
+            <div className="border-b border-gray-100 p-4">
+                <div className="flex items-center justify-between max-w-5xl mx-auto">
+                    <div className="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </div>
+            {/* Hero skeleton */}
+            <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+                <div className="h-10 bg-gray-200 rounded w-48 mx-auto mb-4 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-32 mx-auto animate-pulse"></div>
+            </div>
+            {/* Products grid skeleton */}
+            <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+                {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="animate-pulse">
+                        <div className="bg-gray-100 aspect-square mb-3"></div>
+                        <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-16"></div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+});
+
 type Props = {
     storeSubdomain: string;
     categorySlug?: string;
@@ -116,7 +145,7 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
             return getStoreTheme(storeId);
         },
         enabled: !!storeId,
-        staleTime: 10 * 60 * 1000, // 10 minutos - tema rara vez cambia
+        staleTime: 30 * 1000, // 30 segundos - para ver cambios de tema rápidamente
         placeholderData: 'new-base-default', // Mostrar tema default mientras carga
     });
 
@@ -137,6 +166,9 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
     // mientras se carga el tema real si es diferente
     const themeToRender = theme || 'new-base-default';
     const locale = effectiveLocale || 'es'; // Asegurar que siempre haya un string
+
+    // DEBUG: Ver qué tema se está usando
+    console.log('[ThemeRenderer] storeId:', storeId, '| theme from DB:', theme, '| rendering:', themeToRender);
 
     switch (themeToRender) {
         case 'new-base-default':
@@ -162,6 +194,19 @@ export default function ThemeRenderer({ storeSubdomain, categorySlug, collection
                         {storeId && <CartRecovery storeId={storeId} />}
                     </Suspense>
                     <Restaurant
+                        storeSubdomain={storeSubdomain}
+                        effectiveLocale={locale}
+                        storeId={storeId}
+                    />
+                </>
+            );
+        case 'minimal':
+            return (
+                <>
+                    <Suspense fallback={null}>
+                        {storeId && <CartRecovery storeId={storeId} />}
+                    </Suspense>
+                    <Minimal
                         storeSubdomain={storeSubdomain}
                         effectiveLocale={locale}
                         storeId={storeId}
