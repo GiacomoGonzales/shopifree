@@ -77,7 +77,6 @@ export default function Minimal({ storeSubdomain, effectiveLocale, storeId }: Pr
             name: product.name,
             price: product.price,
             image: product.mediaFiles?.[0]?.url || '',
-            quantity: 1,
             urlSlug: product.urlSlug
         });
         openCart();
