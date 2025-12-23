@@ -1,10 +1,28 @@
 import Stripe from 'stripe'
 
-// Stripe server-side client
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-  typescript: true,
-})
+// Stripe server-side client (lazy initialization to avoid build errors)
+let stripeInstance: Stripe | null = null
+
+export const getStripe = (): Stripe => {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not configured')
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
+      typescript: true,
+    })
+  }
+  return stripeInstance
+}
+
+// For backwards compatibility
+export const stripe = {
+  get checkout() { return getStripe().checkout },
+  get customers() { return getStripe().customers },
+  get subscriptions() { return getStripe().subscriptions },
+  get billingPortal() { return getStripe().billingPortal },
+}
 
 // Price IDs for each plan (set these in your environment variables)
 export const STRIPE_PRICES = {
